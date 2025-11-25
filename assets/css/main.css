@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+  }
+  
+  body {
+    font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+  }
+}
+

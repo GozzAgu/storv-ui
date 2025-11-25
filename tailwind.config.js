@@ -1,18 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./components/**/*.{js,vue,ts}",
-    "./layouts/**/*.vue",
-    "./pages/**/*.vue",
-    "./plugins/**/*.{js,ts}",
-    "./app.vue",
-    "./error.vue",
+    './components/**/*.{vue,js,ts}',
+    './layouts/**/*.vue',
+    './pages/**/*.vue',
+    './app.vue',
+    './plugins/**/*.{js,ts}',
+    './error.vue',
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        display: ['Poppins', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Comic Neue', 'Comic Sans MS', 'cursive'],
+        display: ['Fredoka One', 'Comic Sans MS', 'cursive'],
       },
       colors: {
         primary: {
@@ -48,6 +48,6 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: []
 }
 
