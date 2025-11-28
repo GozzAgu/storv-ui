@@ -116,6 +116,10 @@ export const useFirebaseAuth = () => {
       const result = await signInWithPopup(auth, provider)
       return result.user
     } catch (error: any) {
+      // Handle unauthorized domain (most common deployment issue)
+      if (error.code === 'auth/unauthorized-domain') {
+        throw new Error('UNAUTHORIZED_DOMAIN: This domain is not authorized for Firebase Authentication. Please add your domain to Firebase Console → Authentication → Settings → Authorized domains. See DEPLOYMENT_FIX.md for instructions.')
+      }
       // Handle popup closed by user
       if (error.code === 'auth/popup-closed-by-user') {
         throw new Error('Sign in was cancelled')
@@ -132,11 +136,17 @@ export const useFirebaseAuth = () => {
       if (error.code === 'auth/network-request-failed') {
         throw new Error('Network error. Please check your internet connection and try again.')
       }
+      // Handle operation not allowed (provider not enabled)
+      if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Google sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method → Google.')
+      }
       // Handle missing permissions (Firestore)
       if (error.code === 'permission-denied' || error.message?.includes('permission')) {
         throw new Error('Permission denied. Please check your Firestore security rules. See FIRESTORE_SETUP.md for setup instructions.')
       }
-      throw new Error(error.message || 'Google sign in failed')
+      // Log full error for debugging
+      console.error('Google sign-in error:', error)
+      throw new Error(error.message || `Google sign in failed. Error code: ${error.code || 'unknown'}`)
     }
   }
 

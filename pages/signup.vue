@@ -419,27 +419,31 @@ const handleGoogleSignUp = async () => {
         await navigateTo('/dashboard')
       }
     }
-  } catch (error: any) {
-    console.error('Google sign up error:', error)
-    
-    // Handle specific error cases
-    if (error.message.includes('cancelled')) {
-      errorMessage.value = 'Sign up was cancelled'
-    } else if (error.message.includes('account-exists')) {
-      errorMessage.value = 'An account already exists with this email. Please sign in instead.'
-    } else if (error.message.includes('PERMISSION_DENIED') || error.code === 'permission-denied' || error.message.includes('Permission denied') || error.message.includes('permission')) {
-      // Show detailed instructions for permission errors
-      errorMessage.value = 'Firestore permission denied. To fix this:\n\n1. Go to Firebase Console → Firestore Database → Rules\n2. Copy rules from firestore.rules file in your project\n3. Paste and click Publish\n\nSee FIRESTORE_SETUP.md for detailed instructions.'
-    } else if (error.message.includes('popup-blocked')) {
-      errorMessage.value = 'Pop-up was blocked. Please allow pop-ups for this site and try again.'
-    } else if (error.message.includes('Firestore not initialized')) {
-      errorMessage.value = 'Firestore is not initialized. Please check your Firebase configuration.'
-    } else {
-      errorMessage.value = error.message || 'Failed to sign up with Google. Please try again'
+    } catch (error: any) {
+      console.error('Google sign up error:', error)
+      
+      // Handle specific error cases
+      if (error.message.includes('UNAUTHORIZED_DOMAIN') || error.code === 'auth/unauthorized-domain') {
+        errorMessage.value = '⚠️ Domain not authorized!\n\nThis domain is not authorized for Firebase Authentication.\n\nTo fix:\n1. Go to Firebase Console → Authentication → Settings\n2. Add your domain to "Authorized domains"\n3. Save and try again\n\nSee DEPLOYMENT_FIX.md for detailed instructions.'
+      } else if (error.message.includes('operation-not-allowed')) {
+        errorMessage.value = 'Google sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method → Google.'
+      } else if (error.message.includes('cancelled')) {
+        errorMessage.value = 'Sign up was cancelled'
+      } else if (error.message.includes('account-exists')) {
+        errorMessage.value = 'An account already exists with this email. Please sign in instead.'
+      } else if (error.message.includes('PERMISSION_DENIED') || error.code === 'permission-denied' || error.message.includes('Permission denied') || error.message.includes('permission')) {
+        // Show detailed instructions for permission errors
+        errorMessage.value = 'Firestore permission denied. To fix this:\n\n1. Go to Firebase Console → Firestore Database → Rules\n2. Copy rules from firestore.rules file in your project\n3. Paste and click Publish\n\nSee FIRESTORE_SETUP.md for detailed instructions.'
+      } else if (error.message.includes('popup-blocked')) {
+        errorMessage.value = 'Pop-up was blocked. Please allow pop-ups for this site and try again.'
+      } else if (error.message.includes('Firestore not initialized')) {
+        errorMessage.value = 'Firestore is not initialized. Please check your Firebase configuration.'
+      } else {
+        errorMessage.value = error.message || 'Failed to sign up with Google. Please try again'
+      }
+    } finally {
+      isGoogleLoading.value = false
     }
-  } finally {
-    isGoogleLoading.value = false
-  }
 }
 
 useHead({
