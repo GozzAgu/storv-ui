@@ -10,13 +10,13 @@
             </NuxtLink>
           </div>
           <div class="hidden md:flex items-center space-x-8">
-            <a href="#features" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
+            <a href="#features" @click.prevent="scrollToSection('features')" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 cursor-pointer">
               Features
             </a>
-            <a href="#pricing" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
+            <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 cursor-pointer">
               Pricing
             </a>
-            <a href="#about" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
+            <a href="#about" @click.prevent="scrollToSection('about')" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 cursor-pointer">
               About
             </a>
             <NuxtLink to="/signin" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
@@ -46,13 +46,13 @@
           leave-to-class="opacity-0 -translate-y-1"
         >
           <div v-if="mobileMenuOpen" class="md:hidden pb-4 space-y-3">
-            <a href="#features" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors" @click="mobileMenuOpen = false">
+            <a href="#features" @click.prevent="scrollToSection('features'); mobileMenuOpen = false" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors cursor-pointer">
               Features
             </a>
-            <a href="#pricing" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors" @click="mobileMenuOpen = false">
+            <a href="#pricing" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors cursor-pointer">
               Pricing
             </a>
-            <a href="#about" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors" @click="mobileMenuOpen = false">
+            <a href="#about" @click.prevent="scrollToSection('about'); mobileMenuOpen = false" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors cursor-pointer">
               About
             </a>
             <NuxtLink to="/signin" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors" @click="mobileMenuOpen = false">
@@ -377,7 +377,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400">
+    <footer id="about" class="bg-gray-900 text-gray-400">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8 sm:mb-12">
           <div class="col-span-2">
@@ -428,7 +428,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -444,6 +444,32 @@ import {
 } from '@heroicons/vue/24/outline'
 
 const mobileMenuOpen = ref(false)
+
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId)
+  if (element) {
+    const navHeight = 80 // Approximate height of the fixed navigation bar (lg:h-20)
+    const elementPosition = element.getBoundingClientRect().top
+    const offsetPosition = elementPosition + window.pageYOffset - navHeight
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    })
+  }
+}
+
+// Handle hash navigation on page load
+onMounted(() => {
+  // Check if there's a hash in the URL
+  if (window.location.hash) {
+    const sectionId = window.location.hash.substring(1) // Remove the #
+    // Small delay to ensure page is fully loaded
+    setTimeout(() => {
+      scrollToSection(sectionId)
+    }, 100)
+  }
+})
 
 // SEO and metadata
 useHead({

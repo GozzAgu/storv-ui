@@ -1,26 +1,47 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-    <div class="max-w-md w-full space-y-8">
+  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-purple-50/40 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Enhanced Background Pattern -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <!-- Geometric Grid Pattern -->
+      <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
+        <div class="absolute inset-0" style="background-image: linear-gradient(to right, #667eea 1px, transparent 1px), linear-gradient(to bottom, #667eea 1px, transparent 1px); background-size: 50px 50px;"></div>
+      </div>
+      
+      <!-- Animated Gradient Orbs -->
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary-400/40 to-purple-400/40 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-primary-300/20 to-purple-300/20 rounded-full blur-3xl"></div>
+      
+      <!-- Floating Shapes -->
+      <div class="absolute top-20 left-10 w-32 h-32 bg-primary-200/20 rounded-3xl rotate-45 blur-xl"></div>
+      <div class="absolute bottom-20 right-20 w-24 h-24 bg-purple-200/20 rounded-full blur-xl"></div>
+      <div class="absolute top-1/3 right-1/4 w-20 h-20 bg-pink-200/20 rounded-2xl rotate-12 blur-lg"></div>
+      
+      <!-- Dot Pattern Overlay -->
+      <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style="background-image: radial-gradient(circle, #667eea 1px, transparent 1px); background-size: 30px 30px;"></div>
+    </div>
+
+    <div class="max-w-md w-full relative z-10">
       <!-- Logo and Header -->
-      <div class="text-center">
-        <NuxtLink to="/" class="inline-block">
-          <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent mb-2">
+      <div class="text-center mb-8">
+        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200">
+          <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent mb-4">
             Storv
           </h1>
         </NuxtLink>
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mt-6">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
           Reset your password
         </h2>
-        <p class="mt-2 text-sm sm:text-base text-gray-600">
+        <p class="text-gray-600 text-base">
           Enter your email address and we'll send you a link to reset your password
         </p>
       </div>
 
-      <!-- Forgot Password Form -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+      <!-- Forgot Password Form Card -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50">
         <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-6">
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
               Email address
             </label>
             <input
@@ -29,17 +50,25 @@
               type="email"
               autocomplete="email"
               required
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors outline-none text-gray-900 placeholder-gray-400"
+              class="w-full px-4 py-3.5 bg-white/80 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 hover:border-gray-300"
               placeholder="you@example.com"
             />
+          </div>
+
+          <!-- Error Message -->
+          <div v-if="errorMessage && !emailSent" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <p class="text-sm text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
           </div>
 
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-gradient-to-r from-primary-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+            class="w-full bg-gradient-to-r from-primary-500 to-purple-600 text-white py-4 rounded-xl font-semibold text-base hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
           >
-            <span v-if="!isLoading">Send reset link</span>
+            <span v-if="!isLoading" class="flex items-center gap-2">
+              Send reset link
+              <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </span>
             <span v-else class="flex items-center gap-2">
               <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -52,7 +81,7 @@
 
         <!-- Success Message -->
         <div v-else class="text-center space-y-6">
-          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-green-100 to-green-200">
             <CheckCircleIcon class="h-8 w-8 text-green-600" />
           </div>
           <div>
@@ -79,7 +108,7 @@
         </div>
 
         <!-- Back to Sign In -->
-        <div class="mt-6 text-center">
+        <div class="mt-6 pt-6 border-t border-gray-200 text-center">
           <NuxtLink
             to="/signin"
             class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
@@ -95,7 +124,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CheckCircleIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import { CheckCircleIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 
 definePageMeta({
   layout: false
@@ -108,22 +138,49 @@ const form = ref({
 const emailSent = ref(false)
 const isLoading = ref(false)
 const isResending = ref(false)
+const errorMessage = ref('')
+
+const { resetPassword } = useFirebaseAuth()
 
 const handleForgotPassword = async () => {
+  if (!form.value.email) {
+    errorMessage.value = 'Please enter your email address'
+    return
+  }
+
   isLoading.value = true
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1500))
-  isLoading.value = false
-  emailSent.value = true
-  // Handle forgot password logic here
-  console.log('Forgot password:', form.value)
+  errorMessage.value = ''
+
+  try {
+    await resetPassword(form.value.email)
+    emailSent.value = true
+  } catch (error: any) {
+    console.error('Password reset error:', error)
+    // Handle Firebase Auth errors
+    if (error.message.includes('user-not-found')) {
+      errorMessage.value = 'No account found with this email address'
+    } else if (error.message.includes('invalid-email')) {
+      errorMessage.value = 'Invalid email address'
+    } else {
+      errorMessage.value = error.message || 'Failed to send reset email. Please try again'
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const resendEmail = async () => {
   isResending.value = true
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  isResending.value = false
+  errorMessage.value = ''
+  
+  try {
+    await resetPassword(form.value.email)
+    // Show success feedback
+  } catch (error: any) {
+    errorMessage.value = error.message || 'Failed to resend email. Please try again'
+  } finally {
+    isResending.value = false
+  }
 }
 
 useHead({
@@ -137,3 +194,17 @@ useHead({
 })
 </script>
 
+<style scoped>
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>
