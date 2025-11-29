@@ -3,89 +3,134 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-all duration-300 ease-in-out lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 shadow-xl',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        sidebarCollapsed ? 'w-20' : 'w-64'
+        sidebarCollapsed ? 'w-20' : 'w-72'
       ]"
     >
+      <!-- Background Gradient -->
+      <div class="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 dark:from-gray-900/50 dark:via-gray-800 dark:to-gray-900/50 pointer-events-none"></div>
       <!-- Logo -->
-      <div class="flex items-center justify-between h-16 border-b border-gray-200 dark:border-gray-700">
+      <div class="relative flex items-center justify-between h-20 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm" :class="sidebarCollapsed ? 'px-2' : 'px-6'">
         <NuxtLink 
           to="/dashboard" 
           :class="[
-            'flex items-center transition-all duration-300',
-            sidebarCollapsed ? 'justify-center pl-0' : 'pl-4 space-x-2'
+            'flex items-center transition-all duration-300 group',
+            sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'
           ]"
         >
-          <img
-            :key="currentTheme"
-            :src="currentTheme === 'dark' ? '/storv logo dark.png' : '/storv logo.png'"
-            alt="Storv Logo"
-            class="h-10 w-auto transition-opacity duration-300"
-          />
+          <div class="relative flex-shrink-0">
+            <img
+              :key="currentTheme"
+              :src="currentTheme === 'dark' ? '/storv logo dark.png' : '/storv logo.png'"
+              alt="Storv Logo"
+              :class="[
+                'transition-all duration-300 object-contain',
+                sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-auto'
+              ]"
+            />
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-purple-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
           <span 
             v-if="!sidebarCollapsed" 
-            class="hidden lg:block text-xl font-bold bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent ml-2"
+            class="text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 bg-clip-text text-transparent tracking-tight"
           >
             Storv
           </span>
         </NuxtLink>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2" v-if="!sidebarCollapsed">
           <button
-            v-if="!sidebarCollapsed"
             @click="toggleSidebar"
-            class="hidden lg:flex p-2 mr-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="hidden lg:flex p-2.5 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
             title="Collapse sidebar"
           >
             <ChevronLeftIcon class="w-5 h-5" />
           </button>
           <button
             @click="sidebarOpen = false"
-            class="lg:hidden p-2 mr-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+            class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
           >
             <XMarkIcon class="w-6 h-6" />
           </button>
         </div>
+        <button
+          v-else
+          @click="sidebarOpen = false"
+          class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
+        >
+          <XMarkIcon class="w-6 h-6" />
+        </button>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 py-6 space-y-1 overflow-y-auto" :class="sidebarCollapsed ? 'px-2' : 'px-4'">
-        <NuxtLink
-          v-for="item in navigation"
-          :key="item.name"
-          :to="item.href"
-          :class="[
-            'flex items-center text-sm font-medium rounded-xl transition-all duration-200 group relative',
-            sidebarCollapsed ? 'justify-center px-3 py-3' : 'px-4 py-3',
-            isActive(item.href)
-              ? 'bg-gradient-to-r from-primary-500 to-purple-600 text-white shadow-md'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          ]"
-          :title="sidebarCollapsed ? item.name : ''"
-        >
-          <component :is="item.icon" :class="['w-5 h-5 flex-shrink-0', sidebarCollapsed ? '' : 'mr-3']" />
-          <span 
-            v-if="!sidebarCollapsed" 
-            class="whitespace-nowrap transition-opacity duration-300"
+      <nav class="relative flex-1 py-6 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
+        <div class="space-y-1.5">
+          <NuxtLink
+            v-for="item in navigation"
+            :key="item.name"
+            :to="item.href"
+            :class="[
+              'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden',
+              sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
+              isActive(item.href)
+                ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+            ]"
+            :title="sidebarCollapsed ? item.name : ''"
           >
-            {{ item.name }}
-          </span>
-          <!-- Tooltip for collapsed state -->
-          <div
-            v-if="sidebarCollapsed"
-            class="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none"
-          >
-            {{ item.name }}
-            <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-700"></div>
-          </div>
-        </NuxtLink>
+            <!-- Active indicator -->
+            <div 
+              v-if="isActive(item.href) && !sidebarCollapsed"
+              class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+            ></div>
+            
+            <!-- Active indicator for collapsed (circular) -->
+            <div 
+              v-if="isActive(item.href) && sidebarCollapsed"
+              class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600"
+            ></div>
+            
+            <!-- Hover effect background -->
+            <div 
+              v-if="!isActive(item.href)"
+              class="absolute inset-0 bg-gradient-to-r from-primary-50/0 via-primary-50/50 to-purple-50/0 dark:from-primary-900/0 dark:via-primary-900/30 dark:to-purple-900/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            ></div>
+            
+            <component 
+              :is="item.icon" 
+              :class="[
+                'relative z-10 transition-all duration-300',
+                sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4',
+                isActive(item.href)
+                  ? 'text-white' 
+                  : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+              ]"
+            />
+            <span 
+              v-if="!sidebarCollapsed" 
+              class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
+              :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+            >
+              {{ item.name }}
+            </span>
+            
+            <!-- Tooltip for collapsed state -->
+            <div
+              v-if="sidebarCollapsed"
+              class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+            >
+              {{ item.name }}
+              <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+            </div>
+          </NuxtLink>
+        </div>
       </nav>
       
       <!-- Collapse/Expand Button (at bottom) -->
-      <div v-if="sidebarCollapsed" class="p-2 border-t border-gray-200 dark:border-gray-700">
+      <div v-if="sidebarCollapsed" class="relative px-3 py-3 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
         <button
           @click="toggleSidebar"
-          class="w-full flex items-center justify-center p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="w-full flex items-center justify-center p-3 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
           title="Expand sidebar"
         >
           <ChevronRightIcon class="w-5 h-5" />
@@ -102,7 +147,7 @@
 
     <!-- Main Content -->
     <div 
-      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64']"
+      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72']"
       class="w-full"
       style="min-width: 0; max-width: 100vw;"
     >
@@ -213,7 +258,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -339,6 +384,16 @@ const handleClickOutside = (event: MouseEvent) => {
     profileMenuOpen.value = false
   }
 }
+
+// Close sidebar on mobile when route changes
+watch(() => route.path, () => {
+  if (import.meta.client && sidebarOpen.value) {
+    // Check if we're on mobile (screen width < 1024px which is lg breakpoint)
+    if (window.innerWidth < 1024) {
+      sidebarOpen.value = false
+    }
+  }
+})
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

@@ -122,7 +122,7 @@
     </Card>
 
     <!-- Departments Grid -->
-    <div v-else-if="paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card
         v-for="department in paginatedDepartments"
         :key="department.id"
@@ -237,7 +237,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   BuildingOfficeIcon,
@@ -269,7 +269,7 @@ const editingDepartment = ref<Department | null>(null)
 
 const searchQuery = ref('')
 const currentPage = ref(1)
-const itemsPerPage = ref(9)
+const itemsPerPage = ref(12)
 
 // Import stores directly - Pinia handles SSR automatically
 import { useDepartmentsStore } from '~/stores/departments'
@@ -365,8 +365,26 @@ const openCreateDepartmentModal = () => {
   showDepartmentModal.value = true
 }
 
-const navigateToDepartment = (departmentId: string) => {
-  navigateTo(`/dashboard/departments/${departmentId}`)
+const navigateToDepartment = async (departmentId: string) => {
+  if (import.meta.server) return
+  
+  try {
+    // Use router directly for more reliable navigation
+    const router = useRouter()
+    await router.push(`/dashboard/departments/${departmentId}`)
+    
+    // Force scroll to top after navigation
+    await nextTick()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch (error) {
+    console.error('Navigation error:', error)
+    // Fallback to navigateTo if router.push fails
+    try {
+      await navigateTo(`/dashboard/departments/${departmentId}`)
+    } catch (err) {
+      console.error('Both navigation methods failed:', err)
+    }
+  }
 }
 
 const handleEditDepartment = (department: Department) => {

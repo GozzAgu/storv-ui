@@ -473,13 +473,16 @@ import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
-import { useDepartments, type Department } from '~/composables/useDepartments'
-import { useStaff, type Staff } from '~/composables/useStaff'
+import { useDepartmentsStore } from '~/stores/departments'
+import { useStaffStore } from '~/stores/staff'
+import type { Department } from '~/composables/useDepartments'
+import type { Staff } from '~/composables/useStaff'
 
 definePageMeta({
   layout: 'dashboard',
   key: (route) => `department-${route.params.id}`, // Force re-mount when ID changes
-  middleware: 'auth' // Ensure auth middleware runs
+  middleware: 'auth', // Ensure auth middleware runs
+  ssr: false // Disable SSR for client-side navigation
 })
 
 const route = useRoute()
@@ -517,8 +520,8 @@ const staffItemsPerPage = ref(10)
 const showStaffModal = ref(false)
 const editingStaff = ref<Staff | null>(null)
 
-const { getDepartment } = useDepartments()
-const { getStaffByDepartment, deleteStaff } = useStaff()
+const departmentsStore = useDepartmentsStore()
+const staffStore = useStaffStore()
 
 const paginatedStaff = computed(() => {
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
@@ -630,6 +633,7 @@ const handleViewLeave = (leave: LeaveRequest) => {
 const loadDepartmentData = async () => {
   if (!departmentId.value || typeof departmentId.value !== 'string') {
     console.error('Invalid department ID:', departmentId.value)
+    navigateTo('/dashboard/departments')
     return
   }
 
@@ -637,8 +641,8 @@ const loadDepartmentData = async () => {
   isLoadingStaff.value = true
   
   try {
-    // Load department
-    const dept = await getDepartment(departmentId.value)
+    // Load department using Pinia store
+    const dept = await departmentsStore.fetchDepartment(departmentId.value)
     if (dept) {
       department.value = dept
       useHead({
@@ -650,11 +654,14 @@ const loadDepartmentData = async () => {
       return
     }
 
-    // Load staff for this department
-    staff.value = await getStaffByDepartment(departmentId.value)
+    // Load staff for this department using Pinia store
+    await staffStore.fetchStaffByDepartment(departmentId.value)
+    // Get staff from store getter (it's a function that takes departmentId)
+    staff.value = staffStore.getStaffByDepartment(departmentId.value)
   } catch (error: any) {
     console.error('Error loading department data:', error.message || error)
     alert(error.message || 'Failed to load department data')
+    navigateTo('/dashboard/departments')
   } finally {
     isLoadingDepartment.value = false
     isLoadingStaff.value = false
@@ -675,7 +682,7 @@ const handleEditStaff = (staffMember: Staff) => {
 const handleDeleteStaff = async (staffMember: Staff) => {
   if (confirm(`Are you sure you want to delete ${staffMember.firstName} ${staffMember.lastName}? This action cannot be undone.`)) {
     try {
-      await deleteStaff(staffMember.id)
+      await staffStore.deleteStaff(staffMember.id)
       await loadDepartmentData() // Reload to update staff list and counts
       alert('Staff member deleted successfully')
     } catch (error: any) {
