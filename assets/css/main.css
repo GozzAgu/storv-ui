@@ -5,10 +5,57 @@
 @layer base {
   html {
     font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+    scroll-behavior: smooth;
   }
   
   body {
     font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    /* Prevent horizontal scroll during load */
+    overflow-x: hidden;
+  }
+  
+  /* Prevent layout shift - ensure smooth transition */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent flash of unstyled content */
+  #__nuxt {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure layout stability during hydration */
+  #__nuxt > * {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent layout shift for fixed elements */
+  [class*="fixed"] {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  
+  /* Ensure main content area is stable */
+  main {
+    min-height: calc(100vh - 4rem);
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Prevent overflow causing layout shifts */
+  * {
+    max-width: 100%;
   }
 }
 

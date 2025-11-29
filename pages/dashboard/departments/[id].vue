@@ -23,9 +23,9 @@
     <Card padding="md">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div>
-          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Location</p>
+          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Department Type</p>
           <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {{ department?.location || '-' }}
+            {{ department?.departmentType || '-' }}
           </p>
         </div>
         <div>
@@ -44,7 +44,21 @@
     </Card>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <Card padding="md" extra-class="border-l-4 border-l-purple-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {{ staff.length }}
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <UsersIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+        </div>
+      </Card>
+
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -87,6 +101,155 @@
         </div>
       </Card>
     </div>
+
+    <!-- Staff Management Section -->
+    <Card padding="md">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Staff Members</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage staff in this department</p>
+        </div>
+        <Button
+          :icon="PlusIcon"
+          @click="openCreateStaffModal"
+        >
+          Add Staff
+        </Button>
+      </div>
+
+      <!-- Staff Table -->
+      <div v-if="isLoadingStaff" class="text-center py-8">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading staff...</p>
+      </div>
+
+      <div v-else-if="staff.length === 0" class="text-center py-8">
+        <UsersIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No staff members in this department yet</p>
+        <Button
+          variant="primary"
+          :icon="PlusIcon"
+          @click="openCreateStaffModal"
+        >
+          Add First Staff Member
+        </Button>
+      </div>
+
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Name
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Position
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Role
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Email
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Status
+              </th>
+              <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr
+              v-for="member in paginatedStaff"
+              :key="member.id"
+              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+            >
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {{ member.firstName.charAt(0).toUpperCase() }}{{ member.lastName.charAt(0).toUpperCase() }}
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {{ member.firstName }} {{ member.lastName }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ member.phone || 'No phone' }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900 dark:text-gray-100">
+                  {{ member.position }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                  :class="[
+                    member.role === 'manager'
+                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
+                      : member.role === 'intern'
+                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                  ]"
+                >
+                  {{ member.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900 dark:text-gray-100">
+                  {{ member.email }}
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span
+                  :class="[
+                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                    member.status === 'active'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                      : member.status === 'on_leave'
+                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                  ]"
+                >
+                  {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    @click="handleEditStaff(member)"
+                    class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    title="Edit"
+                  >
+                    <PencilIcon class="w-5 h-5" />
+                  </button>
+                  <button
+                    @click="handleDeleteStaff(member)"
+                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="Delete"
+                  >
+                    <TrashIcon class="w-5 h-5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Staff Pagination -->
+      <Pagination
+        v-if="staff.length > 0"
+        :current-page="staffCurrentPage"
+        :items-per-page="staffItemsPerPage"
+        :total="staff.length"
+        @page-change="handleStaffPageChange"
+        class="mt-4"
+      />
+    </Card>
 
     <!-- Filters -->
     <Card padding="md">
@@ -277,11 +440,21 @@
         @page-change="handlePageChange"
       />
     </Card>
+
+    <!-- Staff Modal -->
+    <StaffModal
+      v-if="departmentId"
+      v-model="showStaffModal"
+      :department-id="departmentId"
+      :staff="editingStaff"
+      @success="handleStaffSuccess"
+      @error="handleStaffError"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -291,26 +464,26 @@ import {
   ArrowPathIcon,
   XMarkIcon,
   EyeIcon,
+  PlusIcon,
+  UsersIcon,
+  PencilIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import StaffModal from '~/components/departments/StaffModal.vue'
+import { useDepartments, type Department } from '~/composables/useDepartments'
+import { useStaff, type Staff } from '~/composables/useStaff'
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  key: (route) => `department-${route.params.id}`, // Force re-mount when ID changes
+  middleware: 'auth' // Ensure auth middleware runs
 })
 
 const route = useRoute()
 const departmentId = computed(() => route.params.id as string)
-
-interface Department {
-  id: string
-  name: string
-  location: string
-  manager: string
-  staffCount: number
-  budget: number
-}
 
 interface LeaveRequest {
   id: string
@@ -326,88 +499,32 @@ interface LeaveRequest {
 }
 
 const department = ref<Department | null>(null)
+const staff = ref<Staff[]>([])
 const leaves = ref<LeaveRequest[]>([])
+const isLoadingDepartment = ref(true)
+const isLoadingStaff = ref(true)
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const typeFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 
-// Sample departments data
-const departmentsData: Department[] = [
-  {
-    id: '1',
-    name: 'Sales',
-    location: 'Main Floor',
-    manager: 'Sarah Johnson',
-    staffCount: 8,
-    budget: 50000,
-  },
-  {
-    id: '2',
-    name: 'Warehouse',
-    location: 'Back Building',
-    manager: 'Mike Wilson',
-    staffCount: 12,
-    budget: 35000,
-  },
-  {
-    id: '3',
-    name: 'Customer Service',
-    location: 'Second Floor',
-    manager: 'Emily Davis',
-    staffCount: 6,
-    budget: 40000,
-  },
-  {
-    id: '4',
-    name: 'Inventory',
-    location: 'Main Floor',
-    manager: 'David Brown',
-    staffCount: 5,
-    budget: 30000,
-  },
-]
+// Staff pagination
+const staffCurrentPage = ref(1)
+const staffItemsPerPage = ref(10)
 
-// Sample leave requests
-const sampleLeaves: LeaveRequest[] = [
-  {
-    id: '1',
-    staffName: 'John Smith',
-    staffEmail: 'john.smith@example.com',
-    type: 'vacation',
-    startDate: '2024-12-15',
-    endDate: '2024-12-22',
-    days: 7,
-    reason: 'Family vacation',
-    status: 'pending',
-    departmentId: '1',
-  },
-  {
-    id: '2',
-    staffName: 'Jane Doe',
-    staffEmail: 'jane.doe@example.com',
-    type: 'sick',
-    startDate: '2024-12-10',
-    endDate: '2024-12-12',
-    days: 2,
-    reason: 'Flu symptoms',
-    status: 'approved',
-    departmentId: '1',
-  },
-  {
-    id: '3',
-    staffName: 'Bob Williams',
-    staffEmail: 'bob.williams@example.com',
-    type: 'personal',
-    startDate: '2024-12-20',
-    endDate: '2024-12-21',
-    days: 1,
-    reason: 'Personal appointment',
-    status: 'pending',
-    departmentId: '2',
-  },
-]
+// Staff modal
+const showStaffModal = ref(false)
+const editingStaff = ref<Staff | null>(null)
+
+const { getDepartment } = useDepartments()
+const { getStaffByDepartment, deleteStaff } = useStaff()
+
+const paginatedStaff = computed(() => {
+  const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
+  const end = start + staffItemsPerPage.value
+  return staff.value.slice(start, end)
+})
 
 const filteredLeaves = computed(() => {
   let result = leaves.value.filter(l => l.departmentId === departmentId.value)
@@ -509,16 +626,106 @@ const handleViewLeave = (leave: LeaveRequest) => {
   alert(`Viewing leave details for ${leave.staffName}`)
 }
 
-onMounted(() => {
-  // Find department
-  department.value = departmentsData.find(d => d.id === departmentId.value) || null
+// Load department and staff data
+const loadDepartmentData = async () => {
+  if (!departmentId.value || typeof departmentId.value !== 'string') {
+    console.error('Invalid department ID:', departmentId.value)
+    return
+  }
 
-  // Load leave requests for this department
-  leaves.value = sampleLeaves.filter(l => l.departmentId === departmentId.value)
+  isLoadingDepartment.value = true
+  isLoadingStaff.value = true
+  
+  try {
+    // Load department
+    const dept = await getDepartment(departmentId.value)
+    if (dept) {
+      department.value = dept
+      useHead({
+        title: `${dept.name || 'Department'} - Leave Management - Storv`,
+      })
+    } else {
+      // Department not found, redirect
+      navigateTo('/dashboard/departments')
+      return
+    }
 
-  useHead({
-    title: `${department.value?.name || 'Department'} - Leave Management - Storv`,
-  })
+    // Load staff for this department
+    staff.value = await getStaffByDepartment(departmentId.value)
+  } catch (error: any) {
+    console.error('Error loading department data:', error.message || error)
+    alert(error.message || 'Failed to load department data')
+  } finally {
+    isLoadingDepartment.value = false
+    isLoadingStaff.value = false
+  }
+}
+
+// Staff management functions
+const openCreateStaffModal = () => {
+  editingStaff.value = null
+  showStaffModal.value = true
+}
+
+const handleEditStaff = (staffMember: Staff) => {
+  editingStaff.value = staffMember
+  showStaffModal.value = true
+}
+
+const handleDeleteStaff = async (staffMember: Staff) => {
+  if (confirm(`Are you sure you want to delete ${staffMember.firstName} ${staffMember.lastName}? This action cannot be undone.`)) {
+    try {
+      await deleteStaff(staffMember.id)
+      await loadDepartmentData() // Reload to update staff list and counts
+      alert('Staff member deleted successfully')
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete staff member')
+    }
+  }
+}
+
+const handleStaffSuccess = async () => {
+  await loadDepartmentData() // Reload staff list
+  showStaffModal.value = false
+  editingStaff.value = null
+}
+
+const handleStaffError = (error: string) => {
+  console.error('Staff error:', error)
+}
+
+const handleStaffPageChange = (page: number) => {
+  staffCurrentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// Watch for route parameter changes when navigating between departments
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId && typeof newId === 'string') {
+    // Clear previous data
+    department.value = null
+    staff.value = []
+    leaves.value = []
+    isLoadingDepartment.value = true
+    isLoadingStaff.value = true
+    // Load new data
+    try {
+      await loadDepartmentData()
+    } catch (error) {
+      console.error('Error loading department data:', error)
+    }
+  }
+}, { immediate: false })
+
+onMounted(async () => {
+  if (import.meta.server) return
+  
+  // Load data immediately
+  await loadDepartmentData()
+  
+  // Load leave requests (for now, we'll keep sample data until leave requests are integrated with Firestore)
+  // TODO: Integrate leave requests with Firestore
+  leaves.value = []
 })
 </script>
 

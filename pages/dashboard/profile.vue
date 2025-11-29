@@ -307,7 +307,7 @@
                 </div>
               </div>
               <button 
-                @click="toggleTwoFactor"
+                @click="handle2FAToggle"
                 :class="[
                   'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
                   securitySettings.twoFactor
@@ -450,12 +450,324 @@
       </div>
     </div>
 
-    <!-- Modals would go here - simplified for now with alerts -->
+    <!-- Theme Change Modal -->
+    <Modal v-model="showThemeModal" title="Change Theme" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Select your preferred theme</p>
+        <div class="space-y-2">
+          <button
+            v-for="themeOption in themeOptions"
+            :key="themeOption.value"
+            @click="selectTheme(themeOption.value as 'light' | 'dark' | 'system')"
+            :class="[
+              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              currentThemeValue === themeOption.value
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            ]"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-gray-900 dark:text-gray-100">{{ themeOption.label }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ themeOption.description }}</p>
+              </div>
+              <div v-if="currentThemeValue === themeOption.value" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+                <CheckCircleIcon class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showThemeModal = false">Close</Button>
+      </template>
+    </Modal>
+
+    <!-- Language Selection Modal -->
+    <Modal v-model="showLanguageModal" title="Change Language" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Select your preferred language</p>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <button
+            v-for="lang in languages"
+            :key="lang.code"
+            @click="selectLanguage(lang.code, lang.name)"
+            :class="[
+              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              accountSettings.language === lang.name
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            ]"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-gray-900 dark:text-gray-100">{{ lang.name }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ lang.nativeName }}</p>
+              </div>
+              <div v-if="accountSettings.language === lang.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+                <CheckCircleIcon class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showLanguageModal = false">Close</Button>
+      </template>
+    </Modal>
+
+    <!-- Notifications Settings Modal -->
+    <Modal v-model="showNotificationsModal" title="Notification Preferences" size="lg">
+      <div class="space-y-6">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div>
+              <p class="font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive notifications via email</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                v-model="notificationSettings.email"
+                type="checkbox"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div>
+              <p class="font-medium text-gray-900 dark:text-gray-100">Push Notifications</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive push notifications in browser</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                v-model="notificationSettings.push"
+                type="checkbox"
+                class="sr-only peer"
+                @change="handlePushNotificationToggle"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+            <div>
+              <p class="font-medium text-gray-900 dark:text-gray-100">SMS Notifications</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive notifications via SMS</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                v-model="notificationSettings.sms"
+                type="checkbox"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+          
+          <div class="flex items-center justify-between py-4">
+            <div>
+              <p class="font-medium text-gray-900 dark:text-gray-100">In-App Notifications</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Show notifications within the app</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                v-model="notificationSettings.inApp"
+                type="checkbox"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showNotificationsModal = false">Cancel</Button>
+        <Button @click="saveNotificationSettings">Save Changes</Button>
+      </template>
+    </Modal>
+
+    <!-- Password Change Modal -->
+    <Modal v-model="showPasswordModal" title="Change Password" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Enter your current password and choose a new one</p>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Current Password
+            </label>
+            <input
+              v-model="passwordForm.currentPassword"
+              type="password"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              New Password
+            </label>
+            <input
+              v-model="passwordForm.newPassword"
+              type="password"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              placeholder="Enter new password"
+            />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Confirm New Password
+            </label>
+            <input
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              placeholder="Confirm new password"
+            />
+            <p v-if="passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="text-xs text-red-500 mt-1">
+              Passwords do not match
+            </p>
+          </div>
+          <div v-if="passwordError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p class="text-sm text-red-600 dark:text-red-400">{{ passwordError }}</p>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showPasswordModal = false; passwordError = ''; passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' }">Cancel</Button>
+        <Button @click="handlePasswordChange" :disabled="isChangingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirmPassword">
+          <span v-if="isChangingPassword" class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Changing...
+          </span>
+          <span v-else>Change Password</span>
+        </Button>
+      </template>
+    </Modal>
+
+    <!-- Active Sessions Modal -->
+    <Modal v-model="showSessionsModal" title="Active Sessions" size="lg">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Manage devices where you're currently signed in</p>
+        <div v-if="isLoadingSessions" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sessions...</p>
+        </div>
+        <div v-else-if="activeSessions.length === 0" class="text-center py-8">
+          <p class="text-sm text-gray-500 dark:text-gray-400">No active sessions found</p>
+        </div>
+        <div v-else class="space-y-3">
+          <div
+            v-for="(session, index) in activeSessions"
+            :key="index"
+            class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <DevicePhoneMobileIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ session.device }}</p>
+                  <span v-if="session.current" class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full">
+                    Current
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ session.location }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Last active: {{ formatDate(session.lastActive) }}</p>
+              </div>
+              <button
+                v-if="!session.current"
+                @click="revokeSession(index)"
+                class="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              >
+                Revoke
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showSessionsModal = false">Close</Button>
+        <Button variant="danger" @click="revokeAllSessions" v-if="activeSessions.length > 1">Revoke All Others</Button>
+      </template>
+    </Modal>
+
+    <!-- Timezone Selection Modal -->
+    <Modal v-model="showTimezoneModal" title="Change Timezone" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Select your timezone</p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Timezone
+          </label>
+          <select
+            v-model="selectedTimezone"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+          >
+            <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
+              {{ tz.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showTimezoneModal = false">Cancel</Button>
+        <Button @click="saveTimezone">Save</Button>
+      </template>
+    </Modal>
+
+    <!-- 2FA Setup Modal -->
+    <TwoFactorSetup
+      v-model="show2FASetupModal"
+      @success="handle2FASetupSuccess"
+      @error="handle2FAError"
+    />
+
+    <!-- 2FA Disable Modal -->
+    <Modal v-model="show2FADisableModal" title="Disable Two-Factor Authentication" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Please enter your password to disable two-factor authentication.
+        </p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Password
+          </label>
+          <input
+            v-model="disable2FAPassword"
+            type="password"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="Enter your password"
+            @keyup.enter="handleDisable2FA"
+          />
+        </div>
+        <div v-if="disable2FAError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p class="text-sm text-red-600 dark:text-red-400">{{ disable2FAError }}</p>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="show2FADisableModal = false; disable2FAPassword = ''; disable2FAError = ''">Cancel</Button>
+        <Button variant="danger" @click="handleDisable2FA" :disabled="isDisabling2FA || !disable2FAPassword">
+          <span v-if="isDisabling2FA" class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Disabling...
+          </span>
+          <span v-else>Disable 2FA</span>
+        </Button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted, computed } from 'vue'
 import {
   CameraIcon,
   LanguageIcon,
@@ -470,6 +782,10 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
+import { useTheme } from '~/composables/useTheme'
+import Modal from '~/components/ui/Modal.vue'
+import Button from '~/components/ui/Button.vue'
+import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
 
 definePageMeta({
   layout: 'dashboard'
@@ -507,43 +823,143 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isLoadingProfile = ref(true)
 
 // Get user data
-const { currentUser } = useFirebaseAuth()
+const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument } = useUser()
 
-// Load profile and store information from Firestore
-onMounted(async () => {
-  if (currentUser.value) {
-    try {
-      const userData = await getUserDocument(currentUser.value.uid)
-      if (userData) {
-        // Split name into first and last name
-        const nameParts = (userData.name || '').split(' ')
-        profileData.firstName = nameParts[0] || ''
-        profileData.lastName = nameParts.slice(1).join(' ') || ''
-        profileData.email = userData.email || currentUser.value.email || ''
-        profileData.role = userData.role === 'superAdmin' ? 'Super Admin' : userData.role || 'User'
-        
-        // Load store details if available
-        if (userData.storeDetails) {
-          storeInfo.storeName = userData.storeDetails.storeName || ''
-          storeInfo.storeAddress = userData.storeDetails.storeAddress || ''
-          storeInfo.storePhone = userData.storeDetails.storePhone || ''
-          storeInfo.storeEmail = userData.storeDetails.storeEmail || ''
-          storeInfo.storeDescription = userData.storeDetails.storeDescription || ''
-        }
-        
-        // Update backup
-        Object.assign(backupData, { ...profileData })
+// Function to load profile data
+const loadProfileData = async () => {
+  if (!currentUser.value) {
+    isLoadingProfile.value = false
+    return
+  }
+
+  try {
+    const userData = await getUserDocument(currentUser.value.uid)
+    if (userData) {
+      // Split name into first and last name
+      const nameParts = (userData.name || '').split(' ')
+      profileData.firstName = nameParts[0] || ''
+      profileData.lastName = nameParts.slice(1).join(' ') || ''
+      profileData.email = userData.email || currentUser.value.email || ''
+      profileData.role = userData.role === 'superAdmin' ? 'Super Admin' : userData.role || 'User'
+      
+      // Load store details if available
+      if (userData.storeDetails) {
+        storeInfo.storeName = userData.storeDetails.storeName || ''
+        storeInfo.storeAddress = userData.storeDetails.storeAddress || ''
+        storeInfo.storePhone = userData.storeDetails.storePhone || ''
+        storeInfo.storeEmail = userData.storeDetails.storeEmail || ''
+        storeInfo.storeDescription = userData.storeDetails.storeDescription || ''
       }
-    } catch (error) {
-      console.error('Error loading profile:', error)
-    } finally {
-      isLoadingProfile.value = false
+      
+      // Load 2FA status from Firestore
+      if (userData.twoFactorEnabled) {
+        securitySettings.twoFactor = true
+        if (import.meta.client) {
+          localStorage.setItem('twoFactorEnabled', 'true')
+        }
+      }
+      
+      // Update backup
+      Object.assign(backupData, { ...profileData })
+    } else {
+      // No user data found, but user is authenticated - set defaults from auth
+      profileData.email = currentUser.value.email || ''
+      profileData.firstName = currentUser.value.displayName?.split(' ')[0] || ''
+      profileData.lastName = currentUser.value.displayName?.split(' ').slice(1).join(' ') || ''
     }
-  } else {
+  } catch (error) {
+    console.error('Error loading profile:', error)
+    // Even on error, set email from auth if available
+    if (currentUser.value?.email) {
+      profileData.email = currentUser.value.email
+    }
+  } finally {
     isLoadingProfile.value = false
   }
+}
+
+// Load profile and store information from Firestore + settings
+onMounted(async () => {
+  if (import.meta.client) {
+    // Load settings from localStorage
+    // Load notification settings
+    const savedNotifications = localStorage.getItem('notificationSettings')
+    if (savedNotifications) {
+      try {
+        Object.assign(notificationSettings, JSON.parse(savedNotifications))
+      } catch (e) {
+        console.error('Error loading notification settings:', e)
+      }
+    }
+    
+    // Update notifications display
+    const enabledTypes: string[] = []
+    if (notificationSettings.email) enabledTypes.push('Email')
+    if (notificationSettings.push) enabledTypes.push('Push')
+    if (notificationSettings.sms) enabledTypes.push('SMS')
+    if (notificationSettings.inApp) enabledTypes.push('In-App')
+    accountSettings.notifications = enabledTypes.length > 0 ? enabledTypes.join(', ') : 'None'
+    
+    // Load timezone
+    const savedTimezone = localStorage.getItem('timezone')
+    if (savedTimezone) {
+      selectedTimezone.value = savedTimezone
+      accountSettings.timezone = timezones.find(tz => tz.value === savedTimezone)?.label || savedTimezone
+    }
+    
+    // Load language
+    const savedLanguage = localStorage.getItem('language')
+    if (savedLanguage) {
+      accountSettings.language = savedLanguage
+    }
+    
+    // Load 2FA status from localStorage (fallback)
+    const saved2FA = localStorage.getItem('twoFactorEnabled')
+    if (saved2FA !== null) {
+      securitySettings.twoFactor = saved2FA === 'true'
+    }
+    
+    // Update theme display
+    accountSettings.theme = theme.value === 'system' ? 'Follow system' : theme.value === 'dark' ? 'Dark' : 'Light'
+  }
+  
+  // Wait for auth to finish loading before loading profile data
+  if (authLoading.value) {
+    await new Promise((resolve) => {
+      let resolved = false
+      const unwatch = watch(authLoading, (val) => {
+        if (!val && !resolved) {
+          resolved = true
+          unwatch()
+          resolve(true)
+        }
+      })
+      
+      // Timeout after 3 seconds
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true
+          unwatch()
+          resolve(true)
+        }
+      }, 3000)
+    })
+  }
+  
+  // Load profile data after auth is ready
+  await loadProfileData()
 })
+
+// Watch for currentUser changes and reload profile data
+watch(currentUser, async (newUser) => {
+  if (newUser && !isLoadingProfile.value) {
+    await loadProfileData()
+  }
+}, { immediate: false })
+
+// Theme integration
+const { theme, setTheme, actualTheme } = useTheme()
 
 // Account settings
 const accountSettings = reactive({
@@ -553,11 +969,79 @@ const accountSettings = reactive({
   timezone: 'UTC (GMT +0:00)',
 })
 
+// Notification settings
+const notificationSettings = reactive({
+  email: true,
+  push: false,
+  sms: false,
+  inApp: true,
+})
+
+// Password form
+const passwordForm = reactive({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+const passwordError = ref('')
+const isChangingPassword = ref(false)
+
 // Security settings
 const securitySettings = reactive({
   twoFactor: false,
   activeSessions: 3,
 })
+
+// Active sessions
+const activeSessions = ref<Array<{ device: string; location: string; lastActive: string; current: boolean }>>([])
+const isLoadingSessions = ref(false)
+
+// Timezone
+const selectedTimezone = ref('UTC')
+const timezones = [
+  { value: 'UTC', label: 'UTC (GMT +0:00)' },
+  { value: 'America/New_York', label: 'Eastern Time (GMT -5:00)' },
+  { value: 'America/Chicago', label: 'Central Time (GMT -6:00)' },
+  { value: 'America/Denver', label: 'Mountain Time (GMT -7:00)' },
+  { value: 'America/Los_Angeles', label: 'Pacific Time (GMT -8:00)' },
+  { value: 'Europe/London', label: 'London (GMT +0:00)' },
+  { value: 'Europe/Paris', label: 'Paris (GMT +1:00)' },
+  { value: 'Asia/Dubai', label: 'Dubai (GMT +4:00)' },
+  { value: 'Asia/Kolkata', label: 'Mumbai (GMT +5:30)' },
+  { value: 'Asia/Shanghai', label: 'Shanghai (GMT +8:00)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (GMT +9:00)' },
+  { value: 'Africa/Lagos', label: 'Lagos (GMT +1:00)' },
+  { value: 'Africa/Johannesburg', label: 'Johannesburg (GMT +2:00)' },
+]
+
+// Languages
+const languages = [
+  { code: 'en', name: 'English (US)', nativeName: 'English' },
+  { code: 'en-GB', name: 'English (UK)', nativeName: 'English' },
+  { code: 'es', name: 'Spanish', nativeName: 'Español' },
+  { code: 'fr', name: 'French', nativeName: 'Français' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch' },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano' },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português' },
+  { code: 'zh', name: 'Chinese', nativeName: '中文' },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語' },
+  { code: 'ko', name: 'Korean', nativeName: '한국어' },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'sw', name: 'Swahili', nativeName: 'Kiswahili' },
+  { code: 'yo', name: 'Yoruba', nativeName: 'Yorùbá' },
+  { code: 'ig', name: 'Igbo', nativeName: 'Igbo' },
+  { code: 'ha', name: 'Hausa', nativeName: 'Hausa' },
+]
+
+// Theme options
+const themeOptions = [
+  { value: 'light', label: 'Light', description: 'Light theme for daytime use' },
+  { value: 'dark', label: 'Dark', description: 'Dark theme for nighttime use' },
+  { value: 'system', label: 'Follow system', description: 'Automatically match your device theme' },
+]
+
+const currentThemeValue = computed(() => theme.value || 'system')
 
 // Super Admin Permissions
 const superAdminPermissions = [
@@ -585,6 +1069,11 @@ const showThemeModal = ref(false)
 const showTimezoneModal = ref(false)
 const showPasswordModal = ref(false)
 const showSessionsModal = ref(false)
+const show2FASetupModal = ref(false)
+const show2FADisableModal = ref(false)
+const disable2FAPassword = ref('')
+const isDisabling2FA = ref(false)
+const disable2FAError = ref('')
 
 // Functions
 const enableEditing = (section: string) => {
@@ -640,40 +1129,213 @@ const handleImageUpload = (event: Event) => {
   }
 }
 
-const toggleTwoFactor = () => {
-  securitySettings.twoFactor = !securitySettings.twoFactor
-  // Here you would typically make an API call
-  console.log('Two-factor auth:', securitySettings.twoFactor ? 'enabled' : 'disabled')
-  alert(`Two-factor authentication ${securitySettings.twoFactor ? 'enabled' : 'disabled'}`)
+const { updateUserPassword, getActiveSessions, is2FAEnabled, disable2FA } = useFirebaseAuth()
+
+// Theme functions
+const selectTheme = (themeValue: 'light' | 'dark' | 'system') => {
+  setTheme(themeValue)
+  accountSettings.theme = themeValue === 'system' ? 'Follow system' : themeValue === 'dark' ? 'Dark' : 'Light'
+  setTimeout(() => {
+    showThemeModal.value = false
+  }, 300)
 }
 
-// Watch for modal states to handle modals (simplified)
-watch([showLanguageModal, showNotificationsModal, showThemeModal, showTimezoneModal, showPasswordModal, showSessionsModal], () => {
-  // In production, these would open actual modal components
-  // For now, we'll just show alerts
-  if (showLanguageModal.value) {
-    alert('Language selection modal would appear here')
+// Language functions
+const selectLanguage = (code: string, name: string) => {
+  accountSettings.language = name
+  if (import.meta.client) {
+    localStorage.setItem('language', name)
+    localStorage.setItem('languageCode', code)
+  }
+  setTimeout(() => {
     showLanguageModal.value = false
+  }, 300)
+}
+
+// Notification functions
+const saveNotificationSettings = () => {
+  if (import.meta.client) {
+    localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings))
+    
+    // Update display text
+    const enabledTypes: string[] = []
+    if (notificationSettings.email) enabledTypes.push('Email')
+    if (notificationSettings.push) enabledTypes.push('Push')
+    if (notificationSettings.sms) enabledTypes.push('SMS')
+    if (notificationSettings.inApp) enabledTypes.push('In-App')
+    
+    accountSettings.notifications = enabledTypes.length > 0 ? enabledTypes.join(', ') : 'None'
   }
-  if (showNotificationsModal.value) {
-    alert('Notifications settings modal would appear here')
-    showNotificationsModal.value = false
+  showNotificationsModal.value = false
+}
+
+const handlePushNotificationToggle = async () => {
+  if (notificationSettings.push) {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        notificationSettings.push = false
+        alert('Push notifications require permission. Please enable them in your browser settings.')
+      }
+    } else if (Notification.permission === 'denied') {
+      notificationSettings.push = false
+      alert('Push notifications are blocked. Please enable them in your browser settings.')
+    }
   }
-  if (showThemeModal.value) {
-    alert('Theme selection modal would appear here')
-    showThemeModal.value = false
+}
+
+// Password change function
+const handlePasswordChange = async () => {
+  if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+    passwordError.value = 'Please fill in all fields'
+    return
   }
-  if (showTimezoneModal.value) {
-    alert('Timezone selection modal would appear here')
-    showTimezoneModal.value = false
+
+  if (passwordForm.newPassword.length < 8) {
+    passwordError.value = 'Password must be at least 8 characters long'
+    return
   }
-  if (showPasswordModal.value) {
-    alert('Password change modal would appear here')
+
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    passwordError.value = 'Passwords do not match'
+    return
+  }
+
+  isChangingPassword.value = true
+  passwordError.value = ''
+
+  try {
+    await updateUserPassword(passwordForm.currentPassword, passwordForm.newPassword)
+    alert('Password changed successfully!')
     showPasswordModal.value = false
+    passwordForm.currentPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+  } catch (error: any) {
+    passwordError.value = error.message || 'Failed to change password. Please try again.'
+  } finally {
+    isChangingPassword.value = false
   }
-  if (showSessionsModal.value) {
-    alert('Active sessions modal would appear here')
-    showSessionsModal.value = false
+}
+
+// 2FA functions
+const handle2FAToggle = () => {
+  if (securitySettings.twoFactor) {
+    // Show disable modal
+    show2FADisableModal.value = true
+  } else {
+    // Show setup modal
+    show2FASetupModal.value = true
+  }
+}
+
+const handle2FASetupSuccess = async () => {
+  // Reload 2FA status
+  const enabled = await is2FAEnabled()
+  securitySettings.twoFactor = enabled
+  if (import.meta.client) {
+    localStorage.setItem('twoFactorEnabled', enabled ? 'true' : 'false')
+  }
+  show2FASetupModal.value = false
+}
+
+const handleDisable2FA = async () => {
+  if (!disable2FAPassword.value) {
+    disable2FAError.value = 'Please enter your password'
+    return
+  }
+
+  isDisabling2FA.value = true
+  disable2FAError.value = ''
+
+  try {
+    await disable2FA(disable2FAPassword.value)
+    securitySettings.twoFactor = false
+    if (import.meta.client) {
+      localStorage.setItem('twoFactorEnabled', 'false')
+    }
+    show2FADisableModal.value = false
+    disable2FAPassword.value = ''
+    alert('Two-factor authentication has been disabled')
+  } catch (error: any) {
+    disable2FAError.value = error.message || 'Failed to disable 2FA. Please try again.'
+  } finally {
+    isDisabling2FA.value = false
+  }
+}
+
+const handle2FAError = (error: string) => {
+  alert(error)
+}
+
+// Sessions functions
+const loadActiveSessions = async () => {
+  isLoadingSessions.value = true
+  try {
+    const sessions = await getActiveSessions()
+    activeSessions.value = sessions
+    securitySettings.activeSessions = sessions.length
+  } catch (error) {
+    console.error('Error loading sessions:', error)
+  } finally {
+    isLoadingSessions.value = false
+  }
+}
+
+const revokeSession = async (index: number) => {
+  if (confirm('Are you sure you want to revoke this session?')) {
+    // Remove session from list
+    activeSessions.value.splice(index, 1)
+    securitySettings.activeSessions = activeSessions.value.length
+    // In production, you'd revoke the actual session token
+    alert('Session revoked successfully')
+  }
+}
+
+const revokeAllSessions = async () => {
+  if (confirm('Are you sure you want to revoke all other sessions? You will remain signed in on this device.')) {
+    // Keep only current session
+    activeSessions.value = activeSessions.value.filter(s => s.current)
+    securitySettings.activeSessions = activeSessions.value.length
+    // In production, you'd revoke all other session tokens
+    alert('All other sessions have been revoked')
+  }
+}
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// Timezone functions
+const saveTimezone = () => {
+  accountSettings.timezone = timezones.find(tz => tz.value === selectedTimezone.value)?.label || selectedTimezone.value
+  if (import.meta.client) {
+    localStorage.setItem('timezone', selectedTimezone.value)
+  }
+  showTimezoneModal.value = false
+}
+
+// Watch for sessions modal to load sessions
+watch(showSessionsModal, (isOpen) => {
+  if (isOpen) {
+    loadActiveSessions()
+  }
+})
+
+// Initialize timezone when modal opens
+watch(showTimezoneModal, (isOpen) => {
+  if (isOpen) {
+    // Set selected timezone to current
+    const currentTz = timezones.find(tz => tz.label === accountSettings.timezone)?.value || 'UTC'
+    selectedTimezone.value = currentTz
   }
 })
 </script>

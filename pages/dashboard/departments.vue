@@ -13,7 +13,7 @@
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Departments</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ departments.length }}
+              {{ departmentsStore.totalDepartments }}
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Active departments</p>
           </div>
@@ -91,13 +91,44 @@
       </div>
     </Card>
 
+    <!-- Error State -->
+    <Card v-if="departmentsStore.error && !departmentsStore.loading">
+      <div class="text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+          <BuildingOfficeIcon class="w-8 h-8 text-red-600 dark:text-red-400" />
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Error Loading Departments
+        </h3>
+        <p class="text-sm text-red-600 dark:text-red-400 mb-6 max-w-md mx-auto">
+          {{ departmentsStore.error }}
+        </p>
+        <Button
+          variant="primary"
+          :icon="ArrowPathIcon"
+          @click="handleRetryFetch"
+        >
+          Retry
+        </Button>
+      </div>
+    </Card>
+
+    <!-- Loading State -->
+    <Card v-else-if="departmentsStore.loading">
+      <div class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading departments...</p>
+      </div>
+    </Card>
+
     <!-- Departments Grid -->
-    <div v-if="paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-else-if="paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <Card
         v-for="department in paginatedDepartments"
         :key="department.id"
         padding="md"
-        extra-class="hover:shadow-lg transition-shadow cursor-pointer"
+        extra-class="group hover:shadow-lg transition-shadow relative cursor-pointer"
+        @click="navigateToDepartment(department.id)"
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
@@ -105,15 +136,15 @@
               {{ department.name.charAt(0) }}
             </div>
             <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                 {{ department.name }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ department.location }}
+                {{ department.departmentType || 'N/A' }}
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 z-10">
             <button
               @click.stop="handleEditDepartment(department)"
               class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
@@ -145,26 +176,17 @@
             </span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600 dark:text-gray-400">Budget:</span>
+            <span class="text-gray-600 dark:text-gray-400">Type:</span>
             <span class="font-medium text-gray-900 dark:text-gray-100">
-              ${{ formatCurrency(department.budget) }}
+              {{ department.departmentType || 'N/A' }}
             </span>
           </div>
-        </div>
-
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            @click.stop="handleViewDepartment(department)"
-            class="w-full px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-          >
-            View Details
-          </button>
         </div>
       </Card>
     </div>
 
     <!-- Empty State -->
-    <Card v-else>
+    <Card v-else-if="!departmentsStore.loading">
       <div class="text-center py-12">
         <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
           <BuildingOfficeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
@@ -195,20 +217,27 @@
       @page-change="handlePageChange"
     />
 
-    <!-- Floating Action Button -->
-    <button
-      v-if="filteredDepartments.length > 0"
-      @click="openCreateDepartmentModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
-      title="Create new department"
-    >
-      <PlusIcon class="w-6 h-6" />
-    </button>
+    <!-- Department Modal -->
+    <DepartmentModal
+      v-model="showDepartmentModal"
+      :department="editingDepartment"
+      @success="handleDepartmentSuccess"
+      @error="handleDepartmentError"
+    />
   </div>
+
+  <!-- Floating Action Button - Always visible -->
+  <button
+    @click="openCreateDepartmentModal"
+    class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+    title="Create new department"
+  >
+    <PlusIcon class="w-6 h-6" />
+  </button>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   PlusIcon,
   BuildingOfficeIcon,
@@ -223,84 +252,45 @@ import {
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import DepartmentModal from '~/components/departments/DepartmentModal.vue'
+import type { Department } from '~/composables/useDepartments'
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  ssr: false // Disable SSR for this page since it requires authentication and client-side data
 })
 
 useHead({
   title: 'Departments - Storv',
 })
 
-interface Department {
-  id: string
-  name: string
-  location: string
-  manager: string
-  staffCount: number
-  budget: number
-}
-
-const departments = ref<Department[]>([
-  {
-    id: '1',
-    name: 'Sales',
-    location: 'Main Floor',
-    manager: 'Sarah Johnson',
-    staffCount: 8,
-    budget: 50000,
-  },
-  {
-    id: '2',
-    name: 'Warehouse',
-    location: 'Back Building',
-    manager: 'Mike Wilson',
-    staffCount: 12,
-    budget: 35000,
-  },
-  {
-    id: '3',
-    name: 'Customer Service',
-    location: 'Second Floor',
-    manager: 'Emily Davis',
-    staffCount: 6,
-    budget: 40000,
-  },
-  {
-    id: '4',
-    name: 'Inventory',
-    location: 'Main Floor',
-    manager: 'David Brown',
-    staffCount: 5,
-    budget: 30000,
-  },
-])
+const showDepartmentModal = ref(false)
+const editingDepartment = ref<Department | null>(null)
 
 const searchQuery = ref('')
 const currentPage = ref(1)
 const itemsPerPage = ref(9)
 
-const totalStaff = computed(() => {
-  return departments.value.reduce((sum, dept) => sum + dept.staffCount, 0)
-})
+// Import stores directly - Pinia handles SSR automatically
+import { useDepartmentsStore } from '~/stores/departments'
+import { useAuthStore } from '~/stores/auth'
 
-const totalManagers = computed(() => {
-  return departments.value.filter(dept => dept.manager).length
-})
+// Get store instances - only accessible on client
+const departmentsStore = useDepartmentsStore()
+const authStore = useAuthStore()
 
-const averageStaffPerDept = computed(() => {
-  if (departments.value.length === 0) return 0
-  return Math.round(totalStaff.value / departments.value.length)
-})
+const totalStaff = computed(() => departmentsStore.totalStaff ?? 0)
+const totalManagers = computed(() => departmentsStore.totalManagers ?? 0)
+const averageStaffPerDept = computed(() => departmentsStore.averageStaffPerDept ?? 0)
 
 const filteredDepartments = computed(() => {
-  if (!searchQuery.value) return departments.value
+  if (!searchQuery.value) return departmentsStore.departments
 
   const query = searchQuery.value.toLowerCase()
-  return departments.value.filter(dept =>
+  return departmentsStore.departments.filter((dept: Department) =>
     dept.name.toLowerCase().includes(query) ||
-    dept.location.toLowerCase().includes(query) ||
-    dept.manager.toLowerCase().includes(query)
+    (dept.departmentType && dept.departmentType.toLowerCase().includes(query)) ||
+    (dept.manager && dept.manager.toLowerCase().includes(query))
   )
 })
 
@@ -309,13 +299,6 @@ const paginatedDepartments = computed(() => {
   const end = start + itemsPerPage.value
   return filteredDepartments.value.slice(start, end)
 })
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 
 const resetFilters = () => {
   searchQuery.value = ''
@@ -327,27 +310,99 @@ const handlePageChange = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+// Load departments on mount
+onMounted(async () => {
+  // Only run on client
+  if (import.meta.server) return
+  
+  try {
+    // Wait for auth to finish loading before loading departments
+    if (authStore.loading) {
+      let resolved = false
+      await new Promise((resolve) => {
+        const unwatch = watch(() => authStore.loading, (val) => {
+          if (!val && !resolved) {
+            resolved = true
+            unwatch()
+            resolve(true)
+          }
+        })
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true
+            unwatch()
+            resolve(true)
+          }
+        }, 5000)
+      })
+    }
+    
+    // Only load departments if user is authenticated
+    if (authStore.currentUser) {
+      await departmentsStore.fetchDepartments()
+    }
+  } catch (error: any) {
+    console.error('Error loading departments:', error.message || error)
+  }
+})
+
+// Watch for auth state changes
+watch(() => authStore.currentUser, async (newUser) => {
+  if (import.meta.server) return
+  if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
+    try {
+      await departmentsStore.fetchDepartments()
+    } catch (error) {
+      // Silently handle - error is already in store
+    }
+  }
+}, { immediate: false })
+
 const openCreateDepartmentModal = () => {
-  // TODO: Implement create department modal
-  alert('Create department functionality coming soon!')
+  editingDepartment.value = null
+  showDepartmentModal.value = true
 }
 
-const handleViewDepartment = (department: Department) => {
-  navigateTo(`/dashboard/departments/${department.id}`)
+const navigateToDepartment = (departmentId: string) => {
+  navigateTo(`/dashboard/departments/${departmentId}`)
 }
 
 const handleEditDepartment = (department: Department) => {
-  // TODO: Implement edit department modal
-  alert(`Editing department: ${department.name}`)
+  editingDepartment.value = department
+  showDepartmentModal.value = true
 }
 
-const handleDeleteDepartment = (department: Department) => {
+const handleDeleteDepartment = async (department: Department) => {
   if (confirm(`Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`)) {
-    const index = departments.value.findIndex(d => d.id === department.id)
-    if (index > -1) {
-      departments.value.splice(index, 1)
+    try {
+      await departmentsStore.deleteDepartment(department.id)
+      alert('Department deleted successfully')
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete department')
     }
   }
 }
+
+const handleRetryFetch = async () => {
+  await departmentsStore.fetchDepartments()
+}
+
+const handleDepartmentSuccess = async (action?: 'create' | 'update') => {
+  // Only refetch on update, since create already adds to local state
+  if (action === 'update') {
+    await departmentsStore.fetchDepartments()
+  }
+  // For create, the department is already in local state, no need to refetch
+  
+  showDepartmentModal.value = false
+  editingDepartment.value = null
+}
+
+const handleDepartmentError = (error: string) => {
+  console.error('Department operation failed:', error)
+}
 </script>
+
 

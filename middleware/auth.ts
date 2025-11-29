@@ -1,31 +1,48 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const { currentUser, loading } = useFirebaseAuth()
+  // Only run on client side
+  if (import.meta.server) return
   
-  // Wait for auth to load with shorter timeout
-  if (loading.value) {
-    await new Promise((resolve) => {
+  // Use Pinia store directly for more reliable state
+  const authStore = useAuthStore()
+  
+  // Wait for auth to finish loading (with proper timeout)
+  if (authStore.loading) {
+    await new Promise<void>((resolve) => {
       let resolved = false
-      const unwatch = watch(loading, (val) => {
-        if (!val && !resolved) {
-          resolved = true
-          unwatch()
-          resolve(true)
-        }
-      })
+      const maxWait = 5000 // 5 seconds max wait
+      const startTime = Date.now()
       
-      // Timeout after 3 seconds - don't wait forever
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true
-          unwatch()
-          resolve(true)
+      const checkAuth = () => {
+        // If loading is complete, resolve
+        if (!authStore.loading) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
         }
-      }, 3000)
+        
+        // If we've exceeded max wait time, resolve anyway
+        if (Date.now() - startTime > maxWait) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
+        }
+        
+        // Check again after a short delay
+        setTimeout(checkAuth, 50)
+      }
+      
+      // Start checking
+      checkAuth()
     })
   }
   
-  // Redirect to signin if not authenticated
-  if (!loading.value && !currentUser.value) {
+  // Only redirect if auth has finished loading and there's no user
+  // If still loading, allow navigation to proceed (auth will resolve during page load)
+  if (!authStore.loading && !authStore.currentUser) {
     return navigateTo('/signin')
   }
 })

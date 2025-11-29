@@ -151,13 +151,23 @@
           </div>
         </div>
 
+        <!-- Divider -->
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
+          </div>
+        </div>
+
         <!-- Social Sign In -->
         <div class="grid grid-cols-2 gap-3">
           <button
             type="button"
             @click="handleGoogleSignIn"
             :disabled="isGoogleLoading || isLoading"
-            class="group w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-gray-300 text-sm font-medium text-gray-700 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            class="group w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg v-if="!isGoogleLoading" class="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -173,13 +183,17 @@
           </button>
           <button
             type="button"
-            class="group w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-gray-300 text-sm font-medium text-gray-700 transition-all duration-200 hover:shadow-md"
+            @click="showPhoneSignIn = !showPhoneSignIn"
+            class="group w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:shadow-md"
           >
-            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="#000000" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            <span class="ml-2">GitHub</span>
+            <PhoneIcon class="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span class="ml-2">Phone</span>
           </button>
+        </div>
+
+        <!-- Phone Sign In Component -->
+        <div v-if="showPhoneSignIn" class="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <PhoneSignIn @success="handlePhoneSignInSuccess" @error="handlePhoneSignInError" />
         </div>
 
         <!-- Sign Up Link -->
@@ -201,9 +215,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
+import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 
 definePageMeta({
   layout: false,
@@ -220,6 +235,7 @@ const showPassword = ref(false)
 const isLoading = ref(false)
 const isGoogleLoading = ref(false)
 const errorMessage = ref('')
+const showPhoneSignIn = ref(false)
 
 const { signIn, signInWithGoogle } = useFirebaseAuth()
 const { getUserDocument, createUserDocument } = useUser()
@@ -328,6 +344,46 @@ const handleGoogleSignIn = async () => {
   } finally {
     isGoogleLoading.value = false
   }
+}
+
+const handlePhoneSignInSuccess = async (user: any) => {
+  try {
+    // Check if user document exists in Firestore
+    let userData = await getUserDocument(user.uid)
+    
+    // If user doesn't exist in Firestore, create user document
+    if (!userData) {
+      const phoneNumber = user.phoneNumber || ''
+      const displayName = user.displayName || phoneNumber.split('@')[0] || 'User'
+      
+      await createUserDocument(user.uid, {
+        email: user.email || '',
+        name: displayName,
+        role: 'superAdmin',
+        hasCompletedOnboarding: false,
+        hasCompletedTutorial: false
+      })
+      
+      // Get the newly created user data
+      userData = await getUserDocument(user.uid)
+    }
+    
+    // Redirect based on onboarding status
+    if (userData && !userData.hasCompletedOnboarding) {
+      await navigateTo('/dashboard/onboarding')
+    } else if (userData && !userData.hasCompletedTutorial) {
+      await navigateTo('/dashboard')
+    } else {
+      await navigateTo('/dashboard')
+    }
+  } catch (error: any) {
+    console.error('Error handling phone sign-in:', error)
+    errorMessage.value = error.message || 'Failed to complete sign-in. Please try again.'
+  }
+}
+
+const handlePhoneSignInError = (error: string) => {
+  errorMessage.value = error
 }
 
 useHead({

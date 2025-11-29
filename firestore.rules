@@ -26,6 +26,36 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
     
+    // Departments collection - users can only access their own departments
+    match /departments/{departmentId} {
+      // Allow read if user owns the department
+      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow create if user is creating their own department
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      
+      // Allow update if user owns the department
+      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow delete if user owns the department
+      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Staff collection - users can only access their own staff
+    match /staff/{staffId} {
+      // Allow read if user owns the staff member
+      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow create if user is creating their own staff member
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      
+      // Allow update if user owns the staff member
+      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow delete if user owns the staff member
+      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+    
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;

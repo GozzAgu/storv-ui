@@ -50,9 +50,13 @@ export const useTheme = () => {
       const savedTheme = localStorage.getItem('theme') as Theme | null
       if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
         theme.value = savedTheme
+      } else {
+        // If no saved theme, default to 'system' and save it
+        theme.value = 'system'
+        localStorage.setItem('theme', 'system')
       }
       
-      // Apply theme immediately
+      // Apply theme immediately to ensure consistency with inline script
       applyTheme()
 
       // Listen for system theme changes

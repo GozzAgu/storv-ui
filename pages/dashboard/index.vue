@@ -338,7 +338,7 @@ const tutorialSteps = [
 ]
 
 const onTutorialComplete = () => {
-  console.log('Tutorial completed')
+  // Tutorial completed - no action needed
 }
 
 const topProducts = [

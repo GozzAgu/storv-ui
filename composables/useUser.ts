@@ -17,6 +17,10 @@ export interface UserData {
   storeDetails?: StoreDetails
   hasCompletedOnboarding: boolean
   hasCompletedTutorial: boolean
+  twoFactorEnabled?: boolean
+  twoFactorMethod?: 'totp' | 'phone' | null
+  twoFactorSecret?: string | null
+  twoFactorEnabledAt?: string | null
   createdAt: any
   updatedAt: any
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full overflow-x-hidden relative">
     <!-- Sidebar -->
     <aside
       :class="[
@@ -101,7 +101,11 @@
     ></div>
 
     <!-- Main Content -->
-    <div :class="['transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64']">
+    <div 
+      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64']"
+      class="w-full"
+      style="min-width: 0; max-width: 100vw;"
+    >
       <!-- Top Navigation -->
       <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -201,7 +205,7 @@
       </header>
 
       <!-- Page Content -->
-      <main class="p-4 sm:p-6 lg:p-8">
+      <main class="p-4 sm:p-6 lg:p-8 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
         <slot />
       </main>
     </div>
@@ -237,17 +241,20 @@ const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
 
 // Sidebar collapsed state with localStorage persistence
+// Initialize synchronously on client to prevent layout shift
 const sidebarCollapsed = ref(false)
 
-// Load sidebar state from localStorage on mount
-onMounted(() => {
-  if (import.meta.client) {
+// Load sidebar state synchronously before mount to prevent layout shift
+if (import.meta.client) {
+  try {
     const savedState = localStorage.getItem('sidebarCollapsed')
     if (savedState !== null) {
       sidebarCollapsed.value = savedState === 'true'
     }
+  } catch (e) {
+    // Ignore localStorage errors
   }
-})
+}
 
 // Save sidebar state to localStorage when it changes
 const toggleSidebar = () => {
