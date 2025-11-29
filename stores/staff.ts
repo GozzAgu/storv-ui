@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
+import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
+import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import type { Staff } from '~/composables/useStaff'
 
 export const useStaffStore = defineStore('staff', {
@@ -263,7 +266,7 @@ export const useStaffStore = defineStore('staff', {
     },
 
     // Create a new staff member
-    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName'>) {
+    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName'> & { password?: string; superAdminPassword?: string }) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -274,6 +277,42 @@ export const useStaffStore = defineStore('staff', {
         throw new Error('User must be authenticated to create staff')
       }
 
+      // Get super admin credentials for signing back in
+      const { getCredentials, storeCredentials } = useAdminCredentials()
+      const adminCredentials = getCredentials()
+      
+      // Use provided password or stored credentials
+      const superAdminEmail = authStore.currentUser.email
+      let superAdminPassword: string | undefined
+      
+      if (staffData.superAdminPassword) {
+        // Use password provided directly (e.g., from modal when credentials not stored)
+        superAdminPassword = staffData.superAdminPassword
+        // Store credentials for future use if email is available
+        if (superAdminEmail) {
+          storeCredentials(superAdminEmail, superAdminPassword)
+        }
+      } else if (adminCredentials) {
+        // Use stored credentials
+        superAdminPassword = adminCredentials.password
+      }
+      
+      if (!superAdminPassword) {
+        throw new Error('Super admin password is required. If you signed in with Google or your credentials expired, please enter your password in the "Your Super Admin Password" field above.')
+      }
+      
+      if (!superAdminEmail) {
+        throw new Error('Super admin email not found')
+      }
+
+      if (!staffData.password || !staffData.email) {
+        throw new Error('Staff email and password are required')
+      }
+
+      let staffAuthUid: string | null = null
+      let signedBackIn = false
+      let firebaseAuthAccountCreated = false // Flag to track if Firebase Auth account was successfully created
+
       try {
         // Verify department exists and belongs to this user
         const departmentsStore = useDepartmentsStore()
@@ -282,17 +321,182 @@ export const useStaffStore = defineStore('staff', {
           throw new Error('Department not found or access denied')
         }
 
+        // Step 1: Sign out super admin temporarily
+        console.log('[Staff Creation] Signing out super admin...')
+        await authStore.signOut()
+        console.log('[Staff Creation] Super admin signed out successfully')
+
+        // Step 2: Create Firebase Auth account for staff
+        const auth = authStore.getAuthInstance()
+        if (!auth) {
+          // Sign super admin back in before throwing error
+          try {
+            await authStore.signIn(superAdminEmail, superAdminPassword)
+            signedBackIn = true
+          } catch (signInError) {
+            console.error('Failed to sign super admin back in:', signInError)
+          }
+          throw new Error('Firebase Auth not initialized')
+        }
+
+        console.log('[Staff Creation] Creating Firebase Auth account for staff:', staffData.email)
+        try {
+          if (!staffData.email || !staffData.password) {
+            throw new Error('Staff email and password are required for Firebase Auth account creation')
+          }
+
+          if (staffData.password.length < 6) {
+            throw new Error('Staff password must be at least 6 characters long')
+          }
+
+          console.log('[Staff Creation] Calling createUserWithEmailAndPassword...')
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            staffData.email.trim().toLowerCase(),
+            staffData.password
+          )
+          
+          if (!userCredential || !userCredential.user) {
+            throw new Error('Firebase Auth account creation returned null user credential')
+          }
+
+          staffAuthUid = userCredential.user.uid
+          console.log('[Staff Creation] Firebase Auth account created successfully. UID:', staffAuthUid)
+
+          if (!staffAuthUid || staffAuthUid.trim() === '') {
+            throw new Error('Staff Firebase Auth UID is null or empty after account creation')
+          }
+
+          // Mark that Firebase Auth account was successfully created
+          firebaseAuthAccountCreated = true
+          console.log('[Staff Creation] ✅ Firebase Auth account creation confirmed. Flag set to true.')
+
+          // Verify the account was actually created
+          console.log('[Staff Creation] Verifying Firebase Auth account exists...')
+          const createdUser = auth.currentUser
+          if (createdUser && createdUser.uid === staffAuthUid && createdUser.email === staffData.email) {
+            console.log('[Staff Creation] ✅ Verified: Firebase Auth account exists and matches created user')
+          } else {
+            // This is expected - after signing out, currentUser will be null, but the account still exists
+            console.log('[Staff Creation] Note: Auth state cleared (expected after sign out), but Firebase Auth account was created with UID:', staffAuthUid)
+          }
+          
+          // Additional verification: Ensure we have a valid UID
+          if (!staffAuthUid || staffAuthUid.length < 20) {
+            throw new Error('Invalid Firebase Auth UID received: ' + staffAuthUid)
+          }
+          
+          console.log('[Staff Creation] ✅ Firebase Auth account UID validated:', staffAuthUid.substring(0, 8) + '...')
+
+          // Step 3: Create user document for staff with 'staff' role
+          console.log('[Staff Creation] Creating user document in Firestore for staff...')
+          const userStore = useUserStore()
+          try {
+            await userStore.createUserDocument(staffAuthUid, {
+              email: staffData.email,
+              name: `${staffData.firstName} ${staffData.lastName}`,
+              role: 'staff',
+              hasCompletedOnboarding: true,
+              hasCompletedTutorial: false,
+            })
+            console.log('[Staff Creation] User document created successfully in users collection')
+          } catch (userDocError: any) {
+            console.error('[Staff Creation] Error creating user document:', userDocError)
+            // Don't fail the entire process if user document creation fails
+            // The staff document will still have the authUid
+            console.warn('[Staff Creation] Continuing despite user document creation error...')
+          }
+        } catch (authError: any) {
+          console.error('[Staff Creation] Error creating staff Firebase Auth account:', authError)
+          // If staff account creation fails, sign super admin back in first
+          try {
+            await authStore.signIn(superAdminEmail, superAdminPassword)
+            signedBackIn = true
+          } catch (signInError) {
+            console.error('Failed to sign super admin back in after staff creation error:', signInError)
+          }
+          // Re-throw with more context
+          const errorMessage = authError.code 
+            ? `Failed to create staff Firebase Auth account (${authError.code}): ${authError.message}`
+            : `Failed to create staff Firebase Auth account: ${authError.message}`
+          throw new Error(errorMessage)
+        }
+
+        // Step 4: Sign super admin back in quickly
+        console.log('[Staff Creation] Signing super admin back in...')
+        try {
+          await authStore.signIn(superAdminEmail, superAdminPassword)
+          signedBackIn = true
+          console.log('[Staff Creation] Super admin signed back in successfully')
+          
+          // Verify we're signed back in
+          if (!authStore.currentUser) {
+            throw new Error('Super admin sign-in verification failed - currentUser is null')
+          }
+        } catch (signInError: any) {
+          console.error('[Staff Creation] Failed to sign super admin back in:', signInError)
+          throw new Error(`Staff account created but failed to sign super admin back in: ${signInError.message}`)
+        }
+
+        // Step 5: Create staff document in Firestore
+        // CRITICAL VALIDATION: Ensure Firebase Auth account was created
+        if (!firebaseAuthAccountCreated) {
+          console.error('[Staff Creation] FATAL ERROR: Firebase Auth account was not created!')
+          throw new Error('Cannot create staff document: Firebase Auth account creation failed or was not completed.')
+        }
+
+        if (!staffAuthUid || staffAuthUid.trim() === '') {
+          console.error('[Staff Creation] FATAL ERROR: staffAuthUid is null or empty!')
+          console.error('[Staff Creation] Cannot create Firestore document without Firebase Auth account.')
+          throw new Error('Cannot create staff document: Firebase Auth account was not created. staffAuthUid is null or empty.')
+        }
+
+        console.log('[Staff Creation] ✅ Firebase Auth account confirmed. Creation flag:', firebaseAuthAccountCreated, 'UID:', staffAuthUid)
+        console.log('[Staff Creation] Creating staff document in Firestore...')
+        // Remove password and superAdminPassword from staffData - these are not stored in Firestore
+        // Rename superAdminPassword during destructuring to avoid naming conflict
+        const { password, superAdminPassword: _, ...staffDataWithoutPassword } = staffData
         const staffRef = collection(db, 'staff')
         const newStaffRef = doc(staffRef)
 
         const newStaff: Omit<Staff, 'id' | 'departmentName'> = {
-          ...staffData,
+          ...staffDataWithoutPassword,
+          authUid: staffAuthUid, // CRITICAL: This must be set for staff to log in
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          createdBy: authStore.currentUser.uid,
+          createdBy: authStore.currentUser.uid, // Should be set now after sign in
         }
 
+        // Double-check before saving
+        if (!newStaff.authUid || newStaff.authUid.trim() === '') {
+          console.error('[Staff Creation] FATAL ERROR: authUid is missing in newStaff object!')
+          throw new Error('Staff object is missing authUid field. Cannot save to Firestore.')
+        }
+
+        console.log('[Staff Creation] Staff document data:', {
+          ...newStaff,
+          authUid: staffAuthUid,
+          createdBy: authStore.currentUser.uid
+        })
+
         await setDoc(newStaffRef, newStaff)
+        console.log('[Staff Creation] ✅ SUCCESS: Staff created in Firestore with authUid:', staffAuthUid)
+
+        // Verify the staff document was created with authUid
+        const verifyDoc = await getDoc(newStaffRef)
+        if (!verifyDoc.exists()) {
+          throw new Error('Staff document was not created in Firestore')
+        }
+        const verifyData = verifyDoc.data()
+        if (!verifyData.authUid || verifyData.authUid !== staffAuthUid) {
+          console.error('[Staff Creation] ERROR: Staff document created but authUid is missing or incorrect!')
+          console.error('[Staff Creation] Expected authUid:', staffAuthUid)
+          console.error('[Staff Creation] Actual authUid in document:', verifyData.authUid)
+          // Delete the document since it's incomplete
+          await deleteDoc(newStaffRef)
+          throw new Error('Staff document was created without authUid. Document deleted. Please try again.')
+        }
+        console.log('[Staff Creation] ✅ Verified: Staff document has correct authUid:', verifyData.authUid)
 
         // Update department staff count
         await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1)
@@ -316,6 +520,16 @@ export const useStaffStore = defineStore('staff', {
         return newStaffRef.id
       } catch (error: any) {
         console.error('Error creating staff:', error)
+        
+        // Ensure super admin is signed back in even if something fails
+        if (!signedBackIn && superAdminEmail && superAdminPassword) {
+          try {
+            await authStore.signIn(superAdminEmail, superAdminPassword)
+          } catch (signInError) {
+            console.error('Failed to sign super admin back in after error:', signInError)
+          }
+        }
+        
         throw new Error(error.message || 'Failed to create staff')
       }
     },

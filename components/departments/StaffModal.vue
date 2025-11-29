@@ -46,6 +46,47 @@
           />
         </div>
 
+        <div v-if="!isEdit">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Password <span class="text-red-500">*</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(For staff login)</span>
+          </label>
+          <input
+            v-model="formData.password"
+            type="password"
+            required
+            minlength="6"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="Minimum 6 characters"
+          />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Staff will use this email and password to log in
+          </p>
+        </div>
+
+        <div v-if="!isEdit && needsSuperAdminPassword" class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-4">
+            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>Security Verification Required</strong><br>
+              Please enter your super admin password to create staff accounts. This is required because your credentials are not stored.
+            </p>
+          </div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Your Super Admin Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="formData.superAdminPassword"
+            type="password"
+            :required="needsSuperAdminPassword"
+            minlength="6"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="Enter your password"
+          />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            This is required to temporarily sign you out while creating the staff account
+          </p>
+        </div>
+
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Phone Number
@@ -150,10 +191,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
-import { useStaff, type Staff } from '~/composables/useStaff'
+import type { Staff } from '~/composables/useStaff'
+import { useStaffStore } from '~/stores/staff'
+import { useAdminCredentials } from '~/composables/useAdminCredentials'
 
 interface Props {
   modelValue: boolean
@@ -169,12 +212,15 @@ const emit = defineEmits<{
   'error': [error: string]
 }>()
 
-const { createStaff, updateStaff } = useStaff()
+const staffStore = useStaffStore()
+const { hasCredentials } = useAdminCredentials()
 
 const formData = ref({
   firstName: '',
   lastName: '',
   email: '',
+  password: '',
+  superAdminPassword: '',
   phone: '',
   position: '',
   role: 'staff' as 'manager' | 'staff' | 'intern',
@@ -186,16 +232,38 @@ const formData = ref({
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
+// Computed to check if super admin password is needed
+const needsSuperAdminPassword = computed(() => {
+  if (isEdit.value) return false
+  // Always check if credentials are available
+  try {
+    return !hasCredentials()
+  } catch (e) {
+    // If check fails, assume credentials are not available
+    return true
+  }
+})
+
 const isEdit = computed(() => !!props.staff)
 
 const isFormValid = computed(() => {
-  return !!(
+  const baseValid = !!(
     formData.value.firstName &&
     formData.value.lastName &&
     formData.value.email &&
     formData.value.position &&
     formData.value.hireDate
   )
+  
+  // For new staff, password is required
+  if (!isEdit.value) {
+    const staffPasswordValid = !!formData.value.password && formData.value.password.length >= 6
+    // Super admin password is required if credentials aren't stored
+    const superAdminPasswordValid = !needsSuperAdminPassword.value || (!!formData.value.superAdminPassword && formData.value.superAdminPassword.length >= 6)
+    return baseValid && staffPasswordValid && superAdminPasswordValid
+  }
+  
+  return baseValid
 })
 
 // Reset form when modal opens/closes
@@ -207,6 +275,8 @@ watch(() => props.modelValue, (isOpen) => {
         firstName: props.staff.firstName || '',
         lastName: props.staff.lastName || '',
         email: props.staff.email || '',
+        password: '', // Don't show password when editing
+        superAdminPassword: '',
         phone: props.staff.phone || '',
         position: props.staff.position || '',
         role: props.staff.role || 'staff',
@@ -225,6 +295,8 @@ const resetForm = () => {
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
+    superAdminPassword: '',
     phone: '',
     position: '',
     role: 'staff',
@@ -234,6 +306,7 @@ const resetForm = () => {
   }
   errorMessage.value = ''
   isSubmitting.value = false
+  // Don't reset needsSuperAdminPassword here - it will be set by the watch
 }
 
 const handleClose = () => {
@@ -251,7 +324,7 @@ const handleSubmit = async () => {
 
   try {
     if (isEdit.value && props.staff) {
-      await updateStaff(props.staff.id, {
+      await staffStore.updateStaff(props.staff.id, {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
@@ -271,10 +344,12 @@ const handleSubmit = async () => {
         return
       }
 
-      await createStaff({
+      await staffStore.createStaff({
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
+        password: formData.value.password,
+        superAdminPassword: needsSuperAdminPassword.value ? formData.value.superAdminPassword : undefined,
         phone: formData.value.phone || undefined,
         departmentId: deptId,
         position: formData.value.position,

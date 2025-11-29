@@ -16,6 +16,7 @@ export interface Staff {
   hireDate: string
   salary?: number
   status: 'active' | 'inactive' | 'on_leave'
+  authUid?: string // Firebase Auth UID
   createdAt: any
   updatedAt: any
   createdBy: string

@@ -218,6 +218,8 @@ import { ref } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
+import { useAdminCredentials } from '~/composables/useAdminCredentials'
+import { useUserStore } from '~/stores/user'
 import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 
 definePageMeta({
@@ -239,6 +241,8 @@ const showPhoneSignIn = ref(false)
 
 const { signIn, signInWithGoogle } = useFirebaseAuth()
 const { getUserDocument, createUserDocument } = useUser()
+const { storeCredentials } = useAdminCredentials()
+const userStore = useUserStore()
 
 const handleSignIn = async () => {
   if (!form.value.email || !form.value.password) {
@@ -253,8 +257,14 @@ const handleSignIn = async () => {
     const user = await signIn(form.value.email, form.value.password)
     
     if (user) {
-      // Get user document to check onboarding status
-      const userData = await getUserDocument(user.uid)
+      // Get user document to check role and onboarding status
+      await userStore.fetchUserData(user.uid)
+      const userData = userStore.userData || await getUserDocument(user.uid)
+      
+      // If user is super admin, store credentials for staff creation
+      if (userData && userData.role === 'superAdmin') {
+        storeCredentials(form.value.email, form.value.password)
+      }
       
       if (userData && !userData.hasCompletedOnboarding) {
         // Redirect to onboarding

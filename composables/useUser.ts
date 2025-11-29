@@ -13,7 +13,7 @@ export interface UserData {
   uid: string
   email: string
   name: string
-  role: 'superAdmin' | 'admin' | 'user'
+  role: 'superAdmin' | 'admin' | 'user' | 'staff'
   storeDetails?: StoreDetails
   hasCompletedOnboarding: boolean
   hasCompletedTutorial: boolean
