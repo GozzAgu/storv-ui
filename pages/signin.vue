@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-purple-50/40 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-purple-50/40 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/40 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
     <!-- Enhanced Background Pattern -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <!-- Geometric Grid Pattern -->
@@ -8,14 +8,14 @@
       </div>
       
       <!-- Animated Gradient Orbs -->
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary-400/40 to-purple-400/40 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-primary-300/20 to-purple-300/20 rounded-full blur-3xl"></div>
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary-400/40 to-purple-400/40 dark:from-primary-500/30 dark:to-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-purple-400/30 to-pink-400/30 dark:from-purple-500/20 dark:to-pink-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-primary-300/20 to-purple-300/20 dark:from-primary-400/15 dark:to-purple-400/15 rounded-full blur-3xl"></div>
       
       <!-- Floating Shapes -->
-      <div class="absolute top-20 left-10 w-32 h-32 bg-primary-200/20 rounded-3xl rotate-45 blur-xl"></div>
-      <div class="absolute bottom-20 right-20 w-24 h-24 bg-purple-200/20 rounded-full blur-xl"></div>
-      <div class="absolute top-1/3 right-1/4 w-20 h-20 bg-pink-200/20 rounded-2xl rotate-12 blur-lg"></div>
+      <div class="absolute top-20 left-10 w-32 h-32 bg-primary-200/20 dark:bg-primary-400/10 rounded-3xl rotate-45 blur-xl"></div>
+      <div class="absolute bottom-20 right-20 w-24 h-24 bg-purple-200/20 dark:bg-purple-400/10 rounded-full blur-xl"></div>
+      <div class="absolute top-1/3 right-1/4 w-20 h-20 bg-pink-200/20 dark:bg-pink-400/10 rounded-2xl rotate-12 blur-lg"></div>
       
       <!-- Dot Pattern Overlay -->
       <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style="background-image: radial-gradient(circle, #667eea 1px, transparent 1px); background-size: 30px 30px;"></div>
@@ -29,19 +29,19 @@
             Storv
           </h1>
         </NuxtLink>
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Welcome back
         </h2>
-        <p class="text-gray-600 text-base">
+        <p class="text-gray-600 dark:text-gray-400 text-base">
           Sign in to continue to your dashboard
         </p>
       </div>
 
       <!-- Sign In Form Card -->
-      <div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
         <form @submit.prevent="handleSignIn" class="space-y-5">
           <div class="space-y-2">
-            <label for="email" class="block text-sm font-semibold text-gray-700">
+            <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Email address
             </label>
             <div class="relative">
@@ -51,7 +51,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3.5 bg-white/80 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 hover:border-gray-300"
+                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
                 placeholder="Enter your email"
               />
             </div>
@@ -59,7 +59,7 @@
 
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label for="password" class="block text-sm font-semibold text-gray-700">
+              <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <NuxtLink
@@ -76,13 +76,13 @@
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="current-password"
                 required
-                class="w-full px-4 py-3.5 bg-white/80 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 pr-12 hover:border-gray-300"
+                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12 hover:border-gray-300 dark:hover:border-gray-500"
                 placeholder="Enter your password"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
                 <EyeIcon v-if="!showPassword" class="w-5 h-5" />
                 <EyeSlashIcon v-else class="w-5 h-5" />
@@ -96,9 +96,9 @@
                 id="remember-me"
                 v-model="form.rememberMe"
                 type="checkbox"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
               />
-              <label for="remember-me" class="ml-2 block text-sm text-gray-700 cursor-pointer">
+              <label for="remember-me" class="ml-2 block text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 Remember me
               </label>
             </div>
@@ -143,21 +143,11 @@
         <div class="my-8">
           <div class="relative">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300"></div>
+              <div class="w-full border-t border-gray-300 dark:border-gray-700"></div>
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-4 bg-white/90 text-gray-500 font-medium">Or continue with</span>
+              <span class="px-4 bg-white/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400 font-medium">Or continue with</span>
             </div>
-          </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
-          </div>
-          <div class="relative flex justify-center text-sm">
-            <span class="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
           </div>
         </div>
 
@@ -197,12 +187,12 @@
         </div>
 
         <!-- Sign Up Link -->
-        <div class="mt-8 pt-6 border-t border-gray-200">
-          <p class="text-center text-sm text-gray-600">
+        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?
             <NuxtLink
               to="/signup"
-              class="font-semibold text-primary-600 hover:text-primary-500 transition-colors ml-1"
+              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors ml-1"
             >
               Sign up for free
             </NuxtLink>

@@ -54,8 +54,8 @@
       </Card>
 
       <Card padding="md" extra-class="border-l-4 border-l-purple-500">
-        <div class="flex items-center justify-between">
-          <div>
+    <div class="flex items-center justify-between">
+      <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
               {{ monthReturns }}
@@ -65,7 +65,7 @@
           <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
             <CalendarIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
           </div>
-        </div>
+      </div>
       </Card>
     </div>
 
