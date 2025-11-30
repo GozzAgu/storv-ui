@@ -21,7 +21,7 @@
         >
           <div class="relative flex-shrink-0">
             <img
-              :key="currentTheme"
+              :key="`logo-${currentTheme}`"
               :src="currentTheme === 'dark' ? '/storv logo dark.png' : '/storv logo.png'"
               alt="Storv Logo"
               :class="[
@@ -313,7 +313,46 @@ const toggleSidebar = () => {
   }
 }
 
-const currentTheme = computed(() => actualTheme.value || 'light')
+// Logo theme detection - sync with actual DOM state for immediate responsiveness
+const logoTheme = ref<'light' | 'dark'>('light')
+
+// Initialize logo theme on mount and watch for changes
+onMounted(() => {
+  // Function to update logo theme based on current DOM state
+  const updateLogoTheme = () => {
+    if (import.meta.client) {
+      const isDark = document.documentElement.classList.contains('dark')
+      logoTheme.value = isDark ? 'dark' : 'light'
+    }
+  }
+  
+  // Initial update
+  updateLogoTheme()
+  
+  // Watch for theme changes via actualTheme
+  watch(actualTheme, () => {
+    updateLogoTheme()
+  }, { immediate: true })
+  
+  // Also watch for DOM class changes (when theme is applied)
+  const observer = new MutationObserver(() => {
+    updateLogoTheme()
+  })
+  
+  if (import.meta.client) {
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+  }
+  
+  // Cleanup on unmount
+  onUnmounted(() => {
+    observer.disconnect()
+  })
+})
+
+const currentTheme = computed(() => logoTheme.value)
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },

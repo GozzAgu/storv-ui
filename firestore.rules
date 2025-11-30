@@ -86,6 +86,21 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
     }
     
+    // Receipts collection - users can only access their own receipts
+    match /receipts/{receiptId} {
+      // Allow read if user owns the receipt
+      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow create if user is creating their own receipt
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      
+      // Allow update if user owns the receipt
+      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow delete if user owns the receipt
+      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+    
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;

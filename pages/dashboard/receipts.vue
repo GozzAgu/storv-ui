@@ -1,5 +1,48 @@
 <template>
-  <div class="space-y-6 pb-24">
+  <ClientOnly>
+    <div class="space-y-6 pb-24 min-h-screen w-full">
+      <!-- Loading State -->
+      <div v-if="isInitialLoading" class="space-y-6">
+      <!-- Page Header Skeleton -->
+      <div>
+        <div class="h-9 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        <div class="h-5 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
+      </div>
+      
+      <!-- Stats Cards Skeleton -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card padding="md" v-for="i in 4" :key="i">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
+              <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
+            </div>
+            <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+          </div>
+        </Card>
+      </div>
+      
+      <!-- Filters Skeleton -->
+      <Card padding="md">
+        <div class="flex gap-4">
+          <div class="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+      </Card>
+      
+      <!-- Table Skeleton -->
+      <Card padding="none">
+        <div class="p-12 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
+        </div>
+      </Card>
+    </div>
+    
+    <!-- Actual Content -->
+    <template v-else>
     <!-- Page Header -->
       <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Receipts</h1>
@@ -12,8 +55,9 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Receipts</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ receipts.length }}
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+              <span v-if="receiptsStore.loading">-</span>
+              <span v-else>{{ receiptsStore.totalReceipts }}</span>
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All time</p>
           </div>
@@ -42,10 +86,14 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Today's Sales</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              ${{ formatCurrency(todaySales) }}
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+              <span v-if="receiptsStore.loading">-</span>
+              <span v-else>${{ formatCurrency(todaySales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ todayReceipts }} receipts</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem]">
+              <span v-if="receiptsStore.loading">-</span>
+              <span v-else>{{ todayReceipts }} receipts</span>
+            </p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
             <CalendarIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -57,10 +105,14 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              ${{ formatCurrency(monthSales) }}
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+              <span v-if="receiptsStore.loading">-</span>
+              <span v-else>${{ formatCurrency(monthSales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ monthReceipts }} receipts</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem]">
+              <span v-if="receiptsStore.loading">-</span>
+              <span v-else>{{ monthReceipts }} receipts</span>
+            </p>
           </div>
           <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
             <ChartBarIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -111,7 +163,11 @@
 
     <!-- Receipts Table -->
     <Card padding="none">
-      <div class="overflow-x-auto mb-6">
+      <div v-if="receiptsStore.loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
+      </div>
+      <div v-else class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -270,7 +326,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="filteredReceipts.length > 0"
+      v-if="!isInitialLoading && filteredReceipts.length > 0"
       @click="openCreateReceiptModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
@@ -278,16 +334,61 @@
       <PlusIcon class="w-6 h-6" />
     </button>
 
-    <!-- Create Receipt Modal -->
-    <CreateReceiptModal
-      v-model="showCreateReceiptModal"
-      @receipt-created="handleReceiptCreated"
-    />
-  </div>
+      <!-- Create Receipt Modal -->
+      <CreateReceiptModal
+        v-model="showCreateReceiptModal"
+        @receipt-created="handleReceiptCreated"
+      />
+      </template>
+    </div>
+    <template #fallback>
+      <div class="space-y-6 pb-24 min-h-screen w-full">
+        <!-- Loading State Fallback -->
+        <div class="space-y-6">
+          <!-- Page Header Skeleton -->
+          <div>
+            <div class="h-9 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div class="h-5 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
+          </div>
+          
+          <!-- Stats Cards Skeleton -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card padding="md" v-for="i in 4" :key="i">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
+                  <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
+                </div>
+                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+              </div>
+            </Card>
+          </div>
+          
+          <!-- Filters Skeleton -->
+          <Card padding="md">
+            <div class="flex gap-4">
+              <div class="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </Card>
+          
+          <!-- Table Skeleton -->
+          <Card padding="none">
+            <div class="p-12 text-center">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </template>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   ReceiptPercentIcon,
@@ -302,64 +403,25 @@ import {
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+// @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+import { useReceiptsStore, type Receipt } from '~/stores/receipts'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
+  ssr: false
 })
 
 useHead({
   title: 'Receipts - Storv',
 })
 
-interface Receipt {
-  id: string
-  receiptNumber: string
-  customerName: string
-  customerEmail: string
-  date: string
-  itemsCount: number
-  total: number
-  paymentMethod: string
-  status: 'completed' | 'pending' | 'refunded'
-}
+const receiptsStore = useReceiptsStore()
+const authStore = useAuthStore()
 
-const receipts = ref<Receipt[]>([
-  {
-    id: '1',
-    receiptNumber: 'REC-001',
-    customerName: 'John Doe',
-    customerEmail: 'john@example.com',
-    date: new Date().toISOString(),
-    itemsCount: 3,
-    total: 149.97,
-    paymentMethod: 'Card',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    receiptNumber: 'REC-002',
-    customerName: 'Jane Smith',
-    customerEmail: 'jane@example.com',
-    date: new Date(Date.now() - 86400000).toISOString(),
-    itemsCount: 5,
-    total: 289.50,
-    paymentMethod: 'Cash',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    receiptNumber: 'REC-003',
-    customerName: 'Bob Johnson',
-    customerEmail: 'bob@example.com',
-    date: new Date(Date.now() - 172800000).toISOString(),
-    itemsCount: 2,
-    total: 89.99,
-    paymentMethod: 'Mobile Money',
-    status: 'pending',
-  },
-])
-
+// Initialize loading state synchronously on client
+const isInitialLoading = ref(true)
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const dateFilter = ref('all')
@@ -402,39 +464,25 @@ if (import.meta.client) {
   }, 100)
 }
 
-const totalSales = computed(() => {
-  return receipts.value
-    .filter(r => r.status === 'completed')
-    .reduce((sum, r) => sum + r.total, 0)
-})
-
+const receipts = computed(() => receiptsStore.receipts)
+const totalSales = computed(() => receiptsStore.totalSales)
 const todaySales = computed(() => {
   const today = new Date().toDateString()
-  return receipts.value
+  return receiptsStore.receipts
     .filter(r => r.status === 'completed' && new Date(r.date).toDateString() === today)
     .reduce((sum, r) => sum + r.total, 0)
 })
 
 const todayReceipts = computed(() => {
   const today = new Date().toDateString()
-  return receipts.value.filter(r => new Date(r.date).toDateString() === today).length
+  return receiptsStore.receipts.filter(r => new Date(r.date).toDateString() === today).length
 })
 
-const monthSales = computed(() => {
-  const now = new Date()
-  return receipts.value
-    .filter(r => {
-      const receiptDate = new Date(r.date)
-      return r.status === 'completed' &&
-        receiptDate.getMonth() === now.getMonth() &&
-        receiptDate.getFullYear() === now.getFullYear()
-    })
-    .reduce((sum, r) => sum + r.total, 0)
-})
+const monthSales = computed(() => receiptsStore.monthSales)
 
 const monthReceipts = computed(() => {
   const now = new Date()
-  return receipts.value.filter(r => {
+  return receiptsStore.receipts.filter(r => {
     const receiptDate = new Date(r.date)
     return receiptDate.getMonth() === now.getMonth() &&
       receiptDate.getFullYear() === now.getFullYear()
@@ -498,16 +546,18 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+const formatDate = (date: string | Date) => {
+  const dateObj = date instanceof Date ? date : new Date(date)
+  return dateObj.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   })
 }
 
-const formatTime = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString('en-US', {
+const formatTime = (date: string | Date) => {
+  const dateObj = date instanceof Date ? date : new Date(date)
+  return dateObj.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -531,9 +581,11 @@ const openCreateReceiptModal = () => {
   showCreateReceiptModal.value = true
 }
 
-const handleReceiptCreated = (receipt: Receipt) => {
-  receipts.value.unshift(receipt)
+const handleReceiptCreated = async (receipt: Receipt) => {
+  // Receipt is already added to store by the modal
   showCreateReceiptModal.value = false
+  // Refresh receipts list
+  await receiptsStore.fetchReceipts()
 }
 
 const handleViewReceipt = (receipt: Receipt) => {
@@ -546,13 +598,70 @@ const handlePrintReceipt = (receipt: Receipt) => {
   alert(`Printing receipt ${receipt.receiptNumber}`)
 }
 
-const handleRefundReceipt = (receipt: Receipt) => {
+const handleRefundReceipt = async (receipt: Receipt) => {
   if (confirm(`Are you sure you want to refund receipt ${receipt.receiptNumber}?`)) {
-    const index = receipts.value.findIndex(r => r.id === receipt.id)
-    if (index > -1 && receipts.value[index]) {
-      receipts.value[index].status = 'refunded'
+    try {
+      await receiptsStore.updateReceipt(receipt.id, { status: 'refunded' })
+    } catch (error: any) {
+      alert(error.message || 'Failed to refund receipt')
     }
   }
 }
+
+// Load receipts on mount
+onMounted(async () => {
+  // Only run on client
+  if (import.meta.server) return
+  
+  // Set initial loading state
+  isInitialLoading.value = true
+  
+  // Wait for auth to finish loading before loading receipts
+  if (authStore.loading) {
+    let resolved = false
+    await new Promise((resolve) => {
+      const unwatch = watch(() => authStore.loading, (val) => {
+        if (!val && !resolved) {
+          resolved = true
+          unwatch()
+          resolve(true)
+        }
+      })
+      
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        if (!resolved) {
+          resolved = true
+          unwatch()
+          resolve(true)
+        }
+      }, 5000)
+    })
+  }
+  
+  // Only load receipts if user is authenticated
+  if (authStore.currentUser) {
+    try {
+      await receiptsStore.fetchReceipts()
+    } catch (error: any) {
+      console.error('Error loading receipts:', error.message || error)
+    }
+  }
+  
+  // Hide initial loading state after a minimum time to prevent flash
+  await new Promise(resolve => setTimeout(resolve, 300))
+  isInitialLoading.value = false
+})
+
+// Watch for auth state changes
+watch(() => authStore.currentUser, async (user) => {
+  if (user && receiptsStore.receipts.length === 0) {
+    try {
+      await receiptsStore.fetchReceipts()
+    } catch (error: any) {
+      console.error('Error loading receipts:', error.message || error)
+    }
+  }
+}, { immediate: false })
 </script>
 

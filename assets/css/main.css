@@ -8,6 +8,12 @@
     scroll-behavior: smooth;
   }
   
+  html.styles-loaded {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transition: opacity 0.15s ease-in;
+  }
+  
   body {
     font-family: 'Comic Neue', 'Comic Sans MS', cursive;
     margin: 0;

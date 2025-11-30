@@ -328,6 +328,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
+import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 
 interface Props {
   modelValue: boolean
@@ -340,6 +341,7 @@ const emit = defineEmits<{
 }>()
 
 const inventoryStore = useInventoryStore()
+const receiptsStore = useReceiptsStore()
 
 const steps = [
   { id: 'folder', label: 'Select Folder' },
@@ -546,28 +548,44 @@ const handleCreateReceipt = async () => {
     // Generate receipt number
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
     
-    // Create receipt object
-    const receipt = {
-      id: Date.now().toString(),
-      receiptNumber,
-      customerName: receiptForm.value.customerName,
-      customerEmail: receiptForm.value.customerEmail || '',
-      date: new Date().toISOString(),
-      itemsCount: totalSelectedQuantity.value,
-      total: calculateTotal(),
-      paymentMethod: receiptForm.value.paymentMethod,
-      status: receiptForm.value.status,
-      notes: receiptForm.value.notes || '',
-    }
-
+    // Create receipt items array
+    const receiptItems: ReceiptItem[] = selectedItems.value.map(si => {
+      const price = parseFloat(getItemField(si.item, 'price') || '0')
+      return {
+        itemId: si.id,
+        quantity: si.quantity,
+        price,
+        itemName: getItemDisplayName(si.item),
+      }
+    })
+    
     // Update dateOut for selected items
     const itemIds = selectedItems.value.map(si => si.id)
     if (itemIds.length > 0 && selectedFolder.value) {
       await inventoryStore.updateItemsDateOut(selectedFolder.value.id, itemIds)
     }
+    
+    // Create receipt in Firestore
+    const receiptData = {
+      receiptNumber,
+      customerName: receiptForm.value.customerName,
+      customerEmail: receiptForm.value.customerEmail || '',
+      date: new Date(),
+      items: receiptItems,
+      itemsCount: totalSelectedQuantity.value,
+      total: calculateTotal(),
+      paymentMethod: receiptForm.value.paymentMethod,
+      status: receiptForm.value.status as 'completed' | 'pending',
+      notes: receiptForm.value.notes || '',
+      folderId: selectedFolder.value.id,
+      itemIds,
+    }
+    
+    await receiptsStore.createReceipt(receiptData)
 
-    emit('receipt-created', receipt)
+    emit('receipt-created', receiptData)
     resetForm()
+    emit('update:modelValue', false)
   } catch (error: any) {
     console.error('Error creating receipt:', error)
     alert(`Error creating receipt: ${error.message || 'Unknown error'}`)

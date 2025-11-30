@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- CRITICAL: Apply theme IMMEDIATELY - blocking script that runs before rendering -->
+    <script>
+      !function() {
+        'use strict';
+        var html = document.documentElement;
+        var theme, isDark = false;
+        
+        try {
+          theme = localStorage.getItem('theme');
+          
+          if (theme === 'dark') {
+            isDark = true;
+          } else if (theme === 'light') {
+            isDark = false;
+          } else {
+            // theme is 'system', null, or undefined - check system preference
+            try {
+              if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                isDark = true;
+              }
+            } catch(e) {
+              isDark = false;
+            }
+          }
+        } catch(e) {
+          // localStorage access failed - check system preference
+          try {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              isDark = true;
+            }
+          } catch(e2) {
+            isDark = false;
+          }
+        }
+        
+        // Apply theme class SYNCHRONOUSLY before any rendering
+        if (isDark) {
+          html.className = (html.className ? html.className + ' ' : '') + 'dark';
+        } else {
+          html.className = html.className.replace(/\s*dark\s*/g, ' ').trim();
+        }
+      }();
+    </script>
+    
+    <!-- CRITICAL: Block all rendering until styles load -->
+    <style id="fouc-blocker">
+      html:not(.styles-loaded) { visibility: hidden !important; opacity: 0 !important; }
+      html.styles-loaded { visibility: visible !important; opacity: 1 !important; transition: opacity 0.2s; }
+      /* Prevent white flash - set dark background if dark class is present */
+      html.dark { background-color: #111827; }
+      html:not(.dark) { background-color: #ffffff; }
+      body { background-color: inherit; }
+    </style>
+    
+    <!-- Blocking script - runs immediately -->
+    <script>
+      (function() {
+        'use strict';
+        var html = document.documentElement;
+        
+        // Hide content immediately
+        html.style.setProperty('visibility', 'hidden', 'important');
+        html.style.setProperty('opacity', '0', 'important');
+        
+        // Ensure theme is still applied (double-check for consistency)
+        try {
+          var theme = localStorage.getItem('theme');
+          var isDark = false;
+          
+          if (theme === 'dark') {
+            isDark = true;
+          } else if (theme === 'light') {
+            isDark = false;
+          } else {
+            // 'system' or null - check system preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              isDark = true;
+            }
+          }
+          
+          // Only update if different from current state
+          var hasDark = html.classList.contains('dark');
+          if (isDark && !hasDark) {
+            html.classList.add('dark');
+          } else if (!isDark && hasDark) {
+            html.classList.remove('dark');
+          }
+        } catch(e) {}
+        
+        var revealed = false;
+        function reveal() {
+          if (revealed) return;
+          revealed = true;
+          html.classList.add('styles-loaded');
+          html.style.removeProperty('visibility');
+          html.style.removeProperty('opacity');
+        }
+        
+        if (document.readyState === 'complete') {
+          setTimeout(reveal, 500);
+        } else {
+          window.addEventListener('load', function() { setTimeout(reveal, 500); }, {once:true});
+          setTimeout(reveal, 3000);
+        }
+      })();
+    </script>
+    
+    {{ HEAD }}
+  </head>
+  <body>
+    {{ APP }}
+  </body>
+</html>
+
