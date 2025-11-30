@@ -110,6 +110,7 @@
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage staff in this department</p>
         </div>
         <Button
+          v-if="canManageDepartments"
           :icon="PlusIcon"
           @click="openCreateStaffModal"
         >
@@ -127,6 +128,7 @@
         <UsersIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No staff members in this department yet</p>
         <Button
+          v-if="canManageDepartments"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateStaffModal"
@@ -227,6 +229,7 @@
                     <PencilIcon class="w-5 h-5" />
                   </button>
                   <button
+                    v-if="canManageDepartments"
                     @click="handleDeleteStaff(member)"
                     class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete"
@@ -319,7 +322,7 @@
               <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageDepartments" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Actions
               </th>
             </tr>
@@ -384,7 +387,7 @@
                   {{ leave.status.charAt(0).toUpperCase() + leave.status.slice(1) }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
+              <td v-if="canManageDepartments" class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
                     v-if="leave.status === 'pending'"
@@ -475,6 +478,8 @@ import Pagination from '~/components/ui/Pagination.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import type { Department } from '~/composables/useDepartments'
 import type { Staff } from '~/composables/useStaff'
 
@@ -522,6 +527,12 @@ const editingStaff = ref<Staff | null>(null)
 
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+
+// Check if current user is staff (limited permissions)
+const isStaff = computed(() => userStore.userData?.role === 'staff')
+const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
 
 const paginatedStaff = computed(() => {
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
@@ -631,6 +642,11 @@ const handleViewLeave = (leave: LeaveRequest) => {
 
 // Load department and staff data
 const loadDepartmentData = async () => {
+  // Fetch user data if authenticated and not already loaded
+  if (authStore.currentUser?.uid && !userStore.userData) {
+    await userStore.fetchUserData(authStore.currentUser.uid)
+  }
+
   if (!departmentId.value || typeof departmentId.value !== 'string') {
     console.error('Invalid department ID:', departmentId.value)
     navigateTo('/dashboard/departments')

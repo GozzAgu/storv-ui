@@ -199,11 +199,11 @@
                 class="flex items-center space-x-2 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                  CA
+                  {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left">
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Chigozie Agu</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">gozieagu1@gmail.com</p>
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
                 </div>
                 <ChevronDownIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
               </button>
@@ -279,8 +279,12 @@ import {
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 const { actualTheme } = useTheme()
+const authStore = useAuthStore()
+const userStore = useUserStore()
 const sidebarOpen = ref(false)
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
@@ -366,6 +370,52 @@ const currentPageIcon = computed(() => {
   return currentPage.value?.icon || HomeIcon
 })
 
+// User profile data
+const userName = computed(() => {
+  // Try to get name from Firestore userData first
+  if (userStore.userData?.name) {
+    return userStore.userData.name
+  }
+  // Fallback to Firebase Auth displayName
+  if (authStore.currentUser?.displayName) {
+    return authStore.currentUser.displayName
+  }
+  // Fallback to email prefix (part before @)
+  if (authStore.currentUser?.email) {
+    return authStore.currentUser.email.split('@')[0]
+  }
+  return 'User'
+})
+
+const userEmail = computed(() => {
+  return authStore.currentUser?.email || ''
+})
+
+const userInitials = computed(() => {
+  const name = userName.value
+  if (!name || name === 'User') {
+    // If no name, use first two letters of email
+    const email = userEmail.value
+    if (email) {
+      return email.substring(0, 2).toUpperCase()
+    }
+    return 'U'
+  }
+  
+  // Split name and get first letter of each word
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    // First letter of first name + first letter of last name
+    const first = parts[0]?.[0] || ''
+    const last = parts[parts.length - 1]?.[0] || ''
+    return (first + last).toUpperCase()
+  } else if (parts.length === 1 && parts[0]) {
+    // Single name, use first two letters
+    return parts[0].substring(0, 2).toUpperCase()
+  }
+  return 'U'
+})
+
 const handleSignOut = async () => {
   const { signOut } = useFirebaseAuth()
   try {
@@ -397,7 +447,19 @@ watch(() => route.path, () => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  
+  // Fetch user data if authenticated and not already loaded
+  if (authStore.currentUser?.uid && !userStore.userData) {
+    userStore.fetchUserData(authStore.currentUser.uid)
+  }
 })
+
+// Watch for auth state changes to fetch user data
+watch(() => authStore.currentUser, (user) => {
+  if (user?.uid && !userStore.userData) {
+    userStore.fetchUserData(user.uid)
+  }
+}, { immediate: true })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)

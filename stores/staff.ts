@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -7,6 +7,7 @@ import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import type { Staff } from '~/composables/useStaff'
+import type { Department } from '~/composables/useDepartments'
 
 export const useStaffStore = defineStore('staff', {
   state: () => ({
@@ -21,6 +22,11 @@ export const useStaffStore = defineStore('staff', {
       state.staff.filter(s => s.departmentId === departmentId),
     getStaffMember: (state) => (staffId: string) => 
       state.staff.find(s => s.id === staffId),
+    getCurrentStaffMember: (state) => {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return null
+      return state.staff.find(s => s.authUid === authStore.currentUser?.uid) || null
+    },
   },
 
   actions: {
@@ -126,13 +132,46 @@ export const useStaffStore = defineStore('staff', {
         return
       }
 
+      // Check if user is staff to determine which staff to show
+      const userStore = useUserStore()
+      
+      // If user data is not loaded, fetch it first
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let userId = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          // Find the staff document for this user to get their super admin's UID
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', userId))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              // Use the super admin's UID who created this staff member
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+                console.log('[StaffStore] Staff user detected, using super admin UID for fetchStaffByDepartment:', userId)
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[StaffStore] Could not fetch staff document, using current user UID:', error.message)
+        }
+      }
+
       try {
         const staffRef = collection(db, 'staff')
-        const userId = authStore.currentUser.uid
         let querySnapshot
 
         try {
-          // Filter by departmentId AND createdBy to only get staff for this user
+          // Filter by departmentId AND createdBy to only get staff for this user (or super admin if staff)
           const q = query(
             staffRef,
             where('departmentId', '==', departmentId),
@@ -591,17 +630,47 @@ export const useStaffStore = defineStore('staff', {
           } as Staff
         }
 
-        // If role changed to manager, update department (verify department belongs to user)
-        if (updates.role === 'manager') {
+        // Handle role changes that affect department manager assignment
+        if (updates.role !== undefined) {
           const currentStaff = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
           if (currentStaff && currentStaff.createdBy === authStore.currentUser.uid) {
             const departmentsStore = useDepartmentsStore()
             const dept = departmentsStore.getDepartmentById(currentStaff.departmentId)
+            
             if (dept && dept.createdBy === authStore.currentUser.uid) {
-              await departmentsStore.updateDepartment(currentStaff.departmentId, {
-                manager: `${currentStaff.firstName} ${currentStaff.lastName}`,
-                managerId: staffId,
-              } as Partial<import('~/composables/useDepartments').Department>)
+              // If role changed to manager, set as manager
+              if (updates.role === 'manager') {
+                await departmentsStore.updateDepartment(currentStaff.departmentId, {
+                  manager: `${currentStaff.firstName} ${currentStaff.lastName}`,
+                  managerId: staffId,
+                } as Partial<import('~/composables/useDepartments').Department>)
+              }
+              // If role changed from manager to something else (like staff), clear manager
+              else if (staffMember.role === 'manager' && (updates.role === 'staff' || updates.role === 'intern')) {
+                // Check if this staff member is currently the manager of the department
+                if (dept.managerId === staffId) {
+                  // Use deleteField() to properly remove the fields from Firestore
+                  const db = useFirestore().getFirestoreInstance()
+                  if (db) {
+                    const departmentRef = doc(db, 'departments', currentStaff.departmentId)
+                    await updateDoc(departmentRef, {
+                      manager: deleteField(),
+                      managerId: deleteField(),
+                      updatedAt: serverTimestamp(),
+                    })
+                    
+                    // Update local state to reflect the change immediately
+                    const deptIndex = departmentsStore.departments.findIndex(d => d.id === currentStaff.departmentId)
+                    if (deptIndex > -1) {
+                      departmentsStore.departments[deptIndex] = {
+                        ...departmentsStore.departments[deptIndex],
+                        manager: undefined,
+                        managerId: undefined,
+                      } as Department
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -644,6 +713,59 @@ export const useStaffStore = defineStore('staff', {
       } catch (error: any) {
         console.error('Error deleting staff:', error)
         throw new Error(error.message || 'Failed to delete staff')
+      }
+    },
+
+    // Get current logged-in staff member's data
+    async fetchCurrentStaffMember(): Promise<Staff | null> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        return null
+      }
+
+      try {
+        const staffRef = collection(db, 'staff')
+        const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+        const staffSnapshot = await getDocs(staffQuery)
+
+        if (staffSnapshot.empty || staffSnapshot.docs.length === 0) {
+          return null
+        }
+
+        const staffDoc = staffSnapshot.docs[0]
+        if (!staffDoc) {
+          return null
+        }
+
+        const staffData = {
+          id: staffDoc.id,
+          ...staffDoc.data(),
+        } as Staff
+
+        // Get department name
+        const departmentsStore = useDepartmentsStore()
+        if (departmentsStore.departments.length === 0) {
+          try {
+            await departmentsStore.fetchDepartments()
+          } catch (e) {
+            console.warn('Could not fetch departments for current staff member:', e)
+          }
+        }
+
+        const department = departmentsStore.getDepartmentById(staffData.departmentId)
+        if (department) {
+          staffData.departmentName = department.name
+        }
+
+        return staffData
+      } catch (error: any) {
+        console.error('Error fetching current staff member:', error)
+        return null
       }
     },
   },

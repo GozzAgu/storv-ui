@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
+import { useUserStore } from './user'
 import type { Department } from '~/composables/useDepartments'
 
 export { CORE_DEPARTMENTS } from '~/composables/useDepartments'
@@ -48,7 +49,39 @@ export const useDepartmentsStore = defineStore('departments', {
         return
       }
 
-      const userId = authStore.currentUser.uid
+      // Check if user is staff to determine which departments to show
+      const userStore = useUserStore()
+
+      // If user data is not loaded, fetch it first
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let userId = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          // Find the staff document for this user
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', userId))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              // Use the super admin's UID who created this staff member
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+                console.log('[DepartmentsStore] Staff user detected, using super admin UID:', userId)
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[DepartmentsStore] Could not fetch staff document, using current user UID:', error.message)
+        }
+      }
 
       try {
         const departmentsRef = collection(db, 'departments')
@@ -142,9 +175,36 @@ export const useDepartmentsStore = defineStore('departments', {
         }
 
         const data = departmentSnap.data()
-        const userId = authStore.currentUser.uid
+        let userId = authStore.currentUser.uid
 
-        // Only return department if it belongs to this user
+        // If the current user is staff, get the super admin UID from the staff document
+        const userStore = useUserStore()
+        
+        if (!userStore.userData) {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        }
+
+        if (userStore.userData?.role === 'staff') {
+          try {
+            const staffRef = collection(db, 'staff')
+            const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+            const staffSnapshot = await getDocs(staffQuery)
+
+            if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+              const staffDoc = staffSnapshot.docs[0]
+              if (staffDoc) {
+                const staffData = staffDoc.data()
+                if (staffData.createdBy) {
+                  userId = staffData.createdBy
+                }
+              }
+            }
+          } catch (error: any) {
+            console.warn('[DepartmentsStore] Could not fetch staff document in fetchDepartment:', error.message)
+          }
+        }
+
+        // Only return department if it belongs to this user (or their super admin)
         if (data.createdBy !== userId) {
           throw new Error('Department not found or access denied')
         }
@@ -224,6 +284,16 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('User must be authenticated')
       }
 
+      // Check if user is staff - staff cannot update departments
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        throw new Error('Staff members do not have permission to update departments')
+      }
+
       try {
         // First verify the department belongs to this user
         const department = await this.fetchDepartment(departmentId)
@@ -261,6 +331,16 @@ export const useDepartmentsStore = defineStore('departments', {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated')
+      }
+
+      // Check if user is staff - staff cannot delete departments
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        throw new Error('Staff members do not have permission to delete departments')
       }
 
       try {

@@ -69,6 +69,31 @@
       </Card>
     </div>
 
+    <!-- Staff Member Banner (only for staff users) -->
+    <Card v-if="isStaff && currentStaffMember" padding="md" extra-class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 border-l-4 border-l-primary-500">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+            <UsersIcon class="w-6 h-6" />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              You are a member of {{ currentStaffMember.departmentName || 'a department' }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Position: {{ currentStaffMember.position }} • Role: {{ currentStaffMember.role }}
+            </p>
+          </div>
+        </div>
+        <NuxtLink
+          :to="`/dashboard/departments/${currentStaffMember.departmentId}`"
+          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+        >
+          View My Department
+        </NuxtLink>
+      </div>
+    </Card>
+
     <!-- Filters -->
     <Card padding="md">
       <div class="flex flex-col md:flex-row gap-4">
@@ -144,7 +169,7 @@
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-1 z-10">
+          <div v-if="canManageDepartments" class="flex items-center gap-1 z-10">
             <button
               @click.stop="handleEditDepartment(department)"
               class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
@@ -198,7 +223,7 @@
           {{ searchQuery ? 'Try adjusting your search' : 'Create your first department to organize your store' }}
         </p>
         <Button
-          v-if="!searchQuery"
+          v-if="!searchQuery && canManageDepartments"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateDepartmentModal"
@@ -226,8 +251,9 @@
     />
   </div>
 
-  <!-- Floating Action Button - Always visible -->
+  <!-- Floating Action Button - Only visible for non-staff -->
   <button
+    v-if="canManageDepartments"
     @click="openCreateDepartmentModal"
     class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
     title="Create new department"
@@ -274,10 +300,22 @@ const itemsPerPage = ref(12)
 // Import stores directly - Pinia handles SSR automatically
 import { useDepartmentsStore } from '~/stores/departments'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useStaffStore } from '~/stores/staff'
+import type { Staff } from '~/composables/useStaff'
 
 // Get store instances - only accessible on client
 const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
+const userStore = useUserStore()
+const staffStore = useStaffStore()
+
+// Check if current user is staff (limited permissions)
+const isStaff = computed(() => userStore.userData?.role === 'staff')
+const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
+
+// Current staff member data (for staff users)
+const currentStaffMember = ref<Staff | null>(null)
 
 const totalStaff = computed(() => departmentsStore.totalStaff ?? 0)
 const totalManagers = computed(() => departmentsStore.totalManagers ?? 0)
@@ -314,6 +352,20 @@ const handlePageChange = (page: number) => {
 onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
+  
+  // Fetch user data if authenticated and not already loaded
+  if (authStore.currentUser?.uid && !userStore.userData) {
+    await userStore.fetchUserData(authStore.currentUser.uid)
+  }
+
+  // If user is staff, fetch their staff member data
+  if (userStore.userData?.role === 'staff') {
+    try {
+      currentStaffMember.value = await staffStore.fetchCurrentStaffMember()
+    } catch (error) {
+      console.error('Error fetching current staff member:', error)
+    }
+  }
   
   try {
     // Wait for auth to finish loading before loading departments
