@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Enhanced Header -->
     <div class="flex items-start justify-between gap-4">
       <div class="flex items-start gap-4 flex-1">
@@ -21,10 +21,13 @@
               <FolderIcon class="w-7 h-7 text-white" />
             </div>
             <div class="flex-1">
-              <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {{ folder?.name || 'Loading...' }}
+              <h1 v-if="isLoadingFolder" class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                Loading...
               </h1>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <h1 v-else class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                {{ folder?.name || 'Folder' }}
+              </h1>
+              <p v-if="!isLoadingFolder" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 {{ folder?.description || 'No description' }}
               </p>
             </div>
@@ -44,7 +47,7 @@
     </div>
 
     <!-- Enhanced Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -106,8 +109,16 @@
       </Card>
     </div>
 
+    <!-- Loading State -->
+    <Card v-if="isLoadingFolder" padding="md">
+      <div class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading folder...</p>
+      </div>
+    </Card>
+
     <!-- Enhanced Filters Section -->
-    <Card padding="md">
+    <Card v-else padding="md">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -148,7 +159,7 @@
 
     <!-- Enhanced Items Table -->
     <Card padding="none">
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -187,52 +198,48 @@
               :key="item.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-3">
+              <td
+                v-for="(column, colIndex) in columns"
+                :key="column.key"
+                class="px-6 py-4 whitespace-nowrap"
+              >
+                <div v-if="colIndex === 0" class="flex items-center gap-3">
+                  <!-- First column shows avatar and value -->
                   <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ item.name.charAt(0).toUpperCase() }}
+                    {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
                   </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {{ item.name }}
+                      {{ getItemDisplayValue(item[column.key]) }}
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ item.sku }}
+                    <div v-if="columns.length > 1 && columns[1]" class="text-xs text-gray-500 dark:text-gray-400">
+                      {{ getItemDisplayValue(item[columns[1].key]) }}
                     </div>
                   </div>
                 </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm text-gray-600 dark:text-gray-300 font-mono">
-                  {{ item.sku }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
-                    item.stock === 0
-                      ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                      : item.stock < 10
-                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                      : item.stock < 20
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                      : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                  ]"
-                >
-                  <span class="w-2 h-2 rounded-full mr-2" :class="{
-                    'bg-red-500': item.stock === 0,
-                    'bg-orange-500': item.stock > 0 && item.stock < 10,
-                    'bg-yellow-500': item.stock >= 10 && item.stock < 20,
-                    'bg-green-500': item.stock >= 20
-                  }"></span>
-                  {{ item.stock }} units
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  ${{ formatCurrency(item.price) }}
-                </span>
+                <div v-else>
+                  <div v-if="'type' in column && column.type === 'currency'" class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    ${{ formatCurrency(item[column.key] || 0) }}
+                  </div>
+                  <div v-else-if="'type' in column && column.type === 'number'" class="text-sm text-gray-600 dark:text-gray-300">
+                    {{ formatNumber(item[column.key]) }}
+                  </div>
+                  <div v-else-if="'type' in column && column.type === 'date'" class="text-sm text-gray-600 dark:text-gray-300">
+                    <span v-if="item[column.key]">
+                      {{ formatItemDate(item[column.key]) }}
+                    </span>
+                    <span v-else class="text-gray-400 dark:text-gray-500 italic">
+                      -
+                    </span>
+                  </div>
+                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
+                    {{ item[column.key] ? 'Yes' : 'No' }}
+                  </div>
+                  <div v-else class="text-sm text-gray-600 dark:text-gray-300">
+                    {{ getItemDisplayValue(item[column.key]) }}
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
@@ -280,21 +287,28 @@
           </tbody>
         </table>
       </div>
-      <!-- Pagination -->
+    </Card>
+
+    <!-- Fixed Pagination -->
+    <div
+      v-if="sortedFilteredItems.length > 0"
+      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      style="left: 0;"
+    >
       <Pagination
-        v-if="sortedFilteredItems.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="sortedFilteredItems.length"
         @page-change="handlePageChange"
       />
-    </Card>
+    </div>
 
     <!-- Floating Action Button -->
     <button
       v-if="sortedFilteredItems.length > 0"
       @click="openAddItemModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new item"
     >
       <PlusIcon class="w-6 h-6" />
@@ -307,64 +321,79 @@
       size="md"
     >
       <form @submit.prevent="handleSaveItem" class="space-y-6">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Item Name *
-          </label>
-          <input
-            v-model="itemForm.name"
-            type="text"
-            required
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            placeholder="Enter item name"
-          />
-        </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div
+          v-for="field in folder?.template?.fields || []"
+          :key="field.id"
+          :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
+        >
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              SKU *
+              {{ field.label || field.name }} {{ field.required ? '*' : '' }}
             </label>
+            <!-- Text Input -->
             <input
-              v-model="itemForm.sku"
+              v-if="field.type === 'text'"
+              v-model="itemForm[field.name]"
               type="text"
-              required
+              :required="field.required"
               class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              placeholder="SKU-001"
+              :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
             />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Price *
-            </label>
-            <div class="relative">
+            <!-- Number Input -->
+            <input
+              v-else-if="field.type === 'number'"
+              v-model.number="itemForm[field.name]"
+              type="number"
+              :required="field.required"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+            />
+            <!-- Currency Input -->
+            <div v-else-if="field.type === 'currency'" class="relative">
               <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
               <input
-                v-model.number="itemForm.price"
+                v-model.number="itemForm[field.name]"
                 type="number"
                 step="0.01"
                 min="0"
-                required
+                :required="field.required"
                 class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                placeholder="0.00"
+                :placeholder="field.placeholder || '0.00'"
               />
             </div>
+            <!-- Date Input -->
+            <input
+              v-else-if="field.type === 'date'"
+              v-model="itemForm[field.name]"
+              type="date"
+              :required="field.required"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            />
+            <!-- Select Input -->
+            <select
+              v-else-if="field.type === 'select' && field.options"
+              v-model="itemForm[field.name]"
+              :required="field.required"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            >
+              <option value="">Select {{ field.label || field.name }}</option>
+              <option v-for="option in field.options" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
+            <!-- Boolean Input -->
+            <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
+              <input
+                v-model="itemForm[field.name]"
+                type="checkbox"
+                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+              />
+              <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
+            </label>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Stock Quantity *
-          </label>
-          <input
-            v-model.number="itemForm.stock"
-            type="number"
-            min="0"
-            required
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            placeholder="0"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Items available in stock
-          </p>
+        <div v-if="!folder?.template?.fields || folder.template.fields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+          No template fields defined for this folder. Please edit the folder to add fields.
         </div>
       </form>
 
@@ -401,6 +430,8 @@ import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
   layout: 'dashboard'
@@ -409,27 +440,51 @@ definePageMeta({
 const route = useRoute()
 const folderId = computed(() => route.params.id as string)
 
-interface Folder {
-  id: string
-  name: string
-  description: string
-  color: string
-  itemCount: number
-  totalValue: number
-  lowStockCount: number
-  createdAt?: string
+// Import InventoryItem from store
+import type { InventoryItem } from '~/stores/inventory'
+
+const inventoryStore = useInventoryStore()
+const authStore = useAuthStore()
+
+const folder = ref<InventoryFolder | null>(null)
+const isLoadingFolder = ref(true)
+const isLoadingItems = ref(false)
+const sidebarCollapsed = ref(false)
+
+// Load sidebar state from localStorage
+if (import.meta.client) {
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
 }
 
-interface InventoryItem {
-  id: string
-  name: string
-  sku: string
-  stock: number
-  price: number
+// Watch for sidebar state changes
+if (import.meta.client) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
 }
-
-const folder = ref<Folder | null>(null)
-const items = ref<InventoryItem[]>([])
 const searchQuery = ref('')
 const stockFilter = ref('all')
 const sortBy = ref('name')
@@ -440,105 +495,79 @@ const itemsPerPage = ref(10)
 
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
 
-const itemForm = reactive({
-  name: '',
-  sku: '',
-  price: 0,
-  stock: 0,
+const itemForm = reactive<Record<string, any>>({})
+
+// Folder will be loaded from Firestore via inventoryStore
+
+// Generate columns based on folder template
+const columns = computed(() => {
+  const templateColumns: Array<{ key: string; label: string; sortable: boolean; type?: string }> = []
+  
+  if (folder.value?.template?.fields && folder.value.template.fields.length > 0) {
+    // Generate columns from template fields
+    templateColumns.push(...folder.value.template.fields.map(field => ({
+      key: field.name,
+      label: field.label || field.name,
+      sortable: true,
+      type: field.type,
+    })))
+  } else {
+    // Fallback to default columns if no template
+    templateColumns.push(
+      { key: 'name', label: 'Item', sortable: true },
+      { key: 'sku', label: 'SKU', sortable: true },
+      { key: 'stock', label: 'Stock', sortable: true },
+      { key: 'price', label: 'Price', sortable: true }
+    )
+  }
+  
+  // Always add Date In and Date Out columns at the end
+  templateColumns.push(
+    { key: 'dateIn', label: 'Date In', sortable: true, type: 'date' },
+    { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' }
+  )
+  
+  return templateColumns
 })
 
-// Sample folders data
-const foldersData: Folder[] = [
-  {
-    id: '1',
-    name: 'Electronics',
-    description: 'Electronic items and gadgets',
-    color: 'blue',
-    itemCount: 45,
-    totalValue: 12500,
-    lowStockCount: 3,
-    createdAt: '2024-01-15',
-  },
-  {
-    id: '2',
-    name: 'Clothing',
-    description: 'Apparel and fashion items',
-    color: 'pink',
-    itemCount: 120,
-    totalValue: 8500,
-    lowStockCount: 8,
-    createdAt: '2024-01-10',
-  },
-  {
-    id: '3',
-    name: 'Food & Beverages',
-    description: 'Food items and drinks',
-    color: 'orange',
-    itemCount: 89,
-    totalValue: 3200,
-    lowStockCount: 12,
-    createdAt: '2024-01-05',
-  },
-  {
-    id: '4',
-    name: 'Office Supplies',
-    description: 'Stationery and office equipment',
-    color: 'purple',
-    itemCount: 67,
-    totalValue: 2100,
-    lowStockCount: 0,
-    createdAt: '2024-01-20',
-  },
-  {
-    id: '5',
-    name: 'Home & Garden',
-    description: 'Home improvement and garden items',
-    color: 'green',
-    itemCount: 34,
-    totalValue: 5600,
-    lowStockCount: 5,
-    createdAt: '2024-01-12',
-  },
-  {
-    id: '6',
-    name: 'Toys & Games',
-    description: 'Children toys and games',
-    color: 'yellow',
-    itemCount: 56,
-    totalValue: 3400,
-    lowStockCount: 2,
-    createdAt: '2024-01-18',
-  },
-]
-
-const columns = [
-  { key: 'name', label: 'Item', sortable: true },
-  { key: 'sku', label: 'SKU', sortable: true },
-  { key: 'stock', label: 'Stock', sortable: true },
-  { key: 'price', label: 'Price', sortable: true },
-]
+const items = computed(() => {
+  return inventoryStore.items[folderId.value] || []
+})
 
 const filteredItems = computed(() => {
   let result = [...items.value]
 
-  // Filter by search query
+  // Filter by search query - search across all template fields
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    result = result.filter(
-      item =>
-        item.name.toLowerCase().includes(query) ||
-        item.sku.toLowerCase().includes(query)
-    )
+    result = result.filter(item => {
+      // Search in all item values
+      return Object.values(item).some(value => {
+        const strValue = value?.toString().toLowerCase() || ''
+        return strValue.includes(query)
+      })
+    })
   }
 
-  // Filter by stock status
-  if (stockFilter.value !== 'all') {
-    result = result.filter(item => {
-      if (stockFilter.value === 'in-stock') return item.stock >= 20
-      if (stockFilter.value === 'low-stock') return item.stock < 20 && item.stock > 0
-      if (stockFilter.value === 'out-of-stock') return item.stock === 0
-      return true
-    })
+  // Filter by stock status (if folder has a stock/quantity field)
+  if (stockFilter.value !== 'all' && folder.value?.template) {
+    // Find a field that might represent stock/quantity
+    const stockField = folder.value.template.fields.find(f => 
+      f.name.toLowerCase().includes('stock') || 
+      f.name.toLowerCase().includes('quantity') ||
+      f.name.toLowerCase().includes('qty')
+    )
+    
+    if (stockField) {
+      result = result.filter(item => {
+        const stockValue = item[stockField.name] || 0
+        const stockNum = typeof stockValue === 'number' ? stockValue : parseFloat(stockValue) || 0
+        if (stockFilter.value === 'in-stock') return stockNum >= 20
+        if (stockFilter.value === 'low-stock') return stockNum < 20 && stockNum > 0
+        if (stockFilter.value === 'out-of-stock') return stockNum === 0
+        return true
+      })
+    }
   }
 
   return result
@@ -548,8 +577,12 @@ const sortedFilteredItems = computed(() => {
   const result = [...filteredItems.value]
   
   result.sort((a, b) => {
-    let aValue = a[currentSort.value.key as keyof InventoryItem]
-    let bValue = b[currentSort.value.key as keyof InventoryItem]
+    let aValue = a[currentSort.value.key]
+    let bValue = b[currentSort.value.key]
+    
+    // Handle undefined/null values
+    if (aValue === undefined || aValue === null) return 1
+    if (bValue === undefined || bValue === null) return -1
     
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return currentSort.value.order === 'asc'
@@ -557,13 +590,13 @@ const sortedFilteredItems = computed(() => {
         : bValue.localeCompare(aValue)
     }
     
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return currentSort.value.order === 'asc'
-        ? aValue - bValue
-        : bValue - aValue
-    }
+    // Try to convert to numbers for comparison
+    const aNum = typeof aValue === 'number' ? aValue : parseFloat(aValue) || 0
+    const bNum = typeof bValue === 'number' ? bValue : parseFloat(bValue) || 0
     
-    return 0
+    return currentSort.value.order === 'asc'
+      ? aNum - bNum
+      : bNum - aNum
   })
   
   return result
@@ -584,7 +617,14 @@ const toggleSort = (key: string) => {
   }
 }
 
-const getFolderColorClass = (color: string) => {
+const getFolderColorClass = (color?: string) => {
+  if (!color) return 'bg-gradient-to-br from-gray-500 to-gray-600'
+  
+  // If color is a hex value, use it directly
+  if (color.startsWith('#')) {
+    return `bg-[${color}]`
+  }
+  
   const colorMap: Record<string, string> = {
     blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
     green: 'bg-gradient-to-br from-green-500 to-green-600',
@@ -605,13 +645,36 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return 'Unknown'
+const formatNumber = (value: number | string | undefined) => {
+  if (value === undefined || value === null) return '-'
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(num)) return value?.toString() || '-'
+  return new Intl.NumberFormat('en-US').format(num)
+}
+
+const formatItemDate = (date: string | Date | undefined) => {
+  if (!date) return '-'
   try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    const dateObj = date instanceof Date ? date : new Date(date)
+    if (isNaN(dateObj.getTime())) return date.toString()
+    return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   } catch {
-    return dateString
+    return date.toString()
+  }
+}
+
+const getItemDisplayValue = (value: any) => {
+  if (value === undefined || value === null || value === '') return '-'
+  return value
+}
+
+const formatDate = (date?: Date | string) => {
+  if (!date) return 'Unknown'
+  try {
+    const dateObj = date instanceof Date ? date : new Date(date)
+    return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  } catch {
+    return 'Unknown'
   }
 }
 
@@ -630,122 +693,205 @@ const handlePageChange = (page: number) => {
 
 const openAddItemModal = () => {
   editingItem.value = null
-  itemForm.name = ''
-  itemForm.sku = ''
-  itemForm.price = 0
-  itemForm.stock = 0
+  // Initialize form with empty values for all template fields
+  if (folder.value?.template?.fields) {
+    Object.keys(itemForm).forEach(key => delete itemForm[key])
+    folder.value.template.fields.forEach(field => {
+      if (field.type === 'number' || field.type === 'currency') {
+        itemForm[field.name] = 0
+      } else if (field.type === 'boolean') {
+        itemForm[field.name] = false
+      } else if (field.type === 'date') {
+        itemForm[field.name] = new Date().toISOString().split('T')[0]
+      } else {
+        itemForm[field.name] = ''
+      }
+    })
+  }
   showAddItemModal.value = true
 }
 
 const handleEditItem = (item: InventoryItem) => {
   editingItem.value = item
-  itemForm.name = item.name
-  itemForm.sku = item.sku
-  itemForm.price = item.price
-  itemForm.stock = item.stock
+  // Copy all item data to form
+  Object.keys(itemForm).forEach(key => delete itemForm[key])
+  Object.keys(item).forEach(key => {
+    if (!['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy'].includes(key)) {
+      itemForm[key] = item[key]
+    }
+  })
   showAddItemModal.value = true
 }
 
-const handleDeleteItem = (item: InventoryItem) => {
-  if (confirm(`Are you sure you want to delete "${item.name}"? This action cannot be undone.`)) {
-    const index = items.value.findIndex(i => i.id === item.id)
-    if (index > -1) {
-      items.value.splice(index, 1)
-      // Update folder stats
+const handleDeleteItem = async (item: InventoryItem) => {
+  const firstColumn = columns.value[0]
+  const itemName = firstColumn ? (item[firstColumn.key] || 'this item') : 'this item'
+  if (confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)) {
+    try {
+      await inventoryStore.deleteItem(folderId.value, item.id)
+      // Reload folder to update stats
       if (folder.value) {
-        folder.value.itemCount--
-        folder.value.totalValue -= item.price * item.stock
-        if (item.stock < 10) {
-          folder.value.lowStockCount--
-        }
+        await inventoryStore.fetchFolder(folderId.value)
+        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
       }
+      // Refresh folder list to update item counts on the folders page
+      await inventoryStore.fetchFolders()
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete item')
     }
   }
 }
 
-const handleSaveItem = () => {
-  if (!itemForm.name.trim() || !itemForm.sku.trim()) {
-    alert('Please fill in all required fields')
-    return
+const handleSaveItem = async () => {
+  // Validate required fields based on template
+  if (folder.value?.template?.fields) {
+    const requiredFields = folder.value.template.fields.filter(f => f.required)
+    for (const field of requiredFields) {
+      if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
+        alert(`Please fill in the required field: ${field.label || field.name}`)
+        return
+      }
+    }
   }
 
-  if (editingItem.value) {
-    // Update existing item
-    const index = items.value.findIndex(i => i.id === editingItem.value!.id)
-    if (index > -1) {
-      const oldItem = items.value[index]
-      if (oldItem) {
-        items.value[index] = { ...itemForm, id: editingItem.value.id }
-        
-        // Update folder stats
-        if (folder.value) {
-          folder.value.totalValue -= oldItem.price * oldItem.stock
-          folder.value.totalValue += itemForm.price * itemForm.stock
-          
-          // Update low stock count
-          if (oldItem.stock < 10 && itemForm.stock >= 10) {
-            folder.value.lowStockCount--
-          } else if (oldItem.stock >= 10 && itemForm.stock < 10) {
-            folder.value.lowStockCount++
-          }
-        }
+  try {
+    if (editingItem.value) {
+      // Update existing item
+      await inventoryStore.updateItem(folderId.value, editingItem.value.id, itemForm)
+      // Reload folder to update stats
+      if (folder.value) {
+        await inventoryStore.fetchFolder(folderId.value)
+        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
       }
-    }
-  } else {
-    // Add new item
-    const newItem: InventoryItem = {
-      id: Date.now().toString(),
-      ...itemForm,
-    }
-    items.value.push(newItem)
-    // Update folder stats
-    if (folder.value) {
-      folder.value.itemCount++
-      folder.value.totalValue += newItem.price * newItem.stock
-      if (newItem.stock < 10) {
-        folder.value.lowStockCount++
+    } else {
+      // Create new item
+      await inventoryStore.createItem(folderId.value, itemForm)
+      // Reload folder to update stats
+      if (folder.value) {
+        await inventoryStore.fetchFolder(folderId.value)
+        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
       }
+      // Refresh folder list to update item counts on the folders page
+      await inventoryStore.fetchFolders()
     }
+    handleCancelItem()
+  } catch (error: any) {
+    alert(error.message || 'Failed to save item')
   }
-  handleCancelItem()
 }
 
 const handleCancelItem = () => {
   showAddItemModal.value = false
   editingItem.value = null
-  itemForm.name = ''
-  itemForm.sku = ''
-  itemForm.price = 0
-  itemForm.stock = 0
+  Object.keys(itemForm).forEach(key => delete itemForm[key])
 }
 
-// Load folder and items
-onMounted(() => {
-  // Find folder
-  folder.value = foldersData.find(f => f.id === folderId.value) || null
-
-  // Load sample items for this folder
-  if (folderId.value === '1') {
-    items.value = [
-      { id: '1', name: 'Wireless Mouse', sku: 'ELEC-001', stock: 45, price: 29.99 },
-      { id: '2', name: 'USB Keyboard', sku: 'ELEC-002', stock: 32, price: 49.99 },
-      { id: '3', name: 'Webcam HD', sku: 'ELEC-003', stock: 5, price: 79.99 },
-      { id: '4', name: 'Bluetooth Speaker', sku: 'ELEC-004', stock: 18, price: 89.99 },
-      { id: '5', name: 'USB-C Hub', sku: 'ELEC-005', stock: 22, price: 64.99 },
-    ]
+// Load folder from Firestore
+onMounted(async () => {
+  // Wait for auth to be ready
+  if (authStore.loading) {
+    const checkAuth = setInterval(() => {
+      if (!authStore.loading) {
+        clearInterval(checkAuth)
+        if (authStore.currentUser) {
+          loadFolderData()
+        } else {
+          // User not authenticated, redirect to signin
+          navigateTo('/signin')
+        }
+      }
+    }, 100)
+    setTimeout(() => {
+      clearInterval(checkAuth)
+      if (!authStore.loading && authStore.currentUser) {
+        loadFolderData()
+      } else if (!authStore.loading && !authStore.currentUser) {
+        navigateTo('/signin')
+      }
+    }, 5000)
   } else {
-    // Generate sample items for other folders
-    items.value = Array.from({ length: 10 }, (_, i) => ({
-      id: `${folderId.value}-${i + 1}`,
-      name: `${folder.value?.name || 'Item'} ${i + 1}`,
-      sku: `${folder.value?.name.substring(0, 4).toUpperCase()}-${String(i + 1).padStart(3, '0')}`,
-      stock: Math.floor(Math.random() * 100),
-      price: Math.floor(Math.random() * 500) + 10,
-    }))
+    if (authStore.currentUser) {
+      await loadFolderData()
+    } else {
+      navigateTo('/signin')
+    }
   }
 
-  useHead({
-    title: `${folder.value?.name || 'Folder'} - Inventory - Storv`,
-  })
+  // Items will be loaded by loadFolderData
 })
+
+// Watch for auth state changes
+watch(() => authStore.currentUser, async (user) => {
+  if (user && isLoadingFolder.value && !folder.value) {
+    await loadFolderData()
+  }
+}, { immediate: false })
+
+// Watch for route parameter changes
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId && typeof newId === 'string') {
+    // Clear previous data
+    folder.value = null
+    isLoadingFolder.value = true
+    // Load new folder
+    if (authStore.currentUser) {
+      await loadFolderData()
+    }
+  }
+}, { immediate: false })
+
+const loadFolderData = async () => {
+  if (!folderId.value || typeof folderId.value !== 'string') {
+    console.error('Invalid folder ID:', folderId.value)
+    navigateTo('/dashboard/inventory')
+    return
+  }
+
+  isLoadingFolder.value = true
+  try {
+    const fetchedFolder = await inventoryStore.fetchFolder(folderId.value)
+    if (fetchedFolder) {
+      folder.value = fetchedFolder
+      useHead({
+        title: `${folder.value?.name || 'Folder'} - Inventory - Storv`,
+      })
+      // Load items for this folder
+      await loadItems()
+    } else {
+      // Folder not found, redirect back
+      navigateTo('/dashboard/inventory')
+    }
+  } catch (error: any) {
+    console.error('Error loading folder:', error)
+    alert(error.message || 'Failed to load folder')
+    navigateTo('/dashboard/inventory')
+  } finally {
+    isLoadingFolder.value = false
+  }
+}
+
+const loadItems = async () => {
+  if (!folderId.value || typeof folderId.value !== 'string') {
+    return
+  }
+
+  isLoadingItems.value = true
+  try {
+    await inventoryStore.fetchItems(folderId.value)
+    // Refresh folder list to update item counts
+    await inventoryStore.fetchFolders()
+    // Update local folder reference
+    if (folder.value) {
+      const updatedFolder = inventoryStore.getFolderById(folderId.value)
+      if (updatedFolder) {
+        folder.value = updatedFolder
+      }
+    }
+  } catch (error: any) {
+    console.error('Error loading items:', error)
+    alert(error.message || 'Failed to load items')
+  } finally {
+    isLoadingItems.value = false
+  }
+}
 </script>

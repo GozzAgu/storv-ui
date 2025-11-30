@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Page Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Departments</h1>
@@ -233,14 +233,20 @@
       </div>
     </Card>
 
-    <!-- Pagination -->
-    <Pagination
+    <!-- Fixed Pagination -->
+    <div
       v-if="filteredDepartments.length > 0"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total="filteredDepartments.length"
-      @page-change="handlePageChange"
-    />
+      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      style="left: 0;"
+    >
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredDepartments.length"
+        @page-change="handlePageChange"
+      />
+    </div>
 
     <!-- Department Modal -->
     <DepartmentModal
@@ -255,7 +261,7 @@
   <button
     v-if="canManageDepartments"
     @click="openCreateDepartmentModal"
-    class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+    class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
     title="Create new department"
   >
     <PlusIcon class="w-6 h-6" />
@@ -309,6 +315,42 @@ const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
+const sidebarCollapsed = ref(false)
+
+// Load sidebar state from localStorage
+if (import.meta.client) {
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// Watch for sidebar state changes
+if (import.meta.client) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
+}
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')

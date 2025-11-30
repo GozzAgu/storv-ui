@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Page Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Inventory Folders</h1>
@@ -30,9 +30,9 @@
     </Card>
 
     <!-- Folders Grid -->
-    <div v-if="filteredFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
       <div
-        v-for="folder in filteredFolders"
+        v-for="folder in paginatedFolders"
         :key="folder.id"
         class="group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer transition-all duration-200 overflow-hidden"
         @click="navigateToFolder(folder.id)"
@@ -131,11 +131,26 @@
       </div>
     </Card>
 
+    <!-- Fixed Pagination -->
+    <div
+      v-if="filteredFolders.length > 0"
+      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      style="left: 0;"
+    >
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredFolders.length"
+        @page-change="handlePageChange"
+      />
+    </div>
+
     <!-- Floating Action Button -->
     <button
       v-if="filteredFolders.length > 0"
       @click="openCreateFolderModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new folder"
     >
       <PlusIcon class="w-6 h-6" />
@@ -145,21 +160,59 @@
     <Modal
       v-model="showCreateFolderModal"
       :title="editingFolder ? 'Edit Folder' : 'Create New Folder'"
-      size="sm"
+      size="lg"
     >
-      <form @submit.prevent="handleSaveFolder" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Folder Name *
-          </label>
-          <input
-            v-model="folderForm.name"
-            type="text"
-            required
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder="Enter folder name"
-          />
+      <template #header>
+        <div class="flex items-center justify-between w-full">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {{ editingFolder ? 'Edit Folder' : 'Create New Folder' }}
+            </h3>
+            <div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <span>Created By: {{ userStore.userData?.name || authStore.currentUser?.displayName || authStore.currentUser?.email?.split('@')[0] || 'User' }}</span>
+              <span>Date: {{ new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}</span>
+            </div>
+          </div>
         </div>
+      </template>
+      
+      <div class="max-h-[60vh] overflow-y-auto pr-2 -mr-2">
+        <form @submit.prevent="handleSaveFolder" class="space-y-6">
+        <!-- Folder Basic Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Folder Name *
+            </label>
+            <input
+              v-model="folderForm.name"
+              type="text"
+              required
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Enter folder name"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Type *
+            </label>
+            <select
+              v-model="folderForm.type"
+              required
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="">Select type</option>
+              <option value="general">General</option>
+              <option value="electronics">Electronics</option>
+              <option value="clothing">Clothing & Apparel</option>
+              <option value="automotive">Automotive</option>
+              <option value="food">Food & Beverage</option>
+              <option value="office">Office Supplies</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description
@@ -168,10 +221,155 @@
             v-model="folderForm.description"
             rows="3"
             class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
-            placeholder="Enter folder description (optional)"
+            placeholder="Describe the folder's purpose"
           ></textarea>
         </div>
-      </form>
+
+        <!-- Color Selector -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Color
+          </label>
+          <div class="flex items-center gap-3">
+            <input
+              v-model="folderForm.color"
+              type="color"
+              class="w-16 h-12 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+            />
+            <span class="text-sm text-gray-600 dark:text-gray-400">{{ folderForm.color }}</span>
+          </div>
+        </div>
+
+        <!-- Serial Number Management -->
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input
+              v-model="folderForm.hasSerialNumbers"
+              type="checkbox"
+              class="mt-1 w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+            />
+            <div class="flex-1">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Is serial number going to be available for items in this folder?
+              </span>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                When enabled, quantity field will be hidden and automatically set to 1 for each item (each item has a unique serial number). When disabled, quantity field will be visible and editable for bulk items.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Template Editor -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Table Template *
+          </label>
+          <div class="p-4 bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-xl mb-4">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Custom Template
+              </span>
+              <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full">
+                Custom
+              </span>
+            </div>
+            <p class="text-xs text-gray-600 dark:text-gray-400">
+              Create your own custom table structure by adding fields below
+            </p>
+          </div>
+        </div>
+
+        <!-- Template Editor -->
+        <div v-if="selectedTemplate" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Customize Template Fields
+            </h4>
+            <Button
+              variant="outline"
+              size="sm"
+              @click="handleAddField"
+            >
+              + Add Field
+            </Button>
+          </div>
+          
+          <div class="space-y-3 max-h-64 overflow-y-auto pr-2">
+            <div
+              v-for="(field, index) in editableFields"
+              :key="field.id"
+              class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+            >
+              <div class="flex-1 grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Field Name *
+                  </label>
+                  <input
+                    v-model="field.name"
+                    type="text"
+                    required
+                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="fieldName"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Label *
+                  </label>
+                  <input
+                    v-model="field.label"
+                    type="text"
+                    required
+                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Display Name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Field Type *
+                  </label>
+                  <select
+                    v-model="field.type"
+                    required
+                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="date">Date</option>
+                    <option value="select">Select</option>
+                    <option value="boolean">Boolean</option>
+                    <option value="currency">Currency</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 pt-6">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    v-model="field.required"
+                    type="checkbox"
+                    class="w-3 h-3 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                  />
+                  <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
+                </label>
+                <button
+                  type="button"
+                  @click="handleRemoveField(index)"
+                  class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Remove field"
+                >
+                  <TrashIcon class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            
+            <div v-if="editableFields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+              No fields added. Click "Add Field" to get started.
+            </div>
+          </div>
+        </div>
+        </form>
+      </div>
 
       <template #footer>
         <Button variant="outline" @click="handleCancelFolder">Cancel</Button>
@@ -184,7 +382,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, nextTick } from 'vue'
+import { ref, computed, reactive, watch, onMounted } from 'vue'
 import {
   FolderIcon,
   PlusIcon,
@@ -198,6 +396,10 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import Pagination from '~/components/ui/Pagination.vue'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'
 
 definePageMeta({
   layout: 'dashboard'
@@ -207,90 +409,85 @@ useHead({
   title: 'Inventory Folders - Storv',
 })
 
-interface Folder {
-  id: string
-  name: string
-  description: string
-  color: string
-  itemCount: number
-  totalValue: number
-  lowStockCount: number
-  createdAt: string
-}
-
 const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
-const editingFolder = ref<Folder | null>(null)
+const editingFolder = ref<InventoryFolder | null>(null)
+const currentPage = ref(1)
+const itemsPerPage = ref(12)
+const sidebarCollapsed = ref(false)
+
+// Load sidebar state from localStorage
+if (import.meta.client) {
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// Watch for sidebar state changes
+if (import.meta.client) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
+}
+
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const inventoryStore = useInventoryStore()
 
 const folderForm = reactive({
   name: '',
-  description: ''
+  description: '',
+  type: '',
+  color: '#3B82F6',
+  hasSerialNumbers: false,
 })
 
-// Sample folders data
-const folders = ref<Folder[]>([
-  {
-    id: '1',
-    name: 'Electronics',
-    description: 'Electronic items and gadgets',
-    color: 'blue',
-    itemCount: 45,
-    totalValue: 12500,
-    lowStockCount: 3,
-    createdAt: '2024-01-15',
-  },
-  {
-    id: '2',
-    name: 'Clothing',
-    description: 'Apparel and fashion items',
-    color: 'pink',
-    itemCount: 120,
-    totalValue: 8500,
-    lowStockCount: 8,
-    createdAt: '2024-01-10',
-  },
-  {
-    id: '3',
-    name: 'Food & Beverages',
-    description: 'Food items and drinks',
-    color: 'orange',
-    itemCount: 89,
-    totalValue: 3200,
-    lowStockCount: 12,
-    createdAt: '2024-01-05',
-  },
-  {
-    id: '4',
-    name: 'Office Supplies',
-    description: 'Stationery and office equipment',
-    color: 'purple',
-    itemCount: 67,
-    totalValue: 2100,
-    lowStockCount: 0,
-    createdAt: '2024-01-20',
-  },
-  {
-    id: '5',
-    name: 'Home & Garden',
-    description: 'Home improvement and garden items',
-    color: 'green',
-    itemCount: 34,
-    totalValue: 5600,
-    lowStockCount: 5,
-    createdAt: '2024-01-12',
-  },
-  {
-    id: '6',
-    name: 'Toys & Games',
-    description: 'Children toys and games',
-    color: 'yellow',
-    itemCount: 56,
-    totalValue: 3400,
-    lowStockCount: 2,
-    createdAt: '2024-01-18',
-  },
-])
+const editableFields = ref<TemplateField[]>([])
+
+// Custom template only
+const selectedTemplateId = ref<string>('custom')
+
+const selectedTemplate = computed(() => {
+  return {
+    id: 'custom',
+    name: 'Custom Template',
+    description: 'Create your own custom table structure',
+    fields: [],
+  }
+})
+
+// Initialize with empty fields for custom template
+watch(() => showCreateFolderModal.value, (isOpen) => {
+  if (isOpen && !editingFolder.value) {
+    // Reset to empty fields for new folder
+    editableFields.value = []
+    selectedTemplateId.value = 'custom'
+  }
+})
+
+const folders = computed(() => inventoryStore.folders)
 
 const filteredFolders = computed(() => {
   let result = [...folders.value]
@@ -313,7 +510,9 @@ const filteredFolders = computed(() => {
       case 'items':
         return b.itemCount - a.itemCount
       case 'date':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+        return dateB.getTime() - dateA.getTime()
       default:
         return 0
     }
@@ -321,6 +520,17 @@ const filteredFolders = computed(() => {
 
   return result
 })
+
+const paginatedFolders = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredFolders.value.slice(start, end)
+})
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const getFolderColor = (color: string) => {
   const colorMap: Record<string, string> = {
@@ -365,51 +575,89 @@ const openCreateFolderModal = () => {
   editingFolder.value = null
   folderForm.name = ''
   folderForm.description = ''
+  folderForm.type = ''
+  folderForm.color = '#3B82F6'
+  folderForm.hasSerialNumbers = false
+  editableFields.value = []
   showCreateFolderModal.value = true
 }
 
-const handleEditFolder = (folder: Folder) => {
+const handleEditFolder = (folder: InventoryFolder) => {
   editingFolder.value = folder
   folderForm.name = folder.name
   folderForm.description = folder.description || ''
+  folderForm.type = folder.type || ''
+  folderForm.color = folder.color || '#3B82F6'
+  folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
+  if (folder.template) {
+    editableFields.value = folder.template.fields.map(f => ({ ...f }))
+  } else {
+    editableFields.value = []
+  }
   showCreateFolderModal.value = true
 }
 
-const handleDeleteFolder = (folder: Folder) => {
+const handleDeleteFolder = async (folder: InventoryFolder) => {
   if (confirm(`Are you sure you want to delete "${folder.name}"? This will not delete the items in the folder.`)) {
-    const index = folders.value.findIndex(f => f.id === folder.id)
-    if (index > -1) {
-      folders.value.splice(index, 1)
+    try {
+      await inventoryStore.deleteFolder(folder.id)
+    } catch (error: any) {
+      alert(error.message || 'Failed to delete folder')
     }
   }
 }
 
-const handleSaveFolder = () => {
+const handleSaveFolder = async () => {
   if (!folderForm.name.trim()) {
     alert('Please enter a folder name')
     return
   }
 
-  if (editingFolder.value) {
-    // Update existing folder
-    editingFolder.value.name = folderForm.name.trim()
-    editingFolder.value.description = folderForm.description.trim()
-    handleCancelFolder()
-  } else {
-    // Create new folder with user-provided name and description
-    const createdAt = new Date().toISOString().split('T')[0] || new Date().toISOString()
-    const newFolder: Folder = {
-      id: Date.now().toString(),
-      name: folderForm.name.trim(),
-      description: folderForm.description.trim(),
-      color: 'blue', // Default color
-      itemCount: 0,
-      totalValue: 0,
-      lowStockCount: 0,
-      createdAt: createdAt.substring(0, 10),
+  if (!folderForm.type) {
+    alert('Please select a folder type')
+    return
+  }
+
+  // Template is always custom, no need to check
+
+  if (editableFields.value.length === 0) {
+    alert('Please add at least one field to the template')
+    return
+  }
+
+  const template: Template = {
+    id: 'custom',
+    name: 'Custom Template',
+    description: 'Custom table structure',
+    fields: editableFields.value.map(f => ({ ...f })),
+  }
+
+  try {
+    if (editingFolder.value) {
+      // Update existing folder
+      await inventoryStore.updateFolder(editingFolder.value.id, {
+        name: folderForm.name.trim(),
+        description: folderForm.description.trim(),
+        type: folderForm.type,
+        color: folderForm.color,
+        hasSerialNumbers: folderForm.hasSerialNumbers,
+        template: template,
+      })
+      handleCancelFolder()
+    } else {
+      // Create new folder
+      await inventoryStore.createFolder({
+        name: folderForm.name.trim(),
+        description: folderForm.description.trim(),
+        type: folderForm.type,
+        color: folderForm.color,
+        hasSerialNumbers: folderForm.hasSerialNumbers,
+        template: template,
+      })
+      handleCancelFolder()
     }
-    folders.value.push(newFolder)
-    handleCancelFolder()
+  } catch (error: any) {
+    alert(error.message || 'Failed to save folder')
   }
 }
 
@@ -418,6 +666,50 @@ const handleCancelFolder = () => {
   editingFolder.value = null
   folderForm.name = ''
   folderForm.description = ''
+  folderForm.type = ''
+  folderForm.color = '#3B82F6'
+  folderForm.hasSerialNumbers = false
+  editableFields.value = []
 }
+
+const handleAddField = () => {
+  const newField: TemplateField = {
+    id: `field-${Date.now()}-${Math.random()}`,
+    name: '',
+    label: '',
+    type: 'text',
+    required: false,
+  }
+  editableFields.value.push(newField)
+}
+
+const handleRemoveField = (index: number) => {
+  editableFields.value.splice(index, 1)
+}
+
+// Fetch folders on mount
+onMounted(async () => {
+  if (authStore.currentUser) {
+    // Wait for auth to be ready
+    if (authStore.loading) {
+      const checkAuth = setInterval(() => {
+        if (!authStore.loading) {
+          clearInterval(checkAuth)
+          inventoryStore.fetchFolders().catch(console.error)
+        }
+      }, 100)
+      setTimeout(() => clearInterval(checkAuth), 5000)
+    } else {
+      await inventoryStore.fetchFolders().catch(console.error)
+    }
+  }
+})
+
+// Watch for auth state changes
+watch(() => authStore.currentUser, async (user) => {
+  if (user && inventoryStore.folders.length === 0) {
+    await inventoryStore.fetchFolders().catch(console.error)
+  }
+}, { immediate: false })
 </script>
 

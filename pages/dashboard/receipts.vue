@@ -1,7 +1,7 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Page Header -->
-    <div>
+      <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Receipts</h1>
       <p class="mt-1 text-gray-600 dark:text-gray-400">View and manage all sales receipts</p>
     </div>
@@ -111,7 +111,7 @@
 
     <!-- Receipts Table -->
     <Card padding="none">
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -212,7 +212,7 @@
                     title="Print"
                   >
                     <PrinterIcon class="w-5 h-5" />
-                  </button>
+          </button>
                   <button
                     v-if="receipt.status === 'completed'"
                     @click="handleRefundReceipt(receipt)"
@@ -220,8 +220,8 @@
                     title="Refund"
                   >
                     <ArrowPathIcon class="w-5 h-5" />
-                  </button>
-                </div>
+          </button>
+        </div>
               </td>
             </tr>
             <!-- Empty State -->
@@ -251,25 +251,38 @@
           </tbody>
         </table>
       </div>
-      <!-- Pagination -->
+    </Card>
+
+    <!-- Fixed Pagination -->
+    <div
+      v-if="filteredReceipts.length > 0"
+      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      style="left: 0;"
+    >
       <Pagination
-        v-if="filteredReceipts.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="filteredReceipts.length"
         @page-change="handlePageChange"
       />
-    </Card>
+    </div>
 
     <!-- Floating Action Button -->
     <button
       v-if="filteredReceipts.length > 0"
       @click="openCreateReceiptModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
     >
       <PlusIcon class="w-6 h-6" />
     </button>
+
+    <!-- Create Receipt Modal -->
+    <CreateReceiptModal
+      v-model="showCreateReceiptModal"
+      @receipt-created="handleReceiptCreated"
+    />
   </div>
 </template>
 
@@ -289,6 +302,7 @@ import {
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 
 definePageMeta({
   layout: 'dashboard'
@@ -351,6 +365,42 @@ const statusFilter = ref('all')
 const dateFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+const sidebarCollapsed = ref(false)
+
+// Load sidebar state from localStorage
+if (import.meta.client) {
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// Watch for sidebar state changes
+if (import.meta.client) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
+}
 
 const totalSales = computed(() => {
   return receipts.value
@@ -475,9 +525,15 @@ const handlePageChange = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const showCreateReceiptModal = ref(false)
+
 const openCreateReceiptModal = () => {
-  // TODO: Implement create receipt modal
-  alert('Create receipt functionality coming soon!')
+  showCreateReceiptModal.value = true
+}
+
+const handleReceiptCreated = (receipt: Receipt) => {
+  receipts.value.unshift(receipt)
+  showCreateReceiptModal.value = false
 }
 
 const handleViewReceipt = (receipt: Receipt) => {

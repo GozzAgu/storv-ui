@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Page Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Returns</h1>
@@ -113,7 +113,7 @@
 
     <!-- Returns Table -->
     <Card padding="none">
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -269,21 +269,26 @@
           </tbody>
         </table>
       </div>
-      <!-- Pagination -->
+    </Card>
+
+    <!-- Fixed Pagination -->
+    <div
+      v-if="filteredReturns.length > 0"
+      class="fixed bottom-0 left-0 lg:left-20 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30"
+    >
       <Pagination
-        v-if="filteredReturns.length > 0"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="filteredReturns.length"
         @page-change="handlePageChange"
       />
-    </Card>
+    </div>
 
     <!-- Floating Action Button -->
     <button
       v-if="filteredReturns.length > 0"
       @click="openCreateReturnModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new return"
     >
       <PlusIcon class="w-6 h-6" />

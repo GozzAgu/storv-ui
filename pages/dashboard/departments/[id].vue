@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Header with Back Button -->
     <div class="flex items-center gap-4">
       <button
@@ -14,7 +14,7 @@
           {{ department?.name || 'Loading...' }}
         </h1>
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Department Management & Leave Requests
+          Department Management
         </p>
       </div>
     </div>
@@ -44,7 +44,7 @@
     </Card>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <Card padding="md" extra-class="border-l-4 border-l-purple-500">
         <div class="flex items-center justify-between">
           <div>
@@ -58,48 +58,6 @@
           </div>
         </div>
       </Card>
-
-      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Leaves</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ pendingLeavesCount }}
-            </p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <ClockIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="md" extra-class="border-l-4 border-l-green-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Approved This Month</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ approvedThisMonth }}
-            </p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <CheckCircleIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="md" extra-class="border-l-4 border-l-orange-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">On Leave Now</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ onLeaveNow }}
-            </p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <CalendarDaysIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
-          </div>
-        </div>
-      </Card>
     </div>
 
     <!-- Staff Management Section -->
@@ -109,13 +67,6 @@
           <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Staff Members</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage staff in this department</p>
         </div>
-        <Button
-          v-if="canManageDepartments"
-          :icon="PlusIcon"
-          @click="openCreateStaffModal"
-        >
-          Add Staff
-        </Button>
       </div>
 
       <!-- Staff Table -->
@@ -127,17 +78,9 @@
       <div v-else-if="staff.length === 0" class="text-center py-8">
         <UsersIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No staff members in this department yet</p>
-        <Button
-          v-if="canManageDepartments"
-          variant="primary"
-          :icon="PlusIcon"
-          @click="openCreateStaffModal"
-        >
-          Add First Staff Member
-        </Button>
       </div>
 
-      <div v-else class="overflow-x-auto">
+      <div v-else class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -156,7 +99,7 @@
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageDepartments" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Actions
               </th>
             </tr>
@@ -222,6 +165,7 @@
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
+                    v-if="canManageDepartments"
                     @click="handleEditStaff(member)"
                     class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="Edit"
@@ -242,207 +186,32 @@
           </tbody>
         </table>
       </div>
+    </Card>
 
-      <!-- Staff Pagination -->
+    <!-- Fixed Staff Pagination -->
+    <div
+      v-if="staff.length > 0"
+      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      style="left: 0;"
+    >
       <Pagination
-        v-if="staff.length > 0"
         :current-page="staffCurrentPage"
         :items-per-page="staffItemsPerPage"
         :total="staff.length"
         @page-change="handleStaffPageChange"
-        class="mt-4"
       />
-    </Card>
+    </div>
 
-    <!-- Filters -->
-    <Card padding="md">
-      <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by staff name, leave type..."
-            class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-          />
-        </div>
-        <select
-          v-model="statusFilter"
-          class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all min-w-[160px]"
-        >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <select
-          v-model="typeFilter"
-          class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all min-w-[160px]"
-        >
-          <option value="all">All Types</option>
-          <option value="vacation">Vacation</option>
-          <option value="sick">Sick Leave</option>
-          <option value="personal">Personal</option>
-          <option value="other">Other</option>
-        </select>
-        <Button
-          variant="outline"
-          @click="resetFilters"
-          :icon="ArrowPathIcon"
-        >
-          Reset
-        </Button>
-      </div>
-    </Card>
-
-    <!-- Leave Requests Table -->
-    <Card padding="none">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
-            <tr>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Staff Member
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Leave Type
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Start Date
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                End Date
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Days
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Reason
-              </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Status
-              </th>
-              <th v-if="canManageDepartments" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="leave in paginatedLeaves"
-              :key="leave.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-            >
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ leave.staffName.charAt(0).toUpperCase() }}
-                  </div>
-                  <div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {{ leave.staffName }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                      {{ leave.staffEmail }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm text-gray-600 dark:text-gray-300 capitalize">
-                  {{ leave.type }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                  {{ formatDate(leave.startDate) }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                  {{ formatDate(leave.endDate) }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {{ leave.days }} days
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate" :title="leave.reason">
-                  {{ leave.reason }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  :class="[
-                    'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
-                    leave.status === 'approved'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                      : leave.status === 'pending'
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                  ]"
-                >
-                  {{ leave.status.charAt(0).toUpperCase() + leave.status.slice(1) }}
-                </span>
-              </td>
-              <td v-if="canManageDepartments" class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    v-if="leave.status === 'pending'"
-                    @click="handleApproveLeave(leave)"
-                    class="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                    title="Approve"
-                  >
-                    <CheckCircleIcon class="w-5 h-5" />
-                  </button>
-                  <button
-                    v-if="leave.status === 'pending'"
-                    @click="handleRejectLeave(leave)"
-                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Reject"
-                  >
-                    <XMarkIcon class="w-5 h-5" />
-                  </button>
-                  <button
-                    @click="handleViewLeave(leave)"
-                    class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-                    title="View Details"
-                  >
-                    <EyeIcon class="w-5 h-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <!-- Empty State -->
-            <tr v-if="filteredLeaves.length === 0">
-              <td colspan="8" class="px-6 py-12">
-                <div class="text-center">
-                  <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                    <CalendarDaysIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    {{ searchQuery || statusFilter !== 'all' || typeFilter !== 'all' ? 'No leave requests found' : 'No leave requests yet' }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ searchQuery || statusFilter !== 'all' || typeFilter !== 'all' ? 'Try adjusting your filters' : 'Leave requests from staff will appear here' }}
-                  </p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Pagination -->
-      <Pagination
-        v-if="filteredLeaves.length > 0"
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredLeaves.length"
-        @page-change="handlePageChange"
-      />
-    </Card>
+    <!-- Floating Action Button -->
+    <button
+      v-if="canManageDepartments && !isLoadingStaff"
+      @click="openCreateStaffModal"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      title="Add new staff"
+    >
+      <PlusIcon class="w-6 h-6" />
+    </button>
 
     <!-- Staff Modal -->
     <StaffModal
@@ -453,6 +222,7 @@
       @success="handleStaffSuccess"
       @error="handleStaffError"
     />
+
   </div>
 </template>
 
@@ -460,13 +230,6 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   ArrowLeftIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  CalendarDaysIcon,
-  MagnifyingGlassIcon,
-  ArrowPathIcon,
-  XMarkIcon,
-  EyeIcon,
   PlusIcon,
   UsersIcon,
   PencilIcon,
@@ -493,29 +256,10 @@ definePageMeta({
 const route = useRoute()
 const departmentId = computed(() => route.params.id as string)
 
-interface LeaveRequest {
-  id: string
-  staffName: string
-  staffEmail: string
-  type: 'vacation' | 'sick' | 'personal' | 'other'
-  startDate: string
-  endDate: string
-  days: number
-  reason: string
-  status: 'pending' | 'approved' | 'rejected'
-  departmentId: string
-}
-
 const department = ref<Department | null>(null)
 const staff = ref<Staff[]>([])
-const leaves = ref<LeaveRequest[]>([])
 const isLoadingDepartment = ref(true)
 const isLoadingStaff = ref(true)
-const searchQuery = ref('')
-const statusFilter = ref('all')
-const typeFilter = ref('all')
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
 
 // Staff pagination
 const staffCurrentPage = ref(1)
@@ -529,10 +273,56 @@ const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const sidebarCollapsed = ref(false)
+
+// Load sidebar state from localStorage
+if (import.meta.client) {
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// Watch for sidebar state changes
+if (import.meta.client) {
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
+}
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
-const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
+// Check if current user is a manager in the department (even if they're a super admin)
+const isManager = computed(() => {
+  if (!department.value || !currentStaffMember.value) return false
+  return currentStaffMember.value.role === 'manager' && 
+         currentStaffMember.value.departmentId === department.value.id
+})
+// Only super admins who are not managers can manage (edit/delete staff)
+const canManageDepartments = computed(() => !isStaff.value && !isManager.value)
+
+// Current staff member (for staff users and to check manager status)
+const currentStaffMember = ref<Staff | null>(null)
 
 const paginatedStaff = computed(() => {
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
@@ -540,105 +330,6 @@ const paginatedStaff = computed(() => {
   return staff.value.slice(start, end)
 })
 
-const filteredLeaves = computed(() => {
-  let result = leaves.value.filter(l => l.departmentId === departmentId.value)
-
-  // Search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(l =>
-      l.staffName.toLowerCase().includes(query) ||
-      l.staffEmail.toLowerCase().includes(query) ||
-      l.type.toLowerCase().includes(query) ||
-      l.reason.toLowerCase().includes(query)
-    )
-  }
-
-  // Status filter
-  if (statusFilter.value !== 'all') {
-    result = result.filter(l => l.status === statusFilter.value)
-  }
-
-  // Type filter
-  if (typeFilter.value !== 'all') {
-    result = result.filter(l => l.type === typeFilter.value)
-  }
-
-  // Sort by date (newest first)
-  result.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
-
-  return result
-})
-
-const paginatedLeaves = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredLeaves.value.slice(start, end)
-})
-
-const pendingLeavesCount = computed(() => {
-  return leaves.value.filter(l => l.departmentId === departmentId.value && l.status === 'pending').length
-})
-
-const approvedThisMonth = computed(() => {
-  const now = new Date()
-  return leaves.value.filter(l => {
-    if (l.departmentId !== departmentId.value || l.status !== 'approved') return false
-    const leaveDate = new Date(l.startDate)
-    return leaveDate.getMonth() === now.getMonth() && leaveDate.getFullYear() === now.getFullYear()
-  }).length
-})
-
-const onLeaveNow = computed(() => {
-  const today = new Date().toISOString().split('T')[0]!
-  return leaves.value.filter(l => {
-    if (l.departmentId !== departmentId.value || l.status !== 'approved') return false
-    return l.startDate <= today && l.endDate >= today
-  }).length
-})
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
-const resetFilters = () => {
-  searchQuery.value = ''
-  statusFilter.value = 'all'
-  typeFilter.value = 'all'
-  currentPage.value = 1
-}
-
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
-const handleApproveLeave = (leave: LeaveRequest) => {
-  if (confirm(`Approve leave request for ${leave.staffName}?`)) {
-    const index = leaves.value.findIndex(l => l.id === leave.id)
-    if (index > -1 && leaves.value[index]) {
-      leaves.value[index].status = 'approved'
-    }
-  }
-}
-
-const handleRejectLeave = (leave: LeaveRequest) => {
-  if (confirm(`Reject leave request for ${leave.staffName}?`)) {
-    const index = leaves.value.findIndex(l => l.id === leave.id)
-    if (index > -1 && leaves.value[index]) {
-      leaves.value[index].status = 'rejected'
-    }
-  }
-}
-
-const handleViewLeave = (leave: LeaveRequest) => {
-  // TODO: Implement view leave details modal
-  alert(`Viewing leave details for ${leave.staffName}`)
-}
 
 // Load department and staff data
 const loadDepartmentData = async () => {
@@ -662,7 +353,7 @@ const loadDepartmentData = async () => {
     if (dept) {
       department.value = dept
       useHead({
-        title: `${dept.name || 'Department'} - Leave Management - Storv`,
+        title: `${dept.name || 'Department'} - Department Management - Storv`,
       })
     } else {
       // Department not found, redirect
@@ -674,6 +365,22 @@ const loadDepartmentData = async () => {
     await staffStore.fetchStaffByDepartment(departmentId.value)
     // Get staff from store getter (it's a function that takes departmentId)
     staff.value = staffStore.getStaffByDepartment(departmentId.value)
+
+    // Get current staff member data (for staff users and to check if user is a manager)
+    // This helps determine if a super admin is also a manager in this department
+    try {
+      const staffMember = await staffStore.fetchCurrentStaffMember()
+      if (staffMember && staffMember.departmentId === departmentId.value) {
+        currentStaffMember.value = staffMember
+      }
+    } catch (error) {
+      // Not a staff member in this department, that's okay
+      if (userStore.userData?.role === 'staff') {
+        // If they're a staff user, they should be in a department
+        console.warn('Staff user not found in department:', error)
+      }
+    }
+
   } catch (error: any) {
     console.error('Error loading department data:', error.message || error)
     alert(error.message || 'Failed to load department data')
@@ -683,6 +390,7 @@ const loadDepartmentData = async () => {
     isLoadingStaff.value = false
   }
 }
+
 
 // Staff management functions
 const openCreateStaffModal = () => {
@@ -728,7 +436,6 @@ watch(() => route.params.id, async (newId, oldId) => {
     // Clear previous data
     department.value = null
     staff.value = []
-    leaves.value = []
     isLoadingDepartment.value = true
     isLoadingStaff.value = true
     // Load new data
@@ -745,10 +452,6 @@ onMounted(async () => {
   
   // Load data immediately
   await loadDepartmentData()
-  
-  // Load leave requests (for now, we'll keep sample data until leave requests are integrated with Firestore)
-  // TODO: Integrate leave requests with Firestore
-  leaves.value = []
 })
 </script>
 

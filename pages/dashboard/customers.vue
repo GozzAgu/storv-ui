@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-24">
     <!-- Page Header -->
     <div>
       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Customers</h1>
@@ -201,20 +201,24 @@
       </div>
     </Card>
 
-    <!-- Pagination -->
-    <Pagination
+    <!-- Fixed Pagination -->
+    <div
       v-if="filteredCustomers.length > 0"
-      :current-page="currentPage"
-      :items-per-page="itemsPerPage"
-      :total="filteredCustomers.length"
-      @page-change="handlePageChange"
-    />
+      class="fixed bottom-0 left-0 lg:left-20 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30"
+    >
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredCustomers.length"
+        @page-change="handlePageChange"
+      />
+    </div>
 
     <!-- Floating Action Button -->
     <button
       v-if="filteredCustomers.length > 0"
       @click="openCreateCustomerModal"
-      class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new customer"
     >
       <PlusIcon class="w-6 h-6" />
