@@ -132,6 +132,25 @@
               ⚠ {{ folder.lowStockCount }} low stock
             </p>
           </div>
+
+          <!-- Department Access Info -->
+          <div
+            v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
+            class="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+          >
+            <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+              Accessible to:
+            </p>
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="deptId in folder.allowedDepartments"
+                :key="deptId"
+                class="inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
+              >
+                {{ getDepartmentName(deptId) }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -149,7 +168,7 @@
           {{ searchQuery ? 'Try adjusting your search criteria' : 'Create your first folder to organize your inventory' }}
         </p>
         <Button
-          v-if="!searchQuery && canManage"
+          v-if="!searchQuery && canCreateInventoryFolders"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateFolderModal"
@@ -175,7 +194,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="filteredFolders.length > 0 && canManage"
+      v-if="filteredFolders.length > 0 && canCreateInventoryFolders"
       @click="openCreateFolderModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new folder"
@@ -286,6 +305,40 @@
           </label>
         </div>
 
+        <!-- Department Access Control -->
+        <div v-if="canCreateInventoryFolders" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Department Access
+          </label>
+          <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+            Select which departments can access this folder. Leave empty to allow all departments.
+          </p>
+          <div v-if="departmentsStore.loading" class="text-sm text-gray-500 dark:text-gray-400">
+            Loading departments...
+          </div>
+          <div v-else-if="departmentsStore.departments.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+            No departments available. Create departments first.
+          </div>
+          <div v-else class="space-y-2 max-h-48 overflow-y-auto">
+            <label
+              v-for="dept in departmentsStore.departments"
+              :key="dept.id"
+              class="flex items-center gap-2 p-2 hover:bg-white dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
+            >
+              <input
+                :value="dept.id"
+                v-model="folderForm.allowedDepartments"
+                type="checkbox"
+                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+              />
+              <span class="text-sm text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
+              <span v-if="dept.description" class="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                {{ dept.description }}
+              </span>
+            </label>
+          </div>
+        </div>
+
         <!-- Template Editor -->
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -381,7 +434,7 @@
                 </label>
                 <!-- Default fields cannot be removed -->
                 <button
-                  v-if="!['name', 'stock', 'price'].includes(field.name)"
+                  v-if="!['name', 'price'].includes(field.name)"
                   type="button"
                   @click="handleRemoveField(index)"
                   class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -436,6 +489,7 @@ import Pagination from '~/components/ui/Pagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'
+import { useDepartmentsStore } from '~/stores/departments'
 import { usePermissions } from '~/composables/usePermissions'
 
 definePageMeta({
@@ -492,7 +546,8 @@ if (import.meta.client) {
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
-const { canManage } = usePermissions()
+const departmentsStore = useDepartmentsStore()
+const { canManage, canCreateInventoryFolders } = usePermissions()
 
 const folderForm = reactive({
   name: '',
@@ -500,6 +555,7 @@ const folderForm = reactive({
   type: '',
   color: '#3B82F6',
   hasSerialNumbers: false,
+  allowedDepartments: [] as string[], // Array of department IDs
 })
 
 // Default fields that should always be included
@@ -511,13 +567,6 @@ const getDefaultFields = (): TemplateField[] => {
       label: 'Item',
       type: 'text',
       required: true,
-    },
-    {
-      id: `field-stock-${Date.now()}`,
-      name: 'stock',
-      label: 'Stock',
-      type: 'number',
-      required: false,
     },
     {
       id: `field-price-${Date.now()}`,
@@ -654,6 +703,11 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
+const getDepartmentName = (deptId: string) => {
+  const dept = departmentsStore.getDepartmentById(deptId)
+  return dept?.name || deptId
+}
+
 const navigateToFolder = (folderId: string) => {
   navigateTo(`/dashboard/inventory/${folderId}`)
 }
@@ -676,6 +730,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   folderForm.type = folder.type || ''
   folderForm.color = folder.color || '#3B82F6'
   folderForm.hasSerialNumbers = folder.hasSerialNumbers || false
+  folderForm.allowedDepartments = folder.allowedDepartments ? [...folder.allowedDepartments] : []
   if (folder.template) {
     editableFields.value = folder.template.fields.map(f => ({ ...f }))
   } else {
@@ -683,7 +738,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
   }
   
   // Ensure default fields are always included when editing
-  const defaultFieldNames = ['name', 'stock', 'price']
+  const defaultFieldNames = ['name', 'price']
   const existingFieldNames = editableFields.value.map(f => f.name)
   const missingDefaults = defaultFieldNames.filter(name => !existingFieldNames.includes(name))
   
@@ -747,7 +802,7 @@ const handleSaveFolder = async () => {
   // Template is always custom, no need to check
 
   // Ensure default fields are always included
-  const defaultFieldNames = ['name', 'stock', 'price']
+  const defaultFieldNames = ['name', 'price']
   const existingFieldNames = editableFields.value.map(f => f.name)
   const missingDefaults = defaultFieldNames.filter(name => !existingFieldNames.includes(name))
   
@@ -784,6 +839,9 @@ const handleSaveFolder = async () => {
   }
 
   try {
+    // Prepare allowedDepartments - use empty array if none selected (accessible to all)
+    const allowedDepartments = folderForm.allowedDepartments.length > 0 ? folderForm.allowedDepartments : undefined
+
     if (editingFolder.value) {
       // Update existing folder
       await inventoryStore.updateFolder(editingFolder.value.id, {
@@ -793,6 +851,7 @@ const handleSaveFolder = async () => {
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
         template: template,
+        allowedDepartments: allowedDepartments,
       })
       handleCancelFolder()
     } else {
@@ -804,6 +863,7 @@ const handleSaveFolder = async () => {
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
         template: template,
+        allowedDepartments: allowedDepartments,
       })
       handleCancelFolder()
     }
@@ -820,6 +880,7 @@ const handleCancelFolder = () => {
   folderForm.type = ''
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
+  folderForm.allowedDepartments = []
   editableFields.value = getDefaultFields()
 }
 
@@ -837,7 +898,7 @@ const handleAddField = () => {
 const handleRemoveField = (index: number) => {
   const field = editableFields.value[index]
   // Prevent removal of default fields
-  if (field && ['name', 'stock', 'price'].includes(field.name)) {
+  if (field && ['name', 'price'].includes(field.name)) {
     return
   }
   editableFields.value.splice(index, 1)
@@ -884,6 +945,15 @@ onMounted(async () => {
         console.log('[InventoryPage] User data fetched:', userData ? (userData as any).role : 'unknown')
       } else {
         const userData = userStore.userData
+      
+      // Load departments if user can manage (needed for department access UI)
+      if (canManage) {
+        try {
+          await departmentsStore.fetchDepartments()
+        } catch (error: any) {
+          console.warn('[InventoryPage] Error fetching departments:', error.message || error)
+        }
+      }
         console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
       }
       

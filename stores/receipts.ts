@@ -132,7 +132,33 @@ export const useReceiptsStore = defineStore('receipts', {
         } catch (orderByError: any) {
           // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            console.warn('[ReceiptsStore] orderBy failed, retrying without orderBy:', orderByError.message)
+            // Check if warning was already shown for receipts
+            // Handle case where other stores set it as boolean
+            let warned = typeof window !== 'undefined' ? (window as any).__firestoreIndexWarned : null
+            
+            // Convert to object if it's a boolean (from other stores)
+            if (warned && typeof warned !== 'object') {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            // Initialize as object if it doesn't exist
+            if (!warned) {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            // Only warn once
+            if (!warned.receipts) {
+              const indexUrlMatch = orderByError.message?.match(/https:\/\/[^\s]+/)
+              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
+              console.warn('[ReceiptsStore] orderBy failed, retrying without orderBy. This is expected if indexes are not yet created.')
+              if (indexUrl) {
+                console.info('[ReceiptsStore] Create the index here:', indexUrl)
+              }
+              warned.receipts = true
+            }
+            
             const q = query(receiptsRef, where('createdBy', '==', userId))
             querySnapshot = await getDocs(q)
           } else {
@@ -259,13 +285,15 @@ export const useReceiptsStore = defineStore('receipts', {
         const newReceiptRef = doc(receiptsRef)
 
         const now = new Date()
+        
+        // Build receipt object - only include actualCreator if it's different from createdBy
         const newReceipt: Omit<Receipt, 'id'> = {
           ...receiptData,
           date: receiptData.date || now,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           createdBy: createdByUid,
-          actualCreator: actualCreatorUid !== createdByUid ? actualCreatorUid : undefined, // Only store if different from createdBy
+          ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }), // Only include if different
         }
 
         await setDoc(newReceiptRef, newReceipt)
@@ -278,7 +306,7 @@ export const useReceiptsStore = defineStore('receipts', {
           createdAt: now,
           updatedAt: now,
           createdBy: createdByUid,
-          actualCreator: actualCreatorUid !== createdByUid ? actualCreatorUid : undefined,
+          ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }), // Only include if different
         }
 
         this.receipts.unshift(receiptForState)

@@ -43,11 +43,42 @@
             </div>
           </div>
         </div>
+        
+        <!-- Import/Export Actions -->
+        <div v-if="!isLoadingFolder && canManageInventoryItems" class="flex items-center gap-2">
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept=".xlsx,.xls"
+            class="hidden"
+            @change="handleFileImport"
+          />
+          <button
+            @click="handleExportToExcel"
+            :disabled="isExporting || items.length === 0"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
+            title="Export to Excel"
+          >
+            <ArrowDownTrayIcon v-if="!isExporting" class="w-5 h-5" />
+            <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span class="hidden sm:inline">{{ isExporting ? 'Exporting...' : 'Export' }}</span>
+          </button>
+          <button
+            @click="() => fileInputRef?.click()"
+            :disabled="isImporting"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
+            title="Import from Excel"
+          >
+            <ArrowUpTrayIcon v-if="!isImporting" class="w-5 h-5" />
+            <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span class="hidden sm:inline">{{ isImporting ? 'Importing...' : 'Import' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Enhanced Stats Cards - Hidden on large screens -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
+    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -78,35 +109,6 @@ ${{ formatCurrency(totalInventoryValue) }}
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-orange-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Low Stock</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ folder?.lowStockCount || 0 }}
-            </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Need restocking</p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <ExclamationTriangleIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="md" extra-class="border-l-4 border-l-purple-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">In Stock</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {{ (folder?.itemCount || 0) - (folder?.lowStockCount || 0) }}
-            </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Items available</p>
-          </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <CheckCircleIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
-          </div>
-        </div>
-      </Card>
     </div>
 
     <!-- Loading State -->
@@ -130,20 +132,10 @@ ${{ formatCurrency(totalInventoryValue) }}
           />
         </div>
         <select
-          v-model="stockFilter"
-          class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all min-w-[160px]"
-        >
-          <option value="all">All Status</option>
-          <option value="in-stock">In Stock</option>
-          <option value="low-stock">Low Stock</option>
-          <option value="out-of-stock">Out of Stock</option>
-        </select>
-        <select
           v-model="sortBy"
           class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all min-w-[160px]"
         >
           <option value="name">Sort by Name</option>
-          <option value="stock">Sort by Stock</option>
           <option value="price">Sort by Price</option>
           <option value="sku">Sort by SKU</option>
         </select>
@@ -174,16 +166,6 @@ ${{ formatCurrency(totalInventoryValue) }}
               <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalInventoryValue) }}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <ExclamationTriangleIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Low Stock:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.lowStockCount || 0 }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <CheckCircleIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">In Stock:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ (folder?.itemCount || 0) - (folder?.lowStockCount || 0) }}</span>
-            </div>
           </div>
           <!-- Compact Filters -->
           <div class="flex items-center gap-3">
@@ -197,20 +179,10 @@ ${{ formatCurrency(totalInventoryValue) }}
               />
             </div>
             <select
-              v-model="stockFilter"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="all">All Status</option>
-              <option value="in-stock">In Stock</option>
-              <option value="low-stock">Low Stock</option>
-              <option value="out-of-stock">Out of Stock</option>
-            </select>
-            <select
               v-model="sortBy"
               class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="name">Sort by Name</option>
-              <option value="stock">Sort by Stock</option>
               <option value="price">Sort by Price</option>
               <option value="sku">Sort by SKU</option>
             </select>
@@ -252,9 +224,9 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </template>
                 </div>
               </th>
-              <th v-if="canManage" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Actions
-              </th>
+              <th v-if="canManageInventoryItems" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                    Actions
+                  </th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -320,7 +292,7 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </div>
                 </div>
               </td>
-              <td v-if="canManage" class="px-6 py-4 whitespace-nowrap text-right">
+                  <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
                     @click="handleEditItem(item)"
@@ -347,13 +319,13 @@ ${{ formatCurrency(totalInventoryValue) }}
                     <CubeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
                   </div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    {{ searchQuery || stockFilter !== 'all' ? 'No items found' : 'No items in this folder' }}
+                    {{ searchQuery ? 'No items found' : 'No items in this folder' }}
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    {{ searchQuery || stockFilter !== 'all' ? 'Try adjusting your filters' : 'Add items to get started' }}
+                    {{ searchQuery ? 'Try adjusting your filters' : 'Add items to get started' }}
                   </p>
                   <Button
-                    v-if="!searchQuery && stockFilter === 'all'"
+                    v-if="!searchQuery && canManageInventoryItems"
                     variant="primary"
                     :icon="PlusIcon"
                     @click="openAddItemModal"
@@ -384,7 +356,7 @@ ${{ formatCurrency(totalInventoryValue) }}
 
     <!-- Floating Action Button -->
     <button
-      v-if="sortedFilteredItems.length > 0 && canManage"
+      v-if="sortedFilteredItems.length > 0 && canManageInventoryItems"
       @click="openAddItemModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new item"
@@ -631,6 +603,8 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   BarsArrowUpIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -640,6 +614,8 @@ import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
+import { useToast } from '~/composables/useToast'
+import * as XLSX from 'xlsx'
 
 definePageMeta({
   layout: 'dashboard'
@@ -654,7 +630,8 @@ import type { InventoryItem } from '~/stores/inventory'
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
-const { canManage } = usePermissions()
+const { canManage, canManageInventoryItems } = usePermissions()
+const toast = useToast()
 
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
@@ -696,12 +673,14 @@ if (import.meta.client) {
   }, 100)
 }
 const searchQuery = ref('')
-const stockFilter = ref('all')
 const sortBy = ref('name')
 const showAddItemModal = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const isImporting = ref(false)
+const isExporting = ref(false)
 
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
 
@@ -727,7 +706,6 @@ const columns = computed(() => {
     templateColumns.push(
       { key: 'name', label: 'Item', sortable: true },
       { key: 'sku', label: 'SKU', sortable: true },
-      { key: 'stock', label: 'Stock', sortable: true },
       { key: 'price', label: 'Price', sortable: true }
     )
   }
@@ -757,12 +735,11 @@ const totalInventoryValue = computed(() => {
     f.type === 'currency'
   )?.name || 'price'
   
-  // Find the stock field name from template
-  const stockField = folder.value?.template?.fields?.find(f => 
-    f.name.toLowerCase() === 'stock' || 
+  // Find a quantity field name from template (if exists - no default stock field)
+  const quantityField = folder.value?.template?.fields?.find(f => 
     f.name.toLowerCase() === 'quantity' ||
     f.name.toLowerCase() === 'qty'
-  )?.name || 'stock'
+  )?.name
   
   let total = 0
   folderItems.forEach(item => {
@@ -772,10 +749,11 @@ const totalInventoryValue = computed(() => {
     
     // For serial number items, quantity is always 1
     let quantity = 1
-    if (!folder.value?.hasSerialNumbers && item[stockField] !== undefined) {
-      quantity = typeof item[stockField] === 'number' 
-        ? item[stockField] 
-        : parseFloat(item[stockField]) || 0
+    // Only use quantity if it's a custom field and not serial numbers (serial numbers are individual items)
+    if (!folder.value?.hasSerialNumbers && quantityField && item[quantityField] !== undefined) {
+      quantity = typeof item[quantityField] === 'number' 
+        ? item[quantityField] 
+        : parseFloat(item[quantityField]) || 0
     }
     
     // Only count available items (not sold) in the total value
@@ -828,26 +806,6 @@ const filteredItems = computed(() => {
     })
   }
 
-  // Filter by stock status (if folder has a stock/quantity field)
-  if (stockFilter.value !== 'all' && folder.value?.template) {
-    // Find a field that might represent stock/quantity
-    const stockField = folder.value.template.fields.find(f => 
-      f.name.toLowerCase().includes('stock') || 
-      f.name.toLowerCase().includes('quantity') ||
-      f.name.toLowerCase().includes('qty')
-    )
-    
-    if (stockField) {
-      result = result.filter(item => {
-        const stockValue = item[stockField.name] || 0
-        const stockNum = typeof stockValue === 'number' ? stockValue : parseFloat(stockValue) || 0
-        if (stockFilter.value === 'in-stock') return stockNum >= 20
-        if (stockFilter.value === 'low-stock') return stockNum < 20 && stockNum > 0
-        if (stockFilter.value === 'out-of-stock') return stockNum === 0
-        return true
-      })
-    }
-  }
 
   return result
 })
@@ -1041,7 +999,6 @@ const formatDate = (date?: Date | string) => {
 
 const resetFilters = () => {
   searchQuery.value = ''
-  stockFilter.value = 'all'
   sortBy.value = 'name'
   currentSort.value = { key: 'name', order: 'asc' }
   currentPage.value = 1
@@ -1100,7 +1057,7 @@ const handleDeleteItem = async (item: InventoryItem) => {
       // Refresh folder list to update item counts on the folders page
       await inventoryStore.fetchFolders()
     } catch (error: any) {
-      alert(error.message || 'Failed to delete item')
+      toast.error(error.message || 'Failed to delete item')
     }
   }
 }
@@ -1119,7 +1076,7 @@ const handleSaveItem = async () => {
     const requiredFields = folder.value.template.fields.filter(f => f.required && f.name !== 'serialNo')
     for (const field of requiredFields) {
       if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
-        alert(`Please fill in the required field: ${field.label || field.name}`)
+        toast.warning(`Please fill in the required field: ${field.label || field.name}`)
         return
       }
     }
@@ -1140,14 +1097,14 @@ const handleSaveItem = async () => {
         // Validate serial numbers
         const validSerialNumbers = serialNumbers.value.filter(sn => sn && sn.trim() !== '')
         if (validSerialNumbers.length === 0) {
-          alert('Please add at least one serial number')
+          toast.warning('Please add at least one serial number')
           return
         }
 
         // Check for duplicate serial numbers
         const uniqueSerials = new Set(validSerialNumbers)
         if (uniqueSerials.size !== validSerialNumbers.length) {
-          alert('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
+          toast.error('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
           return
         }
 
@@ -1174,7 +1131,7 @@ const handleSaveItem = async () => {
         // Refresh folder list to update item counts on the folders page
         await inventoryStore.fetchFolders()
 
-        alert(`Successfully created ${createdCount} item${createdCount !== 1 ? 's' : ''}`)
+        toast.success(`Successfully created ${createdCount} item${createdCount !== 1 ? 's' : ''}`)
       } else {
         // Create single item (normal mode)
         await inventoryStore.createItem(folderId.value, itemForm)
@@ -1189,7 +1146,7 @@ const handleSaveItem = async () => {
     }
     handleCancelItem()
   } catch (error: any) {
-    alert(error.message || 'Failed to save item')
+    toast.error(error.message || 'Failed to save item')
   }
 }
 
@@ -1198,6 +1155,533 @@ const handleCancelItem = () => {
   editingItem.value = null
   serialNumbers.value = []
   Object.keys(itemForm).forEach(key => delete itemForm[key])
+}
+
+// Export inventory items to Excel
+const handleExportToExcel = async () => {
+  if (!folder.value || !folder.value.template) {
+    toast.error('Folder template not found. Cannot export items.')
+    return
+  }
+
+  isExporting.value = true
+  try {
+    const folderItems = items.value
+    if (folderItems.length === 0) {
+      toast.warning('No items to export.')
+      isExporting.value = false
+      return
+    }
+
+    // Get template fields to determine columns
+    const templateFields = folder.value.template.fields || []
+    
+    // Create worksheet data
+    const worksheetData: any[] = []
+    
+    // Add header row with field labels
+    const headers: string[] = templateFields.map(field => field.label || field.name)
+    worksheetData.push(headers)
+
+    // Add data rows
+    folderItems.forEach((item) => {
+      const row: any[] = []
+      templateFields.forEach((field) => {
+        let value = item[field.name]
+        
+        // Format values based on type
+        if (value === null || value === undefined) {
+          value = ''
+        } else if (field.type === 'date' && value) {
+          // Format date
+          const date = value instanceof Date ? value : new Date(value)
+          value = date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })
+        } else if (field.type === 'boolean') {
+          value = value ? 'Yes' : 'No'
+        } else if (field.type === 'currency' || field.type === 'number') {
+          value = typeof value === 'number' ? value : parseFloat(value) || 0
+        }
+        
+        row.push(value)
+      })
+      worksheetData.push(row)
+    })
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData)
+
+    // Set column widths
+    const colWidths = templateFields.map((field) => ({
+      wch: Math.max(field.label?.length || field.name.length || 10, 15)
+    }))
+    ws['!cols'] = colWidths
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory Items')
+
+    // Generate filename
+    const folderName = folder.value.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+    const filename = `${folderName}_inventory_${new Date().toISOString().split('T')[0]}.xlsx`
+
+    // Write and download file
+    XLSX.writeFile(wb, filename)
+    
+    toast.success(`Successfully exported ${folderItems.length} item(s) to ${filename}`)
+  } catch (error: any) {
+    console.error('Export error:', error)
+    toast.error(`Failed to export items: ${error.message || 'Unknown error'}`)
+  } finally {
+    isExporting.value = false
+  }
+}
+
+// Import inventory items from Excel
+const handleFileImport = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) {
+    return
+  }
+
+  if (!folder.value || !folder.value.template) {
+    toast.error('Folder template not found. Cannot import items.')
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
+    return
+  }
+
+  isImporting.value = true
+  
+  try {
+    // Read the file
+    const data = await file.arrayBuffer()
+    const workbook = XLSX.read(data, { type: 'array' })
+    
+    // Get first worksheet
+    const firstSheetName = workbook.SheetNames[0]
+    if (!firstSheetName) {
+      toast.error('Excel file does not contain any worksheets.')
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+    const worksheet = workbook.Sheets[firstSheetName]
+    if (!worksheet) {
+      toast.error('Could not read worksheet from Excel file.')
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+    
+    // Convert to JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+    
+    if (jsonData.length < 2) {
+      toast.error('Excel file must contain at least a header row and one data row.')
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+
+    // Get template fields
+    const templateFields = folder.value.template.fields || []
+    
+    // Parse header row
+    const headers = jsonData[0] as string[]
+    
+    // Map headers to field names (match by label or name)
+    const headerToFieldMap = new Map<string, string>()
+    headers.forEach((header, index) => {
+      const field = templateFields.find(
+        f => f.label?.toLowerCase() === header?.toString().toLowerCase() || 
+        f.name.toLowerCase() === header?.toString().toLowerCase()
+      )
+      if (field) {
+        headerToFieldMap.set(header.toString(), field.name)
+      }
+    })
+
+    // Validate required fields
+    const requiredFields = templateFields.filter(f => f.required)
+    const missingRequiredFields = requiredFields.filter(
+      field => !headerToFieldMap.has(field.label || field.name)
+    )
+    
+    if (missingRequiredFields.length > 0) {
+      toast.error(`Missing required columns: ${missingRequiredFields.map(f => f.label || f.name).join(', ')}`)
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+
+    // Process data rows
+    const itemsToImport: Array<{ data: any; rowNumber: number }> = []
+    const errors: string[] = []
+
+    for (let i = 1; i < jsonData.length; i++) {
+      const row = jsonData[i]
+      if (!row || row.every(cell => cell === null || cell === undefined || cell === '')) {
+        continue // Skip empty rows
+      }
+
+      const itemData: any = {}
+      let hasError = false
+
+      templateFields.forEach((field) => {
+        // Find column index for this field
+        const headerIndex = headers.findIndex(
+          h => field.label?.toLowerCase() === h?.toString().toLowerCase() ||
+          field.name.toLowerCase() === h?.toString().toLowerCase()
+        )
+
+        if (headerIndex === -1) {
+          if (field.required) {
+            errors.push(`Row ${i + 1}: Missing required field "${field.label || field.name}"`)
+            hasError = true
+          }
+          return
+        }
+
+        let value = row[headerIndex]
+
+        // Handle empty values
+        if (value === null || value === undefined || value === '') {
+          if (field.required) {
+            errors.push(`Row ${i + 1}: Required field "${field.label || field.name}" is empty`)
+            hasError = true
+          } else {
+            // Set default value based on type
+            if (field.type === 'number' || field.type === 'currency') {
+              itemData[field.name] = 0
+            } else if (field.type === 'boolean') {
+              itemData[field.name] = false
+            }
+          }
+          return
+        }
+
+        // Parse value based on field type
+        try {
+          switch (field.type) {
+            case 'number':
+            case 'currency':
+              value = typeof value === 'number' ? value : parseFloat(value)
+              if (isNaN(value)) {
+                errors.push(`Row ${i + 1}: Invalid number for "${field.label || field.name}"`)
+                hasError = true
+                return
+              }
+              break
+            case 'date':
+              if (typeof value === 'number') {
+                // Excel date serial number
+                const excelEpoch = new Date(1900, 0, 1)
+                value = new Date(excelEpoch.getTime() + (value - 2) * 86400000)
+              } else {
+                value = new Date(value)
+              }
+              if (isNaN(value.getTime())) {
+                errors.push(`Row ${i + 1}: Invalid date for "${field.label || field.name}"`)
+                hasError = true
+                return
+              }
+              value = value.toISOString().split('T')[0] // Store as YYYY-MM-DD
+              break
+            case 'boolean':
+              value = value === true || value === 'Yes' || value === 'yes' || value === 'TRUE' || value === 'true' || value === '1'
+              break
+            case 'select':
+              if (field.options && !field.options.includes(value)) {
+                errors.push(`Row ${i + 1}: Invalid option "${value}" for "${field.label || field.name}". Must be one of: ${field.options.join(', ')}`)
+                hasError = true
+                return
+              }
+              break
+            default:
+              value = value.toString()
+          }
+          
+          itemData[field.name] = value
+        } catch (error: any) {
+          errors.push(`Row ${i + 1}: Error parsing "${field.label || field.name}": ${error.message}`)
+          hasError = true
+        }
+      })
+
+      if (!hasError) {
+        itemsToImport.push({ data: itemData, rowNumber: i + 1 })
+      }
+    }
+
+    // Check for duplicate serial numbers if folder has serial numbers enabled
+    let skippedDuplicates = 0
+    const duplicateSerialNumbers: string[] = []
+    
+    if (folder.value?.hasSerialNumbers && itemsToImport.length > 0) {
+      // Find serialNo field name from template
+      const serialNoField = templateFields.find(
+        f => f.name.toLowerCase() === 'serialno' || 
+        f.name.toLowerCase() === 'serialnumber' ||
+        f.name.toLowerCase() === 'serial_no' ||
+        f.name.toLowerCase() === 'serial_number'
+      )
+      
+      if (serialNoField) {
+        // STEP 1: Fetch items ONLY from the current folder
+        const currentFolderId = folderId.value
+        console.log('[Import] ========== DUPLICATE CHECK START ==========')
+        console.log('[Import] Current folder ID:', currentFolderId)
+        
+        // Force fetch items for this folder (this ensures we get fresh data)
+        let existingItems = await inventoryStore.fetchItems(currentFolderId)
+        
+        // STEP 2: Filter to ONLY items from this folder (extra safety check)
+        existingItems = existingItems.filter(item => {
+          const matches = item.folderId === currentFolderId
+          if (!matches) {
+            console.warn('[Import] WARNING: Item from wrong folder detected and filtered out:', {
+              itemId: item.id,
+              itemFolderId: item.folderId,
+              expectedFolderId: currentFolderId
+            })
+          }
+          return matches
+        })
+        
+        console.log('[Import] Existing items in THIS folder only:', existingItems.length)
+        
+        // STEP 3: Extract serial numbers from items in THIS folder only
+        const existingSerialNumbers = new Set<string>()
+        existingItems.forEach(item => {
+          // Double-check folder ID
+          if (item.folderId !== currentFolderId) {
+            console.error('[Import] ERROR: Item has wrong folderId!', item.id, item.folderId, 'expected:', currentFolderId)
+            return
+          }
+          
+          const serialNo = item[serialNoField.name] || item['serialNo'] || item['serialNumber']
+          if (serialNo) {
+            const serialNoNormalized = serialNo.toString().trim().toLowerCase()
+            existingSerialNumbers.add(serialNoNormalized)
+            console.log(`[Import] Found existing serial in folder ${currentFolderId}: "${serialNo.toString().trim()}"`)
+          }
+        })
+        
+        console.log('[Import] Total unique serial numbers already in folder:', existingSerialNumbers.size)
+        console.log('[Import] Existing serial numbers:', Array.from(existingSerialNumbers))
+        
+        const totalItemsFromExcel = itemsToImport.length
+        console.log('[Import] Items from Excel to check:', totalItemsFromExcel)
+        
+        // Filter out items with duplicate serial numbers
+        const itemsToImportFiltered: Array<{ data: any; rowNumber: number }> = []
+        const importBatchSerialNumbers = new Map<string, number>() // Track serial numbers and their first occurrence row
+        
+        itemsToImport.forEach((itemEntry) => {
+          const itemData = itemEntry.data
+          const rowNumber = itemEntry.rowNumber
+          
+          // Extract serial number - try multiple possible field names
+          const serialNo = itemData[serialNoField.name] || 
+                          itemData['serialNo'] || 
+                          itemData['serialNumber'] ||
+                          itemData['serialno'] ||
+                          itemData['serialnumber'] ||
+                          itemData['serial_no'] ||
+                          itemData['serial_number']
+          
+          // If no serial number, that's a validation error (not a duplicate)
+          if (!serialNo || serialNo.toString().trim() === '') {
+            errors.push(`Row ${rowNumber}: Serial number is required but missing`)
+            console.log(`[Import] Row ${rowNumber}: Missing serial number - will skip as validation error`)
+            return // Skip this item due to validation error
+          }
+          
+          const serialNoTrimmed = serialNo.toString().trim()
+          const serialNoLower = serialNoTrimmed.toLowerCase()
+          
+          // FIRST: Check if this serial number already exists in the CURRENT FOLDER's inventory
+          const existsInInventory = existingSerialNumbers.has(serialNoLower)
+          
+          if (existsInInventory) {
+            // This serial number already exists in THIS folder - SKIP it
+            duplicateSerialNumbers.push(serialNoTrimmed)
+            skippedDuplicates++
+            console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" already exists in folder ${folderId.value}`)
+            return // Skip this duplicate
+          }
+          
+          // SECOND: Check if this serial number appears earlier in the import batch
+          if (importBatchSerialNumbers.has(serialNoLower)) {
+            // Duplicate within the same import file - SKIP it (keep first occurrence)
+            duplicateSerialNumbers.push(serialNoTrimmed)
+            skippedDuplicates++
+            console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" is duplicated in import file (first seen at row ${importBatchSerialNumbers.get(serialNoLower)})`)
+            return // Skip this duplicate
+          }
+          
+          // Serial number is UNIQUE - ADD to import list
+          itemsToImportFiltered.push(itemEntry)
+          importBatchSerialNumbers.set(serialNoLower, rowNumber)
+          console.log(`[Import] Row ${rowNumber}: ✓ ADDING - Serial "${serialNoTrimmed}" is unique and will be imported`)
+        })
+        
+        console.log('[Import] ========== DUPLICATE CHECK SUMMARY ==========')
+        console.log('[Import] Folder:', currentFolderId)
+        console.log('[Import] Total items from Excel:', totalItemsFromExcel)
+        console.log('[Import] Items skipped (duplicates in folder):', skippedDuplicates)
+        console.log('[Import] Items that will be IMPORTED (unique):', itemsToImportFiltered.length)
+        console.log('[Import] Items with validation errors:', errors.length)
+        console.log('[Import] ===========================================')
+        
+        // Replace itemsToImport with filtered list (only unique items that will be imported)
+        itemsToImport.length = 0
+        itemsToImport.push(...itemsToImportFiltered)
+        
+        if (itemsToImportFiltered.length === 0 && totalItemsFromExcel > 0) {
+          console.error('[Import] ⚠️ WARNING: All items were filtered out!')
+          console.error('[Import] Original items from Excel:', totalItemsFromExcel)
+          console.error('[Import] Items that passed filter:', itemsToImportFiltered.length)
+          console.error('[Import] Skipped duplicates:', skippedDuplicates)
+          console.error('[Import] Validation errors:', errors.length)
+        }
+      } else {
+        console.warn('[Import] Serial number field not found in template - skipping duplicate check')
+      }
+    }
+
+    // If no items to import after filtering duplicates and errors, show message and exit
+    // Only show this if ALL items were duplicates or had errors
+    if (itemsToImport.length === 0) {
+      let message = 'No new items to import.'
+      const reasons: string[] = []
+      
+      if (skippedDuplicates > 0) {
+        reasons.push(`${skippedDuplicates} item(s) were skipped because they already exist in inventory`)
+      }
+      if (errors.length > 0) {
+        reasons.push(`${errors.length} row(s) had validation errors`)
+      }
+      
+      if (reasons.length > 0) {
+        message += `\n\n${reasons.join('.\n')}.`
+        if (skippedDuplicates > 0) {
+          message += `\n\nOnly items with unique serial numbers that don't already exist will be imported.`
+        }
+      } else {
+        message += '\n\nPlease check your Excel file and try again.'
+      }
+      
+      alert(message)
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+
+    // Show validation errors if any (before confirmation) - duplicates are handled separately
+    if (errors.length > 0) {
+      const errorMessage = `Found ${errors.length} validation error(s) that will be skipped:\n\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n... and ${errors.length - 5} more errors` : ''}\n\nThe import will continue with valid items.`
+      alert(errorMessage)
+    }
+
+    // Confirm import with summary
+    let confirmMessage = `Ready to import ${itemsToImport.length} new item(s).`
+    
+    if (skippedDuplicates > 0) {
+      confirmMessage += `\n\n${skippedDuplicates} item(s) with duplicate serial numbers will be skipped (they already exist in inventory or are duplicated in the file).`
+      if (duplicateSerialNumbers.length > 0 && duplicateSerialNumbers.length <= 5) {
+        confirmMessage += `\nDuplicate serial numbers: ${duplicateSerialNumbers.join(', ')}`
+      }
+    }
+    
+    if (errors.length > 0) {
+      confirmMessage += `\n\n${errors.length} row(s) with validation errors will be skipped.`
+    }
+    
+    confirmMessage += '\n\nContinue with import?'
+    
+    console.log('[Import] Items to import:', itemsToImport.length)
+    console.log('[Import] Skipped duplicates:', skippedDuplicates)
+    console.log('[Import] Validation errors:', errors.length)
+    
+    const confirmed = confirm(confirmMessage)
+
+    if (!confirmed) {
+      if (fileInputRef.value) {
+        fileInputRef.value.value = ''
+      }
+      isImporting.value = false
+      return
+    }
+
+    // Import items
+    let successCount = 0
+    let failCount = 0
+
+    for (const itemEntry of itemsToImport) {
+      try {
+        await inventoryStore.createItem(folderId.value, itemEntry.data)
+        successCount++
+      } catch (error: any) {
+        console.error('Error importing item:', error)
+        errors.push(`Row ${itemEntry.rowNumber}: Failed to create item - ${error.message || 'Unknown error'}`)
+        failCount++
+      }
+    }
+
+    // Reload folder and items
+    if (folder.value) {
+      await inventoryStore.fetchFolder(folderId.value)
+      folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+    }
+    await loadItems()
+    await inventoryStore.fetchFolders()
+
+    // Show result
+    let resultMessage = `Import completed!\n\n` +
+      `Successfully imported: ${successCount} item(s)\n`
+    
+    if (failCount > 0) {
+      resultMessage += `Failed: ${failCount} item(s)\n`
+    }
+    
+    if (skippedDuplicates > 0) {
+      resultMessage += `Skipped (duplicate serial numbers): ${skippedDuplicates} item(s)`
+      if (duplicateSerialNumbers.length > 0 && duplicateSerialNumbers.length <= 10) {
+        resultMessage += `\nSerial numbers: ${duplicateSerialNumbers.join(', ')}`
+      } else if (duplicateSerialNumbers.length > 10) {
+        resultMessage += `\nFirst 10 serial numbers: ${duplicateSerialNumbers.slice(0, 10).join(', ')}...`
+      }
+      resultMessage += '\n'
+    }
+    
+    if (errors.length > 0) {
+      resultMessage += `Skipped (errors): ${errors.length} row(s)`
+    }
+    
+    alert(resultMessage)
+  } catch (error: any) {
+    console.error('Import error:', error)
+    alert(`Failed to import items: ${error.message || 'Unknown error'}`)
+  } finally {
+    isImporting.value = false
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
+  }
 }
 
 // Load folder from Firestore

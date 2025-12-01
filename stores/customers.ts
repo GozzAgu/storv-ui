@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where, orderBy, serverTimestamp, arrayUnion } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, arrayUnion } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -62,9 +62,11 @@ export const useCustomersStore = defineStore('customers', {
 
           if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
             const staffDoc = staffSnapshot.docs[0]
-            const staffData = staffDoc.data()
-            if (staffData.createdBy) {
-              userId = staffData.createdBy
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+              }
             }
           }
         } catch (error: any) {
@@ -82,15 +84,17 @@ export const useCustomersStore = defineStore('customers', {
           const emailSnapshot = await getDocs(emailQuery)
           if (!emailSnapshot.empty) {
             const doc = emailSnapshot.docs[0]
-            const data = doc.data()
-            return {
-              id: doc.id,
-              ...data,
-              lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
-              firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-              updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-            } as Customer
+            if (doc) {
+              const data = doc.data()
+              return {
+                id: doc.id,
+                ...data,
+                lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
+                firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
+              } as Customer
+            }
           }
         }
 
@@ -99,15 +103,17 @@ export const useCustomersStore = defineStore('customers', {
           const phoneSnapshot = await getDocs(phoneQuery)
           if (!phoneSnapshot.empty) {
             const doc = phoneSnapshot.docs[0]
-            const data = doc.data()
-            return {
-              id: doc.id,
-              ...data,
-              lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
-              firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-              updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-            } as Customer
+            if (doc) {
+              const data = doc.data()
+              return {
+                id: doc.id,
+                ...data,
+                lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
+                firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
+              } as Customer
+            }
           }
         }
 
@@ -116,15 +122,17 @@ export const useCustomersStore = defineStore('customers', {
           const addressSnapshot = await getDocs(addressQuery)
           if (!addressSnapshot.empty) {
             const doc = addressSnapshot.docs[0]
-            const data = doc.data()
-            return {
-              id: doc.id,
-              ...data,
-              lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
-              firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-              updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-            } as Customer
+            if (doc) {
+              const data = doc.data()
+              return {
+                id: doc.id,
+                ...data,
+                lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
+                firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
+              } as Customer
+            }
           }
         }
 
@@ -173,9 +181,11 @@ export const useCustomersStore = defineStore('customers', {
 
           if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
             const staffDoc = staffSnapshot.docs[0]
-            const staffData = staffDoc.data()
-            if (staffData.createdBy) {
-              userId = staffData.createdBy
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+              }
             }
           }
         } catch (error: any) {
@@ -211,17 +221,18 @@ export const useCustomersStore = defineStore('customers', {
 
           // Update local state
           const index = this.customers.findIndex(c => c.id === existingCustomer.id)
-          if (index > -1) {
+          if (index > -1 && this.customers[index]) {
+            const existing = this.customers[index]
             this.customers[index] = {
-              ...this.customers[index],
+              ...existing,
               name: receiptData.customerName,
-              email: receiptData.customerEmail || this.customers[index].email,
-              phone: receiptData.customerPhone || this.customers[index].phone,
-              address: receiptData.customerAddress || this.customers[index].address,
-              totalOrders: this.customers[index].totalOrders + 1,
-              totalSpent: this.customers[index].totalSpent + receiptData.total,
-              receipts: [...this.customers[index].receipts, receiptId],
-              lastOrderDate: orderDate > this.customers[index].lastOrderDate ? orderDate : this.customers[index].lastOrderDate,
+              email: receiptData.customerEmail || existing.email,
+              phone: receiptData.customerPhone || existing.phone,
+              address: receiptData.customerAddress || existing.address,
+              totalOrders: existing.totalOrders + 1,
+              totalSpent: existing.totalSpent + receiptData.total,
+              receipts: [...existing.receipts, receiptId],
+              lastOrderDate: orderDate > existing.lastOrderDate ? orderDate : existing.lastOrderDate,
               updatedAt: now,
             }
           }
@@ -305,9 +316,11 @@ export const useCustomersStore = defineStore('customers', {
 
           if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
             const staffDoc = staffSnapshot.docs[0]
-            const staffData = staffDoc.data()
-            if (staffData.createdBy) {
-              userId = staffData.createdBy
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+              }
             }
           }
         } catch (error: any) {
@@ -377,9 +390,11 @@ export const useCustomersStore = defineStore('customers', {
 
           if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
             const staffDoc = staffSnapshot.docs[0]
-            const staffData = staffDoc.data()
-            if (staffData.createdBy) {
-              userId = staffData.createdBy
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+              }
             }
           }
         } catch (error: any) {
@@ -404,6 +419,11 @@ export const useCustomersStore = defineStore('customers', {
         }
 
         const customerDoc = querySnapshot.docs[0]
+        if (!customerDoc) {
+          console.warn(`[CustomersStore] Customer document not found for receipt ${receiptId}`)
+          return
+        }
+
         const customerData = customerDoc.data()
 
         // If customer has only one receipt, delete the customer
@@ -427,7 +447,7 @@ export const useCustomersStore = defineStore('customers', {
 
           // Update local state
           const index = this.customers.findIndex(c => c.id === customerDoc.id)
-          if (index > -1) {
+          if (index > -1 && this.customers[index]) {
             this.customers[index].receipts = updatedReceipts
             this.customers[index].totalOrders = updatedTotalOrders
             this.customers[index].totalSpent = updatedTotalSpent

@@ -45,12 +45,30 @@ export const usePermissions = () => {
     return !!authStore.currentUser
   })
 
+  // Check if user can manage inventory items - only super admins or managers
+  const canManageInventoryItems = computed(() => {
+    // Super admins can always manage inventory items
+    if (!isStaff.value) return true
+    
+    // Only managers can manage inventory items (not regular staff or interns)
+    return isManager.value
+  })
+
+  // Check if user can create inventory folders - ONLY super admins (managers cannot)
+  const canCreateInventoryFolders = computed(() => {
+    // Only super admins can create inventory folders
+    // Managers cannot create folders, they can only manage items in folders assigned to their department
+    return !isStaff.value
+  })
+
   return {
     isStaff,
     isManager,
     canManage,
     isReadOnly,
     canCreate,
+    canManageInventoryItems,
+    canCreateInventoryFolders,
   }
 }
 

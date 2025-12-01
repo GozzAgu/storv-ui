@@ -58,6 +58,8 @@ export const useUserStore = defineStore('user', {
         throw new Error('Firestore not initialized')
       }
 
+      const authStore = useAuthStore()
+
       try {
         const userRef = doc(db, 'users', userId)
         await setDoc(userRef, {
@@ -66,10 +68,15 @@ export const useUserStore = defineStore('user', {
           updatedAt: serverTimestamp(),
         })
 
-        this.userData = {
-          uid: userId,
-          ...userData,
-        } as UserData
+        // Only update local userData if this is for the currently logged-in user
+        // This prevents the profile name from changing when creating staff accounts
+        if (authStore.currentUser && authStore.currentUser.uid === userId) {
+          this.userData = {
+            uid: userId,
+            ...userData,
+          } as UserData
+        }
+        // If creating for a different user (e.g., staff), don't update local state
       } catch (error: any) {
         console.error('Error creating user document:', error)
         throw new Error(error.message || 'Failed to create user document')

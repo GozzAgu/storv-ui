@@ -239,7 +239,7 @@
                   <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
                 </div>
-                <ChevronDownIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <ChevronDownIcon class="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-500" />
               </button>
 
               <!-- Profile Dropdown Menu -->
@@ -253,18 +253,19 @@
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50"
+                  class="absolute right-0 mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
+                  style="min-width: 160px; max-width: min(224px, calc(100vw - 2rem));"
                 >
                   <NuxtLink
                     to="/dashboard/profile"
-                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="block px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
                     Profile
                   </NuxtLink>
                   <NuxtLink
                     to="/dashboard/settings"
-                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="block px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
                     Settings
@@ -272,7 +273,7 @@
                   <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                   <button
                     @click="handleSignOut"
-                    class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="block w-full text-left px-4 py-2.5 sm:py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                   >
                     Sign out
                   </button>
@@ -288,6 +289,9 @@
         <slot />
       </main>
     </div>
+    
+    <!-- Toast Notifications -->
+    <ToastContainer />
   </div>
 </template>
 
@@ -312,6 +316,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import ToastContainer from '~/components/ui/ToastContainer.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
@@ -442,25 +447,82 @@ const currentPageIcon = computed(() => {
   return currentPage.value?.icon || HomeIcon
 })
 
-// User profile data
+// Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
+const cachedUserName = ref<string | null>(null)
+const cachedUserEmail = ref<string | null>(null)
+const cachedUserId = ref<string | null | undefined>(null)
+
+// User profile data - use cached values during staff creation to prevent UI bug
 const userName = computed(() => {
+  const currentUserId = authStore.currentUser?.uid
+  
+  // If we have a cached name, keep using it (prevents flicker during staff creation)
+  // Use cache if: same user OR no current user (during sign out/in for staff creation)
+  if (cachedUserName.value && cachedUserId.value) {
+    if (cachedUserId.value === currentUserId || !currentUserId) {
+      return cachedUserName.value
+    }
+  }
+  
   // Try to get name from Firestore userData first
-  if (userStore.userData?.name) {
-    return userStore.userData.name
+  if (userStore.userData?.name && currentUserId) {
+    const name = userStore.userData.name ?? null
+    // Cache it for this user
+    if (name) {
+      cachedUserName.value = name
+      cachedUserId.value = currentUserId ?? null
+      return name
+    }
   }
   // Fallback to Firebase Auth displayName
-  if (authStore.currentUser?.displayName) {
-    return authStore.currentUser.displayName
+  if (authStore.currentUser?.displayName && currentUserId) {
+    const name = authStore.currentUser.displayName ?? null
+    if (name) {
+      cachedUserName.value = name
+      cachedUserId.value = currentUserId ?? null
+      return name
+    }
   }
   // Fallback to email prefix (part before @)
-  if (authStore.currentUser?.email) {
-    return authStore.currentUser.email.split('@')[0]
+  const currentEmail = authStore.currentUser?.email
+  if (currentEmail && currentUserId) {
+    const emailPrefix = currentEmail.split('@')[0]!
+    cachedUserName.value = emailPrefix
+    cachedUserEmail.value = currentEmail
+    cachedUserId.value = currentUserId ?? null
+    return emailPrefix
   }
+  
+  // If no current user but we have cached data, use cache (prevents flicker)
+  if (cachedUserName.value) {
+    return cachedUserName.value
+  }
+  
   return 'User'
 })
 
 const userEmail = computed(() => {
-  return authStore.currentUser?.email || ''
+  const currentUserId = authStore.currentUser?.uid
+  
+  // If we have cached email and it's for the same user, keep using it
+  if (cachedUserEmail.value && cachedUserId.value === currentUserId) {
+    return cachedUserEmail.value
+  }
+  
+  const email = authStore.currentUser?.email || ''
+  
+  // Cache it for this user
+  if (email && currentUserId) {
+    cachedUserEmail.value = email
+    cachedUserId.value = currentUserId ?? null
+  }
+  
+  // If no current user but we have cached data, use cache (prevents flicker)
+  if (!email && cachedUserEmail.value) {
+    return cachedUserEmail.value
+  }
+  
+  return email
 })
 
 const userInitials = computed(() => {
@@ -527,9 +589,19 @@ onMounted(() => {
 })
 
 // Watch for auth state changes to fetch user data
-watch(() => authStore.currentUser, (user) => {
-  if (user?.uid && !userStore.userData) {
-    userStore.fetchUserData(user.uid)
+// Only fetch if userData is missing AND it's for the same user (prevents refetch during staff creation)
+watch(() => authStore.currentUser, (user, oldUser) => {
+  // Only fetch if:
+  // 1. User exists
+  // 2. We don't have userData OR the user changed (not just signed back in)
+  // This prevents refetching during staff creation when super admin signs out/in
+  if (user?.uid) {
+    const hasUserData = userStore.userData && userStore.userData.uid === user.uid
+    const userChanged = oldUser?.uid !== user.uid
+    
+    if (!hasUserData || userChanged) {
+      userStore.fetchUserData(user.uid)
+    }
   }
 }, { immediate: true })
 
