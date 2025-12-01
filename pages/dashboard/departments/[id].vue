@@ -147,7 +147,7 @@
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th v-if="canManageDepartments" class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageDepartments" class="px-3 sm:px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[100px]">
                 Actions
               </th>
             </tr>
@@ -210,23 +210,23 @@
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="flex items-center justify-end gap-2">
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right min-w-[100px]">
+                <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     v-if="canManageDepartments"
                     @click="handleEditStaff(member)"
-                    class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="Edit"
                   >
-                    <PencilIcon class="w-5 h-5" />
+                    <PencilIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canManageDepartments"
                     @click="handleDeleteStaff(member)"
-                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete"
                   >
-                    <TrashIcon class="w-5 h-5" />
+                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                 </div>
               </td>

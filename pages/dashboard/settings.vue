@@ -133,6 +133,9 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure inventory management preferences</p>
           </div>
+          <Button @click="saveInventorySettings" variant="primary">
+            Save Changes
+          </Button>
         </div>
 
         <div class="space-y-6">
@@ -193,6 +196,9 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Receipt & Invoice Settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Customize receipt and invoice preferences</p>
           </div>
+          <Button @click="saveReceiptSettings" variant="primary">
+            Save Changes
+          </Button>
         </div>
 
         <div class="space-y-6">
@@ -239,55 +245,26 @@
         </div>
       </Card>
 
-      <!-- Tax & Payment Settings -->
+      <!-- Payment Settings -->
       <Card>
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Tax & Payment Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure tax rates and payment methods</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment Settings</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure available payment methods</p>
+          </div>
+          <Button @click="savePaymentSettings" variant="primary">
+            Save Changes
+          </Button>
         </div>
-      </div>
 
-            <div class="space-y-6">
-          <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Default Tax Rate</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Default tax percentage applied to sales</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <input
-                v-model.number="taxSettings.defaultRate"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-              <span class="text-sm text-gray-600 dark:text-gray-400">%</span>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Tax Included in Price</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Prices shown include tax</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                v-model="taxSettings.taxIncluded"
-                type="checkbox"
-                class="sr-only peer"
-              />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-            </label>
-          </div>
-
+        <div class="space-y-6">
           <div class="py-4">
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">Payment Methods</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">Available Payment Methods</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Select the payment methods you accept for sales transactions</p>
             <div class="space-y-3">
               <label class="flex items-center gap-3 cursor-pointer">
                 <input
-                  v-model="taxSettings.paymentMethods"
+                  v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="cash"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -296,7 +273,7 @@
               </label>
               <label class="flex items-center gap-3 cursor-pointer">
                 <input
-                  v-model="taxSettings.paymentMethods"
+                  v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="card"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -305,7 +282,7 @@
               </label>
               <label class="flex items-center gap-3 cursor-pointer">
                 <input
-                  v-model="taxSettings.paymentMethods"
+                  v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="mobile"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -314,7 +291,7 @@
               </label>
               <label class="flex items-center gap-3 cursor-pointer">
                 <input
-                  v-model="taxSettings.paymentMethods"
+                  v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="bank"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -466,6 +443,9 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { useUserStore } from '~/stores/user'
+import { useToast } from '~/composables/useToast'
+import Button from '~/components/ui/Button.vue'
+import Card from '~/components/ui/Card.vue'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 
 definePageMeta({
@@ -495,6 +475,7 @@ const { currentUser } = useFirebaseAuth()
 const { getUserDocument, updateStoreDetails } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
+const toast = useToast()
 
 // Helper function to get the correct user ID (super admin UID if staff)
 const getTargetUserId = async (): Promise<string | null> => {
@@ -540,7 +521,7 @@ const getTargetUserId = async (): Promise<string | null> => {
   return userId
 }
 
-// Load store information from Firestore
+// Load store information and settings from Firestore
 onMounted(async () => {
   if (currentUser.value) {
     try {
@@ -560,6 +541,27 @@ onMounted(async () => {
         
         // Update backup
         Object.assign(backupStoreInfo, { ...storeInfo })
+        
+        // Load settings
+        if (userData.storeDetails.settings) {
+          const settings = userData.storeDetails.settings
+          
+          if (settings.inventory) {
+            inventorySettings.lowStockThreshold = settings.inventory.lowStockThreshold ?? 10
+            inventorySettings.autoReorder = settings.inventory.autoReorder ?? false
+            inventorySettings.defaultCategory = settings.inventory.defaultCategory || 'general'
+          }
+          
+          if (settings.receipt) {
+            receiptSettings.prefix = settings.receipt.prefix || 'REC-'
+            receiptSettings.nextNumber = settings.receipt.nextNumber ?? 1001
+            receiptSettings.autoPrint = settings.receipt.autoPrint ?? false
+          }
+          
+          if (settings.payment) {
+            paymentSettings.paymentMethods = settings.payment.paymentMethods || ['cash', 'card']
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading store info:', error)
@@ -585,10 +587,8 @@ const receiptSettings = reactive({
   autoPrint: false,
 })
 
-// Tax settings
-const taxSettings = reactive({
-  defaultRate: 7.5,
-  taxIncluded: false,
+// Payment settings
+const paymentSettings = reactive({
   paymentMethods: ['cash', 'card'],
 })
 
@@ -608,16 +608,52 @@ const cancelEditing = (section: string) => {
   }
 }
 
-const saveStoreInfo = async () => {
+// Helper function to update store settings
+const updateStoreSettings = async (settings: any) => {
   if (!currentUser.value) {
-    alert('You must be signed in to save store information')
+    toast.error('You must be signed in to save settings')
     return
   }
 
   try {
     const targetUserId = await getTargetUserId()
     if (!targetUserId) {
-      alert('Unable to determine target user. Please try again.')
+      toast.error('Unable to determine target user. Please try again.')
+      return
+    }
+    
+    const userData = await getUserDocument(targetUserId)
+    const currentStoreDetails = userData?.storeDetails || {}
+    const currentSettings = (currentStoreDetails as any).settings || {}
+    
+    const { updateUserDocument } = useUser()
+    await updateUserDocument(targetUserId, {
+      storeDetails: {
+        ...currentStoreDetails,
+        settings: {
+          ...currentSettings,
+          ...settings,
+        },
+      },
+    } as any)
+    
+    toast.success('Settings saved successfully!')
+  } catch (error: any) {
+    console.error('Error saving settings:', error)
+    toast.error(error.message || 'Failed to save settings. Please try again.')
+  }
+}
+
+const saveStoreInfo = async () => {
+  if (!currentUser.value) {
+    toast.error('You must be signed in to save store information')
+    return
+  }
+
+  try {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) {
+      toast.error('Unable to determine target user. Please try again.')
       return
     }
     
@@ -631,11 +667,42 @@ const saveStoreInfo = async () => {
     
     isEditingStore.value = false
     Object.assign(backupStoreInfo, { ...storeInfo })
-    alert('Store information updated successfully!')
+    toast.success('Store information updated successfully!')
   } catch (error: any) {
     console.error('Error saving store info:', error)
-    alert(error.message || 'Failed to save store information. Please try again.')
+    toast.error(error.message || 'Failed to save store information. Please try again.')
   }
+}
+
+// Save inventory settings
+const saveInventorySettings = async () => {
+  await updateStoreSettings({
+    inventory: {
+      lowStockThreshold: inventorySettings.lowStockThreshold,
+      autoReorder: inventorySettings.autoReorder,
+      defaultCategory: inventorySettings.defaultCategory,
+    },
+  })
+}
+
+// Save receipt settings
+const saveReceiptSettings = async () => {
+  await updateStoreSettings({
+    receipt: {
+      prefix: receiptSettings.prefix,
+      nextNumber: receiptSettings.nextNumber,
+      autoPrint: receiptSettings.autoPrint,
+    },
+  })
+}
+
+// Save payment settings
+const savePaymentSettings = async () => {
+  await updateStoreSettings({
+    payment: {
+      paymentMethods: paymentSettings.paymentMethods,
+    },
+  })
 }
 
 // Data Management Functions
@@ -644,15 +711,15 @@ const handleExport = () => {
   const exportData = {
     products: 'Export includes: Name, SKU, Category, Price, Quantity, Cost, Supplier, etc.',
     customers: 'Export includes: Name, Email, Phone, Address, Total Orders, Total Spent, etc.',
-    receipts: 'Export includes: Receipt #, Date, Customer, Items, Total, Tax, Payment Method, etc.',
+    receipts: 'Export includes: Receipt #, Date, Customer, Items, Total, Payment Method, etc.',
     returns: 'Export includes: Return #, Original Receipt, Items, Reason, Date, Status, etc.',
     suppliers: 'Export includes: Name, Contact, Email, Products Supplied, Payment Terms, etc.',
-    settings: 'Export includes: Store Info, Inventory Settings, Tax Rates, Payment Methods, etc.',
+    settings: 'Export includes: Store Info, Inventory Settings, Payment Methods, etc.',
   }
   
   console.log('Exporting data:', exportData)
   // Simulate download
-  alert('Data export started! This would download:\n- Products.csv\n- Customers.csv\n- Receipts.csv\n- Returns.csv\n- Suppliers.csv\n- Settings.json\n\nAll files would be downloaded as a ZIP archive.')
+  toast.info('Data export started! This would download:\n- Products.csv\n- Customers.csv\n- Receipts.csv\n- Returns.csv\n- Suppliers.csv\n- Settings.json\n\nAll files would be downloaded as a ZIP archive.', 5000)
 }
 
 const triggerImport = () => {
@@ -667,11 +734,11 @@ const handleImport = (event: Event) => {
     console.log('Importing file:', file.name, 'Type:', fileType)
     
     if (fileType === 'csv') {
-      alert(`Importing ${file.name}...\n\nCSV files should have columns matching:\n- Products: Name, SKU, Category, Price, Quantity\n- Customers: Name, Email, Phone, Address`)
+      toast.info(`Importing ${file.name}...\n\nCSV files should have columns matching:\n- Products: Name, SKU, Category, Price, Quantity\n- Customers: Name, Email, Phone, Address`, 5000)
     } else if (fileType === 'json') {
-      alert(`Importing backup file ${file.name}...\n\nThis will restore all data from the backup file.`)
+      toast.info(`Importing backup file ${file.name}...\n\nThis will restore all data from the backup file.`, 5000)
     } else {
-      alert('Unsupported file type. Please use CSV or JSON files.')
+      toast.error('Unsupported file type. Please use CSV or JSON files.')
     }
     
     // Reset file input

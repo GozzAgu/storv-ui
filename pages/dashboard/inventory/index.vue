@@ -79,20 +79,20 @@
               </h3>
             </div>
           </div>
-          <div v-if="canManage" class="flex items-center gap-1">
+          <div v-if="canManage" class="flex items-center gap-1 flex-shrink-0">
             <button
               @click.stop="handleEditFolder(folder)"
-              class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              class="flex-shrink-0 p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="Edit folder"
             >
-              <PencilIcon class="w-4 h-4" />
+              <PencilIcon class="w-4 h-4 flex-shrink-0" />
             </button>
             <button
               @click.stop="handleDeleteFolder(folder)"
-              class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              class="flex-shrink-0 p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="Delete folder"
             >
-              <TrashIcon class="w-4 h-4" />
+              <TrashIcon class="w-4 h-4 flex-shrink-0" />
             </button>
           </div>
         </div>
@@ -288,12 +288,11 @@
 
         <!-- Serial Number Management -->
         <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-          <label class="flex items-start gap-3 cursor-pointer">
-            <input
-              v-model="folderForm.hasSerialNumbers"
-              type="checkbox"
-              class="mt-1 w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-            />
+          <Checkbox
+            v-model="folderForm.hasSerialNumbers"
+            size="sm"
+            wrapper-class="items-start"
+          >
             <div class="flex-1">
               <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Is serial number going to be available for items in this folder?
@@ -302,7 +301,7 @@
                 When enabled, quantity field will be hidden and automatically set to 1 for each item (each item has a unique serial number). When disabled, quantity field will be visible and editable for bulk items.
               </p>
             </div>
-          </label>
+          </Checkbox>
         </div>
 
         <!-- Department Access Control -->
@@ -320,22 +319,24 @@
             No departments available. Create departments first.
           </div>
           <div v-else class="space-y-2 max-h-48 overflow-y-auto">
-            <label
+            <div
               v-for="dept in departmentsStore.departments"
               :key="dept.id"
-              class="flex items-center gap-2 p-2 hover:bg-white dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
+              class="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <input
-                :value="dept.id"
-                v-model="folderForm.allowedDepartments"
-                type="checkbox"
-                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-              />
-              <span class="text-sm text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
-              <span v-if="dept.description" class="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-                {{ dept.description }}
-              </span>
-            </label>
+              <Checkbox
+                :model-value="folderForm.allowedDepartments.includes(dept.id)"
+                @update:model-value="(checked) => toggleDepartmentAccess(dept.id, checked)"
+                size="sm"
+              >
+                <div class="flex items-center justify-between flex-1">
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
+                  <span v-if="dept.description" class="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                    {{ dept.description }}
+                  </span>
+                </div>
+              </Checkbox>
+            </div>
           </div>
         </div>
 
@@ -485,6 +486,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -902,6 +904,19 @@ const handleRemoveField = (index: number) => {
     return
   }
   editableFields.value.splice(index, 1)
+}
+
+const toggleDepartmentAccess = (departmentId: string, checked: boolean) => {
+  if (checked) {
+    if (!folderForm.allowedDepartments.includes(departmentId)) {
+      folderForm.allowedDepartments.push(departmentId)
+    }
+  } else {
+    const index = folderForm.allowedDepartments.indexOf(departmentId)
+    if (index > -1) {
+      folderForm.allowedDepartments.splice(index, 1)
+    }
+  }
 }
 
 // Load folders on mount

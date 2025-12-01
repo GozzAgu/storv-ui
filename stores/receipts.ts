@@ -6,6 +6,7 @@ import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
+import { useNotificationsStore } from './notifications'
 
 export interface ReceiptItem {
   itemId: string
@@ -319,6 +320,27 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         this.receipts.unshift(receiptForState)
+
+        // Create notification
+        try {
+          const notificationsStore = useNotificationsStore()
+          const notificationType = receiptData.isSwapIn ? 'swap_in_completed' : 'receipt_created'
+          const notificationTitle = receiptData.isSwapIn ? 'Swap-in Completed' : 'New Receipt Created'
+          const notificationMessage = receiptData.isSwapIn
+            ? `Swap-in receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName}`
+            : `Receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName} - Total: $${receiptData.total.toFixed(2)}`
+
+          await notificationsStore.createNotification(
+            notificationType,
+            notificationTitle,
+            notificationMessage,
+            { receiptId: newReceiptRef.id },
+            actualCreatorUid
+          )
+        } catch (notifError: any) {
+          console.warn('Failed to create notification for receipt:', notifError)
+          // Don't fail receipt creation if notification fails
+        }
 
         return newReceiptRef.id
       } catch (error: any) {

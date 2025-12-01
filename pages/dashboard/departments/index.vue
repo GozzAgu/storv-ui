@@ -217,20 +217,20 @@
               </p>
             </div>
           </div>
-          <div v-if="canManageDepartments" class="flex items-center gap-1 z-10">
+          <div v-if="canManageDepartments" class="flex items-center gap-1 z-10 flex-shrink-0">
             <button
               @click.stop="handleEditDepartment(department)"
-              class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+              class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
               title="Edit"
             >
-              <PencilIcon class="w-5 h-5" />
+              <PencilIcon class="w-5 h-5 flex-shrink-0" />
             </button>
             <button
               @click.stop="handleDeleteDepartment(department)"
-              class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               title="Delete"
             >
-              <TrashIcon class="w-5 h-5" />
+              <TrashIcon class="w-5 h-5 flex-shrink-0" />
             </button>
           </div>
         </div>

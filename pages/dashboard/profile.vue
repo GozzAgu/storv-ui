@@ -214,6 +214,42 @@
 
             <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <GlobeAltIcon class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Region</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
+                </div>
+              </div>
+              <button 
+                @click="showRegionModal = true"
+                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+              >
+                Change
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <CurrencyDollarIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Currency</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
+                </div>
+              </div>
+              <button 
+                @click="showCurrencyModal = true"
+                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+              >
+                Change
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                   <BellIcon class="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -696,6 +732,75 @@
       </template>
     </Modal>
 
+    <!-- Region Selection Modal -->
+    <Modal v-model="showRegionModal" title="Change Region" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Select your region</p>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <button
+            v-for="region in regions"
+            :key="region.code"
+            @click="selectRegion(region.code, region.name)"
+            :class="[
+              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              accountSettings.region === region.name
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            ]"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ region.flag }}</span>
+                <div>
+                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ region.name }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ region.code }}</p>
+                </div>
+              </div>
+              <div v-if="accountSettings.region === region.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+                <CheckCircleIcon class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showRegionModal = false">Close</Button>
+      </template>
+    </Modal>
+
+    <!-- Currency Selection Modal -->
+    <Modal v-model="showCurrencyModal" title="Change Currency" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">Select your currency</p>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <button
+            v-for="currency in currencies"
+            :key="currency.code"
+            @click="selectCurrency(currency.code, currency.name, currency.symbol)"
+            :class="[
+              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              accountSettings.currency === currency.code
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            ]"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-gray-900 dark:text-gray-100">{{ currency.name }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ currency.symbol }} {{ currency.code }}</p>
+              </div>
+              <div v-if="accountSettings.currency === currency.code" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+                <CheckCircleIcon class="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="secondary" @click="showCurrencyModal = false">Close</Button>
+      </template>
+    </Modal>
+
     <!-- Timezone Selection Modal -->
     <Modal v-model="showTimezoneModal" title="Change Timezone" size="md">
       <div class="space-y-4">
@@ -779,10 +884,14 @@ import {
   DevicePhoneMobileIcon,
   CheckCircleIcon,
   InformationCircleIcon,
+  GlobeAltIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
+import { usePreferences, currencies, regions } from '~/composables/usePreferences'
+import { useToast } from '~/composables/useToast'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
@@ -881,6 +990,25 @@ const loadProfileData = async () => {
 
 // Load profile and store information from Firestore + settings
 onMounted(async () => {
+  // Initialize preferences first
+  await initPreferences()
+  
+  // Load preferences into accountSettings
+  if (preferences.value) {
+    const lang = languages.find(l => l.code === preferences.value.language)
+    accountSettings.language = lang?.name || 'English (US)'
+    
+    const region = regions.find(r => r.code === preferences.value.region)
+    accountSettings.region = region?.name || 'United States'
+    
+    const currency = currencies.find(c => c.code === preferences.value.currency)
+    accountSettings.currency = currency ? `${currency.code} (${currency.symbol})` : 'USD ($)'
+    
+    const tz = timezones.find(t => t.value === preferences.value.timezone)
+    accountSettings.timezone = tz?.label || 'UTC (GMT +0:00)'
+    selectedTimezone.value = preferences.value.timezone || 'UTC'
+  }
+  
   if (import.meta.client) {
     // Load settings from localStorage
     // Load notification settings
@@ -900,19 +1028,6 @@ onMounted(async () => {
     if (notificationSettings.sms) enabledTypes.push('SMS')
     if (notificationSettings.inApp) enabledTypes.push('In-App')
     accountSettings.notifications = enabledTypes.length > 0 ? enabledTypes.join(', ') : 'None'
-    
-    // Load timezone
-    const savedTimezone = localStorage.getItem('timezone')
-    if (savedTimezone) {
-      selectedTimezone.value = savedTimezone
-      accountSettings.timezone = timezones.find(tz => tz.value === savedTimezone)?.label || savedTimezone
-    }
-    
-    // Load language
-    const savedLanguage = localStorage.getItem('language')
-    if (savedLanguage) {
-      accountSettings.language = savedLanguage
-    }
     
     // Load 2FA status from localStorage (fallback)
     const saved2FA = localStorage.getItem('twoFactorEnabled')
@@ -961,9 +1076,15 @@ watch(currentUser, async (newUser) => {
 // Theme integration
 const { theme, setTheme, actualTheme } = useTheme()
 
+// Preferences integration
+const { preferences, updatePreferences, initialize: initPreferences } = usePreferences()
+const toast = useToast()
+
 // Account settings
 const accountSettings = reactive({
   language: 'English (US)',
+  region: 'United States',
+  currency: 'USD ($)',
   notifications: 'Email, Push, SMS',
   theme: 'Follow system',
   timezone: 'UTC (GMT +0:00)',
@@ -1054,7 +1175,7 @@ const superAdminPermissions = [
   'View and manage all returns',
   'Access all reports and analytics',
   'Manage departments and staff',
-  'Configure tax and payment settings',
+  'Configure payment settings',
   'Export and import all data',
   'Delete all data',
   'Manage leave requests',
@@ -1064,6 +1185,8 @@ const superAdminPermissions = [
 
 // Modal states (simplified - would be actual modals in production)
 const showLanguageModal = ref(false)
+const showRegionModal = ref(false)
+const showCurrencyModal = ref(false)
 const showNotificationsModal = ref(false)
 const showThemeModal = ref(false)
 const showTimezoneModal = ref(false)
@@ -1094,7 +1217,7 @@ const cancelEditing = (section: string) => {
 
 const savePersonalInfo = async () => {
   if (!currentUser.value) {
-    alert('You must be signed in to update your profile')
+    toast.error('You must be signed in to update your profile')
     return
   }
 
@@ -1107,10 +1230,10 @@ const savePersonalInfo = async () => {
     
     isEditingPersonalInfo.value = false
     Object.assign(backupData, { ...profileData })
-    alert('Profile updated successfully!')
+    toast.success('Profile updated successfully!')
   } catch (error: any) {
     console.error('Error saving profile:', error)
-    alert(error.message || 'Failed to update profile. Please try again.')
+    toast.error(error.message || 'Failed to update profile. Please try again.')
   }
 }
 
@@ -1125,7 +1248,7 @@ const handleImageUpload = (event: Event) => {
     // Here you would typically upload to a server
     console.log('Uploading image:', file.name)
     // Show success message
-    alert('Image uploaded successfully!')
+    toast.success('Image uploaded successfully!')
   }
 }
 
@@ -1141,14 +1264,44 @@ const selectTheme = (themeValue: 'light' | 'dark' | 'system') => {
 }
 
 // Language functions
-const selectLanguage = (code: string, name: string) => {
+const selectLanguage = async (code: string, name: string) => {
   accountSettings.language = name
-  if (import.meta.client) {
-    localStorage.setItem('language', name)
-    localStorage.setItem('languageCode', code)
+  try {
+    await updatePreferences({ language: code })
+    toast.success('Language updated successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to update language')
   }
   setTimeout(() => {
     showLanguageModal.value = false
+  }, 300)
+}
+
+// Region functions
+const selectRegion = async (code: string, name: string) => {
+  accountSettings.region = name
+  try {
+    await updatePreferences({ region: code })
+    toast.success('Region updated successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to update region')
+  }
+  setTimeout(() => {
+    showRegionModal.value = false
+  }, 300)
+}
+
+// Currency functions
+const selectCurrency = async (code: string, name: string, symbol: string) => {
+  accountSettings.currency = `${code} (${symbol})`
+  try {
+    await updatePreferences({ currency: code, currencySymbol: symbol })
+    toast.success('Currency updated successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to update currency')
+  }
+  setTimeout(() => {
+    showCurrencyModal.value = false
   }, 300)
 }
 
@@ -1176,11 +1329,11 @@ const handlePushNotificationToggle = async () => {
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
         notificationSettings.push = false
-        alert('Push notifications require permission. Please enable them in your browser settings.')
+        toast.warning('Push notifications require permission. Please enable them in your browser settings.')
       }
     } else if (Notification.permission === 'denied') {
       notificationSettings.push = false
-      alert('Push notifications are blocked. Please enable them in your browser settings.')
+      toast.warning('Push notifications are blocked. Please enable them in your browser settings.')
     }
   }
 }
@@ -1207,7 +1360,7 @@ const handlePasswordChange = async () => {
 
   try {
     await updateUserPassword(passwordForm.currentPassword, passwordForm.newPassword)
-    alert('Password changed successfully!')
+    toast.success('Password changed successfully!')
     showPasswordModal.value = false
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
@@ -1257,7 +1410,7 @@ const handleDisable2FA = async () => {
     }
     show2FADisableModal.value = false
     disable2FAPassword.value = ''
-    alert('Two-factor authentication has been disabled')
+    toast.success('Two-factor authentication has been disabled')
   } catch (error: any) {
     disable2FAError.value = error.message || 'Failed to disable 2FA. Please try again.'
   } finally {
@@ -1266,7 +1419,7 @@ const handleDisable2FA = async () => {
 }
 
 const handle2FAError = (error: string) => {
-  alert(error)
+  toast.error(error)
 }
 
 // Sessions functions
@@ -1289,7 +1442,7 @@ const revokeSession = async (index: number) => {
     activeSessions.value.splice(index, 1)
     securitySettings.activeSessions = activeSessions.value.length
     // In production, you'd revoke the actual session token
-    alert('Session revoked successfully')
+    toast.success('Session revoked successfully')
   }
 }
 
@@ -1299,7 +1452,7 @@ const revokeAllSessions = async () => {
     activeSessions.value = activeSessions.value.filter(s => s.current)
     securitySettings.activeSessions = activeSessions.value.length
     // In production, you'd revoke all other session tokens
-    alert('All other sessions have been revoked')
+    toast.success('All other sessions have been revoked')
   }
 }
 
@@ -1315,10 +1468,14 @@ const formatDate = (dateString: string) => {
 }
 
 // Timezone functions
-const saveTimezone = () => {
-  accountSettings.timezone = timezones.find(tz => tz.value === selectedTimezone.value)?.label || selectedTimezone.value
-  if (import.meta.client) {
-    localStorage.setItem('timezone', selectedTimezone.value)
+const saveTimezone = async () => {
+  const timezoneLabel = timezones.find(tz => tz.value === selectedTimezone.value)?.label || selectedTimezone.value
+  accountSettings.timezone = timezoneLabel
+  try {
+    await updatePreferences({ timezone: selectedTimezone.value })
+    toast.success('Timezone updated successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to update timezone')
   }
   showTimezoneModal.value = false
 }

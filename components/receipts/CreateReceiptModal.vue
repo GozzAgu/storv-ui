@@ -142,12 +142,11 @@
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        :checked="selectedItems.find(si => si.id === item.id) !== undefined"
-                        @change="toggleItemSelection(item)"
+                      <Checkbox
+                        :model-value="selectedItems.find(si => si.id === item.id) !== undefined"
+                        @update:model-value="(checked) => toggleItemSelection(item, checked)"
                         @click.stop
-                        class="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                        size="sm"
                       />
                       <div class="flex-1">
                         <h4 class="font-medium text-gray-900 dark:text-gray-100">
@@ -298,16 +297,11 @@
 
           <!-- Swap-In Section -->
           <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-            <label class="flex items-center gap-3 mb-4 cursor-pointer">
-              <input
-                v-model="isSwapIn"
-                type="checkbox"
-                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-              />
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                This is a swap-in transaction
-              </span>
-            </label>
+            <Checkbox
+              v-model="isSwapIn"
+              label="This is a swap-in transaction"
+              size="sm"
+            />
 
             <div v-if="isSwapIn" class="space-y-4 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div>
@@ -395,14 +389,12 @@
                       </option>
                     </select>
                     <!-- Boolean Input -->
-                    <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
-                      <input
-                        v-model="swapInItemForm[field.name]"
-                        type="checkbox"
-                        class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-                      />
-                      <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
-                    </label>
+                    <Checkbox
+                      v-else-if="field.type === 'boolean'"
+                      v-model="swapInItemForm[field.name]"
+                      :label="field.label || field.name"
+                      size="sm"
+                    />
                   </div>
                 </div>
                 <p v-if="!swapInFolder.template?.fields || swapInFolder.template.fields.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
@@ -478,6 +470,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useCustomersStore } from '~/stores/customers'
@@ -648,16 +641,35 @@ const loadItems = async () => {
   }
 }
 
-const toggleItemSelection = (item: InventoryItem) => {
-  const index = selectedItems.value.findIndex(si => si.id === item.id)
-  if (index > -1) {
-    selectedItems.value.splice(index, 1)
+const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
+  // If called from checkbox component, use the checked value; otherwise toggle
+  if (checked !== undefined) {
+    if (checked) {
+      const index = selectedItems.value.findIndex(si => si.id === item.id)
+      if (index === -1) {
+        selectedItems.value.push({
+          id: item.id,
+          quantity: 1,
+          item,
+        })
+      }
+    } else {
+      const index = selectedItems.value.findIndex(si => si.id === item.id)
+      if (index > -1) {
+        selectedItems.value.splice(index, 1)
+      }
+    }
   } else {
-    selectedItems.value.push({
-      id: item.id,
-      quantity: 1,
-      item,
-    })
+    const index = selectedItems.value.findIndex(si => si.id === item.id)
+    if (index > -1) {
+      selectedItems.value.splice(index, 1)
+    } else {
+      selectedItems.value.push({
+        id: item.id,
+        quantity: 1,
+        item,
+      })
+    }
   }
 }
 

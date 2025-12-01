@@ -124,16 +124,14 @@
         </div>
 
         <!-- Confirmation Checkbox -->
-        <div class="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <input
+        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <Checkbox
             v-model="confirmed"
-            type="checkbox"
-            class="mt-1 w-4 h-4 text-red-600 border-gray-300 dark:border-gray-600 rounded focus:ring-red-500"
-            id="confirmDelete"
+            label="I understand that this action cannot be undone and will permanently delete this receipt and its associated data."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-sm text-gray-700 dark:text-gray-300"
           />
-          <label for="confirmDelete" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            I understand that this action cannot be undone and will permanently delete this receipt and its associated data.
-          </label>
         </div>
       </div>
     </div>
@@ -157,6 +155,7 @@ import { ref, watch } from 'vue'
 import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 
 interface Props {

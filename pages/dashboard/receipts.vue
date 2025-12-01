@@ -292,7 +292,7 @@
               <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Created By
               </th>
-              <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 sm:px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[160px]">
                 Actions
               </th>
             </tr>
@@ -367,37 +367,37 @@
                   {{ getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="flex items-center justify-end gap-2">
+              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right min-w-[160px]">
+                <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     @click="handleViewReceipt(receipt)"
-                    class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="View"
                   >
-                    <EyeIcon class="w-5 h-5" />
+                    <EyeIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handlePrintReceipt(receipt)"
-                    class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     title="Print"
                   >
-                    <PrinterIcon class="w-5 h-5" />
+                    <PrinterIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="receipt.status === 'completed' && canManage"
                     @click="handleRefundReceipt(receipt)"
-                    class="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                     title="Refund"
                   >
-                    <ArrowPathIcon class="w-5 h-5" />
+                    <ArrowPathIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canManage"
                     @click="handleDeleteReceipt(receipt)"
-                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete"
                   >
-                    <TrashIcon class="w-5 h-5" />
+                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                 </div>
               </td>

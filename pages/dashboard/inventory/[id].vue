@@ -234,14 +234,14 @@ ${{ formatCurrency(totalInventoryValue) }}
                 </div>
               </th>
               <th v-if="canManageInventoryItems" class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                <input
-                  type="checkbox"
-                  :checked="selectedItemsForBulk.length === filteredItems.length && filteredItems.length > 0"
-                  @change="toggleSelectAll"
-                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                <Checkbox
+                  :model-value="selectedItemsForBulk.length === filteredItems.length && filteredItems.length > 0"
+                  @update:model-value="(checked) => toggleSelectAll(checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
                     Actions
                   </th>
             </tr>
@@ -332,43 +332,43 @@ ${{ formatCurrency(totalInventoryValue) }}
                 </div>
               </td>
               <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-center">
-                <input
-                  type="checkbox"
-                  :checked="selectedItemsForBulk.some(i => i.id === item.id)"
-                  @change="toggleItemSelection(item)"
-                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                <Checkbox
+                  :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
+                  @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
                 />
               </td>
-                  <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-right">
-                <div class="flex items-center justify-end gap-2">
+                  <td v-if="canManageInventoryItems" class="px-3 sm:px-6 py-4 whitespace-nowrap text-right min-w-[140px]">
+                <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     @click="handleApplyDiscount(item)"
-                    class="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                     :title="item.discountedPrice ? 'Edit discount' : 'Apply discount'"
                   >
-                    <TagIcon class="w-5 h-5" />
+                    <TagIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="item.discountedPrice"
                     @click="handleRemoveDiscount(item)"
-                    class="p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
                     title="Remove discount"
                   >
-                    <XMarkIcon class="w-5 h-5" />
+                    <XMarkIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleEditItem(item)"
-                    class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="Edit item"
                   >
-                    <PencilIcon class="w-5 h-5" />
+                    <PencilIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
-                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete item"
                   >
-                    <TrashIcon class="w-5 h-5" />
+                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                 </div>
               </td>
@@ -505,14 +505,12 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </option>
                 </select>
                 <!-- Boolean Input -->
-                <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
-                  <input
-                    v-model="itemForm[field.name]"
-                    type="checkbox"
-                    class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-                  />
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
-                </label>
+                <Checkbox
+                  v-else-if="field.type === 'boolean'"
+                  v-model="itemForm[field.name]"
+                  :label="field.label || field.name"
+                  size="sm"
+                />
               </div>
             </div>
           </div>
@@ -621,14 +619,12 @@ ${{ formatCurrency(totalInventoryValue) }}
                 </option>
               </select>
               <!-- Boolean Input -->
-              <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
-                <input
-                  v-model="itemForm[field.name]"
-                  type="checkbox"
-                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-                />
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
-              </label>
+              <Checkbox
+                v-else-if="field.type === 'boolean'"
+                v-model="itemForm[field.name]"
+                :label="field.label || field.name"
+                size="sm"
+              />
             </div>
           </div>
           <div v-if="!folder?.template?.fields || folder.template.fields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
@@ -690,6 +686,7 @@ import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
@@ -1278,20 +1275,39 @@ const handleBulkDiscountApplied = async () => {
   selectedItemsForBulk.value = []
 }
 
-const toggleItemSelection = (item: InventoryItem) => {
-  const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
-  if (index > -1) {
-    selectedItemsForBulk.value.splice(index, 1)
+const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
+  // If called from checkbox component, use the checked value; otherwise toggle
+  if (checked !== undefined) {
+    if (checked) {
+      if (!selectedItemsForBulk.value.find(i => i.id === item.id)) {
+        selectedItemsForBulk.value.push(item)
+      }
+    } else {
+      const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
+      if (index > -1) {
+        selectedItemsForBulk.value.splice(index, 1)
+      }
+    }
   } else {
-    selectedItemsForBulk.value.push(item)
+    const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
+    if (index > -1) {
+      selectedItemsForBulk.value.splice(index, 1)
+    } else {
+      selectedItemsForBulk.value.push(item)
+    }
   }
 }
 
-const toggleSelectAll = () => {
-  if (selectedItemsForBulk.value.length === filteredItems.value.length) {
-    selectedItemsForBulk.value = []
+const toggleSelectAll = (checked?: boolean) => {
+  // If called from checkbox component, use the checked value; otherwise toggle
+  if (checked !== undefined) {
+    selectedItemsForBulk.value = checked ? [...filteredItems.value] : []
   } else {
-    selectedItemsForBulk.value = [...filteredItems.value]
+    if (selectedItemsForBulk.value.length === filteredItems.value.length) {
+      selectedItemsForBulk.value = []
+    } else {
+      selectedItemsForBulk.value = [...filteredItems.value]
+    }
   }
 }
 
@@ -1710,26 +1726,21 @@ const handleFileImport = async (event: Event) => {
     // If no items to import after filtering duplicates and errors, show message and exit
     // Only show this if ALL items were duplicates or had errors
     if (itemsToImport.length === 0) {
-      let message = 'No new items to import.'
       const reasons: string[] = []
       
       if (skippedDuplicates > 0) {
-        reasons.push(`${skippedDuplicates} item(s) were skipped because they already exist in inventory`)
+        reasons.push(`${skippedDuplicates} duplicate(s)`)
       }
       if (errors.length > 0) {
-        reasons.push(`${errors.length} row(s) had validation errors`)
+        reasons.push(`${errors.length} error(s)`)
       }
       
       if (reasons.length > 0) {
-        message += `\n\n${reasons.join('.\n')}.`
-        if (skippedDuplicates > 0) {
-          message += `\n\nOnly items with unique serial numbers that don't already exist will be imported.`
-        }
+        toast.warning(`No new items to import. All items were skipped: ${reasons.join(', ')}.`, 5000)
       } else {
-        message += '\n\nPlease check your Excel file and try again.'
+        toast.warning('No new items to import. Please check your Excel file and try again.', 5000)
       }
       
-      alert(message)
       if (fileInputRef.value) {
         fileInputRef.value.value = ''
       }
@@ -1739,8 +1750,10 @@ const handleFileImport = async (event: Event) => {
 
     // Show validation errors if any (before confirmation) - duplicates are handled separately
     if (errors.length > 0) {
-      const errorMessage = `Found ${errors.length} validation error(s) that will be skipped:\n\n${errors.slice(0, 5).join('\n')}${errors.length > 5 ? `\n... and ${errors.length - 5} more errors` : ''}\n\nThe import will continue with valid items.`
-      alert(errorMessage)
+      const errorCount = errors.length
+      const errorPreview = errors.slice(0, 3).join('; ')
+      const moreErrors = errorCount > 3 ? ` (and ${errorCount - 3} more)` : ''
+      toast.warning(`Found ${errorCount} validation error(s) that will be skipped${moreErrors}. The import will continue with valid items.`, 6000)
     }
 
     // Confirm import with summary
@@ -1797,31 +1810,34 @@ const handleFileImport = async (event: Event) => {
     await inventoryStore.fetchFolders()
 
     // Show result
-    let resultMessage = `Import completed!\n\n` +
-      `Successfully imported: ${successCount} item(s)\n`
+    const resultParts: string[] = []
+    
+    if (successCount > 0) {
+      resultParts.push(`Successfully imported: ${successCount} item(s)`)
+    }
     
     if (failCount > 0) {
-      resultMessage += `Failed: ${failCount} item(s)\n`
+      resultParts.push(`Failed: ${failCount} item(s)`)
     }
     
     if (skippedDuplicates > 0) {
-      resultMessage += `Skipped (duplicate serial numbers): ${skippedDuplicates} item(s)`
-      if (duplicateSerialNumbers.length > 0 && duplicateSerialNumbers.length <= 10) {
-        resultMessage += `\nSerial numbers: ${duplicateSerialNumbers.join(', ')}`
-      } else if (duplicateSerialNumbers.length > 10) {
-        resultMessage += `\nFirst 10 serial numbers: ${duplicateSerialNumbers.slice(0, 10).join(', ')}...`
-      }
-      resultMessage += '\n'
+      resultParts.push(`Skipped duplicates: ${skippedDuplicates} item(s)`)
     }
     
     if (errors.length > 0) {
-      resultMessage += `Skipped (errors): ${errors.length} row(s)`
+      resultParts.push(`Skipped errors: ${errors.length} row(s)`)
     }
     
-    alert(resultMessage)
+    if (successCount > 0) {
+      toast.success(resultParts.join('. '), 5000)
+    } else if (failCount > 0 || skippedDuplicates > 0 || errors.length > 0) {
+      toast.warning(resultParts.join('. '), 5000)
+    } else {
+      toast.info('Import completed.', 3000)
+    }
   } catch (error: any) {
     console.error('Import error:', error)
-    alert(`Failed to import items: ${error.message || 'Unknown error'}`)
+    toast.error(`Failed to import items: ${error.message || 'Unknown error'}`)
   } finally {
     isImporting.value = false
     if (fileInputRef.value) {
@@ -1937,7 +1953,7 @@ const loadItems = async () => {
     }
   } catch (error: any) {
     console.error('Error loading items:', error)
-    alert(error.message || 'Failed to load items')
+    toast.error(error.message || 'Failed to load items')
   } finally {
     isLoadingItems.value = false
   }

@@ -122,16 +122,14 @@
         </div>
 
         <!-- Confirmation Checkbox -->
-        <div class="flex items-start gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <input
+        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+          <Checkbox
             v-model="confirmed"
-            type="checkbox"
-            class="mt-1 w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-            id="confirmReturn"
+            label="I confirm that I want to return/refund this receipt. All items will be returned to inventory and the receipt will be marked as refunded."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-sm text-gray-700 dark:text-gray-300"
           />
-          <label for="confirmReturn" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            I confirm that I want to return/refund this receipt. All items will be returned to inventory and the receipt will be marked as refunded.
-          </label>
         </div>
       </div>
     </div>
@@ -155,6 +153,7 @@ import { ref, watch } from 'vue'
 import { ArrowPathIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 

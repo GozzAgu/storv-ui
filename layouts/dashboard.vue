@@ -221,10 +221,19 @@
             <ThemeToggle />
 
             <!-- Notifications -->
-            <button class="relative p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+            <NuxtLink
+              to="/dashboard/notifications"
+              class="relative p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Notifications"
+            >
               <BellIcon class="w-6 h-6" />
-              <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+              <span
+                v-if="unreadNotificationCount > 0"
+                class="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5"
+              >
+                {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+              </span>
+            </NuxtLink>
 
             <!-- Profile Dropdown -->
             <div class="relative" ref="profileMenuRef">
@@ -321,10 +330,29 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { useNotificationsStore } from '~/stores/notifications'
 
 const { actualTheme } = useTheme()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const notificationsStore = useNotificationsStore()
+
+// Fetch notifications on mount
+onMounted(() => {
+  if (authStore.currentUser) {
+    notificationsStore.fetchNotifications()
+  }
+})
+
+// Watch for auth changes to fetch notifications
+watch(() => authStore.currentUser, (newUser) => {
+  if (newUser) {
+    notificationsStore.fetchNotifications()
+  }
+})
+
+// Computed unread count
+const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const sidebarOpen = ref(false)
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)

@@ -1,12 +1,39 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
 
+export interface StoreSettings {
+  inventory?: {
+    lowStockThreshold?: number
+    autoReorder?: boolean
+    defaultCategory?: string
+  }
+  receipt?: {
+    prefix?: string
+    nextNumber?: number
+    autoPrint?: boolean
+  }
+  payment?: {
+    paymentMethods?: string[]
+  }
+}
+
 export interface StoreDetails {
   storeName: string
   storeAddress?: string
   storePhone?: string
   storeEmail?: string
   storeDescription?: string
+  settings?: StoreSettings
+}
+
+export interface UserPreferences {
+  currency: string
+  currencySymbol?: string
+  region: string
+  language: string
+  timezone: string
+  dateFormat: string
+  timeFormat: '12h' | '24h'
 }
 
 export interface UserData {
@@ -15,6 +42,7 @@ export interface UserData {
   name: string
   role: 'superAdmin' | 'admin' | 'user' | 'staff'
   storeDetails?: StoreDetails
+  preferences?: UserPreferences
   hasCompletedOnboarding: boolean
   hasCompletedTutorial: boolean
   twoFactorEnabled?: boolean
