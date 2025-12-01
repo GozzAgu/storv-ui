@@ -380,35 +380,43 @@ const totalInventoryItems = computed(() => inventoryStore.totalItems)
 const lowStockCount = computed(() => inventoryStore.lowStockFolders.reduce((sum, folder) => sum + folder.lowStockCount, 0))
 
 // Inventory status breakdown
+// In stock = items without dateOut (available)
 const inStockCount = computed(() => {
   let count = 0
   inventoryStore.folders.forEach(folder => {
     const items = inventoryStore.items[folder.id] || []
     items.forEach(item => {
-      const stock = typeof item.stock === 'number' ? item.stock : parseFloat(item.stock) || 0
-      if (stock > 10) count++
+      // Item is in stock if it doesn't have dateOut set (not sold)
+      // Check for null, undefined, and empty string to be safe
+      const dateOutValue = item.dateOut
+      const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+      if (!hasDateOut) {
+        count++
+      }
     })
   })
   return count
 })
+
+// Low stock doesn't apply anymore since we track individual items, not quantities
+// Set to 0 or keep for backward compatibility with UI
 const lowStockItemsCount = computed(() => {
-  let count = 0
-  inventoryStore.folders.forEach(folder => {
-    const items = inventoryStore.items[folder.id] || []
-    items.forEach(item => {
-      const stock = typeof item.stock === 'number' ? item.stock : parseFloat(item.stock) || 0
-      if (stock > 0 && stock <= 10) count++
-    })
-  })
-  return count
+  return 0 // No low stock concept with individual item tracking
 })
+
+// Out of stock = items with dateOut set (sold)
 const outOfStockCount = computed(() => {
   let count = 0
   inventoryStore.folders.forEach(folder => {
     const items = inventoryStore.items[folder.id] || []
     items.forEach(item => {
-      const stock = typeof item.stock === 'number' ? item.stock : parseFloat(item.stock) || 0
-      if (stock === 0) count++
+      // Item is out of stock if it has dateOut set (sold)
+      // Check for null, undefined, and empty string to be safe
+      const dateOutValue = item.dateOut
+      const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+      if (hasDateOut) {
+        count++
+      }
     })
   })
   return count

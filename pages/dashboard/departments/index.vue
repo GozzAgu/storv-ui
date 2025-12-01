@@ -147,7 +147,7 @@
     </Card>
 
     <!-- Compact Header (Visible only on large screens) -->
-    <Card v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length > 0" padding="sm" class="hidden lg:block mb-4">
+    <Card v-if="!departmentsStore.loading && !departmentsStore.error" padding="sm" class="hidden lg:block mb-4">
       <div class="flex items-center justify-between">
         <!-- Compact Stats -->
         <div class="flex items-center gap-6">

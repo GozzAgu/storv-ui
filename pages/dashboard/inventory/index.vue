@@ -30,7 +30,7 @@
     </Card>
 
     <!-- Compact Header (Visible only on large screens) -->
-    <Card v-if="paginatedFolders.length > 0" padding="sm" class="hidden lg:block mb-4">
+    <Card v-if="!inventoryStore.loading" padding="sm" class="hidden lg:block mb-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Folders: <span class="font-semibold">{{ filteredFolders.length }}</span></span>
