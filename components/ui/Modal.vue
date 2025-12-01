@@ -20,7 +20,7 @@
         ></div>
 
         <!-- Modal Container -->
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-2 sm:p-4">
           <Transition
             enter-active-class="transition ease-out duration-300"
             enter-from-class="opacity-0 scale-95 translate-y-4"
@@ -40,11 +40,11 @@
               <!-- Header -->
               <div
                 v-if="title || $slots.header || showClose"
-                class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
               >
-                <div class="flex items-center gap-3 flex-1">
+                <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                   <slot name="header">
-                    <h3 v-if="title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 v-if="title" class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {{ title }}
                     </h3>
                   </slot>
@@ -52,21 +52,22 @@
                 <button
                   v-if="showClose"
                   @click="handleClose"
-                  class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+                  aria-label="Close modal"
                 >
                   <XMarkIcon class="w-5 h-5" />
                 </button>
               </div>
 
               <!-- Content -->
-              <div :class="contentPadding" class="overflow-y-auto flex-1 min-h-0">
+              <div class="overflow-y-auto flex-1 min-h-0" :class="contentPadding">
                 <slot />
               </div>
 
               <!-- Footer -->
               <div
                 v-if="$slots.footer"
-                class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl"
+                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl flex-shrink-0"
               >
                 <slot name="footer" />
               </div>
@@ -96,7 +97,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showClose: true,
   closeOnBackdrop: true,
-  contentPadding: 'p-6',
+  contentPadding: 'p-4 sm:p-6',
 })
 
 const emit = defineEmits<{

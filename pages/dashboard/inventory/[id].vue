@@ -447,7 +447,7 @@ ${{ formatCurrency(totalInventoryValue) }}
             <div
               v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo') || []"
               :key="field.id"
-              :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
+              :class="['grid gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']"
             >
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -634,8 +634,8 @@ ${{ formatCurrency(totalInventoryValue) }}
       </form>
 
       <template #footer>
-        <Button variant="outline" @click="handleCancelItem">Cancel</Button>
-        <Button variant="primary" type="submit" @click="handleSaveItem">
+        <Button variant="outline" @click="handleCancelItem" class="w-full sm:w-auto">Cancel</Button>
+        <Button variant="primary" type="submit" @click="handleSaveItem" class="w-full sm:w-auto">
           {{ editingItem ? 'Update' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Item${serialNumbers.length !== 1 ? 's' : ''}` : 'Add') }} Item{{ folder?.hasSerialNumbers && !editingItem && serialNumbers.length !== 1 ? 's' : '' }}
         </Button>
       </template>

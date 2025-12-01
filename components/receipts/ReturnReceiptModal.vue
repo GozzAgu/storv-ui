@@ -135,12 +135,13 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" @click="handleCancel">Cancel</Button>
+      <Button variant="outline" @click="handleCancel" class="w-full sm:w-auto">Cancel</Button>
       <Button
         variant="primary"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmReturn"
         :icon="ArrowPathIcon"
+        class="w-full sm:w-auto"
       >
         {{ isProcessing ? 'Processing...' : 'Confirm Return/Refund' }}
       </Button>

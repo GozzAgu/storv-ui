@@ -20,7 +20,7 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Discount Type *
             </label>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 @click="discountType = 'percentage'"
@@ -110,17 +110,16 @@
     </template>
 
     <template #footer>
-      <div class="flex items-center justify-end gap-3">
-        <Button variant="outline" @click="handleCancel">Cancel</Button>
-        <Button
-          variant="primary"
-          @click="handleApplyDiscount"
-          :disabled="!isValid || isApplying"
-        >
-          <span v-if="isApplying">Applying...</span>
-          <span v-else>Apply Discount</span>
-        </Button>
-      </div>
+      <Button variant="outline" @click="handleCancel" class="w-full sm:w-auto">Cancel</Button>
+      <Button
+        variant="primary"
+        @click="handleApplyDiscount"
+        :disabled="!isValid || isApplying"
+        class="w-full sm:w-auto"
+      >
+        <span v-if="isApplying">Applying...</span>
+        <span v-else>Apply Discount</span>
+      </Button>
     </template>
   </Modal>
 </template>

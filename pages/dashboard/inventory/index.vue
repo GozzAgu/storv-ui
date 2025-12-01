@@ -379,41 +379,41 @@
             <div
               v-for="(field, index) in editableFields"
               :key="field.id"
-              class="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+              class="flex flex-col sm:flex-row items-start gap-3 sm:gap-3 p-4 sm:p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
             >
-              <div class="flex-1 grid grid-cols-3 gap-3">
+              <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Field Name *
                   </label>
                   <input
                     v-model="field.name"
                     type="text"
                     required
-                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="fieldName"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Label *
                   </label>
                   <input
                     v-model="field.label"
                     type="text"
                     required
-                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                     placeholder="Display Name"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Field Type *
                   </label>
                   <select
                     v-model="field.type"
                     required
-                    class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                   >
                     <option value="text">Text</option>
                     <option value="number">Number</option>
@@ -424,14 +424,14 @@
                   </select>
                 </div>
               </div>
-              <div class="flex items-center gap-2 pt-6">
+              <div class="flex items-center gap-2 pt-3 sm:pt-6 w-full sm:w-auto justify-between sm:justify-start">
                 <label class="flex items-center gap-1.5 cursor-pointer">
                   <input
                     v-model="field.required"
                     type="checkbox"
-                    class="w-3 h-3 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                    class="w-4 h-4 sm:w-3 sm:h-3 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                   />
-                  <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
+                  <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Required</span>
                 </label>
                 <!-- Default fields cannot be removed -->
                 <button

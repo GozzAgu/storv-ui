@@ -422,25 +422,28 @@
     </template>
 
     <template #footer>
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 w-full">
         <Button
           v-if="currentStep > 0"
           variant="outline"
           @click="previousStep"
+          class="w-full sm:w-auto order-2 sm:order-1"
         >
           Previous
         </Button>
-        <div v-else></div>
-        <div class="flex items-center gap-2">
+        <div v-else class="hidden sm:block"></div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
             @click="handleCancel"
+            class="w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             v-if="currentStep < 2"
             variant="primary"
+            class="w-full sm:w-auto"
             @click="nextStep"
             :disabled="!canProceed"
           >
@@ -451,6 +454,7 @@
             variant="primary"
             @click="handleCreateReceipt"
             :disabled="!isFormValid || isCreating"
+            class="w-full sm:w-auto"
           >
             <span v-if="isCreating">Creating...</span>
             <span v-else>Create Receipt</span>

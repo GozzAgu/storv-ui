@@ -310,77 +310,191 @@
         </div>
 
         <!-- Additional Features Grid -->
-        <div class="border-t border-gray-200 pt-12 sm:pt-16">
-          <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-10 sm:mb-12 text-center">Additional Powerful Features</h3>
-          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 p-6 rounded-xl border border-yellow-200 dark:border-yellow-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center mb-4">
-                <BoltIcon class="w-5 h-5 text-white" />
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-12 sm:pt-16 pb-12 sm:pb-16">
+          <h3 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-8 sm:mb-12 text-center">
+            <span class="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">Additional Powerful Features</span>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <BoltIcon class="w-6 h-6 text-white" />
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Discount Management</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Individual or bulk discounts</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Track original & discounted prices</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Discount Management</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Apply individual or bulk discounts with percentage or fixed amounts. Track original and discounted prices.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20 p-6 rounded-xl border border-teal-200 dark:border-teal-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center mb-4">
-                <ArrowPathIcon class="w-5 h-5 text-white" />
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <ArrowPathIcon class="w-6 h-6 text-white" />
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Swap-In Transactions</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Device swaps & exchanges</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Auto-update inventory</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Swap-In Transactions</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Handle device swaps where customers exchange items. Automatically add swapped items to inventory.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-800/20 p-6 rounded-xl border border-rose-200 dark:border-rose-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center mb-4">
-                <BellAlertIcon class="w-5 h-5 text-white" />
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-rose-500 to-rose-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <BellAlertIcon class="w-6 h-6 text-white" />
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Activity Notifications</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Real-time activity notifications</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Track receipts & inventory</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Activity Notifications</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Real-time notifications for all activities. Track receipts, inventory changes, and system updates.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/20 dark:to-violet-800/20 p-6 rounded-xl border border-violet-200 dark:border-violet-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-600 rounded-lg flex items-center justify-center mb-4">
-                <ShieldCheckIcon class="w-5 h-5 text-white" />
+            <div class="group relative bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-5 shadow-md border border-violet-500 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md border-2 border-white/30">
+                  <ShieldCheckIcon class="w-6 h-6 text-white" />
+                </div>
+                <h4 class="text-base font-bold text-white mb-3">Role-Based Security</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-white/80">Details:</p>
+                  <ul class="space-y-1 text-xs text-white/90">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Granular permissions system</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Super Admins, Managers, Staff</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Role-Based Security</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Granular permissions. Super Admins, Managers, and Staff with appropriate access controls.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center mb-4">
-                <DevicePhoneMobileIcon class="w-5 h-5 text-white" />
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <DevicePhoneMobileIcon class="w-6 h-6 text-white" />
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Excel Import/Export</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Bulk import via Excel</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Smart duplicate detection</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Excel Import/Export</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Bulk import inventory items via Excel. Export data for backup or reporting. Smart duplicate detection.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/20 dark:to-cyan-800/20 p-6 rounded-xl border border-cyan-200 dark:border-cyan-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center mb-4">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Multi-Currency Support</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Multiple currencies support</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Auto formatting by locale</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Multi-Currency Support</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Support for multiple currencies and regions. Automatic formatting based on your locale settings.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center mb-4">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Payment Configuration</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Configure payment methods</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Customize receipt settings</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Payment Configuration</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Configure payment methods and receipt settings to match your business needs.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-sky-50 to-sky-100 dark:from-sky-900/20 dark:to-sky-800/20 p-6 rounded-xl border border-sky-200 dark:border-sky-800">
-              <div class="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-lg flex items-center justify-center mb-4">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+              <div class="flex flex-col items-center text-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h4 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-3">Data Export & Backup</h4>
+                <div class="text-left w-full space-y-1.5">
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Details:</p>
+                  <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Export CSV or JSON formats</span>
+                    </li>
+                    <li class="flex items-start">
+                      <span class="mr-1.5">•</span>
+                      <span>Full backup & restore</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <h4 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Data Export & Backup</h4>
-              <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">Export all your data in CSV or JSON formats. Full backup and restore capabilities for peace of mind.</p>
             </div>
           </div>
         </div>

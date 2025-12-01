@@ -55,8 +55,8 @@
     </div>
 
     <template #footer>
-      <Button variant="secondary" @click="handleClose">Cancel</Button>
-      <Button @click="handleSubmit" :disabled="isSubmitting || !formData.name || !formData.departmentType">
+      <Button variant="secondary" @click="handleClose" class="w-full sm:w-auto">Cancel</Button>
+      <Button @click="handleSubmit" :disabled="isSubmitting || !formData.name || !formData.departmentType" class="w-full sm:w-auto">
         <span v-if="isSubmitting" class="flex items-center gap-2">
           <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
