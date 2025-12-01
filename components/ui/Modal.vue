@@ -32,7 +32,7 @@
             <div
               v-if="modelValue"
               :class="[
-                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all',
+                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
                 sizeClasses
               ]"
               @click.stop
@@ -59,7 +59,7 @@
               </div>
 
               <!-- Content -->
-              <div :class="contentPadding">
+              <div :class="contentPadding" class="overflow-y-auto flex-1 min-h-0">
                 <slot />
               </div>
 

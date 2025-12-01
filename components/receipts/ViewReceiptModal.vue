@@ -46,7 +46,16 @@
           <div class="flex justify-between items-start mb-3">
             <div>
               <p class="text-xs text-gray-600 mb-0.5">Receipt Number</p>
-              <p class="text-sm font-semibold">{{ receipt.receiptNumber }}</p>
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-semibold">{{ receipt.receiptNumber }}</p>
+                <span
+                  v-if="receipt.isSwapIn"
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                  title="Swap-in transaction"
+                >
+                  Swap-in
+                </span>
+              </div>
             </div>
             <div class="text-right">
               <p class="text-xs text-gray-600 mb-0.5">Date</p>
@@ -132,6 +141,14 @@
           <p class="text-xs text-gray-700 whitespace-pre-wrap">{{ receipt.notes }}</p>
         </div>
 
+        <!-- Swap-In Information -->
+        <div v-if="receipt.isSwapIn && swapInFolderName" class="mb-5 pt-3 border-t border-gray-300">
+          <p class="text-xs font-semibold text-gray-600 mb-1">Swap-In:</p>
+          <p class="text-xs text-gray-700">
+            A device was swapped in and added to inventory folder: <strong>{{ swapInFolderName }}</strong>
+          </p>
+        </div>
+
         <!-- Footer -->
         <div class="mt-6 pt-4 border-t-2 border-gray-300 text-center text-xs text-gray-500">
           <p>Thank you for your business!</p>
@@ -149,6 +166,7 @@ import Modal from '~/components/ui/Modal.vue'
 import type { Receipt } from '~/stores/receipts'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
+import { useInventoryStore } from '~/stores/inventory'
 
 interface Props {
   modelValue: boolean
@@ -164,6 +182,7 @@ const emit = defineEmits<{
 const receiptContent = ref<HTMLElement | null>(null)
 const isPrinting = ref(false)
 const userStore = useUserStore()
+const inventoryStore = useInventoryStore()
 
 // Store information
 const storeName = computed(() => userStore.userData?.storeDetails?.storeName || '')
@@ -171,15 +190,32 @@ const storeAddress = computed(() => userStore.userData?.storeDetails?.storeAddre
 const storePhone = computed(() => userStore.userData?.storeDetails?.storePhone || '')
 const storeEmail = computed(() => userStore.userData?.storeDetails?.storeEmail || '')
 
+// Swap-in folder name
+const swapInFolderName = computed(() => {
+  if (!props.receipt?.isSwapIn || !props.receipt?.swapInFolderId) return null
+  const folder = inventoryStore.getFolderById(props.receipt.swapInFolderId)
+  return folder?.name || null
+})
+
 const authStore = useAuthStore()
 
-// Load user data if not already loaded
+// Load user data and folders if not already loaded
 watch(() => props.modelValue, async (isOpen) => {
-  if (isOpen && !userStore.userData && authStore.currentUser) {
-    try {
-      await userStore.fetchUserData(authStore.currentUser.uid)
-    } catch (error) {
-      console.error('Error loading user data:', error)
+  if (isOpen) {
+    if (!userStore.userData && authStore.currentUser) {
+      try {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      }
+    }
+    // Load folders if receipt has swap-in and folders aren't loaded
+    if (props.receipt?.isSwapIn && props.receipt?.swapInFolderId && inventoryStore.folders.length === 0) {
+      try {
+        await inventoryStore.fetchFolders()
+      } catch (error) {
+        console.error('Error loading folders:', error)
+      }
     }
   }
 }, { immediate: false })

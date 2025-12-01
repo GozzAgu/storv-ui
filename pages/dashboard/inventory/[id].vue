@@ -245,9 +245,18 @@ ${{ formatCurrency(totalInventoryValue) }}
                   <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                     {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
                   </div>
-                  <div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {{ getItemDisplayValue(item[column.key]) }}
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {{ getItemDisplayValue(item[column.key]) }}
+                      </div>
+                      <span
+                        v-if="item.swapIn"
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        title="Swapped-in item"
+                      >
+                        Swap-In
+                      </span>
                     </div>
                     <div v-if="columns.length > 1 && columns[1]" class="text-xs text-gray-500 dark:text-gray-400">
                       {{ getItemDisplayValue(item[columns[1].key]) }}

@@ -282,6 +282,122 @@
               placeholder="Additional notes..."
             ></textarea>
           </div>
+
+          <!-- Swap-In Section -->
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <label class="flex items-center gap-3 mb-4 cursor-pointer">
+              <input
+                v-model="isSwapIn"
+                type="checkbox"
+                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+              />
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                This is a swap-in transaction
+              </span>
+            </label>
+
+            <div v-if="isSwapIn" class="space-y-4 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Select Folder for Swapped-In Device *
+                </label>
+                <div v-if="loadingFolders" class="text-center py-4">
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+                </div>
+                <div
+                  v-else-if="folders.length === 0"
+                  class="text-center py-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <p class="text-sm text-gray-500 dark:text-gray-400">No inventory folders found</p>
+                </div>
+                <select
+                  v-else
+                  v-model="swapInFolderId"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">Select folder for swapped-in device</option>
+                  <option
+                    v-for="folder in folders"
+                    :key="folder.id"
+                    :value="folder.id"
+                  >
+                    {{ folder.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Swap-In Device Form Fields -->
+              <div v-if="swapInFolderId && swapInFolder">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Swapped-In Device Details
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    v-for="field in swapInFolder.template?.fields || []"
+                    :key="field.id || field.name"
+                    :class="field.type === 'boolean' ? 'md:col-span-2' : ''"
+                  >
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {{ field.label || field.name }}
+                      <span v-if="field.required" class="text-red-500">*</span>
+                    </label>
+                    <!-- Text Input -->
+                    <input
+                      v-if="field.type === 'text'"
+                      v-model="swapInItemForm[field.name]"
+                      :required="field.required"
+                      type="text"
+                      :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <!-- Number/Currency Input -->
+                    <input
+                      v-else-if="field.type === 'number' || field.type === 'currency'"
+                      v-model.number="swapInItemForm[field.name]"
+                      :required="field.required"
+                      type="number"
+                      step="any"
+                      :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <!-- Date Input -->
+                    <input
+                      v-else-if="field.type === 'date'"
+                      v-model="swapInItemForm[field.name]"
+                      :required="field.required"
+                      type="date"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <!-- Select Input -->
+                    <select
+                      v-else-if="field.type === 'select' && field.options"
+                      v-model="swapInItemForm[field.name]"
+                      :required="field.required"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="">Select {{ field.label || field.name }}</option>
+                      <option v-for="option in field.options" :key="option" :value="option">
+                        {{ option }}
+                      </option>
+                    </select>
+                    <!-- Boolean Input -->
+                    <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
+                      <input
+                        v-model="swapInItemForm[field.name]"
+                        type="checkbox"
+                        class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                      />
+                      <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
+                    </label>
+                  </div>
+                </div>
+                <p v-if="!swapInFolder.template?.fields || swapInFolder.template.fields.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  No template fields defined for this folder.
+                </p>
+              </div>
+            </div>
+          </div>
           <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm text-gray-600 dark:text-gray-400">Items</span>
@@ -391,7 +507,18 @@ const receiptForm = ref({
   notes: '',
 })
 
+// Swap-in state
+const isSwapIn = ref(false)
+const swapInFolderId = ref<string>('')
+const swapInItemForm = ref<Record<string, any>>({})
+
 const folders = computed(() => inventoryStore.folders)
+
+// Swap-in folder
+const swapInFolder = computed(() => {
+  if (!swapInFolderId.value) return null
+  return inventoryStore.folders.find(f => f.id === swapInFolderId.value) || null
+})
 
 const canProceed = computed(() => {
   if (currentStep.value === 0) {
@@ -404,9 +531,26 @@ const canProceed = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return receiptForm.value.customerName.trim() !== '' &&
+  const baseValid = receiptForm.value.customerName.trim() !== '' &&
     receiptForm.value.paymentMethod !== '' &&
     selectedItems.value.length > 0
+  
+  // If swap-in is enabled, validate swap-in fields
+  if (isSwapIn.value) {
+    if (!swapInFolderId.value) return false
+    if (!swapInFolder.value) return false
+    
+    // Check required fields
+    const requiredFields = swapInFolder.value.template?.fields?.filter(f => f.required) || []
+    for (const field of requiredFields) {
+      const value = swapInItemForm.value[field.name]
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        return false
+      }
+    }
+  }
+  
+  return baseValid
 })
 
 const totalSelectedQuantity = computed(() => {
@@ -418,6 +562,35 @@ watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
     resetForm()
     loadFolders()
+  }
+})
+
+// Watch for swap-in folder selection to initialize form
+watch(() => swapInFolderId.value, (folderId) => {
+  if (folderId && swapInFolder.value?.template?.fields) {
+    // Initialize form with empty values for all template fields
+    swapInItemForm.value = {}
+    swapInFolder.value.template.fields.forEach(field => {
+      if (field.type === 'number' || field.type === 'currency') {
+        swapInItemForm.value[field.name] = 0
+      } else if (field.type === 'boolean') {
+        swapInItemForm.value[field.name] = false
+      } else if (field.type === 'date') {
+        swapInItemForm.value[field.name] = new Date().toISOString().split('T')[0]
+      } else {
+        swapInItemForm.value[field.name] = ''
+      }
+    })
+  } else {
+    swapInItemForm.value = {}
+  }
+})
+
+// Watch for swap-in toggle to reset form when disabled
+watch(() => isSwapIn.value, (enabled) => {
+  if (!enabled) {
+    swapInFolderId.value = ''
+    swapInItemForm.value = {}
   }
 })
 
@@ -561,6 +734,10 @@ const resetForm = () => {
     status: 'completed',
     notes: '',
   }
+  // Reset swap-in state
+  isSwapIn.value = false
+  swapInFolderId.value = ''
+  swapInItemForm.value = {}
 }
 
 const handleCancel = () => {
@@ -593,8 +770,26 @@ const handleCreateReceipt = async () => {
       await inventoryStore.updateItemsDateOut(selectedFolder.value.id, itemIds)
     }
     
+    // Handle swap-in: Create inventory item for swapped-in device
+    let swapInItemId: string | undefined = undefined
+    if (isSwapIn.value && swapInFolderId.value && swapInFolder.value) {
+      try {
+        // Prepare item data from form
+        const swapInItemData: Record<string, any> = {
+          ...swapInItemForm.value,
+          swapIn: true, // Mark as swap-in item
+        }
+        
+        // Create the swap-in inventory item
+        swapInItemId = await inventoryStore.createItem(swapInFolderId.value, swapInItemData)
+      } catch (error: any) {
+        console.error('Error creating swap-in item:', error)
+        throw new Error(`Failed to create swap-in item: ${error.message}`)
+      }
+    }
+    
     // Create receipt in Firestore
-    const receiptData = {
+    const receiptData: any = {
       receiptNumber,
       customerName: receiptForm.value.customerName,
       customerEmail: receiptForm.value.customerEmail || '',
@@ -609,8 +804,28 @@ const handleCreateReceipt = async () => {
       itemIds,
     }
     
+    // Add swap-in fields if enabled
+    if (isSwapIn.value && swapInFolderId.value && swapInItemId) {
+      receiptData.isSwapIn = true
+      receiptData.swapInFolderId = swapInFolderId.value
+      receiptData.swapInItemId = swapInItemId
+    }
+    
     // Create receipt first
     const receiptId = await receiptsStore.createReceipt(receiptData)
+    
+    // Update swap-in item to link it to the receipt (if created)
+    if (swapInItemId && swapInFolderId.value) {
+      try {
+        // Update the item to link it to the receipt
+        await inventoryStore.updateItem(swapInFolderId.value, swapInItemId, {
+          swapInReceiptId: receiptId,
+        })
+      } catch (error: any) {
+        console.error('Error updating swap-in item with receipt ID:', error)
+        // Don't fail receipt creation if swap-in update fails
+      }
+    }
 
     // Create or update customer automatically
     try {

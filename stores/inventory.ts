@@ -46,13 +46,15 @@ export interface InventoryItem {
   [key: string]: any // Dynamic fields based on template
   dateIn?: Date | string // Date when item was added (from createdAt)
   dateOut?: Date | string // Date when item was sold (from receipt generation)
+  swapIn?: boolean // Indicates if this item was swapped in by a customer
+  swapInReceiptId?: string // Receipt ID associated with this swap-in
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string
 }
 
 export const useInventoryStore = defineStore('inventory', {
-  state: () => ({
+  state: () => ({ 
     folders: [] as InventoryFolder[],
     items: {} as Record<string, InventoryItem[]>, // Keyed by folderId
     loading: false,
@@ -628,11 +630,13 @@ export const useInventoryStore = defineStore('inventory', {
                 folderId: data.folderId || folderId,
                 ...Object.fromEntries(
                   Object.entries(data).filter(([key]) => 
-                    !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut'].includes(key)
+                    !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId'].includes(key)
                   )
                 ),
                 dateIn: data.dateIn?.toDate ? data.dateIn.toDate() : (data.dateIn ? new Date(data.dateIn) : (data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date())),
                 dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : (data.dateOut ? new Date(data.dateOut) : undefined),
+                swapIn: data.swapIn || false,
+                swapInReceiptId: data.swapInReceiptId || undefined,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
                 updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
                 createdBy: data.createdBy || userId,
