@@ -88,11 +88,26 @@
                 :key="index"
                 class="border-b border-gray-200"
               >
-                <td class="py-2 px-2">{{ item.itemName }}</td>
+                <td class="py-2 px-2">
+                  <div>{{ item.itemName }}</div>
+                  <div v-if="item.hasDiscount" class="text-xs text-red-600 mt-0.5">
+                    Discount: {{ item.discountPercentage ? `${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }}
+                  </div>
+                </td>
                 <td class="py-2 px-2 text-center">{{ item.quantity }}</td>
-                <td class="py-2 px-2 text-right">${{ formatCurrency(item.price) }}</td>
+                <td class="py-2 px-2 text-right">
+                  <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
+                    <span class="text-xs text-gray-400 line-through">${{ formatCurrency(item.originalPrice) }}</span>
+                    <span class="font-semibold text-green-600">${{ formatCurrency(item.price) }}</span>
+                  </div>
+                  <span v-else>${{ formatCurrency(item.price) }}</span>
+                </td>
                 <td class="py-2 px-2 text-right font-semibold">
-                  ${{ formatCurrency(item.price * item.quantity) }}
+                  <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
+                    <span class="text-xs text-gray-400 line-through">${{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                    <span class="text-green-600">${{ formatCurrency(item.price * item.quantity) }}</span>
+                  </div>
+                  <span v-else>${{ formatCurrency(item.price * item.quantity) }}</span>
                 </td>
               </tr>
             </tbody>
@@ -103,7 +118,18 @@
         <div class="mb-5 pt-3 border-t-2 border-gray-300">
           <div class="flex justify-end">
             <div class="w-48 space-y-1.5">
-              <div class="flex justify-between">
+              <!-- Calculate totals with discounts -->
+              <template v-if="hasAnyDiscount">
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-600">Subtotal:</span>
+                  <span class="text-xs font-semibold">${{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-xs text-red-600">Total Discount:</span>
+                  <span class="text-xs font-semibold text-red-600">-${{ formatCurrency(calculateTotalDiscount) }}</span>
+                </div>
+              </template>
+              <div v-else class="flex justify-between">
                 <span class="text-xs text-gray-600">Subtotal:</span>
                 <span class="text-xs font-semibold">${{ formatCurrency(receipt.total) }}</span>
               </div>
@@ -198,6 +224,30 @@ const swapInFolderName = computed(() => {
 })
 
 const authStore = useAuthStore()
+
+// Discount calculations
+const hasAnyDiscount = computed(() => {
+  return props.receipt?.items?.some(item => item.hasDiscount) || false
+})
+
+const calculateSubtotalBeforeDiscount = computed(() => {
+  if (!props.receipt?.items) return 0
+  return props.receipt.items.reduce((total, item) => {
+    const originalPrice = item.originalPrice || item.price
+    return total + (originalPrice * item.quantity)
+  }, 0)
+})
+
+const calculateTotalDiscount = computed(() => {
+  if (!props.receipt?.items) return 0
+  return props.receipt.items.reduce((total, item) => {
+    if (item.hasDiscount && item.originalPrice) {
+      const itemDiscount = (item.originalPrice - item.price) * item.quantity
+      return total + itemDiscount
+    }
+    return total
+  }, 0)
+})
 
 // Load user data and folders if not already loaded
 watch(() => props.modelValue, async (isOpen) => {

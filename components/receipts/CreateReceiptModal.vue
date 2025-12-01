@@ -153,12 +153,25 @@
                         <h4 class="font-medium text-gray-900 dark:text-gray-100">
                           {{ getItemDisplayName(item) }}
                         </h4>
-                        <div class="flex items-center gap-4 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          <span v-if="getItemField(item, 'sku')">SKU: {{ getItemField(item, 'sku') }}</span>
+                        <div class="flex items-center gap-4 mt-1 text-xs">
+                          <span v-if="getItemField(item, 'sku')" class="text-gray-500 dark:text-gray-400">SKU: {{ getItemField(item, 'sku') }}</span>
                           <span v-if="getItemField(item, 'price')">
-                            Price: ${{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                            <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
+                              <span class="text-gray-400 dark:text-gray-500 line-through">
+                                ${{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                              </span>
+                              <span class="text-green-600 dark:text-green-400 font-semibold">
+                                ${{ formatCurrency(item.discountedPrice) }}
+                              </span>
+                              <span class="text-red-600 dark:text-red-400">
+                                ({{ item.discountPercentage ? `-${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }})
+                              </span>
+                            </span>
+                            <span v-else class="text-gray-500 dark:text-gray-400">
+                              Price: ${{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                            </span>
                           </span>
-                          <span v-if="getItemField(item, 'stock')">
+                          <span v-if="getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
                             Stock: {{ getItemField(item, 'stock') }}
                           </span>
                         </div>
@@ -661,9 +674,29 @@ const updateItemQuantity = (itemId: string, quantity: number) => {
   }
 }
 
+const getEffectivePrice = (item: InventoryItem): number => {
+  // If item has a discount, use discounted price; otherwise use regular price
+  if (item.discountedPrice !== undefined && item.discountedPrice !== null) {
+    return item.discountedPrice
+  }
+  // Try to get price from item
+  const priceField = getItemField(item, 'price')
+  return parseFloat(priceField || '0')
+}
+
+const getOriginalPrice = (item: InventoryItem): number => {
+  // If item has originalPrice stored (from discount), use it
+  if (item.originalPrice !== undefined && item.originalPrice !== null) {
+    return item.originalPrice
+  }
+  // Otherwise get from price field
+  const priceField = getItemField(item, 'price')
+  return parseFloat(priceField || '0')
+}
+
 const calculateTotal = () => {
   return selectedItems.value.reduce((total, si) => {
-    const price = parseFloat(getItemField(si.item, 'price') || '0')
+    const price = getEffectivePrice(si.item)
     return total + (price * si.quantity)
   }, 0)
 }
@@ -755,12 +788,22 @@ const handleCreateReceipt = async () => {
     
     // Create receipt items array
     const receiptItems: ReceiptItem[] = selectedItems.value.map(si => {
-      const price = parseFloat(getItemField(si.item, 'price') || '0')
+      const effectivePrice = getEffectivePrice(si.item)
+      const originalPrice = getOriginalPrice(si.item)
+      const hasDiscount = si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
+      
       return {
         itemId: si.id,
         quantity: si.quantity,
-        price,
+        price: effectivePrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
+        // Include discount information if applicable
+        ...(hasDiscount && {
+          originalPrice: originalPrice,
+          discountPercentage: si.item.discountPercentage,
+          discountAmount: si.item.discountAmount,
+          hasDiscount: true,
+        }),
       }
     })
     

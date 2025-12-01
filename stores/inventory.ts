@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -48,6 +48,11 @@ export interface InventoryItem {
   dateOut?: Date | string // Date when item was sold (from receipt generation)
   swapIn?: boolean // Indicates if this item was swapped in by a customer
   swapInReceiptId?: string // Receipt ID associated with this swap-in
+  // Discount fields
+  discountPercentage?: number // Percentage discount (e.g., 10 for 10%)
+  discountAmount?: number // Fixed discount amount
+  originalPrice?: number // Original price before discount
+  discountedPrice?: number // Price after discount
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string
@@ -630,13 +635,17 @@ export const useInventoryStore = defineStore('inventory', {
                 folderId: data.folderId || folderId,
                 ...Object.fromEntries(
                   Object.entries(data).filter(([key]) => 
-                    !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId'].includes(key)
+                    !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice'].includes(key)
                   )
                 ),
                 dateIn: data.dateIn?.toDate ? data.dateIn.toDate() : (data.dateIn ? new Date(data.dateIn) : (data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date())),
                 dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : (data.dateOut ? new Date(data.dateOut) : undefined),
                 swapIn: data.swapIn || false,
                 swapInReceiptId: data.swapInReceiptId || undefined,
+                discountPercentage: data.discountPercentage || undefined,
+                discountAmount: data.discountAmount || undefined,
+                originalPrice: data.originalPrice || undefined,
+                discountedPrice: data.discountedPrice || undefined,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
                 updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
                 createdBy: data.createdBy || userId,
@@ -1018,6 +1027,340 @@ export const useInventoryStore = defineStore('inventory', {
       } catch (error: any) {
         console.error('Error returning items to stock:', error)
         throw new Error(error.message || 'Failed to return items to stock')
+      }
+    },
+
+    // Helper function to get price field from item
+    getItemPrice(item: InventoryItem): number {
+      // Try common price field names
+      const priceFields = ['price', 'Price', 'PRICE', 'cost', 'Cost', 'COST']
+      for (const field of priceFields) {
+        if (item[field] !== undefined && item[field] !== null) {
+          return parseFloat(String(item[field])) || 0
+        }
+      }
+      return 0
+    },
+
+    // Apply discount to a single item
+    async applyDiscount(folderId: string, itemId: string, discountType: 'percentage' | 'amount', discountValue: number) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to apply discounts')
+      }
+
+      // Check permissions - only managers can apply discounts
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Only managers can apply discounts. Staff and interns do not have this permission.')
+        }
+
+        // For managers: Check if folder allows their department
+        if (currentStaffMember?.departmentId) {
+          const folder = await this.fetchFolder(folderId)
+          if (!folder) {
+            throw new Error('Folder not found')
+          }
+          const allowedDepartments = folder.allowedDepartments || []
+          if (allowedDepartments.length > 0) {
+            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
+              throw new Error('Access denied: Your department does not have access to apply discounts to items in this folder.')
+            }
+          }
+        }
+      }
+
+      try {
+        // Get the item to calculate discount
+        const folderItems = this.items[folderId] || []
+        const item = folderItems.find(i => i.id === itemId)
+        if (!item) {
+          throw new Error('Item not found')
+        }
+
+        const originalPrice = item.originalPrice || this.getItemPrice(item)
+        if (!originalPrice || originalPrice <= 0) {
+          throw new Error('Item does not have a valid price to apply discount')
+        }
+
+        let discountPercentage: number | undefined
+        let discountAmount: number | undefined
+        let discountedPrice: number
+
+        if (discountType === 'percentage') {
+          if (discountValue < 0 || discountValue > 100) {
+            throw new Error('Discount percentage must be between 0 and 100')
+          }
+          discountPercentage = discountValue
+          discountAmount = (originalPrice * discountValue) / 100
+          discountedPrice = originalPrice - discountAmount
+        } else {
+          if (discountValue < 0 || discountValue > originalPrice) {
+            throw new Error('Discount amount cannot be negative or greater than the original price')
+          }
+          discountAmount = discountValue
+          discountPercentage = (discountValue / originalPrice) * 100
+          discountedPrice = originalPrice - discountAmount
+        }
+
+        // Update item in Firestore
+        const itemRef = doc(db, 'inventoryItems', itemId)
+        await updateDoc(itemRef, {
+          discountPercentage,
+          discountAmount,
+          originalPrice: originalPrice,
+          discountedPrice: Math.round(discountedPrice * 100) / 100, // Round to 2 decimal places
+          updatedAt: serverTimestamp(),
+        })
+
+        // Update local state
+        const index = folderItems.findIndex(i => i.id === itemId)
+        if (index > -1 && folderItems[index]) {
+          folderItems[index].discountPercentage = discountPercentage
+          folderItems[index].discountAmount = discountAmount
+          folderItems[index].originalPrice = originalPrice
+          folderItems[index].discountedPrice = Math.round(discountedPrice * 100) / 100
+          folderItems[index].updatedAt = new Date()
+        }
+
+        return {
+          discountPercentage,
+          discountAmount,
+          originalPrice,
+          discountedPrice: Math.round(discountedPrice * 100) / 100,
+        }
+      } catch (error: any) {
+        console.error('Error applying discount:', error)
+        throw new Error(error.message || 'Failed to apply discount')
+      }
+    },
+
+    // Apply discount to multiple items (bulk)
+    async applyBulkDiscount(folderId: string, itemIds: string[], discountType: 'percentage' | 'amount', discountValue: number) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to apply discounts')
+      }
+
+      // Check permissions - only managers can apply discounts
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Only managers can apply discounts. Staff and interns do not have this permission.')
+        }
+
+        // For managers: Check if folder allows their department
+        if (currentStaffMember?.departmentId) {
+          const folder = await this.fetchFolder(folderId)
+          if (!folder) {
+            throw new Error('Folder not found')
+          }
+          const allowedDepartments = folder.allowedDepartments || []
+          if (allowedDepartments.length > 0) {
+            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
+              throw new Error('Access denied: Your department does not have access to apply discounts to items in this folder.')
+            }
+          }
+        }
+      }
+
+      try {
+        const folderItems = this.items[folderId] || []
+        const updates: Array<{ itemId: string; discountPercentage?: number; discountAmount?: number; originalPrice: number; discountedPrice: number }> = []
+
+        // Calculate discounts for all items
+        for (const itemId of itemIds) {
+          const item = folderItems.find(i => i.id === itemId)
+          if (!item) continue
+
+          const originalPrice = item.originalPrice || this.getItemPrice(item)
+          if (!originalPrice || originalPrice <= 0) continue
+
+          let discountPercentage: number | undefined
+          let discountAmount: number | undefined
+          let discountedPrice: number
+
+          if (discountType === 'percentage') {
+            if (discountValue < 0 || discountValue > 100) continue
+            discountPercentage = discountValue
+            discountAmount = (originalPrice * discountValue) / 100
+            discountedPrice = originalPrice - discountAmount
+          } else {
+            if (discountValue < 0 || discountValue > originalPrice) continue
+            discountAmount = discountValue
+            discountPercentage = (discountValue / originalPrice) * 100
+            discountedPrice = originalPrice - discountAmount
+          }
+
+          updates.push({
+            itemId,
+            discountPercentage,
+            discountAmount,
+            originalPrice,
+            discountedPrice: Math.round(discountedPrice * 100) / 100,
+          })
+        }
+
+        // Apply updates in batch
+        const batch = updates.map(({ itemId, discountPercentage, discountAmount, originalPrice, discountedPrice }) => {
+          const itemRef = doc(db, 'inventoryItems', itemId)
+          return updateDoc(itemRef, {
+            discountPercentage,
+            discountAmount,
+            originalPrice,
+            discountedPrice,
+            updatedAt: serverTimestamp(),
+          })
+        })
+
+        await Promise.all(batch)
+
+        // Update local state
+        updates.forEach(({ itemId, discountPercentage, discountAmount, originalPrice, discountedPrice }) => {
+          const index = folderItems.findIndex(i => i.id === itemId)
+          if (index > -1 && folderItems[index]) {
+            folderItems[index].discountPercentage = discountPercentage
+            folderItems[index].discountAmount = discountAmount
+            folderItems[index].originalPrice = originalPrice
+            folderItems[index].discountedPrice = discountedPrice
+            folderItems[index].updatedAt = new Date()
+          }
+        })
+
+        return updates.length
+      } catch (error: any) {
+        console.error('Error applying bulk discount:', error)
+        throw new Error(error.message || 'Failed to apply bulk discount')
+      }
+    },
+
+    // Remove discount from a single item
+    async removeDiscount(folderId: string, itemId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to remove discounts')
+      }
+
+      // Check permissions - only managers can remove discounts
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Only managers can remove discounts. Staff and interns do not have this permission.')
+        }
+      }
+
+      try {
+        const itemRef = doc(db, 'inventoryItems', itemId)
+        await updateDoc(itemRef, {
+          discountPercentage: deleteField(),
+          discountAmount: deleteField(),
+          discountedPrice: deleteField(),
+          updatedAt: serverTimestamp(),
+          // Keep originalPrice in case we want to restore discount later
+        })
+
+        // Update local state
+        const folderItems = this.items[folderId] || []
+        const index = folderItems.findIndex(i => i.id === itemId)
+        if (index > -1 && folderItems[index]) {
+          delete folderItems[index].discountPercentage
+          delete folderItems[index].discountAmount
+          delete folderItems[index].discountedPrice
+          folderItems[index].updatedAt = new Date()
+        }
+      } catch (error: any) {
+        console.error('Error removing discount:', error)
+        throw new Error(error.message || 'Failed to remove discount')
+      }
+    },
+
+    // Remove discount from multiple items (bulk)
+    async removeBulkDiscount(folderId: string, itemIds: string[]) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to remove discounts')
+      }
+
+      // Check permissions - only managers can remove discounts
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Only managers can remove discounts. Staff and interns do not have this permission.')
+        }
+      }
+
+      try {
+        const batch = itemIds.map(itemId => {
+          const itemRef = doc(db, 'inventoryItems', itemId)
+          return updateDoc(itemRef, {
+            discountPercentage: deleteField(),
+            discountAmount: deleteField(),
+            discountedPrice: deleteField(),
+            updatedAt: serverTimestamp(),
+          })
+        })
+
+        await Promise.all(batch)
+
+        // Update local state
+        const folderItems = this.items[folderId] || []
+        itemIds.forEach(itemId => {
+          const index = folderItems.findIndex(i => i.id === itemId)
+          if (index > -1 && folderItems[index]) {
+            delete folderItems[index].discountPercentage
+            delete folderItems[index].discountAmount
+            delete folderItems[index].discountedPrice
+            folderItems[index].updatedAt = new Date()
+          }
+        })
+      } catch (error: any) {
+        console.error('Error removing bulk discount:', error)
+        throw new Error(error.message || 'Failed to remove bulk discount')
       }
     },
   },

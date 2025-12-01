@@ -10,8 +10,13 @@ import { useInventoryStore } from './inventory'
 export interface ReceiptItem {
   itemId: string
   quantity: number
-  price: number
+  price: number // Final price after discount (if any)
   itemName: string
+  // Discount fields
+  originalPrice?: number // Original price before discount
+  discountPercentage?: number // Discount percentage applied
+  discountAmount?: number // Discount amount applied
+  hasDiscount?: boolean // Flag to indicate if discount was applied
 }
 
 export interface Receipt {

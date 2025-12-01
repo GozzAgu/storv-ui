@@ -73,6 +73,15 @@
             <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span class="hidden sm:inline">{{ isImporting ? 'Importing...' : 'Import' }}</span>
           </button>
+          <button
+            v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
+            @click="openBulkDiscountModal"
+            class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
+            title="Apply bulk discount"
+          >
+            <TagIcon class="w-5 h-5" />
+            <span class="hidden sm:inline">Bulk Discount ({{ selectedItemsForBulk.length }})</span>
+          </button>
         </div>
       </div>
     </div>
@@ -224,6 +233,14 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </template>
                 </div>
               </th>
+              <th v-if="canManageInventoryItems" class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  :checked="selectedItemsForBulk.length === filteredItems.length && filteredItems.length > 0"
+                  @change="toggleSelectAll"
+                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                />
+              </th>
               <th v-if="canManageInventoryItems" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                     Actions
                   </th>
@@ -264,8 +281,21 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="'type' in column && column.type === 'currency'" class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    ${{ formatCurrency(item[column.key] || 0) }}
+                  <div v-if="'type' in column && column.type === 'currency'" class="text-sm">
+                    <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
+                      <span class="font-semibold text-green-600 dark:text-green-400">
+                        ${{ formatCurrency(item.discountedPrice) }}
+                      </span>
+                      <span class="text-xs text-gray-400 dark:text-gray-500 line-through">
+                        ${{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
+                      </span>
+                      <span class="text-xs text-red-600 dark:text-red-400 font-medium">
+                        {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }}
+                      </span>
+                    </div>
+                    <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
+                      ${{ formatCurrency(item[column.key] || 0) }}
+                    </span>
                   </div>
                   <div v-else-if="'type' in column && column.type === 'number'" class="text-sm text-gray-600 dark:text-gray-300">
                     {{ formatNumber(item[column.key]) }}
@@ -301,8 +331,31 @@ ${{ formatCurrency(totalInventoryValue) }}
                   </div>
                 </div>
               </td>
+              <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-center">
+                <input
+                  type="checkbox"
+                  :checked="selectedItemsForBulk.some(i => i.id === item.id)"
+                  @change="toggleItemSelection(item)"
+                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                />
+              </td>
                   <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
+                  <button
+                    @click="handleApplyDiscount(item)"
+                    class="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                    :title="item.discountedPrice ? 'Edit discount' : 'Apply discount'"
+                  >
+                    <TagIcon class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="item.discountedPrice"
+                    @click="handleRemoveDiscount(item)"
+                    class="p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
+                    title="Remove discount"
+                  >
+                    <XMarkIcon class="w-5 h-5" />
+                  </button>
                   <button
                     @click="handleEditItem(item)"
                     class="p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
@@ -591,6 +644,22 @@ ${{ formatCurrency(totalInventoryValue) }}
         </Button>
       </template>
     </Modal>
+
+    <!-- Discount Modal -->
+    <DiscountModal
+      v-model="showDiscountModal"
+      :item="selectedItemForDiscount"
+      :folder-id="folderId"
+      @discount-applied="handleDiscountApplied"
+    />
+
+    <!-- Bulk Discount Modal -->
+    <BulkDiscountModal
+      v-model="showBulkDiscountModal"
+      :selected-items="selectedItemsForBulk"
+      :folder-id="folderId"
+      @discount-applied="handleBulkDiscountApplied"
+    />
   </div>
 </template>
 
@@ -614,6 +683,8 @@ import {
   BarsArrowUpIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
+  TagIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -625,6 +696,8 @@ import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
 import * as XLSX from 'xlsx'
+import DiscountModal from '~/components/inventory/DiscountModal.vue'
+import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 
 definePageMeta({
   layout: 'dashboard'
@@ -695,6 +768,12 @@ const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', o
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
+
+// Discount modal state
+const showDiscountModal = ref(false)
+const showBulkDiscountModal = ref(false)
+const selectedItemForDiscount = ref<InventoryItem | null>(null)
+const selectedItemsForBulk = ref<InventoryItem[]>([])
 
 // Folder will be loaded from Firestore via inventoryStore
 
@@ -1164,6 +1243,64 @@ const handleCancelItem = () => {
   editingItem.value = null
   serialNumbers.value = []
   Object.keys(itemForm).forEach(key => delete itemForm[key])
+}
+
+// Discount handlers
+const handleApplyDiscount = (item: InventoryItem) => {
+  selectedItemForDiscount.value = item
+  showDiscountModal.value = true
+}
+
+const handleRemoveDiscount = async (item: InventoryItem) => {
+  if (confirm(`Remove discount from this item?`)) {
+    try {
+      await inventoryStore.removeDiscount(folderId.value, item.id)
+      // Reload items to refresh the display
+      await inventoryStore.fetchItems(folderId.value)
+      toast.success('Discount removed successfully!')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove discount')
+    }
+  }
+}
+
+const handleDiscountApplied = async () => {
+  // Reload items to refresh the display
+  await inventoryStore.fetchItems(folderId.value)
+  showDiscountModal.value = false
+  selectedItemForDiscount.value = null
+}
+
+const handleBulkDiscountApplied = async () => {
+  // Reload items to refresh the display
+  await inventoryStore.fetchItems(folderId.value)
+  showBulkDiscountModal.value = false
+  selectedItemsForBulk.value = []
+}
+
+const toggleItemSelection = (item: InventoryItem) => {
+  const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
+  if (index > -1) {
+    selectedItemsForBulk.value.splice(index, 1)
+  } else {
+    selectedItemsForBulk.value.push(item)
+  }
+}
+
+const toggleSelectAll = () => {
+  if (selectedItemsForBulk.value.length === filteredItems.value.length) {
+    selectedItemsForBulk.value = []
+  } else {
+    selectedItemsForBulk.value = [...filteredItems.value]
+  }
+}
+
+const openBulkDiscountModal = () => {
+  if (selectedItemsForBulk.value.length === 0) {
+    toast.warning('Please select at least one item to apply bulk discount')
+    return
+  }
+  showBulkDiscountModal.value = true
 }
 
 // Export inventory items to Excel
