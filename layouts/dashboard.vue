@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 shadow-xl',
+        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 shadow-xl flex flex-col',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         sidebarCollapsed ? 'w-20' : 'w-72'
       ]"
@@ -64,7 +64,7 @@
 
       <!-- Navigation -->
       <nav class="relative flex-1 py-6 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
-        <div class="space-y-1.5">
+        <div class="space-y-1.5 min-h-0">
           <NuxtLink
             v-for="item in navigation"
             :key="item.name"
@@ -126,11 +126,45 @@
         </div>
       </nav>
       
-      <!-- Collapse/Expand Button (at bottom) -->
-      <div v-if="sidebarCollapsed" class="relative px-3 py-3 border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+      <!-- Bottom Section (Logout + Collapse/Expand) -->
+      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
         <button
+          @click="handleSignOut"
+          :class="[
+            'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden w-full',
+            sidebarCollapsed ? 'justify-center py-3' : 'justify-start px-5 py-3',
+            'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+          ]"
+          :title="sidebarCollapsed ? 'Sign out' : ''"
+        >
+          <ArrowRightOnRectangleIcon 
+            :class="[
+              'relative z-10 transition-all duration-300',
+              sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4'
+            ]"
+          />
+          <span 
+            v-if="!sidebarCollapsed" 
+            class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight"
+          >
+            Sign out
+          </span>
+          
+          <!-- Tooltip for collapsed state -->
+          <div
+            v-if="sidebarCollapsed"
+            class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+          >
+            Sign out
+            <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+          </div>
+        </button>
+        
+        <!-- Collapse/Expand Button (when collapsed) -->
+        <button
+          v-if="sidebarCollapsed"
           @click="toggleSidebar"
-          class="w-full flex items-center justify-center p-3 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
+          class="w-full flex items-center justify-center p-3 mt-2 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
           title="Expand sidebar"
         >
           <ChevronRightIcon class="w-5 h-5" />
@@ -275,6 +309,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -358,8 +393,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon },
-  { name: 'Returns', href: '/dashboard/returns', icon: ArrowPathIcon },
-  { name: 'Customers', href: '/dashboard/customers', icon: UsersIcon },
   { name: 'Departments', href: '/dashboard/departments', icon: BuildingOfficeIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },

@@ -6,8 +6,8 @@
       <p class="mt-1 text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
     </div>
 
-    <!-- Search and Filter -->
-    <Card padding="sm">
+    <!-- Search and Filter - Hidden on large screens -->
+    <Card padding="sm" class="lg:hidden">
       <div class="flex items-center gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -26,6 +26,34 @@
           <option value="items">Sort by Items</option>
           <option value="date">Sort by Date</option>
         </select>
+      </div>
+    </Card>
+
+    <!-- Compact Header (Visible only on large screens) -->
+    <Card v-if="paginatedFolders.length > 0" padding="sm" class="hidden lg:block mb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Folders: <span class="font-semibold">{{ filteredFolders.length }}</span></span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search folders..."
+              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+            />
+          </div>
+          <select
+            v-model="sortBy"
+            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="items">Sort by Items</option>
+            <option value="date">Sort by Date</option>
+          </select>
+        </div>
       </div>
     </Card>
 
@@ -351,7 +379,9 @@
                   />
                   <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
                 </label>
+                <!-- Default fields cannot be removed -->
                 <button
+                  v-if="!['name', 'stock', 'price'].includes(field.name)"
                   type="button"
                   @click="handleRemoveField(index)"
                   class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -359,6 +389,13 @@
                 >
                   <TrashIcon class="w-4 h-4" />
                 </button>
+                <span
+                  v-else
+                  class="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
+                  title="Default field - cannot be removed"
+                >
+                  Default
+                </span>
               </div>
             </div>
             
@@ -381,7 +418,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { ref, computed, reactive, watch, onMounted, nextTick } from 'vue'
 import {
   FolderIcon,
   PlusIcon,
@@ -465,7 +502,34 @@ const folderForm = reactive({
   hasSerialNumbers: false,
 })
 
-const editableFields = ref<TemplateField[]>([])
+// Default fields that should always be included
+const getDefaultFields = (): TemplateField[] => {
+  return [
+    {
+      id: `field-name-${Date.now()}`,
+      name: 'name',
+      label: 'Item',
+      type: 'text',
+      required: true,
+    },
+    {
+      id: `field-stock-${Date.now()}`,
+      name: 'stock',
+      label: 'Stock',
+      type: 'number',
+      required: false,
+    },
+    {
+      id: `field-price-${Date.now()}`,
+      name: 'price',
+      label: 'Price',
+      type: 'currency',
+      required: false,
+    },
+  ]
+}
+
+const editableFields = ref<TemplateField[]>(getDefaultFields())
 
 // Custom template only
 const selectedTemplateId = ref<string>('custom')
@@ -479,11 +543,11 @@ const selectedTemplate = computed(() => {
   }
 })
 
-// Initialize with empty fields for custom template
+// Initialize with default fields for custom template
 watch(() => showCreateFolderModal.value, (isOpen) => {
   if (isOpen && !editingFolder.value) {
-    // Reset to empty fields for new folder
-    editableFields.value = []
+    // Reset to default fields for new folder
+    editableFields.value = getDefaultFields()
     selectedTemplateId.value = 'custom'
   }
 })
@@ -601,7 +665,7 @@ const openCreateFolderModal = () => {
   folderForm.type = ''
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
-  editableFields.value = []
+  editableFields.value = getDefaultFields()
   showCreateFolderModal.value = true
 }
 
@@ -615,8 +679,33 @@ const handleEditFolder = (folder: InventoryFolder) => {
   if (folder.template) {
     editableFields.value = folder.template.fields.map(f => ({ ...f }))
   } else {
-    editableFields.value = []
+    editableFields.value = getDefaultFields()
   }
+  
+  // Ensure default fields are always included when editing
+  const defaultFieldNames = ['name', 'stock', 'price']
+  const existingFieldNames = editableFields.value.map(f => f.name)
+  const missingDefaults = defaultFieldNames.filter(name => !existingFieldNames.includes(name))
+  
+  if (missingDefaults.length > 0) {
+    const defaults = getDefaultFields()
+    missingDefaults.forEach(fieldName => {
+      const defaultField = defaults.find(f => f.name === fieldName)
+      if (defaultField) {
+        editableFields.value.unshift({ ...defaultField, id: `field-${fieldName}-${Date.now()}` })
+      }
+    })
+  }
+  
+  // Ensure default fields are in the correct order (at the beginning)
+  const defaultFields = editableFields.value.filter(f => defaultFieldNames.includes(f.name))
+  const customFields = editableFields.value.filter(f => !defaultFieldNames.includes(f.name))
+  editableFields.value = [...defaultFields.sort((a, b) => {
+    const indexA = defaultFieldNames.indexOf(a.name)
+    const indexB = defaultFieldNames.indexOf(b.name)
+    return indexA - indexB
+  }), ...customFields]
+  
   // If hasSerialNumbers is true, ensure serialNo field exists
   if (folderForm.hasSerialNumbers) {
     const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
@@ -657,6 +746,31 @@ const handleSaveFolder = async () => {
 
   // Template is always custom, no need to check
 
+  // Ensure default fields are always included
+  const defaultFieldNames = ['name', 'stock', 'price']
+  const existingFieldNames = editableFields.value.map(f => f.name)
+  const missingDefaults = defaultFieldNames.filter(name => !existingFieldNames.includes(name))
+  
+  // Add any missing default fields
+  if (missingDefaults.length > 0) {
+    const defaults = getDefaultFields()
+    missingDefaults.forEach(fieldName => {
+      const defaultField = defaults.find(f => f.name === fieldName)
+      if (defaultField) {
+        editableFields.value.unshift({ ...defaultField, id: `field-${fieldName}-${Date.now()}` })
+      }
+    })
+  }
+  
+  // Ensure default fields are in the correct order (at the beginning)
+  const defaultFields = editableFields.value.filter(f => defaultFieldNames.includes(f.name))
+  const customFields = editableFields.value.filter(f => !defaultFieldNames.includes(f.name))
+  editableFields.value = [...defaultFields.sort((a, b) => {
+    const indexA = defaultFieldNames.indexOf(a.name)
+    const indexB = defaultFieldNames.indexOf(b.name)
+    return indexA - indexB
+  }), ...customFields]
+  
   if (editableFields.value.length === 0) {
     alert('Please add at least one field to the template')
     return
@@ -706,7 +820,7 @@ const handleCancelFolder = () => {
   folderForm.type = ''
   folderForm.color = '#3B82F6'
   folderForm.hasSerialNumbers = false
-  editableFields.value = []
+  editableFields.value = getDefaultFields()
 }
 
 const handleAddField = () => {
@@ -721,31 +835,100 @@ const handleAddField = () => {
 }
 
 const handleRemoveField = (index: number) => {
+  const field = editableFields.value[index]
+  // Prevent removal of default fields
+  if (field && ['name', 'stock', 'price'].includes(field.name)) {
+    return
+  }
   editableFields.value.splice(index, 1)
 }
 
-// Fetch folders on mount
+// Load folders on mount
 onMounted(async () => {
-  if (authStore.currentUser) {
-    // Wait for auth to be ready
-    if (authStore.loading) {
-      const checkAuth = setInterval(() => {
-        if (!authStore.loading) {
-          clearInterval(checkAuth)
-          inventoryStore.fetchFolders().catch(console.error)
-        }
-      }, 100)
-      setTimeout(() => clearInterval(checkAuth), 5000)
-    } else {
-      await inventoryStore.fetchFolders().catch(console.error)
+  // Only run on client
+  if (import.meta.server) return
+  
+  console.log('[InventoryPage] onMounted - Starting load process')
+  
+  const loadData = async () => {
+    console.log('[InventoryPage] loadData - Checking auth state')
+    
+    // Wait for auth to finish loading with timeout
+    let attempts = 0
+    while (authStore.loading && attempts < 100) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      attempts++
+      if (attempts % 10 === 0) {
+        console.log('[InventoryPage] Still waiting for auth...', attempts)
+      }
+    }
+    
+    if (attempts >= 100) {
+      console.warn('[InventoryPage] Auth loading timeout, proceeding anyway')
+    }
+    
+    // Check if user is authenticated
+    if (!authStore.currentUser) {
+      console.log('[InventoryPage] No authenticated user, skipping fetch')
+      return
+    }
+    
+    console.log('[InventoryPage] User authenticated:', authStore.currentUser.uid)
+    
+    // Fetch user data first (needed to determine if staff)
+    try {
+      if (!userStore.userData) {
+        console.log('[InventoryPage] Fetching user data...')
+        await userStore.fetchUserData(authStore.currentUser.uid)
+        const userData = userStore.userData
+        console.log('[InventoryPage] User data fetched:', userData ? (userData as any).role : 'unknown')
+      } else {
+        const userData = userStore.userData
+        console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
+      }
+      
+      // Now fetch folders
+      console.log('[InventoryPage] Fetching folders...')
+      await inventoryStore.fetchFolders()
+      console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
+    } catch (error: any) {
+      console.error('[InventoryPage] Error loading data:', error.message || error)
     }
   }
+  
+  // Start loading after a small delay to ensure stores are initialized
+  await nextTick()
+  await loadData()
 })
+
+// Watch for user data changes and fetch folders when it becomes available
+watch(() => userStore.userData, async (userData) => {
+  if (userData && authStore.currentUser && inventoryStore.folders.length === 0) {
+    console.log('[InventoryPage] User data changed, fetching folders...')
+    try {
+      await inventoryStore.fetchFolders()
+      console.log('[InventoryPage] Folders fetched after user data change:', inventoryStore.folders.length)
+    } catch (error: any) {
+      console.error('[InventoryPage] Error fetching folders:', error.message || error)
+    }
+  }
+}, { immediate: false })
 
 // Watch for auth state changes
 watch(() => authStore.currentUser, async (user) => {
   if (user && inventoryStore.folders.length === 0) {
-    await inventoryStore.fetchFolders().catch(console.error)
+    console.log('[InventoryPage] Auth user changed, fetching user data and folders...')
+    try {
+      // Fetch user data first
+      if (!userStore.userData) {
+        await userStore.fetchUserData(user.uid)
+      }
+      // Then fetch folders
+      await inventoryStore.fetchFolders()
+      console.log('[InventoryPage] Folders fetched after auth change:', inventoryStore.folders.length)
+    } catch (error: any) {
+      console.error('[InventoryPage] Error fetching folders:', error.message || error)
+    }
   }
 }, { immediate: false })
 </script>

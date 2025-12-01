@@ -43,8 +43,8 @@
       </div>
     </Card>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Stats Cards - Hidden on large screens -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:hidden">
       <Card padding="md" extra-class="border-l-4 border-l-purple-500">
         <div class="flex items-center justify-between">
           <div>
@@ -58,14 +58,62 @@
           </div>
         </div>
       </Card>
+      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Managers</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {{ totalManagers }}
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <UserCircleIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+        </div>
+      </Card>
+      <Card padding="md" extra-class="border-l-4 border-l-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+              {{ activeStaff }}
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <CheckCircleIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          </div>
+        </div>
+      </Card>
     </div>
 
     <!-- Staff Management Section -->
-    <Card padding="md">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Staff Members</h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage staff in this department</p>
+    <Card padding="none">
+      <!-- Compact Header (Visible only on large screens) -->
+      <div v-if="!isLoadingStaff && staff.length > 0" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+          <!-- Compact Stats -->
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+              <UsersIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ staff.length }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <UserCircleIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CheckCircleIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Active:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ activeStaff }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ClockIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">On Leave:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ onLeaveStaff }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -231,6 +279,9 @@ import {
   ArrowLeftIcon,
   PlusIcon,
   UsersIcon,
+  UserCircleIcon,
+  CheckCircleIcon,
+  ClockIcon,
   PencilIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
@@ -327,6 +378,19 @@ const paginatedStaff = computed(() => {
   const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
   const end = start + staffItemsPerPage.value
   return staff.value.slice(start, end)
+})
+
+// Computed stats for compact header
+const totalManagers = computed(() => {
+  return staff.value.filter(m => m.role === 'manager').length
+})
+
+const activeStaff = computed(() => {
+  return staff.value.filter(m => m.status === 'active').length
+})
+
+const onLeaveStaff = computed(() => {
+  return staff.value.filter(m => m.status === 'on_leave').length
 })
 
 

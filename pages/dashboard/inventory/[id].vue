@@ -46,8 +46,8 @@
       </div>
     </div>
 
-    <!-- Enhanced Stats Cards -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Enhanced Stats Cards - Hidden on large screens -->
+    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -68,7 +68,7 @@
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Value</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-              ${{ formatCurrency(folder?.totalValue || 0) }}
+${{ formatCurrency(totalInventoryValue) }}
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Inventory value</p>
           </div>
@@ -117,8 +117,8 @@
       </div>
     </Card>
 
-    <!-- Enhanced Filters Section -->
-    <Card v-else padding="md">
+    <!-- Enhanced Filters Section - Hidden on large screens -->
+    <Card v-else padding="md" class="lg:hidden">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -159,6 +159,71 @@
 
     <!-- Enhanced Items Table -->
     <Card padding="none">
+      <!-- Compact Header (Visible only on large screens) -->
+      <div v-if="!isLoadingFolder" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+          <!-- Compact Stats -->
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+              <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalInventoryValue) }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ExclamationTriangleIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Low Stock:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.lowStockCount || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CheckCircleIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">In Stock:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ (folder?.itemCount || 0) - (folder?.lowStockCount || 0) }}</span>
+            </div>
+          </div>
+          <!-- Compact Filters -->
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search..."
+                class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+              />
+            </div>
+            <select
+              v-model="stockFilter"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="all">All Status</option>
+              <option value="in-stock">In Stock</option>
+              <option value="low-stock">Low Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+            <select
+              v-model="sortBy"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="stock">Sort by Stock</option>
+              <option value="price">Sort by Price</option>
+              <option value="sku">Sort by SKU</option>
+            </select>
+            <button
+              @click="resetFilters"
+              class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Reset filters"
+            >
+              <ArrowPathIcon class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
@@ -240,6 +305,12 @@
                       -
                     </span>
                   </div>
+                  <div v-else-if="column.key === 'availability'" class="text-sm">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      :class="getItemAvailability(item).class">
+                      {{ getItemAvailability(item).label }}
+                    </span>
+                  </div>
                   <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                     {{ item[column.key] ? 'Yes' : 'No' }}
@@ -313,7 +384,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="sortedFilteredItems.length > 0"
+      v-if="sortedFilteredItems.length > 0 && canManage"
       @click="openAddItemModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new item"
@@ -566,6 +637,7 @@ import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
+import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 
@@ -580,6 +652,7 @@ const folderId = computed(() => route.params.id as string)
 import type { InventoryItem } from '~/stores/inventory'
 
 const inventoryStore = useInventoryStore()
+const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const { canManage } = usePermissions()
 
@@ -659,10 +732,11 @@ const columns = computed(() => {
     )
   }
   
-  // Always add Date In and Date Out columns at the end
+  // Always add Date In, Date Out, and Availability columns at the end
   templateColumns.push(
     { key: 'dateIn', label: 'Date In', sortable: true, type: 'date' },
-    { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' }
+    { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' },
+    { key: 'availability', label: 'Availability', sortable: true, type: 'availability' }
   )
   
   return templateColumns
@@ -671,6 +745,73 @@ const columns = computed(() => {
 const items = computed(() => {
   return inventoryStore.items[folderId.value] || []
 })
+
+// Calculate total inventory value from all items
+const totalInventoryValue = computed(() => {
+  const folderItems = items.value
+  if (folderItems.length === 0) return 0
+  
+  // Find the price field name from template
+  const priceField = folder.value?.template?.fields?.find(f => 
+    f.name.toLowerCase() === 'price' || 
+    f.type === 'currency'
+  )?.name || 'price'
+  
+  // Find the stock field name from template
+  const stockField = folder.value?.template?.fields?.find(f => 
+    f.name.toLowerCase() === 'stock' || 
+    f.name.toLowerCase() === 'quantity' ||
+    f.name.toLowerCase() === 'qty'
+  )?.name || 'stock'
+  
+  let total = 0
+  folderItems.forEach(item => {
+    const price = typeof item[priceField] === 'number' 
+      ? item[priceField] 
+      : parseFloat(item[priceField]) || 0
+    
+    // For serial number items, quantity is always 1
+    let quantity = 1
+    if (!folder.value?.hasSerialNumbers && item[stockField] !== undefined) {
+      quantity = typeof item[stockField] === 'number' 
+        ? item[stockField] 
+        : parseFloat(item[stockField]) || 0
+    }
+    
+    // Only count available items (not sold) in the total value
+    if (!item.dateOut) {
+      total += price * quantity
+    }
+  })
+  
+  return total
+})
+
+// Determine item availability status
+const getItemAvailability = (item: InventoryItem) => {
+  // Check if item is in a refunded receipt (highest priority - returned takes precedence)
+  const refundedReceipts = receiptsStore.receipts.filter(r => 
+    r.status === 'refunded' && r.itemIds?.includes(item.id)
+  )
+  
+  if (refundedReceipts.length > 0) {
+    return { status: 'returned', label: 'Returned', class: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' }
+  }
+  
+  // Check if item has dateOut (was sold via receipt)
+  if (item.dateOut) {
+    // Check if dateOut exists (item was sold)
+    const dateOutValue = item.dateOut
+    const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+    
+    if (hasDateOut) {
+      return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
+    }
+  }
+  
+  // Item is available (not sold, not returned)
+  return { status: 'available', label: 'Available', class: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' }
+}
 
 const filteredItems = computed(() => {
   let result = [...items.value]
@@ -715,6 +856,19 @@ const sortedFilteredItems = computed(() => {
   const result = [...filteredItems.value]
   
   result.sort((a, b) => {
+    // Handle availability column sorting
+    if (currentSort.value.key === 'availability') {
+      const aAvail = getItemAvailability(a).status
+      const bAvail = getItemAvailability(b).status
+      const order = ['available', 'sold', 'returned']
+      const aIndex = order.indexOf(aAvail)
+      const bIndex = order.indexOf(bAvail)
+      
+      return currentSort.value.order === 'asc'
+        ? aIndex - bIndex
+        : bIndex - aIndex
+    }
+    
     let aValue = a[currentSort.value.key]
     let bValue = b[currentSort.value.key]
     
@@ -1137,7 +1291,11 @@ const loadItems = async () => {
 
   isLoadingItems.value = true
   try {
-    await inventoryStore.fetchItems(folderId.value)
+    // Fetch items and receipts in parallel
+    await Promise.all([
+      inventoryStore.fetchItems(folderId.value),
+      receiptsStore.fetchReceipts()
+    ])
     // Refresh folder list to update item counts
     await inventoryStore.fetchFolders()
     // Update local folder reference

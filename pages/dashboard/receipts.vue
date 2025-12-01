@@ -2,55 +2,78 @@
   <ClientOnly>
     <div class="space-y-6 pb-24 min-h-screen w-full">
       <!-- Loading State -->
-      <div v-if="isInitialLoading" class="space-y-6">
-      <!-- Page Header Skeleton -->
-      <div>
-        <div class="h-9 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        <div class="h-5 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
-      </div>
-      
-      <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card padding="md" v-for="i in 4" :key="i">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
-              <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
-            </div>
-            <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+      <div v-if="isInitialLoading">
+        <Card padding="none">
+          <div class="p-12 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
           </div>
         </Card>
       </div>
-      
-      <!-- Filters Skeleton -->
-      <Card padding="md">
-        <div class="flex gap-4">
-          <div class="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-          <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-          <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        </div>
-      </Card>
-      
-      <!-- Table Skeleton -->
-      <Card padding="none">
-        <div class="p-12 text-center">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
-        </div>
-      </Card>
-    </div>
     
     <!-- Actual Content -->
     <template v-else>
     <!-- Page Header -->
       <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Receipts</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">View and manage all sales receipts</p>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Sales</h1>
+      <p class="mt-1 text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Tab Navigation -->
+    <Card padding="none" class="overflow-hidden">
+      <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="flex -mb-px">
+          <button
+            @click="activeTab = 'receipts'"
+            :class="[
+              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+              activeTab === 'receipts'
+                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            ]"
+          >
+            <div class="flex items-center gap-2">
+              <ReceiptPercentIcon class="w-5 h-5" />
+              <span>Receipts</span>
+            </div>
+          </button>
+          <button
+            @click="activeTab = 'customers'"
+            :class="[
+              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+              activeTab === 'customers'
+                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            ]"
+          >
+            <div class="flex items-center gap-2">
+              <UsersIcon class="w-5 h-5" />
+              <span>Customers</span>
+            </div>
+          </button>
+          <button
+            @click="activeTab = 'returns'"
+            :class="[
+              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+              activeTab === 'returns'
+                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            ]"
+          >
+            <div class="flex items-center gap-2">
+              <ArrowPathIcon class="w-5 h-5" />
+              <span>Returns</span>
+            </div>
+          </button>
+        </nav>
+      </div>
+    </Card>
+
+    <!-- Receipts Tab Content -->
+    <template v-if="activeTab === 'receipts'">
+
+    <!-- Stats Cards - Hidden on large screens -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -121,8 +144,8 @@
       </Card>
     </div>
 
-    <!-- Filters -->
-    <Card padding="md">
+    <!-- Filters - Hidden on large screens -->
+    <Card padding="md" class="lg:hidden">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -163,6 +186,80 @@
 
     <!-- Receipts Table -->
     <Card padding="none">
+      <!-- Compact Header (Visible only on large screens) -->
+      <div class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+          <!-- Compact Stats -->
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Receipts:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span v-if="receiptsStore.loading">-</span>
+                <span v-else>{{ receiptsStore.totalReceipts }}</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Sales:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalSales) }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CalendarIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span v-if="receiptsStore.loading">-</span>
+                <span v-else>${{ formatCurrency(todaySales) }}</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span v-if="receiptsStore.loading">-</span>
+                <span v-else>${{ formatCurrency(monthSales) }}</span>
+              </span>
+            </div>
+          </div>
+          <!-- Compact Filters -->
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search..."
+                class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+              />
+            </div>
+            <select
+              v-model="statusFilter"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="all">All Status</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="refunded">Refunded</option>
+            </select>
+            <select
+              v-model="dateFilter"
+              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+            <button
+              @click="resetFilters"
+              class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              title="Reset filters"
+            >
+              <ArrowPathIcon class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
       <div v-if="receiptsStore.loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
@@ -191,6 +288,9 @@
               </th>
               <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Created By
               </th>
               <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Actions
@@ -253,6 +353,11 @@
                   {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                 </span>
               </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900 dark:text-gray-100">
+                  {{ getCreatorName(receipt.actualCreator || receipt.createdBy) }}
+                </div>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
@@ -276,6 +381,14 @@
                     title="Refund"
                   >
                     <ArrowPathIcon class="w-5 h-5" />
+                  </button>
+                  <button
+                    v-if="canManage"
+                    @click="handleDeleteReceipt(receipt)"
+                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="Delete"
+                  >
+                    <TrashIcon class="w-5 h-5" />
                   </button>
                 </div>
               </td>
@@ -325,7 +438,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="!isInitialLoading && filteredReceipts.length > 0 && canManage"
+      v-if="!isInitialLoading && filteredReceipts.length > 0 && canCreate"
       @click="openCreateReceiptModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
@@ -344,49 +457,47 @@
         v-model="showViewReceiptModal"
         :receipt="selectedReceipt"
       />
-      </template>
+
+      <!-- Return Receipt Modal -->
+      <ReturnReceiptModal
+        v-model="showReturnReceiptModal"
+        :receipt="selectedReceipt"
+        @returned="handleReceiptReturned"
+      />
+
+      <!-- Delete Receipt Modal -->
+      <DeleteReceiptModal
+        v-model="showDeleteReceiptModal"
+        :receipt="selectedReceipt"
+        @deleted="handleReceiptDeleted"
+      />
+    </template>
+
+    <!-- Customers Tab Content -->
+    <template v-if="activeTab === 'customers'">
+      <!-- Customers content will be added here -->
+      <div class="text-center py-12">
+        <p class="text-gray-500 dark:text-gray-400">Customers tab coming soon...</p>
+      </div>
+    </template>
+
+    <!-- Returns Tab Content -->
+    <template v-if="activeTab === 'returns'">
+      <!-- Returns content will be added here -->
+      <div class="text-center py-12">
+        <p class="text-gray-500 dark:text-gray-400">Returns tab coming soon...</p>
+      </div>
+    </template>
+    </template>
     </div>
     <template #fallback>
       <div class="space-y-6 pb-24 min-h-screen w-full">
-        <!-- Loading State Fallback -->
-        <div class="space-y-6">
-          <!-- Page Header Skeleton -->
-          <div>
-            <div class="h-9 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div class="h-5 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
+        <Card padding="none">
+          <div class="p-12 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
           </div>
-          
-          <!-- Stats Cards Skeleton -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card padding="md" v-for="i in 4" :key="i">
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-                  <div class="h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2"></div>
-                  <div class="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-1"></div>
-                </div>
-                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
-              </div>
-            </Card>
-          </div>
-          
-          <!-- Filters Skeleton -->
-          <Card padding="md">
-            <div class="flex gap-4">
-              <div class="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-              <div class="h-10 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            </div>
-          </Card>
-          
-          <!-- Table Skeleton -->
-          <Card padding="none">
-            <div class="p-12 text-center">
-              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
-            </div>
-          </Card>
-        </div>
+        </Card>
       </div>
     </template>
   </ClientOnly>
@@ -404,6 +515,13 @@ import {
   ArrowPathIcon,
   EyeIcon,
   PrinterIcon,
+  UsersIcon,
+  UserCircleIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  XMarkIcon,
+  PencilIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -412,9 +530,17 @@ import Pagination from '~/components/ui/Pagination.vue'
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
+// @ts-ignore
+import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
+// @ts-ignore
+import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
+import { useUser } from '~/composables/useUser'
+import { useFirestore } from '~/composables/useFirestore'
+import { useStaffStore } from '~/stores/staff'
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 
 definePageMeta({
   layout: 'dashboard',
@@ -427,7 +553,24 @@ useHead({
 
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
-const { canManage } = usePermissions()
+const { canManage, canCreate } = usePermissions()
+const { getUserDocument } = useUser()
+const { getFirestoreInstance } = useFirestore()
+const staffStore = useStaffStore()
+
+// Store creator names by UID
+const creatorNames = ref<Record<string, string>>({})
+const loadingCreators = ref(false)
+
+// Tab management
+const route = useRoute()
+const router = useRouter()
+const activeTab = ref<'receipts' | 'customers' | 'returns'>((route.query.tab as any) || 'receipts')
+
+// Watch for tab changes and update URL
+watch(activeTab, (newTab) => {
+  router.replace({ query: { ...route.query, tab: newTab } })
+})
 
 // Initialize loading state synchronously on client
 const isInitialLoading = ref(true)
@@ -437,6 +580,19 @@ const dateFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = ref(10)
 const sidebarCollapsed = ref(false)
+
+// Customers tab state
+const customersSearchQuery = ref('')
+const customersSortBy = ref('name')
+const customersCurrentPage = ref(1)
+const customersItemsPerPage = ref(9)
+
+// Returns tab state
+const returnsSearchQuery = ref('')
+const returnsStatusFilter = ref('all')
+const returnsReasonFilter = ref('all')
+const returnsCurrentPage = ref(1)
+const returnsItemsPerPage = ref(10)
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
@@ -591,14 +747,18 @@ const openCreateReceiptModal = () => {
 }
 
 const handleReceiptCreated = async (receipt: Receipt) => {
-  // Receipt is already added to store by the modal
+  // Receipt is already added to store by the modal, but we need to refresh to ensure it appears
   showCreateReceiptModal.value = false
-  // Refresh receipts list
+  // Refresh receipts list to ensure staff-created receipts appear
   await receiptsStore.fetchReceipts()
+  // Reload creator names after receipts are refreshed
+  await loadCreatorNames()
 }
 
 const selectedReceipt = ref<Receipt | null>(null)
 const showViewReceiptModal = ref(false)
+const showReturnReceiptModal = ref(false)
+const showDeleteReceiptModal = ref(false)
 
 const handleViewReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
@@ -617,13 +777,93 @@ const handlePrintReceipt = (receipt: Receipt) => {
   }, 300)
 }
 
-const handleRefundReceipt = async (receipt: Receipt) => {
-  if (confirm(`Are you sure you want to refund receipt ${receipt.receiptNumber}?`)) {
-    try {
-      await receiptsStore.updateReceipt(receipt.id, { status: 'refunded' })
-    } catch (error: any) {
-      alert(error.message || 'Failed to refund receipt')
-    }
+const handleRefundReceipt = (receipt: Receipt) => {
+  selectedReceipt.value = receipt
+  showReturnReceiptModal.value = true
+}
+
+const handleReceiptReturned = async (receipt: Receipt) => {
+  showReturnReceiptModal.value = false
+  selectedReceipt.value = null
+  // Refresh receipts list
+  await receiptsStore.fetchReceipts()
+}
+
+const handleDeleteReceipt = (receipt: Receipt) => {
+  selectedReceipt.value = receipt
+  showDeleteReceiptModal.value = true
+}
+
+const handleReceiptDeleted = async (receipt: Receipt) => {
+  showDeleteReceiptModal.value = false
+  selectedReceipt.value = null
+  // Refresh receipts list
+  await receiptsStore.fetchReceipts()
+  // Reload creator names
+  await loadCreatorNames()
+}
+
+// Function to fetch creator name for a given UID
+const getCreatorName = (uid: string): string => {
+  if (!uid) return 'Unknown'
+  return creatorNames.value[uid] || 'Loading...'
+}
+
+// Load creator names for all unique creator UIDs in receipts
+const loadCreatorNames = async () => {
+  if (loadingCreators.value || receipts.value.length === 0) return
+  
+  loadingCreators.value = true
+  const db = getFirestoreInstance()
+  if (!db) {
+    loadingCreators.value = false
+    return
+  }
+
+  try {
+    // Get unique creator UIDs from receipts (use actualCreator if available, otherwise createdBy)
+    const uniqueCreatorUids = [...new Set(receipts.value.map(r => (r as any).actualCreator || r.createdBy).filter(Boolean))]
+    
+    // Fetch names for all unique creators
+    await Promise.all(uniqueCreatorUids.map(async (uid) => {
+      if (creatorNames.value[uid]) return // Already loaded
+      
+      try {
+        // First try to get from users collection (super admin)
+        const userData = await getUserDocument(uid)
+        if (userData?.name) {
+          creatorNames.value[uid] = userData.name
+          return
+        }
+        
+        // If not found, try to get from staff collection (staff member)
+        const staffRef = collection(db, 'staff')
+        const staffQuery = query(staffRef, where('authUid', '==', uid))
+        const staffSnapshot = await getDocs(staffQuery)
+        
+        if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+          const staffDoc = staffSnapshot.docs[0]
+          if (staffDoc) {
+            const staffData = staffDoc.data()
+            const fullName = `${staffData.firstName || ''} ${staffData.lastName || ''}`.trim()
+            if (fullName) {
+              creatorNames.value[uid] = fullName
+              return
+            }
+          }
+        }
+        
+        // If still not found, use UID as fallback
+        creatorNames.value[uid] = 'Unknown User'
+      } catch (error: any) {
+        console.warn(`Failed to fetch creator name for ${uid}:`, error.message)
+        creatorNames.value[uid] = 'Unknown User'
+      }
+    }))
+  } catch (error: any) {
+    console.error('Error loading creator names:', error)
+  } finally {
+    loadingCreators.value = false
   }
 }
 
@@ -662,6 +902,8 @@ onMounted(async () => {
   if (authStore.currentUser) {
     try {
       await receiptsStore.fetchReceipts()
+      // Load creator names after receipts are loaded
+      await loadCreatorNames()
     } catch (error: any) {
       console.error('Error loading receipts:', error.message || error)
     }
@@ -677,9 +919,18 @@ watch(() => authStore.currentUser, async (user) => {
   if (user && receiptsStore.receipts.length === 0) {
     try {
       await receiptsStore.fetchReceipts()
+      // Load creator names after receipts are loaded
+      await loadCreatorNames()
     } catch (error: any) {
       console.error('Error loading receipts:', error.message || error)
     }
+  }
+}, { immediate: false })
+
+// Watch for receipts changes and load creator names
+watch(() => receiptsStore.receipts, async (newReceipts) => {
+  if (newReceipts && newReceipts.length > 0) {
+    await loadCreatorNames()
   }
 }, { immediate: false })
 </script>

@@ -4,6 +4,8 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
+import { useCustomersStore } from './customers'
+import { useInventoryStore } from './inventory'
 
 export interface ReceiptItem {
   itemId: string
@@ -28,7 +30,8 @@ export interface Receipt {
   itemIds: string[] // Array of inventory item IDs that were sold
   createdAt: Date | any
   updatedAt?: Date | any
-  createdBy: string
+  createdBy: string // Super admin UID (for fetching/ownership)
+  actualCreator?: string // Actual creator's authUid (for display - staff member or super admin)
 }
 
 export const useReceiptsStore = defineStore('receipts', {
@@ -148,6 +151,7 @@ export const useReceiptsStore = defineStore('receipts', {
               date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
               createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
               updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
+              actualCreator: data.actualCreator || undefined,
             } as Receipt)
           }
         })
@@ -216,6 +220,40 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated to create receipts')
       }
 
+      const actualCreatorUid = authStore.currentUser.uid // Store actual creator for display
+
+      // Check if user is staff to determine which UID to use for createdBy
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let createdByUid = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          // Find the staff document for this user
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              // Use the super admin's UID who created this staff member
+              if (staffData.createdBy) {
+                createdByUid = staffData.createdBy
+                console.log('[ReceiptsStore] Staff user detected, using super admin UID for receipt creation:', createdByUid)
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[ReceiptsStore] Could not fetch staff document for receipt creation, using current user UID:', error.message)
+        }
+      }
+
       try {
         const receiptsRef = collection(db, 'receipts')
         const newReceiptRef = doc(receiptsRef)
@@ -226,7 +264,8 @@ export const useReceiptsStore = defineStore('receipts', {
           date: receiptData.date || now,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          createdBy: authStore.currentUser.uid,
+          createdBy: createdByUid,
+          actualCreator: actualCreatorUid !== createdByUid ? actualCreatorUid : undefined, // Only store if different from createdBy
         }
 
         await setDoc(newReceiptRef, newReceipt)
@@ -238,7 +277,8 @@ export const useReceiptsStore = defineStore('receipts', {
           date: receiptData.date || now,
           createdAt: now,
           updatedAt: now,
-          createdBy: authStore.currentUser.uid,
+          createdBy: createdByUid,
+          actualCreator: actualCreatorUid !== createdByUid ? actualCreatorUid : undefined,
         }
 
         this.receipts.unshift(receiptForState)
@@ -323,18 +363,21 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
-      // Check permissions - staff (non-managers) cannot delete
+      // Check permissions - super admins and managers can delete
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
-      if (userStore.userData?.role === 'staff') {
-        // Check if staff member is a manager
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Staff members do not have permission to delete receipts. Only managers can delete.')
+      // Super admins can always delete
+      if (userStore.userData?.role !== 'superAdmin') {
+        // Staff (non-managers) cannot delete
+        if (userStore.userData?.role === 'staff') {
+          const staffStore = useStaffStore()
+          const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+          if (currentStaffMember?.role !== 'manager') {
+            throw new Error('Staff members do not have permission to delete receipts. Only managers and super admins can delete.')
+          }
         }
       }
 
@@ -348,10 +391,42 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         const receiptData = receiptSnap.data()
-        if (receiptData.createdBy !== authStore.currentUser.uid) {
-          throw new Error('Access denied')
+        const receiptCreatedBy = receiptData.createdBy
+        
+        // Super admins can delete receipts they have access to (fetched receipts)
+        // For staff/managers, only allow deletion if they created the receipt
+        if (userStore.userData?.role === 'superAdmin') {
+          // Super admins can delete any receipt (they already filter receipts by their UID when fetching)
+          // The receipt must belong to their organization (handled by fetchReceipts filtering)
+        } else if (receiptCreatedBy !== authStore.currentUser.uid) {
+          // Non-super admins can only delete receipts they created
+          throw new Error('Access denied: You can only delete receipts you created')
         }
 
+        const receipt = receiptData as Receipt
+        const itemIds = receipt.itemIds || []
+
+        // 1. Return items to inventory (remove dateOut)
+        if (itemIds.length > 0) {
+          try {
+            const inventoryStore = useInventoryStore()
+            await inventoryStore.returnItemsToStock(itemIds)
+          } catch (error: any) {
+            console.error('[ReceiptsStore] Error returning items to stock:', error)
+            // Continue with deletion even if returning items fails
+          }
+        }
+
+        // 2. Update or delete customer
+        try {
+          const customersStore = useCustomersStore()
+          await customersStore.removeReceiptFromCustomer(receiptId, receipt.total || 0)
+        } catch (error: any) {
+          console.error('[ReceiptsStore] Error removing receipt from customer:', error)
+          // Continue with deletion even if customer update fails
+        }
+
+        // 3. Delete the receipt
         await deleteDoc(receiptRef)
 
         // Remove from local state

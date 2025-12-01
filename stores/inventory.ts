@@ -134,15 +134,28 @@ export const useInventoryStore = defineStore('inventory', {
             const indexUrlMatch = orderByError.message?.match(/https:\/\/[^\s]+/)
             const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
 
-            if (!(window as any).__firestoreIndexWarned?.inventoryFolders) {
+            // Check if warning was already shown for inventoryFolders
+            // Handle case where other stores (departments) set it as boolean
+            let warned = (window as any).__firestoreIndexWarned
+            
+            // Convert to object if it's a boolean (from other stores)
+            if (warned && typeof warned !== 'object') {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            // Initialize as object if it doesn't exist
+            if (!warned) {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            if (!warned.inventoryFolders) {
               console.warn('[InventoryStore] orderBy failed, retrying without orderBy:', orderByError.message)
               if (indexUrl) {
                 console.info('[InventoryStore] Create the index here:', indexUrl)
               }
-              if (!(window as any).__firestoreIndexWarned) {
-                (window as any).__firestoreIndexWarned = {}
-              }
-              ;(window as any).__firestoreIndexWarned.inventoryFolders = true
+              warned.inventoryFolders = true
             }
 
             // Retry without orderBy
@@ -768,6 +781,48 @@ export const useInventoryStore = defineStore('inventory', {
       } catch (error: any) {
         console.error('Error updating dateOut:', error)
         throw new Error(error.message || 'Failed to update dateOut')
+      }
+    },
+
+    // Remove dateOut from items (return to stock) when receipt is deleted
+    async returnItemsToStock(itemIds: string[]) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      try {
+        const batch = itemIds.map(itemId => {
+          const itemRef = doc(db, 'inventoryItems', itemId)
+          return updateDoc(itemRef, {
+            dateOut: null,
+            updatedAt: serverTimestamp(),
+          })
+        })
+
+        await Promise.all(batch)
+
+        // Update local state
+        Object.keys(this.items).forEach(folderId => {
+          const folderItems = this.items[folderId]
+          if (folderItems) {
+            itemIds.forEach(itemId => {
+              const index = folderItems.findIndex(item => item.id === itemId)
+              if (index > -1 && folderItems[index]) {
+                folderItems[index].dateOut = undefined
+                folderItems[index].updatedAt = new Date()
+              }
+            })
+          }
+        })
+      } catch (error: any) {
+        console.error('Error returning items to stock:', error)
+        throw new Error(error.message || 'Failed to return items to stock')
       }
     },
   },

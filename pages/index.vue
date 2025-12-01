@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen bg-white antialiased">
+  <div class="min-h-screen bg-white antialiased relative">
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.025] z-0 pattern-overlay"></div>
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,21 +69,20 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative overflow-hidden bg-white pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
+    <section class="relative overflow-hidden bg-white pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32 z-10">
       <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-purple-50/30"></div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div class="text-center lg:text-left space-y-8">
             <div class="space-y-6">
               <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
-                Take Control of Your
+                Complete Store
                 <span class="block bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent">
-                  Inventory
+                  Management System
                 </span>
               </h1>
               <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Streamline your inventory management with Storv. Track, organize, and optimize your stock 
-                with ease. Built for businesses that demand efficiency.
+                Manage inventory, track sales, handle customers, process returns, and organize your team all in one powerful platform. Built for modern retailers.
               </p>
             </div>
             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -126,14 +127,14 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 sm:py-20 lg:py-24 bg-white">
+    <section id="features" class="py-16 sm:py-20 lg:py-24 bg-white relative z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12 sm:mb-16">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Powerful Features
           </h2>
           <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            Everything you need to manage your inventory effectively
+            Everything you need to run your store efficiently
           </p>
         </div>
         
@@ -142,59 +143,59 @@
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
               <CubeIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Real-Time Tracking</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Flexible Inventory Management</h3>
             <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Monitor your inventory in real-time with instant updates and accurate stock levels.
-            </p>
-          </div>
-          
-          <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <ChartBarIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Analytics Dashboard</h3>
-            <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Get insights into your inventory trends with comprehensive analytics and reports.
-            </p>
-          </div>
-          
-          <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <BellAlertIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-            </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Smart Alerts</h3>
-            <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Never run out of stock with intelligent alerts for low inventory levels.
+              Organize products into folders with custom templates and dynamic fields. Track stock levels, serial numbers, and low inventory alerts in real-time.
             </p>
           </div>
           
           <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <BoltIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <ReceiptPercentIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Fast & Reliable</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Sales & Receipt Management</h3>
             <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Built for speed and reliability, ensuring your operations never slow down.
+              Create and manage sales receipts with A4-optimized printing. Track all transactions, payment methods, and generate professional receipts for your customers.
+            </p>
+          </div>
+          
+          <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <UsersIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Automatic Customer Tracking</h3>
+            <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+              Customers are automatically created from receipts and tracked by email, phone, or address. View complete purchase history and customer insights.
+            </p>
+          </div>
+          
+          <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <ArrowPathIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+            </div>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Returns & Refunds</h3>
+            <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+              Process product returns and refunds efficiently. Track return status, reasons, and automatically update inventory when items are returned.
             </p>
           </div>
           
           <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <ShieldCheckIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <BuildingOfficeIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Secure & Private</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Team & Department Management</h3>
             <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Your data is protected with enterprise-grade security and encryption.
+              Organize your staff into departments with role-based access control. Manage permissions for staff, managers, and administrators seamlessly.
             </p>
           </div>
           
           <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <DevicePhoneMobileIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <ChartBarIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
-            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Mobile Ready</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Real-Time Analytics</h3>
             <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Access your inventory from anywhere, anytime with our responsive design.
+              Monitor revenue, sales trends, customer activity, and inventory status with a comprehensive dashboard that updates in real-time.
             </p>
           </div>
         </div>
@@ -202,7 +203,7 @@
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-16 sm:py-20 lg:py-24 bg-gray-50">
+    <section id="pricing" class="py-16 sm:py-20 lg:py-24 bg-gray-50 relative z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12 sm:mb-16">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
@@ -360,14 +361,14 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary-500 via-purple-600 to-pink-600 overflow-hidden">
+    <section class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary-500 via-purple-600 to-pink-600 overflow-hidden z-10">
       <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
       <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
-          Ready to Transform Your Inventory Management?
+          Ready to Transform Your Store Operations?
         </h2>
         <p class="text-lg sm:text-xl text-white/90 mb-8 sm:mb-10">
-          Join thousands of businesses already using Storv
+          Join stores using Storv to manage inventory, sales, customers, and teams all in one place
         </p>
         <NuxtLink to="/signup" class="bg-white text-primary-600 px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
           Get Started Free
@@ -376,8 +377,18 @@
       </div>
     </section>
 
+    <!-- Back to Top Button -->
+    <button
+      v-if="showBackToTop"
+      @click="scrollToTop"
+      class="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+      aria-label="Back to top"
+    >
+      <ChevronUpIcon class="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
+    </button>
+
     <!-- Footer -->
-    <footer id="about" class="bg-gray-900 text-gray-400">
+    <footer id="about" class="bg-gray-900 text-gray-400 relative z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8 sm:mb-12">
           <div class="col-span-2">
@@ -385,7 +396,7 @@
               Storv
             </h3>
             <p class="text-gray-500 max-w-sm text-sm sm:text-base">
-              Modern inventory management for modern businesses.
+              Complete store management solution: inventory, sales, customers, returns, and team organization all in one platform.
             </p>
           </div>
           
@@ -428,7 +439,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -441,9 +452,31 @@ import {
   ShieldCheckIcon,
   DevicePhoneMobileIcon,
   CheckIcon,
+  ReceiptPercentIcon,
+  UsersIcon,
+  ArrowPathIcon,
+  BuildingOfficeIcon,
+  ChevronUpIcon,
 } from '@heroicons/vue/24/outline'
 
 const mobileMenuOpen = ref(false)
+const showBackToTop = ref(false)
+
+// Handle scroll to show/hide back to top button
+const handleScroll = () => {
+  if (import.meta.client) {
+    showBackToTop.value = window.scrollY > 300
+  }
+}
+
+const scrollToTop = () => {
+  if (import.meta.client) {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
+}
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -461,8 +494,14 @@ const scrollToSection = (sectionId: string) => {
 
 // Handle hash navigation on page load
 onMounted(() => {
+  // Add scroll listener
+  if (import.meta.client) {
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Check initial scroll position
+  }
+  
   // Check if there's a hash in the URL
-  if (window.location.hash) {
+  if (import.meta.client && window.location.hash) {
     const sectionId = window.location.hash.substring(1) // Remove the #
     // Small delay to ensure page is fully loaded
     setTimeout(() => {
@@ -471,13 +510,20 @@ onMounted(() => {
   }
 })
 
+// Cleanup scroll listener
+onUnmounted(() => {
+  if (import.meta.client) {
+    window.removeEventListener('scroll', handleScroll)
+  }
+})
+
 // SEO and metadata
 useHead({
-  title: 'Storv - Modern Inventory Management',
+  title: 'Storv - Complete Store Management System',
   meta: [
     {
       name: 'description',
-      content: 'Streamline your inventory management with Storv. Track, organize, and optimize your stock with ease.'
+      content: 'Manage inventory, track sales, handle customers, process returns, and organize your team—all in one powerful platform. Built for modern retailers.'
     }
   ]
 })
@@ -487,5 +533,19 @@ useHead({
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Background Pattern */
+.pattern-overlay {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+:global(.dark) .pattern-overlay {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
 </style>

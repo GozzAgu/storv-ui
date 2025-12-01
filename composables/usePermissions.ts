@@ -39,11 +39,18 @@ export const usePermissions = () => {
     return isStaff.value && !isManager.value
   })
 
+  // Check if user can create receipts - all authenticated users can create
+  const canCreate = computed(() => {
+    // All authenticated users (super admins, managers, and staff) can create receipts
+    return !!authStore.currentUser
+  })
+
   return {
     isStaff,
     isManager,
     canManage,
     isReadOnly,
+    canCreate,
   }
 }
 

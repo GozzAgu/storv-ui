@@ -464,6 +464,9 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
+import { useFirestore } from '~/composables/useFirestore'
+import { useUserStore } from '~/stores/user'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 
 definePageMeta({
   layout: 'dashboard'
@@ -490,12 +493,64 @@ const isLoadingStoreInfo = ref(true)
 // Get user data and load store info
 const { currentUser } = useFirebaseAuth()
 const { getUserDocument, updateStoreDetails } = useUser()
+const { getFirestoreInstance } = useFirestore()
+const userStore = useUserStore()
+
+// Helper function to get the correct user ID (super admin UID if staff)
+const getTargetUserId = async (): Promise<string | null> => {
+  if (!currentUser.value) return null
+  
+  // Fetch user data if not loaded
+  if (!userStore.userData) {
+    await userStore.fetchUserData(currentUser.value.uid)
+  }
+  
+  let userId = currentUser.value.uid
+  
+  // If the current user is staff, get the super admin UID from the staff document
+  if (userStore.userData?.role === 'staff') {
+    try {
+      const db = getFirestoreInstance()
+      if (!db) {
+        console.warn('[Settings] Firestore not initialized')
+        return userId
+      }
+      
+      // Find the staff document for this user
+      const staffRef = collection(db, 'staff')
+      const staffQuery = query(staffRef, where('authUid', '==', userId))
+      const staffSnapshot = await getDocs(staffQuery)
+      
+      if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+        const staffDoc = staffSnapshot.docs[0]
+        if (staffDoc) {
+          const staffData = staffDoc.data()
+          // Use the super admin's UID who created this staff member
+          if (staffData.createdBy) {
+            userId = staffData.createdBy
+            console.log('[Settings] Staff user detected, using super admin UID:', userId)
+          }
+        }
+      }
+    } catch (error: any) {
+      console.warn('[Settings] Could not fetch staff document, using current user UID:', error.message)
+    }
+  }
+  
+  return userId
+}
 
 // Load store information from Firestore
 onMounted(async () => {
   if (currentUser.value) {
     try {
-      const userData = await getUserDocument(currentUser.value.uid)
+      const targetUserId = await getTargetUserId()
+      if (!targetUserId) {
+        isLoadingStoreInfo.value = false
+        return
+      }
+      
+      const userData = await getUserDocument(targetUserId)
       if (userData?.storeDetails) {
         storeInfo.name = userData.storeDetails.storeName || ''
         storeInfo.email = userData.storeDetails.storeEmail || ''
@@ -560,7 +615,13 @@ const saveStoreInfo = async () => {
   }
 
   try {
-    await updateStoreDetails(currentUser.value.uid, {
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) {
+      alert('Unable to determine target user. Please try again.')
+      return
+    }
+    
+    await updateStoreDetails(targetUserId, {
       storeName: storeInfo.name,
       storeEmail: storeInfo.email,
       storePhone: storeInfo.phone,

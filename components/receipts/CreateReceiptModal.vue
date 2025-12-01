@@ -221,6 +221,28 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Customer Phone
+              </label>
+              <input
+                v-model="receiptForm.customerPhone"
+                type="tel"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="+1 234 567 8900"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Customer Address
+              </label>
+              <input
+                v-model="receiptForm.customerAddress"
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="123 Main St, City, State"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Payment Method *
               </label>
               <select
@@ -329,6 +351,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
+import { useCustomersStore } from '~/stores/customers'
 
 interface Props {
   modelValue: boolean
@@ -342,6 +365,7 @@ const emit = defineEmits<{
 
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
+const customersStore = useCustomersStore()
 
 const steps = [
   { id: 'folder', label: 'Select Folder' },
@@ -360,6 +384,8 @@ const availableItems = ref<InventoryItem[]>([])
 const receiptForm = ref({
   customerName: '',
   customerEmail: '',
+  customerPhone: '',
+  customerAddress: '',
   paymentMethod: '',
   status: 'completed' as 'completed' | 'pending',
   notes: '',
@@ -529,6 +555,8 @@ const resetForm = () => {
   receiptForm.value = {
     customerName: '',
     customerEmail: '',
+    customerPhone: '',
+    customerAddress: '',
     paymentMethod: '',
     status: 'completed',
     notes: '',
@@ -581,9 +609,25 @@ const handleCreateReceipt = async () => {
       itemIds,
     }
     
-    await receiptsStore.createReceipt(receiptData)
+    // Create receipt first
+    const receiptId = await receiptsStore.createReceipt(receiptData)
 
-    emit('receipt-created', receiptData)
+    // Create or update customer automatically
+    try {
+      await customersStore.createOrUpdateCustomerFromReceipt(receiptId, {
+        customerName: receiptForm.value.customerName,
+        customerEmail: receiptForm.value.customerEmail || undefined,
+        customerPhone: receiptForm.value.customerPhone || undefined,
+        customerAddress: receiptForm.value.customerAddress || undefined,
+        total: calculateTotal(),
+        date: new Date(),
+      })
+    } catch (error: any) {
+      console.error('Error creating/updating customer:', error)
+      // Don't fail the receipt creation if customer creation fails
+    }
+
+    emit('receipt-created', { ...receiptData, id: receiptId })
     resetForm()
     emit('update:modelValue', false)
   } catch (error: any) {

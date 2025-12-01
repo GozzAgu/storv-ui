@@ -6,8 +6,8 @@
       <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your store departments and staff</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Stats Cards - Hidden on large screens -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
       <Card padding="md" extra-class="border-l-4 border-l-blue-500">
         <div class="flex items-center justify-between">
           <div>
@@ -94,8 +94,8 @@
       </div>
     </Card>
 
-    <!-- Filters -->
-    <Card padding="md">
+    <!-- Filters - Hidden on large screens -->
+    <Card padding="md" class="lg:hidden">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1 relative">
           <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -146,8 +146,56 @@
       </div>
     </Card>
 
+    <!-- Compact Header (Visible only on large screens) -->
+    <Card v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length > 0" padding="sm" class="hidden lg:block mb-4">
+      <div class="flex items-center justify-between">
+        <!-- Compact Stats -->
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2">
+            <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Departments:</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <UsersIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <UserCircleIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Avg/Dept:</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</span>
+          </div>
+        </div>
+        <!-- Compact Search -->
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search departments..."
+              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+            />
+          </div>
+          <button
+            @click="resetFilters"
+            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Reset filters"
+          >
+            <ArrowPathIcon class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </Card>
+
     <!-- Departments Grid -->
-    <div v-else-if="paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card
         v-for="department in paginatedDepartments"
         :key="department.id"
@@ -211,7 +259,7 @@
     </div>
 
     <!-- Empty State -->
-    <Card v-else-if="!departmentsStore.loading">
+    <Card v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length === 0 && filteredDepartments.length === 0">
       <div class="text-center py-12">
         <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
           <BuildingOfficeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
@@ -389,69 +437,119 @@ const handlePageChange = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const handleRetryFetch = async () => {
+  console.log('[DepartmentsPage] Retrying fetch...')
+  try {
+    await departmentsStore.fetchDepartments()
+  } catch (error: any) {
+    console.error('[DepartmentsPage] Retry error:', error.message || error)
+  }
+}
+
 // Load departments on mount
 onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
   
-  // Fetch user data if authenticated and not already loaded
-  if (authStore.currentUser?.uid && !userStore.userData) {
-    await userStore.fetchUserData(authStore.currentUser.uid)
-  }
+  console.log('[DepartmentsPage] onMounted - Starting load process')
+  
+  const loadData = async () => {
+    console.log('[DepartmentsPage] loadData - Checking auth state')
+    
+    // Wait for auth to finish loading with timeout
+    let attempts = 0
+    while (authStore.loading && attempts < 100) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      attempts++
+      if (attempts % 10 === 0) {
+        console.log('[DepartmentsPage] Still waiting for auth...', attempts)
+      }
+    }
+    
+    if (attempts >= 100) {
+      console.warn('[DepartmentsPage] Auth loading timeout')
+    }
+    
+    // Check if user is authenticated
+    if (!authStore.currentUser) {
+      console.error('[DepartmentsPage] No authenticated user found')
+      console.log('[DepartmentsPage] Auth store state:', {
+        loading: authStore.loading,
+        currentUser: authStore.currentUser,
+        isAuthenticated: authStore.isAuthenticated
+      })
+      return
+    }
+    
+    console.log('[DepartmentsPage] User authenticated:', authStore.currentUser.uid)
+    
+    // Fetch user data if not already loaded
+    if (!userStore.userData) {
+      console.log('[DepartmentsPage] Fetching user data...')
+      try {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+        console.log('[DepartmentsPage] User data fetched:', userStore.userData)
+      } catch (error) {
+        console.error('[DepartmentsPage] Error fetching user data:', error)
+      }
+    }
 
-  // If user is staff, fetch their staff member data
-  if (userStore.userData?.role === 'staff') {
+    // If user is staff, fetch their staff member data
+    if (userStore.userData?.role === 'staff') {
+      console.log('[DepartmentsPage] User is staff, fetching staff member data...')
+      try {
+        currentStaffMember.value = await staffStore.fetchCurrentStaffMember()
+        console.log('[DepartmentsPage] Staff member data:', currentStaffMember.value)
+      } catch (error) {
+        console.error('[DepartmentsPage] Error fetching current staff member:', error)
+      }
+    }
+    
+    // Load departments
+    console.log('[DepartmentsPage] Fetching departments...')
     try {
-      currentStaffMember.value = await staffStore.fetchCurrentStaffMember()
-    } catch (error) {
-      console.error('Error fetching current staff member:', error)
+      await departmentsStore.fetchDepartments()
+      console.log('[DepartmentsPage] Departments fetched:', departmentsStore.departments.length)
+      if (departmentsStore.error) {
+        console.error('[DepartmentsPage] Departments store error:', departmentsStore.error)
+      }
+    } catch (error: any) {
+      console.error('[DepartmentsPage] Error loading departments:', error.message || error)
+      console.error('[DepartmentsPage] Full error:', error)
     }
   }
   
-  try {
-    // Wait for auth to finish loading before loading departments
-    if (authStore.loading) {
-      let resolved = false
-      await new Promise((resolve) => {
-        const unwatch = watch(() => authStore.loading, (val) => {
-          if (!val && !resolved) {
-            resolved = true
-            unwatch()
-            resolve(true)
-          }
-        })
-        
-        // Timeout after 5 seconds
-        setTimeout(() => {
-          if (!resolved) {
-            resolved = true
-            unwatch()
-            resolve(true)
-          }
-        }, 5000)
-      })
-    }
-    
-    // Only load departments if user is authenticated
-    if (authStore.currentUser) {
-      await departmentsStore.fetchDepartments()
-    }
-  } catch (error: any) {
-    console.error('Error loading departments:', error.message || error)
-  }
+  await loadData()
 })
 
 // Watch for auth state changes
-watch(() => authStore.currentUser, async (newUser) => {
+watch(() => authStore.currentUser, async (newUser, oldUser) => {
   if (import.meta.server) return
+  console.log('[DepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
+  
   if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
+    console.log('[DepartmentsPage] Auth changed and no departments, fetching...')
     try {
       await departmentsStore.fetchDepartments()
-    } catch (error) {
-      // Silently handle - error is already in store
+      console.log('[DepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
+    } catch (error: any) {
+      console.error('[DepartmentsPage] Error in watch fetch:', error.message || error)
     }
   }
 }, { immediate: false })
+
+// Also watch for when auth loading completes
+watch(() => authStore.loading, async (loading) => {
+  if (import.meta.server) return
+  if (!loading && authStore.currentUser && departmentsStore.departments.length === 0 && !departmentsStore.loading) {
+    console.log('[DepartmentsPage] Auth loading completed, fetching departments...')
+    try {
+      await departmentsStore.fetchDepartments()
+    } catch (error: any) {
+      console.error('[DepartmentsPage] Error fetching after auth loaded:', error.message || error)
+    }
+  }
+})
 
 const openCreateDepartmentModal = () => {
   editingDepartment.value = null
@@ -494,10 +592,6 @@ const handleDeleteDepartment = async (department: Department) => {
       alert(error.message || 'Failed to delete department')
     }
   }
-}
-
-const handleRetryFetch = async () => {
-  await departmentsStore.fetchDepartments()
 }
 
 const handleDepartmentSuccess = async (action?: 'create' | 'update') => {

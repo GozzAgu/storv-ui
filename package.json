@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.11.3",
+    "apexcharts": "^5.3.6",
     "firebase": "^12.6.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
@@ -19,7 +20,8 @@
     "pinia": "^3.0.4",
     "qrcode": "^1.5.4",
     "vue": "^3.5.24",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "vue3-apexcharts": "^1.10.0"
   },
   "devDependencies": {
     "@heroicons/vue": "^2.2.0",
