@@ -187,7 +187,7 @@
                   </template>
                 </div>
               </th>
-              <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManage" class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Actions
               </th>
             </tr>
@@ -232,6 +232,14 @@
                       -
                     </span>
                   </div>
+                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-sm text-gray-600 dark:text-gray-300">
+                    <span v-if="item[column.key]">
+                      {{ formatItemDate(item[column.key]) }}
+                    </span>
+                    <span v-else class="text-gray-400 dark:text-gray-500 italic">
+                      -
+                    </span>
+                  </div>
                   <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                     :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                     {{ item[column.key] ? 'Yes' : 'No' }}
@@ -241,7 +249,7 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right">
+              <td v-if="canManage" class="px-6 py-4 whitespace-nowrap text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
                     @click="handleEditItem(item)"
@@ -292,9 +300,8 @@
     <!-- Fixed Pagination -->
     <div
       v-if="sortedFilteredItems.length > 0"
-      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
-      style="left: 0;"
     >
       <Pagination
         :current-page="currentPage"
@@ -317,90 +324,218 @@
     <!-- Enhanced Add/Edit Item Modal -->
     <Modal
       v-model="showAddItemModal"
-      :title="editingItem ? 'Edit Item' : 'Add New Item'"
-      size="md"
+      :title="editingItem ? 'Edit Item' : (folder?.hasSerialNumbers && !editingItem ? 'Add Items with Serial Numbers' : 'Add New Item')"
+      size="lg"
     >
       <form @submit.prevent="handleSaveItem" class="space-y-6">
-        <div
-          v-for="field in folder?.template?.fields || []"
-          :key="field.id"
-          :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
-        >
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-            </label>
-            <!-- Text Input -->
-            <input
-              v-if="field.type === 'text'"
-              v-model="itemForm[field.name]"
-              type="text"
-              :required="field.required"
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-            />
-            <!-- Number Input -->
-            <input
-              v-else-if="field.type === 'number'"
-              v-model.number="itemForm[field.name]"
-              type="number"
-              :required="field.required"
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-            />
-            <!-- Currency Input -->
-            <div v-else-if="field.type === 'currency'" class="relative">
-              <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
-              <input
-                v-model.number="itemForm[field.name]"
-                type="number"
-                step="0.01"
-                min="0"
-                :required="field.required"
-                class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                :placeholder="field.placeholder || '0.00'"
-              />
-            </div>
-            <!-- Date Input -->
-            <input
-              v-else-if="field.type === 'date'"
-              v-model="itemForm[field.name]"
-              type="date"
-              :required="field.required"
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            />
-            <!-- Select Input -->
-            <select
-              v-else-if="field.type === 'select' && field.options"
-              v-model="itemForm[field.name]"
-              :required="field.required"
-              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+        <!-- Bulk Add Mode for Serial Numbers -->
+        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-4">
+          <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+            <p class="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Bulk Add Mode:</strong> Enter the item details once, then add multiple serial numbers below. Each serial number will create a separate item with the same details.
+            </p>
+          </div>
+
+          <!-- Common Fields (all items share these) -->
+          <div class="space-y-4">
+            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Item Details (Shared)</h4>
+            <div
+              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo') || []"
+              :key="field.id"
+              :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
             >
-              <option value="">Select {{ field.label || field.name }}</option>
-              <option v-for="option in field.options" :key="option" :value="option">
-                {{ option }}
-              </option>
-            </select>
-            <!-- Boolean Input -->
-            <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
-              <input
-                v-model="itemForm[field.name]"
-                type="checkbox"
-                class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-              />
-              <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
-            </label>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                </label>
+                <!-- Text Input -->
+                <input
+                  v-if="field.type === 'text'"
+                  v-model="itemForm[field.name]"
+                  type="text"
+                  :required="field.required"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
+                <!-- Number Input -->
+                <input
+                  v-else-if="field.type === 'number'"
+                  v-model.number="itemForm[field.name]"
+                  type="number"
+                  :required="field.required"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
+                <!-- Currency Input -->
+                <div v-else-if="field.type === 'currency'" class="relative">
+                  <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                  <input
+                    v-model.number="itemForm[field.name]"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    :required="field.required"
+                    class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || '0.00'"
+                  />
+                </div>
+                <!-- Date Input -->
+                <input
+                  v-else-if="field.type === 'date'"
+                  v-model="itemForm[field.name]"
+                  type="date"
+                  :required="field.required"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                />
+                <!-- Select Input -->
+                <select
+                  v-else-if="field.type === 'select' && field.options"
+                  v-model="itemForm[field.name]"
+                  :required="field.required"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                >
+                  <option value="">Select {{ field.label || field.name }}</option>
+                  <option v-for="option in field.options" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+                <!-- Boolean Input -->
+                <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    v-model="itemForm[field.name]"
+                    type="checkbox"
+                    class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                  />
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Serial Numbers List -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Serial Numbers</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="PlusIcon"
+                @click="addSerialNumber"
+              >
+                Add Serial Number
+              </Button>
+            </div>
+            <div v-if="serialNumbers.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
+              No serial numbers added. Click "Add Serial Number" to start.
+            </div>
+            <div v-else class="space-y-2 max-h-64 overflow-y-auto">
+              <div
+                v-for="(serial, index) in serialNumbers"
+                :key="index"
+                class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+              >
+                <input
+                  v-model="serialNumbers[index]"
+                  type="text"
+                  :placeholder="`Serial Number ${index + 1}`"
+                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+                <button
+                  type="button"
+                  @click="removeSerialNumber(index)"
+                  class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Remove serial number"
+                >
+                  <TrashIcon class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div v-if="!folder?.template?.fields || folder.template.fields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-          No template fields defined for this folder. Please edit the folder to add fields.
+
+        <!-- Single Item Mode (normal or edit) -->
+        <div v-else>
+          <div
+            v-for="field in folder?.template?.fields || []"
+            :key="field.id"
+            :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
+          >
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+              </label>
+              <!-- Text Input -->
+              <input
+                v-if="field.type === 'text'"
+                v-model="itemForm[field.name]"
+                type="text"
+                :required="field.required"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+              />
+              <!-- Number Input -->
+              <input
+                v-else-if="field.type === 'number'"
+                v-model.number="itemForm[field.name]"
+                type="number"
+                :required="field.required"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+              />
+              <!-- Currency Input -->
+              <div v-else-if="field.type === 'currency'" class="relative">
+                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                <input
+                  v-model.number="itemForm[field.name]"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  :required="field.required"
+                  class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  :placeholder="field.placeholder || '0.00'"
+                />
+              </div>
+              <!-- Date Input -->
+              <input
+                v-else-if="field.type === 'date'"
+                v-model="itemForm[field.name]"
+                type="date"
+                :required="field.required"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              />
+              <!-- Select Input -->
+              <select
+                v-else-if="field.type === 'select' && field.options"
+                v-model="itemForm[field.name]"
+                :required="field.required"
+                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              >
+                <option value="">Select {{ field.label || field.name }}</option>
+                <option v-for="option in field.options" :key="option" :value="option">
+                  {{ option }}
+                </option>
+              </select>
+              <!-- Boolean Input -->
+              <label v-else-if="field.type === 'boolean'" class="flex items-center gap-3 cursor-pointer">
+                <input
+                  v-model="itemForm[field.name]"
+                  type="checkbox"
+                  class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
+                />
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ field.label || field.name }}</span>
+              </label>
+            </div>
+          </div>
+          <div v-if="!folder?.template?.fields || folder.template.fields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+            No template fields defined for this folder. Please edit the folder to add fields.
+          </div>
         </div>
       </form>
 
       <template #footer>
         <Button variant="outline" @click="handleCancelItem">Cancel</Button>
         <Button variant="primary" type="submit" @click="handleSaveItem">
-          {{ editingItem ? 'Update' : 'Add' }} Item
+          {{ editingItem ? 'Update' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Item${serialNumbers.length !== 1 ? 's' : ''}` : 'Add') }} Item{{ folder?.hasSerialNumbers && !editingItem && serialNumbers.length !== 1 ? 's' : '' }}
         </Button>
       </template>
     </Modal>
@@ -432,6 +567,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useAuthStore } from '~/stores/auth'
+import { usePermissions } from '~/composables/usePermissions'
 
 definePageMeta({
   layout: 'dashboard'
@@ -445,6 +581,7 @@ import type { InventoryItem } from '~/stores/inventory'
 
 const inventoryStore = useInventoryStore()
 const authStore = useAuthStore()
+const { canManage } = usePermissions()
 
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
@@ -496,6 +633,7 @@ const itemsPerPage = ref(10)
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
 
 const itemForm = reactive<Record<string, any>>({})
+const serialNumbers = ref<string[]>([])
 
 // Folder will be loaded from Firestore via inventoryStore
 
@@ -652,19 +790,88 @@ const formatNumber = (value: number | string | undefined) => {
   return new Intl.NumberFormat('en-US').format(num)
 }
 
-const formatItemDate = (date: string | Date | undefined) => {
+const formatItemDate = (date: string | Date | any) => {
   if (!date) return '-'
+  
   try {
-    const dateObj = date instanceof Date ? date : new Date(date)
-    if (isNaN(dateObj.getTime())) return date.toString()
-    return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  } catch {
-    return date.toString()
+    // Handle Firestore Timestamp objects (with toDate method)
+    if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+      const dateObj = date.toDate()
+      if (isNaN(dateObj.getTime())) return '-'
+      return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    }
+    
+    // Handle Firestore Timestamp objects (with seconds property)
+    if (date && typeof date === 'object' && 'seconds' in date) {
+      const timestamp = date.seconds * 1000 + ((date.nanoseconds || 0) / 1000000)
+      const dateObj = new Date(timestamp)
+      if (isNaN(dateObj.getTime())) return '-'
+      return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    }
+    
+    // Handle string representation of Timestamp objects like "Timestamp(seconds=1764553673, nanoseconds=602000000)"
+    if (typeof date === 'string' && date.includes('Timestamp') && date.includes('seconds=')) {
+      try {
+        const secondsMatch = date.match(/seconds=(\d+)/)
+        const nanosecondsMatch = date.match(/nanoseconds=(\d+)/)
+        if (secondsMatch && secondsMatch[1]) {
+          const seconds = parseInt(secondsMatch[1], 10)
+          const nanoseconds = (nanosecondsMatch && nanosecondsMatch[1]) ? parseInt(nanosecondsMatch[1], 10) : 0
+          const timestamp = seconds * 1000 + (nanoseconds / 1000000)
+          const dateObj = new Date(timestamp)
+          if (!isNaN(dateObj.getTime())) {
+            return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          }
+        }
+      } catch (e) {
+        // Fall through to next check
+      }
+    }
+    
+    // Handle Date objects
+    if (date instanceof Date) {
+      if (isNaN(date.getTime())) return '-'
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    }
+    
+    // Handle string dates or ISO date strings
+    if (typeof date === 'string') {
+      // Skip if it looks like a Timestamp string that we couldn't parse
+      if (date.includes('Timestamp')) {
+        return '-'
+      }
+      const dateObj = new Date(date)
+      if (!isNaN(dateObj.getTime())) {
+        return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      }
+    }
+    
+    return '-'
+  } catch (error) {
+    console.warn('Error formatting date:', date, error)
+    return '-'
   }
 }
 
 const getItemDisplayValue = (value: any) => {
   if (value === undefined || value === null || value === '') return '-'
+  
+  // Handle Firestore Timestamp objects (with toDate method)
+  if (value && typeof value === 'object' && typeof value.toDate === 'function') {
+    return formatItemDate(value)
+  }
+  
+  // Handle Firestore Timestamp objects (with seconds property)
+  if (value && typeof value === 'object' && 'seconds' in value) {
+    return formatItemDate(value)
+  }
+  
+  // Check if it's a Timestamp string representation that should be formatted
+  if (typeof value === 'string' && (value.includes('Timestamp') || value.includes('seconds='))) {
+    const formatted = formatItemDate(value)
+    return formatted !== '-' ? formatted : value
+  }
+  
   return value
 }
 
@@ -693,6 +900,7 @@ const handlePageChange = (page: number) => {
 
 const openAddItemModal = () => {
   editingItem.value = null
+  serialNumbers.value = []
   // Initialize form with empty values for all template fields
   if (folder.value?.template?.fields) {
     Object.keys(itemForm).forEach(key => delete itemForm[key])
@@ -713,6 +921,7 @@ const openAddItemModal = () => {
 
 const handleEditItem = (item: InventoryItem) => {
   editingItem.value = item
+  serialNumbers.value = []
   // Copy all item data to form
   Object.keys(itemForm).forEach(key => delete itemForm[key])
   Object.keys(item).forEach(key => {
@@ -742,10 +951,18 @@ const handleDeleteItem = async (item: InventoryItem) => {
   }
 }
 
+const addSerialNumber = () => {
+  serialNumbers.value.push('')
+}
+
+const removeSerialNumber = (index: number) => {
+  serialNumbers.value.splice(index, 1)
+}
+
 const handleSaveItem = async () => {
   // Validate required fields based on template
   if (folder.value?.template?.fields) {
-    const requiredFields = folder.value.template.fields.filter(f => f.required)
+    const requiredFields = folder.value.template.fields.filter(f => f.required && f.name !== 'serialNo')
     for (const field of requiredFields) {
       if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
         alert(`Please fill in the required field: ${field.label || field.name}`)
@@ -764,15 +981,57 @@ const handleSaveItem = async () => {
         folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
       }
     } else {
-      // Create new item
-      await inventoryStore.createItem(folderId.value, itemForm)
-      // Reload folder to update stats
-      if (folder.value) {
-        await inventoryStore.fetchFolder(folderId.value)
-        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+      // Check if we're in bulk add mode (hasSerialNumbers and serialNumbers array has items)
+      if (folder.value?.hasSerialNumbers && serialNumbers.value.length > 0) {
+        // Validate serial numbers
+        const validSerialNumbers = serialNumbers.value.filter(sn => sn && sn.trim() !== '')
+        if (validSerialNumbers.length === 0) {
+          alert('Please add at least one serial number')
+          return
+        }
+
+        // Check for duplicate serial numbers
+        const uniqueSerials = new Set(validSerialNumbers)
+        if (uniqueSerials.size !== validSerialNumbers.length) {
+          alert('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
+          return
+        }
+
+        // Create multiple items with different serial numbers
+        const baseItemData = { ...itemForm }
+        // Remove serialNo from base data if it exists (we'll add it per item)
+        delete baseItemData.serialNo
+
+        let createdCount = 0
+        for (const serialNo of validSerialNumbers) {
+          const itemData = {
+            ...baseItemData,
+            serialNo: serialNo.trim(),
+          }
+          await inventoryStore.createItem(folderId.value, itemData)
+          createdCount++
+        }
+
+        // Reload folder to update stats
+        if (folder.value) {
+          await inventoryStore.fetchFolder(folderId.value)
+          folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+        }
+        // Refresh folder list to update item counts on the folders page
+        await inventoryStore.fetchFolders()
+
+        alert(`Successfully created ${createdCount} item${createdCount !== 1 ? 's' : ''}`)
+      } else {
+        // Create single item (normal mode)
+        await inventoryStore.createItem(folderId.value, itemForm)
+        // Reload folder to update stats
+        if (folder.value) {
+          await inventoryStore.fetchFolder(folderId.value)
+          folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+        }
+        // Refresh folder list to update item counts on the folders page
+        await inventoryStore.fetchFolders()
       }
-      // Refresh folder list to update item counts on the folders page
-      await inventoryStore.fetchFolders()
     }
     handleCancelItem()
   } catch (error: any) {
@@ -783,6 +1042,7 @@ const handleSaveItem = async () => {
 const handleCancelItem = () => {
   showAddItemModal.value = false
   editingItem.value = null
+  serialNumbers.value = []
   Object.keys(itemForm).forEach(key => delete itemForm[key])
 }
 

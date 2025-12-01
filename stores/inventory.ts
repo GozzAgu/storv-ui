@@ -3,6 +3,7 @@ import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
+import { useStaffStore } from './staff'
 
 export interface TemplateField {
   id: string
@@ -316,6 +317,21 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to update folders')
       }
 
+      // Check permissions - staff (non-managers) cannot update
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to update folders. Only managers can edit.')
+        }
+      }
+
       // Verify ownership
       const folder = this.getFolderById(folderId)
       if (!folder || folder.createdBy !== authStore.currentUser.uid) {
@@ -356,6 +372,21 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to delete folders')
       }
 
+      // Check permissions - staff (non-managers) cannot delete
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to delete folders. Only managers can delete.')
+        }
+      }
+
       // Verify ownership
       const folder = this.getFolderById(folderId)
       if (!folder || folder.createdBy !== authStore.currentUser.uid) {
@@ -389,7 +420,38 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
-      const userId = authStore.currentUser.uid
+      // Check if user is staff to determine which items to show
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let userId = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          // Find the staff document for this user
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', userId))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              // Use the super admin's UID who created this staff member
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+                console.log('[InventoryStore] Staff user detected, using super admin UID for fetchItems:', userId)
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[InventoryStore] Could not fetch staff document for items, using current user UID:', error.message)
+        }
+      }
+
       this.itemsLoading[folderId] = true
 
       try {
@@ -553,6 +615,21 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to update items')
       }
 
+      // Check permissions - staff (non-managers) cannot update
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to update items. Only managers can edit.')
+        }
+      }
+
       try {
         const itemRef = doc(db, 'inventoryItems', itemId)
         await updateDoc(itemRef, {
@@ -587,6 +664,21 @@ export const useInventoryStore = defineStore('inventory', {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated to delete items')
+      }
+
+      // Check permissions - staff (non-managers) cannot delete
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to delete items. Only managers can delete.')
+        }
       }
 
       try {

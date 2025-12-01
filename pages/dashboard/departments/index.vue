@@ -236,9 +236,8 @@
     <!-- Fixed Pagination -->
     <div
       v-if="filteredDepartments.length > 0"
-      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
-      style="left: 0;"
     >
       <Pagination
         :current-page="currentPage"

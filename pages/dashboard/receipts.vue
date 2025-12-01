@@ -268,16 +268,16 @@
                     title="Print"
                   >
                     <PrinterIcon class="w-5 h-5" />
-          </button>
+                  </button>
                   <button
-                    v-if="receipt.status === 'completed'"
+                    v-if="receipt.status === 'completed' && canManage"
                     @click="handleRefundReceipt(receipt)"
                     class="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                     title="Refund"
                   >
                     <ArrowPathIcon class="w-5 h-5" />
-          </button>
-        </div>
+                  </button>
+                </div>
               </td>
             </tr>
             <!-- Empty State -->
@@ -312,9 +312,8 @@
     <!-- Fixed Pagination -->
     <div
       v-if="filteredReceipts.length > 0"
-      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
-      style="left: 0;"
     >
       <Pagination
         :current-page="currentPage"
@@ -326,7 +325,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="!isInitialLoading && filteredReceipts.length > 0"
+      v-if="!isInitialLoading && filteredReceipts.length > 0 && canManage"
       @click="openCreateReceiptModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
@@ -338,6 +337,12 @@
       <CreateReceiptModal
         v-model="showCreateReceiptModal"
         @receipt-created="handleReceiptCreated"
+      />
+
+      <!-- View Receipt Modal -->
+      <ViewReceiptModal
+        v-model="showViewReceiptModal"
+        :receipt="selectedReceipt"
       />
       </template>
     </div>
@@ -405,8 +410,11 @@ import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
+// @ts-ignore
+import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
+import { usePermissions } from '~/composables/usePermissions'
 
 definePageMeta({
   layout: 'dashboard',
@@ -419,6 +427,7 @@ useHead({
 
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
+const { canManage } = usePermissions()
 
 // Initialize loading state synchronously on client
 const isInitialLoading = ref(true)
@@ -588,14 +597,24 @@ const handleReceiptCreated = async (receipt: Receipt) => {
   await receiptsStore.fetchReceipts()
 }
 
+const selectedReceipt = ref<Receipt | null>(null)
+const showViewReceiptModal = ref(false)
+
 const handleViewReceipt = (receipt: Receipt) => {
-  // TODO: Implement view receipt
-  alert(`Viewing receipt ${receipt.receiptNumber}`)
+  selectedReceipt.value = receipt
+  showViewReceiptModal.value = true
 }
 
 const handlePrintReceipt = (receipt: Receipt) => {
-  // TODO: Implement print receipt
-  alert(`Printing receipt ${receipt.receiptNumber}`)
+  selectedReceipt.value = receipt
+  showViewReceiptModal.value = true
+  // Small delay to allow modal to open, then trigger print
+  setTimeout(() => {
+    const printBtn = document.querySelector('[data-print-pdf]') as HTMLButtonElement
+    if (printBtn) {
+      printBtn.click()
+    }
+  }, 300)
 }
 
 const handleRefundReceipt = async (receipt: Receipt) => {

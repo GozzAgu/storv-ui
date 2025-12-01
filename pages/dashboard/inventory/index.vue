@@ -51,7 +51,7 @@
               </h3>
             </div>
           </div>
-          <div class="flex items-center gap-1">
+          <div v-if="canManage" class="flex items-center gap-1">
             <button
               @click.stop="handleEditFolder(folder)"
               class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -121,7 +121,7 @@
           {{ searchQuery ? 'Try adjusting your search criteria' : 'Create your first folder to organize your inventory' }}
         </p>
         <Button
-          v-if="!searchQuery"
+          v-if="!searchQuery && canManage"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateFolderModal"
@@ -134,9 +134,8 @@
     <!-- Fixed Pagination -->
     <div
       v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
-      style="left: 0;"
     >
       <Pagination
         :current-page="currentPage"
@@ -148,7 +147,7 @@
 
     <!-- Floating Action Button -->
     <button
-      v-if="filteredFolders.length > 0"
+      v-if="filteredFolders.length > 0 && canManage"
       @click="openCreateFolderModal"
       class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new folder"
@@ -400,6 +399,7 @@ import Pagination from '~/components/ui/Pagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'
+import { usePermissions } from '~/composables/usePermissions'
 
 definePageMeta({
   layout: 'dashboard'
@@ -455,6 +455,7 @@ if (import.meta.client) {
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
+const { canManage } = usePermissions()
 
 const folderForm = reactive({
   name: '',
@@ -484,6 +485,28 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
     // Reset to empty fields for new folder
     editableFields.value = []
     selectedTemplateId.value = 'custom'
+  }
+})
+
+// Watch hasSerialNumbers to auto-add/remove serialNo field
+watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
+  if (hasSerial) {
+    // Check if serialNo field already exists
+    const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
+    if (!serialNoFieldExists) {
+      // Add serialNo field to the template
+      const serialNoField: TemplateField = {
+        id: `field-serialNo-${Date.now()}`,
+        name: 'serialNo',
+        label: 'Serial Number',
+        type: 'text',
+        required: true,
+      }
+      editableFields.value.push(serialNoField)
+    }
+  } else {
+    // Remove serialNo field when unchecked
+    editableFields.value = editableFields.value.filter(f => f.name !== 'serialNo' && f.name !== 'serialNumber')
   }
 })
 
@@ -593,6 +616,20 @@ const handleEditFolder = (folder: InventoryFolder) => {
     editableFields.value = folder.template.fields.map(f => ({ ...f }))
   } else {
     editableFields.value = []
+  }
+  // If hasSerialNumbers is true, ensure serialNo field exists
+  if (folderForm.hasSerialNumbers) {
+    const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
+    if (!serialNoFieldExists) {
+      const serialNoField: TemplateField = {
+        id: `field-serialNo-${Date.now()}`,
+        name: 'serialNo',
+        label: 'Serial Number',
+        type: 'text',
+        required: true,
+      }
+      editableFields.value.push(serialNoField)
+    }
   }
   showCreateFolderModal.value = true
 }

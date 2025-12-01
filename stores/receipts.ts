@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
+import { useUserStore } from './user'
+import { useStaffStore } from './staff'
 
 export interface ReceiptItem {
   itemId: string
@@ -80,13 +82,44 @@ export const useReceiptsStore = defineStore('receipts', {
         return
       }
 
+      // Check if user is staff to determine which receipts to show
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let userId = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          // Find the staff document for this user
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', userId))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              // Use the super admin's UID who created this staff member
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+                console.log('[ReceiptsStore] Staff user detected, using super admin UID:', userId)
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[ReceiptsStore] Could not fetch staff document, using current user UID:', error.message)
+        }
+      }
+
       try {
         const receiptsRef = collection(db, 'receipts')
-        const userId = authStore.currentUser.uid
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get receipts for this user
+          // Filter by createdBy to only get receipts for this user (or super admin if staff)
           const q = query(
             receiptsRef,
             where('createdBy', '==', userId),
@@ -229,6 +262,21 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
+      // Check permissions - staff (non-managers) cannot update
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to update receipts. Only managers can edit.')
+        }
+      }
+
       try {
         // First verify the receipt belongs to this user
         const receiptRef = doc(db, 'receipts', receiptId)
@@ -273,6 +321,21 @@ export const useReceiptsStore = defineStore('receipts', {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated')
+      }
+
+      // Check permissions - staff (non-managers) cannot delete
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        // Check if staff member is a manager
+        const staffStore = useStaffStore()
+        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
+        if (currentStaffMember?.role !== 'manager') {
+          throw new Error('Staff members do not have permission to delete receipts. Only managers can delete.')
+        }
       }
 
       try {
