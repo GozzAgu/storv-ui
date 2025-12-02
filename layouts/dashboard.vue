@@ -58,14 +58,14 @@
         </div>
       </div>
       
-      <!-- Toggle button - minimal design matching Dribbble, positioned at top right corner -->
+      <!-- Toggle button - minimal design matching Dribbble, positioned outside and lower -->
       <button
         @click="toggleSidebar"
-        class="absolute top-4 right-2 hidden lg:flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors z-10"
+        class="absolute top-16 -right-3 hidden lg:flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 transition-all z-10"
         :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-4 h-4" />
-        <ChevronLeftIcon v-else class="w-4 h-4" />
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-5 h-5" />
+        <ChevronLeftIcon v-else class="w-5 h-5" />
       </button>
 
       <!-- Navigation -->
