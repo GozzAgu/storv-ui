@@ -2,7 +2,7 @@
   <div class="overflow-x-auto">
     <table :class="['w-full', tableClass]">
       <!-- Header -->
-      <thead v-if="columns && columns.length > 0" class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+      <thead v-if="columns && columns.length > 0" class="border-b border-gray-200 dark:border-gray-700">
         <tr>
           <th
             v-for="column in columns"
@@ -50,7 +50,7 @@
       </thead>
 
       <!-- Body -->
-      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
         <tr
           v-for="(row, index) in sortedData"
           :key="getRowKey(row, index)"

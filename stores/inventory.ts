@@ -832,8 +832,17 @@ export const useInventoryStore = defineStore('inventory', {
 
       try {
         const itemRef = doc(db, 'inventoryItems', itemId)
+        
+        // Filter out undefined values and system fields that shouldn't be updated directly
+        const systemFields = ['dateOut', 'dateIn', 'swapIn', 'swapInReceiptId']
+        const cleanedUpdates = Object.fromEntries(
+          Object.entries(updates).filter(([key, value]) => 
+            value !== undefined && !systemFields.includes(key)
+          )
+        )
+        
         await updateDoc(itemRef, {
-          ...updates,
+          ...cleanedUpdates,
           updatedAt: serverTimestamp(),
         })
 

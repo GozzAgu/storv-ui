@@ -54,20 +54,36 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Select Inventory Folder
             </label>
+            
+            <!-- Search Bar for Folders -->
+            <div class="mb-4">
+              <div class="relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <input
+                  v-model="folderSearchQuery"
+                  type="text"
+                  placeholder="Search folders..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+            
             <div v-if="loadingFolders" class="text-center py-8">
               <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading folders...</p>
             </div>
             <div
-              v-else-if="folders.length === 0"
+              v-else-if="filteredFolders.length === 0"
               class="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg"
             >
               <FolderIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-              <p class="text-sm text-gray-500 dark:text-gray-400">No inventory folders found</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                {{ folderSearchQuery ? 'No folders found matching your search' : 'No inventory folders found' }}
+              </p>
             </div>
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto">
               <button
-                v-for="folder in folders"
+                v-for="folder in filteredFolders"
                 :key="folder.id"
                 @click="selectFolder(folder)"
                 :class="[
@@ -116,6 +132,19 @@
                 Refresh
               </button>
             </div>
+            
+            <!-- Search Bar for Items -->
+            <div class="mb-4">
+              <div class="relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <input
+                  v-model="itemSearchQuery"
+                  type="text"
+                  :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by item name or serial number...' : 'Search by item name...'"
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
             <div v-if="loadingItems" class="text-center py-8">
               <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading items...</p>
@@ -129,7 +158,7 @@
             </div>
             <div v-else class="max-h-[400px] overflow-y-auto space-y-2">
               <div
-                v-for="item in availableItems"
+                v-for="item in filteredAvailableItems"
                 :key="item.id"
                 :class="[
                   'p-4 border rounded-lg transition-all cursor-pointer',
@@ -152,7 +181,10 @@
                         <h4 class="font-medium text-gray-900 dark:text-gray-100">
                           {{ getItemDisplayName(item) }}
                         </h4>
-                        <div class="flex items-center gap-4 mt-1 text-xs">
+                        <div class="flex items-center gap-4 mt-1 text-xs flex-wrap">
+                          <span v-if="(selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) && (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))" class="text-gray-500 dark:text-gray-400">
+                            Serial: {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
+                          </span>
                           <span v-if="getItemField(item, 'sku')" class="text-gray-500 dark:text-gray-400">SKU: {{ getItemField(item, 'sku') }}</span>
                           <span v-if="getItemField(item, 'price')">
                             <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
@@ -170,13 +202,13 @@
                               Price: {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                             </span>
                           </span>
-                          <span v-if="getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
+                          <span v-if="!selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate && getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
                             Stock: {{ getItemField(item, 'stock') }}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div v-if="selectedItems.find(si => si.id === item.id)" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div v-if="selectedItems.find(si => si.id === item.id) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                       <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Quantity
                       </label>
@@ -471,6 +503,7 @@ import {
   FolderIcon,
   CubeIcon,
   CheckCircleIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -508,6 +541,8 @@ const isCreating = ref(false)
 const selectedFolder = ref<InventoryFolder | null>(null)
 const selectedItems = ref<Array<{ id: string; quantity: number; item: InventoryItem }>>([])
 const availableItems = ref<InventoryItem[]>([])
+const folderSearchQuery = ref('')
+const itemSearchQuery = ref('')
 
 const receiptForm = ref({
   customerName: '',
@@ -525,6 +560,52 @@ const swapInFolderId = ref<string>('')
 const swapInItemForm = ref<Record<string, any>>({})
 
 const folders = computed(() => inventoryStore.folders)
+
+const filteredFolders = computed(() => {
+  if (!folderSearchQuery.value.trim()) {
+    return folders.value
+  }
+  const query = folderSearchQuery.value.toLowerCase()
+  return folders.value.filter(folder =>
+    folder.name.toLowerCase().includes(query) ||
+    folder.description.toLowerCase().includes(query)
+  )
+})
+
+const hasSerialNumberInTemplate = computed(() => {
+  if (!selectedFolder.value?.template?.fields) return false
+  return selectedFolder.value.template.fields.some(
+    field => field.name.toLowerCase() === 'serialno' || 
+             field.name.toLowerCase() === 'serialnumber' ||
+             field.name.toLowerCase().includes('serial')
+  )
+})
+
+const filteredAvailableItems = computed(() => {
+  if (!itemSearchQuery.value.trim()) {
+    return availableItems.value
+  }
+  const query = itemSearchQuery.value.toLowerCase()
+  return availableItems.value.filter(item => {
+    // Search by item name
+    const itemName = getItemDisplayName(item).toLowerCase()
+    if (itemName.includes(query)) return true
+    
+    // Search by serial number if folder has serial numbers
+    if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
+      const serialNo = getItemField(item, 'serialNo') || 
+                       getItemField(item, 'serialNumber') ||
+                       getItemField(item, 'serial')
+      if (serialNo && serialNo.toLowerCase().includes(query)) return true
+    }
+    
+    // Search by SKU
+    const sku = getItemField(item, 'sku')
+    if (sku && sku.toLowerCase().includes(query)) return true
+    
+    return false
+  })
+})
 
 // Swap-in folder
 const swapInFolder = computed(() => {
@@ -648,6 +729,10 @@ const loadItems = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
+  // Determine if quantity should be available (not for serial number items)
+  const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value
+  const defaultQuantity = hasSerialNumbers ? 1 : 1
+  
   // If called from checkbox component, use the checked value; otherwise toggle
   if (checked !== undefined) {
     if (checked) {
@@ -655,7 +740,7 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
       if (index === -1) {
         selectedItems.value.push({
           id: item.id,
-          quantity: 1,
+          quantity: defaultQuantity,
           item,
         })
       }
@@ -672,7 +757,7 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
     } else {
       selectedItems.value.push({
         id: item.id,
-        quantity: 1,
+        quantity: defaultQuantity,
         item,
       })
     }
@@ -687,6 +772,11 @@ const getSelectedItemQuantity = (itemId: string) => {
 const updateItemQuantity = (itemId: string, quantity: number) => {
   const selected = selectedItems.value.find(si => si.id === itemId)
   if (selected) {
+    // If folder has serial numbers, quantity should always be 1
+    if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
+      selected.quantity = 1
+      return
+    }
     const maxStock = getItemField(selected.item, 'stock')
     selected.quantity = Math.max(1, Math.min(quantity, maxStock ? parseInt(maxStock) : quantity))
   }
@@ -771,6 +861,8 @@ const resetForm = () => {
   selectedFolder.value = null
   selectedItems.value = []
   availableItems.value = []
+  folderSearchQuery.value = ''
+  itemSearchQuery.value = ''
   receiptForm.value = {
     customerName: '',
     customerEmail: '',
@@ -800,14 +892,18 @@ const handleCreateReceipt = async () => {
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
     
     // Create receipt items array
+    const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value
     const receiptItems: ReceiptItem[] = selectedItems.value.map(si => {
       const effectivePrice = getEffectivePrice(si.item)
       const originalPrice = getOriginalPrice(si.item)
       const hasDiscount = si.item.discountedPrice !== undefined && si.item.discountedPrice !== null
       
+      // Force quantity to 1 for serial number items
+      const itemQuantity = hasSerialNumbers ? 1 : si.quantity
+      
       return {
         itemId: si.id,
-        quantity: si.quantity,
+        quantity: itemQuantity,
         price: effectivePrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
         // Include discount information if applicable

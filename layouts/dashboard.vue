@@ -20,7 +20,7 @@
       <!-- Background Gradient -->
       <div class="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 dark:from-gray-900/50 dark:via-gray-800 dark:to-gray-900/50 pointer-events-none"></div>
       <!-- Logo -->
-      <div class="relative flex items-center justify-between h-20 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm" :class="sidebarCollapsed ? 'px-2' : 'px-6'">
+      <div class="relative flex items-center justify-between h-20 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm" :class="sidebarCollapsed ? 'px-3' : 'px-6'">
         <NuxtLink 
           to="/dashboard" 
           :class="[
@@ -47,14 +47,8 @@
             Storv
           </span>
         </NuxtLink>
-        <div class="flex items-center gap-2" v-if="!sidebarCollapsed">
-          <button
-            @click="toggleSidebar"
-            class="hidden lg:flex p-2.5 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-            title="Collapse sidebar"
-          >
-            <ChevronLeftIcon class="w-5 h-5" />
-          </button>
+        <div class="flex items-center gap-2">
+          <!-- Mobile close button -->
           <button
             @click="sidebarOpen = false"
             class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
@@ -62,76 +56,261 @@
             <XMarkIcon class="w-6 h-6" />
           </button>
         </div>
-        <button
-          v-else
-          @click="sidebarOpen = false"
-          class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
-        >
-          <XMarkIcon class="w-6 h-6" />
-        </button>
       </div>
+      
+      <!-- Toggle button - minimal design matching Dribbble, positioned at top right corner -->
+      <button
+        @click="toggleSidebar"
+        class="absolute top-4 right-2 hidden lg:flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors z-10"
+        :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      >
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-4 h-4" />
+        <ChevronLeftIcon v-else class="w-4 h-4" />
+      </button>
 
       <!-- Navigation -->
       <nav class="relative flex-1 py-6 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
         <div class="space-y-1.5 min-h-0">
-          <NuxtLink
-            v-for="item in navigation"
-            :key="item.name"
-            :to="item.href"
-            :class="[
-              'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden',
-              sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
-              isActive(item.href)
-                ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
-            ]"
-            :title="sidebarCollapsed ? item.name : ''"
-          >
-            <!-- Active indicator -->
-            <div 
-              v-if="isActive(item.href) && !sidebarCollapsed"
-              class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
-            ></div>
-            
-            <!-- Active indicator for collapsed (circular) -->
-            <div 
-              v-if="isActive(item.href) && sidebarCollapsed"
-              class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600"
-            ></div>
-            
-            <!-- Hover effect background -->
-            <div 
-              v-if="!isActive(item.href)"
-              class="absolute inset-0 bg-gradient-to-r from-primary-50/0 via-primary-50/50 to-purple-50/0 dark:from-primary-900/0 dark:via-primary-900/30 dark:to-purple-900/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            ></div>
-            
-            <component 
-              :is="item.icon" 
-              :class="[
-                'relative z-10 transition-all duration-300',
-                sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4',
-                isActive(item.href)
-                  ? 'text-white' 
-                  : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
-              ]"
-            />
-            <span 
-              v-if="!sidebarCollapsed" 
-              class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
-              :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
-            >
-              {{ item.name }}
-            </span>
-            
-            <!-- Tooltip for collapsed state -->
-            <div
-              v-if="sidebarCollapsed"
-              class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
-            >
-              {{ item.name }}
-              <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+          <template v-for="item in navigation" :key="item.name">
+            <!-- Special handling for Inventory - expandable with folders -->
+            <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
+              <div
+                :class="[
+                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden px-5 py-4',
+                  isActive(item.href)
+                    ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+                ]"
+              >
+                <NuxtLink
+                  :to="item.href"
+                  class="flex items-center flex-1"
+                >
+                  <!-- Active indicator -->
+                  <div 
+                    v-if="isActive(item.href)"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+                  ></div>
+                  
+                  <component 
+                    :is="item.icon" 
+                    :class="[
+                      'relative z-10 transition-all duration-300 w-6 h-6 mr-4',
+                      isActive(item.href)
+                        ? 'text-white' 
+                        : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                    ]"
+                  />
+                  <span 
+                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
+                    :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+                  >
+                    {{ item.name }}
+                  </span>
+                </NuxtLink>
+                <button
+                  @click.stop="inventoryExpanded = !inventoryExpanded"
+                  class="p-1 hover:bg-white/10 dark:hover:bg-white/5 rounded transition-colors"
+                  :class="[
+                    isActive(item.href) ? 'text-white' : 'text-gray-400 dark:text-gray-500'
+                  ]"
+                >
+                  <ChevronDownIcon 
+                    :class="[
+                      'w-4 h-4 transition-transform duration-200',
+                      inventoryExpanded ? 'rotate-180' : ''
+                    ]"
+                  />
+                </button>
+              </div>
+              
+              <!-- Folders tree structure - matches Dribbble design -->
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="pl-9 pr-5 space-y-0.5 mt-1">
+                <div v-for="folder in recentFolders.slice(0, 5)" :key="folder.id" class="relative">
+                  <NuxtLink
+                    :to="`/dashboard/inventory/${folder.id}`"
+                    :class="[
+                      'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                      route.params.id === folder.id
+                        ? 'bg-gradient-to-r from-primary-50 to-primary-50/50 dark:from-primary-900/30 dark:to-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                    ]"
+                  >
+                    <!-- Active indicator bar -->
+                    <div 
+                      v-if="route.params.id === folder.id"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full"
+                    ></div>
+                    
+                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                      <FolderIcon 
+                        :class="[
+                          'w-4 h-4 flex-shrink-0 transition-colors',
+                          route.params.id === folder.id
+                            ? 'text-primary-600 dark:text-primary-400'
+                            : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                        ]"
+                      />
+                      <span class="truncate">{{ folder.name }}</span>
+                    </div>
+                    <ArrowRightIcon 
+                      v-if="route.params.id === folder.id"
+                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400 animate-in slide-in-from-right-1 duration-200"
+                    />
+                  </NuxtLink>
+                </div>
+              </div>
             </div>
-          </NuxtLink>
+            
+            <!-- Special handling for Departments - expandable with departments list -->
+            <div v-else-if="item.name === 'Departments' && !sidebarCollapsed" class="space-y-1">
+              <div
+                :class="[
+                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden px-5 py-4',
+                  isActive(item.href)
+                    ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+                ]"
+              >
+                <NuxtLink
+                  :to="item.href"
+                  class="flex items-center flex-1"
+                >
+                  <!-- Active indicator -->
+                  <div 
+                    v-if="isActive(item.href)"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+                  ></div>
+                  
+                  <component 
+                    :is="item.icon" 
+                    :class="[
+                      'relative z-10 transition-all duration-300 w-6 h-6 mr-4',
+                      isActive(item.href)
+                        ? 'text-white' 
+                        : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                    ]"
+                  />
+                  <span 
+                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
+                    :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+                  >
+                    {{ item.name }}
+                  </span>
+                </NuxtLink>
+                <button
+                  @click.stop="departmentsExpanded = !departmentsExpanded"
+                  class="p-1 hover:bg-white/10 dark:hover:bg-white/5 rounded transition-colors"
+                  :class="[
+                    isActive(item.href) ? 'text-white' : 'text-gray-400 dark:text-gray-500'
+                  ]"
+                >
+                  <ChevronDownIcon 
+                    :class="[
+                      'w-4 h-4 transition-transform duration-200',
+                      departmentsExpanded ? 'rotate-180' : ''
+                    ]"
+                  />
+                </button>
+              </div>
+              
+              <!-- Departments tree structure - matches Dribbble design -->
+              <div v-if="departmentsExpanded && departmentsList.length > 0" class="pl-9 pr-5 space-y-0.5 mt-1">
+                <div v-for="department in recentDepartments.slice(0, 5)" :key="department.id" class="relative">
+                  <NuxtLink
+                    :to="`/dashboard/departments/${department.id}`"
+                    :class="[
+                      'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                      route.params.id === department.id
+                        ? 'bg-gradient-to-r from-primary-50 to-primary-50/50 dark:from-primary-900/30 dark:to-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                    ]"
+                  >
+                    <!-- Active indicator bar -->
+                    <div 
+                      v-if="route.params.id === department.id"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full"
+                    ></div>
+                    
+                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                      <BuildingOfficeIcon 
+                        :class="[
+                          'w-4 h-4 flex-shrink-0 transition-colors',
+                          route.params.id === department.id
+                            ? 'text-primary-600 dark:text-primary-400'
+                            : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                        ]"
+                      />
+                      <span class="truncate">{{ department.name }}</span>
+                    </div>
+                    <ArrowRightIcon 
+                      v-if="route.params.id === department.id"
+                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400 animate-in slide-in-from-right-1 duration-200"
+                    />
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Regular navigation items (non-expandable) -->
+            <NuxtLink
+              v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
+              :to="item.href"
+              :class="[
+                'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden',
+                sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
+                isActive(item.href)
+                  ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+              ]"
+              :title="sidebarCollapsed ? item.name : ''"
+            >
+              <!-- Active indicator -->
+              <div 
+                v-if="isActive(item.href) && !sidebarCollapsed"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+              ></div>
+              
+              <!-- Active indicator for collapsed (circular) -->
+              <div 
+                v-if="isActive(item.href) && sidebarCollapsed"
+                class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600"
+              ></div>
+              
+              <!-- Hover effect background -->
+              <div 
+                v-if="!isActive(item.href)"
+                class="absolute inset-0 bg-gradient-to-r from-primary-50/0 via-primary-50/50 to-purple-50/0 dark:from-primary-900/0 dark:via-primary-900/30 dark:to-purple-900/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              ></div>
+              
+              <component 
+                :is="item.icon" 
+                :class="[
+                  'relative z-10 transition-all duration-300',
+                  sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4',
+                  isActive(item.href)
+                    ? 'text-white' 
+                    : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                ]"
+              />
+              <span 
+                v-if="!sidebarCollapsed" 
+                class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
+                :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+              >
+                {{ item.name }}
+              </span>
+              
+              <!-- Tooltip for collapsed state -->
+              <div
+                v-if="sidebarCollapsed"
+                class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+              >
+                {{ item.name }}
+                <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+              </div>
+            </NuxtLink>
+          </template>
         </div>
       </nav>
       
@@ -169,15 +348,6 @@
           </div>
         </button>
         
-        <!-- Collapse/Expand Button (when collapsed) -->
-        <button
-          v-if="sidebarCollapsed"
-          @click="toggleSidebar"
-          class="w-full flex items-center justify-center p-3 mt-2 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
-          title="Expand sidebar"
-        >
-          <ChevronRightIcon class="w-5 h-5" />
-        </button>
       </div>
     </aside>
 
@@ -332,6 +502,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
+  FolderIcon,
+  ArrowRightIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
@@ -340,11 +512,15 @@ import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useNotificationsStore } from '~/stores/notifications'
+import { useInventoryStore } from '~/stores/inventory'
+import { useDepartmentsStore } from '~/stores/departments'
 
 const { actualTheme } = useTheme()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
+const inventoryStore = useInventoryStore()
+const departmentsStore = useDepartmentsStore()
 
 // Fetch notifications on mount
 onMounted(() => {
@@ -484,6 +660,94 @@ const currentPageName = computed(() => {
 const currentPageIcon = computed(() => {
   return currentPage.value?.icon || HomeIcon
 })
+
+// Folder navigation for Inventory
+const isInventoryRoute = computed(() => {
+  return route.path.startsWith('/dashboard/inventory')
+})
+
+// Expanded state for Inventory folders - auto-expand when on inventory route
+const inventoryExpanded = ref(true)
+
+// Expanded state for Departments - auto-expand when on departments route
+const departmentsExpanded = ref(true)
+
+// Auto-expand folders when navigating to inventory route
+watch(() => route.path, (path) => {
+  if (path.startsWith('/dashboard/inventory')) {
+    inventoryExpanded.value = true
+  }
+  if (path.startsWith('/dashboard/departments')) {
+    departmentsExpanded.value = true
+  }
+}, { immediate: true })
+
+const inventoryFolders = computed(() => {
+  if (!inventoryStore.folders) return []
+  return inventoryStore.folders
+})
+
+const recentFolders = computed(() => {
+  return [...inventoryFolders.value].sort((a, b) => {
+    const dateA = a.updatedAt instanceof Date ? a.updatedAt : (a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt))
+    const dateB = b.updatedAt instanceof Date ? b.updatedAt : (b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt))
+    return dateB.getTime() - dateA.getTime()
+  })
+})
+
+// Departments navigation
+const isDepartmentsRoute = computed(() => {
+  return route.path.startsWith('/dashboard/departments')
+})
+
+const departmentsList = computed(() => {
+  if (!departmentsStore.departments) return []
+  return departmentsStore.departments
+})
+
+const recentDepartments = computed(() => {
+  return [...departmentsList.value].sort((a, b) => {
+    const dateA = a.updatedAt instanceof Date ? a.updatedAt : (a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt))
+    const dateB = b.updatedAt instanceof Date ? b.updatedAt : (b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt))
+    return dateB.getTime() - dateA.getTime()
+  })
+})
+
+// Fetch inventory folders when on inventory routes
+watch(() => route.path, async (path) => {
+  if (path.startsWith('/dashboard/inventory') && authStore.currentUser) {
+    try {
+      await inventoryStore.fetchFolders()
+    } catch (error) {
+      console.error('Error fetching inventory folders:', error)
+    }
+  }
+  if (path.startsWith('/dashboard/departments') && authStore.currentUser) {
+    try {
+      await departmentsStore.fetchDepartments()
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+    }
+  }
+}, { immediate: true })
+
+// Also fetch folders when user is authenticated
+watch(() => authStore.currentUser, async (user) => {
+  if (user && isInventoryRoute.value) {
+    try {
+      await inventoryStore.fetchFolders()
+    } catch (error) {
+      console.error('Error fetching inventory folders:', error)
+    }
+  }
+  if (user && isDepartmentsRoute.value) {
+    try {
+      await departmentsStore.fetchDepartments()
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+    }
+  }
+}, { immediate: true })
 
 // Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
 const cachedUserName = ref<string | null>(null)
@@ -677,6 +941,24 @@ onMounted(async () => {
   // Fetch user data if authenticated and not already loaded
   if (authStore.currentUser?.uid && !userStore.userData) {
     userStore.fetchUserData(authStore.currentUser.uid)
+  }
+  
+  // Fetch inventory folders if on inventory route
+  if (authStore.currentUser && isInventoryRoute.value) {
+    try {
+      await inventoryStore.fetchFolders()
+    } catch (error) {
+      console.error('Error fetching inventory folders:', error)
+    }
+  }
+  
+  // Fetch departments if on departments route
+  if (authStore.currentUser && isDepartmentsRoute.value) {
+    try {
+      await departmentsStore.fetchDepartments()
+    } catch (error) {
+      console.error('Error fetching departments:', error)
+    }
   }
 })
 

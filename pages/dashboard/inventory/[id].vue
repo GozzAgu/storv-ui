@@ -207,7 +207,7 @@
       </div>
       <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
+          <thead>
             <tr>
               <th
                 v-for="column in columns"
@@ -246,7 +246,7 @@
                   </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="(item, index) in paginatedItems"
               :key="item.id"
@@ -1115,10 +1115,12 @@ const openAddItemModal = () => {
 const handleEditItem = (item: InventoryItem) => {
   editingItem.value = item
   serialNumbers.value = []
-  // Copy all item data to form
+  // Copy all item data to form, excluding system fields
   Object.keys(itemForm).forEach(key => delete itemForm[key])
   Object.keys(item).forEach(key => {
-    if (!['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy'].includes(key)) {
+    // Exclude system/managed fields that shouldn't be edited
+    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateOut', 'dateIn', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice']
+    if (!systemFields.includes(key)) {
       itemForm[key] = item[key]
     }
   })

@@ -185,9 +185,9 @@
     </Card>
 
     <!-- Receipts Table -->
-    <Card padding="none">
+    <div>
       <!-- Compact Header (Visible only on large screens) -->
-      <div class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+      <div class="hidden lg:block border-b border-gray-200 dark:border-gray-700 mb-6">
         <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
           <!-- Compact Stats -->
           <div class="flex items-center gap-6">
@@ -266,7 +266,7 @@
       </div>
       <div v-else class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
+          <thead>
             <tr>
               <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Receipt #
@@ -297,7 +297,7 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="receipt in paginatedReceipts"
               :key="receipt.id"
@@ -429,7 +429,7 @@
           </tbody>
         </table>
       </div>
-    </Card>
+    </div>
 
     <!-- Fixed Pagination -->
     <div

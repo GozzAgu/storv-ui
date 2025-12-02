@@ -134,7 +134,7 @@
             Powerful Features for Your Business
           </h2>
           <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            Everything you need to manage your store efficiently—from inventory to analytics
+            Everything you need to manage your store efficiently from inventory to analytics
           </p>
         </div>
         
