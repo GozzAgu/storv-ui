@@ -230,9 +230,9 @@
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div class="bg-orange-500 h-2 rounded-full" :style="`width: ${lowStockPercentage}%`"></div>
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>

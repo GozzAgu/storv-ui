@@ -130,35 +130,35 @@
 
       <div v-else class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
+          <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Name
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Position
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Role
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Email
               </th>
-              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th v-if="canManageDepartments" class="px-3 sm:px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[100px]">
+              <th v-if="canManageDepartments" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[100px]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="member in paginatedStaff"
               :key="member.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-3 py-2 whitespace-nowrap">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                     {{ member.firstName.charAt(0).toUpperCase() }}{{ member.lastName.charAt(0).toUpperCase() }}
@@ -173,12 +173,12 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-3 py-2 whitespace-nowrap">
                 <span class="text-sm text-gray-900 dark:text-gray-100">
                   {{ member.position }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-3 py-2 whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
                   :class="[
                     member.role === 'manager'
@@ -191,12 +191,12 @@
                   {{ member.role }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-3 py-2 whitespace-nowrap">
                 <div class="text-sm text-gray-900 dark:text-gray-100">
                   {{ member.email }}
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              <td class="px-3 py-2 whitespace-nowrap">
                 <span
                   :class="[
                     'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
@@ -210,7 +210,7 @@
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>
               </td>
-              <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right min-w-[100px]">
+              <td class="px-3 py-2 whitespace-nowrap text-right min-w-[100px]">
                 <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     v-if="canManageDepartments"

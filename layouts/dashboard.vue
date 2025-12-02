@@ -44,17 +44,17 @@
             v-if="!sidebarCollapsed" 
             class="text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 bg-clip-text text-transparent tracking-tight"
           >
-            Storv
+          Storv
           </span>
         </NuxtLink>
         <div class="flex items-center gap-2">
           <!-- Mobile close button -->
-          <button
-            @click="sidebarOpen = false"
+        <button
+          @click="sidebarOpen = false"
             class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
-          >
-            <XMarkIcon class="w-6 h-6" />
-          </button>
+        >
+          <XMarkIcon class="w-6 h-6" />
+        </button>
         </div>
       </div>
       
@@ -253,9 +253,9 @@
             </div>
             
             <!-- Regular navigation items (non-expandable) -->
-            <NuxtLink
+        <NuxtLink
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
-              :to="item.href"
+          :to="item.href"
               :class="[
                 'group relative flex items-center font-medium rounded-xl transition-all duration-200',
                 sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
@@ -362,12 +362,12 @@
       <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           <div class="flex items-center space-x-3">
-            <button
-              @click="sidebarOpen = true"
+          <button
+            @click="sidebarOpen = true"
               class="lg:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              <Bars3Icon class="w-6 h-6" />
-            </button>
+          >
+            <Bars3Icon class="w-6 h-6" />
+          </button>
             <!-- Page Name -->
             <div class="hidden md:flex items-center space-x-2">
               <component :is="currentPageIcon" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -854,7 +854,7 @@ const handleSignOut = async () => {
   } catch (error) {
     console.error('Sign out error:', error)
     // Still navigate even if sign out fails
-    navigateTo('/signin')
+  navigateTo('/signin')
   }
 }
 

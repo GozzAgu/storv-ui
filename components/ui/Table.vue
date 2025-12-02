@@ -2,13 +2,13 @@
   <div class="overflow-x-auto">
     <table :class="['w-full', tableClass]">
       <!-- Header -->
-      <thead v-if="columns && columns.length > 0" class="border-b border-gray-200 dark:border-gray-700">
+      <thead v-if="columns && columns.length > 0" class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
         <tr>
           <th
             v-for="column in columns"
             :key="column.key"
             :class="[
-              'px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+              'px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
               column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none' : '',
               column.class || '',
               headerClass
@@ -42,7 +42,7 @@
           </th>
           <th
             v-if="showActions"
-            class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
           >
             Actions
           </th>
@@ -50,7 +50,7 @@
       </thead>
 
       <!-- Body -->
-      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
         <tr
           v-for="(row, index) in sortedData"
           :key="getRowKey(row, index)"
@@ -62,7 +62,7 @@
           <td
             v-for="column in columns"
             :key="column.key"
-            :class="['px-6 py-4 whitespace-nowrap text-sm', column.class || '', cellClass]"
+            :class="['px-3 py-2 whitespace-nowrap text-sm', column.class || '', cellClass]"
           >
             <slot
               :name="`cell-${column.key}`"
@@ -77,7 +77,7 @@
           </td>
           <td
             v-if="showActions"
-            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+            class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium"
           >
             <slot
               name="actions"
@@ -110,7 +110,7 @@
         <tr v-if="!sortedData || sortedData.length === 0">
           <td
             :colspan="(columns?.length || 0) + (showActions ? 1 : 0)"
-            class="px-6 py-12 text-center"
+            class="px-3 py-12 text-center"
           >
             <slot name="empty">
               <div class="flex flex-col items-center justify-center">

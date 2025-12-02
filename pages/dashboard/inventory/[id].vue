@@ -207,13 +207,13 @@
       </div>
       <div class="overflow-x-auto mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
+          <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
               <th
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
@@ -233,7 +233,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 <Checkbox
                   :model-value="selectedItemsForBulk.length === filteredItems.length && filteredItems.length > 0"
                   @update:model-value="(checked) => toggleSelectAll(checked)"
@@ -241,12 +241,12 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
+              <th v-if="canManageInventoryItems" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
                     Actions
                   </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="(item, index) in paginatedItems"
               :key="item.id"
@@ -255,7 +255,7 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-6 py-4 whitespace-nowrap"
+                class="px-3 py-2 whitespace-nowrap"
               >
                 <div v-if="colIndex === 0" class="flex items-center gap-3">
                   <!-- First column shows avatar and value -->
@@ -331,7 +331,7 @@
                   </div>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-6 py-4 whitespace-nowrap text-center">
+              <td v-if="canManageInventoryItems" class="px-3 py-2 whitespace-nowrap text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -339,7 +339,7 @@
                   wrapper-class="justify-center"
                 />
               </td>
-                  <td v-if="canManageInventoryItems" class="px-3 sm:px-6 py-4 whitespace-nowrap text-right min-w-[140px]">
+                  <td v-if="canManageInventoryItems" class="px-3 py-2 whitespace-nowrap text-right min-w-[140px]">
                 <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     @click="handleApplyDiscount(item)"

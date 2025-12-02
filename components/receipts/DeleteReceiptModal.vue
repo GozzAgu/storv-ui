@@ -79,7 +79,7 @@
           <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div class="overflow-x-auto max-h-48 overflow-y-auto">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                <thead class="sticky top-0">
                   <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Item</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Quantity</th>
@@ -87,7 +87,7 @@
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
                   </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="(item, index) in receipt.items" :key="index">
                     <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ item.itemName }}</td>
                     <td class="px-4 py-3 text-sm text-center text-gray-600 dark:text-gray-400">{{ item.quantity }}</td>
