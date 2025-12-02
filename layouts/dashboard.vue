@@ -1,5 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full overflow-x-hidden relative">
+  <!-- Loading state while checking authentication -->
+  <div v-if="checkingAuth" class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full flex items-center justify-center">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
+      <p class="text-sm text-gray-600 dark:text-gray-400">Verifying authentication...</p>
+    </div>
+  </div>
+  
+  <!-- Dashboard content (only shown if authenticated) -->
+  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full overflow-x-hidden relative">
     <!-- Sidebar -->
     <aside
       :class="[
@@ -356,6 +365,7 @@ const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const sidebarOpen = ref(false)
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
+const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
 
 // Sidebar collapsed state with localStorage persistence
 // Initialize synchronously on client to prevent layout shift
@@ -607,8 +617,62 @@ watch(() => route.path, () => {
   }
 })
 
-onMounted(() => {
+// Authentication guard - redirect if no user
+const checkAuth = async () => {
+  if (!import.meta.client) {
+    checkingAuth.value = false
+    return
+  }
+  
+  checkingAuth.value = true
+  
+  // Wait for auth to finish loading
+  if (authStore.loading) {
+    await new Promise<void>((resolve) => {
+      let resolved = false
+      const maxWait = 5000 // 5 seconds max wait
+      const startTime = Date.now()
+      
+      const checkAuthState = () => {
+        if (!authStore.loading) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
+        }
+        
+        if (Date.now() - startTime > maxWait) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
+        }
+        
+        setTimeout(checkAuthState, 50)
+      }
+      
+      checkAuthState()
+    })
+  }
+  
+  // Redirect to signin if no user after loading completes
+  if (!authStore.loading && !authStore.currentUser) {
+    checkingAuth.value = false
+    return navigateTo('/signin')
+  }
+  
+  checkingAuth.value = false
+}
+
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  
+  // Check authentication first
+  if (import.meta.client) {
+    await checkAuth()
+  }
   
   // Fetch user data if authenticated and not already loaded
   if (authStore.currentUser?.uid && !userStore.userData) {
@@ -616,9 +680,13 @@ onMounted(() => {
   }
 })
 
-// Watch for auth state changes to fetch user data
-// Only fetch if userData is missing AND it's for the same user (prevents refetch during staff creation)
-watch(() => authStore.currentUser, (user, oldUser) => {
+// Watch for auth state changes to fetch user data and protect routes
+watch(() => authStore.currentUser, async (user, oldUser) => {
+  // Redirect to signin if user logs out
+  if (import.meta.client && !authStore.loading && !user) {
+    return navigateTo('/signin')
+  }
+  
   // Only fetch if:
   // 1. User exists
   // 2. We don't have userData OR the user changed (not just signed back in)

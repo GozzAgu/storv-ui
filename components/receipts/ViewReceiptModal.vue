@@ -91,23 +91,23 @@
                 <td class="py-2 px-2">
                   <div>{{ item.itemName }}</div>
                   <div v-if="item.hasDiscount" class="text-xs text-red-600 mt-0.5">
-                    Discount: {{ item.discountPercentage ? `${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }}
+                    Discount: {{ item.discountPercentage ? `${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                   </div>
                 </td>
                 <td class="py-2 px-2 text-center">{{ item.quantity }}</td>
                 <td class="py-2 px-2 text-right">
                   <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs text-gray-400 line-through">${{ formatCurrency(item.originalPrice) }}</span>
-                    <span class="font-semibold text-green-600">${{ formatCurrency(item.price) }}</span>
+                    <span class="text-xs text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
+                    <span class="font-semibold text-green-600">{{ formatCurrency(item.price) }}</span>
                   </div>
-                  <span v-else>${{ formatCurrency(item.price) }}</span>
+                  <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
                 <td class="py-2 px-2 text-right font-semibold">
                   <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs text-gray-400 line-through">${{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
-                    <span class="text-green-600">${{ formatCurrency(item.price * item.quantity) }}</span>
+                    <span class="text-xs text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                    <span class="text-green-600">{{ formatCurrency(item.price * item.quantity) }}</span>
                   </div>
-                  <span v-else>${{ formatCurrency(item.price * item.quantity) }}</span>
+                  <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
                 </td>
               </tr>
             </tbody>
@@ -122,16 +122,16 @@
               <template v-if="hasAnyDiscount">
                 <div class="flex justify-between">
                   <span class="text-xs text-gray-600">Subtotal:</span>
-                  <span class="text-xs font-semibold">${{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
+                  <span class="text-xs font-semibold">{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-xs text-red-600">Total Discount:</span>
-                  <span class="text-xs font-semibold text-red-600">-${{ formatCurrency(calculateTotalDiscount) }}</span>
+                  <span class="text-xs font-semibold text-red-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
                 </div>
               </template>
               <div v-else class="flex justify-between">
                 <span class="text-xs text-gray-600">Subtotal:</span>
-                <span class="text-xs font-semibold">${{ formatCurrency(receipt.total) }}</span>
+                <span class="text-xs font-semibold">{{ formatCurrency(receipt.total) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-xs text-gray-600">Payment Method:</span>
@@ -139,7 +139,7 @@
               </div>
               <div class="flex justify-between pt-1.5 border-t border-gray-300">
                 <span class="text-sm font-bold">Total:</span>
-                <span class="text-sm font-bold">${{ formatCurrency(receipt.total) }}</span>
+                <span class="text-sm font-bold">{{ formatCurrency(receipt.total) }}</span>
               </div>
             </div>
           </div>
@@ -193,6 +193,7 @@ import type { Receipt } from '~/stores/receipts'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useInventoryStore } from '~/stores/inventory'
+import { usePreferences } from '~/composables/usePreferences'
 
 interface Props {
   modelValue: boolean
@@ -209,6 +210,7 @@ const receiptContent = ref<HTMLElement | null>(null)
 const isPrinting = ref(false)
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
+const { formatCurrency } = usePreferences()
 
 // Store information
 const storeName = computed(() => userStore.userData?.storeDetails?.storeName || '')
@@ -281,12 +283,7 @@ onMounted(async () => {
   }
 })
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
+// formatCurrency is now imported from usePreferences for currency conversion
 
 const formatReceiptDate = (date: string | Date) => {
   const dateObj = date instanceof Date ? date : new Date(date)

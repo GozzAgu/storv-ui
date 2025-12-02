@@ -1295,8 +1295,25 @@ const selectRegion = async (code: string, name: string) => {
 const selectCurrency = async (code: string, name: string, symbol: string) => {
   accountSettings.currency = `${code} (${symbol})`
   try {
+    // Show loading toast
+    const loadingToast = toast.info('Updating currency and fetching exchange rates...')
+    
+    // Update preferences (this will trigger exchange rate refresh)
     await updatePreferences({ currency: code, currencySymbol: symbol })
-    toast.success('Currency updated successfully')
+    
+    // Refresh exchange rates explicitly
+    if (import.meta.client) {
+      try {
+        const { useCurrencyConversion } = await import('~/composables/useCurrencyConversion')
+        const { refreshRates, baseCurrency } = useCurrencyConversion()
+        const base = baseCurrency.value || preferences.value.currency || 'USD'
+        await refreshRates(base)
+      } catch (error) {
+        console.warn('Error refreshing exchange rates:', error)
+      }
+    }
+    
+    toast.success(`Currency updated to ${code}. All prices will be converted automatically.`)
   } catch (error: any) {
     toast.error(error.message || 'Failed to update currency')
   }

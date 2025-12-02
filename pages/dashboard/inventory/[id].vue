@@ -108,7 +108,7 @@
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Value</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-${{ formatCurrency(totalInventoryValue) }}
+{{ formatCurrency(totalInventoryValue) }}
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Inventory value</p>
           </div>
@@ -173,7 +173,7 @@ ${{ formatCurrency(totalInventoryValue) }}
             <div class="flex items-center gap-2">
               <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalInventoryValue) }}</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
             </div>
           </div>
           <!-- Compact Filters -->
@@ -284,17 +284,17 @@ ${{ formatCurrency(totalInventoryValue) }}
                   <div v-if="'type' in column && column.type === 'currency'" class="text-sm">
                     <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                       <span class="font-semibold text-green-600 dark:text-green-400">
-                        ${{ formatCurrency(item.discountedPrice) }}
+                        {{ formatCurrency(item.discountedPrice) }}
                       </span>
                       <span class="text-xs text-gray-400 dark:text-gray-500 line-through">
-                        ${{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
+                        {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                       </span>
                       <span class="text-xs text-red-600 dark:text-red-400 font-medium">
-                        {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }}
+                        {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                       </span>
                     </div>
                     <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
-                      ${{ formatCurrency(item[column.key] || 0) }}
+                      {{ formatCurrency(item[column.key] || 0) }}
                     </span>
                   </div>
                   <div v-else-if="'type' in column && column.type === 'number'" class="text-sm text-gray-600 dark:text-gray-300">
@@ -692,6 +692,7 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
+import { usePreferences } from '~/composables/usePreferences'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -711,6 +712,7 @@ const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const { canManage, canManageInventoryItems } = usePermissions()
 const toast = useToast()
+const { formatCurrency } = usePreferences()
 
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
@@ -973,12 +975,7 @@ const getFolderColorClass = (color?: string) => {
   return colorMap[color] || 'bg-gradient-to-br from-gray-500 to-gray-600'
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
+// formatCurrency is now imported from usePreferences for currency conversion
 
 const formatNumber = (value: number | string | undefined) => {
   if (value === undefined || value === null) return '-'

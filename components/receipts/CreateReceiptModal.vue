@@ -157,17 +157,17 @@
                           <span v-if="getItemField(item, 'price')">
                             <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
                               <span class="text-gray-400 dark:text-gray-500 line-through">
-                                ${{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                                {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                               </span>
                               <span class="text-green-600 dark:text-green-400 font-semibold">
-                                ${{ formatCurrency(item.discountedPrice) }}
+                                {{ formatCurrency(item.discountedPrice) }}
                               </span>
                               <span class="text-red-600 dark:text-red-400">
-                                ({{ item.discountPercentage ? `-${item.discountPercentage}%` : `-$${formatCurrency(item.discountAmount || 0)}` }})
+                                ({{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }})
                               </span>
                             </span>
                             <span v-else class="text-gray-500 dark:text-gray-400">
-                              Price: ${{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                              Price: {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                             </span>
                           </span>
                           <span v-if="getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
@@ -200,7 +200,7 @@
               Selected Items ({{ totalSelectedQuantity }})
             </p>
             <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Total: ${{ formatCurrency(calculateTotal()) }}
+              Total: {{ formatCurrency(calculateTotal()) }}
             </p>
           </div>
         </div>
@@ -410,11 +410,11 @@
             </div>
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">${{ formatCurrency(calculateTotal()) }}</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(calculateTotal()) }}</span>
             </div>
             <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
               <span class="text-base font-semibold text-gray-900 dark:text-gray-100">Total</span>
-              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">${{ formatCurrency(calculateTotal()) }}</span>
+              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(calculateTotal()) }}</span>
             </div>
           </div>
         </div>
@@ -478,6 +478,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useCustomersStore } from '~/stores/customers'
+import { usePreferences } from '~/composables/usePreferences'
 
 interface Props {
   modelValue: boolean
@@ -492,6 +493,7 @@ const emit = defineEmits<{
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const customersStore = useCustomersStore()
+const { formatCurrency } = usePreferences()
 
 const steps = [
   { id: 'folder', label: 'Select Folder' },
@@ -736,12 +738,7 @@ const getItemField = (item: InventoryItem, fieldName: string): string => {
   return key ? String(item[key]) : ''
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
+// formatCurrency is now imported from usePreferences for currency conversion
 
 const getFolderColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
