@@ -68,7 +68,7 @@
           <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-4">
             <p class="text-sm text-yellow-800 dark:text-yellow-200">
               <strong>Security Verification Required</strong><br>
-              Please enter your super admin password to create staff accounts. This is required because your credentials are not stored.
+              Please enter your super admin password to create staff accounts. Your credentials are not currently stored.
             </p>
           </div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

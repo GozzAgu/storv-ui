@@ -4,7 +4,7 @@
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
     <!-- Welcome Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
+    <div>
         <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome back, {{ userName }}! 👋</h1>
         <p class="mt-1 text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
@@ -95,19 +95,19 @@
               </div>
             </template>
           </ClientOnly>
-        </div>
+      </div>
       </Card>
 
       <!-- Quick Stats -->
       <Card>
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Quick Stats</h2>
         <div class="space-y-6">
-          <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <div>
+          <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Completed Orders</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
               </div>
@@ -122,16 +122,16 @@
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Pending Orders</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
-              </div>
-            </div>
           </div>
-          
-          <div class="flex items-center justify-between">
+        </div>
+      </div>
+
+        <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                 <XCircleIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
               </div>
-              <div>
+          <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Refunded</p>
                 <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
               </div>
@@ -151,7 +151,7 @@
           </div>
         </div>
       </Card>
-    </div>
+      </div>
 
     <!-- Bottom Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -187,7 +187,7 @@
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
           <NuxtLink to="/dashboard/inventory" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">View All</NuxtLink>
-        </div>
+    </div>
         <div class="space-y-4">
           <div v-if="topSellingItems.length === 0" class="text-center py-8">
             <p class="text-sm text-gray-500 dark:text-gray-400">No products sold yet</p>
@@ -240,9 +240,9 @@
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div class="bg-red-500 h-2 rounded-full" :style="`width: ${outOfStockPercentage}%`"></div>
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
               <span class="text-sm text-gray-600 dark:text-gray-400">Total Items</span>

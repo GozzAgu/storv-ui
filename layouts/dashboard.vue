@@ -682,8 +682,13 @@ onMounted(async () => {
 
 // Watch for auth state changes to fetch user data and protect routes
 watch(() => authStore.currentUser, async (user, oldUser) => {
-  // Redirect to signin if user logs out
-  if (import.meta.client && !authStore.loading && !user) {
+  // Check if staff creation is in progress - don't redirect during temporary sign-out
+  const isStaffCreationInProgress = import.meta.client 
+    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+    : false
+  
+  // Redirect to signin if user logs out (but not during staff creation)
+  if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress) {
     return navigateTo('/signin')
   }
   

@@ -320,20 +320,20 @@ export const useStaffStore = defineStore('staff', {
       const { getCredentials, storeCredentials } = useAdminCredentials()
       const adminCredentials = getCredentials()
       
-      // Use provided password or stored credentials
+      // Use provided password or stored credentials (prefer stored credentials)
       const superAdminEmail = authStore.currentUser.email
       let superAdminPassword: string | undefined
       
-      if (staffData.superAdminPassword) {
+      // First try stored credentials (they're automatically available if user signed in recently)
+      if (adminCredentials) {
+        superAdminPassword = adminCredentials.password
+      } else if (staffData.superAdminPassword) {
         // Use password provided directly (e.g., from modal when credentials not stored)
         superAdminPassword = staffData.superAdminPassword
         // Store credentials for future use if email is available
         if (superAdminEmail) {
           storeCredentials(superAdminEmail, superAdminPassword)
         }
-      } else if (adminCredentials) {
-        // Use stored credentials
-        superAdminPassword = adminCredentials.password
       }
       
       if (!superAdminPassword) {
@@ -380,6 +380,11 @@ export const useStaffStore = defineStore('staff', {
         const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
         if (!department || department.createdBy !== authStore.currentUser.uid) {
           throw new Error('Department not found or access denied')
+        }
+
+        // Set flag to prevent redirect during staff creation
+        if (import.meta.client) {
+          sessionStorage.setItem('staff_creation_in_progress', 'true')
         }
 
         // Step 1: Sign out super admin temporarily
@@ -564,6 +569,11 @@ export const useStaffStore = defineStore('staff', {
         } as Staff
         this.staff.unshift(staffWithDept)
 
+        // Clear staff creation flag on success
+        if (import.meta.client) {
+          sessionStorage.removeItem('staff_creation_in_progress')
+        }
+
         return newStaffRef.id
       } catch (error: any) {
         console.error('Error creating staff:', error)
@@ -575,6 +585,11 @@ export const useStaffStore = defineStore('staff', {
           } catch (signInError) {
             console.error('Failed to sign super admin back in after error:', signInError)
           }
+        }
+        
+        // Clear staff creation flag on error
+        if (import.meta.client) {
+          sessionStorage.removeItem('staff_creation_in_progress')
         }
         
         throw new Error(error.message || 'Failed to create staff')

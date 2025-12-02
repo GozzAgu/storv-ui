@@ -255,9 +255,9 @@
           <Button @click="savePaymentSettings" variant="primary">
             Save Changes
           </Button>
-        </div>
+      </div>
 
-        <div class="space-y-6">
+            <div class="space-y-6">
           <div class="py-4">
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">Available Payment Methods</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Select the payment methods you accept for sales transactions</p>

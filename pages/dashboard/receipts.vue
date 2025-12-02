@@ -87,7 +87,7 @@
           <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
             <ReceiptPercentIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
-        </div>
+    </div>
       </Card>
 
       <Card padding="md" extra-class="border-l-4 border-l-green-500">
@@ -256,7 +256,7 @@
               title="Reset filters"
             >
               <ArrowPathIcon class="w-4 h-4" />
-            </button>
+          </button>
           </div>
         </div>
       </div>
@@ -507,7 +507,7 @@
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
           </div>
         </Card>
-      </div>
+  </div>
     </template>
   </ClientOnly>
 </template>
@@ -529,7 +529,7 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XMarkIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'

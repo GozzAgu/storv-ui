@@ -85,7 +85,7 @@
               class="flex-shrink-0 p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="Edit folder"
             >
-              <PencilIcon class="w-4 h-4 flex-shrink-0" />
+              <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
             </button>
             <button
               @click.stop="handleDeleteFolder(folder)"
@@ -479,7 +479,7 @@ import {
   MagnifyingGlassIcon,
   CubeIcon,
   CurrencyDollarIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'

@@ -91,7 +91,7 @@
                   class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
                   title="Edit"
                 >
-                  <PencilIcon class="w-5 h-5" />
+                  <PencilSquareIcon class="w-5 h-5" />
                 </button>
                 <button
                   v-if="onDelete"
@@ -133,7 +133,7 @@ import { ref, computed } from 'vue'
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
   InboxIcon,
 } from '@heroicons/vue/24/outline'

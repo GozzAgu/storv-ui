@@ -218,7 +218,7 @@
                     class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="Edit"
                   >
-                    <PencilIcon class="w-5 h-5 flex-shrink-0" />
+                    <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canManageDepartments"
@@ -282,7 +282,7 @@ import {
   UserCircleIcon,
   CheckCircleIcon,
   ClockIcon,
-  PencilIcon,
+  PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
