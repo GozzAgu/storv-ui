@@ -76,10 +76,10 @@
             <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
               <div
                 :class="[
-                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden px-5 py-4',
+                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-4',
                   isActive(item.href)
-                    ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+                    ? 'bg-primary-50 dark:bg-primary-900/20'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 ]"
               >
                 <NuxtLink
@@ -89,30 +89,30 @@
                   <!-- Active indicator -->
                   <div 
                     v-if="isActive(item.href)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                   ></div>
                   
                   <component 
                     :is="item.icon" 
                     :class="[
-                      'relative z-10 transition-all duration-300 w-6 h-6 mr-4',
+                      'relative z-10 transition-colors w-6 h-6 mr-4',
                       isActive(item.href)
-                        ? 'text-white' 
-                        : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                        ? 'text-primary-600 dark:text-primary-400' 
+                        : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                     ]"
                   />
                   <span 
-                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
-                    :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold transition-colors"
+                    :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
                   >
                     {{ item.name }}
                   </span>
                 </NuxtLink>
                 <button
                   @click.stop="inventoryExpanded = !inventoryExpanded"
-                  class="p-1 hover:bg-white/10 dark:hover:bg-white/5 rounded transition-colors"
+                  class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   :class="[
-                    isActive(item.href) ? 'text-white' : 'text-gray-400 dark:text-gray-500'
+                    isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'
                   ]"
                 >
                   <ChevronDownIcon 
@@ -132,14 +132,14 @@
                     :class="[
                       'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                       route.params.id === folder.id
-                        ? 'bg-gradient-to-r from-primary-50 to-primary-50/50 dark:from-primary-900/30 dark:to-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold shadow-sm'
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                     ]"
                   >
                     <!-- Active indicator bar -->
                     <div 
                       v-if="route.params.id === folder.id"
-                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                     ></div>
                     
                     <div class="flex items-center gap-2.5 flex-1 min-w-0">
@@ -155,7 +155,7 @@
                     </div>
                     <ArrowRightIcon 
                       v-if="route.params.id === folder.id"
-                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400 animate-in slide-in-from-right-1 duration-200"
+                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400"
                     />
                   </NuxtLink>
                 </div>
@@ -166,10 +166,10 @@
             <div v-else-if="item.name === 'Departments' && !sidebarCollapsed" class="space-y-1">
               <div
                 :class="[
-                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden px-5 py-4',
+                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-4',
                   isActive(item.href)
-                    ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+                    ? 'bg-primary-50 dark:bg-primary-900/20'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 ]"
               >
                 <NuxtLink
@@ -179,30 +179,30 @@
                   <!-- Active indicator -->
                   <div 
                     v-if="isActive(item.href)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                   ></div>
                   
                   <component 
                     :is="item.icon" 
                     :class="[
-                      'relative z-10 transition-all duration-300 w-6 h-6 mr-4',
+                      'relative z-10 transition-colors w-6 h-6 mr-4',
                       isActive(item.href)
-                        ? 'text-white' 
-                        : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                        ? 'text-primary-600 dark:text-primary-400' 
+                        : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                     ]"
                   />
                   <span 
-                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
-                    :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold transition-colors"
+                    :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
                   >
                     {{ item.name }}
                   </span>
                 </NuxtLink>
                 <button
                   @click.stop="departmentsExpanded = !departmentsExpanded"
-                  class="p-1 hover:bg-white/10 dark:hover:bg-white/5 rounded transition-colors"
+                  class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   :class="[
-                    isActive(item.href) ? 'text-white' : 'text-gray-400 dark:text-gray-500'
+                    isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'
                   ]"
                 >
                   <ChevronDownIcon 
@@ -222,14 +222,14 @@
                     :class="[
                       'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                       route.params.id === department.id
-                        ? 'bg-gradient-to-r from-primary-50 to-primary-50/50 dark:from-primary-900/30 dark:to-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold shadow-sm'
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                     ]"
                   >
                     <!-- Active indicator bar -->
                     <div 
                       v-if="route.params.id === department.id"
-                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-r-full"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                     ></div>
                     
                     <div class="flex items-center gap-2.5 flex-1 min-w-0">
@@ -245,7 +245,7 @@
                     </div>
                     <ArrowRightIcon 
                       v-if="route.params.id === department.id"
-                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400 animate-in slide-in-from-right-1 duration-200"
+                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400"
                     />
                   </NuxtLink>
                 </div>
@@ -257,46 +257,40 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
               :to="item.href"
               :class="[
-                'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden',
+                'group relative flex items-center font-medium rounded-xl transition-all duration-200',
                 sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
                 isActive(item.href)
-                  ? 'bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-gray-100/80 hover:to-gray-50/80 dark:hover:from-gray-800/80 dark:hover:to-gray-700/50'
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
               ]"
               :title="sidebarCollapsed ? item.name : ''"
             >
               <!-- Active indicator -->
               <div 
                 v-if="isActive(item.href) && !sidebarCollapsed"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white/60 rounded-r-full"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
               ></div>
               
-              <!-- Active indicator for collapsed (circular) -->
+              <!-- Active indicator for collapsed -->
               <div 
                 v-if="isActive(item.href) && sidebarCollapsed"
-                class="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-purple-600"
-              ></div>
-              
-              <!-- Hover effect background -->
-              <div 
-                v-if="!isActive(item.href)"
-                class="absolute inset-0 bg-gradient-to-r from-primary-50/0 via-primary-50/50 to-purple-50/0 dark:from-primary-900/0 dark:via-primary-900/30 dark:to-purple-900/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                class="absolute inset-0 rounded-xl bg-primary-50 dark:bg-primary-900/20"
               ></div>
               
               <component 
                 :is="item.icon" 
                 :class="[
-                  'relative z-10 transition-all duration-300',
+                  'relative z-10 transition-colors',
                   sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4',
                   isActive(item.href)
-                    ? 'text-white' 
-                    : 'text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400'
+                    ? 'text-primary-600 dark:text-primary-400' 
+                    : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                 ]"
               />
               <span 
                 v-if="!sidebarCollapsed" 
-                class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight transition-all duration-300"
-                :class="isActive(item.href) ? 'text-white' : 'text-gray-700 dark:text-gray-300'"
+                class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold transition-colors"
+                :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
               >
                 {{ item.name }}
               </span>
