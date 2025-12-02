@@ -86,7 +86,7 @@
             This is required to temporarily sign you out while creating the staff account
           </p>
         </div>
-
+        
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Phone Number
@@ -235,6 +235,7 @@ const errorMessage = ref('')
 // Computed to check if super admin password is needed
 const needsSuperAdminPassword = computed(() => {
   if (isEdit.value) return false
+  
   // Always check if credentials are available
   try {
     return !hasCredentials()

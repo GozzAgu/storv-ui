@@ -2,8 +2,6 @@ import {
   getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
@@ -106,57 +104,6 @@ export const useFirebaseAuth = () => {
     }
   }
 
-  // Sign in with Google (using popup method - more reliable)
-  const signInWithGoogle = async () => {
-    const auth = getAuthInstance()
-    if (!auth) {
-      throw new Error('Firebase Auth not initialized')
-    }
-
-    try {
-      const provider = new GoogleAuthProvider()
-      // Add scopes if needed
-      provider.addScope('profile')
-      provider.addScope('email')
-      
-      // Use popup method (more reliable, avoids sessionStorage issues)
-      // Note: COOP warnings in console are harmless and can be ignored
-      const result = await signInWithPopup(auth, provider)
-      return result.user
-    } catch (error: any) {
-      // Handle unauthorized domain (most common deployment issue)
-      if (error.code === 'auth/unauthorized-domain') {
-        throw new Error('UNAUTHORIZED_DOMAIN: This domain is not authorized for Firebase Authentication. Please add your domain to Firebase Console → Authentication → Settings → Authorized domains. See DEPLOYMENT_FIX.md for instructions.')
-      }
-      // Handle popup closed by user
-      if (error.code === 'auth/popup-closed-by-user') {
-        throw new Error('Sign in was cancelled')
-      }
-      // Handle account exists with different credential
-      if (error.code === 'auth/account-exists-with-different-credential') {
-        throw new Error('An account already exists with this email. Please sign in with your email and password instead.')
-      }
-      // Handle popup blocked
-      if (error.code === 'auth/popup-blocked') {
-        throw new Error('Pop-up was blocked by your browser. Please allow pop-ups for this site.')
-      }
-      // Handle network errors
-      if (error.code === 'auth/network-request-failed') {
-        throw new Error('Network error. Please check your internet connection and try again.')
-      }
-      // Handle operation not allowed (provider not enabled)
-      if (error.code === 'auth/operation-not-allowed') {
-        throw new Error('Google sign-in is not enabled. Please enable it in Firebase Console → Authentication → Sign-in method → Google.')
-      }
-      // Handle missing permissions (Firestore)
-      if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-        throw new Error('Permission denied. Please check your Firestore security rules. See FIRESTORE_SETUP.md for setup instructions.')
-      }
-      // Log full error for debugging
-      console.error('Google sign-in error:', error)
-      throw new Error(error.message || `Google sign in failed. Error code: ${error.code || 'unknown'}`)
-    }
-  }
 
   // Phone authentication functions
   let recaptchaVerifier: RecaptchaVerifier | null = null
@@ -477,7 +424,6 @@ export const useFirebaseAuth = () => {
     signUp,
     signOut,
     resetPassword,
-    signInWithGoogle,
     sendPhoneVerificationCode,
     verifyPhoneCode,
     clearRecaptcha,

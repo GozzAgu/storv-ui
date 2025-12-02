@@ -47,15 +47,24 @@
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-4 w-full mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">142</p>
+              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              </p>
+              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Orders</p>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">89</p>
+              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              </p>
+              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Products</p>
             </div>
             <div>
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">23</p>
+              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              </p>
+              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Customers</p>
             </div>
           </div>
@@ -892,6 +901,10 @@ import { useUser } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
+import { useReceiptsStore } from '~/stores/receipts'
+import { useInventoryStore } from '~/stores/inventory'
+import { useCustomersStore } from '~/stores/customers'
+import { useAuthStore } from '~/stores/auth'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
@@ -930,10 +943,15 @@ const backupData = reactive({ ...profileData })
 const isEditingPersonalInfo = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const isLoadingProfile = ref(true)
+const isLoadingStats = ref(true)
 
 // Get user data
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument } = useUser()
+const authStore = useAuthStore()
+const receiptsStore = useReceiptsStore()
+const inventoryStore = useInventoryStore()
+const customersStore = useCustomersStore()
 
 // Function to load profile data
 const loadProfileData = async () => {
@@ -988,10 +1006,76 @@ const loadProfileData = async () => {
   }
 }
 
+// Computed properties for real stats
+const totalOrders = computed(() => {
+  return receiptsStore.totalReceipts || 0
+})
+
+const totalProducts = computed(() => {
+  return inventoryStore.totalItems || 0
+})
+
+// Get unique customers from receipts (since customers store might not be used everywhere)
+const totalCustomers = computed(() => {
+  // Try to get from customers store first
+  if (customersStore.customers.length > 0) {
+    return customersStore.totalCustomers || 0
+  }
+  
+  // Fallback: Count unique customers from receipts
+  const customersMap = new Map<string, boolean>()
+  receiptsStore.receipts.forEach(receipt => {
+    if (receipt.customerEmail) {
+      customersMap.set(receipt.customerEmail, true)
+    }
+  })
+  return customersMap.size
+})
+
+// Load stats data
+const loadStatsData = async () => {
+  if (!authStore.currentUser) {
+    isLoadingStats.value = false
+    return
+  }
+  
+  isLoadingStats.value = true
+  
+  try {
+    // Fetch data in parallel
+    await Promise.all([
+      receiptsStore.fetchReceipts(),
+      inventoryStore.fetchFolders(),
+      customersStore.fetchCustomers().catch(() => {
+        // If customers store fetch fails, we'll use receipts-based calculation
+        console.warn('Could not fetch customers, will use receipts-based count')
+      })
+    ])
+    
+    // Load items for each folder to get accurate product count
+    if (inventoryStore.folders.length > 0) {
+      await Promise.all(
+        inventoryStore.folders.map(folder => 
+          inventoryStore.fetchItems(folder.id).catch(() => {
+            // Ignore errors for individual folder item fetches
+          })
+        )
+      )
+    }
+  } catch (error) {
+    console.error('Error loading stats data:', error)
+  } finally {
+    isLoadingStats.value = false
+  }
+}
+
 // Load profile and store information from Firestore + settings
 onMounted(async () => {
   // Initialize preferences first
   await initPreferences()
+  
+  // Load stats data
+  await loadStatsData()
   
   // Load preferences into accountSettings
   if (preferences.value) {

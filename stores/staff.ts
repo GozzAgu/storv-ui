@@ -337,7 +337,7 @@ export const useStaffStore = defineStore('staff', {
       }
       
       if (!superAdminPassword) {
-        throw new Error('Super admin password is required. If you signed in with Google or your credentials expired, please enter your password in the "Your Super Admin Password" field above.')
+        throw new Error('Super admin password is required. If your credentials expired, please enter your password in the "Your Super Admin Password" field above.')
       }
       
       if (!superAdminEmail) {
@@ -352,6 +352,28 @@ export const useStaffStore = defineStore('staff', {
       let signedBackIn = false
       let firebaseAuthAccountCreated = false // Flag to track if Firebase Auth account was successfully created
 
+      // Helper function to sign super admin back in
+      const signSuperAdminBackIn = async () => {
+        if (signedBackIn) return
+        
+        try {
+          if (!superAdminPassword) {
+            throw new Error('Password is required to sign back in')
+          }
+          await authStore.signIn(superAdminEmail, superAdminPassword)
+          signedBackIn = true
+          console.log('[Staff Creation] Super admin signed back in successfully')
+          
+          // Verify we're signed back in
+          if (!authStore.currentUser) {
+            throw new Error('Super admin sign-in verification failed - currentUser is null')
+          }
+        } catch (signInError: any) {
+          console.error('[Staff Creation] Failed to sign super admin back in:', signInError)
+          throw new Error(`Failed to sign super admin back in: ${signInError.message}`)
+        }
+      }
+
       try {
         // Verify department exists and belongs to this user
         const departmentsStore = useDepartmentsStore()
@@ -365,117 +387,103 @@ export const useStaffStore = defineStore('staff', {
         await authStore.signOut()
         console.log('[Staff Creation] Super admin signed out successfully')
 
-        // Step 2: Create Firebase Auth account for staff
-        const auth = authStore.getAuthInstance()
-        if (!auth) {
-          // Sign super admin back in before throwing error
+          // Step 2: Create Firebase Auth account for staff
+          const auth = authStore.getAuthInstance()
+          if (!auth) {
+            // Sign super admin back in before throwing error
+            try {
+              await signSuperAdminBackIn()
+            } catch (signInError) {
+              console.error('Failed to sign super admin back in:', signInError)
+            }
+            throw new Error('Firebase Auth not initialized')
+          }
+
+          console.log('[Staff Creation] Creating Firebase Auth account for staff:', staffData.email)
           try {
-            await authStore.signIn(superAdminEmail, superAdminPassword)
-            signedBackIn = true
-          } catch (signInError) {
-            console.error('Failed to sign super admin back in:', signInError)
-          }
-          throw new Error('Firebase Auth not initialized')
-        }
+            if (!staffData.email || !staffData.password) {
+              throw new Error('Staff email and password are required for Firebase Auth account creation')
+            }
 
-        console.log('[Staff Creation] Creating Firebase Auth account for staff:', staffData.email)
-        try {
-          if (!staffData.email || !staffData.password) {
-            throw new Error('Staff email and password are required for Firebase Auth account creation')
-          }
+            if (staffData.password.length < 6) {
+              throw new Error('Staff password must be at least 6 characters long')
+            }
 
-          if (staffData.password.length < 6) {
-            throw new Error('Staff password must be at least 6 characters long')
-          }
+            console.log('[Staff Creation] Calling createUserWithEmailAndPassword...')
+            const userCredential = await createUserWithEmailAndPassword(
+              auth,
+              staffData.email.trim().toLowerCase(),
+              staffData.password
+            )
+            
+            if (!userCredential || !userCredential.user) {
+              throw new Error('Firebase Auth account creation returned null user credential')
+            }
 
-          console.log('[Staff Creation] Calling createUserWithEmailAndPassword...')
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            staffData.email.trim().toLowerCase(),
-            staffData.password
-          )
-          
-          if (!userCredential || !userCredential.user) {
-            throw new Error('Firebase Auth account creation returned null user credential')
-          }
+            staffAuthUid = userCredential.user.uid
+            console.log('[Staff Creation] Firebase Auth account created successfully. UID:', staffAuthUid)
 
-          staffAuthUid = userCredential.user.uid
-          console.log('[Staff Creation] Firebase Auth account created successfully. UID:', staffAuthUid)
+            if (!staffAuthUid || staffAuthUid.trim() === '') {
+              throw new Error('Staff Firebase Auth UID is null or empty after account creation')
+            }
 
-          if (!staffAuthUid || staffAuthUid.trim() === '') {
-            throw new Error('Staff Firebase Auth UID is null or empty after account creation')
-          }
+            // Mark that Firebase Auth account was successfully created
+            firebaseAuthAccountCreated = true
+            console.log('[Staff Creation] ✅ Firebase Auth account creation confirmed. Flag set to true.')
 
-          // Mark that Firebase Auth account was successfully created
-          firebaseAuthAccountCreated = true
-          console.log('[Staff Creation] ✅ Firebase Auth account creation confirmed. Flag set to true.')
+            // Verify the account was actually created
+            console.log('[Staff Creation] Verifying Firebase Auth account exists...')
+            const createdUser = auth.currentUser
+            if (createdUser && createdUser.uid === staffAuthUid && createdUser.email === staffData.email) {
+              console.log('[Staff Creation] ✅ Verified: Firebase Auth account exists and matches created user')
+            } else {
+              // This is expected - after signing out, currentUser will be null, but the account still exists
+              console.log('[Staff Creation] Note: Auth state cleared (expected after sign out), but Firebase Auth account was created with UID:', staffAuthUid)
+            }
+            
+            // Additional verification: Ensure we have a valid UID
+            if (!staffAuthUid || staffAuthUid.length < 20) {
+              throw new Error('Invalid Firebase Auth UID received: ' + staffAuthUid)
+            }
+            
+            console.log('[Staff Creation] ✅ Firebase Auth account UID validated:', staffAuthUid.substring(0, 8) + '...')
 
-          // Verify the account was actually created
-          console.log('[Staff Creation] Verifying Firebase Auth account exists...')
-          const createdUser = auth.currentUser
-          if (createdUser && createdUser.uid === staffAuthUid && createdUser.email === staffData.email) {
-            console.log('[Staff Creation] ✅ Verified: Firebase Auth account exists and matches created user')
-          } else {
-            // This is expected - after signing out, currentUser will be null, but the account still exists
-            console.log('[Staff Creation] Note: Auth state cleared (expected after sign out), but Firebase Auth account was created with UID:', staffAuthUid)
+            // Step 3: Create user document for staff with 'staff' role
+            console.log('[Staff Creation] Creating user document in Firestore for staff...')
+            const userStore = useUserStore()
+            try {
+              await userStore.createUserDocument(staffAuthUid, {
+                email: staffData.email,
+                name: `${staffData.firstName} ${staffData.lastName}`,
+                role: 'staff',
+                hasCompletedOnboarding: true,
+                hasCompletedTutorial: false,
+              })
+              console.log('[Staff Creation] User document created successfully in users collection')
+            } catch (userDocError: any) {
+              console.error('[Staff Creation] Error creating user document:', userDocError)
+              // Don't fail the entire process if user document creation fails
+              // The staff document will still have the authUid
+              console.warn('[Staff Creation] Continuing despite user document creation error...')
+            }
+          } catch (authError: any) {
+            console.error('[Staff Creation] Error creating staff Firebase Auth account:', authError)
+            // If staff account creation fails, sign super admin back in first
+            try {
+              await signSuperAdminBackIn()
+            } catch (signInError) {
+              console.error('Failed to sign super admin back in after staff creation error:', signInError)
+            }
+            // Re-throw with more context
+            const errorMessage = authError.code 
+              ? `Failed to create staff Firebase Auth account (${authError.code}): ${authError.message}`
+              : `Failed to create staff Firebase Auth account: ${authError.message}`
+            throw new Error(errorMessage)
           }
-          
-          // Additional verification: Ensure we have a valid UID
-          if (!staffAuthUid || staffAuthUid.length < 20) {
-            throw new Error('Invalid Firebase Auth UID received: ' + staffAuthUid)
-          }
-          
-          console.log('[Staff Creation] ✅ Firebase Auth account UID validated:', staffAuthUid.substring(0, 8) + '...')
-
-          // Step 3: Create user document for staff with 'staff' role
-          console.log('[Staff Creation] Creating user document in Firestore for staff...')
-          const userStore = useUserStore()
-          try {
-            await userStore.createUserDocument(staffAuthUid, {
-              email: staffData.email,
-              name: `${staffData.firstName} ${staffData.lastName}`,
-              role: 'staff',
-              hasCompletedOnboarding: true,
-              hasCompletedTutorial: false,
-            })
-            console.log('[Staff Creation] User document created successfully in users collection')
-          } catch (userDocError: any) {
-            console.error('[Staff Creation] Error creating user document:', userDocError)
-            // Don't fail the entire process if user document creation fails
-            // The staff document will still have the authUid
-            console.warn('[Staff Creation] Continuing despite user document creation error...')
-          }
-        } catch (authError: any) {
-          console.error('[Staff Creation] Error creating staff Firebase Auth account:', authError)
-          // If staff account creation fails, sign super admin back in first
-          try {
-            await authStore.signIn(superAdminEmail, superAdminPassword)
-            signedBackIn = true
-          } catch (signInError) {
-            console.error('Failed to sign super admin back in after staff creation error:', signInError)
-          }
-          // Re-throw with more context
-          const errorMessage = authError.code 
-            ? `Failed to create staff Firebase Auth account (${authError.code}): ${authError.message}`
-            : `Failed to create staff Firebase Auth account: ${authError.message}`
-          throw new Error(errorMessage)
-        }
 
         // Step 4: Sign super admin back in quickly
         console.log('[Staff Creation] Signing super admin back in...')
-        try {
-          await authStore.signIn(superAdminEmail, superAdminPassword)
-          signedBackIn = true
-          console.log('[Staff Creation] Super admin signed back in successfully')
-          
-          // Verify we're signed back in
-          if (!authStore.currentUser) {
-            throw new Error('Super admin sign-in verification failed - currentUser is null')
-          }
-        } catch (signInError: any) {
-          console.error('[Staff Creation] Failed to sign super admin back in:', signInError)
-          throw new Error(`Staff account created but failed to sign super admin back in: ${signInError.message}`)
-        }
+        await signSuperAdminBackIn()
 
         // Step 5: Create staff document in Firestore
         // CRITICAL VALIDATION: Ensure Firebase Auth account was created
@@ -561,9 +569,9 @@ export const useStaffStore = defineStore('staff', {
         console.error('Error creating staff:', error)
         
         // Ensure super admin is signed back in even if something fails
-        if (!signedBackIn && superAdminEmail && superAdminPassword) {
+        if (!signedBackIn) {
           try {
-            await authStore.signIn(superAdminEmail, superAdminPassword)
+            await signSuperAdminBackIn()
           } catch (signInError) {
             console.error('Failed to sign super admin back in after error:', signInError)
           }

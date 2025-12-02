@@ -3,8 +3,6 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
@@ -137,45 +135,6 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // Sign in with Google
-    async signInWithGoogle() {
-      const auth = this.getAuthInstance()
-      if (!auth) throw new Error('Firebase Auth not initialized')
-
-      try {
-        const provider = new GoogleAuthProvider()
-        provider.addScope('profile')
-        provider.addScope('email')
-
-        const result = await signInWithPopup(auth, provider)
-        this.currentUser = result.user
-        return result.user
-      } catch (error: any) {
-        if (error.code === 'auth/unauthorized-domain') {
-          throw new Error('UNAUTHORIZED_DOMAIN: This domain is not authorized for Firebase Authentication. Please add your domain to Firebase Console → Authentication → Settings → Authorized domains.')
-        }
-        if (error.code === 'auth/popup-closed-by-user') {
-          throw new Error('Sign in was cancelled')
-        }
-        if (error.code === 'auth/account-exists-with-different-credential') {
-          throw new Error('An account already exists with this email. Please sign in with your email and password instead.')
-        }
-        if (error.code === 'auth/popup-blocked') {
-          throw new Error('Pop-up was blocked by your browser. Please allow pop-ups for this site.')
-        }
-        if (error.code === 'auth/network-request-failed') {
-          throw new Error('Network error. Please check your internet connection and try again.')
-        }
-        if (error.code === 'auth/operation-not-allowed') {
-          throw new Error('Google sign-in is not enabled. Please enable it in Firebase Console.')
-        }
-        if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-          throw new Error('Permission denied. Please check your Firestore security rules.')
-        }
-        console.error('Google sign-in error:', error)
-        throw new Error(error.message || `Google sign in failed. Error code: ${error.code || 'unknown'}`)
-      }
-    },
 
     // Initialize reCAPTCHA verifier
     async initializeRecaptcha(containerId: string = 'recaptcha-container'): Promise<RecaptchaVerifier> {
