@@ -2,12 +2,12 @@
   <button
     @click="toggleTheme"
     :key="currentTheme"
-    class="inline-flex items-center justify-center p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-all duration-200 border border-gray-300 dark:border-gray-600 hover:border-primary-500 dark:hover:border-primary-400 bg-white dark:bg-gray-800 shadow-sm min-w-[40px] min-h-[40px]"
+    class="relative p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     :aria-label="`Switch to ${currentTheme === 'dark' ? 'light' : 'dark'} mode`"
     title="Toggle theme"
   >
-    <SunIcon v-if="currentTheme === 'dark'" class="w-5 h-5 transition-transform duration-200" />
-    <MoonIcon v-else class="w-5 h-5 transition-transform duration-200" />
+    <SunIcon v-if="currentTheme === 'dark'" class="w-6 h-6 transition-transform duration-200" />
+    <MoonIcon v-else class="w-6 h-6 transition-transform duration-200" />
   </button>
 </template>
 

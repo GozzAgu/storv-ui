@@ -201,7 +201,30 @@ export const useInventoryStore = defineStore('inventory', {
         if (userStore.userData?.role === 'staff') {
           try {
             const staffStore = useStaffStore()
-            const currentStaffMember = staffStore.getCurrentStaffMember
+            let currentStaffMember = staffStore.getCurrentStaffMember
+
+            // If current staff member not found in store, fetch it directly
+            if (!currentStaffMember) {
+              try {
+                const staffRef = collection(db, 'staff')
+                const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+                const staffSnapshot = await getDocs(staffQuery)
+
+                if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+                  const staffDoc = staffSnapshot.docs[0]
+                  if (staffDoc) {
+                    const staffData = staffDoc.data()
+                    currentStaffMember = {
+                      id: staffDoc.id,
+                      ...staffData,
+                    } as any
+                  }
+                }
+              } catch (fetchError: any) {
+                console.warn('[InventoryStore] Could not fetch staff document:', fetchError.message)
+              }
+            }
+
             const staffDepartmentId = currentStaffMember?.departmentId
 
             if (staffDepartmentId) {
@@ -520,8 +543,9 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       let userId = authStore.currentUser.uid
+      let staffDepartmentId: string | undefined
 
-      // If the current user is staff, get the super admin UID from the staff document
+      // If the current user is staff, get the super admin UID from the staff document and department ID
       if (userStore.userData?.role === 'staff') {
         try {
           // Find the staff document for this user
@@ -538,10 +562,35 @@ export const useInventoryStore = defineStore('inventory', {
                 userId = staffData.createdBy
                 console.log('[InventoryStore] Staff user detected, using super admin UID for fetchItems:', userId)
               }
+              // Get department ID for access check
+              staffDepartmentId = staffData.departmentId
             }
           }
         } catch (error: any) {
           console.warn('[InventoryStore] Could not fetch staff document for items, using current user UID:', error.message)
+        }
+
+        // Verify department access to the folder
+        if (staffDepartmentId) {
+          const folder = this.getFolderById(folderId)
+          if (folder) {
+            // If folder has allowedDepartments, verify staff's department has access
+            if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
+              if (!folder.allowedDepartments.includes(staffDepartmentId)) {
+                throw new Error('Access denied: Your department does not have access to items in this folder')
+              }
+            }
+          } else {
+            // Folder not in store, fetch it to check access
+            try {
+              const folderData = await this.fetchFolder(folderId)
+              if (!folderData) {
+                throw new Error('Folder not found')
+              }
+            } catch (error: any) {
+              throw new Error(error.message || 'Access denied: Cannot access items in this folder')
+            }
+          }
         }
       }
 

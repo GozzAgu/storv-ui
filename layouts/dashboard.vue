@@ -498,6 +498,7 @@ import {
   ArrowRightOnRectangleIcon,
   FolderIcon,
   ArrowRightIcon,
+  ChartBarIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'

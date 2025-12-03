@@ -44,37 +44,9 @@
           </div>
         </div>
         
-        <!-- Import/Export Actions -->
-        <div v-if="!isLoadingFolder && canManageInventoryItems" class="flex items-center gap-2">
-          <input
-            ref="fileInputRef"
-            type="file"
-            accept=".xlsx,.xls"
-            class="hidden"
-            @change="handleFileImport"
-          />
+        <!-- Bulk Discount Button (if items selected) -->
+        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2">
           <button
-            @click="handleExportToExcel"
-            :disabled="isExporting || items.length === 0"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
-            title="Export to Excel"
-          >
-            <ArrowDownTrayIcon v-if="!isExporting" class="w-5 h-5" />
-            <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span class="hidden sm:inline">{{ isExporting ? 'Exporting...' : 'Export' }}</span>
-          </button>
-          <button
-            @click="() => fileInputRef?.click()"
-            :disabled="isImporting"
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
-            title="Import from Excel"
-          >
-            <ArrowUpTrayIcon v-if="!isImporting" class="w-5 h-5" />
-            <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span class="hidden sm:inline">{{ isImporting ? 'Importing...' : 'Import' }}</span>
-          </button>
-          <button
-            v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
             @click="openBulkDiscountModal"
             class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
             title="Apply bulk discount"
@@ -433,15 +405,50 @@
       />
     </div>
 
-    <!-- Floating Action Button -->
+    <!-- Hidden file input for import -->
+    <input
+      v-if="canManageInventoryItems"
+      ref="fileInputRef"
+      type="file"
+      accept=".xlsx,.xls"
+      class="hidden"
+      @change="handleFileImport"
+    />
+
+    <!-- Floating Action Buttons -->
+    <div v-if="!isLoadingFolder && canManageInventoryItems" class="fixed bottom-24 right-6 flex flex-col gap-2 z-40">
     <button
-      v-if="sortedFilteredItems.length > 0 && canManageInventoryItems"
-      @click="openAddItemModal"
-      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
-      title="Add new item"
-    >
-      <PlusIcon class="w-6 h-6" />
-    </button>
+        @click="() => fileInputRef?.click()"
+        :disabled="isImporting"
+        :class="[
+          'w-11 h-11 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110',
+          (isImporting || isExporting) ? 'opacity-50 cursor-not-allowed' : ''
+        ]"
+        title="Import from Excel"
+      >
+        <ArrowDownTrayIcon v-if="!isImporting" class="w-5 h-5" />
+        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      </button>
+      <button
+        @click="handleExportToExcel"
+        :disabled="isExporting || items.length === 0"
+        :class="[
+          'w-11 h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110',
+          (isExporting || isImporting || items.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+        ]"
+        title="Export to Excel"
+      >
+        <ArrowUpTrayIcon v-if="!isExporting" class="w-5 h-5" />
+        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      </button>
+      <button
+        @click="openAddItemModal"
+        class="w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+        title="Add new item"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
+    </div>
 
     <!-- Enhanced Add/Edit Item Modal -->
     <Modal
@@ -790,7 +797,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(20)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isImporting = ref(false)
 const isExporting = ref(false)
@@ -908,7 +915,7 @@ const getItemAvailability = (item: InventoryItem) => {
   
   // Check if item has dateOut (was sold via receipt)
   if (isItemSold(item)) {
-    return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
+      return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
   }
   
   // Item is available (not sold, not returned)

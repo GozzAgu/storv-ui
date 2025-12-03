@@ -232,7 +232,7 @@
               Selected Items ({{ totalSelectedQuantity }})
             </p>
             <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Total: {{ formatCurrency(calculateTotal()) }}
+              Total: {{ formatCurrency(receiptTotal) }}
             </p>
           </div>
         </div>
@@ -286,9 +286,19 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Payment Method *
               </label>
+                <Checkbox
+                  v-model="useSplitPayment"
+                  label="Split Payment"
+                  size="sm"
+                />
+              </div>
+              
+              <!-- Single Payment Method -->
+              <div v-if="!useSplitPayment">
               <select
                 v-model="receiptForm.paymentMethod"
                 required
@@ -300,6 +310,67 @@
                 <option value="Mobile Money">Mobile Money</option>
                 <option value="Bank Transfer">Bank Transfer</option>
               </select>
+              </div>
+
+              <!-- Split Payment Methods -->
+              <div v-else class="space-y-3">
+                <div
+                  v-for="(payment, index) in splitPayments"
+                  :key="index"
+                  class="flex items-center gap-3"
+                >
+                  <select
+                    v-model="payment.method"
+                    required
+                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="">Select method</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                  </select>
+                  <div class="relative w-32">
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                    <input
+                      v-model.number="payment.amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      :max="receiptTotal - splitPaymentsTotal + payment.amount"
+                      required
+                      class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <button
+                    v-if="splitPayments.length > 1"
+                    @click="removeSplitPayment(index)"
+                    type="button"
+                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
+                    <XMarkIcon class="w-5 h-5" />
+                  </button>
+                </div>
+                <button
+                  @click="addSplitPayment"
+                  type="button"
+                  class="w-full px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg border border-primary-300 dark:border-primary-700 transition-colors"
+                >
+                  + Add Payment Method
+                </button>
+                <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total:</span>
+                  <div class="text-right">
+                    <span class="text-sm font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                      ${{ formatCurrency(splitPaymentsTotal) }} / ${{ formatCurrency(receiptTotal) }}
+                    </span>
+                    <p v-if="splitPaymentsTotal !== receiptTotal" class="text-xs text-red-600 dark:text-red-400 mt-1">
+                      Amount must equal total
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -442,11 +513,11 @@
             </div>
             <div class="flex justify-between items-center mb-2">
               <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(calculateTotal()) }}</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
             </div>
             <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
               <span class="text-base font-semibold text-gray-900 dark:text-gray-100">Total</span>
-              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(calculateTotal()) }}</span>
+              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
             </div>
           </div>
         </div>
@@ -504,6 +575,7 @@ import {
   CubeIcon,
   CheckCircleIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -558,6 +630,12 @@ const receiptForm = ref({
 const isSwapIn = ref(false)
 const swapInFolderId = ref<string>('')
 const swapInItemForm = ref<Record<string, any>>({})
+
+// Split payment state
+const useSplitPayment = ref(false)
+const splitPayments = ref<Array<{ method: string; amount: number }>>([
+  { method: '', amount: 0 }
+])
 
 const folders = computed(() => inventoryStore.folders)
 
@@ -625,8 +703,16 @@ const canProceed = computed(() => {
 
 const isFormValid = computed(() => {
   const baseValid = receiptForm.value.customerName.trim() !== '' &&
-    receiptForm.value.paymentMethod !== '' &&
     selectedItems.value.length > 0
+  
+  // Payment validation
+  if (useSplitPayment.value) {
+    if (splitPayments.value.length === 0) return false
+    if (splitPayments.value.some(p => !p.method || p.amount <= 0)) return false
+    if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) return false
+  } else {
+    if (!receiptForm.value.paymentMethod) return false
+  }
   
   // If swap-in is enabled, validate swap-in fields
   if (isSwapIn.value) {
@@ -809,6 +895,23 @@ const calculateTotal = () => {
   }, 0)
 }
 
+const receiptTotal = computed(() => calculateTotal())
+
+const splitPaymentsTotal = computed(() => {
+  return splitPayments.value.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+})
+
+const addSplitPayment = () => {
+  splitPayments.value.push({ method: '', amount: 0 })
+}
+
+const removeSplitPayment = (index: number) => {
+  splitPayments.value.splice(index, 1)
+  if (splitPayments.value.length === 0) {
+    splitPayments.value.push({ method: '', amount: 0 })
+  }
+}
+
 const getItemDisplayName = (item: InventoryItem) => {
   // Try to find a name field in the item
   const nameField = Object.keys(item).find(key => 
@@ -876,6 +979,9 @@ const resetForm = () => {
   isSwapIn.value = false
   swapInFolderId.value = ''
   swapInItemForm.value = {}
+  // Reset split payment state
+  useSplitPayment.value = false
+  splitPayments.value = [{ method: '', amount: 0 }]
 }
 
 const handleCancel = () => {
@@ -949,11 +1055,19 @@ const handleCreateReceipt = async () => {
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,
       total: calculateTotal(),
-      paymentMethod: receiptForm.value.paymentMethod,
+      paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
       status: receiptForm.value.status as 'completed' | 'pending',
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
       itemIds,
+    }
+    
+    // Add split payments if enabled
+    if (useSplitPayment.value && splitPayments.value.length > 0) {
+      receiptData.splitPayments = splitPayments.value.map(p => ({
+        method: p.method,
+        amount: p.amount
+      }))
     }
     
     // Add swap-in fields if enabled

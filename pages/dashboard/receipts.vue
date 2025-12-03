@@ -460,8 +460,8 @@
                     </div>
                   </div>
                   <span v-else class="text-gray-500 dark:text-gray-400">
-                    {{ receipt.itemsCount }} items
-                  </span>
+                  {{ receipt.itemsCount }} items
+                </span>
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
@@ -496,16 +496,9 @@
               <td class="px-3 py-2 whitespace-nowrap text-right min-w-[160px]">
                 <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
-                    @click="handleViewReceipt(receipt)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-                    title="View"
-                  >
-                    <EyeIcon class="w-5 h-5 flex-shrink-0" />
-                  </button>
-                  <button
                     @click="handlePrintReceipt(receipt)"
                     class="flex-shrink-0 p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    title="Print"
+                    title="View/Print"
                   >
                     <PrinterIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
@@ -575,10 +568,10 @@
     <button
       v-if="!isInitialLoading && sortedFilteredReceipts.length > 0 && canCreate"
       @click="openCreateReceiptModal"
-      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
     >
-      <PlusIcon class="w-6 h-6" />
+      <PlusIcon class="w-5 h-5" />
     </button>
 
       <!-- Create Receipt Modal -->
@@ -648,7 +641,6 @@ import {
   ChartBarIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
-  EyeIcon,
   PrinterIcon,
   UsersIcon,
   UserCircleIcon,
@@ -728,7 +720,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(20)
 const sidebarCollapsed = ref(false)
 
 // Sorting state
@@ -761,7 +753,7 @@ const getCustomersInitialPage = (): number => {
   return 1
 }
 const customersCurrentPage = ref(getCustomersInitialPage())
-const customersItemsPerPage = ref(9)
+const customersItemsPerPage = ref(20)
 
 // Returns tab state
 const returnsSearchQuery = ref('')
@@ -779,7 +771,7 @@ const getReturnsInitialPage = (): number => {
   return 1
 }
 const returnsCurrentPage = ref(getReturnsInitialPage())
-const returnsItemsPerPage = ref(10)
+const returnsItemsPerPage = ref(20)
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
@@ -1075,10 +1067,6 @@ const showViewReceiptModal = ref(false)
 const showReturnReceiptModal = ref(false)
 const showDeleteReceiptModal = ref(false)
 
-const handleViewReceipt = (receipt: Receipt) => {
-  selectedReceipt.value = receipt
-  showViewReceiptModal.value = true
-}
 
 const handlePrintReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt

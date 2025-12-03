@@ -254,10 +254,10 @@
     <button
       v-if="canManageDepartments && !isLoadingStaff"
       @click="openCreateStaffModal"
-      class="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new staff"
     >
-      <PlusIcon class="w-6 h-6" />
+      <PlusIcon class="w-5 h-5" />
     </button>
 
     <!-- Staff Modal -->
@@ -327,7 +327,7 @@ const getStaffInitialPage = (): number => {
   return 1
 }
 const staffCurrentPage = ref(getStaffInitialPage())
-const staffItemsPerPage = ref(10)
+const staffItemsPerPage = ref(20)
 
 // Staff modal
 const showStaffModal = ref(false)

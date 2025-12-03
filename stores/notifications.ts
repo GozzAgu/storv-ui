@@ -211,7 +211,23 @@ export const useNotificationsStore = defineStore('notifications', {
           )
         }
 
-        const snapshot = await getDocs(notificationsQuery)
+        let snapshot
+        try {
+          snapshot = await getDocs(notificationsQuery)
+        } catch (indexError: any) {
+          // If index error, try fetching without orderBy and sort in memory
+          if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
+            console.warn('Firestore index not created yet. Fetching without orderBy and sorting in memory.')
+            const fallbackQuery = query(
+              notificationsRef,
+              where('userId', '==', userId),
+              limit(100) // Limit to reasonable number for in-memory sort
+            )
+            snapshot = await getDocs(fallbackQuery)
+          } else {
+            throw indexError
+          }
+        }
 
         const notifications: Notification[] = []
         snapshot.forEach((doc) => {
@@ -222,6 +238,20 @@ export const useNotificationsStore = defineStore('notifications', {
             createdAt: data.createdAt?.toDate() || new Date(),
           } as Notification)
         })
+
+        // Sort in memory if we used fallback query (no orderBy in Firestore)
+        if (notifications.length > 0 && (!loadMore || !this.lastDoc)) {
+          notifications.sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : new Date(a.createdAt).getTime()
+            const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : new Date(b.createdAt).getTime()
+            return dateB - dateA // Descending order
+          })
+          
+          // If we fetched more than limit, take only the first 20
+          if (notifications.length > 20) {
+            notifications.splice(20)
+          }
+        }
 
         if (loadMore) {
           this.notifications.push(...notifications)
