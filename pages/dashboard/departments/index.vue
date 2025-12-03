@@ -347,7 +347,19 @@ const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
 
 const searchQuery = ref('')
-const currentPage = ref(1)
+// Load pagination state from localStorage
+const getInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('departments-index-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(12)
 
 // Import stores directly - Pinia handles SSR automatically
@@ -430,12 +442,39 @@ const paginatedDepartments = computed(() => {
 const resetFilters = () => {
   searchQuery.value = ''
   currentPage.value = 1
+  // Clear pagination from localStorage when filters are reset
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('departments-index-page', '1')
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
 }
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
+  // Save to localStorage
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('departments-index-page', page.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Watch for page changes to persist
+watch(currentPage, (newPage) => {
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('departments-index-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
 
 const handleRetryFetch = async () => {
   console.log('[DepartmentsPage] Retrying fetch...')

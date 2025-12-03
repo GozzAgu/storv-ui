@@ -235,7 +235,10 @@
               </th>
               <th v-if="canManageInventoryItems" class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 <Checkbox
-                  :model-value="selectedItemsForBulk.length === filteredItems.length && filteredItems.length > 0"
+                  :model-value="(() => {
+                    const availableItems = filteredItems.filter(item => !isItemSold(item))
+                    return selectedItemsForBulk.length === availableItems.length && availableItems.length > 0
+                  })()"
                   @update:model-value="(checked) => toggleSelectAll(checked)"
                   size="sm"
                   wrapper-class="justify-center"
@@ -335,24 +338,38 @@
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                  :disabled="isItemSold(item)"
                   size="sm"
                   wrapper-class="justify-center"
+                  :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
                 />
               </td>
                   <td v-if="canManageInventoryItems" class="px-3 py-2 whitespace-nowrap text-right min-w-[140px]">
                 <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     @click="handleApplyDiscount(item)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
-                    :title="item.discountedPrice ? 'Edit discount' : 'Apply discount'"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
+                      isItemSold(item)
+                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                        : 'text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot apply discount to sold item' : (item.discountedPrice ? 'Edit discount' : 'Apply discount')"
                   >
                     <TagIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="item.discountedPrice"
                     @click="handleRemoveDiscount(item)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
-                    title="Remove discount"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
+                      isItemSold(item)
+                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                        : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot remove discount from sold item' : 'Remove discount'"
                   >
                     <XMarkIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
@@ -757,7 +774,22 @@ const searchQuery = ref('')
 const sortBy = ref('name')
 const showAddItemModal = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
-const currentPage = ref(1)
+// Load pagination state from localStorage - use folder ID in key for uniqueness
+const getInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const folderId = route.params.id as string
+      if (folderId) {
+        const saved = localStorage.getItem(`inventory-page-${folderId}`)
+        return saved ? parseInt(saved, 10) : 1
+      }
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(10)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isImporting = ref(false)
@@ -852,6 +884,17 @@ const totalInventoryValue = computed(() => {
   return total
 })
 
+// Check if an item has been sold
+const isItemSold = (item: InventoryItem) => {
+  // Check if item has dateOut (was sold via receipt)
+  if (item.dateOut) {
+    const dateOutValue = item.dateOut
+    const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+    return hasDateOut
+  }
+  return false
+}
+
 // Determine item availability status
 const getItemAvailability = (item: InventoryItem) => {
   // Check if item is in a refunded receipt (highest priority - returned takes precedence)
@@ -864,14 +907,8 @@ const getItemAvailability = (item: InventoryItem) => {
   }
   
   // Check if item has dateOut (was sold via receipt)
-  if (item.dateOut) {
-    // Check if dateOut exists (item was sold)
-    const dateOutValue = item.dateOut
-    const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-    
-    if (hasDateOut) {
-      return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
-    }
+  if (isItemSold(item)) {
+    return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
   }
   
   // Item is available (not sold, not returned)
@@ -1084,12 +1121,64 @@ const resetFilters = () => {
   sortBy.value = 'name'
   currentSort.value = { key: 'name', order: 'asc' }
   currentPage.value = 1
+  // Clear pagination from localStorage when filters are reset
+  if (import.meta.client) {
+    try {
+      const folderId = route.params.id as string
+      if (folderId) {
+        localStorage.setItem(`inventory-page-${folderId}`, '1')
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
 }
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
+  // Save to localStorage with folder ID
+  if (import.meta.client) {
+    try {
+      const folderId = route.params.id as string
+      if (folderId) {
+        localStorage.setItem(`inventory-page-${folderId}`, page.toString())
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Watch for page changes to persist
+watch(currentPage, (newPage) => {
+  if (import.meta.client) {
+    try {
+      const folderId = route.params.id as string
+      if (folderId) {
+        localStorage.setItem(`inventory-page-${folderId}`, newPage.toString())
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
+
+// Watch for folder ID changes and restore pagination
+watch(() => route.params.id, (newFolderId) => {
+  if (import.meta.client && newFolderId) {
+    try {
+      const saved = localStorage.getItem(`inventory-page-${newFolderId}`)
+      if (saved) {
+        currentPage.value = parseInt(saved, 10)
+      } else {
+        currentPage.value = 1
+      }
+    } catch (e) {
+      currentPage.value = 1
+    }
+  }
+}, { immediate: false })
 
 const openAddItemModal = () => {
   editingItem.value = null
@@ -1243,11 +1332,21 @@ const handleCancelItem = () => {
 
 // Discount handlers
 const handleApplyDiscount = (item: InventoryItem) => {
+  // Prevent applying discount to sold items
+  if (isItemSold(item)) {
+    toast.error('Cannot apply discount to sold items')
+    return
+  }
   selectedItemForDiscount.value = item
   showDiscountModal.value = true
 }
 
 const handleRemoveDiscount = async (item: InventoryItem) => {
+  // Prevent removing discount from sold items
+  if (isItemSold(item)) {
+    toast.error('Cannot modify discount on sold items')
+    return
+  }
   if (confirm(`Remove discount from this item?`)) {
     try {
       await inventoryStore.removeDiscount(folderId.value, item.id)
@@ -1275,6 +1374,16 @@ const handleBulkDiscountApplied = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
+  // Prevent selecting sold items
+  if (isItemSold(item)) {
+    // Remove if already selected
+    const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
+    if (index > -1) {
+      selectedItemsForBulk.value.splice(index, 1)
+    }
+    return
+  }
+
   // If called from checkbox component, use the checked value; otherwise toggle
   if (checked !== undefined) {
     if (checked) {
@@ -1298,14 +1407,17 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
 }
 
 const toggleSelectAll = (checked?: boolean) => {
+  // Filter out sold items when selecting all
+  const availableItems = filteredItems.value.filter(item => !isItemSold(item))
+  
   // If called from checkbox component, use the checked value; otherwise toggle
   if (checked !== undefined) {
-    selectedItemsForBulk.value = checked ? [...filteredItems.value] : []
+    selectedItemsForBulk.value = checked ? [...availableItems] : []
   } else {
-    if (selectedItemsForBulk.value.length === filteredItems.value.length) {
+    if (selectedItemsForBulk.value.length === availableItems.length) {
       selectedItemsForBulk.value = []
     } else {
-      selectedItemsForBulk.value = [...filteredItems.value]
+      selectedItemsForBulk.value = [...availableItems]
     }
   }
 }

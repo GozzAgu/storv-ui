@@ -1099,6 +1099,15 @@ export const useInventoryStore = defineStore('inventory', {
           throw new Error('Item not found')
         }
 
+        // Check if item has been sold
+        if (item.dateOut) {
+          const dateOutValue = item.dateOut
+          const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+          if (hasDateOut) {
+            throw new Error('Cannot apply discount to sold items')
+          }
+        }
+
         const originalPrice = item.originalPrice || this.getItemPrice(item)
         if (!originalPrice || originalPrice <= 0) {
           throw new Error('Item does not have a valid price to apply discount')
@@ -1205,6 +1214,13 @@ export const useInventoryStore = defineStore('inventory', {
           const item = folderItems.find(i => i.id === itemId)
           if (!item) continue
 
+          // Skip sold items
+          if (item.dateOut) {
+            const dateOutValue = item.dateOut
+            const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+            if (hasDateOut) continue
+          }
+
           const originalPrice = item.originalPrice || this.getItemPrice(item)
           if (!originalPrice || originalPrice <= 0) continue
 
@@ -1293,6 +1309,19 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
+        // Check if item has been sold
+        const folderItems = this.items[folderId] || []
+        const item = folderItems.find(i => i.id === itemId)
+        if (item) {
+          if (item.dateOut) {
+            const dateOutValue = item.dateOut
+            const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+            if (hasDateOut) {
+              throw new Error('Cannot remove discount from sold items')
+            }
+          }
+        }
+
         const itemRef = doc(db, 'inventoryItems', itemId)
         await updateDoc(itemRef, {
           discountPercentage: deleteField(),
@@ -1303,7 +1332,6 @@ export const useInventoryStore = defineStore('inventory', {
         })
 
         // Update local state
-        const folderItems = this.items[folderId] || []
         const index = folderItems.findIndex(i => i.id === itemId)
         if (index > -1 && folderItems[index]) {
           delete folderItems[index].discountPercentage

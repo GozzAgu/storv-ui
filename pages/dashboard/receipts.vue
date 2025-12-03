@@ -445,10 +445,24 @@
                   {{ formatTime(receipt.date) }}
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-sm text-gray-600 dark:text-gray-300">
-                  {{ receipt.itemsCount }} items
-                </span>
+              <td class="px-3 py-2">
+                <div class="text-sm text-gray-900 dark:text-gray-100">
+                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-1">
+                    <div 
+                      v-for="(item, idx) in receipt.items.slice(0, 3)" 
+                      :key="idx"
+                      class="text-sm"
+                    >
+                      {{ item.itemName }}<span v-if="item.quantity > 1" class="text-gray-500 dark:text-gray-400"> × {{ item.quantity }}</span>
+                    </div>
+                    <div v-if="receipt.items.length > 3" class="text-xs text-gray-500 dark:text-gray-400 italic">
+                      and {{ receipt.items.length - 3 }} more item{{ receipt.items.length - 3 > 1 ? 's' : '' }}
+                    </div>
+                  </div>
+                  <span v-else class="text-gray-500 dark:text-gray-400">
+                    {{ receipt.itemsCount }} items
+                  </span>
+                </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -701,7 +715,19 @@ const isInitialLoading = ref(true)
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const dateFilter = ref('all')
-const currentPage = ref(1)
+// Load pagination state from localStorage
+const getInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('receipts-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(10)
 const sidebarCollapsed = ref(false)
 
@@ -723,14 +749,36 @@ const sortableColumns = [
 // Customers tab state
 const customersSearchQuery = ref('')
 const customersSortBy = ref('name')
-const customersCurrentPage = ref(1)
+const getCustomersInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('receipts-customers-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const customersCurrentPage = ref(getCustomersInitialPage())
 const customersItemsPerPage = ref(9)
 
 // Returns tab state
 const returnsSearchQuery = ref('')
 const returnsStatusFilter = ref('all')
 const returnsReasonFilter = ref('all')
-const returnsCurrentPage = ref(1)
+const getReturnsInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('receipts-returns-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const returnsCurrentPage = ref(getReturnsInitialPage())
 const returnsItemsPerPage = ref(10)
 
 // Load sidebar state from localStorage
@@ -951,12 +999,61 @@ const resetFilters = () => {
   statusFilter.value = 'all'
   dateFilter.value = 'all'
   currentPage.value = 1
+  // Clear pagination from localStorage when filters are reset
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('receipts-page', '1')
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
 }
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
+  // Save to localStorage
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('receipts-page', page.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Watch for page changes to persist
+watch(currentPage, (newPage) => {
+  if (import.meta.client && activeTab.value === 'receipts') {
+    try {
+      localStorage.setItem('receipts-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
+
+// Watch for customers tab page changes
+watch(customersCurrentPage, (newPage) => {
+  if (import.meta.client && activeTab.value === 'customers') {
+    try {
+      localStorage.setItem('receipts-customers-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
+
+// Watch for returns tab page changes
+watch(returnsCurrentPage, (newPage) => {
+  if (import.meta.client && activeTab.value === 'returns') {
+    try {
+      localStorage.setItem('receipts-returns-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
 
 const showCreateReceiptModal = ref(false)
 

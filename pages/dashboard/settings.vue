@@ -2,8 +2,16 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your store and application preferences</p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+          <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your store and application preferences</p>
+        </div>
+        <div v-if="!canEditSettings" class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">View Only Mode</p>
+          <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">Only super admins can edit settings</p>
+        </div>
+      </div>
     </div>
 
     <div class="space-y-6">
@@ -15,13 +23,13 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Update your business details</p>
           </div>
           <button 
-            v-if="!isEditingStore"
+            v-if="canEditSettings && !isEditingStore"
             @click="enableEditing('store')"
             class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
           >
             Edit
           </button>
-          <div v-else class="flex gap-2">
+          <div v-else-if="canEditSettings && isEditingStore" class="flex gap-2">
             <button 
               @click="cancelEditing('store')"
               class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -35,6 +43,9 @@
               Save Changes
             </button>
           </div>
+          <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            View Only
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -45,7 +56,7 @@
             <input
               v-model="storeInfo.name"
               type="text"
-              :disabled="!isEditingStore"
+              :disabled="!canEditSettings || !isEditingStore"
               :class="[
                 'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
@@ -62,7 +73,7 @@
             <input
               v-model="storeInfo.businessType"
               type="text"
-              :disabled="!isEditingStore"
+              :disabled="!canEditSettings || !isEditingStore"
               :class="[
                 'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
@@ -79,7 +90,7 @@
             <input
               v-model="storeInfo.email"
               type="email"
-              :disabled="!isEditingStore"
+              :disabled="!canEditSettings || !isEditingStore"
               :class="[
                 'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
@@ -96,7 +107,7 @@
             <input
               v-model="storeInfo.phone"
               type="tel"
-              :disabled="!isEditingStore"
+              :disabled="!canEditSettings || !isEditingStore"
               :class="[
                 'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
@@ -113,7 +124,7 @@
             <textarea
               v-model="storeInfo.address"
               rows="2"
-              :disabled="!isEditingStore"
+              :disabled="!canEditSettings || !isEditingStore"
               :class="[
                 'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none',
                 isEditingStore
@@ -133,9 +144,16 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure inventory management preferences</p>
           </div>
-          <Button @click="saveInventorySettings" variant="primary">
+          <Button 
+            v-if="canEditSettings"
+            @click="saveInventorySettings" 
+            variant="primary"
+          >
             Save Changes
           </Button>
+          <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            View Only
+          </div>
         </div>
 
         <div class="space-y-6">
@@ -149,7 +167,13 @@
                 v-model.number="inventorySettings.lowStockThreshold"
                 type="number"
                 min="1"
-                class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                :disabled="!canEditSettings"
+                :class="[
+                  'w-20 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  canEditSettings
+                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                ]"
               />
               <span class="text-sm text-gray-600 dark:text-gray-400">units</span>
             </div>
@@ -164,6 +188,7 @@
               <input
                 v-model="inventorySettings.autoReorder"
                 type="checkbox"
+                :disabled="!canEditSettings"
                 class="sr-only peer"
               />
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
@@ -177,7 +202,13 @@
             </div>
             <select
               v-model="inventorySettings.defaultCategory"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              :disabled="!canEditSettings"
+              :class="[
+                'px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                canEditSettings
+                  ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+              ]"
             >
               <option value="general">General</option>
               <option value="electronics">Electronics</option>
@@ -196,9 +227,16 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Receipt & Invoice Settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Customize receipt and invoice preferences</p>
           </div>
-          <Button @click="saveReceiptSettings" variant="primary">
+          <Button 
+            v-if="canEditSettings"
+            @click="saveReceiptSettings" 
+            variant="primary"
+          >
             Save Changes
           </Button>
+          <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            View Only
+          </div>
         </div>
 
         <div class="space-y-6">
@@ -210,7 +248,13 @@
             <input
               v-model="receiptSettings.prefix"
               type="text"
-              class="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              :disabled="!canEditSettings"
+              :class="[
+                'w-32 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                canEditSettings
+                  ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+              ]"
               placeholder="REC-"
             />
           </div>
@@ -224,7 +268,13 @@
               v-model.number="receiptSettings.nextNumber"
               type="number"
               min="1"
-              class="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              :disabled="!canEditSettings"
+              :class="[
+                'w-32 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                canEditSettings
+                  ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+              ]"
             />
           </div>
 
@@ -237,6 +287,7 @@
               <input
                 v-model="receiptSettings.autoPrint"
                 type="checkbox"
+                :disabled="!canEditSettings"
                 class="sr-only peer"
               />
               <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
@@ -252,9 +303,16 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment Settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Configure available payment methods</p>
           </div>
-          <Button @click="savePaymentSettings" variant="primary">
+          <Button 
+            v-if="canEditSettings"
+            @click="savePaymentSettings" 
+            variant="primary"
+          >
             Save Changes
           </Button>
+          <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            View Only
+          </div>
       </div>
 
             <div class="space-y-6">
@@ -262,38 +320,42 @@
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">Available Payment Methods</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Select the payment methods you accept for sales transactions</p>
             <div class="space-y-3">
-              <label class="flex items-center gap-3 cursor-pointer">
+              <label :class="['flex items-center gap-3', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
                 <input
                   v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="cash"
+                  :disabled="!canEditSettings"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Cash</span>
               </label>
-              <label class="flex items-center gap-3 cursor-pointer">
+              <label :class="['flex items-center gap-3', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
                 <input
                   v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="card"
+                  :disabled="!canEditSettings"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Card Payment</span>
               </label>
-              <label class="flex items-center gap-3 cursor-pointer">
+              <label :class="['flex items-center gap-3', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
                 <input
                   v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="mobile"
+                  :disabled="!canEditSettings"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Mobile Money</span>
               </label>
-              <label class="flex items-center gap-3 cursor-pointer">
+              <label :class="['flex items-center gap-3', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
                 <input
                   v-model="paymentSettings.paymentMethods"
                   type="checkbox"
                   value="bank"
+                  :disabled="!canEditSettings"
                   class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 />
                 <span class="text-sm text-gray-700 dark:text-gray-300">Bank Transfer</span>
@@ -356,7 +418,13 @@
             <div class="ml-13 mt-4">
               <button 
                 @click="handleExport"
-                class="px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                :disabled="!canEditSettings"
+                :class="[
+                  'px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
+                  canEditSettings
+                    ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed opacity-60'
+                ]"
               >
                 Export All Data
               </button>
@@ -401,7 +469,13 @@
               />
               <button 
                 @click="triggerImport"
-                class="px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+                :disabled="!canEditSettings"
+                :class="[
+                  'px-4 py-2 text-sm font-medium border rounded-lg transition-colors',
+                  canEditSettings
+                    ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed opacity-60'
+                ]"
               >
                 Choose File to Import
               </button>
@@ -420,11 +494,15 @@
               </div>
             </div>
             <button 
+              v-if="canEditSettings"
               @click="handleDeleteAll"
               class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
             >
               Delete All
             </button>
+            <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              View Only
+            </div>
           </div>
         </div>
       </Card>
@@ -433,7 +511,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
@@ -476,6 +554,11 @@ const { getUserDocument, updateStoreDetails } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const toast = useToast()
+
+// Check if user is super admin (only super admins can edit settings)
+const canEditSettings = computed(() => {
+  return userStore.isSuperAdmin
+})
 
 // Helper function to get the correct user ID (super admin UID if staff)
 const getTargetUserId = async (): Promise<string | null> => {
@@ -525,6 +608,11 @@ const getTargetUserId = async (): Promise<string | null> => {
 onMounted(async () => {
   if (currentUser.value) {
     try {
+      // Fetch current user data first to check permissions
+      if (!userStore.userData) {
+        await userStore.fetchUserData(currentUser.value.uid)
+      }
+      
       const targetUserId = await getTargetUserId()
       if (!targetUserId) {
         isLoadingStoreInfo.value = false
@@ -595,6 +683,11 @@ const paymentSettings = reactive({
 
 // Functions
 const enableEditing = (section: string) => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+  
   if (section === 'store') {
     isEditingStore.value = true
     Object.assign(backupStoreInfo, { ...storeInfo })
@@ -650,6 +743,11 @@ const saveStoreInfo = async () => {
     return
   }
 
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit store settings')
+    return
+  }
+
   try {
     const targetUserId = await getTargetUserId()
     if (!targetUserId) {
@@ -676,6 +774,11 @@ const saveStoreInfo = async () => {
 
 // Save inventory settings
 const saveInventorySettings = async () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+  
   await updateStoreSettings({
     inventory: {
       lowStockThreshold: inventorySettings.lowStockThreshold,
@@ -687,6 +790,11 @@ const saveInventorySettings = async () => {
 
 // Save receipt settings
 const saveReceiptSettings = async () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+  
   await updateStoreSettings({
     receipt: {
       prefix: receiptSettings.prefix,
@@ -698,6 +806,11 @@ const saveReceiptSettings = async () => {
 
 // Save payment settings
 const savePaymentSettings = async () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can edit settings')
+    return
+  }
+  
   await updateStoreSettings({
     payment: {
       paymentMethods: paymentSettings.paymentMethods,
@@ -707,6 +820,11 @@ const savePaymentSettings = async () => {
 
 // Data Management Functions
 const handleExport = () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can export data')
+    return
+  }
+  
   // In production, this would generate and download files
   const exportData = {
     products: 'Export includes: Name, SKU, Category, Price, Quantity, Cost, Supplier, etc.',
@@ -723,6 +841,10 @@ const handleExport = () => {
 }
 
 const triggerImport = () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can import data')
+    return
+  }
   importFileInput.value?.click()
 }
 
@@ -747,6 +869,11 @@ const handleImport = (event: Event) => {
 }
 
 const handleDeleteAll = () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can delete data')
+    return
+  }
+  
   const confirmed = confirm(
     '⚠️ WARNING: This will permanently delete ALL your data!\n\n' +
     'This includes:\n' +

@@ -506,7 +506,19 @@ const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const editingFolder = ref<InventoryFolder | null>(null)
-const currentPage = ref(1)
+// Load pagination state from localStorage
+const getInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('inventory-index-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(12)
 const sidebarCollapsed = ref(false)
 
@@ -667,8 +679,27 @@ const paginatedFolders = computed(() => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
+  // Save to localStorage
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('inventory-index-page', page.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Watch for page changes to persist
+watch(currentPage, (newPage) => {
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('inventory-index-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
 
 const getFolderColor = (color: string) => {
   const colorMap: Record<string, string> = {

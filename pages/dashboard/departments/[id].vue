@@ -311,8 +311,22 @@ const staff = ref<Staff[]>([])
 const isLoadingDepartment = ref(true)
 const isLoadingStaff = ref(true)
 
-// Staff pagination
-const staffCurrentPage = ref(1)
+// Staff pagination - load from localStorage per department
+const getStaffInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const deptId = route.params.id as string
+      if (deptId) {
+        const saved = localStorage.getItem(`departments-staff-page-${deptId}`)
+        return saved ? parseInt(saved, 10) : 1
+      }
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
+}
+const staffCurrentPage = ref(getStaffInitialPage())
 const staffItemsPerPage = ref(10)
 
 // Staff modal
@@ -490,8 +504,49 @@ const handleStaffError = (error: string) => {
 
 const handleStaffPageChange = (page: number) => {
   staffCurrentPage.value = page
+  // Save to localStorage with department ID
+  if (import.meta.client) {
+    try {
+      const deptId = departmentId.value
+      if (deptId) {
+        localStorage.setItem(`departments-staff-page-${deptId}`, page.toString())
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+// Watch for page changes to persist
+watch(staffCurrentPage, (newPage) => {
+  if (import.meta.client) {
+    try {
+      const deptId = departmentId.value
+      if (deptId) {
+        localStorage.setItem(`departments-staff-page-${deptId}`, newPage.toString())
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
+
+// Watch for department ID changes and restore pagination
+watch(() => route.params.id, (newDeptId) => {
+  if (import.meta.client && newDeptId) {
+    try {
+      const saved = localStorage.getItem(`departments-staff-page-${newDeptId}`)
+      if (saved) {
+        staffCurrentPage.value = parseInt(saved, 10)
+      } else {
+        staffCurrentPage.value = 1
+      }
+    } catch (e) {
+      staffCurrentPage.value = 1
+    }
+  }
+}, { immediate: false })
 
 // Watch for route parameter changes when navigating between departments
 watch(() => route.params.id, async (newId, oldId) => {
