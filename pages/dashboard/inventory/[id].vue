@@ -1874,35 +1874,26 @@ const handleFileImport = async (event: Event) => {
       toast.warning(`Found ${errorCount} validation error(s) that will be skipped${moreErrors}. The import will continue with valid items.`, 6000)
     }
 
-    // Confirm import with summary
-    let confirmMessage = `Ready to import ${itemsToImport.length} new item(s).`
+    // Show import summary in toast
+    let summaryMessage = `Importing ${itemsToImport.length} new item(s)...`
     
+    const summaryParts: string[] = []
     if (skippedDuplicates > 0) {
-      confirmMessage += `\n\n${skippedDuplicates} item(s) with duplicate serial numbers will be skipped (they already exist in inventory or are duplicated in the file).`
-      if (duplicateSerialNumbers.length > 0 && duplicateSerialNumbers.length <= 5) {
-        confirmMessage += `\nDuplicate serial numbers: ${duplicateSerialNumbers.join(', ')}`
-      }
+      summaryParts.push(`${skippedDuplicates} duplicate(s) skipped`)
     }
-    
     if (errors.length > 0) {
-      confirmMessage += `\n\n${errors.length} row(s) with validation errors will be skipped.`
+      summaryParts.push(`${errors.length} error(s) skipped`)
     }
     
-    confirmMessage += '\n\nContinue with import?'
+    if (summaryParts.length > 0) {
+      summaryMessage += ` (${summaryParts.join(', ')})`
+    }
+    
+    toast.info(summaryMessage, 4000)
     
     console.log('[Import] Items to import:', itemsToImport.length)
     console.log('[Import] Skipped duplicates:', skippedDuplicates)
     console.log('[Import] Validation errors:', errors.length)
-    
-    const confirmed = confirm(confirmMessage)
-
-    if (!confirmed) {
-      if (fileInputRef.value) {
-        fileInputRef.value.value = ''
-      }
-      isImporting.value = false
-      return
-    }
 
     // Import items
     let successCount = 0
