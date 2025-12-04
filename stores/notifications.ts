@@ -217,7 +217,32 @@ export const useNotificationsStore = defineStore('notifications', {
         } catch (indexError: any) {
           // If index error, try fetching without orderBy and sort in memory
           if (indexError.code === 'failed-precondition' || indexError.message?.includes('index')) {
-            console.warn('Firestore index not created yet. Fetching without orderBy and sorting in memory.')
+            // Check if warning was already shown for notifications
+            let warned = typeof window !== 'undefined' ? (window as any).__firestoreIndexWarned : null
+            
+            // Convert to object if it's a boolean (from other stores)
+            if (warned && typeof warned !== 'object') {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            // Initialize as object if it doesn't exist
+            if (!warned) {
+              (window as any).__firestoreIndexWarned = {}
+              warned = (window as any).__firestoreIndexWarned
+            }
+            
+            // Only warn once
+            if (!warned.notifications) {
+              const indexUrlMatch = indexError.message?.match(/https:\/\/[^\s]+/)
+              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
+              console.warn('[NotificationsStore] Firestore index not created yet. Fetching without orderBy and sorting in memory.')
+              if (indexUrl) {
+                console.info('[NotificationsStore] Create the index here:', indexUrl)
+              }
+              warned.notifications = true
+            }
+            
             const fallbackQuery = query(
               notificationsRef,
               where('userId', '==', userId),

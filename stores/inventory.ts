@@ -598,16 +598,29 @@ export const useInventoryStore = defineStore('inventory', {
 
       try {
         const itemsRef = collection(db, 'inventoryItems')
-        const q = query(
-          itemsRef,
-          where('folderId', '==', folderId),
-          where('createdBy', '==', userId),
-          orderBy('createdAt', 'desc')
-        )
+        
+        // For staff: Query all items in folder (then filter client-side)
+        // For super admin: Query with createdBy filter
+        let q
+        if (userStore.userData?.role === 'staff') {
+          // Staff: Query all items in folder - Firestore rules allow authenticated reads
+          q = query(
+            itemsRef,
+            where('folderId', '==', folderId)
+          )
+        } else {
+          // Super admin: Normal query with createdBy filter
+          q = query(
+            itemsRef,
+            where('folderId', '==', folderId),
+            where('createdBy', '==', userId),
+            orderBy('createdAt', 'desc')
+          )
+        }
 
         const querySnapshot = await getDocs(q)
 
-        const fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
+        let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
           const data = doc.data()
           return {
             id: doc.id,
@@ -624,6 +637,11 @@ export const useInventoryStore = defineStore('inventory', {
             createdBy: data.createdBy || userId,
           } as InventoryItem
         })
+
+        // For staff: Filter items to only show those created by their super admin
+        if (userStore.userData?.role === 'staff') {
+          fetchedItems = fetchedItems.filter(item => item.createdBy === userId)
+        }
 
         // Sort by createdAt if orderBy failed
         fetchedItems.sort((a, b) => {
@@ -670,14 +688,27 @@ export const useInventoryStore = defineStore('inventory', {
           
           try {
             const itemsRef = collection(db, 'inventoryItems')
-            const q = query(
-              itemsRef,
-              where('folderId', '==', folderId),
-              where('createdBy', '==', userId)
-            )
+            
+            // For staff: Query all items in folder (then filter client-side)
+            // For super admin: Query with createdBy filter
+            let q
+            if (userStore.userData?.role === 'staff') {
+              // Staff: Query all items in folder
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId)
+              )
+            } else {
+              // Super admin: Query with createdBy filter
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId),
+                where('createdBy', '==', userId)
+              )
+            }
 
             const querySnapshot = await getDocs(q)
-            const fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
+            let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
               const data = doc.data()
               return {
                 id: doc.id,
@@ -700,6 +731,11 @@ export const useInventoryStore = defineStore('inventory', {
                 createdBy: data.createdBy || userId,
               } as InventoryItem
             })
+
+            // For staff: Filter items to only show those created by their super admin
+            if (userStore.userData?.role === 'staff') {
+              fetchedItems = fetchedItems.filter(item => item.createdBy === userId)
+            }
 
             fetchedItems.sort((a, b) => {
               const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
@@ -737,61 +773,18 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to create items')
       }
 
-      // Check permissions - only managers can create items
+      // Check permissions - only super admins can create items (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
-      let createdByUid = authStore.currentUser.uid
-
+      // Only super admins can create inventory items
       if (userStore.userData?.role === 'staff') {
-        // Check if staff member is a manager
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can add items to inventory. Staff and interns have view-only access.')
-        }
-
-        // For managers: Check if folder allows their department
-        if (currentStaffMember?.departmentId) {
-          // Fetch folder to check department access
-          const folder = await this.fetchFolder(folderId)
-          if (!folder) {
-            throw new Error('Folder not found')
-          }
-          
-          const allowedDepartments = folder.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            // Folder has department restrictions - check if manager's department is allowed
-            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
-              throw new Error('Access denied: Your department does not have access to add items to this folder.')
-            }
-          }
-        }
-
-        // For managers: Use super admin's UID for createdBy (for data isolation)
-        // This ensures items created by managers are fetched correctly
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // Use the super admin's UID who created this staff member
-              if (staffData.createdBy) {
-                createdByUid = staffData.createdBy
-                console.log('[InventoryStore] Manager detected, using super admin UID for item creation:', createdByUid)
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[InventoryStore] Could not fetch staff document for item creation, using current user UID:', error.message)
-        }
+        throw new Error('Only super admins can add items to inventory. Staff have view-only access.')
       }
+
+      const createdByUid = authStore.currentUser.uid
 
       try {
         const itemsRef = collection(db, 'inventoryItems')
@@ -847,36 +840,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to update items')
       }
 
-      // Check permissions - staff (non-managers) cannot update
+      // Check permissions - only super admins can update (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can update inventory items
       if (userStore.userData?.role === 'staff') {
-        // Check if staff member is a manager
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can update items in inventory. Staff and interns have view-only access.')
-        }
-
-        // For managers: Check if folder allows their department
-        if (currentStaffMember?.departmentId) {
-          // Fetch folder to check department access
-          const folder = await this.fetchFolder(folderId)
-          if (!folder) {
-            throw new Error('Folder not found')
-          }
-          
-          const allowedDepartments = folder.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            // Folder has department restrictions - check if manager's department is allowed
-            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
-              throw new Error('Access denied: Your department does not have access to update items in this folder.')
-            }
-          }
-        }
+        throw new Error('Only super admins can update items in inventory. Staff have view-only access.')
       }
 
       try {
@@ -924,36 +896,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to delete items')
       }
 
-      // Check permissions - staff (non-managers) cannot delete
+      // Check permissions - only super admins can delete (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can delete inventory items
       if (userStore.userData?.role === 'staff') {
-        // Check if staff member is a manager
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can delete items from inventory. Staff and interns have view-only access.')
-        }
-
-        // For managers: Check if folder allows their department
-        if (currentStaffMember?.departmentId) {
-          // Fetch folder to check department access
-          const folder = await this.fetchFolder(folderId)
-          if (!folder) {
-            throw new Error('Folder not found')
-          }
-          
-          const allowedDepartments = folder.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            // Folder has department restrictions - check if manager's department is allowed
-            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
-              throw new Error('Access denied: Your department does not have access to delete items from this folder.')
-            }
-          }
-        }
+        throw new Error('Only super admins can delete items from inventory. Staff have view-only access.')
       }
 
       try {
@@ -1112,32 +1063,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - only managers can apply discounts
+      // Check permissions - only super admins can apply discounts (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can apply discounts
       if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can apply discounts. Staff and interns do not have this permission.')
-        }
-
-        // For managers: Check if folder allows their department
-        if (currentStaffMember?.departmentId) {
-          const folder = await this.fetchFolder(folderId)
-          if (!folder) {
-            throw new Error('Folder not found')
-          }
-          const allowedDepartments = folder.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
-              throw new Error('Access denied: Your department does not have access to apply discounts to items in this folder.')
-            }
-          }
-        }
+        throw new Error('Only super admins can apply discounts. Staff have view-only access.')
       }
 
       try {
@@ -1226,32 +1160,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - only managers can apply discounts
+      // Check permissions - only super admins can apply discounts (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can apply discounts
       if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can apply discounts. Staff and interns do not have this permission.')
-        }
-
-        // For managers: Check if folder allows their department
-        if (currentStaffMember?.departmentId) {
-          const folder = await this.fetchFolder(folderId)
-          if (!folder) {
-            throw new Error('Folder not found')
-          }
-          const allowedDepartments = folder.allowedDepartments || []
-          if (allowedDepartments.length > 0) {
-            if (!allowedDepartments.includes(currentStaffMember.departmentId)) {
-              throw new Error('Access denied: Your department does not have access to apply discounts to items in this folder.')
-            }
-          }
-        }
+        throw new Error('Only super admins can apply discounts. Staff have view-only access.')
       }
 
       try {
@@ -1343,18 +1260,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - only managers can remove discounts
+      // Check permissions - only super admins can remove discounts (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can remove discounts
       if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can remove discounts. Staff and interns do not have this permission.')
-        }
+        throw new Error('Only super admins can remove discounts. Staff have view-only access.')
       }
 
       try {
@@ -1406,18 +1320,15 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - only managers can remove discounts
+      // Check permissions - only super admins can remove discounts (all staff have view-only)
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Only super admins can remove discounts
       if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Only managers can remove discounts. Staff and interns do not have this permission.')
-        }
+        throw new Error('Only super admins can remove discounts. Staff have view-only access.')
       }
 
       try {
