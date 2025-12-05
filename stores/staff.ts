@@ -406,6 +406,13 @@ export const useStaffStore = defineStore('staff', {
           throw new Error('Department not found or access denied')
         }
 
+        // Auto-assign staff to the department's store (no manual store selection needed)
+        const storeId = department.storeId
+        if (!storeId) {
+          throw new Error('Department does not have a store assigned. Please assign the department to a store first.')
+        }
+        console.log('[Staff Creation] Auto-assigning staff to department\'s store:', storeId)
+
         // Set flag to prevent redirect during staff creation
         if (import.meta.client) {
           sessionStorage.setItem('staff_creation_in_progress', 'true')
@@ -535,15 +542,11 @@ export const useStaffStore = defineStore('staff', {
         const staffRef = collection(db, 'staff')
         const newStaffRef = doc(staffRef)
 
-        // Get current store ID for staff assignment
-        const storeId = await getCurrentStoreId()
-        if (!storeId) {
-          throw new Error('No store selected. Please select a store first.')
-        }
+        // StoreId is already obtained from the department above (auto-assigned)
 
         const newStaff: Omit<Staff, 'id' | 'departmentName'> = {
           ...staffDataWithoutPassword,
-          storeId, // Assign staff to current store
+          storeId, // Assign staff to department's store (auto-detected)
           authUid: staffAuthUid, // CRITICAL: This must be set for staff to log in
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),

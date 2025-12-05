@@ -75,16 +75,19 @@ import { ref, watch, computed } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useDepartmentsStore } from '~/stores/departments'
+import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
 import type { Department } from '~/composables/useDepartments'
 
 interface Props {
   modelValue: boolean
   department?: Department | null
+  storeId?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
   department: null,
+  storeId: null,
 })
 
 const emit = defineEmits<{
@@ -94,6 +97,7 @@ const emit = defineEmits<{
 }>()
 
 const departmentsStore = useDepartmentsStore()
+const storesStore = useStoresStore()
 
 const coreDepartments = CORE_DEPARTMENTS
 
@@ -157,15 +161,39 @@ const handleSubmit = async () => {
       emit('success', 'update')
       emit('update:modelValue', false)
     } else {
-      await departmentsStore.createDepartment({
-        name: formData.value.name,
-        description: formData.value.description || undefined,
-        departmentType: formData.value.departmentType,
-      })
-      // Department is automatically added to the store's local state
-      // No need to refetch since it's already in local state
-      emit('success', 'create')
-      emit('update:modelValue', false)
+      // If storeId prop is provided, temporarily switch store context for creation
+      const originalStoreId = storesStore.currentStoreId
+      let shouldRestoreStore = false
+      
+      if (props.storeId && props.storeId !== storesStore.currentStoreId) {
+        try {
+          await storesStore.setCurrentStore(props.storeId)
+          shouldRestoreStore = true
+        } catch (error) {
+          console.warn('Could not switch store context, using current store:', error)
+        }
+      }
+
+      try {
+        await departmentsStore.createDepartment({
+          name: formData.value.name,
+          description: formData.value.description || undefined,
+          departmentType: formData.value.departmentType,
+        })
+        // Department is automatically added to the store's local state
+        // No need to refetch since it's already in local state
+        emit('success', 'create')
+        emit('update:modelValue', false)
+      } finally {
+        // Restore original store context if we switched it
+        if (shouldRestoreStore && originalStoreId) {
+          try {
+            await storesStore.setCurrentStore(originalStoreId)
+          } catch (error) {
+            console.warn('Could not restore store context:', error)
+          }
+        }
+      }
     }
   } catch (error: any) {
     errorMessage.value = error.message || 'Failed to save department. Please try again.'

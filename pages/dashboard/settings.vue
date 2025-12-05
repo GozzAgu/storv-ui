@@ -20,13 +20,14 @@
         <div class="flex items-center justify-between mb-6">
           <div>
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Stores Management</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your stores and switch between them</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create, edit, and delete your stores</p>
           </div>
-          <NuxtLink to="/dashboard/stores">
-            <Button variant="secondary">
-              Manage Stores
-            </Button>
-          </NuxtLink>
+          <Button @click="showCreateModal = true" v-if="!isStaff">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Create Store
+          </Button>
         </div>
 
         <div v-if="storesLoading" class="text-center py-8">
@@ -45,71 +46,83 @@
           <h3 class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-50">No stores yet</h3>
           <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">Get started by creating your first store.</p>
           <div class="mt-4">
-            <NuxtLink to="/dashboard/stores">
-              <Button size="sm">Create Store</Button>
-            </NuxtLink>
+            <Button size="sm" @click="showCreateModal = true">Create Store</Button>
           </div>
         </div>
 
-        <div v-else class="space-y-3">
-          <!-- Current Store -->
-          <div v-if="currentStore" class="p-4 bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 dark:border-primary-600 rounded-xl">
-            <div class="flex items-center justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                  <span class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Current Store</span>
-                  <span class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">
-                    Active
-                  </span>
-                </div>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-50">{{ currentStore.name }}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" v-if="currentStore.description">
-                  {{ currentStore.description }}
-                </p>
-                <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span v-if="currentStore.address">
-                    <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {{ currentStore.address }}
-                  </span>
-                  <span v-if="currentStore.phone">
-                    <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    {{ currentStore.phone }}
-                  </span>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card
+            v-for="store in stores"
+            :key="store.id"
+            class="hover:shadow-lg transition-shadow overflow-hidden"
+            :class="{ 'ring-2 ring-primary-500': currentStore?.id === store.id }"
+          >
+            <div class="flex flex-col h-full">
+              <div class="flex-1 mb-4">
+                <div class="flex items-start justify-between mb-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 class="text-base font-semibold text-gray-900 dark:text-gray-50 truncate">{{ store.name }}</h3>
+                      <span
+                        v-if="currentStore?.id === store.id"
+                        class="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full whitespace-nowrap"
+                      >
+                        Current
+                      </span>
+                      <span
+                        v-else-if="!store.isActive"
+                        class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap"
+                      >
+                        Inactive
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words" v-if="store.description">
+                      {{ store.description }}
+                    </p>
+                    <div class="mt-2 space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                      <p v-if="store.address" class="break-words">
+                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        </svg>
+                        {{ store.address }}
+                      </p>
+                      <p v-if="store.phone" class="break-words">
+                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        {{ store.phone }}
+                      </p>
+                      <p v-if="store.email" class="break-words">
+                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        {{ store.email }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Other Stores -->
-          <div v-if="otherStores.length > 0" class="space-y-2">
-            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Other Stores</p>
-            <div
-              v-for="store in otherStores"
-              :key="store.id"
-              @click="switchStore(store.id)"
-              class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex-1">
-                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-50">{{ store.name }}</h3>
-                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1" v-if="store.description">
-                    {{ store.description }}
-                  </p>
-                </div>
-                <span
-                  v-if="!store.isActive"
-                  class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full"
+              <div class="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  @click="editStore(store)"
+                  class="flex-1"
                 >
-                  Inactive
-                </span>
+                  Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  @click="confirmDelete(store)"
+                  :disabled="currentStore?.id === store.id"
+                  class="flex-1"
+                >
+                  Delete
+                </Button>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </Card>
 
@@ -605,6 +618,118 @@
         </div>
       </Card>
     </div>
+
+    <!-- Create/Edit Store Modal -->
+    <Modal
+      v-model="showCreateModal"
+      :title="editingStore ? 'Edit Store' : 'Create Store'"
+      size="lg"
+    >
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Store Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="storeForm.name"
+            type="text"
+            required
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="My Store"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Description
+          </label>
+          <textarea
+            v-model="storeForm.description"
+            rows="3"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="Store description..."
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Address
+          </label>
+          <input
+            v-model="storeForm.address"
+            type="text"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            placeholder="123 Main St, City, State ZIP"
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Phone
+            </label>
+            <input
+              v-model="storeForm.phone"
+              type="tel"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              placeholder="+1234567890"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Email
+            </label>
+            <input
+              v-model="storeForm.email"
+              type="email"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              placeholder="store@example.com"
+            />
+          </div>
+        </div>
+
+        <div v-if="editingStore">
+          <label class="flex items-center gap-2">
+            <input
+              v-model="storeForm.isActive"
+              type="checkbox"
+              class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+            />
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+          </label>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button variant="secondary" @click="closeStoreModal">Cancel</Button>
+        <Button @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore">
+          {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
+        </Button>
+      </template>
+    </Modal>
+
+    <!-- Delete Store Confirmation Modal -->
+    <Modal
+      v-model="showDeleteModal"
+      title="Delete Store"
+      size="md"
+    >
+      <div class="space-y-4">
+        <p class="text-gray-700 dark:text-gray-300">
+          Are you sure you want to delete <strong>{{ storeToDelete?.name }}</strong>? This action cannot be undone.
+        </p>
+        <p class="text-sm text-red-600 dark:text-red-400">
+          Warning: All data associated with this store (departments, staff, inventory, receipts) will need to be handled separately.
+        </p>
+      </div>
+
+      <template #footer>
+        <Button variant="secondary" @click="showDeleteModal = false">Cancel</Button>
+        <Button variant="danger" @click="handleStoreDelete" :disabled="isDeletingStore">
+          {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
+        </Button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -623,6 +748,8 @@ import { useStoresStore } from '~/stores/stores'
 import { useToast } from '~/composables/useToast'
 import Button from '~/components/ui/Button.vue'
 import Card from '~/components/ui/Card.vue'
+import Modal from '~/components/ui/Modal.vue'
+import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 
 definePageMeta({
@@ -665,10 +792,47 @@ const storesLoading = computed(() => storesStore.loading)
 const storesError = computed(() => storesStore.error)
 const stores = computed(() => storesStore.stores)
 const currentStore = computed(() => storesStore.currentStore)
+const isStaff = computed(() => userStore.userData?.role === 'staff')
 const otherStores = computed(() => {
   const allStores = stores.value
   const current = currentStore.value
   return current ? allStores.filter(s => s.id !== current.id) : allStores
+})
+
+// Store management state
+const showCreateModal = ref(false)
+const showDeleteModal = ref(false)
+const editingStore = ref<Store | null>(null)
+const storeToDelete = ref<Store | null>(null)
+const isSubmittingStore = ref(false)
+const isDeletingStore = ref(false)
+
+const storeForm = ref({
+  name: '',
+  description: '',
+  address: '',
+  phone: '',
+  email: '',
+  isActive: true,
+})
+
+// Inventory settings
+const inventorySettings = reactive({
+  lowStockThreshold: 10,
+  autoReorder: false,
+  defaultCategory: 'general',
+})
+
+// Receipt settings
+const receiptSettings = reactive({
+  prefix: 'REC-',
+  nextNumber: 1001,
+  autoPrint: false,
+})
+
+// Payment settings
+const paymentSettings = reactive({
+  paymentMethods: ['cash', 'card'],
 })
 
 const switchStore = async (storeId: string) => {
@@ -678,6 +842,76 @@ const switchStore = async (storeId: string) => {
     toast.success('Store switched successfully')
   } catch (err: any) {
     toast.error(err.message || 'Failed to switch store')
+  }
+}
+
+// Store management functions
+const closeStoreModal = () => {
+  showCreateModal.value = false
+  editingStore.value = null
+  storeForm.value = {
+    name: '',
+    description: '',
+    address: '',
+    phone: '',
+    email: '',
+    isActive: true,
+  }
+}
+
+const editStore = (store: Store) => {
+  editingStore.value = store
+  storeForm.value = {
+    name: store.name,
+    description: store.description || '',
+    address: store.address || '',
+    phone: store.phone || '',
+    email: store.email || '',
+    isActive: store.isActive,
+  }
+  showCreateModal.value = true
+}
+
+const handleStoreSubmit = async () => {
+  if (!storeForm.value.name) return
+
+  isSubmittingStore.value = true
+  try {
+    if (editingStore.value) {
+      await storesStore.updateStore(editingStore.value.id, storeForm.value)
+      toast.success('Store updated successfully')
+    } else {
+      await storesStore.createStore(storeForm.value)
+      toast.success('Store created successfully')
+    }
+    closeStoreModal()
+    await storesStore.fetchStores()
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to save store')
+  } finally {
+    isSubmittingStore.value = false
+  }
+}
+
+const confirmDelete = (store: Store) => {
+  storeToDelete.value = store
+  showDeleteModal.value = true
+}
+
+const handleStoreDelete = async () => {
+  if (!storeToDelete.value) return
+
+  isDeletingStore.value = true
+  try {
+    await storesStore.deleteStore(storeToDelete.value.id)
+    toast.success('Store deleted successfully')
+    showDeleteModal.value = false
+    storeToDelete.value = null
+    await storesStore.fetchStores()
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to delete store')
+  } finally {
+    isDeletingStore.value = false
   }
 }
 
@@ -787,26 +1021,6 @@ onMounted(async () => {
     isLoadingStoreInfo.value = false
   }
 })
-
-// Inventory settings
-const inventorySettings = reactive({
-  lowStockThreshold: 10,
-  autoReorder: false,
-  defaultCategory: 'general',
-})
-
-// Receipt settings
-const receiptSettings = reactive({
-  prefix: 'REC-',
-  nextNumber: 1001,
-  autoPrint: false,
-})
-
-// Payment settings
-const paymentSettings = reactive({
-  paymentMethods: ['cash', 'card'],
-})
-
 
 // Functions
 const enableEditing = (section: string) => {

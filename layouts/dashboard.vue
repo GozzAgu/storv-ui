@@ -162,100 +162,10 @@
               </div>
             </div>
             
-            <!-- Special handling for Departments - expandable with departments list -->
-            <div v-else-if="item.name === 'Departments' && !sidebarCollapsed" class="space-y-1">
-              <div
-                :class="[
-                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-4',
-                  isActive(item.href)
-                    ? 'bg-primary-50 dark:bg-primary-900/20'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                ]"
-              >
-                <NuxtLink
-                  :to="item.href"
-                  class="flex items-center flex-1"
-                >
-                  <!-- Active indicator -->
-                  <div 
-                    v-if="isActive(item.href)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
-                  ></div>
-                  
-                  <component 
-                    :is="item.icon" 
-                    :class="[
-                      'relative z-10 transition-colors w-6 h-6 mr-4',
-                      isActive(item.href)
-                        ? 'text-primary-600 dark:text-primary-400' 
-                        : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
-                    ]"
-                  />
-                  <span 
-                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold transition-colors"
-                    :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
-                  >
-                    {{ item.name }}
-                  </span>
-                </NuxtLink>
-                <button
-                  @click.stop="departmentsExpanded = !departmentsExpanded"
-                  class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                  :class="[
-                    isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'
-                  ]"
-                >
-                  <ChevronDownIcon 
-                    :class="[
-                      'w-4 h-4 transition-transform duration-200',
-                      departmentsExpanded ? 'rotate-180' : ''
-                    ]"
-                  />
-                </button>
-              </div>
-              
-              <!-- Departments tree structure - matches Dribbble design -->
-              <div v-if="departmentsExpanded && departmentsList.length > 0" class="pl-9 pr-5 space-y-0.5 mt-1">
-                <div v-for="department in recentDepartments.slice(0, 5)" :key="department.id" class="relative">
-                  <NuxtLink
-                    :to="`/dashboard/departments/${department.id}`"
-                    :class="[
-                      'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
-                      route.params.id === department.id
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
-                    ]"
-                  >
-                    <!-- Active indicator bar -->
-                    <div 
-                      v-if="route.params.id === department.id"
-                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
-                    ></div>
-                    
-                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
-                      <BuildingOfficeIcon 
-                        :class="[
-                          'w-4 h-4 flex-shrink-0 transition-colors',
-                          route.params.id === department.id
-                            ? 'text-primary-600 dark:text-primary-400'
-                            : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
-                        ]"
-                      />
-                      <span class="truncate">{{ department.name }}</span>
-                    </div>
-                    <ArrowRightIcon 
-                      v-if="route.params.id === department.id"
-                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400"
-                    />
-                  </NuxtLink>
-                </div>
-              </div>
-            </div>
-            
             <!-- Regular navigation items (non-expandable) -->
-        <NuxtLink
+            <NuxtLink
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
-          :to="item.href"
+              :to="item.href"
               :class="[
                 'group relative flex items-center font-medium rounded-xl transition-all duration-200',
                 sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
@@ -305,6 +215,243 @@
               </div>
             </NuxtLink>
           </template>
+          
+          <!-- Stores Tree (for super admins) -->
+          <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="space-y-1">
+              <div class="px-5 mb-3">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stores</p>
+              </div>
+              
+              <!-- Store items -->
+              <div v-for="store in storesList" :key="store.id" class="space-y-0.5">
+                <!-- Store header -->
+                <div
+                  :class="[
+                    'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-3',
+                    route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                      ? 'bg-primary-50 dark:bg-primary-900/20'
+                      : currentStore?.id === store.id
+                        ? 'bg-primary-50/50 dark:bg-primary-900/10'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  ]"
+                >
+                  <NuxtLink
+                    :to="`/dashboard/stores/${store.id}/departments`"
+                    class="flex items-center flex-1 min-w-0"
+                  >
+                    <svg 
+                      class="w-5 h-5 mr-3 flex-shrink-0"
+                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                        ? 'text-primary-600 dark:text-primary-400'
+                        : currentStore?.id === store.id
+                          ? 'text-primary-600/80 dark:text-primary-400/80'
+                          : 'text-gray-500 dark:text-gray-400'"
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span 
+                      class="relative z-10 whitespace-nowrap text-sm font-semibold truncate transition-colors"
+                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                        ? 'text-primary-700 dark:text-primary-300'
+                        : currentStore?.id === store.id
+                          ? 'text-primary-700/80 dark:text-primary-300/80'
+                          : 'text-gray-700 dark:text-gray-300'"
+                    >
+                      {{ store.name }}
+                    </span>
+                  </NuxtLink>
+                  <button
+                    @click.stop="toggleStoreExpanded(store.id)"
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0"
+                    :class="[
+                      route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                        ? 'text-primary-600 dark:text-primary-400'
+                        : currentStore?.id === store.id
+                          ? 'text-primary-600/80 dark:text-primary-400/80'
+                          : 'text-gray-400 dark:text-gray-500'
+                    ]"
+                  >
+                    <ChevronDownIcon 
+                      :class="[
+                        'w-4 h-4 transition-transform duration-200',
+                        expandedStores[store.id] ? 'rotate-180' : ''
+                      ]"
+                    />
+                  </button>
+                </div>
+                
+                <!-- Departments under store -->
+                <div v-if="expandedStores[store.id]" class="pl-9 pr-5 space-y-0.5 mt-1">
+                  <div v-for="department in getDepartmentsForStore(store.id)" :key="department.id" class="space-y-0.5">
+                    <!-- Department header -->
+                    <div
+                      :class="[
+                        'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                        route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                      ]"
+                    >
+                      <NuxtLink
+                        :to="`/dashboard/departments/${department.id}`"
+                        class="flex items-center gap-2.5 flex-1 min-w-0"
+                      >
+                        <BuildingOfficeIcon 
+                          :class="[
+                            'w-4 h-4 flex-shrink-0 transition-colors',
+                            route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                              ? 'text-primary-600 dark:text-primary-400'
+                              : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                          ]"
+                        />
+                        <span class="truncate">{{ department.name }}</span>
+                      </NuxtLink>
+                      <button
+                        @click.stop="toggleDepartmentExpanded(department.id)"
+                        class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0"
+                        :class="[
+                          route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                            ? 'text-primary-600 dark:text-primary-400'
+                            : 'text-gray-400 dark:text-gray-500'
+                        ]"
+                      >
+                        <ChevronDownIcon 
+                          :class="[
+                            'w-3 h-3 transition-transform duration-200',
+                            expandedDepartments[department.id] ? 'rotate-180' : ''
+                          ]"
+                        />
+                      </button>
+                    </div>
+                    
+                    <!-- Staff under department -->
+                    <div v-if="expandedDepartments[department.id]" class="pl-7 pr-5 space-y-0.5 mt-1">
+                      <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
+                        <NuxtLink
+                          :to="`/dashboard/departments/${department.id}`"
+                          class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                        >
+                          <UsersIcon 
+                            class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                          />
+                          <span class="truncate">{{ staff.firstName }} {{ staff.lastName }}</span>
+                        </NuxtLink>
+                      </div>
+                      <div v-if="getStaffForDepartment(department.id).length === 0" class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 italic">
+                        No staff
+                      </div>
+                    </div>
+                  </div>
+                  <NuxtLink
+                    v-if="getDepartmentsForStore(store.id).length === 0"
+                    :to="`/dashboard/stores/${store.id}/departments`"
+                    class="block px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  >
+                    <span class="italic">No departments</span>
+                    <span class="ml-2 text-primary-600 dark:text-primary-400 hover:underline">View Departments →</span>
+                  </NuxtLink>
+                </div>
+              </div>
+              
+              <!-- No stores message -->
+              <div v-if="storesList.length === 0" class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">
+                No stores available
+              </div>
+            </div>
+          </div>
+          
+          <!-- Staff view (for staff members - show only their store/department) -->
+          <div v-if="userStore.userData?.role === 'staff' && !sidebarCollapsed" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="space-y-1">
+              <div class="px-5 mb-3">
+                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">My Store</p>
+              </div>
+              
+              <!-- Show current store and department for staff -->
+              <div v-if="currentStore" class="space-y-0.5">
+                <div class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {{ currentStore.name }}
+                </div>
+                
+                <!-- Show departments in their store -->
+                <div v-for="department in getDepartmentsForStore(currentStore.id)" :key="department.id" class="pl-5 pr-5 space-y-0.5">
+                  <div class="space-y-0.5">
+                    <!-- Department header -->
+                    <div
+                      :class="[
+                        'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                        route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                      ]"
+                    >
+                      <NuxtLink
+                        :to="`/dashboard/departments/${department.id}`"
+                        class="flex items-center gap-2.5 flex-1 min-w-0"
+                      >
+                        <BuildingOfficeIcon 
+                          :class="[
+                            'w-4 h-4 flex-shrink-0 transition-colors',
+                            route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                              ? 'text-primary-600 dark:text-primary-400'
+                              : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                          ]"
+                        />
+                        <span class="truncate">{{ department.name }}</span>
+                      </NuxtLink>
+                      <button
+                        @click.stop="toggleDepartmentExpanded(department.id)"
+                        class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0"
+                        :class="[
+                          route.params.id === department.id && route.path.startsWith('/dashboard/departments')
+                            ? 'text-primary-600 dark:text-primary-400'
+                            : 'text-gray-400 dark:text-gray-500'
+                        ]"
+                      >
+                        <ChevronDownIcon 
+                          :class="[
+                            'w-3 h-3 transition-transform duration-200',
+                            expandedDepartments[department.id] ? 'rotate-180' : ''
+                          ]"
+                        />
+                      </button>
+                    </div>
+                    
+                    <!-- Staff under department -->
+                    <div v-if="expandedDepartments[department.id]" class="pl-7 pr-5 space-y-0.5 mt-1">
+                      <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
+                        <NuxtLink
+                          :to="`/dashboard/departments/${department.id}`"
+                          class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                        >
+                          <UsersIcon 
+                            class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                          />
+                          <span class="truncate">{{ staff.firstName }} {{ staff.lastName }}</span>
+                        </NuxtLink>
+                      </div>
+                      <div v-if="getStaffForDepartment(department.id).length === 0" class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 italic">
+                        No staff
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <NuxtLink
+                  v-if="getDepartmentsForStore(currentStore.id).length === 0"
+                  :to="`/dashboard/stores/${currentStore.id}/departments`"
+                  class="block px-5 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group"
+                >
+                  <span class="italic">No departments</span>
+                  <span class="ml-2 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">View Departments →</span>
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
       
@@ -481,7 +628,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -513,6 +660,8 @@ import { useUserStore } from '~/stores/user'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useInventoryStore } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
+import { useStoresStore } from '~/stores/stores'
+import { useStaffStore } from '~/stores/staff'
 
 const { actualTheme } = useTheme()
 const authStore = useAuthStore()
@@ -520,6 +669,8 @@ const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
+const storesStore = useStoresStore()
+const staffStore = useStaffStore()
 
 // Fetch notifications on mount
 onMounted(() => {
@@ -611,7 +762,6 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon },
-  { name: 'Departments', href: '/dashboard/departments', icon: BuildingOfficeIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
 ]
@@ -668,16 +818,103 @@ const isInventoryRoute = computed(() => {
 // Expanded state for Inventory folders - auto-expand when on inventory route
 const inventoryExpanded = ref(true)
 
-// Expanded state for Departments - auto-expand when on departments route
-const departmentsExpanded = ref(true)
+// Expanded state for Stores - manage which stores are expanded
+// Use reactive object instead of Set for better Vue reactivity
+const expandedStores = reactive<Record<string, boolean>>({})
+const expandedDepartments = reactive<Record<string, boolean>>({})
+
+// Load stores and departments when user data is available
+watch([() => authStore.currentUser, () => userStore.userData], async ([user, userData]) => {
+  if (!user) return
+  
+  // Fetch user data if not loaded
+  if (!userData && user) {
+    await userStore.fetchUserData(user.uid)
+  }
+  
+  const finalUserData = userStore.userData
+  
+  if (finalUserData?.role === 'superAdmin') {
+    await storesStore.fetchStores()
+    await storesStore.initializeCurrentStore()
+    await departmentsStore.fetchDepartments()
+    // Auto-expand current store
+    if (storesStore.currentStoreId) {
+      expandedStores[storesStore.currentStoreId] = true
+    }
+  } else if (finalUserData?.role === 'staff') {
+    await storesStore.initializeCurrentStore()
+    await departmentsStore.fetchDepartments()
+    // Auto-expand current store for staff
+    if (storesStore.currentStoreId) {
+      expandedStores[storesStore.currentStoreId] = true
+    }
+  }
+}, { immediate: true })
+
+// Also load on mount
+onMounted(async () => {
+  if (authStore.currentUser) {
+    if (!userStore.userData) {
+      await userStore.fetchUserData(authStore.currentUser.uid)
+    }
+    
+    if (userStore.isSuperAdmin) {
+      await storesStore.fetchStores()
+      await storesStore.initializeCurrentStore()
+      await departmentsStore.fetchDepartments()
+      if (storesStore.currentStoreId) {
+        expandedStores[storesStore.currentStoreId] = true
+      }
+    } else if (userStore.userData?.role === 'staff') {
+      await storesStore.initializeCurrentStore()
+      await departmentsStore.fetchDepartments()
+      if (storesStore.currentStoreId) {
+        expandedStores[storesStore.currentStoreId] = true
+      }
+    }
+  }
+})
+
+// Watch for store changes and auto-expand current store
+watch(() => storesStore.currentStoreId, (storeId) => {
+  if (storeId) {
+    expandedStores[storeId] = true
+  }
+}, { immediate: true })
+
+// Auto-expand departments when navigating to departments route
+watch(() => route.path, (path) => {
+  if (path.startsWith('/dashboard/departments')) {
+    // Extract department ID from route if available
+    const deptId = route.params.id as string
+    if (deptId && deptId !== 'index') {
+      expandedDepartments[deptId] = true
+      // Find which store this department belongs to and expand it
+      const dept = departmentsStore.departments.find(d => d.id === deptId)
+      if (dept?.storeId) {
+        expandedStores[dept.storeId] = true
+      }
+    }
+  }
+  
+  // Auto-expand store when navigating to store departments page
+  if (path.startsWith('/dashboard/stores/') && path.includes('/departments')) {
+    const storeId = route.params.storeId as string
+    if (storeId) {
+      expandedStores[storeId] = true
+      // Also fetch departments for this store if not already loaded
+      if (authStore.currentUser && departmentsStore.departments.length === 0) {
+        departmentsStore.fetchDepartments().catch(err => console.error('Error fetching departments:', err))
+      }
+    }
+  }
+}, { immediate: true })
 
 // Auto-expand folders when navigating to inventory route
 watch(() => route.path, (path) => {
   if (path.startsWith('/dashboard/inventory')) {
     inventoryExpanded.value = true
-  }
-  if (path.startsWith('/dashboard/departments')) {
-    departmentsExpanded.value = true
   }
 }, { immediate: true })
 
@@ -694,7 +931,54 @@ const recentFolders = computed(() => {
   })
 })
 
-// Departments navigation
+// Current store
+const currentStore = computed(() => storesStore.currentStore)
+
+// Stores list - show current store first, then others
+const storesList = computed(() => {
+  const allStores = storesStore.stores
+  const current = currentStore.value
+  
+  if (!current) return allStores
+  
+  // Sort: current store first, then others
+  const otherStores = allStores.filter(s => s.id !== current.id)
+  return [current, ...otherStores]
+})
+
+// Get departments for a specific store
+const getDepartmentsForStore = (storeId: string) => {
+  return departmentsStore.departments.filter(dept => dept.storeId === storeId)
+}
+
+// Get staff for a specific department
+const getStaffForDepartment = (departmentId: string) => {
+  return staffStore.staff.filter(s => s.departmentId === departmentId)
+}
+
+// Toggle store expansion
+const toggleStoreExpanded = (storeId: string) => {
+  expandedStores[storeId] = !expandedStores[storeId]
+  // Fetch departments for this store when expanding
+  if (expandedStores[storeId] && authStore.currentUser) {
+    departmentsStore.fetchDepartments().catch(err => console.error('Error fetching departments:', err))
+  }
+}
+
+// Toggle department expansion
+const toggleDepartmentExpanded = async (departmentId: string) => {
+  expandedDepartments[departmentId] = !expandedDepartments[departmentId]
+  // Fetch staff for this department when expanding
+  if (expandedDepartments[departmentId] && authStore.currentUser) {
+    try {
+      await staffStore.fetchStaffByDepartment(departmentId)
+    } catch (err) {
+      console.error('Error fetching staff:', err)
+    }
+  }
+}
+
+// Departments navigation (kept for compatibility)
 const isDepartmentsRoute = computed(() => {
   return route.path.startsWith('/dashboard/departments')
 })
@@ -702,14 +986,6 @@ const isDepartmentsRoute = computed(() => {
 const departmentsList = computed(() => {
   if (!departmentsStore.departments) return []
   return departmentsStore.departments
-})
-
-const recentDepartments = computed(() => {
-  return [...departmentsList.value].sort((a, b) => {
-    const dateA = a.updatedAt instanceof Date ? a.updatedAt : (a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt))
-    const dateB = b.updatedAt instanceof Date ? b.updatedAt : (b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt))
-    return dateB.getTime() - dateA.getTime()
-  })
 })
 
 // Fetch inventory folders when on inventory routes
