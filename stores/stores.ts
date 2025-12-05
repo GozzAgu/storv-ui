@@ -1,0 +1,464 @@
+import { defineStore } from 'pinia'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { useFirestore } from '~/composables/useFirestore'
+import { useAuthStore } from './auth'
+import type { Store, StoreWithStats } from '~/composables/useStores'
+
+export const useStoresStore = defineStore('stores', {
+  state: () => ({
+    stores: [] as Store[],
+    currentStoreId: null as string | null,
+    loading: false,
+    error: null as string | null,
+  }),
+
+  getters: {
+    totalStores: (state) => state.stores.length,
+    activeStores: (state) => state.stores.filter(s => s.isActive),
+    currentStore: (state) => {
+      if (!state.currentStoreId) return null
+      return state.stores.find(s => s.id === state.currentStoreId) || null
+    },
+    getStoreById: (state) => (id: string) => state.stores.find(s => s.id === id),
+  },
+
+  actions: {
+    // Initialize current store from localStorage or set first store
+    async initializeCurrentStore() {
+      if (import.meta.server) return
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return
+
+      // Check if user is super admin
+      const { useUserStore } = await import('./user')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      if (userStore.userData?.role !== 'superAdmin') {
+        // For staff, get their store from staff document
+        const { useStaffStore } = await import('./staff')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.storeId) {
+          this.currentStoreId = staffMember.storeId
+          if (import.meta.client) {
+            localStorage.setItem('currentStoreId', staffMember.storeId)
+          }
+          // Refresh data for staff's store
+          this.refreshStoreData().catch(err => console.warn('Failed to refresh store data for staff:', err))
+        }
+        return
+      }
+
+      // Fetch stores first
+      if (this.stores.length === 0) {
+        await this.fetchStores()
+      }
+
+      // Try to get from localStorage first
+      let storeWasSet = false
+      if (import.meta.client) {
+        const savedStoreId = localStorage.getItem('currentStoreId')
+        if (savedStoreId && this.getStoreById(savedStoreId)) {
+          this.currentStoreId = savedStoreId
+          storeWasSet = true
+        }
+      }
+
+      // If no saved store or saved store doesn't exist, use first active store
+      if (!storeWasSet) {
+        const firstActiveStore = this.activeStores[0]
+        if (firstActiveStore) {
+          this.currentStoreId = firstActiveStore.id
+          if (import.meta.client) {
+            localStorage.setItem('currentStoreId', firstActiveStore.id)
+          }
+          storeWasSet = true
+        }
+      }
+
+      // Refresh data if store was set
+      if (storeWasSet && this.currentStoreId) {
+        // Don't await - let it refresh in background to avoid blocking initialization
+        this.refreshStoreData().catch(err => console.warn('Failed to refresh store data on init:', err))
+      }
+    },
+
+    // Set current store and refresh all data
+    async setCurrentStore(storeId: string | null) {
+      if (storeId && !this.getStoreById(storeId)) {
+        throw new Error('Store not found')
+      }
+      this.currentStoreId = storeId
+      if (import.meta.client) {
+        if (storeId) {
+          localStorage.setItem('currentStoreId', storeId)
+        } else {
+          localStorage.removeItem('currentStoreId')
+        }
+      }
+      
+      // Refresh all data for the new store
+      await this.refreshStoreData()
+    },
+
+    // Refresh all data for the current store
+    async refreshStoreData() {
+      if (import.meta.server) return
+      if (!this.currentStoreId) return
+
+      console.log('[StoresStore] Refreshing all data for store:', this.currentStoreId)
+
+      try {
+        // Import stores dynamically to avoid circular dependencies
+        const [
+          { useDepartmentsStore },
+          { useStaffStore },
+          { useInventoryStore },
+          { useReceiptsStore },
+          { useCustomersStore },
+        ] = await Promise.all([
+          import('./departments'),
+          import('./staff'),
+          import('./inventory'),
+          import('./receipts'),
+          import('./customers'),
+        ])
+
+        const departmentsStore = useDepartmentsStore()
+        const staffStore = useStaffStore()
+        const inventoryStore = useInventoryStore()
+        const receiptsStore = useReceiptsStore()
+        const customersStore = useCustomersStore()
+
+        // Clear existing data first to avoid showing stale data
+        departmentsStore.departments = []
+        staffStore.staff = []
+        inventoryStore.folders = []
+        receiptsStore.receipts = []
+        customersStore.customers = []
+
+        // Fetch all data in parallel for the new store
+        await Promise.all([
+          departmentsStore.fetchDepartments().catch(err => console.warn('[StoresStore] Failed to fetch departments:', err)),
+          staffStore.fetchStaff().catch(err => console.warn('[StoresStore] Failed to fetch staff:', err)),
+          inventoryStore.fetchFolders().catch(err => console.warn('[StoresStore] Failed to fetch inventory folders:', err)),
+          receiptsStore.fetchReceipts().catch(err => console.warn('[StoresStore] Failed to fetch receipts:', err)),
+          customersStore.fetchCustomers().catch(err => console.warn('[StoresStore] Failed to fetch customers:', err)),
+        ])
+
+        console.log('[StoresStore] Successfully refreshed all data for store:', this.currentStoreId)
+      } catch (error) {
+        console.error('[StoresStore] Error refreshing store data:', error)
+      }
+    },
+
+    // Fetch all stores for current super admin
+    async fetchStores() {
+      this.loading = true
+      this.error = null
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        this.error = 'Firestore not initialized'
+        this.loading = false
+        return
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        this.error = 'User must be authenticated'
+        this.loading = false
+        return
+      }
+
+      // Check if user is staff or super admin
+      const { useUserStore } = await import('./user')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let ownerId = authStore.currentUser.uid
+
+      // If staff, get their store
+      if (userStore.userData?.role === 'staff') {
+        const { useStaffStore } = await import('./staff')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.storeId) {
+          // Staff can only see their own store
+          try {
+            const storeRef = doc(db, 'stores', staffMember.storeId)
+            const storeSnap = await getDoc(storeRef)
+            if (storeSnap.exists()) {
+              const data = storeSnap.data()
+              this.stores = [{
+                id: storeSnap.id,
+                ...data,
+              } as Store]
+            } else {
+              this.stores = []
+            }
+          } catch (error: any) {
+            console.error('Error fetching store for staff:', error)
+            this.error = error.message || 'Failed to fetch store'
+          } finally {
+            this.loading = false
+          }
+          return
+        } else {
+          this.stores = []
+          this.loading = false
+          return
+        }
+      }
+
+      try {
+        const storesRef = collection(db, 'stores')
+        let querySnapshot
+
+        try {
+          const q = query(
+            storesRef,
+            where('ownerId', '==', ownerId),
+            orderBy('createdAt', 'desc')
+          )
+          querySnapshot = await getDocs(q)
+        } catch (orderByError: any) {
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            const q = query(storesRef, where('ownerId', '==', ownerId))
+            querySnapshot = await getDocs(q)
+          } else {
+            throw orderByError
+          }
+        }
+
+        const stores: Store[] = []
+        querySnapshot.forEach((docSnapshot) => {
+          const data = docSnapshot.data()
+          stores.push({
+            id: docSnapshot.id,
+            ...data,
+          } as Store)
+        })
+
+        this.stores = stores
+
+        // Initialize current store if not set
+        if (!this.currentStoreId && stores.length > 0) {
+          await this.initializeCurrentStore()
+        }
+      } catch (error: any) {
+        console.error('Error fetching stores:', error)
+        this.error = error.message || 'Failed to fetch stores'
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Fetch a single store
+    async fetchStore(storeId: string): Promise<Store | null> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      try {
+        const storeRef = doc(db, 'stores', storeId)
+        const storeSnap = await getDoc(storeRef)
+
+        if (!storeSnap.exists()) {
+          return null
+        }
+
+        const data = storeSnap.data()
+        const store = {
+          id: storeSnap.id,
+          ...data,
+        } as Store
+
+        // Verify ownership or staff access
+        const { useUserStore } = await import('./user')
+        const userStore = useUserStore()
+        if (!userStore.userData) {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        }
+
+        if (userStore.userData?.role === 'superAdmin') {
+          if (store.ownerId !== authStore.currentUser.uid) {
+            throw new Error('Access denied')
+          }
+        } else if (userStore.userData?.role === 'staff') {
+          const { useStaffStore } = await import('./staff')
+          const staffStore = useStaffStore()
+          const staffMember = await staffStore.fetchCurrentStaffMember()
+          if (staffMember?.storeId !== storeId) {
+            throw new Error('Access denied')
+          }
+        } else {
+          throw new Error('Access denied')
+        }
+
+        // Update in local state
+        const index = this.stores.findIndex(s => s.id === storeId)
+        if (index > -1) {
+          this.stores[index] = store
+        } else {
+          this.stores.push(store)
+        }
+
+        return store
+      } catch (error: any) {
+        console.error('Error fetching store:', error)
+        throw new Error(error.message || 'Failed to fetch store')
+      }
+    },
+
+    // Create a new store
+    async createStore(storeData: Omit<Store, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'isActive'> & { isActive?: boolean }) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to create stores')
+      }
+
+      // Verify user is super admin
+      const { useUserStore } = await import('./user')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      if (userStore.userData?.role !== 'superAdmin') {
+        throw new Error('Only super admins can create stores')
+      }
+
+      try {
+        const storesRef = collection(db, 'stores')
+        const newStoreRef = doc(storesRef)
+
+        const newStore: Omit<Store, 'id'> = {
+          ...storeData,
+          ownerId: authStore.currentUser.uid,
+          isActive: storeData.isActive ?? true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }
+
+        await setDoc(newStoreRef, newStore)
+
+        const storeWithId = {
+          id: newStoreRef.id,
+          ...newStore,
+        } as Store
+
+        this.stores.unshift(storeWithId)
+
+        // If this is the first store, set it as current
+        if (this.stores.length === 1) {
+          this.setCurrentStore(newStoreRef.id)
+        }
+
+        return newStoreRef.id
+      } catch (error: any) {
+        console.error('Error creating store:', error)
+        throw new Error(error.message || 'Failed to create store')
+      }
+    },
+
+    // Update a store
+    async updateStore(storeId: string, updates: Partial<Omit<Store, 'id' | 'ownerId' | 'createdAt'>>) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      // Verify ownership
+      const store = this.getStoreById(storeId) || await this.fetchStore(storeId)
+      if (!store || store.ownerId !== authStore.currentUser.uid) {
+        throw new Error('Access denied')
+      }
+
+      try {
+        const storeRef = doc(db, 'stores', storeId)
+        await updateDoc(storeRef, {
+          ...updates,
+          updatedAt: serverTimestamp(),
+        })
+
+        // Update in local state
+        const index = this.stores.findIndex(s => s.id === storeId)
+        if (index > -1) {
+          this.stores[index] = {
+            ...this.stores[index],
+            ...updates,
+          } as Store
+        }
+      } catch (error: any) {
+        console.error('Error updating store:', error)
+        throw new Error(error.message || 'Failed to update store')
+      }
+    },
+
+    // Delete a store
+    async deleteStore(storeId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      // Verify ownership
+      const store = this.getStoreById(storeId) || await this.fetchStore(storeId)
+      if (!store || store.ownerId !== authStore.currentUser.uid) {
+        throw new Error('Access denied')
+      }
+
+      // TODO: Check if store has any data (departments, staff, receipts, inventory)
+      // For now, we'll allow deletion but warn in UI
+
+      try {
+        const storeRef = doc(db, 'stores', storeId)
+        await deleteDoc(storeRef)
+
+        // Remove from local state
+        this.stores = this.stores.filter(s => s.id !== storeId)
+
+        // If this was the current store, switch to another one
+        if (this.currentStoreId === storeId) {
+          const nextStore = this.activeStores.find(s => s.id !== storeId) || this.activeStores[0]
+          if (nextStore) {
+            this.setCurrentStore(nextStore.id)
+          } else {
+            this.setCurrentStore(null)
+          }
+        }
+      } catch (error: any) {
+        console.error('Error deleting store:', error)
+        throw new Error(error.message || 'Failed to delete store')
+      }
+    },
+  },
+})

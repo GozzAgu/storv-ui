@@ -14,6 +14,7 @@ export interface Customer {
   totalOrders: number
   totalSpent: number
   receipts: string[] // Array of receipt IDs
+  storeId: string // Store this customer belongs to
   lastOrderDate: Date | any
   firstOrderDate: Date | any
   createdAt: Date | any

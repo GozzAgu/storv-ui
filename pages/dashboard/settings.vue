@@ -15,6 +15,104 @@
     </div>
 
     <div class="space-y-6">
+      <!-- Stores Management (for super admins) -->
+      <Card v-if="userStore.isSuperAdmin">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Stores Management</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your stores and switch between them</p>
+          </div>
+          <NuxtLink to="/dashboard/stores">
+            <Button variant="secondary">
+              Manage Stores
+            </Button>
+          </NuxtLink>
+        </div>
+
+        <div v-if="storesLoading" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+          <p class="text-gray-600 dark:text-gray-400 mt-3 text-sm">Loading stores...</p>
+        </div>
+
+        <div v-else-if="storesError" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p class="text-red-800 dark:text-red-200 text-sm">{{ storesError }}</p>
+        </div>
+
+        <div v-else-if="stores.length === 0" class="text-center py-8">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <h3 class="mt-4 text-sm font-medium text-gray-900 dark:text-gray-50">No stores yet</h3>
+          <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">Get started by creating your first store.</p>
+          <div class="mt-4">
+            <NuxtLink to="/dashboard/stores">
+              <Button size="sm">Create Store</Button>
+            </NuxtLink>
+          </div>
+        </div>
+
+        <div v-else class="space-y-3">
+          <!-- Current Store -->
+          <div v-if="currentStore" class="p-4 bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 dark:border-primary-600 rounded-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider">Current Store</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">
+                    Active
+                  </span>
+                </div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-50">{{ currentStore.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" v-if="currentStore.description">
+                  {{ currentStore.description }}
+                </p>
+                <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span v-if="currentStore.address">
+                    <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    {{ currentStore.address }}
+                  </span>
+                  <span v-if="currentStore.phone">
+                    <svg class="inline w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    {{ currentStore.phone }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Stores -->
+          <div v-if="otherStores.length > 0" class="space-y-2">
+            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Other Stores</p>
+            <div
+              v-for="store in otherStores"
+              :key="store.id"
+              @click="switchStore(store.id)"
+              class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-50">{{ store.name }}</h3>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1" v-if="store.description">
+                    {{ store.description }}
+                  </p>
+                </div>
+                <span
+                  v-if="!store.isActive"
+                  class="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full"
+                >
+                  Inactive
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <!-- Store Information -->
       <Card>
         <div class="flex items-center justify-between mb-6">
@@ -521,6 +619,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { useUserStore } from '~/stores/user'
+import { useStoresStore } from '~/stores/stores'
 import { useToast } from '~/composables/useToast'
 import Button from '~/components/ui/Button.vue'
 import Card from '~/components/ui/Card.vue'
@@ -553,12 +652,34 @@ const { currentUser } = useFirebaseAuth()
 const { getUserDocument, updateStoreDetails } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
+const storesStore = useStoresStore()
 const toast = useToast()
 
 // Check if user is super admin (only super admins can edit settings)
 const canEditSettings = computed(() => {
   return userStore.isSuperAdmin
 })
+
+// Stores management
+const storesLoading = computed(() => storesStore.loading)
+const storesError = computed(() => storesStore.error)
+const stores = computed(() => storesStore.stores)
+const currentStore = computed(() => storesStore.currentStore)
+const otherStores = computed(() => {
+  const allStores = stores.value
+  const current = currentStore.value
+  return current ? allStores.filter(s => s.id !== current.id) : allStores
+})
+
+const switchStore = async (storeId: string) => {
+  try {
+    toast.info('Switching store...')
+    await storesStore.setCurrentStore(storeId)
+    toast.success('Store switched successfully')
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to switch store')
+  }
+}
 
 // Helper function to get the correct user ID (super admin UID if staff)
 const getTargetUserId = async (): Promise<string | null> => {
@@ -611,6 +732,12 @@ onMounted(async () => {
       // Fetch current user data first to check permissions
       if (!userStore.userData) {
         await userStore.fetchUserData(currentUser.value.uid)
+      }
+
+      // Load stores if super admin
+      if (userStore.isSuperAdmin) {
+        await storesStore.fetchStores()
+        await storesStore.initializeCurrentStore()
       }
       
       const targetUserId = await getTargetUserId()

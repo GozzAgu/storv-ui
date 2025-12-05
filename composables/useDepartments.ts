@@ -10,6 +10,7 @@ export interface Department {
   manager?: string
   managerId?: string
   staffCount: number
+  storeId: string // Store this department belongs to
   createdAt: any
   updatedAt: any
   createdBy: string

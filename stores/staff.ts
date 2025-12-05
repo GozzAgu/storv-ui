@@ -6,6 +6,7 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
+import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 
@@ -49,15 +50,24 @@ export const useStaffStore = defineStore('staff', {
         return
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
+      }
+
       try {
         const staffRef = collection(db, 'staff')
         const userId = authStore.currentUser.uid
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get staff for this user
+          // Filter by storeId AND createdBy to only get staff for this store
           const q = query(
             staffRef,
+            where('storeId', '==', storeId),
             where('createdBy', '==', userId),
             orderBy('createdAt', 'desc')
           )
@@ -65,7 +75,11 @@ export const useStaffStore = defineStore('staff', {
         } catch (orderByError: any) {
           // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            const q = query(staffRef, where('createdBy', '==', userId))
+            const q = query(
+              staffRef,
+              where('storeId', '==', storeId),
+              where('createdBy', '==', userId)
+            )
             querySnapshot = await getDocs(q)
           } else {
             throw orderByError
@@ -75,8 +89,8 @@ export const useStaffStore = defineStore('staff', {
         const staff: Staff[] = []
         querySnapshot.forEach((docSnapshot) => {
           const data = docSnapshot.data()
-          // Double-check that the staff belongs to this user
-          if (data.createdBy === userId) {
+          // Double-check that the staff belongs to this store and user
+          if (data.createdBy === userId && data.storeId === storeId) {
             staff.push({
               id: docSnapshot.id,
               ...data,
@@ -132,6 +146,14 @@ export const useStaffStore = defineStore('staff', {
         return
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return []
+      }
+
       // Check if user is staff to determine which staff to show
       const userStore = useUserStore()
       
@@ -171,9 +193,10 @@ export const useStaffStore = defineStore('staff', {
         let querySnapshot
 
         try {
-          // Filter by departmentId AND createdBy to only get staff for this user (or super admin if staff)
+          // Filter by storeId, departmentId AND createdBy to only get staff for this store
           const q = query(
             staffRef,
+            where('storeId', '==', storeId),
             where('departmentId', '==', departmentId),
             where('createdBy', '==', userId),
             orderBy('createdAt', 'desc')
@@ -201,6 +224,7 @@ export const useStaffStore = defineStore('staff', {
             // Retry query without orderBy - this works but is less efficient
             const q = query(
               staffRef,
+              where('storeId', '==', storeId),
               where('departmentId', '==', departmentId),
               where('createdBy', '==', userId)
             )
@@ -213,8 +237,8 @@ export const useStaffStore = defineStore('staff', {
         const staff: Staff[] = []
         querySnapshot.forEach((docSnapshot) => {
           const data = docSnapshot.data()
-          // Double-check that the staff belongs to this user
-          if (data.createdBy === userId) {
+          // Double-check that the staff belongs to this store and user
+          if (data.createdBy === userId && data.storeId === storeId) {
             staff.push({
               id: docSnapshot.id,
               ...data,
@@ -511,8 +535,15 @@ export const useStaffStore = defineStore('staff', {
         const staffRef = collection(db, 'staff')
         const newStaffRef = doc(staffRef)
 
+        // Get current store ID for staff assignment
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected. Please select a store first.')
+        }
+
         const newStaff: Omit<Staff, 'id' | 'departmentName'> = {
           ...staffDataWithoutPassword,
+          storeId, // Assign staff to current store
           authUid: staffAuthUid, // CRITICAL: This must be set for staff to log in
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),

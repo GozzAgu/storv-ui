@@ -11,6 +11,7 @@ export interface Staff {
   phone?: string
   departmentId: string
   departmentName?: string
+  storeId: string // Store this staff member belongs to
   position: string
   role: 'manager' | 'staff' | 'intern'
   hireDate: string

@@ -3,6 +3,7 @@ import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
+import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import type { Department } from '~/composables/useDepartments'
 
 export { CORE_DEPARTMENTS } from '~/composables/useDepartments'
@@ -49,6 +50,14 @@ export const useDepartmentsStore = defineStore('departments', {
         return
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
+      }
+
       // Check if user is staff to determine which departments to show
       const userStore = useUserStore()
 
@@ -88,9 +97,10 @@ export const useDepartmentsStore = defineStore('departments', {
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get departments for this user
+          // Filter by storeId AND createdBy to only get departments for this store
           const q = query(
             departmentsRef,
+            where('storeId', '==', storeId),
             where('createdBy', '==', userId),
             orderBy('createdAt', 'desc')
           )
@@ -113,7 +123,11 @@ export const useDepartmentsStore = defineStore('departments', {
             }
             
             // Retry query without orderBy - this works but is less efficient
-            const q = query(departmentsRef, where('createdBy', '==', userId))
+            const q = query(
+              departmentsRef,
+              where('storeId', '==', storeId),
+              where('createdBy', '==', userId)
+            )
             querySnapshot = await getDocs(q)
           } else {
             throw orderByError
@@ -123,8 +137,8 @@ export const useDepartmentsStore = defineStore('departments', {
         const departments: Department[] = []
         querySnapshot.forEach((docSnapshot) => {
           const data = docSnapshot.data()
-          // Double-check that the department belongs to this user
-          if (data.createdBy === userId) {
+          // Double-check that the department belongs to this store and user
+          if (data.createdBy === userId && data.storeId === storeId) {
             departments.push({
               id: docSnapshot.id,
               ...data,
@@ -166,6 +180,12 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('User must be authenticated')
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
         const departmentRef = doc(db, 'departments', departmentId)
         const departmentSnap = await getDoc(departmentRef)
@@ -204,8 +224,8 @@ export const useDepartmentsStore = defineStore('departments', {
           }
         }
 
-        // Only return department if it belongs to this user (or their super admin)
-        if (data.createdBy !== userId) {
+        // Only return department if it belongs to this store and user
+        if (data.createdBy !== userId || data.storeId !== storeId) {
           throw new Error('Department not found or access denied')
         }
 
@@ -228,7 +248,7 @@ export const useDepartmentsStore = defineStore('departments', {
     },
 
     // Create a new department
-    async createDepartment(departmentData: Omit<Department, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'staffCount'>): Promise<string> {
+    async createDepartment(departmentData: Omit<Department, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'staffCount' | 'storeId'>): Promise<string> {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -239,12 +259,19 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('User must be authenticated to create departments')
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected. Please select a store first.')
+      }
+
       try {
         const departmentsRef = collection(db, 'departments')
         const newDepartmentRef = doc(departmentsRef)
 
         const newDepartment: Omit<Department, 'id'> = {
           ...departmentData,
+          storeId,
           staffCount: 0,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -258,6 +285,7 @@ export const useDepartmentsStore = defineStore('departments', {
         const departmentForState: Department = {
           id: newDepartmentRef.id,
           ...departmentData,
+          storeId,
           staffCount: 0,
           createdAt: now,
           updatedAt: now,
@@ -273,7 +301,7 @@ export const useDepartmentsStore = defineStore('departments', {
     },
 
     // Update a department
-    async updateDepartment(departmentId: string, updates: Partial<Omit<Department, 'id' | 'createdAt' | 'createdBy'>>) {
+    async updateDepartment(departmentId: string, updates: Partial<Omit<Department, 'id' | 'createdAt' | 'createdBy' | 'storeId'>>) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -295,7 +323,7 @@ export const useDepartmentsStore = defineStore('departments', {
       }
 
       try {
-        // First verify the department belongs to this user
+        // First verify the department belongs to this user and store
         const department = await this.fetchDepartment(departmentId)
         if (!department || department.createdBy !== authStore.currentUser.uid) {
           throw new Error('Department not found or access denied')
@@ -343,18 +371,25 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('Staff members do not have permission to delete departments')
       }
 
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        // First verify the department belongs to this user
+        // First verify the department belongs to this user and store
         const department = await this.fetchDepartment(departmentId)
         if (!department || department.createdBy !== authStore.currentUser.uid) {
           throw new Error('Department not found or access denied')
         }
 
-        // Check if department has staff (only staff created by this user)
+        // Check if department has staff (only staff created by this user and in this store)
         const staffRef = collection(db, 'staff')
         const q = query(
           staffRef,
           where('departmentId', '==', departmentId),
+          where('storeId', '==', storeId),
           where('createdBy', '==', authStore.currentUser.uid)
         )
         const querySnapshot = await getDocs(q)
@@ -400,4 +435,3 @@ export const useDepartmentsStore = defineStore('departments', {
     },
   },
 })
-

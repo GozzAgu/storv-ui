@@ -34,6 +34,7 @@ export interface Receipt {
   notes?: string
   folderId: string
   itemIds: string[] // Array of inventory item IDs that were sold
+  storeId: string // Store this receipt belongs to
   // Swap-in fields
   isSwapIn?: boolean // Indicates if this receipt includes a swap-in
   swapInFolderId?: string // Folder ID where swapped-in device is added

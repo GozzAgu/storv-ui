@@ -11,6 +11,20 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Stores collection
+    match /stores/{storeId} {
+      // Allow read if user is authenticated (store access will be filtered client-side)
+      allow read: if isAuthenticated();
+      
+      // Allow create if user is super admin and creating their own store
+      allow create: if isAuthenticated() && 
+                     request.resource.data.ownerId == request.auth.uid;
+      
+      // Allow update/delete if user owns the store
+      allow update, delete: if isAuthenticated() && 
+                             resource.data.ownerId == request.auth.uid;
+    }
+    
     // Users collection - users can read/write their own document
     match /users/{userId} {
       // Allow read if user is authenticated
@@ -27,6 +41,7 @@ service cloud.firestore {
     }
     
     // Departments collection - users can only access their own departments
+    // Store-level filtering is handled client-side via storeId field
     match /departments/{departmentId} {
       // Allow read if user owns the department
       allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
@@ -42,9 +57,11 @@ service cloud.firestore {
     }
     
     // Staff collection - users can only access their own staff
+    // Store-level filtering is handled client-side via storeId field
     match /staff/{staffId} {
-      // Allow read if user owns the staff member
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      // Allow read if user owns the staff member OR if it's the staff member's own document (for staff login)
+      allow read: if isAuthenticated() && 
+                   (resource.data.createdBy == request.auth.uid || resource.data.authUid == request.auth.uid);
       
       // Allow create if user is creating their own staff member
       allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
@@ -57,6 +74,7 @@ service cloud.firestore {
     }
     
     // Inventory folders collection - users can only access their own folders
+    // Store-level filtering is handled client-side via storeId field
     match /inventoryFolders/{folderId} {
       // Allow read if user owns the folder
       allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
@@ -72,6 +90,7 @@ service cloud.firestore {
     }
     
     // Inventory items collection - users can only access their own items
+    // Store-level filtering is handled client-side via storeId field
     match /inventoryItems/{itemId} {
       // Allow read if user owns the item
       allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
@@ -87,6 +106,7 @@ service cloud.firestore {
     }
     
     // Receipts collection - users can only access their own receipts
+    // Store-level filtering is handled client-side via storeId field
     match /receipts/{receiptId} {
       // Allow read if user owns the receipt
       allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
@@ -101,10 +121,25 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
     }
     
+    // Customers collection - users can only access their own customers
+    // Store-level filtering is handled client-side via storeId field
+    match /customers/{customerId} {
+      // Allow read if user owns the customer
+      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow create if user is creating their own customer
+      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+      
+      // Allow update if user owns the customer
+      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow delete if user owns the customer
+      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+    }
+    
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
-

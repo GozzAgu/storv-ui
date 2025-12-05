@@ -390,6 +390,9 @@
               </div>
             </div>
 
+            <!-- Store Selector (for super admins) -->
+            <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
+
             <!-- Theme Toggle Button -->
             <ThemeToggle />
 
@@ -501,6 +504,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'

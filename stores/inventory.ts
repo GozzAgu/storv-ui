@@ -34,6 +34,7 @@ export interface InventoryFolder {
   itemCount: number
   totalValue: number
   lowStockCount: number
+  storeId: string // Store this folder belongs to
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string
@@ -43,6 +44,7 @@ export interface InventoryFolder {
 export interface InventoryItem {
   id: string
   folderId: string
+  storeId: string // Store this item belongs to
   [key: string]: any // Dynamic fields based on template
   dateIn?: Date | string // Date when item was added (from createdAt)
   dateOut?: Date | string // Date when item was sold (from receipt generation)
