@@ -21,6 +21,19 @@ export const useUserStore = defineStore('user', {
   actions: {
     // Fetch user data from Firestore
     async fetchUserData(userId: string) {
+      // Check if staff creation is in progress - don't update userData during staff creation
+      // This prevents the profile card from showing staff name instead of super admin name
+      const isStaffCreationInProgress = typeof window !== 'undefined' 
+        ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+        : false
+      
+      // If staff creation is in progress and we already have super admin data, preserve it
+      // Don't fetch staff data during creation process
+      if (isStaffCreationInProgress && this.userData?.role === 'superAdmin') {
+        console.log('[UserStore] Staff creation in progress - preserving super admin userData, skipping fetch for:', userId)
+        return
+      }
+      
       this.loading = true
       this.error = null
 
@@ -36,12 +49,29 @@ export const useUserStore = defineStore('user', {
         const userSnap = await getDoc(userRef)
 
         if (userSnap.exists()) {
-          this.userData = {
+          const fetchedData = {
             uid: userSnap.id,
             ...userSnap.data(),
           } as UserData
+          
+          // During staff creation, only update if this is the super admin's data
+          // Don't update if it's staff data (preserve super admin's profile info)
+          if (isStaffCreationInProgress) {
+            // Only update if fetched data is for super admin or if we're fetching super admin's own data
+            if (fetchedData.role === 'superAdmin' || (this.userData?.role === 'superAdmin' && this.userData.uid === userId)) {
+              this.userData = fetchedData
+            } else {
+              // Don't overwrite super admin data with staff data during creation
+              console.log('[UserStore] Ignoring staff data fetch during staff creation - preserving super admin data')
+            }
+          } else {
+            this.userData = fetchedData
+          }
         } else {
-          this.userData = null
+          // Only clear userData if staff creation is not in progress
+          if (!isStaffCreationInProgress) {
+            this.userData = null
+          }
         }
       } catch (error: any) {
         console.error('Error fetching user data:', error)

@@ -608,6 +608,29 @@ export const useStaffStore = defineStore('staff', {
           sessionStorage.removeItem('staff_creation_in_progress')
         }
 
+        // Refresh data in the background (non-blocking) for quick UI update
+        if (import.meta.client) {
+          // Refresh data immediately in background - Promise.all is non-blocking
+          Promise.all([
+            // Refresh staff list for the department
+            this.fetchStaffByDepartment(staffData.departmentId).catch(err => 
+              console.warn('[Staff Creation] Background refresh: Failed to refresh department staff:', err)
+            ),
+            // Refresh overall staff list for consistency across pages
+            this.fetchStaff().catch(err =>
+              console.warn('[Staff Creation] Background refresh: Failed to refresh staff list:', err)
+            ),
+            // Refresh department to update staff count
+            departmentsStore.fetchDepartment(staffData.departmentId).catch(err =>
+              console.warn('[Staff Creation] Background refresh: Failed to refresh department:', err)
+            ),
+          ]).then(() => {
+            console.log('[Staff Creation] ✅ Background refresh completed successfully')
+          }).catch(err => {
+            console.warn('[Staff Creation] Background refresh completed with warnings:', err)
+          })
+        }
+
         return newStaffRef.id
       } catch (error: any) {
         console.error('Error creating staff:', error)

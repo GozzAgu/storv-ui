@@ -827,8 +827,19 @@ const expandedDepartments = reactive<Record<string, boolean>>({})
 watch([() => authStore.currentUser, () => userStore.userData], async ([user, userData]) => {
   if (!user) return
   
-  // Fetch user data if not loaded
-  if (!userData && user) {
+  // Check if staff creation is in progress - don't update userData during this time
+  const isStaffCreationInProgress = import.meta.client 
+    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+    : false
+  
+  // During staff creation, don't fetch or update userData to preserve super admin's data
+  if (isStaffCreationInProgress) {
+    console.log('[Dashboard] Staff creation in progress - skipping userData fetch to preserve super admin data')
+    return
+  }
+  
+  // Fetch user data if not loaded (only if not during staff creation)
+  if (!userData && user && !isStaffCreationInProgress) {
     await userStore.fetchUserData(user.uid)
   }
   
@@ -1025,34 +1036,86 @@ watch(() => authStore.currentUser, async (user) => {
 }, { immediate: true })
 
 // Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
+// Store the super admin's info when they first load, and preserve it during staff creation
 const cachedUserName = ref<string | null>(null)
 const cachedUserEmail = ref<string | null>(null)
 const cachedUserId = ref<string | null | undefined>(null)
+
+// Watch userStore.userData to cache super admin info when it's first loaded
+watch(() => userStore.userData, (userData, oldUserData) => {
+  // Check if staff creation is in progress - don't update cache during staff creation
+  const isStaffCreationInProgress = import.meta.client 
+    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+    : false
+  
+  // During staff creation, preserve existing cache and don't update it
+  if (isStaffCreationInProgress && cachedUserName.value) {
+    return
+  }
+  
+  // Only cache if this is a super admin (not staff) and we don't already have cached data
+  if (userData?.role === 'superAdmin' && userData.uid) {
+    // Only cache if this is a new user or we don't have cached data yet
+    if (!cachedUserName.value || cachedUserId.value !== userData.uid) {
+      if (userData.name) {
+        cachedUserName.value = userData.name
+        cachedUserId.value = userData.uid
+      }
+      // Cache email from auth if available
+      if (authStore.currentUser?.email && authStore.currentUser.uid === userData.uid) {
+        cachedUserEmail.value = authStore.currentUser.email
+        cachedUserId.value = authStore.currentUser.uid
+      }
+    }
+  }
+}, { immediate: true })
 
 // User profile data - use cached values during staff creation to prevent UI bug
 const userName = computed(() => {
   const currentUserId = authStore.currentUser?.uid
   
-  // If we have a cached name, keep using it (prevents flicker during staff creation)
-  // Use cache if: same user OR no current user (during sign out/in for staff creation)
-  if (cachedUserName.value && cachedUserId.value) {
-    if (cachedUserId.value === currentUserId || !currentUserId) {
-      return cachedUserName.value
-    }
+  // Check if staff creation is in progress - preserve cached super admin name
+  const isStaffCreationInProgress = import.meta.client 
+    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+    : false
+  
+  // During staff creation, always use cached name if available (preserve super admin name)
+  if (isStaffCreationInProgress && cachedUserName.value) {
+    return cachedUserName.value
+  }
+  
+  // If we have a cached name for the same user, keep using it (prevents flicker)
+  if (cachedUserName.value && cachedUserId.value === currentUserId) {
+    return cachedUserName.value
+  }
+  
+  // If no current user but we have cached data, use cache (prevents flicker during sign out)
+  if (!currentUserId && cachedUserName.value) {
+    return cachedUserName.value
   }
   
   // Try to get name from Firestore userData first
+  // During staff creation, ignore userData if it's for staff (preserve super admin cache)
   if (userStore.userData?.name && currentUserId) {
     const name = userStore.userData.name ?? null
-    // Cache it for this user
-    if (name) {
-      cachedUserName.value = name
-      cachedUserId.value = currentUserId ?? null
+    const userRole = userStore.userData.role
+    
+    // During staff creation, if userData shows staff, ignore it and use cache
+    if (isStaffCreationInProgress && userRole === 'staff') {
+      return cachedUserName.value || 'User'
+    }
+    
+    // Only use and cache if it's the super admin (not staff)
+    if (name && userRole === 'superAdmin') {
+      if (!isStaffCreationInProgress) {
+        cachedUserName.value = name
+        cachedUserId.value = currentUserId ?? null
+      }
       return name
     }
   }
   // Fallback to Firebase Auth displayName
-  if (authStore.currentUser?.displayName && currentUserId) {
+  if (authStore.currentUser?.displayName && currentUserId && !isStaffCreationInProgress) {
     const name = authStore.currentUser.displayName ?? null
     if (name) {
       cachedUserName.value = name
@@ -1062,7 +1125,7 @@ const userName = computed(() => {
   }
   // Fallback to email prefix (part before @)
   const currentEmail = authStore.currentUser?.email
-  if (currentEmail && currentUserId) {
+  if (currentEmail && currentUserId && !isStaffCreationInProgress) {
     const emailPrefix = currentEmail.split('@')[0]!
     cachedUserName.value = emailPrefix
     cachedUserEmail.value = currentEmail
@@ -1081,22 +1144,40 @@ const userName = computed(() => {
 const userEmail = computed(() => {
   const currentUserId = authStore.currentUser?.uid
   
-  // If we have cached email and it's for the same user, keep using it
+  // Check if staff creation is in progress - preserve cached super admin email
+  const isStaffCreationInProgress = import.meta.client 
+    ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
+    : false
+  
+  // During staff creation, always use cached email if available (preserve super admin email)
+  if (isStaffCreationInProgress && cachedUserEmail.value) {
+    return cachedUserEmail.value
+  }
+  
+  // If we have cached email for the same user, keep using it
   if (cachedUserEmail.value && cachedUserId.value === currentUserId) {
+    return cachedUserEmail.value
+  }
+  
+  // If no current user but we have cached data, use cache (prevents flicker during sign out)
+  if (!currentUserId && cachedUserEmail.value) {
     return cachedUserEmail.value
   }
   
   const email = authStore.currentUser?.email || ''
   
-  // Cache it for this user
-  if (email && currentUserId) {
-    cachedUserEmail.value = email
-    cachedUserId.value = currentUserId ?? null
+  // Cache it for this user (only if not staff creation and it's super admin)
+  if (email && currentUserId && !isStaffCreationInProgress) {
+    // Only cache if userStore indicates this is a super admin (or we don't have userData yet)
+    if (userStore.userData?.role === 'superAdmin' || !userStore.userData) {
+      cachedUserEmail.value = email
+      cachedUserId.value = currentUserId ?? null
+    }
   }
   
-  // If no current user but we have cached data, use cache (prevents flicker)
-  if (!email && cachedUserEmail.value) {
-    return cachedUserEmail.value
+  // During staff creation, if userData shows staff, ignore it and use cache
+  if (isStaffCreationInProgress && userStore.userData?.role === 'staff') {
+    return cachedUserEmail.value || ''
   }
   
   return email
@@ -1239,7 +1320,7 @@ onMounted(async () => {
 
 // Watch for auth state changes to fetch user data and protect routes
 watch(() => authStore.currentUser, async (user, oldUser) => {
-  // Check if staff creation is in progress - don't redirect during temporary sign-out
+  // Check if staff creation is in progress - don't redirect or update user data during temporary sign-out
   const isStaffCreationInProgress = import.meta.client 
     ? sessionStorage.getItem('staff_creation_in_progress') === 'true'
     : false
@@ -1249,15 +1330,23 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     return navigateTo('/signin')
   }
   
+  // During staff creation, don't fetch or update userData to preserve super admin's profile info
+  if (isStaffCreationInProgress) {
+    console.log('[Dashboard] Staff creation in progress - preserving super admin userData')
+    return
+  }
+  
   // Only fetch if:
   // 1. User exists
   // 2. We don't have userData OR the user changed (not just signed back in)
-  // This prevents refetching during staff creation when super admin signs out/in
+  // 3. Staff creation is not in progress
   if (user?.uid) {
     const hasUserData = userStore.userData && userStore.userData.uid === user.uid
     const userChanged = oldUser?.uid !== user.uid
     
-    if (!hasUserData || userChanged) {
+    // Only fetch if we don't have data for this user or if user actually changed
+    // Don't fetch during staff creation to prevent overwriting super admin data
+    if ((!hasUserData || userChanged) && !isStaffCreationInProgress) {
       userStore.fetchUserData(user.uid)
     }
   }

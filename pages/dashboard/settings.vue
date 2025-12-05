@@ -730,6 +730,54 @@
         </Button>
       </template>
     </Modal>
+
+    <!-- Store Selection Modal (shown after first store creation) -->
+    <Modal
+      v-model="showStoreSelectionModal"
+      title="Select Your Store"
+      size="md"
+      :close-on-backdrop="false"
+    >
+      <div class="space-y-4">
+        <p class="text-gray-700 dark:text-gray-300">
+          Your store has been created successfully! Please select this store to continue.
+        </p>
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+          <button
+            v-for="store in stores"
+            :key="store.id"
+            @click="handleStoreSelection(store.id)"
+            class="w-full text-left p-4 border-2 rounded-xl transition-all"
+            :class="
+              newlyCreatedStoreId === store.id
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            "
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ store.name }}</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" v-if="store.description">
+                  {{ store.description }}
+                </p>
+                <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span v-if="store.address">{{ store.address }}</span>
+                  <span v-if="store.phone">{{ store.phone }}</span>
+                </div>
+              </div>
+              <svg
+                v-if="newlyCreatedStoreId === store.id"
+                class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </button>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -802,10 +850,12 @@ const otherStores = computed(() => {
 // Store management state
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
+const showStoreSelectionModal = ref(false)
 const editingStore = ref<Store | null>(null)
 const storeToDelete = ref<Store | null>(null)
 const isSubmittingStore = ref(false)
 const isDeletingStore = ref(false)
+const newlyCreatedStoreId = ref<string | null>(null)
 
 const storeForm = ref({
   name: '',
@@ -880,16 +930,35 @@ const handleStoreSubmit = async () => {
     if (editingStore.value) {
       await storesStore.updateStore(editingStore.value.id, storeForm.value)
       toast.success('Store updated successfully')
+      closeStoreModal()
     } else {
-      await storesStore.createStore(storeForm.value)
+      const wasFirstStore = stores.value.length === 0
+      const newStoreId = await storesStore.createStore(storeForm.value)
       toast.success('Store created successfully')
+      closeStoreModal()
+      await storesStore.fetchStores()
+      
+      // If this was the first store, show store selection modal
+      if (wasFirstStore) {
+        newlyCreatedStoreId.value = newStoreId
+        showStoreSelectionModal.value = true
+      }
     }
-    closeStoreModal()
-    await storesStore.fetchStores()
   } catch (err: any) {
     toast.error(err.message || 'Failed to save store')
   } finally {
     isSubmittingStore.value = false
+  }
+}
+
+const handleStoreSelection = async (storeId: string) => {
+  try {
+    await storesStore.setCurrentStore(storeId)
+    toast.success('Store selected successfully')
+    showStoreSelectionModal.value = false
+    newlyCreatedStoreId.value = null
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to select store')
   }
 }
 

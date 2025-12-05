@@ -367,11 +367,8 @@ export const useStoresStore = defineStore('stores', {
 
         this.stores.unshift(storeWithId)
 
-        // If this is the first store, set it as current
-        if (this.stores.length === 1) {
-          this.setCurrentStore(newStoreRef.id)
-        }
-
+        // Don't automatically set first store as current - user will select it via modal
+        // Return the store ID and a flag indicating if this is the first store
         return newStoreRef.id
       } catch (error: any) {
         console.error('Error creating store:', error)
