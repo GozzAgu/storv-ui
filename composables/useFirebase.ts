@@ -1,6 +1,5 @@
 import { getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
-import { firebaseConfig } from '~/config/firebase.config'
 
 /**
  * Composable to access Firebase app and services

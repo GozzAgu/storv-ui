@@ -1,6 +1,6 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
-import { firebaseConfig } from '~/config/firebase.config'
+import { getFirebaseConfig } from '~/config/firebase.config'
 
 export default defineNuxtPlugin(() => {
   let app: FirebaseApp | undefined
@@ -8,6 +8,9 @@ export default defineNuxtPlugin(() => {
 
   // Only run on client side
   if (import.meta.client) {
+    // Get Firebase config from environment variables
+    const firebaseConfig = getFirebaseConfig()
+    
     // Initialize Firebase only if it hasn't been initialized
     if (!getApps().length) {
       app = initializeApp(firebaseConfig)
