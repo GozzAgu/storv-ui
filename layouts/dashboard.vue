@@ -525,17 +525,25 @@
           </div>
 
           <div class="flex items-center space-x-3 ml-auto">
-            <!-- Search -->
-            <div class="hidden md:block">
-              <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Search anything..."
-                  class="pl-10 pr-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                />
-              </div>
-            </div>
+            <!-- Global Search Button -->
+            <button
+              @click="searchStore.openSearch()"
+              class="hidden md:flex items-center gap-2 px-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              title="Search (Cmd/Ctrl+K)"
+            >
+              <MagnifyingGlassIcon class="w-5 h-5 flex-shrink-0" />
+              <span class="flex-1 text-left">Search anything...</span>
+              <kbd class="hidden lg:inline-flex px-2 py-0.5 text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd>
+            </button>
+            
+            <!-- Mobile Search Button -->
+            <button
+              @click="searchStore.openSearch()"
+              class="md:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Search"
+            >
+              <MagnifyingGlassIcon class="w-6 h-6" />
+            </button>
 
             <!-- Store Selector (for super admins) -->
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
@@ -624,6 +632,9 @@
     
     <!-- Toast Notifications -->
     <ToastContainer />
+    
+    <!-- Global Search -->
+    <GlobalSearch />
   </div>
 </template>
 
@@ -653,6 +664,7 @@ import {
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
+import GlobalSearch from '~/components/search/GlobalSearch.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
@@ -662,6 +674,7 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
+import { useSearchStore } from '~/stores/search'
 
 const { actualTheme } = useTheme()
 const authStore = useAuthStore()
@@ -671,6 +684,7 @@ const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
+const searchStore = useSearchStore()
 
 // Fetch notifications on mount
 onMounted(() => {
