@@ -25,6 +25,8 @@ export interface Receipt {
   receiptNumber: string
   customerName: string
   customerEmail: string
+  customerPhone?: string // Customer phone number
+  customerAddress?: string // Customer address
   date: Date | any
   items: ReceiptItem[]
   itemsCount: number

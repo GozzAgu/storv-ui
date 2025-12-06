@@ -1051,6 +1051,8 @@ const handleCreateReceipt = async () => {
       receiptNumber,
       customerName: receiptForm.value.customerName,
       customerEmail: receiptForm.value.customerEmail || '',
+      customerPhone: receiptForm.value.customerPhone || undefined,
+      customerAddress: receiptForm.value.customerAddress || undefined,
       date: new Date(),
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,

@@ -51,20 +51,6 @@
               <span>Customers</span>
             </div>
           </button>
-          <button
-            @click="activeTab = 'returns'"
-            :class="[
-              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
-              activeTab === 'returns'
-                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            ]"
-          >
-            <div class="flex items-center gap-2">
-              <ArrowPathIcon class="w-5 h-5" />
-              <span>Returns</span>
-            </div>
-          </button>
         </nav>
       </div>
     </Card>
@@ -603,19 +589,224 @@
 
     <!-- Customers Tab Content -->
     <template v-if="activeTab === 'customers'">
-      <!-- Customers content will be added here -->
-      <div class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">Customers tab coming soon...</p>
+      <!-- Customers Table -->
+      <Card padding="none">
+        <!-- Header with Stats and Filters -->
+        <div v-if="!receiptsStore.loading" class="border-b border-gray-200 dark:border-gray-700">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+            <!-- Stats -->
+            <div class="flex items-center flex-wrap gap-4 sm:gap-6">
+              <div class="flex items-center gap-2">
+                <UsersIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span class="text-xs text-gray-600 dark:text-gray-400">Customers:</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  {{ uniqueCustomers.length }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span class="text-xs text-gray-600 dark:text-gray-400">Revenue:</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
+              </div>
+              <div class="hidden sm:flex items-center gap-2">
+                <ChartBarIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span class="text-xs text-gray-600 dark:text-gray-400">Avg. Order:</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  ${{ formatCurrency(customersAverageOrderValue) }}
+                </span>
+              </div>
+            </div>
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="relative flex-1 sm:flex-initial">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <input
+                  v-model="customersSearchQuery"
+                  type="text"
+                  placeholder="Search..."
+                  class="w-full sm:w-48 pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <select
+                v-model="customersSortBy"
+                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[160px]"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="orders">Sort by Orders</option>
+                <option value="spent">Sort by Total Spent</option>
+                <option value="lastOrder">Sort by Last Order</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div v-if="receiptsStore.loading" class="text-center py-12">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading customers...</p>
+        </div>
+        <div v-else class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800/50">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 w-12"></th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Customer</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Contact</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Orders</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Total Spent</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Last Order</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <template v-for="customer in paginatedCustomers" :key="customer.id">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <td class="px-4 py-3">
+                    <button
+                      @click="toggleCustomerExpanded(customer.id)"
+                      class="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <ChevronRightIcon
+                        :class="['w-5 h-5 transition-transform', expandedCustomers[customer.id] ? 'rotate-90' : '']"
+                      />
+                    </button>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                        {{ customer.name.charAt(0).toUpperCase() }}
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ customer.name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="space-y-1">
+                      <p v-if="customer.email" class="text-sm text-gray-900 dark:text-gray-100">{{ customer.email }}</p>
+                      <p v-if="customer.phone" class="text-sm text-gray-600 dark:text-gray-400">{{ customer.phone }}</p>
+                      <p v-if="!customer.email && !customer.phone" class="text-xs text-gray-400 dark:text-gray-500 italic">No contact info</p>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <button
+                      @click="viewCustomerReceipts(customer)"
+                      class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                    >
+                      View Receipts
+                    </button>
+                  </td>
+                </tr>
+                <!-- Expanded Row: Purchased Items -->
+                <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50 dark:bg-gray-900/50">
+                  <td colspan="7" class="px-4 py-4">
+                    <div class="space-y-4">
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Purchased Items</h4>
+                      <div class="space-y-3">
+                        <div
+                          v-for="receipt in getCustomerReceipts(customer.id)"
+                          :key="receipt.id"
+                          class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+                        >
+                          <div class="flex items-center justify-between mb-3">
+                            <div>
+                              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                Receipt #{{ receipt.receiptNumber }}
+                              </p>
+                              <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ formatDate(receipt.date) }} • {{ formatTime(receipt.date) }}
+                              </p>
+                            </div>
+                            <div class="text-right">
+                              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                ${{ formatCurrency(receipt.total) }}
+                              </p>
+                              <span
+                                :class="[
+                                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                  receipt.status === 'completed'
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                                    : receipt.status === 'pending'
+                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
+                                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                                ]"
+                              >
+                                {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="space-y-2">
+                            <div
+                              v-for="(item, index) in receipt.items"
+                              :key="index"
+                              class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                            >
+                              <div class="flex-1">
+                                <p class="text-sm text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                  Quantity: {{ item.quantity }} • Price: ${{ formatCurrency(item.price) }}
+                                  <span v-if="item.hasDiscount" class="text-green-600 dark:text-green-400">
+                                    ({{ item.discountPercentage }}% off)
+                                  </span>
+                                </p>
+                              </div>
+                              <div class="text-right">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                  ${{ formatCurrency(item.price * item.quantity) }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <!-- Empty State -->
+              <tr v-if="filteredCustomers.length === 0" class="bg-white dark:bg-gray-800">
+                <td colspan="7" class="px-6 py-12">
+                  <div class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
+                      <UsersIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once receipts are created' }}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <!-- Pagination -->
+      <div
+        v-if="filteredCustomers.length > 0"
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+        :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      >
+        <Pagination
+          :current-page="customersCurrentPage"
+          :items-per-page="customersItemsPerPage"
+          :total="filteredCustomers.length"
+          @page-change="handleCustomersPageChange"
+        />
       </div>
     </template>
 
-    <!-- Returns Tab Content -->
-    <template v-if="activeTab === 'returns'">
-      <!-- Returns content will be added here -->
-      <div class="text-center py-12">
-        <p class="text-gray-500 dark:text-gray-400">Returns tab coming soon...</p>
-      </div>
-    </template>
     </template>
     </div>
     <template #fallback>
@@ -651,6 +842,7 @@ import {
   TrashIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  ChevronRightIcon,
   BarsArrowUpIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
@@ -695,7 +887,7 @@ const loadingCreators = ref(false)
 // Tab management
 const route = useRoute()
 const router = useRouter()
-const activeTab = ref<'receipts' | 'customers' | 'returns'>((route.query.tab as any) || 'receipts')
+const activeTab = ref<'receipts' | 'customers'>((route.query.tab as any) || 'receipts')
 
 // Watch for tab changes and update URL
 watch(activeTab, (newTab) => {
@@ -741,6 +933,7 @@ const sortableColumns = [
 // Customers tab state
 const customersSearchQuery = ref('')
 const customersSortBy = ref('name')
+const expandedCustomers = ref<Record<string, boolean>>({})
 const getCustomersInitialPage = (): number => {
   if (import.meta.client) {
     try {
@@ -755,23 +948,166 @@ const getCustomersInitialPage = (): number => {
 const customersCurrentPage = ref(getCustomersInitialPage())
 const customersItemsPerPage = ref(20)
 
-// Returns tab state
-const returnsSearchQuery = ref('')
-const returnsStatusFilter = ref('all')
-const returnsReasonFilter = ref('all')
-const getReturnsInitialPage = (): number => {
+// Customer interface for display
+interface CustomerDisplay {
+  id: string
+  name: string
+  email?: string
+  phone?: string
+  address?: string
+  receipts: string[]
+  totalSpent: number
+  lastOrderDate: Date
+  firstOrderDate: Date
+}
+
+// Extract unique customers from receipts based on email or phone
+const uniqueCustomers = computed(() => {
+  const customerMap = new Map<string, CustomerDisplay>()
+  
+  receiptsStore.receipts.forEach(receipt => {
+    // Use email or phone as the key to identify unique customers
+    const receiptWithPhone = receipt as Receipt & { customerPhone?: string; customerAddress?: string }
+    const key = (receipt.customerEmail?.toLowerCase().trim() || receiptWithPhone.customerPhone?.trim() || receipt.customerName.toLowerCase().trim()) || ''
+    
+    if (!key) return // Skip receipts without any identifier
+    
+    if (customerMap.has(key)) {
+      // Update existing customer
+      const existing = customerMap.get(key)!
+      existing.receipts.push(receipt.id)
+      existing.totalSpent += receipt.total
+      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
+      if (receiptDate > existing.lastOrderDate) {
+        existing.lastOrderDate = receiptDate
+      }
+      if (receiptDate < existing.firstOrderDate) {
+        existing.firstOrderDate = receiptDate
+      }
+      // Update contact info if available
+      if (receipt.customerEmail && !existing.email) {
+        existing.email = receipt.customerEmail
+      }
+      if (receiptWithPhone.customerPhone && !existing.phone) {
+        existing.phone = receiptWithPhone.customerPhone
+      }
+      if (receiptWithPhone.customerAddress && !existing.address) {
+        existing.address = receiptWithPhone.customerAddress
+      }
+    } else {
+      // Create new customer
+      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
+      customerMap.set(key, {
+        id: key,
+        name: receipt.customerName,
+        email: receipt.customerEmail,
+        phone: receiptWithPhone.customerPhone,
+        address: receiptWithPhone.customerAddress,
+        receipts: [receipt.id],
+        totalSpent: receipt.total,
+        lastOrderDate: receiptDate,
+        firstOrderDate: receiptDate,
+      })
+    }
+  })
+  
+  return Array.from(customerMap.values())
+})
+
+// Filter customers
+const filteredCustomers = computed(() => {
+  let result = [...uniqueCustomers.value]
+  
+  // Search filter
+  if (customersSearchQuery.value) {
+    const query = customersSearchQuery.value.toLowerCase()
+    result = result.filter(customer =>
+      customer.name.toLowerCase().includes(query) ||
+      customer.email?.toLowerCase().includes(query) ||
+      customer.phone?.toLowerCase().includes(query)
+    )
+  }
+  
+  // Sort
+  result.sort((a, b) => {
+    switch (customersSortBy.value) {
+      case 'name':
+        return a.name.localeCompare(b.name)
+      case 'orders':
+        return b.receipts.length - a.receipts.length
+      case 'spent':
+        return b.totalSpent - a.totalSpent
+      case 'lastOrder':
+        return b.lastOrderDate.getTime() - a.lastOrderDate.getTime()
+      default:
+        return 0
+    }
+  })
+  
+  return result
+})
+
+// Paginated customers
+const paginatedCustomers = computed(() => {
+  const start = (customersCurrentPage.value - 1) * customersItemsPerPage.value
+  const end = start + customersItemsPerPage.value
+  return filteredCustomers.value.slice(start, end)
+})
+
+// Customer statistics
+const customersTotalRevenue = computed(() => {
+  return uniqueCustomers.value.reduce((sum, c) => sum + c.totalSpent, 0)
+})
+
+const customersAverageOrderValue = computed(() => {
+  const totalOrders = uniqueCustomers.value.reduce((sum, c) => sum + c.receipts.length, 0)
+  return totalOrders > 0 ? customersTotalRevenue.value / totalOrders : 0
+})
+
+// Get receipts for a customer
+const getCustomerReceipts = (customerId: string) => {
+  const customer = uniqueCustomers.value.find(c => c.id === customerId)
+  if (!customer) return []
+  
+  return receiptsStore.receipts
+    .filter(r => customer.receipts.includes(r.id))
+    .sort((a, b) => {
+      const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date)
+      const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date)
+      return dateB.getTime() - dateA.getTime()
+    })
+}
+
+// Toggle customer expanded state
+const toggleCustomerExpanded = (customerId: string) => {
+  expandedCustomers.value[customerId] = !expandedCustomers.value[customerId]
+}
+
+// View customer receipts (filter receipts tab)
+const viewCustomerReceipts = (customer: CustomerDisplay) => {
+  activeTab.value = 'receipts'
+  // Set search query to customer name or email
+  searchQuery.value = customer.email || customer.name
+  // Trigger search
+  setTimeout(() => {
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, 100)
+}
+
+// Handle customers page change
+const handleCustomersPageChange = (page: number) => {
+  customersCurrentPage.value = page
   if (import.meta.client) {
     try {
-      const saved = localStorage.getItem('receipts-returns-page')
-      return saved ? parseInt(saved, 10) : 1
+      localStorage.setItem('receipts-customers-page', page.toString())
     } catch (e) {
-      return 1
+      // Ignore localStorage errors
     }
   }
-  return 1
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-const returnsCurrentPage = ref(getReturnsInitialPage())
-const returnsItemsPerPage = ref(20)
+
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
@@ -1036,16 +1372,6 @@ watch(customersCurrentPage, (newPage) => {
   }
 })
 
-// Watch for returns tab page changes
-watch(returnsCurrentPage, (newPage) => {
-  if (import.meta.client && activeTab.value === 'returns') {
-    try {
-      localStorage.setItem('receipts-returns-page', newPage.toString())
-    } catch (e) {
-      // Ignore localStorage errors
-    }
-  }
-})
 
 const showCreateReceiptModal = ref(false)
 
