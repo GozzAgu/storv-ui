@@ -50,50 +50,51 @@
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
           <Card
             v-for="store in stores"
             :key="store.id"
-            class="hover:shadow-lg transition-shadow overflow-hidden"
-            :class="{ 'ring-2 ring-primary-500': currentStore?.id === store.id }"
+            padding="sm"
+            class="hover:shadow-md transition-shadow overflow-hidden"
+            :class="{ 'ring-1 ring-primary-500': currentStore?.id === store.id }"
           >
             <div class="flex flex-col h-full">
-              <div class="flex-1 mb-4">
-                <div class="flex items-start justify-between mb-2">
+              <div class="flex-1 mb-2">
+                <div class="flex items-start justify-between mb-1">
                   <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1 flex-wrap">
-                      <h3 class="text-base font-semibold text-gray-900 dark:text-gray-50 truncate">{{ store.name }}</h3>
+                    <div class="flex items-center gap-1 mb-0.5 flex-wrap">
+                      <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-50 truncate">{{ store.name }}</h3>
                       <span
                         v-if="currentStore?.id === store.id"
-                        class="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full whitespace-nowrap"
+                        class="px-1 py-0.5 text-[10px] font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded whitespace-nowrap"
                       >
                         Current
                       </span>
                       <span
                         v-else-if="!store.isActive"
-                        class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full whitespace-nowrap"
+                        class="px-1 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded whitespace-nowrap"
                       >
                         Inactive
                       </span>
                     </div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 break-words" v-if="store.description">
+                    <p class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 break-words line-clamp-1" v-if="store.description">
                       {{ store.description }}
                     </p>
-                    <div class="mt-2 space-y-1 text-xs text-gray-500 dark:text-gray-400">
-                      <p v-if="store.address" class="break-words">
-                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="mt-1 space-y-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                      <p v-if="store.address" class="break-words line-clamp-1">
+                        <svg class="inline w-2.5 h-2.5 mr-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         </svg>
                         {{ store.address }}
                       </p>
-                      <p v-if="store.phone" class="break-words">
-                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <p v-if="store.phone" class="break-words line-clamp-1">
+                        <svg class="inline w-2.5 h-2.5 mr-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
                         {{ store.phone }}
                       </p>
-                      <p v-if="store.email" class="break-words">
-                        <svg class="inline w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <p v-if="store.email" class="break-words line-clamp-1">
+                        <svg class="inline w-2.5 h-2.5 mr-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         {{ store.email }}
@@ -102,24 +103,20 @@
                   </div>
                 </div>
               </div>
-              <div class="flex items-center gap-2 pt-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
-                <Button
-                  variant="secondary"
-                  size="sm"
+              <div class="flex items-center gap-1 pt-2 border-t border-gray-200 dark:border-gray-700 mt-auto">
+                <button
                   @click="editStore(store)"
-                  class="flex-1"
+                  class="flex-1 px-1.5 py-1 text-[10px] font-medium bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded transition-colors"
                 >
                   Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
+                </button>
+                <button
                   @click="confirmDelete(store)"
                   :disabled="currentStore?.id === store.id"
-                  class="flex-1"
+                  class="flex-1 px-1.5 py-1 text-[10px] font-medium bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Delete
-                </Button>
+                </button>
               </div>
             </div>
           </Card>

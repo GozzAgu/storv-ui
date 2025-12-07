@@ -583,6 +583,10 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore, type ReceiptItem } from '~/stores/receipts'
 import { useCustomersStore } from '~/stores/customers'
+import { useStoresStore } from '~/stores/stores'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 
 interface Props {
@@ -598,6 +602,10 @@ const emit = defineEmits<{
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const customersStore = useCustomersStore()
+const storesStore = useStoresStore()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const staffStore = useStaffStore()
 const { formatCurrency } = usePreferences()
 
 const steps = [
@@ -1046,6 +1054,23 @@ const handleCreateReceipt = async () => {
       }
     }
     
+    // Get current store and user information
+    const currentStore = storesStore.currentStore
+    const storeBranchName = currentStore?.name || 'Unknown Store'
+    
+    // Get user name (staff member or super admin)
+    let createdByUserName = 'Unknown User'
+    if (userStore.userData?.role === 'staff') {
+      // For staff, get their name from staff document
+      const staffMember = await staffStore.fetchCurrentStaffMember()
+      if (staffMember) {
+        createdByUserName = `${staffMember.firstName} ${staffMember.lastName}`.trim() || staffMember.email || 'Staff Member'
+      }
+    } else if (userStore.userData) {
+      // For super admin, use their name or email
+      createdByUserName = userStore.userData.name || userStore.userData.email || 'Super Admin'
+    }
+    
     // Create receipt in Firestore
     const receiptData: any = {
       receiptNumber,
@@ -1062,6 +1087,8 @@ const handleCreateReceipt = async () => {
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
       itemIds,
+      storeBranchName, // Store branch name
+      createdByUserName, // User who created the receipt
     }
     
     // Add split payments if enabled

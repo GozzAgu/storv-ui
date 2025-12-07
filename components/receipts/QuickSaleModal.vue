@@ -218,6 +218,10 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
+import { useStoresStore } from '~/stores/stores'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
+import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 
@@ -233,6 +237,10 @@ const emit = defineEmits<{
 
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
+const storesStore = useStoresStore()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const staffStore = useStaffStore()
 const { formatCurrency } = usePreferences()
 const { success: showSuccessToast, error: showErrorToast, warning: showWarningToast } = useToast()
 
@@ -431,6 +439,23 @@ const completeSale = async () => {
         await inventoryStore.updateItemsDateOut(selectedFolderId.value, itemIds)
       }
       
+      // Get current store and user information
+      const currentStore = storesStore.currentStore
+      const storeBranchName = currentStore?.name || 'Unknown Store'
+      
+      // Get user name (staff member or super admin)
+      let createdByUserName = 'Unknown User'
+      if (userStore.userData?.role === 'staff') {
+        // For staff, get their name from staff document
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember) {
+          createdByUserName = `${staffMember.firstName} ${staffMember.lastName}`.trim() || staffMember.email || 'Staff Member'
+        }
+      } else if (userStore.userData) {
+        // For super admin, use their name or email
+        createdByUserName = userStore.userData.name || userStore.userData.email || 'Super Admin'
+      }
+      
       // Create receipt
       const receiptData: any = {
         receiptNumber,
@@ -445,6 +470,8 @@ const completeSale = async () => {
         notes: 'Quick Sale',
         folderId: selectedFolderId.value || '',
         itemIds,
+        storeBranchName, // Store branch name
+        createdByUserName, // User who created the receipt
       }
       
       await receiptsStore.createReceipt(receiptData)

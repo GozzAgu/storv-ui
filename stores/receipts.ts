@@ -37,6 +37,8 @@ export interface Receipt {
   folderId: string
   itemIds: string[] // Array of inventory item IDs that were sold
   storeId: string // Store this receipt belongs to
+  storeBranchName?: string // Store branch name where receipt was generated
+  createdByUserName?: string // Name of the user who created the receipt
   // Swap-in fields
   isSwapIn?: boolean // Indicates if this receipt includes a swap-in
   swapInFolderId?: string // Folder ID where swapped-in device is added
