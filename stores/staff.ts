@@ -406,12 +406,20 @@ export const useStaffStore = defineStore('staff', {
           throw new Error('Department not found or access denied')
         }
 
-        // Auto-assign staff to the department's store (no manual store selection needed)
-        const storeId = department.storeId
+        // Auto-assign staff to the active store where the superadmin is currently working
+        // This ensures staff is assigned to the store the superadmin is actively managing
+        let storeId = await getCurrentStoreId()
+        
+        // Fallback: If no active store is selected, use the department's store
         if (!storeId) {
-          throw new Error('Department does not have a store assigned. Please assign the department to a store first.')
+          storeId = department.storeId
+          if (!storeId) {
+            throw new Error('No active store selected and department does not have a store assigned. Please select a store first or assign the department to a store.')
+          }
+          console.log('[Staff Creation] No active store selected, using department\'s store:', storeId)
+        } else {
+          console.log('[Staff Creation] Auto-assigning staff to active store:', storeId)
         }
-        console.log('[Staff Creation] Auto-assigning staff to department\'s store:', storeId)
 
         // Set flag to prevent redirect during staff creation
         if (import.meta.client) {
@@ -520,6 +528,24 @@ export const useStaffStore = defineStore('staff', {
         // Step 4: Sign super admin back in quickly
         console.log('[Staff Creation] Signing super admin back in...')
         await signSuperAdminBackIn()
+        
+        // Step 4.5: Restore store context after sign-in
+        // The storeId might be lost during sign-out/sign-in, so restore it
+        if (import.meta.client && storeId) {
+          try {
+            // Save storeId to localStorage before it might be lost
+            localStorage.setItem('currentStoreId', storeId)
+            console.log('[Staff Creation] Saved storeId to localStorage:', storeId)
+            
+            // Restore store context in stores store
+            const { useStoresStore } = await import('./stores')
+            const storesStore = useStoresStore()
+            storesStore.currentStoreId = storeId
+            console.log('[Staff Creation] Restored storeId in storesStore:', storeId)
+          } catch (restoreError) {
+            console.warn('[Staff Creation] Could not restore store context:', restoreError)
+          }
+        }
 
         // Step 5: Create staff document in Firestore
         // CRITICAL VALIDATION: Ensure Firebase Auth account was created
@@ -608,6 +634,28 @@ export const useStaffStore = defineStore('staff', {
           sessionStorage.removeItem('staff_creation_in_progress')
         }
 
+        // Ensure store context is properly initialized after staff creation
+        if (import.meta.client && storeId) {
+          try {
+            const { useStoresStore } = await import('./stores')
+            const storesStore = useStoresStore()
+            
+            // Ensure store is set in the store
+            if (!storesStore.currentStoreId || storesStore.currentStoreId !== storeId) {
+              storesStore.currentStoreId = storeId
+              localStorage.setItem('currentStoreId', storeId)
+              console.log('[Staff Creation] Final store context restoration:', storeId)
+            }
+            
+            // Initialize stores if needed
+            if (storesStore.stores.length === 0) {
+              await storesStore.fetchStores()
+            }
+          } catch (storeError) {
+            console.warn('[Staff Creation] Could not finalize store context:', storeError)
+          }
+        }
+
         // Refresh data in the background (non-blocking) for quick UI update
         if (import.meta.client) {
           // Refresh data immediately in background - Promise.all is non-blocking
@@ -623,6 +671,10 @@ export const useStaffStore = defineStore('staff', {
             // Refresh department to update staff count
             departmentsStore.fetchDepartment(staffData.departmentId).catch(err =>
               console.warn('[Staff Creation] Background refresh: Failed to refresh department:', err)
+            ),
+            // Refresh departments list to ensure it loads properly
+            departmentsStore.fetchDepartments().catch(err =>
+              console.warn('[Staff Creation] Background refresh: Failed to refresh departments:', err)
             ),
           ]).then(() => {
             console.log('[Staff Creation] ✅ Background refresh completed successfully')

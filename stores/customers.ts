@@ -329,29 +329,106 @@ export const useCustomersStore = defineStore('customers', {
         }
       }
 
+      // Get current store ID to filter customers
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      
+      console.log('[CustomersStore] fetchCustomers - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
+
       try {
         const customersRef = collection(db, 'customers')
-        const q = query(
-          customersRef,
-          where('createdBy', '==', userId),
-          orderBy('lastOrderDate', 'desc')
-        )
-        
-        const querySnapshot = await getDocs(q)
+        let allCustomers: any[] = []
 
-        const customers: Customer[] = []
-        querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data()
-          if (data.createdBy === userId) {
-            customers.push({
-              id: docSnapshot.id,
-              ...data,
-              lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
-              firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-              updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-            } as Customer)
+        // Query ALL customers created by superadmin first, then filter by storeId client-side
+        // This ensures we don't miss any data due to storeId mismatches
+        try {
+          // Query all customers created by the superadmin (without storeId filter)
+          const qAll = query(
+            customersRef,
+            where('createdBy', '==', userId)
+          )
+          const snapshotAll = await getDocs(qAll)
+          allCustomers = snapshotAll.docs
+          console.log('[CustomersStore] Found', allCustomers.length, 'total customers created by superadmin (userId:', userId + ')')
+        } catch (error: any) {
+          console.error('[CustomersStore] Error querying customers:', error.message)
+          // If the basic query fails, try with orderBy as fallback
+          try {
+            const qWithOrder = query(
+              customersRef,
+              where('createdBy', '==', userId),
+              orderBy('lastOrderDate', 'desc')
+            )
+            const snapshotWithOrder = await getDocs(qWithOrder)
+            allCustomers = snapshotWithOrder.docs
+            console.log('[CustomersStore] Found', allCustomers.length, 'customers with orderBy fallback')
+          } catch (orderError: any) {
+            // If orderBy also fails, try without it
+            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
+              const qBasic = query(
+                customersRef,
+                where('createdBy', '==', userId)
+              )
+              const snapshotBasic = await getDocs(qBasic)
+              allCustomers = snapshotBasic.docs
+              console.log('[CustomersStore] Found', allCustomers.length, 'customers with basic query')
+            } else {
+              throw orderError
+            }
           }
+        }
+
+        console.log('[CustomersStore] Total customers found before filtering:', allCustomers.length)
+
+        // Process and filter customers
+        let customers = allCustomers.map((doc) => {
+          const data = doc.data()
+          return {
+            id: doc.id,
+            name: data.name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            address: data.address || '',
+            totalOrders: data.totalOrders || 0,
+            totalSpent: data.totalSpent || 0,
+            receipts: data.receipts || [],
+            storeId: data.storeId || '',
+            lastOrderDate: data.lastOrderDate?.toDate ? data.lastOrderDate.toDate() : new Date(data.lastOrderDate),
+            firstOrderDate: data.firstOrderDate?.toDate ? data.firstOrderDate.toDate() : new Date(data.firstOrderDate),
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
+            createdBy: data.createdBy || userId,
+          } as Customer
+        })
+
+        // Filter customers by current store ID (client-side filter)
+        // Include customers that match the storeId, or customers without a storeId (legacy data)
+        if (storeId) {
+          const beforeFilter = customers.length
+          customers = customers.filter(customer => {
+            const customerStoreId = customer.storeId || ''
+            const matches = !customerStoreId || customerStoreId === '' || customerStoreId === storeId
+            if (!matches) {
+              console.log('[CustomersStore] Filtering out customer:', customer.id, 'name:', customer.name, 'customer storeId:', customerStoreId, 'expected:', storeId)
+            }
+            return matches
+          })
+          console.log('[CustomersStore] Filtered customers from', beforeFilter, 'to', customers.length, 'by storeId:', storeId)
+          
+          // If no customers after filtering, log a warning
+          if (customers.length === 0 && beforeFilter > 0) {
+            console.warn('[CustomersStore] WARNING: All customers were filtered out! This might indicate a storeId mismatch.')
+            console.warn('[CustomersStore] Staff storeId:', storeId, 'Superadmin userId:', userId)
+          }
+        } else {
+          console.warn('[CustomersStore] WARNING: No storeId available! Staff might not have a storeId set.')
+        }
+
+        // Sort customers by lastOrderDate (newest first)
+        customers.sort((a, b) => {
+          const dateA = a.lastOrderDate instanceof Date ? a.lastOrderDate.getTime() : new Date(a.lastOrderDate).getTime()
+          const dateB = b.lastOrderDate instanceof Date ? b.lastOrderDate.getTime() : new Date(b.lastOrderDate).getTime()
+          return dateB - dateA
         })
 
         this.customers = customers

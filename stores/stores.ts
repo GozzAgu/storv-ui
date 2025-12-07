@@ -47,8 +47,45 @@ export const useStoresStore = defineStore('stores', {
           if (import.meta.client) {
             localStorage.setItem('currentStoreId', staffMember.storeId)
           }
+          
+          // Fetch the store document so we can display store name and details
+          const db = useFirestore().getFirestoreInstance()
+          if (db) {
+            try {
+              const storeRef = doc(db, 'stores', staffMember.storeId)
+              const storeSnap = await getDoc(storeRef)
+              if (storeSnap.exists()) {
+                const storeData = storeSnap.data()
+                // Add store to stores array if not already there
+                const existingStore = this.stores.find(s => s.id === staffMember.storeId)
+                if (!existingStore) {
+                  this.stores = [{
+                    id: storeSnap.id,
+                    ...storeData,
+                  } as Store]
+                } else {
+                  // Update existing store
+                  const index = this.stores.findIndex(s => s.id === staffMember.storeId)
+                  if (index > -1) {
+                    this.stores[index] = {
+                      id: storeSnap.id,
+                      ...storeData,
+                    } as Store
+                  }
+                }
+                console.log('[StoresStore] Staff store loaded:', storeData.name || storeData.branchName || staffMember.storeId)
+              } else {
+                console.warn('[StoresStore] Staff store document not found:', staffMember.storeId)
+              }
+            } catch (storeError: any) {
+              console.warn('[StoresStore] Could not fetch staff store document:', storeError.message)
+            }
+          }
+          
           // Refresh data for staff's store
           this.refreshStoreData().catch(err => console.warn('Failed to refresh store data for staff:', err))
+        } else {
+          console.warn('[StoresStore] Staff member has no storeId assigned. Staff member:', staffMember)
         }
         return
       }

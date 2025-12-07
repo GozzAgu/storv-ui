@@ -127,63 +127,82 @@ export const useInventoryStore = defineStore('inventory', {
         }
       }
 
+      // Get current store ID to filter folders
+      const currentStoreId = await getCurrentStoreId()
+      
+      console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
+
+      // If staff, also log their staff document info for debugging
+      if (userStore.userData?.role === 'staff') {
+        try {
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+          const staffSnapshot = await getDocs(staffQuery)
+          if (!staffSnapshot.empty) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              console.log('[InventoryStore] Staff document - storeId:', staffData.storeId, 'createdBy:', staffData.createdBy)
+            }
+          }
+        } catch (e) {
+          console.warn('[InventoryStore] Could not fetch staff doc for logging:', e)
+        }
+      }
+
       try {
         const foldersRef = collection(db, 'inventoryFolders')
-        let querySnapshot
+        let allFolders: any[] = []
 
+        // For staff: Query ALL folders created by superadmin, then filter by storeId client-side
+        // This ensures we don't miss any data due to storeId mismatches
         try {
-          // Filter by createdBy to only get folders for this user
-          const q = query(
+          // First, query all folders created by the superadmin (without storeId filter)
+          const qAll = query(
             foldersRef,
-            where('createdBy', '==', userId),
-            orderBy('createdAt', 'desc')
+            where('createdBy', '==', userId)
           )
-          querySnapshot = await getDocs(q)
-        } catch (orderByError: any) {
-          // If orderBy fails (missing index), try without orderBy
-          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            const indexUrlMatch = orderByError.message?.match(/https:\/\/[^\s]+/)
-            const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-
-            // Check if warning was already shown for inventoryFolders
-            // Handle case where other stores (departments) set it as boolean
-            let warned = (window as any).__firestoreIndexWarned
-            
-            // Convert to object if it's a boolean (from other stores)
-            if (warned && typeof warned !== 'object') {
-              (window as any).__firestoreIndexWarned = {}
-              warned = (window as any).__firestoreIndexWarned
-            }
-            
-            // Initialize as object if it doesn't exist
-            if (!warned) {
-              (window as any).__firestoreIndexWarned = {}
-              warned = (window as any).__firestoreIndexWarned
-            }
-            
-            if (!warned.inventoryFolders) {
-              console.warn('[InventoryStore] orderBy failed for folders, retrying without orderBy. This is expected if indexes are not yet created.')
-              if (indexUrl) {
-                console.info('[InventoryStore] Create the index here:', indexUrl)
-              }
-              warned.inventoryFolders = true
-            }
-
-            // Retry without orderBy
-            const q = query(
+          const snapshotAll = await getDocs(qAll)
+          allFolders = snapshotAll.docs
+          console.log('[InventoryStore] Found', allFolders.length, 'total folders created by superadmin (userId:', userId + ')')
+          
+          // Log storeIds of found folders for debugging
+          if (allFolders.length > 0) {
+            const storeIds = allFolders.map(doc => doc.data().storeId).filter(Boolean)
+            console.log('[InventoryStore] StoreIds in found folders:', [...new Set(storeIds)])
+          }
+        } catch (error: any) {
+          console.error('[InventoryStore] Error querying folders:', error.message)
+          // If the basic query fails, try with orderBy as fallback
+          try {
+            const qWithOrder = query(
               foldersRef,
-              where('createdBy', '==', userId)
+              where('createdBy', '==', userId),
+              orderBy('createdAt', 'desc')
             )
-            querySnapshot = await getDocs(q)
-          } else {
-            throw orderByError
+            const snapshotWithOrder = await getDocs(qWithOrder)
+            allFolders = snapshotWithOrder.docs
+            console.log('[InventoryStore] Found', allFolders.length, 'folders with orderBy fallback')
+          } catch (orderError: any) {
+            // If orderBy also fails, try without it
+            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
+              const qBasic = query(
+                foldersRef,
+                where('createdBy', '==', userId)
+              )
+              const snapshotBasic = await getDocs(qBasic)
+              allFolders = snapshotBasic.docs
+              console.log('[InventoryStore] Found', allFolders.length, 'folders with basic query')
+            } else {
+              throw orderError
+            }
           }
         }
 
-        // Get current store ID to filter folders
-        const currentStoreId = await getCurrentStoreId()
+        console.log('[InventoryStore] Total folders found before filtering:', allFolders.length)
 
-        let folders = querySnapshot.docs.map((doc) => {
+        // Process the combined results
+        let folders = allFolders.map((doc) => {
           const data = doc.data()
           return {
             id: doc.id,
@@ -204,9 +223,28 @@ export const useInventoryStore = defineStore('inventory', {
           } as InventoryFolder
         })
 
-        // Filter folders by current store ID
+        // Filter folders by current store ID (client-side filter)
+        // Include folders that match the storeId, or folders without a storeId (legacy data)
         if (currentStoreId) {
-          folders = folders.filter(folder => folder.storeId === currentStoreId)
+          const beforeFilter = folders.length
+          folders = folders.filter(folder => {
+            // Include folders that match the storeId, or folders without a storeId (legacy data)
+            const folderStoreId = folder.storeId || ''
+            const matches = !folderStoreId || folderStoreId === '' || folderStoreId === currentStoreId
+            if (!matches) {
+              console.log('[InventoryStore] Filtering out folder:', folder.id, 'name:', folder.name, 'folder storeId:', folderStoreId, 'expected:', currentStoreId)
+            }
+            return matches
+          })
+          console.log('[InventoryStore] Filtered folders from', beforeFilter, 'to', folders.length, 'by storeId:', currentStoreId)
+          
+          // If no folders after filtering, log a warning
+          if (folders.length === 0 && beforeFilter > 0) {
+            console.warn('[InventoryStore] WARNING: All folders were filtered out! This might indicate a storeId mismatch.')
+            console.warn('[InventoryStore] Staff storeId:', currentStoreId, 'Superadmin userId:', userId)
+          }
+        } else {
+          console.warn('[InventoryStore] WARNING: No currentStoreId available! Staff might not have a storeId set.')
         }
 
         // If user is staff, filter folders by department access

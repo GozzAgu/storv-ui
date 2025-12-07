@@ -135,6 +135,9 @@ export const useReceiptsStore = defineStore('receipts', {
       // Get current store ID to filter receipts
       const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
       const storeId = await getCurrentStoreId()
+      
+      console.log('[ReceiptsStore] fetchReceipts - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
+      
       if (!storeId) {
         this.error = 'No store selected. Please select a store first.'
         this.loading = false
@@ -143,84 +146,113 @@ export const useReceiptsStore = defineStore('receipts', {
 
       try {
         const receiptsRef = collection(db, 'receipts')
-        let querySnapshot
+        let allReceipts: any[] = []
 
+        // Query ALL receipts created by superadmin first, then filter by storeId client-side
+        // This ensures we don't miss any data due to storeId mismatches
         try {
-          // Filter by createdBy AND storeId to only get receipts for this user and store
-          const q = query(
+          // Query all receipts created by the superadmin (without storeId filter)
+          const qAll = query(
             receiptsRef,
-            where('createdBy', '==', userId),
-            where('storeId', '==', storeId),
-            orderBy('createdAt', 'desc')
+            where('createdBy', '==', userId)
           )
-          querySnapshot = await getDocs(q)
-        } catch (orderByError: any) {
-          // If orderBy fails (missing index), try without orderBy
-          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            // Check if warning was already shown for receipts
-            // Handle case where other stores set it as boolean
-            let warned = typeof window !== 'undefined' ? (window as any).__firestoreIndexWarned : null
-            
-            // Convert to object if it's a boolean (from other stores)
-            if (warned && typeof warned !== 'object') {
-              (window as any).__firestoreIndexWarned = {}
-              warned = (window as any).__firestoreIndexWarned
-            }
-            
-            // Initialize as object if it doesn't exist
-            if (!warned) {
-              (window as any).__firestoreIndexWarned = {}
-              warned = (window as any).__firestoreIndexWarned
-            }
-            
-            // Only warn once
-            if (!warned.receipts) {
-              const indexUrlMatch = orderByError.message?.match(/https:\/\/[^\s]+/)
-              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-              console.warn('[ReceiptsStore] orderBy failed, retrying without orderBy. This is expected if indexes are not yet created.')
-              if (indexUrl) {
-                console.info('[ReceiptsStore] Create the index here:', indexUrl)
-              }
-              warned.receipts = true
-            }
-            
-            // Try with just storeId filter if orderBy fails
-            try {
-              const q = query(
+          const snapshotAll = await getDocs(qAll)
+          allReceipts = snapshotAll.docs
+          console.log('[ReceiptsStore] Found', allReceipts.length, 'total receipts created by superadmin (userId:', userId + ')')
+          
+          // Log storeIds of found receipts for debugging
+          if (allReceipts.length > 0) {
+            const storeIds = allReceipts.map(doc => doc.data().storeId).filter(Boolean)
+            console.log('[ReceiptsStore] StoreIds in found receipts:', [...new Set(storeIds)])
+          }
+        } catch (error: any) {
+          console.error('[ReceiptsStore] Error querying receipts:', error.message)
+          // If the basic query fails, try with orderBy as fallback
+          try {
+            const qWithOrder = query(
+              receiptsRef,
+              where('createdBy', '==', userId),
+              orderBy('createdAt', 'desc')
+            )
+            const snapshotWithOrder = await getDocs(qWithOrder)
+            allReceipts = snapshotWithOrder.docs
+            console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts with orderBy fallback')
+          } catch (orderError: any) {
+            // If orderBy also fails, try without it
+            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
+              const qBasic = query(
                 receiptsRef,
-                where('createdBy', '==', userId),
-                where('storeId', '==', storeId)
+                where('createdBy', '==', userId)
               )
-              querySnapshot = await getDocs(q)
-            } catch (storeFilterError: any) {
-              // If storeId filter also fails, fall back to createdBy only and filter in memory
-              console.warn('[ReceiptsStore] StoreId filter failed, filtering in memory:', storeFilterError.message)
-              const q = query(receiptsRef, where('createdBy', '==', userId))
-              querySnapshot = await getDocs(q)
+              const snapshotBasic = await getDocs(qBasic)
+              allReceipts = snapshotBasic.docs
+              console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts with basic query')
+            } else {
+              throw orderError
             }
-          } else {
-            throw orderByError
           }
         }
 
-        const receipts: Receipt[] = []
-        querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data()
-          // Double-check that the receipt belongs to this user and store
-          if (data.createdBy === userId && data.storeId === storeId) {
-            receipts.push({
-              id: docSnapshot.id,
-              ...data,
-              date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-              updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-              actualCreator: data.actualCreator || undefined,
-            } as Receipt)
-          }
+        console.log('[ReceiptsStore] Total receipts found before filtering:', allReceipts.length)
+
+        // Process and filter receipts by storeId client-side
+        let receipts = allReceipts.map((doc) => {
+          const data = doc.data()
+          return {
+            id: doc.id,
+            receiptNumber: data.receiptNumber || '',
+            customerName: data.customerName || '',
+            customerEmail: data.customerEmail || '',
+            customerPhone: data.customerPhone || '',
+            customerAddress: data.customerAddress || '',
+            date: data.date?.toDate ? data.date.toDate() : new Date(data.date) || new Date(),
+            items: data.items || [],
+            itemsCount: data.itemsCount || 0,
+            total: data.total || 0,
+            paymentMethod: data.paymentMethod || '',
+            status: data.status || 'completed',
+            notes: data.notes || '',
+            folderId: data.folderId || '',
+            itemIds: data.itemIds || [],
+            storeId: data.storeId || '',
+            storeBranchName: data.storeBranchName || '',
+            createdByUserName: data.createdByUserName || '',
+            createdBy: data.createdBy || userId,
+            actualCreator: data.actualCreator || data.createdBy,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
+            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
+            splitPayments: data.splitPayments || undefined,
+            isSwapIn: data.isSwapIn || false,
+            swapInFolderId: data.swapInFolderId || undefined,
+            swapInItemId: data.swapInItemId || undefined,
+          } as Receipt
         })
 
-        // Sort by date (newest first) if orderBy failed
-        receipts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        // Filter receipts by current store ID (client-side filter)
+        // Include receipts that match the storeId, or receipts without a storeId (legacy data)
+        const beforeFilter = receipts.length
+        receipts = receipts.filter(receipt => {
+          const receiptStoreId = receipt.storeId || ''
+          const matches = !receiptStoreId || receiptStoreId === '' || receiptStoreId === storeId
+          if (!matches) {
+            console.log('[ReceiptsStore] Filtering out receipt:', receipt.id, 'receiptNumber:', receipt.receiptNumber, 'receipt storeId:', receiptStoreId, 'expected:', storeId)
+          }
+          return matches
+        })
+        console.log('[ReceiptsStore] Filtered receipts from', beforeFilter, 'to', receipts.length, 'by storeId:', storeId)
+        
+        // If no receipts after filtering, log a warning
+        if (receipts.length === 0 && beforeFilter > 0) {
+          console.warn('[ReceiptsStore] WARNING: All receipts were filtered out! This might indicate a storeId mismatch.')
+          console.warn('[ReceiptsStore] Staff storeId:', storeId, 'Superadmin userId:', userId)
+        }
+
+        // Sort receipts by date (newest first) if we didn't use orderBy
+        receipts.sort((a, b) => {
+          const dateA = a.date instanceof Date ? a.date.getTime() : new Date(a.date).getTime()
+          const dateB = b.date instanceof Date ? b.date.getTime() : new Date(b.date).getTime()
+          return dateB - dateA
+        })
 
         this.receipts = receipts
       } catch (error: any) {
@@ -243,6 +275,35 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
+      // Check if user is staff to determine which UID to use for verification
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      let userId = authStore.currentUser.uid
+
+      // If the current user is staff, get the super admin UID from the staff document
+      if (userStore.userData?.role === 'staff') {
+        try {
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', userId))
+          const staffSnapshot = await getDocs(staffQuery)
+
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              if (staffData.createdBy) {
+                userId = staffData.createdBy
+              }
+            }
+          }
+        } catch (error: any) {
+          console.warn('[ReceiptsStore] Could not fetch staff document in fetchReceipt:', error.message)
+        }
+      }
+
       try {
         const receiptRef = doc(db, 'receipts', receiptId)
         const receiptSnap = await getDoc(receiptRef)
@@ -253,8 +314,8 @@ export const useReceiptsStore = defineStore('receipts', {
 
         const data = receiptSnap.data()
         
-        // Verify ownership
-        if (data.createdBy !== authStore.currentUser.uid) {
+        // Verify ownership - check against superadmin UID for staff
+        if (data.createdBy !== userId) {
           throw new Error('Access denied')
         }
 
