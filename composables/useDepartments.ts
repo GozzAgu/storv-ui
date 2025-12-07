@@ -11,6 +11,7 @@ export interface Department {
   managerId?: string
   staffCount: number
   storeId: string // Store this department belongs to
+  isActive?: boolean // Whether the department is active (defaults to true for backward compatibility)
   createdAt: any
   updatedAt: any
   createdBy: string

@@ -236,13 +236,20 @@
                       ? 'bg-primary-50 dark:bg-primary-900/20'
                       : currentStore?.id === store.id
                         ? 'bg-primary-50/50 dark:bg-primary-900/10'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                        : store.id !== storesStore.currentStoreId
+                          ? 'text-gray-400 dark:text-gray-500 opacity-60'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   ]"
                 >
                   <NuxtLink
-                    :to="`/dashboard/stores/${store.id}/departments`"
+                    :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
                     class="flex items-center flex-1 min-w-0"
-                    :class="{ 'pointer-events-none opacity-50': switchingStore && store.id !== storesStore.currentStoreId }"
+                    :class="{ 
+                      'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (store.id !== storesStore.currentStoreId),
+                      'opacity-60': store.id !== storesStore.currentStoreId
+                    }"
+                    :title="store.id !== storesStore.currentStoreId ? 'Switch to this store to access it' : ''"
+                    @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
                     <svg 
                       class="w-5 h-5 mr-3 flex-shrink-0"
@@ -250,7 +257,9 @@
                         ? 'text-primary-600 dark:text-primary-400'
                         : currentStore?.id === store.id
                           ? 'text-primary-600/80 dark:text-primary-400/80'
-                          : 'text-gray-500 dark:text-gray-400'"
+                          : store.id !== storesStore.currentStoreId
+                            ? 'text-gray-300 dark:text-gray-600'
+                            : 'text-gray-500 dark:text-gray-400'"
                       fill="none" 
                       stroke="currentColor" 
                       viewBox="0 0 24 24"
@@ -263,21 +272,28 @@
                         ? 'text-primary-700 dark:text-primary-300'
                         : currentStore?.id === store.id
                           ? 'text-primary-700/80 dark:text-primary-300/80'
-                          : 'text-gray-700 dark:text-gray-300'"
+                          : store.id !== storesStore.currentStoreId
+                            ? 'text-gray-400 dark:text-gray-500'
+                            : 'text-gray-700 dark:text-gray-300'"
                     >
                       {{ store.name }}
+                      <span v-if="store.id !== storesStore.currentStoreId" class="ml-2 text-xs text-gray-400 dark:text-gray-500 italic">(Inactive)</span>
                     </span>
                   </NuxtLink>
                   <button
-                    @click.stop="toggleStoreExpanded(store.id)"
-                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0"
+                    @click.stop="store.id === storesStore.currentStoreId ? toggleStoreExpanded(store.id) : null"
+                    :disabled="store.id !== storesStore.currentStoreId"
+                    class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     :class="[
                       route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                         ? 'text-primary-600 dark:text-primary-400'
                         : currentStore?.id === store.id
                           ? 'text-primary-600/80 dark:text-primary-400/80'
-                          : 'text-gray-400 dark:text-gray-500'
+                          : store.id !== storesStore.currentStoreId
+                            ? 'text-gray-300 dark:text-gray-600'
+                            : 'text-gray-400 dark:text-gray-500'
                     ]"
+                    :title="store.id !== storesStore.currentStoreId ? 'Switch to this store to access it' : ''"
                   >
                     <ChevronDownIcon 
                       :class="[
@@ -338,9 +354,13 @@
                     <div v-if="expandedDepartments[department.id]" class="pl-7 pr-5 space-y-0.5 mt-1">
                       <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
                         <NuxtLink
-                          :to="`/dashboard/departments/${department.id}`"
+                          :to="department.isActive === false ? '#' : `/dashboard/departments/${department.id}`"
                           class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
-                          :class="{ 'pointer-events-none opacity-50': switchingStore }"
+                          :class="{ 
+                            'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (department.isActive === false)
+                          }"
+                          :title="department.isActive === false ? 'This department is inactive' : ''"
+                          @click.prevent="department.isActive === false ? null : null"
                         >
                           <UsersIcon 
                             class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
@@ -394,13 +414,19 @@
                         'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                         route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                           ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                          : department.isActive === false
+                            ? 'text-gray-400 dark:text-gray-500 opacity-60'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
                       ]"
                     >
                       <NuxtLink
-                        :to="`/dashboard/departments/${department.id}`"
+                        :to="department.isActive === false ? '#' : `/dashboard/departments/${department.id}`"
                         class="flex items-center gap-2.5 flex-1 min-w-0"
-                        :class="{ 'pointer-events-none opacity-50': switchingStore }"
+                        :class="{ 
+                          'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (department.isActive === false)
+                        }"
+                        :title="department.isActive === false ? 'This department is inactive' : ''"
+                        @click.prevent="department.isActive === false ? null : null"
                       >
                         <BuildingOfficeIcon 
                           :class="[
@@ -435,9 +461,13 @@
                     <div v-if="expandedDepartments[department.id]" class="pl-7 pr-5 space-y-0.5 mt-1">
                       <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
                         <NuxtLink
-                          :to="`/dashboard/departments/${department.id}`"
+                          :to="department.isActive === false ? '#' : `/dashboard/departments/${department.id}`"
                           class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
-                          :class="{ 'pointer-events-none opacity-50': switchingStore }"
+                          :class="{ 
+                            'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (department.isActive === false)
+                          }"
+                          :title="department.isActive === false ? 'This department is inactive' : ''"
+                          @click.prevent="department.isActive === false ? null : null"
                         >
                           <UsersIcon 
                             class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"

@@ -1675,20 +1675,35 @@ const handleFileImport = async (event: Event) => {
       }
     }
 
-    // Check for duplicate serial numbers if folder has serial numbers enabled
+    // Check for duplicate serial numbers - always check if items have serial numbers
     let skippedDuplicates = 0
     const duplicateSerialNumbers: string[] = []
     
-    if (folder.value?.hasSerialNumbers && itemsToImport.length > 0) {
-      // Find serialNo field name from template
+    if (itemsToImport.length > 0) {
+      // Find serialNo field name from template - check multiple possible field names
       const serialNoField = templateFields.find(
         f => f.name.toLowerCase() === 'serialno' || 
         f.name.toLowerCase() === 'serialnumber' ||
         f.name.toLowerCase() === 'serial_no' ||
-        f.name.toLowerCase() === 'serial_number'
+        f.name.toLowerCase() === 'serial_number' ||
+        f.label?.toLowerCase() === 'serial number' ||
+        f.label?.toLowerCase() === 'serial no' ||
+        f.label?.toLowerCase() === 'serial'
       )
       
-      if (serialNoField) {
+      // Also check if any items in the import have serial number data (even if field not in template)
+      const hasSerialNumberData = itemsToImport.some(itemEntry => {
+        const itemData = itemEntry.data
+        return itemData['serialNo'] || 
+               itemData['serialNumber'] ||
+               itemData['serialno'] ||
+               itemData['serialnumber'] ||
+               itemData['serial_no'] ||
+               itemData['serial_number']
+      })
+      
+      // Check for duplicates if we have serial number field or data
+      if (serialNoField || hasSerialNumberData) {
         // STEP 1: Fetch items ONLY from the current folder
         const currentFolderId = folderId.value
         console.log('[Import] ========== DUPLICATE CHECK START ==========')
@@ -1721,7 +1736,19 @@ const handleFileImport = async (event: Event) => {
             return
           }
           
-          const serialNo = item[serialNoField.name] || item['serialNo'] || item['serialNumber']
+          // Extract serial number from existing item - try multiple possible field names
+          let serialNo: any = null
+          if (serialNoField) {
+            serialNo = item[serialNoField.name]
+          }
+          if (!serialNo) {
+            serialNo = item['serialNo'] || 
+                      item['serialNumber'] ||
+                      item['serialno'] ||
+                      item['serialnumber'] ||
+                      item['serial_no'] ||
+                      item['serial_number']
+          }
           if (serialNo) {
             const serialNoNormalized = serialNo.toString().trim().toLowerCase()
             existingSerialNumbers.add(serialNoNormalized)
@@ -1744,7 +1771,7 @@ const handleFileImport = async (event: Event) => {
           const rowNumber = itemEntry.rowNumber
           
           // Extract serial number - try multiple possible field names
-          const serialNo = itemData[serialNoField.name] || 
+          const serialNo = (serialNoField ? itemData[serialNoField.name] : null) ||
                           itemData['serialNo'] || 
                           itemData['serialNumber'] ||
                           itemData['serialno'] ||
@@ -1752,11 +1779,18 @@ const handleFileImport = async (event: Event) => {
                           itemData['serial_no'] ||
                           itemData['serial_number']
           
-          // If no serial number, that's a validation error (not a duplicate)
+          // If no serial number found, skip duplicate check for this item (but still import it)
           if (!serialNo || serialNo.toString().trim() === '') {
-            errors.push(`Row ${rowNumber}: Serial number is required but missing`)
-            console.log(`[Import] Row ${rowNumber}: Missing serial number - will skip as validation error`)
-            return // Skip this item due to validation error
+            // Only add to errors if serial number was required (folder has serial numbers enabled)
+            if (folder.value?.hasSerialNumbers) {
+              errors.push(`Row ${rowNumber}: Serial number is required but missing`)
+              console.log(`[Import] Row ${rowNumber}: Missing serial number - will skip as validation error`)
+              return // Skip this item due to validation error
+            }
+            // If serial numbers are not required, add item without checking duplicates
+            itemsToImportFiltered.push(itemEntry)
+            console.log(`[Import] Row ${rowNumber}: No serial number - adding without duplicate check`)
+            return
           }
           
           const serialNoTrimmed = serialNo.toString().trim()
@@ -1808,7 +1842,8 @@ const handleFileImport = async (event: Event) => {
           console.error('[Import] Validation errors:', errors.length)
         }
       } else {
-        console.warn('[Import] Serial number field not found in template - skipping duplicate check')
+        // No serial number field or data found - import all items without duplicate check
+        console.log('[Import] No serial number field or data detected - importing all items without duplicate check')
       }
     }
 

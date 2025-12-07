@@ -171,8 +171,8 @@
         v-for="department in paginatedDepartments"
         :key="department.id"
         padding="md"
-        extra-class="group hover:shadow-lg transition-shadow relative cursor-pointer"
-        @click="navigateToDepartment(department.id)"
+        :extra-class="`group transition-shadow relative ${department.isActive === false ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg cursor-pointer'}`"
+        @click="department.isActive === false ? null : navigateToDepartment(department.id)"
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
@@ -190,19 +190,24 @@
           </div>
           <div v-if="canManageDepartments" class="flex items-center gap-1 z-10 flex-shrink-0">
             <button
-              @click.stop="handleEditDepartment(department)"
-              class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-              title="Edit"
+              @click.stop="department.isActive === false ? null : handleEditDepartment(department)"
+              :disabled="department.isActive === false"
+              class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :title="department.isActive === false ? 'Department is inactive' : 'Edit'"
             >
               <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
             </button>
             <button
-              @click.stop="handleDeleteDepartment(department)"
-              class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-              title="Delete"
+              @click.stop="department.isActive === false ? null : handleDeleteDepartment(department)"
+              :disabled="department.isActive === false"
+              class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :title="department.isActive === false ? 'Department is inactive' : 'Delete'"
             >
               <TrashIcon class="w-5 h-5 flex-shrink-0" />
             </button>
+          </div>
+          <div v-if="department.isActive === false" class="absolute top-2 right-2 z-10">
+            <span class="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">Inactive</span>
           </div>
         </div>
 
