@@ -493,9 +493,37 @@ const handleDeleteStaff = async (staffMember: Staff) => {
 }
 
 const handleStaffSuccess = async () => {
-  await loadDepartmentData() // Reload staff list
+  // Close modal immediately for better UX
   showStaffModal.value = false
   editingStaff.value = null
+  
+  // Refresh staff list in the background (non-blocking)
+  // The store's createStaff already triggers background refresh, but we'll also refresh here
+  // to ensure the table updates reactively
+  isLoadingStaff.value = true
+  
+  // Refresh in background without blocking
+  Promise.all([
+    // Refresh staff for this department
+    staffStore.fetchStaffByDepartment(departmentId.value).then(() => {
+      // Update local staff ref from store getter
+      staff.value = staffStore.getStaffByDepartment(departmentId.value)
+    }),
+    // Also refresh the department to update staff count
+    departmentsStore.fetchDepartment(departmentId.value).then(() => {
+      // Update local department ref
+      const updatedDept = departmentsStore.getDepartmentById(departmentId.value)
+      if (updatedDept) {
+        department.value = updatedDept
+      }
+    }),
+  ]).then(() => {
+    console.log('[Department Page] Staff list refreshed after creation')
+  }).catch((error: any) => {
+    console.error('Error refreshing staff after creation:', error)
+  }).finally(() => {
+    isLoadingStaff.value = false
+  })
 }
 
 const handleStaffError = (error: string) => {

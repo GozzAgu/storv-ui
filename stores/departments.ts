@@ -4,6 +4,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import { getDepartmentsCollection, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Department } from '~/composables/useDepartments'
 
 export { CORE_DEPARTMENTS } from '~/composables/useDepartments'
@@ -93,14 +94,14 @@ export const useDepartmentsStore = defineStore('departments', {
       }
 
       try {
-        const departmentsRef = collection(db, 'departments')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments
+        const departmentsRef = getDepartmentsCollection(db, userId, storeId)
         let querySnapshot
 
         try {
-          // Filter by storeId AND createdBy to only get departments for this store
+          // Filter by createdBy to only get departments for this user
           const q = query(
             departmentsRef,
-            where('storeId', '==', storeId),
             where('createdBy', '==', userId),
             orderBy('createdAt', 'desc')
           )
@@ -125,7 +126,6 @@ export const useDepartmentsStore = defineStore('departments', {
             // Retry query without orderBy - this works but is less efficient
             const q = query(
               departmentsRef,
-              where('storeId', '==', storeId),
               where('createdBy', '==', userId)
             )
             querySnapshot = await getDocs(q)
@@ -137,8 +137,8 @@ export const useDepartmentsStore = defineStore('departments', {
         const departments: Department[] = []
         querySnapshot.forEach((docSnapshot) => {
           const data = docSnapshot.data()
-          // Double-check that the department belongs to this store and user
-          if (data.createdBy === userId && data.storeId === storeId) {
+          // Double-check that the department belongs to this user
+          if (data.createdBy === userId) {
             departments.push({
               id: docSnapshot.id,
               ...data,
@@ -186,8 +186,15 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('No store selected')
       }
 
+      // Get userId for hierarchical path (superadmin's UID)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+
       try {
-        const departmentRef = doc(db, 'departments', departmentId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
+        const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
         const departmentSnap = await getDoc(departmentRef)
 
         if (!departmentSnap.exists()) {
@@ -195,37 +202,9 @@ export const useDepartmentsStore = defineStore('departments', {
         }
 
         const data = departmentSnap.data()
-        let userId = authStore.currentUser.uid
 
-        // If the current user is staff, get the super admin UID from the staff document
-        const userStore = useUserStore()
-        
-        if (!userStore.userData) {
-          await userStore.fetchUserData(authStore.currentUser.uid)
-        }
-
-        if (userStore.userData?.role === 'staff') {
-          try {
-            const staffRef = collection(db, 'staff')
-            const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-            const staffSnapshot = await getDocs(staffQuery)
-
-            if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-              const staffDoc = staffSnapshot.docs[0]
-              if (staffDoc) {
-                const staffData = staffDoc.data()
-                if (staffData.createdBy) {
-                  userId = staffData.createdBy
-                }
-              }
-            }
-          } catch (error: any) {
-            console.warn('[DepartmentsStore] Could not fetch staff document in fetchDepartment:', error.message)
-          }
-        }
-
-        // Only return department if it belongs to this store and user
-        if (data.createdBy !== userId || data.storeId !== storeId) {
+        // Only return department if it belongs to this user
+        if (data.createdBy !== userId) {
           throw new Error('Department not found or access denied')
         }
 
@@ -266,7 +245,11 @@ export const useDepartmentsStore = defineStore('departments', {
       }
 
       try {
-        const departmentsRef = collection(db, 'departments')
+        // Get userId for hierarchical path
+        const userId = authStore.currentUser.uid
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments
+        const departmentsRef = getDepartmentsCollection(db, userId, storeId)
         const newDepartmentRef = doc(departmentsRef)
 
         const newDepartment: Omit<Department, 'id'> = {
@@ -329,7 +312,15 @@ export const useDepartmentsStore = defineStore('departments', {
           throw new Error('Department not found or access denied')
         }
 
-        const departmentRef = doc(db, 'departments', departmentId)
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
+        const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
         await updateDoc(departmentRef, {
           ...updates,
           updatedAt: serverTimestamp(),
@@ -410,14 +401,45 @@ export const useDepartmentsStore = defineStore('departments', {
     },
 
     // Update staff count for a department
-    async updateStaffCount(departmentId: string, count: number) {
+    async updateStaffCount(departmentId: string, count: number, storeId?: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
       }
 
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
       try {
-        const departmentRef = doc(db, 'departments', departmentId)
+        // Get userId and storeId for hierarchical path
+        const userId = await getQueryUserId()
+        if (!userId) {
+          throw new Error('User ID not available')
+        }
+        
+        // Use provided storeId or get from current store
+        let finalStoreId: string | undefined = storeId
+        if (!finalStoreId) {
+          const currentStoreId = await getCurrentStoreId()
+          finalStoreId = currentStoreId || undefined
+        }
+        
+        // If still no storeId, try to get it from the department
+        if (!finalStoreId) {
+          const department = this.getDepartmentById(departmentId)
+          if (department?.storeId) {
+            finalStoreId = department.storeId
+          }
+        }
+        
+        if (!finalStoreId) {
+          throw new Error('No store selected')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
+        const departmentRef = getDepartmentDocument(db, userId, finalStoreId, departmentId)
         await updateDoc(departmentRef, {
           staffCount: count,
           updatedAt: serverTimestamp(),

@@ -11,18 +11,10 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    // Stores collection
-    match /stores/{storeId} {
-      // Allow read if user is authenticated (store access will be filtered client-side)
-      allow read: if isAuthenticated();
-      
-      // Allow create if user is super admin and creating their own store
-      allow create: if isAuthenticated() && 
-                     request.resource.data.ownerId == request.auth.uid;
-      
-      // Allow update/delete if user owns the store
-      allow update, delete: if isAuthenticated() && 
-                             resource.data.ownerId == request.auth.uid;
+    // Helper function to check if user is staff member accessing their own store
+    function isStaffMember(userId, storeId) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(request.resource.data.departmentId)/staff/$(request.auth.uid));
     }
     
     // Users collection - users can read/write their own document
@@ -38,103 +30,163 @@ service cloud.firestore {
       
       // Only allow delete by the document owner
       allow delete: if isOwner(userId);
+      
+      // Stores subcollection: users/{userId}/stores/{storeId}
+      match /stores/{storeId} {
+        // Allow read if user owns the store OR if staff member belongs to this store
+        allow read: if isAuthenticated() && 
+                     (resource.data.ownerId == request.auth.uid || 
+                      exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+        
+        // Allow create if user is creating their own store
+        allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+        
+        // Allow update/delete if user owns the store
+        allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+        
+        // Departments subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}
+        match /departments/{departmentId} {
+          // Allow read if user owns the store OR if staff member belongs to this department
+          allow read: if isAuthenticated() && 
+                       (resource.data.createdBy == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(departmentId)/staff/$(request.auth.uid)));
+          
+          // Allow create if user is creating their own department
+          allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+          
+          // Allow update if user owns the department
+          allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          
+          // Allow delete if user owns the department
+          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          
+          // Staff subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
+          match /staff/{staffId} {
+            // Allow read if user owns the staff member OR if it's the staff member's own document (for staff login)
+            allow read: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid || resource.data.authUid == request.auth.uid);
+            
+            // Allow create if user is creating their own staff member
+            allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+            
+            // Allow update if user owns the staff member
+            allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+            
+            // Allow delete if user owns the staff member
+            allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          }
+        }
+        
+        // Inventory folders subcollection: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
+        match /inventoryFolders/{folderId} {
+          // Allow read if user owns the store OR if staff member belongs to this store
+          allow read: if isAuthenticated() && 
+                       (resource.data.createdBy == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow create if user is creating their own folder
+          allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+          
+          // Allow update if user owns the folder
+          allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          
+          // Allow delete if user owns the folder
+          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+        }
+        
+        // Inventory items subcollection: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        match /inventoryItems/{itemId} {
+          // Allow read if user owns the store OR if staff member belongs to this store
+          allow read: if isAuthenticated() && 
+                       (resource.data.createdBy == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow create if user is creating their own item OR if staff member belongs to this store
+          allow create: if isAuthenticated() && 
+                         (request.resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow update if user owns the item OR if staff member belongs to this store
+          allow update: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow delete if user owns the item
+          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+        }
+        
+        // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
+        match /receipts/{receiptId} {
+          // Allow read if user owns the store OR if staff member belongs to this store
+          allow read: if isAuthenticated() && 
+                       (resource.data.createdBy == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow create if user is creating their own receipt OR if staff member belongs to this store
+          allow create: if isAuthenticated() && 
+                         (request.resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow update if user owns the receipt OR if staff member belongs to this store
+          allow update: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow delete if user owns the receipt
+          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+        }
+        
+        // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
+        match /customers/{customerId} {
+          // Allow read if user owns the store OR if staff member belongs to this store
+          allow read: if isAuthenticated() && 
+                       (resource.data.createdBy == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow create if user is creating their own customer OR if staff member belongs to this store
+          allow create: if isAuthenticated() && 
+                         (request.resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow update if user owns the customer OR if staff member belongs to this store
+          allow update: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow delete if user owns the customer
+          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+        }
+      }
     }
     
-    // Departments collection - users can only access their own departments
-    // Store-level filtering is handled client-side via storeId field
+    // Legacy collections - keep for backward compatibility during migration
+    // These will be removed after migration is complete
+    match /stores/{storeId} {
+      allow read, write: if false; // Deny all access to legacy stores collection
+    }
+    
     match /departments/{departmentId} {
-      // Allow read if user owns the department
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow create if user is creating their own department
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the department
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the department
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy departments collection
     }
     
-    // Staff collection - users can only access their own staff
-    // Store-level filtering is handled client-side via storeId field
     match /staff/{staffId} {
-      // Allow read if user owns the staff member OR if it's the staff member's own document (for staff login)
-      allow read: if isAuthenticated() && 
-                   (resource.data.createdBy == request.auth.uid || resource.data.authUid == request.auth.uid);
-      
-      // Allow create if user is creating their own staff member
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the staff member
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the staff member
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy staff collection
     }
     
-    // Inventory folders collection - users can only access their own folders
-    // Store-level filtering is handled client-side via storeId field
     match /inventoryFolders/{folderId} {
-      // Allow read if user owns the folder
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow create if user is creating their own folder
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the folder
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the folder
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy inventoryFolders collection
     }
     
-    // Inventory items collection - users can only access their own items
-    // Store-level filtering is handled client-side via storeId field
     match /inventoryItems/{itemId} {
-      // Allow read if user owns the item
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow create if user is creating their own item
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the item
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the item
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy inventoryItems collection
     }
     
-    // Receipts collection - users can only access their own receipts
-    // Store-level filtering is handled client-side via storeId field
     match /receipts/{receiptId} {
-      // Allow read if user owns the receipt
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow create if user is creating their own receipt
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the receipt
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the receipt
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy receipts collection
     }
     
-    // Customers collection - users can only access their own customers
-    // Store-level filtering is handled client-side via storeId field
     match /customers/{customerId} {
-      // Allow read if user owns the customer
-      allow read: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow create if user is creating their own customer
-      allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
-      
-      // Allow update if user owns the customer
-      allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
-      
-      // Allow delete if user owns the customer
-      allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      allow read, write: if false; // Deny all access to legacy customers collection
     }
     
     // Deny all other access by default

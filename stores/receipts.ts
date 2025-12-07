@@ -3,6 +3,7 @@ import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
+import { getReceiptsCollection, getReceiptDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import { useStaffStore } from './staff'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
@@ -145,55 +146,33 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       try {
-        const receiptsRef = collection(db, 'receipts')
-        let allReceipts: any[] = []
+        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts
+        const receiptsRef = getReceiptsCollection(db, userId, storeId)
+        let querySnapshot
 
-        // Query ALL receipts created by superadmin first, then filter by storeId client-side
-        // This ensures we don't miss any data due to storeId mismatches
         try {
-          // Query all receipts created by the superadmin (without storeId filter)
-          const qAll = query(
+          // Filter by createdBy to only get receipts for this user
+          const q = query(
             receiptsRef,
-            where('createdBy', '==', userId)
+            where('createdBy', '==', userId),
+            orderBy('createdAt', 'desc')
           )
-          const snapshotAll = await getDocs(qAll)
-          allReceipts = snapshotAll.docs
-          console.log('[ReceiptsStore] Found', allReceipts.length, 'total receipts created by superadmin (userId:', userId + ')')
-          
-          // Log storeIds of found receipts for debugging
-          if (allReceipts.length > 0) {
-            const storeIds = allReceipts.map(doc => doc.data().storeId).filter(Boolean)
-            console.log('[ReceiptsStore] StoreIds in found receipts:', [...new Set(storeIds)])
-          }
-        } catch (error: any) {
-          console.error('[ReceiptsStore] Error querying receipts:', error.message)
-          // If the basic query fails, try with orderBy as fallback
-          try {
-            const qWithOrder = query(
+          querySnapshot = await getDocs(q)
+        } catch (orderByError: any) {
+          // If orderBy fails (missing index), try without orderBy
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            const q = query(
               receiptsRef,
-              where('createdBy', '==', userId),
-              orderBy('createdAt', 'desc')
+              where('createdBy', '==', userId)
             )
-            const snapshotWithOrder = await getDocs(qWithOrder)
-            allReceipts = snapshotWithOrder.docs
-            console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts with orderBy fallback')
-          } catch (orderError: any) {
-            // If orderBy also fails, try without it
-            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
-              const qBasic = query(
-                receiptsRef,
-                where('createdBy', '==', userId)
-              )
-              const snapshotBasic = await getDocs(qBasic)
-              allReceipts = snapshotBasic.docs
-              console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts with basic query')
-            } else {
-              throw orderError
-            }
+            querySnapshot = await getDocs(q)
+          } else {
+            throw orderByError
           }
         }
 
-        console.log('[ReceiptsStore] Total receipts found before filtering:', allReceipts.length)
+        const allReceipts = querySnapshot.docs
+        console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId + ')')
 
         // Process and filter receipts by storeId client-side
         let receipts = allReceipts.map((doc) => {
@@ -228,24 +207,8 @@ export const useReceiptsStore = defineStore('receipts', {
           } as Receipt
         })
 
-        // Filter receipts by current store ID (client-side filter)
-        // Include receipts that match the storeId, or receipts without a storeId (legacy data)
-        const beforeFilter = receipts.length
-        receipts = receipts.filter(receipt => {
-          const receiptStoreId = receipt.storeId || ''
-          const matches = !receiptStoreId || receiptStoreId === '' || receiptStoreId === storeId
-          if (!matches) {
-            console.log('[ReceiptsStore] Filtering out receipt:', receipt.id, 'receiptNumber:', receipt.receiptNumber, 'receipt storeId:', receiptStoreId, 'expected:', storeId)
-          }
-          return matches
-        })
-        console.log('[ReceiptsStore] Filtered receipts from', beforeFilter, 'to', receipts.length, 'by storeId:', storeId)
-        
-        // If no receipts after filtering, log a warning
-        if (receipts.length === 0 && beforeFilter > 0) {
-          console.warn('[ReceiptsStore] WARNING: All receipts were filtered out! This might indicate a storeId mismatch.')
-          console.warn('[ReceiptsStore] Staff storeId:', storeId, 'Superadmin userId:', userId)
-        }
+        // No need to filter by storeId since we're already querying from the store's subcollection
+        // All receipts returned are already in the correct store
 
         // Sort receipts by date (newest first) if we didn't use orderBy
         receipts.sort((a, b) => {
@@ -275,37 +238,20 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
-      // Check if user is staff to determine which UID to use for verification
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
+      // Get userId for hierarchical path (superadmin's UID)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
       }
-
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[ReceiptsStore] Could not fetch staff document in fetchReceipt:', error.message)
-        }
+      
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
       }
 
       try {
-        const receiptRef = doc(db, 'receipts', receiptId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts/{receiptId}
+        const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
         const receiptSnap = await getDoc(receiptRef)
 
         if (!receiptSnap.exists()) {
@@ -391,7 +337,9 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       try {
-        const receiptsRef = collection(db, 'receipts')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts
+        const userId = createdByUid
+        const receiptsRef = getReceiptsCollection(db, userId, storeId)
         const newReceiptRef = doc(receiptsRef)
 
         const now = new Date()
@@ -476,9 +424,20 @@ export const useReceiptsStore = defineStore('receipts', {
         }
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+      
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        // First verify the receipt belongs to this user
-        const receiptRef = doc(db, 'receipts', receiptId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts/{receiptId}
+        const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
         const receiptSnap = await getDoc(receiptRef)
 
         if (!receiptSnap.exists()) {
@@ -486,7 +445,7 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         const receiptData = receiptSnap.data()
-        if (receiptData.createdBy !== authStore.currentUser.uid) {
+        if (receiptData.createdBy !== userId) {
           throw new Error('Access denied')
         }
 
@@ -540,9 +499,20 @@ export const useReceiptsStore = defineStore('receipts', {
         }
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+      
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        // First verify the receipt belongs to this user
-        const receiptRef = doc(db, 'receipts', receiptId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts/{receiptId}
+        const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
         const receiptSnap = await getDoc(receiptRef)
 
         if (!receiptSnap.exists()) {

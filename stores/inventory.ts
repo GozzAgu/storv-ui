@@ -5,6 +5,7 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
+import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventoryItemsCollection, getInventoryItemDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 
 export interface TemplateField {
   id: string
@@ -130,6 +131,12 @@ export const useInventoryStore = defineStore('inventory', {
       // Get current store ID to filter folders
       const currentStoreId = await getCurrentStoreId()
       
+      if (!currentStoreId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
+      }
+      
       console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
 
       // If staff, also log their staff document info for debugging
@@ -151,57 +158,35 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        const foldersRef = collection(db, 'inventoryFolders')
-        let allFolders: any[] = []
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
+        const foldersRef = getInventoryFoldersCollection(db, userId, currentStoreId)
+        let querySnapshot
 
-        // For staff: Query ALL folders created by superadmin, then filter by storeId client-side
-        // This ensures we don't miss any data due to storeId mismatches
         try {
-          // First, query all folders created by the superadmin (without storeId filter)
-          const qAll = query(
+          // Filter by createdBy to only get folders for this user
+          const q = query(
             foldersRef,
-            where('createdBy', '==', userId)
+            where('createdBy', '==', userId),
+            orderBy('createdAt', 'desc')
           )
-          const snapshotAll = await getDocs(qAll)
-          allFolders = snapshotAll.docs
-          console.log('[InventoryStore] Found', allFolders.length, 'total folders created by superadmin (userId:', userId + ')')
-          
-          // Log storeIds of found folders for debugging
-          if (allFolders.length > 0) {
-            const storeIds = allFolders.map(doc => doc.data().storeId).filter(Boolean)
-            console.log('[InventoryStore] StoreIds in found folders:', [...new Set(storeIds)])
-          }
-        } catch (error: any) {
-          console.error('[InventoryStore] Error querying folders:', error.message)
-          // If the basic query fails, try with orderBy as fallback
-          try {
-            const qWithOrder = query(
+          querySnapshot = await getDocs(q)
+        } catch (orderByError: any) {
+          // If orderBy fails (missing index), try without orderBy
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            const q = query(
               foldersRef,
-              where('createdBy', '==', userId),
-              orderBy('createdAt', 'desc')
+              where('createdBy', '==', userId)
             )
-            const snapshotWithOrder = await getDocs(qWithOrder)
-            allFolders = snapshotWithOrder.docs
-            console.log('[InventoryStore] Found', allFolders.length, 'folders with orderBy fallback')
-          } catch (orderError: any) {
-            // If orderBy also fails, try without it
-            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
-              const qBasic = query(
-                foldersRef,
-                where('createdBy', '==', userId)
-              )
-              const snapshotBasic = await getDocs(qBasic)
-              allFolders = snapshotBasic.docs
-              console.log('[InventoryStore] Found', allFolders.length, 'folders with basic query')
-            } else {
-              throw orderError
-            }
+            querySnapshot = await getDocs(q)
+          } else {
+            throw orderByError
           }
         }
 
-        console.log('[InventoryStore] Total folders found before filtering:', allFolders.length)
+        const allFolders = querySnapshot.docs
+        console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId + ')')
 
-        // Process the combined results
+        // Process the results
         let folders = allFolders.map((doc) => {
           const data = doc.data()
           return {
@@ -223,29 +208,8 @@ export const useInventoryStore = defineStore('inventory', {
           } as InventoryFolder
         })
 
-        // Filter folders by current store ID (client-side filter)
-        // Include folders that match the storeId, or folders without a storeId (legacy data)
-        if (currentStoreId) {
-          const beforeFilter = folders.length
-          folders = folders.filter(folder => {
-            // Include folders that match the storeId, or folders without a storeId (legacy data)
-            const folderStoreId = folder.storeId || ''
-            const matches = !folderStoreId || folderStoreId === '' || folderStoreId === currentStoreId
-            if (!matches) {
-              console.log('[InventoryStore] Filtering out folder:', folder.id, 'name:', folder.name, 'folder storeId:', folderStoreId, 'expected:', currentStoreId)
-            }
-            return matches
-          })
-          console.log('[InventoryStore] Filtered folders from', beforeFilter, 'to', folders.length, 'by storeId:', currentStoreId)
-          
-          // If no folders after filtering, log a warning
-          if (folders.length === 0 && beforeFilter > 0) {
-            console.warn('[InventoryStore] WARNING: All folders were filtered out! This might indicate a storeId mismatch.')
-            console.warn('[InventoryStore] Staff storeId:', currentStoreId, 'Superadmin userId:', userId)
-          }
-        } else {
-          console.warn('[InventoryStore] WARNING: No currentStoreId available! Staff might not have a storeId set.')
-        }
+        // No need to filter by storeId since we're already querying from the store's subcollection
+        // All folders returned are already in the correct store
 
         // If user is staff, filter folders by department access
         if (userStore.userData?.role === 'staff') {
@@ -326,8 +290,20 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+      
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        const folderRef = doc(db, 'inventoryFolders', folderId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
+        const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
         const folderSnap = await getDoc(folderRef)
 
         if (!folderSnap.exists()) {
@@ -442,7 +418,9 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        const foldersRef = collection(db, 'inventoryFolders')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
+        const userId = authStore.currentUser.uid
+        const foldersRef = getInventoryFoldersCollection(db, userId, storeId)
         const newFolderRef = doc(foldersRef)
 
         const newFolder: Omit<InventoryFolder, 'id'> = {
@@ -514,7 +492,15 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        const folderRef = doc(db, 'inventoryFolders', folderId)
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
+        const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
         await updateDoc(folderRef, {
           ...updates,
           updatedAt: serverTimestamp(),
@@ -569,7 +555,15 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        const folderRef = doc(db, 'inventoryFolders', folderId)
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
+        const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
         await deleteDoc(folderRef)
 
         // Remove from local state
@@ -655,26 +649,37 @@ export const useInventoryStore = defineStore('inventory', {
 
       this.itemsLoading[folderId] = true
 
+      // Get storeId for hierarchical path
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.itemsLoading[folderId] = false
+        throw new Error('No store selected')
+      }
+
       try {
-        const itemsRef = collection(db, 'inventoryItems')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
+        const itemsRef = getInventoryItemsCollection(db, userId, storeId)
         
-        // For staff: Query all items in folder (then filter client-side)
-        // For super admin: Query with createdBy filter
+        // Query items by folderId
         let q
-        if (userStore.userData?.role === 'staff') {
-          // Staff: Query all items in folder - Firestore rules allow authenticated reads
-          q = query(
-            itemsRef,
-            where('folderId', '==', folderId)
-          )
-        } else {
-          // Super admin: Normal query with createdBy filter
+        try {
           q = query(
             itemsRef,
             where('folderId', '==', folderId),
             where('createdBy', '==', userId),
             orderBy('createdAt', 'desc')
           )
+        } catch (orderByError: any) {
+          // If orderBy fails, try without it
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            q = query(
+              itemsRef,
+              where('folderId', '==', folderId),
+              where('createdBy', '==', userId)
+            )
+          } else {
+            throw orderByError
+          }
         }
 
         const querySnapshot = await getDocs(q)
@@ -746,25 +751,21 @@ export const useInventoryStore = defineStore('inventory', {
           }
           
           try {
-            const itemsRef = collection(db, 'inventoryItems')
-            
-            // For staff: Query all items in folder (then filter client-side)
-            // For super admin: Query with createdBy filter
-            let q
-            if (userStore.userData?.role === 'staff') {
-              // Staff: Query all items in folder
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId)
-              )
-            } else {
-              // Super admin: Query with createdBy filter
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                where('createdBy', '==', userId)
-              )
+            // Get storeId for hierarchical path
+            const storeId = await getCurrentStoreId()
+            if (!storeId) {
+              throw new Error('No store selected')
             }
+            
+            // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
+            const itemsRef = getInventoryItemsCollection(db, userId, storeId)
+            
+            // Query items by folderId
+            let q = query(
+              itemsRef,
+              where('folderId', '==', folderId),
+              where('createdBy', '==', userId)
+            )
 
             const querySnapshot = await getDocs(q)
             let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
@@ -861,7 +862,9 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        const itemsRef = collection(db, 'inventoryItems')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
+        // For superadmins, userId is their own UID (createdByUid)
+        const itemsRef = getInventoryItemsCollection(db, createdByUid, storeId)
         const newItemRef = doc(itemsRef)
 
         const now = new Date()
@@ -927,8 +930,16 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Only super admins can update items in inventory. Staff have view-only access.')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = authStore.currentUser.uid
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        const itemRef = doc(db, 'inventoryItems', itemId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         
         // Filter out undefined values and system fields that shouldn't be updated directly
         const systemFields = ['dateOut', 'dateIn', 'swapIn', 'swapInReceiptId']
@@ -983,8 +994,16 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Only super admins can delete items from inventory. Staff have view-only access.')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = authStore.currentUser.uid
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
-        const itemRef = doc(db, 'inventoryItems', itemId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         await deleteDoc(itemRef)
 
         // Remove from local state
@@ -1010,16 +1029,27 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Firestore not initialized')
       }
 
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        console.warn('[InventoryStore] Cannot update folder item count: user not authenticated')
+        return
+      }
+
       try {
         // Get actual count from items
         const actualCount = this.items[folderId]?.length || 0
 
-        // Update folder in Firestore
-        const folderRef = doc(db, 'inventoryFolders', folderId)
-        await updateDoc(folderRef, {
-          itemCount: actualCount,
-          updatedAt: serverTimestamp(),
-        })
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (storeId) {
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
+          const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
+          await updateDoc(folderRef, {
+            itemCount: actualCount,
+            updatedAt: serverTimestamp(),
+          })
+        }
 
         // Update in local state
         const index = this.folders.findIndex(f => f.id === folderId)
@@ -1044,10 +1074,18 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = authStore.currentUser.uid
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
         const now = new Date()
         const batch = itemIds.map(itemId => {
-          const itemRef = doc(db, 'inventoryItems', itemId)
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             dateOut: now,
             updatedAt: serverTimestamp(),
@@ -1085,9 +1123,17 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = authStore.currentUser.uid
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
         const batch = itemIds.map(itemId => {
-          const itemRef = doc(db, 'inventoryItems', itemId)
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             dateOut: null,
             updatedAt: serverTimestamp(),
@@ -1192,8 +1238,16 @@ export const useInventoryStore = defineStore('inventory', {
           discountedPrice = originalPrice - discountAmount
         }
 
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+
         // Update item in Firestore
-        const itemRef = doc(db, 'inventoryItems', itemId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         await updateDoc(itemRef, {
           discountPercentage,
           discountAmount,
@@ -1291,9 +1345,17 @@ export const useInventoryStore = defineStore('inventory', {
           })
         }
 
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+
         // Apply updates in batch
         const batch = updates.map(({ itemId, discountPercentage, discountAmount, originalPrice, discountedPrice }) => {
-          const itemRef = doc(db, 'inventoryItems', itemId)
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             discountPercentage,
             discountAmount,
@@ -1361,7 +1423,15 @@ export const useInventoryStore = defineStore('inventory', {
           }
         }
 
-        const itemRef = doc(db, 'inventoryItems', itemId)
+        // Get userId and storeId for hierarchical path
+        const userId = authStore.currentUser.uid
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+
+        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         await updateDoc(itemRef, {
           discountPercentage: deleteField(),
           discountAmount: deleteField(),
@@ -1407,9 +1477,17 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Only super admins can remove discounts. Staff have view-only access.')
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = authStore.currentUser.uid
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
       try {
         const batch = itemIds.map(itemId => {
-          const itemRef = doc(db, 'inventoryItems', itemId)
+          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             discountPercentage: deleteField(),
             discountAmount: deleteField(),

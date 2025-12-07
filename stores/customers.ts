@@ -4,6 +4,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
+import { getCustomersCollection, getCustomerDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 
 export interface Customer {
   id: string
@@ -76,7 +77,14 @@ export const useCustomersStore = defineStore('customers', {
       }
 
       try {
-        const customersRef = collection(db, 'customers')
+        // Get storeId for hierarchical path - we need to search across all stores for the superadmin
+        // For now, we'll search in the current store, but this might need adjustment
+        const currentStoreId = await getCurrentStoreId()
+        if (!currentStoreId) {
+          return null
+        }
+        
+        const customersRef = getCustomersCollection(db, userId, currentStoreId)
         const conditions: any[] = [where('createdBy', '==', userId)]
 
         // Build query conditions
@@ -207,7 +215,14 @@ export const useCustomersStore = defineStore('customers', {
 
         if (existingCustomer) {
           // Update existing customer
-          const customerRef = doc(db, 'customers', existingCustomer.id)
+          // Get storeId for hierarchical path
+          const storeId = await getCurrentStoreId()
+          if (!storeId) {
+            throw new Error('No store selected')
+          }
+          
+          // Use hierarchical path: users/{userId}/stores/{storeId}/customers/{customerId}
+          const customerRef = getCustomerDocument(db, userId, storeId, existingCustomer.id)
           await updateDoc(customerRef, {
             name: receiptData.customerName, // Update name in case it changed
             email: receiptData.customerEmail || existingCustomer.email,
@@ -240,8 +255,15 @@ export const useCustomersStore = defineStore('customers', {
 
           return existingCustomer.id
         } else {
+          // Get storeId for hierarchical path
+          const storeId = await getCurrentStoreId()
+          if (!storeId) {
+            throw new Error('No store selected')
+          }
+          
           // Create new customer
-          const customersRef = collection(db, 'customers')
+          // Use hierarchical path: users/{userId}/stores/{storeId}/customers
+          const customersRef = getCustomersCollection(db, userId, storeId)
           const newCustomerRef = doc(customersRef)
 
           const newCustomer: Omit<Customer, 'id'> = {
@@ -252,6 +274,7 @@ export const useCustomersStore = defineStore('customers', {
             totalOrders: 1,
             totalSpent: receiptData.total,
             receipts: [receiptId],
+            storeId: storeId, // Add storeId
             lastOrderDate: orderDate,
             firstOrderDate: orderDate,
             createdAt: serverTimestamp(),
@@ -335,50 +358,40 @@ export const useCustomersStore = defineStore('customers', {
       
       console.log('[CustomersStore] fetchCustomers - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
 
-      try {
-        const customersRef = collection(db, 'customers')
-        let allCustomers: any[] = []
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
+      }
 
-        // Query ALL customers created by superadmin first, then filter by storeId client-side
-        // This ensures we don't miss any data due to storeId mismatches
+      try {
+        // Use hierarchical path: users/{userId}/stores/{storeId}/customers
+        const customersRef = getCustomersCollection(db, userId, storeId)
+        let querySnapshot
+
         try {
-          // Query all customers created by the superadmin (without storeId filter)
-          const qAll = query(
+          // Filter by createdBy to only get customers for this user
+          const q = query(
             customersRef,
-            where('createdBy', '==', userId)
+            where('createdBy', '==', userId),
+            orderBy('lastOrderDate', 'desc')
           )
-          const snapshotAll = await getDocs(qAll)
-          allCustomers = snapshotAll.docs
-          console.log('[CustomersStore] Found', allCustomers.length, 'total customers created by superadmin (userId:', userId + ')')
-        } catch (error: any) {
-          console.error('[CustomersStore] Error querying customers:', error.message)
-          // If the basic query fails, try with orderBy as fallback
-          try {
-            const qWithOrder = query(
+          querySnapshot = await getDocs(q)
+        } catch (orderByError: any) {
+          // If orderBy fails (missing index), try without orderBy
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            const q = query(
               customersRef,
-              where('createdBy', '==', userId),
-              orderBy('lastOrderDate', 'desc')
+              where('createdBy', '==', userId)
             )
-            const snapshotWithOrder = await getDocs(qWithOrder)
-            allCustomers = snapshotWithOrder.docs
-            console.log('[CustomersStore] Found', allCustomers.length, 'customers with orderBy fallback')
-          } catch (orderError: any) {
-            // If orderBy also fails, try without it
-            if (orderError.code === 'failed-precondition' || orderError.message?.includes('index')) {
-              const qBasic = query(
-                customersRef,
-                where('createdBy', '==', userId)
-              )
-              const snapshotBasic = await getDocs(qBasic)
-              allCustomers = snapshotBasic.docs
-              console.log('[CustomersStore] Found', allCustomers.length, 'customers with basic query')
-            } else {
-              throw orderError
-            }
+            querySnapshot = await getDocs(q)
+          } else {
+            throw orderByError
           }
         }
 
-        console.log('[CustomersStore] Total customers found before filtering:', allCustomers.length)
+        const allCustomers = querySnapshot.docs
+        console.log('[CustomersStore] Found', allCustomers.length, 'customers in store (userId:', userId, 'storeId:', storeId + ')')
 
         // Process and filter customers
         let customers = allCustomers.map((doc) => {
@@ -401,28 +414,8 @@ export const useCustomersStore = defineStore('customers', {
           } as Customer
         })
 
-        // Filter customers by current store ID (client-side filter)
-        // Include customers that match the storeId, or customers without a storeId (legacy data)
-        if (storeId) {
-          const beforeFilter = customers.length
-          customers = customers.filter(customer => {
-            const customerStoreId = customer.storeId || ''
-            const matches = !customerStoreId || customerStoreId === '' || customerStoreId === storeId
-            if (!matches) {
-              console.log('[CustomersStore] Filtering out customer:', customer.id, 'name:', customer.name, 'customer storeId:', customerStoreId, 'expected:', storeId)
-            }
-            return matches
-          })
-          console.log('[CustomersStore] Filtered customers from', beforeFilter, 'to', customers.length, 'by storeId:', storeId)
-          
-          // If no customers after filtering, log a warning
-          if (customers.length === 0 && beforeFilter > 0) {
-            console.warn('[CustomersStore] WARNING: All customers were filtered out! This might indicate a storeId mismatch.')
-            console.warn('[CustomersStore] Staff storeId:', storeId, 'Superadmin userId:', userId)
-          }
-        } else {
-          console.warn('[CustomersStore] WARNING: No storeId available! Staff might not have a storeId set.')
-        }
+        // No need to filter by storeId since we're already querying from the store's subcollection
+        // All customers returned are already in the correct store
 
         // Sort customers by lastOrderDate (newest first)
         customers.sort((a, b) => {
@@ -481,8 +474,15 @@ export const useCustomersStore = defineStore('customers', {
       }
 
       try {
+        // Get storeId for hierarchical path
+        const storeId = await getCurrentStoreId()
+        if (!storeId) {
+          throw new Error('No store selected')
+        }
+        
         // Find customer that has this receipt
-        const customersRef = collection(db, 'customers')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/customers
+        const customersRef = getCustomersCollection(db, userId, storeId)
         const q = query(
           customersRef,
           where('createdBy', '==', userId),
@@ -506,7 +506,9 @@ export const useCustomersStore = defineStore('customers', {
 
         // If customer has only one receipt, delete the customer
         if (customerData.receipts && customerData.receipts.length === 1) {
-          await deleteDoc(doc(db, 'customers', customerDoc.id))
+          // Use hierarchical path: users/{userId}/stores/{storeId}/customers/{customerId}
+          const customerRef = getCustomerDocument(db, userId, storeId, customerDoc.id)
+          await deleteDoc(customerRef)
           
           // Remove from local state
           this.customers = this.customers.filter(c => c.id !== customerDoc.id)
@@ -516,7 +518,9 @@ export const useCustomersStore = defineStore('customers', {
           const updatedTotalOrders = Math.max(0, (customerData.totalOrders || 1) - 1)
           const updatedTotalSpent = Math.max(0, (customerData.totalSpent || receiptTotal) - receiptTotal)
 
-          await updateDoc(doc(db, 'customers', customerDoc.id), {
+          // Use hierarchical path: users/{userId}/stores/{storeId}/customers/{customerId}
+          const customerRef = getCustomerDocument(db, userId, storeId, customerDoc.id)
+          await updateDoc(customerRef, {
             receipts: updatedReceipts,
             totalOrders: updatedTotalOrders,
             totalSpent: updatedTotalSpent,

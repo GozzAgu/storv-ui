@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
+import { getStoresCollection, getStoreDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 
 export const useStoresStore = defineStore('stores', {
@@ -52,9 +53,12 @@ export const useStoresStore = defineStore('stores', {
           const db = useFirestore().getFirestoreInstance()
           if (db) {
             try {
-              const storeRef = doc(db, 'stores', staffMember.storeId)
-              const storeSnap = await getDoc(storeRef)
-              if (storeSnap.exists()) {
+              // Use hierarchical path: users/{userId}/stores/{storeId}
+              const userId = await getQueryUserId()
+              if (userId) {
+                const storeRef = getStoreDocument(db, userId, staffMember.storeId)
+                const storeSnap = await getDoc(storeRef)
+                if (storeSnap.exists()) {
                 const storeData = storeSnap.data()
                 // Add store to stores array if not already there
                 const existingStore = this.stores.find(s => s.id === staffMember.storeId)
@@ -74,8 +78,11 @@ export const useStoresStore = defineStore('stores', {
                   }
                 }
                 console.log('[StoresStore] Staff store loaded:', storeData.name || storeData.branchName || staffMember.storeId)
+                } else {
+                  console.warn('[StoresStore] Staff store document not found:', staffMember.storeId)
+                }
               } else {
-                console.warn('[StoresStore] Staff store document not found:', staffMember.storeId)
+                console.warn('[StoresStore] Could not get userId for staff store')
               }
             } catch (storeError: any) {
               console.warn('[StoresStore] Could not fetch staff store document:', storeError.message)
@@ -129,6 +136,10 @@ export const useStoresStore = defineStore('stores', {
       if (storeId && !this.getStoreById(storeId)) {
         throw new Error('Store not found')
       }
+      
+      // Clear all data from previous store before switching
+      await this.clearStoreData()
+      
       this.currentStoreId = storeId
       if (import.meta.client) {
         if (storeId) {
@@ -140,6 +151,63 @@ export const useStoresStore = defineStore('stores', {
       
       // Refresh all data for the new store
       await this.refreshStoreData()
+    },
+
+    // Clear all store data (departments, staff, inventory, receipts, customers)
+    async clearStoreData() {
+      if (import.meta.server) return
+
+      console.log('[StoresStore] Clearing all store data')
+
+      try {
+        // Import stores dynamically to avoid circular dependencies
+        const [
+          { useDepartmentsStore },
+          { useStaffStore },
+          { useInventoryStore },
+          { useReceiptsStore },
+          { useCustomersStore },
+        ] = await Promise.all([
+          import('./departments'),
+          import('./staff'),
+          import('./inventory'),
+          import('./receipts'),
+          import('./customers'),
+        ])
+
+        const departmentsStore = useDepartmentsStore()
+        const staffStore = useStaffStore()
+        const inventoryStore = useInventoryStore()
+        const receiptsStore = useReceiptsStore()
+        const customersStore = useCustomersStore()
+
+        // Clear all data from stores to hide previous store's data
+        departmentsStore.departments = []
+        departmentsStore.loading = false
+        departmentsStore.error = null
+        
+        staffStore.staff = []
+        staffStore.loading = false
+        staffStore.error = null
+        
+        inventoryStore.folders = []
+        inventoryStore.items = {}
+        inventoryStore.loading = false
+        inventoryStore.error = null
+        
+        receiptsStore.receipts = []
+        receiptsStore.loading = false
+        receiptsStore.error = null
+        
+        customersStore.customers = []
+        customersStore.loading = false
+        customersStore.error = null
+
+        console.log('[StoresStore] All store data cleared')
+      } catch (error: any) {
+        console.warn('[StoresStore] Error clearing store data:', error)
+        // Don't throw - clearing is best effort
+      }
     },
 
     // Refresh all data for the current store
@@ -171,12 +239,20 @@ export const useStoresStore = defineStore('stores', {
         const receiptsStore = useReceiptsStore()
         const customersStore = useCustomersStore()
 
-        // Clear existing data first to avoid showing stale data
+        // Clear existing data first to avoid showing stale data from previous store
         departmentsStore.departments = []
         staffStore.staff = []
         inventoryStore.folders = []
+        inventoryStore.items = {} // Clear all inventory items
         receiptsStore.receipts = []
         customersStore.customers = []
+        
+        // Set loading states to hide UI during data fetch
+        departmentsStore.loading = true
+        staffStore.loading = true
+        inventoryStore.loading = true
+        receiptsStore.loading = true
+        customersStore.loading = true
 
         // Fetch all data in parallel for the new store
         await Promise.all([
@@ -221,15 +297,23 @@ export const useStoresStore = defineStore('stores', {
 
       let ownerId = authStore.currentUser.uid
 
+      // Get userId for hierarchical path (superadmin's UID)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
+        this.loading = false
+        return
+      }
+
       // If staff, get their store
       if (userStore.userData?.role === 'staff') {
         const { useStaffStore } = await import('./staff')
         const staffStore = useStaffStore()
         const staffMember = await staffStore.fetchCurrentStaffMember()
         if (staffMember?.storeId) {
-          // Staff can only see their own store
+          // Staff can only see their own store - use hierarchical path
           try {
-            const storeRef = doc(db, 'stores', staffMember.storeId)
+            const storeRef = getStoreDocument(db, userId, staffMember.storeId)
             const storeSnap = await getDoc(storeRef)
             if (storeSnap.exists()) {
               const data = storeSnap.data()
@@ -255,7 +339,8 @@ export const useStoresStore = defineStore('stores', {
       }
 
       try {
-        const storesRef = collection(db, 'stores')
+        // Use hierarchical path: users/{userId}/stores
+        const storesRef = getStoresCollection(db, userId)
         let querySnapshot
 
         try {
@@ -309,8 +394,15 @@ export const useStoresStore = defineStore('stores', {
         throw new Error('User must be authenticated')
       }
 
+      // Get userId for hierarchical path (superadmin's UID)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+
       try {
-        const storeRef = doc(db, 'stores', storeId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}
+        const storeRef = getStoreDocument(db, userId, storeId)
         const storeSnap = await getDoc(storeRef)
 
         if (!storeSnap.exists()) {
@@ -384,7 +476,9 @@ export const useStoresStore = defineStore('stores', {
       }
 
       try {
-        const storesRef = collection(db, 'stores')
+        // Use hierarchical path: users/{userId}/stores
+        const userId = authStore.currentUser.uid
+        const storesRef = getStoresCollection(db, userId)
         const newStoreRef = doc(storesRef)
 
         const newStore: Omit<Store, 'id'> = {
@@ -432,7 +526,14 @@ export const useStoresStore = defineStore('stores', {
       }
 
       try {
-        const storeRef = doc(db, 'stores', storeId)
+        // Get userId for hierarchical path
+        const userId = await getQueryUserId()
+        if (!userId) {
+          throw new Error('User ID not available')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}
+        const storeRef = getStoreDocument(db, userId, storeId)
         await updateDoc(storeRef, {
           ...updates,
           updatedAt: serverTimestamp(),
@@ -474,7 +575,14 @@ export const useStoresStore = defineStore('stores', {
       // For now, we'll allow deletion but warn in UI
 
       try {
-        const storeRef = doc(db, 'stores', storeId)
+        // Get userId for hierarchical path
+        const userId = await getQueryUserId()
+        if (!userId) {
+          throw new Error('User ID not available')
+        }
+        
+        // Use hierarchical path: users/{userId}/stores/{storeId}
+        const storeRef = getStoreDocument(db, userId, storeId)
         await deleteDoc(storeRef)
 
         // Remove from local state

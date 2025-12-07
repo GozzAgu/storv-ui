@@ -167,7 +167,36 @@ const switchStore = async (storeId: string) => {
     toast.info('Switching store and loading data...')
     dropdownOpen.value = false
     
+    // Set loading state on all stores to hide previous data
+    const [
+      departmentsModule,
+      staffModule,
+      inventoryModule,
+      receiptsModule,
+      customersModule,
+    ] = await Promise.all([
+      import('~/stores/departments'),
+      import('~/stores/staff'),
+      import('~/stores/inventory'),
+      import('~/stores/receipts'),
+      import('~/stores/customers'),
+    ])
+    
+    const departmentsStore = departmentsModule.useDepartmentsStore()
+    const staffStore = staffModule.useStaffStore()
+    const inventoryStore = inventoryModule.useInventoryStore()
+    const receiptsStore = receiptsModule.useReceiptsStore()
+    const customersStore = customersModule.useCustomersStore()
+    
+    // Set loading state to hide previous store data
+    departmentsStore.loading = true
+    staffStore.loading = true
+    inventoryStore.loading = true
+    receiptsStore.loading = true
+    customersStore.loading = true
+    
     // Set the new store and automatically refresh all data
+    // This will clear old data and load new data
     await storesStore.setCurrentStore(storeId)
     
     toast.success('Store switched successfully. All data loaded.')
