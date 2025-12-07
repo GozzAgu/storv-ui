@@ -79,7 +79,7 @@ const iconSize = computed(() => {
 
 const variantClasses = computed(() => {
   const variantMap = {
-    primary: 'bg-gradient-to-r from-primary-500 to-purple-600 hover:from-primary-600 hover:to-purple-700 text-white shadow-sm hover:shadow-md focus:ring-primary-500 dark:focus:ring-offset-gray-800',
+    primary: 'bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white shadow-sm hover:shadow-md focus:ring-primary-500 dark:focus:ring-offset-gray-800',
     secondary: 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 focus:ring-gray-500 dark:focus:ring-offset-gray-800',
     danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md focus:ring-red-500 dark:focus:ring-offset-gray-800',
     success: 'bg-green-600 hover:bg-green-700 text-white shadow-sm hover:shadow-md focus:ring-green-500 dark:focus:ring-offset-gray-800',

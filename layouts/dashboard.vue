@@ -30,19 +30,18 @@
         >
           <div class="relative flex-shrink-0">
             <img
-              :key="`logo-${currentTheme}`"
-              :src="currentTheme === 'dark' ? '/storv logo dark.png' : '/storv logo.png'"
+              src="/storv logo.png"
               alt="Storv Logo"
               :class="[
                 'transition-all duration-300 object-contain',
                 sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-auto'
               ]"
             />
-            <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-purple-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-primary-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <span 
             v-if="!sidebarCollapsed" 
-            class="text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 bg-clip-text text-transparent tracking-tight"
+            class="text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
           >
           Storv
           </span>
@@ -614,7 +613,7 @@
                 @click="profileMenuOpen = !profileMenuOpen"
                 class="flex items-center space-x-2 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                   {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left">
@@ -777,46 +776,6 @@ const toggleSidebar = () => {
   }
 }
 
-// Logo theme detection - sync with actual DOM state for immediate responsiveness
-const logoTheme = ref<'light' | 'dark'>('light')
-
-// Initialize logo theme on mount and watch for changes
-onMounted(() => {
-  // Function to update logo theme based on current DOM state
-  const updateLogoTheme = () => {
-    if (import.meta.client) {
-      const isDark = document.documentElement.classList.contains('dark')
-      logoTheme.value = isDark ? 'dark' : 'light'
-    }
-  }
-  
-  // Initial update
-  updateLogoTheme()
-  
-  // Watch for theme changes via actualTheme
-  watch(actualTheme, () => {
-    updateLogoTheme()
-  }, { immediate: true })
-  
-  // Also watch for DOM class changes (when theme is applied)
-  const observer = new MutationObserver(() => {
-    updateLogoTheme()
-  })
-  
-  if (import.meta.client) {
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    })
-  }
-  
-  // Cleanup on unmount
-  onUnmounted(() => {
-    observer.disconnect()
-  })
-})
-
-const currentTheme = computed(() => logoTheme.value)
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },

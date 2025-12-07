@@ -226,7 +226,7 @@
               >
                 <div v-if="colIndex === 0" class="flex items-center gap-3">
                   <!-- First column shows avatar and value -->
-                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
                     {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
                   </div>
                   <div class="flex-1">
@@ -435,7 +435,7 @@
       </button>
       <button
         @click="openAddItemModal"
-        class="w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+        class="w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
         title="Add new item"
       >
         <PlusIcon class="w-5 h-5" />

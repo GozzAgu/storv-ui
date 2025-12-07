@@ -25,7 +25,7 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/storv logo dark.png'
+          href: '/storv logo.png'
         },
         {
           rel: 'preconnect',

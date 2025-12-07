@@ -12,7 +12,7 @@
         <div class="flex flex-col items-center text-center">
           <!-- Avatar -->
           <div class="relative mb-4">
-            <div class="w-24 h-24 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
               {{ profileData.firstName[0] }}{{ profileData.lastName[0] }}
             </div>
             <button 
@@ -259,8 +259,8 @@
 
             <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <BellIcon class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <BellIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</p>
@@ -366,8 +366,8 @@
 
             <div class="flex items-center justify-between py-4">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <DevicePhoneMobileIcon class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <DevicePhoneMobileIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Active Sessions</p>
@@ -449,16 +449,16 @@
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-50">Roles & Permissions</h2>
               <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Your current role and access permissions</p>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-900/60 dark:to-purple-800/60 text-purple-700 dark:text-purple-50 rounded-full border border-purple-300 dark:border-purple-600 shadow-sm">
+            <span class="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/60 dark:to-primary-800/60 text-primary-700 dark:text-primary-50 rounded-full border border-primary-300 dark:border-primary-600 shadow-sm">
               {{ profileData.role }}
             </span>
           </div>
 
           <div class="space-y-4">
             <!-- Role Description -->
-            <div class="p-4 bg-gradient-to-r from-purple-50 to-purple-100/50 dark:from-purple-900/40 dark:to-purple-800/30 border border-purple-200 dark:border-purple-700 rounded-xl">
-              <p class="text-sm text-purple-900 dark:text-purple-50 font-medium mb-2">Super Admin</p>
-              <p class="text-xs text-purple-700 dark:text-purple-100 leading-relaxed">
+            <div class="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-xl">
+              <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">Super Admin</p>
+              <p class="text-xs text-primary-700 dark:text-primary-100 leading-relaxed">
                 As a Super Admin, you have full access to all features and settings in the system. You are the account owner and have complete control over your store operations.
               </p>
             </div>

@@ -9,7 +9,7 @@
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div 
-            class="bg-gradient-to-r from-primary-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
             :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
           ></div>
         </div>
@@ -20,7 +20,7 @@
         <!-- Step 1: Store Name -->
         <div v-if="currentStep === 1" class="space-y-6">
           <div class="text-center mb-8">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 mb-4">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4">
               <BuildingStorefrontIcon class="h-8 w-8 text-white" />
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -49,7 +49,7 @@
         <!-- Step 2: Store Details -->
         <div v-if="currentStep === 2" class="space-y-6">
           <div class="text-center mb-8">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 mb-4">
+            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4">
               <InformationCircleIcon class="h-8 w-8 text-white" />
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -134,7 +134,7 @@
             @click="nextStep"
             :disabled="isLoading || (currentStep === 1 && !storeDetails.storeName)"
             type="button"
-            class="px-8 py-3 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
+            class="px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
           >
             <span v-if="!isLoading">
               {{ currentStep === totalSteps ? 'Complete Setup' : 'Continue' }}

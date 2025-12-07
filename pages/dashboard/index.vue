@@ -11,7 +11,7 @@
       <div class="flex items-center gap-3">
         <NuxtLink
           to="/dashboard/inventory"
-          class="px-4 py-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-200 flex items-center gap-2"
+          class="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-200 flex items-center gap-2"
         >
           <PlusIcon class="w-5 h-5" />
           Add Product
@@ -62,10 +62,10 @@
         label="Orders Today"
         :value="todayReceiptsCount.toString()"
         :subtext="`$${formatCurrency(todaySales)} in sales`"
-        :subtext-class="'text-purple-600 dark:text-purple-400 text-xs font-medium'"
+        :subtext-class="'text-primary-600 dark:text-primary-400 text-xs font-medium'"
         :icon="ShoppingCartIcon"
-        icon-bg-class="bg-purple-100 dark:bg-purple-900/30"
-        icon-class="text-purple-600 dark:text-purple-400"
+        icon-bg-class="bg-primary-100 dark:bg-primary-900/30"
+        icon-class="text-primary-600 dark:text-primary-400"
       />
     </div>
 
@@ -193,7 +193,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">No products sold yet</p>
           </div>
           <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-bold">
+            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold">
               {{ index + 1 }}
             </div>
             <div class="flex-1 min-w-0">

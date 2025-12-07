@@ -230,7 +230,7 @@
     <button
       v-if="filteredFolders.length > 0 && canCreateInventoryFolders"
       @click="openCreateFolderModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new folder"
     >
       <PlusIcon class="w-5 h-5" />
@@ -793,7 +793,7 @@ const getFolderColor = (color: string) => {
   const colorMap: Record<string, string> = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',
-    purple: 'bg-purple-500',
+    purple: 'bg-primary-500',
     orange: 'bg-orange-500',
     red: 'bg-red-500',
     pink: 'bg-pink-500',
@@ -807,7 +807,7 @@ const getFolderGradient = (color: string) => {
   const gradientMap: Record<string, string> = {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
+    purple: 'from-primary-500 to-primary-600',
     orange: 'from-orange-500 to-orange-600',
     red: 'from-red-500 to-red-600',
     pink: 'from-pink-500 to-pink-600',

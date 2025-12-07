@@ -45,7 +45,7 @@
 
     <!-- Stats Cards - Hidden on large screens -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:hidden">
-      <Card padding="md" extra-class="border-l-4 border-l-purple-500">
+      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
@@ -53,8 +53,8 @@
               {{ staff.length }}
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <UsersIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <UsersIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
@@ -94,7 +94,7 @@
           <!-- Compact Stats -->
           <div class="flex items-center gap-6">
             <div class="flex items-center gap-2">
-              <UsersIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <UsersIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ staff.length }}</span>
             </div>
@@ -160,7 +160,7 @@
             >
               <td class="px-3 py-2 whitespace-nowrap">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
                     {{ member.firstName.charAt(0).toUpperCase() }}{{ member.lastName.charAt(0).toUpperCase() }}
                   </div>
                   <div>
@@ -182,7 +182,7 @@
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
                   :class="[
                     member.role === 'manager'
-                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300'
                       : member.role === 'intern'
                       ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
@@ -254,7 +254,7 @@
     <button
       v-if="canManageDepartments && !isLoadingStaff"
       @click="openCreateStaffModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Add new staff"
     >
       <PlusIcon class="w-5 h-5" />

@@ -7,7 +7,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
           <div class="flex items-center">
-            <NuxtLink to="/" class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+            <NuxtLink to="/" class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
               Storv
             </NuxtLink>
           </div>
@@ -24,7 +24,7 @@
             <NuxtLink to="/signin" class="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200">
               Sign In
             </NuxtLink>
-            <NuxtLink to="/signup" class="bg-gradient-to-r from-primary-500 to-purple-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5">
+            <NuxtLink to="/signup" class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5">
               Get Started
             </NuxtLink>
           </div>
@@ -60,7 +60,7 @@
             <NuxtLink to="/signin" class="block text-gray-600 hover:text-gray-900 font-medium py-2 transition-colors" @click="mobileMenuOpen = false">
               Sign In
             </NuxtLink>
-            <NuxtLink to="/signup" class="block w-full bg-gradient-to-r from-primary-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold mt-2 text-center" @click="mobileMenuOpen = false">
+            <NuxtLink to="/signup" class="block w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-semibold mt-2 text-center" @click="mobileMenuOpen = false">
               Get Started
             </NuxtLink>
           </div>
@@ -70,14 +70,14 @@
 
     <!-- Hero Section -->
     <section class="relative overflow-hidden bg-white pt-24 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32 z-10">
-      <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-purple-50/30"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 via-white to-primary-50/30"></div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div class="text-center lg:text-left space-y-8">
             <div class="space-y-6">
               <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
                 Complete Store
-                <span class="block bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent">
+                <span class="block bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent">
                   Management System
                 </span>
               </h1>
@@ -86,7 +86,7 @@
               </p>
             </div>
             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <NuxtLink to="/signup" class="group bg-gradient-to-r from-primary-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2">
+              <NuxtLink to="/signup" class="group bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-base sm:text-lg hover:shadow-2xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2">
                 Start Free Trial
                 <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </NuxtLink>
@@ -111,7 +111,7 @@
               <div class="space-y-4">
                 <div class="grid grid-cols-3 gap-3">
                   <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 h-20"></div>
-                  <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 h-20"></div>
+                  <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-4 h-20"></div>
                   <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 h-20"></div>
                 </div>
                 <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 h-40"></div>
@@ -197,7 +197,7 @@
           </div>
           
           <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+            <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
               <UsersIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
             <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3">Automatic Customer Management</h3>
@@ -312,7 +312,7 @@
         <!-- Additional Features Grid -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-12 sm:pt-16 pb-12 sm:pb-16">
           <h3 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-8 sm:mb-12 text-center">
-            <span class="bg-gradient-to-r from-primary-600 via-purple-600 to-primary-600 bg-clip-text text-transparent">Additional Powerful Features</span>
+            <span class="bg-gradient-to-r from-primary-600 via-primary-600 to-primary-600 bg-clip-text text-transparent">Additional Powerful Features</span>
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
             <div class="group relative bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
@@ -381,7 +381,7 @@
               </div>
             </div>
 
-            <div class="group relative bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-5 shadow-md border border-violet-500 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
+            <div class="group relative bg-gradient-to-br from-violet-600 to-primary-700 rounded-xl p-5 shadow-md border border-violet-500 transition-all duration-300 hover:shadow-xl hover:translate-y-[-4px] hover:z-10 cursor-pointer">
               <div class="flex flex-col items-center text-center">
                 <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md border-2 border-white/30">
                   <ShieldCheckIcon class="w-6 h-6 text-white" />
@@ -544,8 +544,8 @@
 
           <div class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <UsersIcon class="w-6 h-6 text-purple-600" />
+              <div class="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                <UsersIcon class="w-6 h-6 text-primary-600" />
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 mb-2">Customer Management</h3>
@@ -618,7 +618,7 @@
             <!-- Step 1 -->
             <div class="flex flex-col sm:flex-row gap-6 items-start">
               <div class="flex-shrink-0">
-                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                   1
                 </div>
               </div>
@@ -705,7 +705,7 @@
             <!-- Step 4 -->
             <div class="flex flex-col sm:flex-row gap-6 items-start">
               <div class="flex-shrink-0">
-                <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-pink-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
                   4
                 </div>
               </div>
@@ -762,7 +762,7 @@
           </div>
 
           <div class="mt-12 text-center">
-            <NuxtLink to="/signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1">
+            <NuxtLink to="/signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1">
               Start Your Free Trial
               <ArrowRightIcon class="w-5 h-5" />
             </NuxtLink>
@@ -826,7 +826,7 @@
           <!-- Starter Tier - $10/month -->
           <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-primary-500 shadow-xl sm:shadow-2xl transform lg:scale-105 z-10 h-full flex flex-col sm:-mt-2 sm:mb-2">
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-              <span class="bg-gradient-to-r from-primary-500 to-purple-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-lg whitespace-nowrap">
+              <span class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-lg whitespace-nowrap">
                 Most Popular
               </span>
             </div>
@@ -839,7 +839,7 @@
               <p class="text-gray-600 mt-4 text-sm sm:text-base">Ideal for small businesses</p>
             </div>
             
-            <NuxtLink to="/signup" class="block w-full bg-gradient-to-r from-primary-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 mb-6 sm:mb-8 text-sm sm:text-base text-center">
+            <NuxtLink to="/signup" class="block w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 mb-6 sm:mb-8 text-sm sm:text-base text-center">
               Start Free Trial
             </NuxtLink>
             
@@ -930,7 +930,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary-500 via-purple-600 to-pink-600 overflow-hidden z-10">
+    <section class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-primary-500 via-primary-600 to-pink-600 overflow-hidden z-10">
       <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
       <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 tracking-tight">
@@ -950,7 +950,7 @@
     <button
       v-if="showBackToTop"
       @click="scrollToTop"
-      class="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+      class="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 group"
       aria-label="Back to top"
     >
       <ChevronUpIcon class="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
@@ -961,7 +961,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8 sm:mb-12">
           <div class="col-span-2">
-            <h3 class="text-2xl font-bold bg-gradient-to-r from-primary-400 to-purple-500 bg-clip-text text-transparent mb-4">
+            <h3 class="text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-4">
               Storv
             </h3>
             <p class="text-gray-500 max-w-sm text-sm sm:text-base">

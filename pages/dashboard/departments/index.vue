@@ -38,7 +38,7 @@
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-purple-500">
+      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Managers</p>
@@ -47,8 +47,8 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Department heads</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <UserCircleIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <UserCircleIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
@@ -70,10 +70,10 @@
     </div>
 
     <!-- Staff Member Banner (only for staff users) -->
-    <Card v-if="isStaff && currentStaffMember" padding="md" extra-class="bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 border-l-4 border-l-primary-500">
+    <Card v-if="isStaff && currentStaffMember" padding="md" extra-class="bg-gradient-to-r from-primary-50 to-primary-50 dark:from-primary-900/20 dark:to-primary-900/20 border-l-4 border-l-primary-500">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
             <UsersIcon class="w-6 h-6" />
           </div>
           <div>
@@ -164,7 +164,7 @@
             <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <UserCircleIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
             <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
             <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
           </div>
@@ -207,7 +207,7 @@
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
               {{ department.name.charAt(0) }}
             </div>
             <div>
@@ -315,7 +315,7 @@
   <button
     v-if="canManageDepartments"
     @click="openCreateDepartmentModal"
-    class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
+    class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-50"
     title="Create new department"
   >
     <PlusIcon class="w-5 h-5" />

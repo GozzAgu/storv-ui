@@ -164,7 +164,7 @@ const getIconClasses = (type: NotificationType) => {
     item_created: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
     item_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
     item_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    item_discount_applied: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    item_discount_applied: 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400',
     item_discount_removed: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
     folder_created: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
     folder_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
@@ -177,7 +177,7 @@ const getIconClasses = (type: NotificationType) => {
     department_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
     import_completed: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
     export_completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    swap_in_completed: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+    swap_in_completed: 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400',
   }
   return classMap[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
 }

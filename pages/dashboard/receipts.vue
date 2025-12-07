@@ -91,7 +91,7 @@
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-purple-500">
+      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Today's Sales</p>
@@ -104,8 +104,8 @@
               <span v-else>{{ todayReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <CalendarIcon class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <CalendarIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
@@ -151,7 +151,7 @@
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalSales) }}</span>
             </div>
             <div class="hidden sm:flex items-center gap-2">
-              <CalendarIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <CalendarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
@@ -554,7 +554,7 @@
     <button
       v-if="!isInitialLoading && sortedFilteredReceipts.length > 0 && canCreate"
       @click="openCreateReceiptModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
       title="Create new receipt"
     >
       <PlusIcon class="w-5 h-5" />
@@ -609,7 +609,7 @@
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
               </div>
               <div class="hidden sm:flex items-center gap-2">
-                <ChartBarIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <ChartBarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 <span class="text-xs text-gray-600 dark:text-gray-400">Avg. Order:</span>
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   ${{ formatCurrency(customersAverageOrderValue) }}
@@ -671,7 +671,7 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold">
                         {{ customer.name.charAt(0).toUpperCase() }}
                       </div>
                       <div>

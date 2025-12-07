@@ -28,7 +28,7 @@
 
         <!-- Tutorial Content -->
         <div class="space-y-4">
-          <div class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 mb-4 mx-auto">
+          <div class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4 mx-auto">
             <component :is="tutorialSteps[currentStep - 1]?.icon" class="h-8 w-8 text-white" />
           </div>
           
@@ -61,7 +61,7 @@
             </button>
             <button
               @click="nextStep"
-              class="px-6 py-2 bg-gradient-to-r from-primary-500 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300"
+              class="px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300"
             >
               {{ currentStep === totalSteps ? 'Get Started' : 'Next' }}
             </button>
