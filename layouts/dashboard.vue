@@ -85,6 +85,7 @@
                 <NuxtLink
                   :to="item.href"
                   class="flex items-center flex-1"
+                  :class="{ 'pointer-events-none opacity-50': switchingStore }"
                 >
                   <!-- Active indicator -->
                   <div 
@@ -133,7 +134,8 @@
                       'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                       route.params.id === folder.id
                         ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200',
+                      { 'pointer-events-none opacity-50': switchingStore }
                     ]"
                   >
                     <!-- Active indicator bar -->
@@ -171,7 +173,8 @@
                 sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
                 isActive(item.href)
                   ? 'bg-primary-50 dark:bg-primary-900/20'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50',
+                { 'pointer-events-none opacity-50': switchingStore }
               ]"
               :title="sidebarCollapsed ? item.name : ''"
             >
@@ -239,6 +242,7 @@
                   <NuxtLink
                     :to="`/dashboard/stores/${store.id}/departments`"
                     class="flex items-center flex-1 min-w-0"
+                    :class="{ 'pointer-events-none opacity-50': switchingStore && store.id !== storesStore.currentStoreId }"
                   >
                     <svg 
                       class="w-5 h-5 mr-3 flex-shrink-0"
@@ -284,8 +288,8 @@
                   </button>
                 </div>
                 
-                <!-- Departments under store -->
-                <div v-if="expandedStores[store.id]" class="pl-9 pr-5 space-y-0.5 mt-1">
+                <!-- Departments under store - only show for current store -->
+                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="pl-9 pr-5 space-y-0.5 mt-1">
                   <div v-for="department in getDepartmentsForStore(store.id)" :key="department.id" class="space-y-0.5">
                     <!-- Department header -->
                     <div
@@ -299,6 +303,7 @@
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
                         class="flex items-center gap-2.5 flex-1 min-w-0"
+                        :class="{ 'pointer-events-none opacity-50': switchingStore }"
                       >
                         <BuildingOfficeIcon 
                           :class="[
@@ -318,6 +323,7 @@
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-gray-400 dark:text-gray-500'
                         ]"
+                        :disabled="switchingStore"
                       >
                         <ChevronDownIcon 
                           :class="[
@@ -334,6 +340,7 @@
                         <NuxtLink
                           :to="`/dashboard/departments/${department.id}`"
                           class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                          :class="{ 'pointer-events-none opacity-50': switchingStore }"
                         >
                           <UsersIcon 
                             class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
@@ -350,6 +357,7 @@
                     v-if="getDepartmentsForStore(store.id).length === 0"
                     :to="`/dashboard/stores/${store.id}/departments`"
                     class="block px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    :class="{ 'pointer-events-none opacity-50': switchingStore && store.id !== storesStore.currentStoreId }"
                   >
                     <span class="italic">No departments</span>
                     <span class="ml-2 text-primary-600 dark:text-primary-400 hover:underline">View Departments →</span>
@@ -392,6 +400,7 @@
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
                         class="flex items-center gap-2.5 flex-1 min-w-0"
+                        :class="{ 'pointer-events-none opacity-50': switchingStore }"
                       >
                         <BuildingOfficeIcon 
                           :class="[
@@ -411,6 +420,7 @@
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-gray-400 dark:text-gray-500'
                         ]"
+                        :disabled="switchingStore"
                       >
                         <ChevronDownIcon 
                           :class="[
@@ -427,6 +437,7 @@
                         <NuxtLink
                           :to="`/dashboard/departments/${department.id}`"
                           class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                          :class="{ 'pointer-events-none opacity-50': switchingStore }"
                         >
                           <UsersIcon 
                             class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
@@ -445,6 +456,7 @@
                   v-if="getDepartmentsForStore(currentStore.id).length === 0"
                   :to="`/dashboard/stores/${currentStore.id}/departments`"
                   class="block px-5 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors group"
+                  :class="{ 'pointer-events-none opacity-50': switchingStore }"
                 >
                   <span class="italic">No departments</span>
                   <span class="ml-2 text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">View Departments →</span>
@@ -707,6 +719,10 @@ const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
 const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
 
+// Track store switching state
+const switchingStore = ref(false)
+const previousStoreId = ref<string | null>(null)
+
 // Sidebar collapsed state with localStorage persistence
 // Initialize synchronously on client to prevent layout shift
 const sidebarCollapsed = ref(false)
@@ -902,11 +918,42 @@ onMounted(async () => {
 })
 
 // Watch for store changes and auto-expand current store
-watch(() => storesStore.currentStoreId, (storeId) => {
-  if (storeId) {
-    expandedStores[storeId] = true
+watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
+  // Track store switching
+  if (oldStoreId && newStoreId && oldStoreId !== newStoreId) {
+    switchingStore.value = true
+    previousStoreId.value = oldStoreId
+    
+    // Collapse the previous store
+    if (oldStoreId) {
+      expandedStores[oldStoreId] = false
+    }
+  }
+  
+  if (newStoreId) {
+    // Expand the new current store
+    expandedStores[newStoreId] = true
+    
+    // Wait for data to load before showing details
+    if (switchingStore.value) {
+      // Wait a bit for data to refresh
+      await new Promise(resolve => setTimeout(resolve, 500))
+      switchingStore.value = false
+      previousStoreId.value = null
+    }
   }
 }, { immediate: true })
+
+// Also watch for loading state to detect when switching completes
+watch(() => storesStore.loading, (loading) => {
+  if (!loading && switchingStore.value) {
+    // Give a small delay to ensure all data is loaded
+    setTimeout(() => {
+      switchingStore.value = false
+      previousStoreId.value = null
+    }, 300)
+  }
+})
 
 // Auto-expand departments when navigating to departments route
 watch(() => route.path, (path) => {

@@ -58,78 +58,35 @@ The application requires Firebase environment variables to be configured. See [D
 
 ## Deployment
 
-When deploying to production, ensure all Firebase environment variables are set in your deployment platform. The application will display a clear error message if configuration is missing.
+### Vercel Deployment
 
-See [DEPLOYMENT_ENV_SETUP.md](./DEPLOYMENT_ENV_SETUP.md) for platform-specific instructions.
+When deploying to Vercel, you **must** set Firebase environment variables:
 
-## Setup
+1. Go to your Vercel project → **Settings** → **Environment Variables**
+2. Add all 7 Firebase environment variables (see values below)
+3. **Redeploy** your application after adding variables
 
-Make sure to install dependencies:
+**Quick Setup**: See [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md) for detailed step-by-step instructions.
 
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+**Required Variables for Vercel:**
+```
+NUXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAjWHyQswMM_u98vZ5vokrv9m3TuJndPkU
+NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=storv-ux.firebaseapp.com
+NUXT_PUBLIC_FIREBASE_PROJECT_ID=storv-ux
+NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET=storv-ux.firebasestorage.app
+NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1038005888848
+NUXT_PUBLIC_FIREBASE_APP_ID=1:1038005888848:web:1630fa92450882af08ee55
+NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-TW5BCF05NL
 ```
 
-## Development Server
+⚠️ **Important**: 
+- Variables must start with `NUXT_PUBLIC_` to be available in the browser
+- You must **redeploy** after adding variables
+- Select **Production**, **Preview**, and **Development** environments
 
-Start the development server on `http://localhost:3000`:
+For other platforms, see [DEPLOYMENT_ENV_SETUP.md](./DEPLOYMENT_ENV_SETUP.md).
 
-```bash
-# npm
-npm run dev
+## Documentation
 
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- **[VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md)** - Complete step-by-step guide for setting environment variables in Vercel
+- **[DEPLOYMENT_ENV_SETUP.md](./DEPLOYMENT_ENV_SETUP.md)** - General deployment guide for all platforms

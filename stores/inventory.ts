@@ -4,6 +4,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
+import { getCurrentStoreId } from '~/composables/useCurrentStore'
 
 export interface TemplateField {
   id: string
@@ -179,6 +180,9 @@ export const useInventoryStore = defineStore('inventory', {
           }
         }
 
+        // Get current store ID to filter folders
+        const currentStoreId = await getCurrentStoreId()
+
         let folders = querySnapshot.docs.map((doc) => {
           const data = doc.data()
           return {
@@ -192,12 +196,18 @@ export const useInventoryStore = defineStore('inventory', {
             itemCount: data.itemCount || 0,
             totalValue: data.totalValue || 0,
             lowStockCount: data.lowStockCount || 0,
+            storeId: data.storeId || '', // Include storeId from data
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
             updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
             createdBy: data.createdBy || userId,
             allowedDepartments: data.allowedDepartments || undefined,
           } as InventoryFolder
         })
+
+        // Filter folders by current store ID
+        if (currentStoreId) {
+          folders = folders.filter(folder => folder.storeId === currentStoreId)
+        }
 
         // If user is staff, filter folders by department access
         if (userStore.userData?.role === 'staff') {
@@ -364,7 +374,7 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Create a new inventory folder
-    async createFolder(folderData: Omit<InventoryFolder, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'itemCount' | 'totalValue' | 'lowStockCount'>): Promise<string> {
+    async createFolder(folderData: Omit<InventoryFolder, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'itemCount' | 'totalValue' | 'lowStockCount' | 'storeId'>): Promise<string> {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -386,12 +396,20 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Managers cannot create inventory folders. Only super admins can create folders.')
       }
 
+      // Get current store ID
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected. Please select a store first.')
+      }
+
       try {
         const foldersRef = collection(db, 'inventoryFolders')
         const newFolderRef = doc(foldersRef)
 
         const newFolder: Omit<InventoryFolder, 'id'> = {
           ...folderData,
+          storeId, // Add storeId to the folder
           itemCount: 0,
           totalValue: 0,
           lowStockCount: 0,
@@ -407,6 +425,7 @@ export const useInventoryStore = defineStore('inventory', {
         const folderForState: InventoryFolder = {
           id: newFolderRef.id,
           ...folderData,
+          storeId, // Add storeId to local state
           itemCount: 0,
           totalValue: 0,
           lowStockCount: 0,
@@ -788,6 +807,21 @@ export const useInventoryStore = defineStore('inventory', {
 
       const createdByUid = authStore.currentUser.uid
 
+      // Get folder to get its storeId
+      const folder = this.getFolderById(folderId)
+      if (!folder) {
+        throw new Error('Folder not found')
+      }
+
+      // Get storeId from folder or current store
+      let storeId = folder.storeId
+      if (!storeId) {
+        storeId = await getCurrentStoreId() || ''
+        if (!storeId) {
+          throw new Error('No store selected. Please select a store first.')
+        }
+      }
+
       try {
         const itemsRef = collection(db, 'inventoryItems')
         const newItemRef = doc(itemsRef)
@@ -796,6 +830,7 @@ export const useInventoryStore = defineStore('inventory', {
         const newItem: Omit<InventoryItem, 'id'> = {
           ...itemData,
           folderId,
+          storeId, // Add storeId from folder
           dateIn: now, // Set dateIn from createdAt
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -809,6 +844,7 @@ export const useInventoryStore = defineStore('inventory', {
           id: newItemRef.id,
           ...itemData,
           folderId,
+          storeId, // Add storeId to local state
           dateIn: now, // Set dateIn from createdAt
           createdAt: now,
           updatedAt: now,

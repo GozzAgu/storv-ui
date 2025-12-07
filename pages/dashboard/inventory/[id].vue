@@ -12,14 +12,6 @@
         </button>
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
-            <div
-              :class="[
-                'w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg',
-                getFolderColorClass(folder?.color || 'blue')
-              ]"
-            >
-              <FolderIcon class="w-7 h-7 text-white" />
-            </div>
             <div class="flex-1">
               <h1 v-if="isLoadingFolder" class="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 Loading...
@@ -687,7 +679,6 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import {
   ArrowLeftIcon,
-  FolderIcon,
   PlusIcon,
   CubeIcon,
   CurrencyDollarIcon,
@@ -998,26 +989,6 @@ const toggleSort = (key: string) => {
   }
 }
 
-const getFolderColorClass = (color?: string) => {
-  if (!color) return 'bg-gradient-to-br from-gray-500 to-gray-600'
-  
-  // If color is a hex value, use it directly
-  if (color.startsWith('#')) {
-    return `bg-[${color}]`
-  }
-  
-  const colorMap: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-    green: 'bg-gradient-to-br from-green-500 to-green-600',
-    purple: 'bg-gradient-to-br from-purple-500 to-purple-600',
-    orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
-    red: 'bg-gradient-to-br from-red-500 to-red-600',
-    pink: 'bg-gradient-to-br from-pink-500 to-pink-600',
-    indigo: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
-    yellow: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
-  }
-  return colorMap[color] || 'bg-gradient-to-br from-gray-500 to-gray-600'
-}
 
 // formatCurrency is now imported from usePreferences for currency conversion
 

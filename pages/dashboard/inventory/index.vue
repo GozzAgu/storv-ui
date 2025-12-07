@@ -8,24 +8,37 @@
 
     <!-- Search and Filter - Hidden on large screens -->
     <Card padding="sm" class="lg:hidden">
-      <div class="flex items-center gap-4">
-        <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search folders..."
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          />
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <div class="flex-1 relative">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search folders..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
         </div>
-        <select
-          v-model="sortBy"
-          class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="items">Sort by Items</option>
-          <option value="date">Sort by Date</option>
-        </select>
+        <div class="flex items-center gap-4">
+          <select
+            v-model="selectedDepartmentId"
+            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="">All Departments</option>
+            <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+              {{ dept.name }}
+            </option>
+          </select>
+          <select
+            v-model="sortBy"
+            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="items">Sort by Items</option>
+            <option value="date">Sort by Date</option>
+          </select>
+        </div>
       </div>
     </Card>
 
@@ -45,6 +58,15 @@
               class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
             />
           </div>
+          <select
+            v-model="selectedDepartmentId"
+            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[180px]"
+          >
+            <option value="">All Departments</option>
+            <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+              {{ dept.name }}
+            </option>
+          </select>
           <select
             v-model="sortBy"
             class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -162,13 +184,25 @@
           <FolderIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
         </div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          {{ searchQuery ? 'No folders found' : 'No folders yet' }}
+          <span v-if="selectedDepartmentId">No folders found for {{ getDepartmentName(selectedDepartmentId) }}</span>
+          <span v-else-if="searchQuery">No folders found</span>
+          <span v-else>No folders yet</span>
         </h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          {{ searchQuery ? 'Try adjusting your search criteria' : 'Create your first folder to organize your inventory' }}
+          <span v-if="selectedDepartmentId">Try selecting a different department or clear the filter</span>
+          <span v-else-if="searchQuery">Try adjusting your search criteria</span>
+          <span v-else>Create your first folder to organize your inventory</span>
         </p>
+        <div v-if="selectedDepartmentId" class="mb-4">
+          <Button
+            variant="outline"
+            @click="selectedDepartmentId = ''"
+          >
+            Clear Department Filter
+          </Button>
+        </div>
         <Button
-          v-if="!searchQuery && canCreateInventoryFolders"
+          v-if="!searchQuery && !selectedDepartmentId && canCreateInventoryFolders"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateFolderModal"
@@ -492,6 +526,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
+import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 
 definePageMeta({
@@ -506,6 +541,20 @@ const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const editingFolder = ref<InventoryFolder | null>(null)
+
+// Department filter - load from localStorage
+const getInitialDepartment = (): string => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('inventory-selected-department')
+      return saved || ''
+    } catch (e) {
+      return ''
+    }
+  }
+  return ''
+}
+const selectedDepartmentId = ref(getInitialDepartment())
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
   if (import.meta.client) {
@@ -561,7 +610,11 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
+const storesStore = useStoresStore()
 const { canManage, canCreateInventoryFolders } = usePermissions()
+
+// Get current store ID for filtering
+const currentStoreId = computed(() => storesStore.currentStoreId)
 
 const folderForm = reactive({
   name: '',
@@ -639,8 +692,26 @@ watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
 
 const folders = computed(() => inventoryStore.folders)
 
+// Get departments for current store only
+const currentStoreDepartments = computed(() => {
+  if (!currentStoreId.value) return departmentsStore.departments
+  return departmentsStore.departments.filter(dept => dept.storeId === currentStoreId.value)
+})
+
 const filteredFolders = computed(() => {
   let result = [...folders.value]
+
+  // Filter by selected department
+  if (selectedDepartmentId.value) {
+    result = result.filter(folder => {
+      // If folder has no allowedDepartments, it's accessible to all departments
+      if (!folder.allowedDepartments || folder.allowedDepartments.length === 0) {
+        return true
+      }
+      // Otherwise, check if selected department is in the allowed list
+      return folder.allowedDepartments.includes(selectedDepartmentId.value)
+    })
+  }
 
   // Filter by search query
   if (searchQuery.value) {
@@ -695,6 +766,23 @@ watch(currentPage, (newPage) => {
   if (import.meta.client) {
     try {
       localStorage.setItem('inventory-index-page', newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+})
+
+// Watch for department filter changes and persist
+watch(selectedDepartmentId, (newDeptId) => {
+  if (import.meta.client) {
+    try {
+      if (newDeptId) {
+        localStorage.setItem('inventory-selected-department', newDeptId)
+      } else {
+        localStorage.removeItem('inventory-selected-department')
+      }
+      // Reset to first page when department changes
+      currentPage.value = 1
     } catch (e) {
       // Ignore localStorage errors
     }
@@ -992,12 +1080,16 @@ onMounted(async () => {
       } else {
         const userData = userStore.userData
       
-      // Load departments if user can manage (needed for department access UI)
+      // Load stores and departments if user can manage (needed for department access UI and filter)
       if (canManage) {
         try {
+          // Initialize current store if not set
+          if (!storesStore.currentStoreId) {
+            await storesStore.initializeCurrentStore()
+          }
           await departmentsStore.fetchDepartments()
         } catch (error: any) {
-          console.warn('[InventoryPage] Error fetching departments:', error.message || error)
+          console.warn('[InventoryPage] Error fetching stores/departments:', error.message || error)
         }
       }
         console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
@@ -1044,6 +1136,26 @@ watch(() => authStore.currentUser, async (user) => {
       console.log('[InventoryPage] Folders fetched after auth change:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error fetching folders:', error.message || error)
+    }
+  }
+}, { immediate: false })
+
+// Watch for store changes and refetch folders
+watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
+  if (newStoreId && newStoreId !== oldStoreId && authStore.currentUser) {
+    console.log('[InventoryPage] Store changed, refetching folders...')
+    try {
+      // Reset department filter when store changes
+      selectedDepartmentId.value = ''
+      // Refetch folders for new store
+      await inventoryStore.fetchFolders()
+      // Refetch departments for new store
+      if (canManage) {
+        await departmentsStore.fetchDepartments()
+      }
+      console.log('[InventoryPage] Folders refetched after store change:', inventoryStore.folders.length)
+    } catch (error: any) {
+      console.error('[InventoryPage] Error refetching folders after store change:', error.message || error)
     }
   }
 }, { immediate: false })

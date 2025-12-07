@@ -29,13 +29,28 @@ NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id_here
 
 ## Setting Environment Variables by Platform
 
-### Vercel
-1. Go to your project dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Add each variable with the name and value
-4. Select the environments (Production, Preview, Development)
-5. Click **Save**
-6. Redeploy your application
+### Vercel (Detailed Guide)
+**See [VERCEL_ENV_SETUP.md](./VERCEL_ENV_SETUP.md) for a complete step-by-step guide.**
+
+Quick steps:
+1. Go to [vercel.com](https://vercel.com) and log in
+2. Select your project: **storv-ui**
+3. Go to **Settings** → **Environment Variables**
+4. Click **Add New** for each variable below
+5. **Important**: Select **Production**, **Preview**, and **Development** environments
+6. Click **Save** for each variable
+7. **Redeploy** your application (go to Deployments → ⋯ → Redeploy)
+
+**Required Variables:**
+- `NUXT_PUBLIC_FIREBASE_API_KEY` = `AIzaSyAjWHyQswMM_u98vZ5vokrv9m3TuJndPkU`
+- `NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN` = `storv-ux.firebaseapp.com`
+- `NUXT_PUBLIC_FIREBASE_PROJECT_ID` = `storv-ux`
+- `NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET` = `storv-ux.firebasestorage.app`
+- `NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` = `1038005888848`
+- `NUXT_PUBLIC_FIREBASE_APP_ID` = `1:1038005888848:web:1630fa92450882af08ee55`
+- `NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID` = `G-TW5BCF05NL`
+
+⚠️ **Critical**: You must **redeploy** after adding variables for them to take effect!
 
 ### Netlify
 1. Go to your site dashboard
