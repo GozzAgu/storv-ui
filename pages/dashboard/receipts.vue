@@ -66,7 +66,7 @@
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Receipts</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
               <span v-if="receiptsStore.loading">-</span>
-              <span v-else>{{ receiptsStore.totalReceipts }}</span>
+              <span v-else>{{ receipts.length }}</span>
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All time</p>
           </div>
@@ -858,6 +858,7 @@ import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
+import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
@@ -874,6 +875,7 @@ useHead({
 })
 
 const receiptsStore = useReceiptsStore()
+const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const { canManage, canCreate } = usePermissions()
 const { getUserDocument } = useUser()
@@ -1144,25 +1146,53 @@ if (import.meta.client) {
   }, 100)
 }
 
-const receipts = computed(() => receiptsStore.receipts)
-const totalSales = computed(() => receiptsStore.totalSales)
+// Filter receipts by current store for all computed properties
+const currentStoreId = computed(() => storesStore.currentStoreId)
+
+// Filter receipts by current store
+const receipts = computed(() => {
+  const storeId = currentStoreId.value
+  if (!storeId) return []
+  return receiptsStore.receipts.filter(receipt => receipt.storeId === storeId)
+})
+
+const totalSales = computed(() => {
+  const storeId = currentStoreId.value
+  if (!storeId) return 0
+  return receipts.value
+    .filter(r => r.status === 'completed')
+    .reduce((sum, r) => sum + r.total, 0)
+})
+
 const todaySales = computed(() => {
   const today = new Date().toDateString()
-  return receiptsStore.receipts
+  const storeId = currentStoreId.value
+  if (!storeId) return 0
+  return receipts.value
     .filter(r => r.status === 'completed' && new Date(r.date).toDateString() === today)
     .reduce((sum, r) => sum + r.total, 0)
 })
 
 const todayReceipts = computed(() => {
   const today = new Date().toDateString()
-  return receiptsStore.receipts.filter(r => new Date(r.date).toDateString() === today).length
+  return receipts.value.filter(r => new Date(r.date).toDateString() === today).length
 })
 
-const monthSales = computed(() => receiptsStore.monthSales)
+const monthSales = computed(() => {
+  const now = new Date()
+  return receipts.value
+    .filter(r => {
+      const receiptDate = new Date(r.date)
+      return r.status === 'completed' &&
+        receiptDate.getMonth() === now.getMonth() &&
+        receiptDate.getFullYear() === now.getFullYear()
+    })
+    .reduce((sum, r) => sum + r.total, 0)
+})
 
 const monthReceipts = computed(() => {
   const now = new Date()
-  return receiptsStore.receipts.filter(r => {
+  return receipts.value.filter(r => {
     const receiptDate = new Date(r.date)
     return receiptDate.getMonth() === now.getMonth() &&
       receiptDate.getFullYear() === now.getFullYear()
@@ -1557,6 +1587,19 @@ watch(() => authStore.currentUser, async (user) => {
 }, { immediate: false })
 
 // Watch for receipts changes and load creator names
+// Watch for store changes and refetch receipts
+watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
+  if (newStoreId && newStoreId !== oldStoreId && authStore.currentUser) {
+    console.log('[ReceiptsPage] Store changed, refetching receipts...')
+    try {
+      await receiptsStore.fetchReceipts()
+      console.log('[ReceiptsPage] Receipts refetched after store change:', receiptsStore.receipts.length)
+    } catch (error: any) {
+      console.error('[ReceiptsPage] Error refetching receipts after store change:', error.message || error)
+    }
+  }
+}, { immediate: false })
+
 watch(() => receiptsStore.receipts, async (newReceipts) => {
   if (newReceipts && newReceipts.length > 0) {
     await loadCreatorNames()

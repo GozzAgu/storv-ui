@@ -441,6 +441,13 @@ const completeSale = async () => {
       
       // Get current store and user information
       const currentStore = storesStore.currentStore
+      const currentStoreId = storesStore.currentStoreId
+      if (!currentStoreId) {
+        showErrorToast('No store selected. Please select a store first.')
+        isProcessing.value = false
+        return
+      }
+      
       const storeBranchName = currentStore?.name || 'Unknown Store'
       
       // Get user name (staff member or super admin)
@@ -470,6 +477,7 @@ const completeSale = async () => {
         notes: 'Quick Sale',
         folderId: selectedFolderId.value || '',
         itemIds,
+        storeId: currentStoreId, // Store ID where receipt was created
         storeBranchName, // Store branch name
         createdByUserName, // User who created the receipt
       }

@@ -132,15 +132,25 @@ export const useReceiptsStore = defineStore('receipts', {
         }
       }
 
+      // Get current store ID to filter receipts
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
+      }
+
       try {
         const receiptsRef = collection(db, 'receipts')
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get receipts for this user (or super admin if staff)
+          // Filter by createdBy AND storeId to only get receipts for this user and store
           const q = query(
             receiptsRef,
             where('createdBy', '==', userId),
+            where('storeId', '==', storeId),
             orderBy('createdAt', 'desc')
           )
           querySnapshot = await getDocs(q)
@@ -174,8 +184,20 @@ export const useReceiptsStore = defineStore('receipts', {
               warned.receipts = true
             }
             
-            const q = query(receiptsRef, where('createdBy', '==', userId))
-            querySnapshot = await getDocs(q)
+            // Try with just storeId filter if orderBy fails
+            try {
+              const q = query(
+                receiptsRef,
+                where('createdBy', '==', userId),
+                where('storeId', '==', storeId)
+              )
+              querySnapshot = await getDocs(q)
+            } catch (storeFilterError: any) {
+              // If storeId filter also fails, fall back to createdBy only and filter in memory
+              console.warn('[ReceiptsStore] StoreId filter failed, filtering in memory:', storeFilterError.message)
+              const q = query(receiptsRef, where('createdBy', '==', userId))
+              querySnapshot = await getDocs(q)
+            }
           } else {
             throw orderByError
           }
@@ -184,8 +206,8 @@ export const useReceiptsStore = defineStore('receipts', {
         const receipts: Receipt[] = []
         querySnapshot.forEach((docSnapshot) => {
           const data = docSnapshot.data()
-          // Double-check that the receipt belongs to this user
-          if (data.createdBy === userId) {
+          // Double-check that the receipt belongs to this user and store
+          if (data.createdBy === userId && data.storeId === storeId) {
             receipts.push({
               id: docSnapshot.id,
               ...data,
@@ -259,6 +281,18 @@ export const useReceiptsStore = defineStore('receipts', {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated to create receipts')
+      }
+
+      // Get current store ID - ensure receipt has storeId
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected. Please select a store first.')
+      }
+
+      // Ensure receiptData has storeId
+      if (!receiptData.storeId) {
+        receiptData.storeId = storeId
       }
 
       const actualCreatorUid = authStore.currentUser.uid // Store actual creator for display

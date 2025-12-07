@@ -1056,6 +1056,13 @@ const handleCreateReceipt = async () => {
     
     // Get current store and user information
     const currentStore = storesStore.currentStore
+    const currentStoreId = storesStore.currentStoreId
+    if (!currentStoreId) {
+      alert('No store selected. Please select a store first.')
+      isCreating.value = false
+      return
+    }
+    
     const storeBranchName = currentStore?.name || 'Unknown Store'
     
     // Get user name (staff member or super admin)
@@ -1087,6 +1094,7 @@ const handleCreateReceipt = async () => {
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
       itemIds,
+      storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name
       createdByUserName, // User who created the receipt
     }
