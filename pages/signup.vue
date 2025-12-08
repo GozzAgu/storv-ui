@@ -24,10 +24,12 @@
     <div class="max-w-md w-full relative z-10">
       <!-- Logo and Header -->
       <div class="text-center mb-8">
-        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent mb-4">
-            Storv
-          </h1>
+        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-4">
+          <img
+            src="/storv logo.png"
+            alt="Storv Logo"
+            class="h-16 w-auto mx-auto object-contain"
+          />
         </NuxtLink>
         <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Create your account
