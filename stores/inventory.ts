@@ -1084,8 +1084,13 @@ export const useInventoryStore = defineStore('inventory', {
         // Get actual count from items
         const actualCount = this.items[folderId]?.length || 0
 
-        // Get userId and storeId for hierarchical path
-        const userId = authStore.currentUser.uid
+        // Get userId for hierarchical path (superadmin's UID for staff)
+        const userId = await getQueryUserId()
+        if (!userId) {
+          console.warn('[InventoryStore] Cannot update folder item count: user ID not available')
+          return
+        }
+        
         const storeId = await getCurrentStoreId()
         if (storeId) {
           // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}

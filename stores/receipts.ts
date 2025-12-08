@@ -312,30 +312,16 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let createdByUid = authStore.currentUser.uid
+      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
+      // This ensures receipts are saved in the correct hierarchical path
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const createdByUid = await getQueryUserId()
+      if (!createdByUid) {
+        throw new Error('User ID not available. Cannot create receipt.')
+      }
 
-      // If the current user is staff, get the super admin UID from the staff document
       if (userStore.userData?.role === 'staff') {
-        try {
-          // Find the staff document for this user
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // Use the super admin's UID who created this staff member
-              if (staffData.createdBy) {
-                createdByUid = staffData.createdBy
-                console.log('[ReceiptsStore] Staff user detected, using super admin UID for receipt creation:', createdByUid)
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[ReceiptsStore] Could not fetch staff document for receipt creation, using current user UID:', error.message)
-        }
+        console.log('[ReceiptsStore] Staff user detected, using super admin UID for receipt creation:', createdByUid)
       }
 
       try {

@@ -476,7 +476,7 @@
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
                 <div class="text-sm text-gray-900 dark:text-gray-100">
-                  {{ getCreatorName(receipt.actualCreator || receipt.createdBy) }}
+                  {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap text-right min-w-[160px]">
@@ -1279,8 +1279,8 @@ const sortedFilteredReceipts = computed(() => {
         bValue = statusOrder.indexOf(b.status)
         break
       case 'createdBy':
-        aValue = getCreatorName(a.actualCreator || a.createdBy)
-        bValue = getCreatorName(b.actualCreator || b.createdBy)
+        aValue = a.createdByUserName || getCreatorName(a.actualCreator || a.createdBy)
+        bValue = b.createdByUserName || getCreatorName(b.actualCreator || b.createdBy)
         break
       default:
         return 0
@@ -1495,21 +1495,94 @@ const loadCreatorNames = async () => {
           return
         }
         
-        // If not found, try to get from staff collection (staff member)
-        const staffRef = collection(db, 'staff')
-        const staffQuery = query(staffRef, where('authUid', '==', uid))
-        const staffSnapshot = await getDocs(staffQuery)
+        // Try to get from staff store cache first (faster if already loaded)
+        const cachedStaff = staffStore.staff.find(s => s.authUid === uid)
+        if (cachedStaff) {
+          const fullName = `${cachedStaff.firstName || ''} ${cachedStaff.lastName || ''}`.trim()
+          if (fullName) {
+            creatorNames.value[uid] = fullName
+            return
+          }
+        }
         
-        if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-          const staffDoc = staffSnapshot.docs[0]
-          if (staffDoc) {
-            const staffData = staffDoc.data()
-            const fullName = `${staffData.firstName || ''} ${staffData.lastName || ''}`.trim()
-            if (fullName) {
-              creatorNames.value[uid] = fullName
-              return
+        // If not found in cache, try legacy staff collection (for migration)
+        try {
+          const staffRef = collection(db, 'staff')
+          const staffQuery = query(staffRef, where('authUid', '==', uid))
+          const staffSnapshot = await getDocs(staffQuery)
+          
+          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+            const staffDoc = staffSnapshot.docs[0]
+            if (staffDoc) {
+              const staffData = staffDoc.data()
+              const fullName = `${staffData.firstName || ''} ${staffData.lastName || ''}`.trim()
+              if (fullName) {
+                creatorNames.value[uid] = fullName
+                return
+              }
             }
           }
+        } catch (legacyError: any) {
+          console.warn(`Could not fetch from legacy staff collection for ${uid}:`, legacyError.message)
+        }
+        
+        // If still not found, search hierarchical structure
+        try {
+          const { getStoresCollection, getDepartmentsCollection, getStaffCollection } = await import('~/composables/useFirestorePaths')
+          
+          // Get all superadmin users from top-level users collection
+          const usersRef = collection(db, 'users')
+          const usersSnapshot = await getDocs(usersRef)
+          
+          for (const userDoc of usersSnapshot.docs) {
+            const potentialSuperadminId = userDoc.id
+            const userData = userDoc.data()
+            
+            // Only search superadmins
+            if (userData.role !== 'superAdmin') continue
+            
+            try {
+              const storesRef = getStoresCollection(db, potentialSuperadminId)
+              const storesSnapshot = await getDocs(storesRef)
+              
+              for (const storeDoc of storesSnapshot.docs) {
+                const storeId = storeDoc.id
+                const departmentsRef = getDepartmentsCollection(db, potentialSuperadminId, storeId)
+                const departmentsSnapshot = await getDocs(departmentsRef)
+                
+                for (const deptDoc of departmentsSnapshot.docs) {
+                  const departmentId = deptDoc.id
+                  try {
+                    const staffRef = getStaffCollection(db, potentialSuperadminId, storeId, departmentId)
+                    const staffSnapshot = await getDocs(staffRef)
+                    
+                    for (const staffDoc of staffSnapshot.docs) {
+                      const staffData = staffDoc.data()
+                      if (staffData.authUid === uid) {
+                        // Found the staff member!
+                        const fullName = `${staffData.firstName || ''} ${staffData.lastName || ''}`.trim()
+                        if (fullName) {
+                          creatorNames.value[uid] = fullName
+                          return
+                        }
+                        // If no name, try email
+                        if (staffData.email) {
+                          creatorNames.value[uid] = staffData.email
+                          return
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    continue
+                  }
+                }
+              }
+            } catch (e) {
+              continue
+            }
+          }
+        } catch (hierarchicalError: any) {
+          console.warn(`Could not search hierarchical structure for ${uid}:`, hierarchicalError.message)
         }
         
         // If still not found, use UID as fallback

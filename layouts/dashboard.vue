@@ -777,11 +777,25 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
     ]).catch(err => {
       console.warn('[Dashboard] Error fetching inventory/receipts:', err)
     })
+    // Fetch items for all folders after folders are loaded
+    if (inventoryStore.folders.length > 0) {
+      await Promise.all(
+        inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+      ).catch(err => {
+        console.warn('[Dashboard] Error fetching inventory items:', err)
+      })
+    }
     // Auto-expand current store
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
     }
   } else if (finalUserData?.role === 'staff') {
+    // Fetch staff member data first to ensure getQueryUserId works correctly
+    try {
+      await staffStore.fetchCurrentStaffMember()
+    } catch (err) {
+      console.warn('[Dashboard] Error fetching staff member:', err)
+    }
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()
     // Fetch inventory and receipts in parallel
@@ -791,6 +805,14 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
     ]).catch(err => {
       console.warn('[Dashboard] Error fetching inventory/receipts:', err)
     })
+    // Fetch items for all folders after folders are loaded
+    if (inventoryStore.folders.length > 0) {
+      await Promise.all(
+        inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+      ).catch(err => {
+        console.warn('[Dashboard] Error fetching inventory items:', err)
+      })
+    }
     // Auto-expand current store for staff
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
@@ -816,10 +838,24 @@ onMounted(async () => {
       ]).catch(err => {
         console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
       })
+      // Fetch items for all folders after folders are loaded
+      if (inventoryStore.folders.length > 0) {
+        await Promise.all(
+          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+        ).catch(err => {
+          console.warn('[Dashboard] Error fetching inventory items on mount:', err)
+        })
+      }
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
       }
     } else if (userStore.userData?.role === 'staff') {
+      // Fetch staff member data first to ensure getQueryUserId works correctly
+      try {
+        await staffStore.fetchCurrentStaffMember()
+      } catch (err) {
+        console.warn('[Dashboard] Error fetching staff member on mount:', err)
+      }
       await storesStore.initializeCurrentStore()
       await departmentsStore.fetchDepartments()
       // Fetch inventory and receipts in parallel
@@ -829,6 +865,14 @@ onMounted(async () => {
       ]).catch(err => {
         console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
       })
+      // Fetch items for all folders after folders are loaded
+      if (inventoryStore.folders.length > 0) {
+        await Promise.all(
+          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+        ).catch(err => {
+          console.warn('[Dashboard] Error fetching inventory items on mount:', err)
+        })
+      }
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
       }
@@ -984,6 +1028,14 @@ watch(() => route.path, async (path) => {
   if (path.startsWith('/dashboard/inventory') && authStore.currentUser) {
     try {
       await inventoryStore.fetchFolders()
+      // Also fetch items for all folders
+      if (inventoryStore.folders.length > 0) {
+        await Promise.all(
+          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+        ).catch(err => {
+          console.warn('[Dashboard] Error fetching inventory items on route change:', err)
+        })
+      }
     } catch (error) {
       console.error('Error fetching inventory folders:', error)
     }
@@ -1002,6 +1054,14 @@ watch(() => authStore.currentUser, async (user) => {
   if (user && isInventoryRoute.value) {
     try {
       await inventoryStore.fetchFolders()
+      // Also fetch items for all folders
+      if (inventoryStore.folders.length > 0) {
+        await Promise.all(
+          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+        ).catch(err => {
+          console.warn('[Dashboard] Error fetching inventory items on auth change:', err)
+        })
+      }
     } catch (error) {
       console.error('Error fetching inventory folders:', error)
     }

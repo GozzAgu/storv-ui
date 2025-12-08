@@ -351,7 +351,9 @@ export const useStoresStore = defineStore('stores', {
       }
 
       try {
-        // Use hierarchical path: users/{userId}/stores
+        // IMPORTANT: Stores are ONLY fetched from the hierarchical family tree structure
+        // Path: users/{userId}/stores
+        // This ensures stores belong to the superadmin's family tree, just like inventory
         const storesRef = getStoresCollection(db, userId)
         let querySnapshot
 
@@ -488,7 +490,9 @@ export const useStoresStore = defineStore('stores', {
       }
 
       try {
-        // Use hierarchical path: users/{userId}/stores
+        // IMPORTANT: Stores are ONLY created in the hierarchical family tree structure
+        // Path: users/{userId}/stores/{storeId}
+        // This ensures stores belong to the superadmin's family tree, just like inventory
         const userId = authStore.currentUser.uid
         const storesRef = getStoresCollection(db, userId)
         const newStoreRef = doc(storesRef)

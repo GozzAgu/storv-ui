@@ -160,13 +160,45 @@ export async function getQueryUserId(): Promise<string | null> {
           console.log('[useFirestorePaths] Staff found in cache, using superadmin UID:', userId)
           return userId
         }
+        
+        // If not in cache, try fetching the staff member (but only if not already fetching to avoid loops)
+        // Check if we're already in a fetch operation by looking for a flag
+        const isFetching = (staffStore as any).__fetchingStaffMember
+        if (!isFetching) {
+          try {
+            (staffStore as any).__fetchingStaffMember = true
+            const fetchedStaff = await staffStore.fetchCurrentStaffMember()
+            if (fetchedStaff?.createdBy) {
+              userId = fetchedStaff.createdBy
+              console.log('[useFirestorePaths] Staff fetched and found, using superadmin UID:', userId)
+              (staffStore as any).__fetchingStaffMember = false
+              return userId
+            }
+            (staffStore as any).__fetchingStaffMember = false
+          } catch (fetchError: any) {
+            (staffStore as any).__fetchingStaffMember = false
+            console.warn('[useFirestorePaths] Could not fetch staff member:', fetchError.message)
+          }
+        } else {
+          // If already fetching, wait a bit and check cache again
+          await new Promise(resolve => setTimeout(resolve, 100))
+          const retryCachedStaff = staffStore.getCurrentStaffMember
+          if (retryCachedStaff?.createdBy) {
+            userId = retryCachedStaff.createdBy
+            console.log('[useFirestorePaths] Staff found in cache after wait, using superadmin UID:', userId)
+            return userId
+          }
+        }
       } catch (error: any) {
         console.warn('[useFirestorePaths] Could not get from cache:', error.message)
       }
 
-      // If not found, we can't search hierarchically here without creating a circular dependency
-      // Return null and let fetchCurrentStaffMember handle the full search
-      console.warn('[useFirestorePaths] Staff member not found in legacy collection or cache')
+      // If still not found, log warning but return null to indicate failure
+      // This will cause operations to fail gracefully rather than using wrong UID
+      if (userStore.userData?.role === 'staff') {
+        console.warn('[useFirestorePaths] Staff member not found in legacy collection or cache. Staff data may need to be loaded first.')
+        return null
+      }
     }
   }
 
