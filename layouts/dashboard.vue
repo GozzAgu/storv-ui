@@ -566,7 +566,7 @@
       </header>
 
       <!-- Page Content -->
-      <main class="p-4 sm:p-6 lg:p-8 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
+      <main class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
         <slot />
       </main>
     </div>

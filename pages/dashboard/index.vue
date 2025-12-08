@@ -1,36 +1,36 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4 sm:space-y-6 pb-6 sm:pb-8">
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
-    <!-- Welcome Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Welcome back, {{ userName }}! 👋</h1>
-        <p class="mt-1 text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
+    <!-- Welcome Header - Mobile Optimized -->
+    <div class="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex-1">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
+        <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
-          class="px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-200 flex items-center gap-2"
+          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
           <PlusIcon class="w-5 h-5" />
-          Add Product
+          <span>Add Product</span>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Card v-for="i in 4" :key="i" padding="md">
+    <div v-if="isLoading" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <Card v-for="i in 4" :key="i" padding="md" class="sm:p-6">
         <div class="animate-pulse">
-          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
-          <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+          <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3 sm:mb-4"></div>
+          <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
         </div>
       </Card>
     </div>
 
-    <!-- Key Metrics Cards -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Key Metrics Cards - Mobile Optimized -->
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
       <StatCard
         label="Total Revenue"
         :value="formatCurrency(totalRevenue)"
@@ -70,22 +70,22 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
       <!-- Revenue Chart -->
       <Card class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 30 days performance</p>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Last 30 days performance</p>
           </div>
         </div>
-        <div class="h-80 relative">
+        <div class="h-64 sm:h-80 relative">
           <p v-if="dailyRevenueData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
           <ClientOnly>
             <apexchart
               v-if="dailyRevenueData.length > 0"
               type="area"
-              height="320"
+              :height="chartHeight"
               :options="chartOptions"
               :series="chartSeries"
             />
@@ -100,52 +100,52 @@
 
       <!-- Quick Stats -->
       <Card>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Quick Stats</h2>
-        <div class="space-y-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">Quick Stats</h2>
+        <div class="space-y-4 sm:space-y-6">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
               </div>
-          <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Completed Orders</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
+          <div class="min-w-0 flex-1">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
+                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <ClockIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                <ClockIcon class="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
               </div>
-              <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Pending Orders</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
+                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
           </div>
         </div>
       </div>
 
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <XCircleIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
+            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                <XCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
               </div>
-          <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Refunded</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
+          <div class="min-w-0 flex-1">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Refunded</p>
+                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <BuildingOfficeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                <BuildingOfficeIcon class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
               </div>
-              <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Departments</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Departments</p>
+                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
               </div>
             </div>
           </div>
@@ -154,29 +154,29 @@
       </div>
 
     <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
       <!-- Recent Transactions -->
       <Card>
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-          <NuxtLink to="/dashboard/receipts" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">View All</NuxtLink>
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
+          <NuxtLink to="/dashboard/receipts" class="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
-        <div class="space-y-4">
-          <div v-if="recentTransactions.length === 0" class="text-center py-8">
-            <p class="text-sm text-gray-500 dark:text-gray-400">No recent transactions</p>
+        <div class="space-y-3 sm:space-y-4">
+          <div v-if="recentTransactions.length === 0" class="text-center py-6 sm:py-8">
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No recent transactions</p>
           </div>
-          <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
-            <div class="flex items-center gap-3">
-              <div :class="['w-8 h-8 rounded-lg flex items-center justify-center', transaction.iconBg]">
-                <component :is="transaction.icon" :class="['w-4 h-4', transaction.iconColor]" />
+          <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-2.5 sm:py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
+            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+              <div :class="['w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0', transaction.iconBg]">
+                <component :is="transaction.icon" :class="['w-4 h-4 sm:w-5 sm:h-5', transaction.iconColor]" />
               </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ transaction.description }}</p>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
               </div>
             </div>
-            <div class="text-right">
-              <p :class="['text-sm font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
+            <div class="text-right flex-shrink-0 ml-2">
+              <p :class="['text-xs sm:text-sm font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
             </div>
           </div>
         </div>
@@ -184,24 +184,24 @@
 
       <!-- Top Selling Products -->
       <Card>
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
-          <NuxtLink to="/dashboard/inventory" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">View All</NuxtLink>
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
+          <NuxtLink to="/dashboard/inventory" class="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
     </div>
-        <div class="space-y-4">
-          <div v-if="topSellingItems.length === 0" class="text-center py-8">
-            <p class="text-sm text-gray-500 dark:text-gray-400">No products sold yet</p>
+        <div class="space-y-3 sm:space-y-4">
+          <div v-if="topSellingItems.length === 0" class="text-center py-6 sm:py-8">
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No products sold yet</p>
           </div>
-          <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-4">
-            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold">
+          <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-3 sm:gap-4">
+            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm sm:text-base">
               {{ index + 1 }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
             </div>
-            <div class="text-right">
-              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
+            <div class="text-right flex-shrink-0">
+              <p class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
             </div>
           </div>
         </div>
@@ -209,44 +209,44 @@
 
       <!-- Inventory Status -->
       <Card>
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
         </div>
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">In Stock</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">In Stock</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div class="bg-green-500 h-2 rounded-full" :style="`width: ${inStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+              <div class="bg-green-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${inStockPercentage}%`"></div>
             </div>
           </div>
           
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Low Stock</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Low Stock</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div class="bg-orange-500 h-2 rounded-full" :style="`width: ${lowStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+              <div class="bg-orange-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${lowStockPercentage}%`"></div>
         </div>
       </div>
 
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div class="bg-red-500 h-2 rounded-full" :style="`width: ${outOfStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
+              <div class="bg-red-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${outOfStockPercentage}%`"></div>
         </div>
       </div>
 
-          <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Total Items</span>
-              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
+              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Items</span>
+              <span class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
             </div>
           </div>
         </div>
@@ -564,6 +564,17 @@ const chartSeries = computed(() => {
 })
 
 const themeStore = useThemeStore()
+
+// Responsive chart height - use ref for reactive updates
+const isMobile = ref(false)
+if (import.meta.client) {
+  isMobile.value = window.innerWidth < 640
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 640
+  })
+}
+const chartHeight = computed(() => isMobile.value ? 256 : 320)
+
 const chartOptions = computed(() => {
   const isDark = import.meta.client 
     ? (document.documentElement.classList.contains('dark') || themeStore.actualTheme === 'dark')
@@ -572,7 +583,7 @@ const chartOptions = computed(() => {
   return {
     chart: {
       type: 'area',
-      height: 320,
+      height: chartHeight.value,
       toolbar: {
         show: false
       },

@@ -7,7 +7,7 @@ import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { getStaffCollection, getStaffDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getStaffCollection, getStaffDocument, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 
@@ -797,35 +797,41 @@ export const useStaffStore = defineStore('staff', {
 
         // Handle role changes that affect department manager assignment
         if (updates.role !== undefined) {
-          const currentStaff = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
-          if (currentStaff && currentStaff.createdBy === authStore.currentUser.uid) {
-            const departmentsStore = useDepartmentsStore()
-            const dept = departmentsStore.getDepartmentById(currentStaff.departmentId)
-            
-            if (dept && dept.createdBy === authStore.currentUser.uid) {
-              // If role changed to manager, set as manager
-              if (updates.role === 'manager') {
-                await departmentsStore.updateDepartment(currentStaff.departmentId, {
-                  manager: `${currentStaff.firstName} ${currentStaff.lastName}`,
+          // Get the old role before the update
+          const oldRole = staffMember.role
+          const newRole = updates.role
+          
+          const departmentsStore = useDepartmentsStore()
+          const dept = departmentsStore.getDepartmentById(staffMember.departmentId)
+          
+          if (dept && dept.createdBy === authStore.currentUser.uid) {
+            // If role changed to manager, set as manager
+            if (newRole === 'manager') {
+              const updatedStaff = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
+              if (updatedStaff) {
+                await departmentsStore.updateDepartment(staffMember.departmentId, {
+                  manager: `${updatedStaff.firstName} ${updatedStaff.lastName}`,
                   managerId: staffId,
                 } as Partial<import('~/composables/useDepartments').Department>)
               }
-              // If role changed from manager to something else (like staff), clear manager
-              else if (staffMember.role === 'manager' && (updates.role === 'staff' || updates.role === 'intern')) {
+            }
+              // If role changed from manager to something else (like staff), clear manager and set to "not assigned"
+              else if (oldRole === 'manager' && (newRole === 'staff' || newRole === 'intern')) {
                 // Check if this staff member is currently the manager of the department
                 if (dept.managerId === staffId) {
                   // Use deleteField() to properly remove the fields from Firestore
                   const db = useFirestore().getFirestoreInstance()
                   if (db) {
-                    const departmentRef = doc(db, 'departments', currentStaff.departmentId)
+                    // Use hierarchical path for department update
+                    const departmentRef = getDepartmentDocument(db, userId, storeId, staffMember.departmentId)
                     await updateDoc(departmentRef, {
                       manager: deleteField(),
                       managerId: deleteField(),
                       updatedAt: serverTimestamp(),
                     })
                     
-                    // Update local state to reflect the change immediately
-                    const deptIndex = departmentsStore.departments.findIndex(d => d.id === currentStaff.departmentId)
+                    // Update local state to reflect the change immediately (set to undefined so UI shows "Not assigned")
+                    const deptIndex = departmentsStore.departments.findIndex(d => d.id === staffMember.departmentId)
                     if (deptIndex > -1) {
                       departmentsStore.departments[deptIndex] = {
                         ...departmentsStore.departments[deptIndex],
@@ -836,7 +842,6 @@ export const useStaffStore = defineStore('staff', {
                   }
                 }
               }
-            }
           }
         }
       } catch (error: any) {
@@ -881,6 +886,26 @@ export const useStaffStore = defineStore('staff', {
         if (department && department.createdBy === authStore.currentUser.uid) {
           // Pass storeId from department to avoid "No store selected" error
           await departmentsStore.updateStaffCount(staffMember.departmentId, Math.max(0, department.staffCount - 1), department.storeId)
+          
+          // If this staff member was the manager, clear the manager fields (set to "not assigned")
+          if (staffMember.role === 'manager' && department.managerId === staffId) {
+            const departmentRef = getDepartmentDocument(db, userId, storeId, staffMember.departmentId)
+            await updateDoc(departmentRef, {
+              manager: deleteField(),
+              managerId: deleteField(),
+              updatedAt: serverTimestamp(),
+            })
+            
+            // Update local state to reflect the change immediately (set to undefined so UI shows "Not assigned")
+            const deptIndex = departmentsStore.departments.findIndex(d => d.id === staffMember.departmentId)
+            if (deptIndex > -1) {
+              departmentsStore.departments[deptIndex] = {
+                ...departmentsStore.departments[deptIndex],
+                manager: undefined,
+                managerId: undefined,
+              } as Department
+            }
+          }
         }
 
         // Remove from local state

@@ -1,10 +1,10 @@
 <template>
   <ClientOnly>
-    <div class="space-y-6 pb-24 min-h-screen w-full">
+    <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full">
       <!-- Loading State -->
       <div v-if="isInitialLoading">
         <Card padding="none">
-          <div class="p-12 text-center">
+          <div class="p-8 sm:p-12 text-center">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
           </div>
@@ -13,41 +13,41 @@
     
     <!-- Actual Content -->
     <template v-else>
-    <!-- Page Header -->
+    <!-- Page Header - Mobile Optimized -->
       <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Sales</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Sales</h1>
+      <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
-    <!-- Tab Navigation -->
+    <!-- Tab Navigation - Mobile Optimized -->
     <Card padding="none" class="overflow-hidden">
       <div class="border-b border-gray-200 dark:border-gray-700">
         <nav class="flex -mb-px">
           <button
             @click="activeTab = 'receipts'"
             :class="[
-              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+              'flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors touch-manipulation active:bg-gray-50 dark:active:bg-gray-800/50',
               activeTab === 'receipts'
                 ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             ]"
           >
-            <div class="flex items-center gap-2">
-              <ReceiptPercentIcon class="w-5 h-5" />
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
+              <ReceiptPercentIcon class="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Receipts</span>
             </div>
           </button>
           <button
             @click="activeTab = 'customers'"
             :class="[
-              'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+              'flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors touch-manipulation active:bg-gray-50 dark:active:bg-gray-800/50',
               activeTab === 'customers'
                 ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             ]"
           >
-            <div class="flex items-center gap-2">
-              <UsersIcon class="w-5 h-5" />
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
+              <UsersIcon class="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Customers</span>
             </div>
           </button>
@@ -58,73 +58,73 @@
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
 
-    <!-- Stats Cards - Hidden on large screens -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
-      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
+    <!-- Stats Cards - Mobile Optimized -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:hidden">
+      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Receipts</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Receipts</p>
+            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               <span v-if="receiptsStore.loading">-</span>
               <span v-else>{{ receipts.length }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All time</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <ReceiptPercentIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <ReceiptPercentIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
     </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-green-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Sales</p>
+            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               ${{ formatCurrency(totalSales) }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All time revenue</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time revenue</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <CurrencyDollarIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Today's Sales</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Today's Sales</p>
+            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               <span v-if="receiptsStore.loading">-</span>
               <span v-else>${{ formatCurrency(todaySales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem]">
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
               <span v-if="receiptsStore.loading">-</span>
               <span v-else>{{ todayReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <CalendarIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CalendarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-orange-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-orange-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2.5rem]">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
+            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               <span v-if="receiptsStore.loading">-</span>
               <span v-else>${{ formatCurrency(monthSales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem]">
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
               <span v-if="receiptsStore.loading">-</span>
               <span v-else>{{ monthReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <ChartBarIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <ChartBarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
       </Card>
@@ -134,19 +134,19 @@
     <Card padding="none">
       <!-- Header with Stats and Filters -->
       <div v-if="!receiptsStore.loading" class="border-b border-gray-200 dark:border-gray-700">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-          <!-- Stats -->
-          <div class="flex items-center flex-wrap gap-4 sm:gap-6">
-            <div class="flex items-center gap-2">
-              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <!-- Stats - Mobile Optimized -->
+        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
+          <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Receipts:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
                 <span v-else>{{ receiptsStore.totalReceipts }}</span>
               </span>
             </div>
-            <div class="flex items-center gap-2">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Sales:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalSales) }}</span>
             </div>
@@ -167,42 +167,49 @@
               </span>
             </div>
           </div>
-          <!-- Filters -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        </div>
+        <!-- Filters - Mobile Optimized with Card-like Design -->
+        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 lg:bg-gray-50 lg:dark:bg-gray-800/50 lg:border-t-0">
+          <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-3">
+            <!-- Search Input -->
             <div class="relative flex-1 sm:flex-initial">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500" />
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search..."
-                class="w-full sm:w-48 pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder="Search receipts..."
+                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
-            <select
-              v-model="statusFilter"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
-            >
-              <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="refunded">Refunded</option>
-            </select>
-            <select
-              v-model="dateFilter"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
-            >
-              <option value="all">All Dates</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-            </select>
-            <button
-              @click="resetFilters"
-              class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0 self-start sm:self-auto"
-              title="Reset filters"
-            >
-              <ArrowPathIcon class="w-4 h-4" />
-            </button>
+            <!-- Filter Row -->
+            <div class="flex items-center gap-2 sm:gap-3">
+              <select
+                v-model="statusFilter"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+              >
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="refunded">Refunded</option>
+              </select>
+              <select
+                v-model="dateFilter"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+              >
+                <option value="all">All Dates</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <button
+                @click="resetFilters"
+                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl sm:rounded-lg transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
+                title="Reset filters"
+              >
+                <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
+                <span class="sm:hidden">Reset</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -480,10 +487,10 @@
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap text-right min-w-[160px]">
-                <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
+                <div class="flex items-center justify-end gap-1.5 sm:gap-2 flex-shrink-0">
                   <button
                     @click="handlePrintReceipt(receipt)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-2 sm:p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
                     title="View/Print"
                   >
                     <PrinterIcon class="w-5 h-5 flex-shrink-0" />
@@ -491,7 +498,7 @@
                   <button
                     v-if="receipt.status === 'completed' && canManage"
                     @click="handleRefundReceipt(receipt)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-2 sm:p-1.5 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 active:bg-orange-100 dark:active:bg-orange-900/30 rounded-lg transition-colors touch-manipulation"
                     title="Refund"
                   >
                     <ArrowPathIcon class="w-5 h-5 flex-shrink-0" />
@@ -499,7 +506,7 @@
                   <button
                     v-if="canManage"
                     @click="handleDeleteReceipt(receipt)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    class="flex-shrink-0 p-2 sm:p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded-lg transition-colors touch-manipulation"
                     title="Delete"
                   >
                     <TrashIcon class="w-5 h-5 flex-shrink-0" />
@@ -507,17 +514,17 @@
                 </div>
               </td>
             </tr>
-            <!-- Empty State -->
+            <!-- Empty State - Mobile Optimized -->
             <tr v-if="sortedFilteredReceipts.length === 0" class="bg-white dark:bg-gray-800">
-              <td colspan="9" class="px-6 py-12">
+              <td colspan="9" class="px-4 sm:px-6 py-8 sm:py-12">
                 <div class="text-center">
-                  <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                    <ReceiptPercentIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                  <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                    <ReceiptPercentIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
                   </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                  <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
                     {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first receipt to get started' }}
                   </p>
                   <Button
@@ -525,6 +532,7 @@
                     variant="primary"
                     :icon="PlusIcon"
                     @click="openCreateReceiptModal"
+                    class="w-full sm:w-auto"
                   >
                     Create First Receipt
                   </Button>
@@ -536,28 +544,30 @@
       </div>
     </Card>
 
-    <!-- Fixed Pagination -->
+    <!-- Fixed Pagination - Mobile Optimized -->
     <div
       v-if="sortedFilteredReceipts.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
     >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="sortedFilteredReceipts.length"
-        @page-change="handlePageChange"
-      />
+      <div class="px-4 sm:px-6">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="sortedFilteredReceipts.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
-    <!-- Floating Action Button -->
+    <!-- Floating Action Button - Mobile Optimized -->
     <button
       v-if="!isInitialLoading && sortedFilteredReceipts.length > 0 && canCreate"
       @click="openCreateReceiptModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
       title="Create new receipt"
     >
-      <PlusIcon class="w-5 h-5" />
+      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
     </button>
 
       <!-- Create Receipt Modal -->
@@ -593,18 +603,18 @@
       <Card padding="none">
         <!-- Header with Stats and Filters -->
         <div v-if="!receiptsStore.loading" class="border-b border-gray-200 dark:border-gray-700">
-          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 sm:px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-            <!-- Stats -->
-            <div class="flex items-center flex-wrap gap-4 sm:gap-6">
-              <div class="flex items-center gap-2">
-                <UsersIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <!-- Stats - Mobile Optimized -->
+          <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <UsersIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <span class="text-xs text-gray-600 dark:text-gray-400">Customers:</span>
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {{ uniqueCustomers.length }}
                 </span>
               </div>
-              <div class="flex items-center gap-2">
-                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                 <span class="text-xs text-gray-600 dark:text-gray-400">Revenue:</span>
                 <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
               </div>
@@ -616,20 +626,24 @@
                 </span>
               </div>
             </div>
-            <!-- Filters -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          </div>
+          <!-- Filters - Mobile Optimized with Card-like Design -->
+          <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 lg:bg-gray-50 lg:dark:bg-gray-800/50 lg:border-t-0">
+            <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-3">
+              <!-- Search Input -->
               <div class="relative flex-1 sm:flex-initial">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="customersSearchQuery"
                   type="text"
-                  placeholder="Search..."
-                  class="w-full sm:w-48 pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Search customers..."
+                  class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                 />
               </div>
+              <!-- Sort Select -->
               <select
                 v-model="customersSortBy"
-                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[160px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
               >
                 <option value="name">Sort by Name</option>
                 <option value="orders">Sort by Orders</option>
@@ -699,7 +713,7 @@
                   <td class="px-4 py-3 text-right">
                     <button
                       @click="viewCustomerReceipts(customer)"
-                      class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                      class="px-3 sm:px-3 py-2 sm:py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-lg transition-colors touch-manipulation"
                     >
                       View Receipts
                     </button>
@@ -771,17 +785,17 @@
                   </td>
                 </tr>
               </template>
-              <!-- Empty State -->
+              <!-- Empty State - Mobile Optimized -->
               <tr v-if="filteredCustomers.length === 0" class="bg-white dark:bg-gray-800">
-                <td colspan="7" class="px-6 py-12">
+                <td colspan="7" class="px-4 sm:px-6 py-8 sm:py-12">
                   <div class="text-center">
-                    <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                      <UsersIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <UsersIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
                     </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
                       {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once receipts are created' }}
                     </p>
                   </div>
@@ -792,18 +806,20 @@
         </div>
       </Card>
 
-      <!-- Pagination -->
+      <!-- Pagination - Mobile Optimized -->
       <div
         v-if="filteredCustomers.length > 0"
-        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+        class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
         :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
       >
-        <Pagination
-          :current-page="customersCurrentPage"
-          :items-per-page="customersItemsPerPage"
-          :total="filteredCustomers.length"
-          @page-change="handleCustomersPageChange"
-        />
+        <div class="px-4 sm:px-6">
+          <Pagination
+            :current-page="customersCurrentPage"
+            :items-per-page="customersItemsPerPage"
+            :total="filteredCustomers.length"
+            @page-change="handleCustomersPageChange"
+          />
+        </div>
       </div>
     </template>
 

@@ -1,83 +1,84 @@
 <template>
-  <div class="space-y-6 pb-24">
-    <!-- Enhanced Header -->
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex items-start gap-4 flex-1">
+  <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
+    <!-- Enhanced Header - Mobile Optimized -->
+    <div class="flex items-start justify-between gap-3 sm:gap-4">
+      <div class="flex items-start gap-2.5 sm:gap-4 flex-1 min-w-0">
         <button
           @click="navigateTo('/dashboard/inventory')"
-          class="mt-1 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+          class="mt-1 p-2 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors touch-manipulation flex-shrink-0"
           title="Back to folders"
         >
           <ArrowLeftIcon class="w-5 h-5" />
         </button>
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-2">
-            <div class="flex-1">
-              <h1 v-if="isLoadingFolder" class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="flex-1 min-w-0">
+              <h1 v-if="isLoadingFolder" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 Loading...
               </h1>
-              <h1 v-else class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 v-else class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
                 {{ folder?.name || 'Folder' }}
               </h1>
-              <p v-if="!isLoadingFolder" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <p v-if="!isLoadingFolder" class="mt-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                 {{ folder?.description || 'No description' }}
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-4 mt-4 text-sm text-gray-600 dark:text-gray-400">
-            <div class="flex items-center gap-2">
-              <CalendarIcon class="w-4 h-4" />
-              <span>Created {{ formatDate(folder?.createdAt) }}</span>
+          <div class="flex items-center gap-3 sm:gap-4 mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <CalendarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span class="truncate">Created {{ formatDate(folder?.createdAt) }}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <CubeIcon class="w-4 h-4" />
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <CubeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span>{{ folder?.itemCount || 0 }} items</span>
             </div>
           </div>
         </div>
         
-        <!-- Bulk Discount Button (if items selected) -->
-        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2">
+        <!-- Bulk Discount Button (if items selected) - Mobile Optimized -->
+        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 flex-shrink-0 ml-2">
           <button
             @click="openBulkDiscountModal"
-            class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm font-medium"
+            class="px-3 sm:px-4 py-2 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-xl transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium touch-manipulation"
             title="Apply bulk discount"
           >
-            <TagIcon class="w-5 h-5" />
+            <TagIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
             <span class="hidden sm:inline">Bulk Discount ({{ selectedItemsForBulk.length }})</span>
+            <span class="sm:hidden">({{ selectedItemsForBulk.length }})</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Enhanced Stats Cards - Hidden on large screens -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
-      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
+    <!-- Enhanced Stats Cards - Mobile Optimized -->
+    <div v-if="!isLoadingFolder" class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Items</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Items</p>
+            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {{ folder?.itemCount || 0 }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Items in this folder</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <CubeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-green-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Value</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
-{{ formatCurrency(totalInventoryValue) }}
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Value</p>
+            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              {{ formatCurrency(totalInventoryValue) }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Inventory value</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <CurrencyDollarIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </Card>
@@ -92,33 +93,37 @@
       </div>
     </Card>
 
-    <!-- Enhanced Filters Section - Hidden on large screens -->
-    <Card v-else padding="md" class="lg:hidden">
-      <div class="flex flex-col md:flex-row gap-4">
+    <!-- Enhanced Filters Section - Mobile Optimized -->
+    <Card v-else padding="sm" class="lg:hidden sm:p-4">
+      <div class="flex flex-col gap-3">
         <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <MagnifyingGlassIcon class="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search by name, SKU..."
-            class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </div>
-        <select
-          v-model="sortBy"
-          class="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all min-w-[160px]"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="price">Sort by Price</option>
-          <option value="sku">Sort by SKU</option>
-        </select>
-        <Button
-          variant="outline"
-          @click="resetFilters"
-          :icon="ArrowPathIcon"
-        >
-          Reset
-        </Button>
+        <div class="flex items-center gap-3">
+          <select
+            v-model="sortBy"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="price">Sort by Price</option>
+            <option value="sku">Sort by SKU</option>
+          </select>
+          <Button
+            variant="outline"
+            @click="resetFilters"
+            :icon="ArrowPathIcon"
+            class="flex-shrink-0 px-3 sm:px-4"
+          >
+            <span class="hidden sm:inline">Reset</span>
+            <span class="sm:hidden">↻</span>
+          </Button>
+        </div>
       </div>
     </Card>
 
@@ -383,18 +388,20 @@
       </div>
     </Card>
 
-    <!-- Fixed Pagination -->
+    <!-- Fixed Pagination - Mobile Optimized -->
     <div
       v-if="sortedFilteredItems.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
     >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="sortedFilteredItems.length"
-        @page-change="handlePageChange"
-      />
+      <div class="px-4 sm:px-6">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="sortedFilteredItems.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- Hidden file input for import -->
@@ -407,38 +414,38 @@
       @change="handleFileImport"
     />
 
-    <!-- Floating Action Buttons -->
-    <div v-if="!isLoadingFolder && canManageInventoryItems" class="fixed bottom-24 right-6 flex flex-col gap-2 z-40">
+    <!-- Floating Action Buttons - Mobile Optimized -->
+    <div v-if="!isLoadingFolder && canManageInventoryItems" class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 flex flex-col gap-2.5 sm:gap-2 z-40">
     <button
         @click="() => fileInputRef?.click()"
         :disabled="isImporting"
         :class="[
-          'w-11 h-11 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110',
+          'w-12 h-12 sm:w-11 sm:h-11 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation',
           (isImporting || isExporting) ? 'opacity-50 cursor-not-allowed' : ''
         ]"
         title="Import from Excel"
       >
-        <ArrowDownTrayIcon v-if="!isImporting" class="w-5 h-5" />
+        <ArrowDownTrayIcon v-if="!isImporting" class="w-5 h-5 sm:w-5 sm:h-5" />
         <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </button>
       <button
         @click="handleExportToExcel"
         :disabled="isExporting || items.length === 0"
         :class="[
-          'w-11 h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110',
+          'w-12 h-12 sm:w-11 sm:h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation',
           (isExporting || isImporting || items.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
         ]"
         title="Export to Excel"
       >
-        <ArrowUpTrayIcon v-if="!isExporting" class="w-5 h-5" />
+        <ArrowUpTrayIcon v-if="!isExporting" class="w-5 h-5 sm:w-5 sm:h-5" />
         <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
       </button>
       <button
         @click="openAddItemModal"
-        class="w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110"
+        class="w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
         title="Add new item"
       >
-        <PlusIcon class="w-5 h-5" />
+        <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
       </button>
     </div>
 

@@ -1,29 +1,29 @@
 <template>
-  <div class="space-y-6 pb-24">
-    <!-- Page Header -->
+  <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
+    <!-- Page Header - Mobile Optimized -->
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Inventory Folders</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
+      <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
     </div>
 
-    <!-- Search and Filter - Hidden on large screens -->
+    <!-- Search and Filter - Mobile Optimized -->
     <Card padding="sm" class="lg:hidden">
-      <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-4">
+      <div class="flex flex-col gap-3">
+        <div class="flex items-center gap-3">
           <div class="flex-1 relative">
             <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search folders..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full pl-10 pr-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <select
             v-model="selectedDepartmentId"
-            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="">All Departments</option>
             <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -32,7 +32,7 @@
           </select>
           <select
             v-model="sortBy"
-            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Sort by Name</option>
             <option value="items">Sort by Items</option>
@@ -79,95 +79,95 @@
       </div>
     </Card>
 
-    <!-- Folders Grid -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+    <!-- Folders Grid - Mobile Optimized -->
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer transition-all duration-200 overflow-hidden"
+        class="group relative bg-white dark:bg-gray-800 rounded-2xl sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Card Header -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-3">
+        <!-- Card Header - Mobile Optimized -->
+        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
             <div
-              class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
+              class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0"
             >
-              <FolderIcon class="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <FolderIcon class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
             </div>
-            <div>
-              <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+            <div class="min-w-0 flex-1">
+              <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                 {{ folder.name }}
               </h3>
             </div>
           </div>
-          <div v-if="canManage" class="flex items-center gap-1 flex-shrink-0">
+          <div v-if="canManage" class="flex items-center gap-1 flex-shrink-0 ml-2">
             <button
               @click.stop="handleEditFolder(folder)"
-              class="flex-shrink-0 p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              class="flex-shrink-0 p-2 sm:p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
               title="Edit folder"
             >
-              <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
+              <PencilSquareIcon class="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
             </button>
             <button
               @click.stop="handleDeleteFolder(folder)"
-              class="flex-shrink-0 p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              class="flex-shrink-0 p-2 sm:p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
               title="Delete folder"
             >
-              <TrashIcon class="w-4 h-4 flex-shrink-0" />
+              <TrashIcon class="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
             </button>
           </div>
         </div>
 
-        <!-- Card Body -->
-        <div class="p-4">
+        <!-- Card Body - Mobile Optimized -->
+        <div class="p-3 sm:p-4">
           <!-- Description -->
-          <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 min-h-[2rem]">
+          <p class="text-xs sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 sm:mb-4 min-h-[2rem]">
             {{ folder.description || 'No description' }}
           </p>
           
-          <!-- Folder Stats -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
+          <!-- Folder Stats - Mobile Optimized -->
+          <div class="space-y-2.5 sm:space-y-2">
+            <div class="flex items-center justify-between py-1">
               <div class="flex items-center gap-2">
-                <CubeIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Items</span>
+                <CubeIcon class="w-4 h-4 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Items</span>
               </div>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
+              <span class="text-sm sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
             </div>
             
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between py-1">
               <div class="flex items-center gap-2">
-                <CurrencyDollarIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Value</span>
+                <CurrencyDollarIcon class="w-4 h-4 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Value</span>
               </div>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
+              <span class="text-sm sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
             </div>
           </div>
 
-          <!-- Low Stock Warning -->
+          <!-- Low Stock Warning - Mobile Optimized -->
           <div
             v-if="folder.lowStockCount > 0"
-            class="mt-3 p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
+            class="mt-3 p-2.5 sm:p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
           >
             <p class="text-xs font-medium text-orange-700 dark:text-orange-300">
               ⚠ {{ folder.lowStockCount }} low stock
             </p>
           </div>
 
-          <!-- Department Access Info -->
+          <!-- Department Access Info - Mobile Optimized -->
           <div
             v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
-            class="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            class="mt-3 p-2.5 sm:p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
           >
-            <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+            <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1.5 sm:mb-1">
               Accessible to:
             </p>
-            <div class="flex flex-wrap gap-1">
+            <div class="flex flex-wrap gap-1.5 sm:gap-1">
               <span
                 v-for="deptId in folder.allowedDepartments"
                 :key="deptId"
-                class="inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
+                class="inline-block px-2 py-1 sm:py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-md sm:rounded"
               >
                 {{ getDepartmentName(deptId) }}
               </span>
@@ -177,18 +177,18 @@
       </div>
     </div>
 
-    <!-- Empty State -->
+    <!-- Empty State - Mobile Optimized -->
     <Card v-else>
-      <div class="text-center py-12">
-        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-          <FolderIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+      <div class="text-center py-8 sm:py-12">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
+          <FolderIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           <span v-if="selectedDepartmentId">No folders found for {{ getDepartmentName(selectedDepartmentId) }}</span>
           <span v-else-if="searchQuery">No folders found</span>
           <span v-else>No folders yet</span>
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
           <span v-if="selectedDepartmentId">Try selecting a different department or clear the filter</span>
           <span v-else-if="searchQuery">Try adjusting your search criteria</span>
           <span v-else>Create your first folder to organize your inventory</span>
@@ -197,6 +197,7 @@
           <Button
             variant="outline"
             @click="selectedDepartmentId = ''"
+            class="w-full sm:w-auto"
           >
             Clear Department Filter
           </Button>
@@ -206,34 +207,37 @@
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateFolderModal"
+          class="w-full sm:w-auto"
         >
           Create Your First Folder
         </Button>
       </div>
     </Card>
 
-    <!-- Fixed Pagination -->
+    <!-- Fixed Pagination - Mobile Optimized -->
     <div
       v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
     >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredFolders.length"
-        @page-change="handlePageChange"
-      />
+      <div class="px-4 sm:px-6">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="filteredFolders.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
-    <!-- Floating Action Button -->
+    <!-- Floating Action Button - Mobile Optimized -->
     <button
       v-if="filteredFolders.length > 0 && canCreateInventoryFolders"
       @click="openCreateFolderModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
       title="Create new folder"
     >
-      <PlusIcon class="w-5 h-5" />
+      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
     </button>
 
     <!-- Create Folder Modal -->
