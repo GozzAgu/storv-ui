@@ -34,14 +34,14 @@
               alt="Storv Logo"
               :class="[
                 'transition-all duration-300 object-contain',
-                sidebarCollapsed ? 'h-10 w-10' : 'h-12 w-auto'
+                sidebarCollapsed ? 'h-8 w-8' : 'h-8 w-auto'
               ]"
             />
             <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-primary-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <span 
             v-if="!sidebarCollapsed" 
-            class="text-2xl font-bold bg-gradient-to-r from-primary-600 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
+            class="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
           >
           Storv
           </span>
@@ -712,6 +712,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useInventoryStore } from '~/stores/inventory'
+import { useReceiptsStore } from '~/stores/receipts'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
@@ -722,6 +723,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
 const inventoryStore = useInventoryStore()
+const receiptsStore = useReceiptsStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
@@ -868,6 +870,13 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
     await storesStore.fetchStores()
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()
+    // Fetch inventory and receipts in parallel
+    await Promise.all([
+      inventoryStore.fetchFolders(),
+      receiptsStore.fetchReceipts()
+    ]).catch(err => {
+      console.warn('[Dashboard] Error fetching inventory/receipts:', err)
+    })
     // Auto-expand current store
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
@@ -875,6 +884,13 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
   } else if (finalUserData?.role === 'staff') {
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()
+    // Fetch inventory and receipts in parallel
+    await Promise.all([
+      inventoryStore.fetchFolders(),
+      receiptsStore.fetchReceipts()
+    ]).catch(err => {
+      console.warn('[Dashboard] Error fetching inventory/receipts:', err)
+    })
     // Auto-expand current store for staff
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
@@ -893,12 +909,26 @@ onMounted(async () => {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
       await departmentsStore.fetchDepartments()
+      // Fetch inventory and receipts in parallel
+      await Promise.all([
+        inventoryStore.fetchFolders(),
+        receiptsStore.fetchReceipts()
+      ]).catch(err => {
+        console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
+      })
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
       }
     } else if (userStore.userData?.role === 'staff') {
       await storesStore.initializeCurrentStore()
       await departmentsStore.fetchDepartments()
+      // Fetch inventory and receipts in parallel
+      await Promise.all([
+        inventoryStore.fetchFolders(),
+        receiptsStore.fetchReceipts()
+      ]).catch(err => {
+        console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
+      })
       if (storesStore.currentStoreId) {
         expandedStores[storesStore.currentStoreId] = true
       }

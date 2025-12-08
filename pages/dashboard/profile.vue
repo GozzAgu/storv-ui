@@ -41,7 +41,9 @@
               {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
             </h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ profileData.email || 'No email' }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ profileData.role || 'User' }}</p>
+            <p class="text-sm font-medium text-primary-600 dark:text-primary-400">
+              {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
+            </p>
           </div>
           
           <!-- Stats -->
@@ -450,16 +452,23 @@
               <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Your current role and access permissions</p>
             </div>
             <span class="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/60 dark:to-primary-800/60 text-primary-700 dark:text-primary-50 rounded-full border border-primary-300 dark:border-primary-600 shadow-sm">
-              {{ profileData.role }}
+              {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
 
           <div class="space-y-4">
             <!-- Role Description -->
             <div class="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-xl">
-              <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">Super Admin</p>
+              <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">
+                {{ profileData.role === 'staff' ? 'Staff Member' : 'Super Admin' }}
+              </p>
               <p class="text-xs text-primary-700 dark:text-primary-100 leading-relaxed">
-                As a Super Admin, you have full access to all features and settings in the system. You are the account owner and have complete control over your store operations.
+                <template v-if="profileData.role === 'staff'">
+                  As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
+                </template>
+                <template v-else>
+                  As a Super Admin, you have full access to all features and settings in the system. You are the account owner and have complete control over your store operations.
+                </template>
               </p>
             </div>
 
@@ -468,7 +477,7 @@
               <p class="text-sm font-medium text-gray-900 dark:text-gray-50 mb-3">Your Permissions:</p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div 
-                  v-for="permission in superAdminPermissions" 
+                  v-for="permission in (profileData.role === 'staff' ? staffPermissions : superAdminPermissions)" 
                   :key="permission"
                   class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
                 >
@@ -485,7 +494,12 @@
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-50 mb-1">About Your Role</p>
                   <p class="text-xs text-gray-600 dark:text-gray-200 leading-relaxed">
-                    You created this account and are the primary administrator. You can manage all aspects of the system including team members, settings, and data management.
+                    <template v-if="profileData.role === 'staff'">
+                      You are a staff member with access to your assigned store and department. Contact your Super Admin if you need additional permissions or have questions about your access.
+                    </template>
+                    <template v-else>
+                      You created this account and are the primary administrator. You can manage all aspects of the system including team members, settings, and data management.
+                    </template>
                   </p>
                 </div>
               </div>
@@ -968,7 +982,8 @@ const loadProfileData = async () => {
       profileData.firstName = nameParts[0] || ''
       profileData.lastName = nameParts.slice(1).join(' ') || ''
       profileData.email = userData.email || currentUser.value.email || ''
-      profileData.role = userData.role === 'superAdmin' ? 'Super Admin' : userData.role || 'User'
+      // Keep original role value for conditional checks (staff, superAdmin, etc.)
+      profileData.role = userData.role || 'User'
       
       // Load store details if available
       if (userData.storeDetails) {
@@ -1247,6 +1262,16 @@ const themeOptions = [
 ]
 
 const currentThemeValue = computed(() => theme.value || 'system')
+
+// Staff Permissions
+const staffPermissions = [
+  'View and manage inventory items',
+  'View and manage receipts',
+  'View customer information',
+  'Create and process sales',
+  'View inventory folders in assigned department',
+  'Process returns and exchanges',
+]
 
 // Super Admin Permissions
 const superAdminPermissions = [

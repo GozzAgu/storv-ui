@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import type { UserData, StoreDetails } from '~/composables/useUser'
@@ -73,32 +73,99 @@ export const useUserStore = defineStore('user', {
           // Staff members are stored at: users/{superadminUID}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           // We need to find the staff member by their authUid
           try {
-            const { useStaffStore } = await import('./staff')
-            const staffStore = useStaffStore()
-            const staffMember = await staffStore.fetchCurrentStaffMember()
+            // Search all superadmins' hierarchical structures to find this staff member
+            // First, get all superadmin users from top-level users collection
+            const usersRef = collection(db, 'users')
+            const usersSnapshot = await getDocs(usersRef)
             
-            if (staffMember) {
-              // Convert staff member data to UserData format
-              const staffUserData: UserData = {
-                uid: userId,
-                email: staffMember.email,
-                name: `${staffMember.firstName} ${staffMember.lastName}`,
-                role: 'staff',
-                hasCompletedOnboarding: true,
-                hasCompletedTutorial: false,
-              }
+            let staffMemberFound = false
+            
+            // Search through each superadmin's stores/departments/staff
+            for (const userDoc of usersSnapshot.docs) {
+              const superadminUserId = userDoc.id
+              const userData = userDoc.data()
               
-              this.userData = staffUserData
-              console.log('[UserStore] Found staff member in hierarchical structure, using staff data')
-            } else {
+              // Only search superadmins (skip if role is not superAdmin or if it's staff)
+              if (userData.role !== 'superAdmin') continue
+              
+              try {
+                const { getStoresCollection } = await import('~/composables/useFirestorePaths')
+                const storesRef = getStoresCollection(db, superadminUserId)
+                const storesSnapshot = await getDocs(storesRef)
+                
+                for (const storeDoc of storesSnapshot.docs) {
+                  const storeId = storeDoc.id
+                  const { getDepartmentsCollection } = await import('~/composables/useFirestorePaths')
+                  const departmentsRef = getDepartmentsCollection(db, superadminUserId, storeId)
+                  const departmentsSnapshot = await getDocs(departmentsRef)
+                  
+                  for (const deptDoc of departmentsSnapshot.docs) {
+                    const departmentId = deptDoc.id
+                    try {
+                      const { getStaffCollection } = await import('~/composables/useFirestorePaths')
+                      const staffRef = getStaffCollection(db, superadminUserId, storeId, departmentId)
+                      const staffSnapshot = await getDocs(staffRef)
+                      
+                      for (const staffDoc of staffSnapshot.docs) {
+                        const staffData = staffDoc.data()
+                        if (staffData.authUid === userId) {
+                          // Found the staff member!
+                          const staffUserData: UserData = {
+                            uid: userId,
+                            email: staffData.email || '',
+                            name: `${staffData.firstName || ''} ${staffData.lastName || ''}`.trim() || 'Staff Member',
+                            role: 'staff',
+                            hasCompletedOnboarding: true,
+                            hasCompletedTutorial: false,
+                            createdAt: staffData.createdAt || null,
+                            updatedAt: staffData.updatedAt || null,
+                          }
+                          
+                          this.userData = staffUserData
+                          console.log('[UserStore] Found staff member in hierarchical structure under superadmin:', superadminUserId)
+                          
+                          // Also add to staff store cache for future lookups
+                          const { useStaffStore } = await import('./staff')
+                          const staffStore = useStaffStore()
+                          const foundStaff = {
+                            id: staffDoc.id,
+                            ...staffData,
+                            departmentId: departmentId,
+                            storeId: staffData.storeId || storeId,
+                            createdBy: staffData.createdBy || superadminUserId,
+                          }
+                          const existingIndex = staffStore.staff.findIndex(s => s.id === foundStaff.id)
+                          if (existingIndex === -1) {
+                            staffStore.staff.push(foundStaff as any)
+                          }
+                          
+                          staffMemberFound = true
+                          break
+                        }
+                      }
+                      if (staffMemberFound) break
+                    } catch (e) {
+                      continue
+                    }
+                  }
+                  if (staffMemberFound) break
+                }
+                if (staffMemberFound) break
+              } catch (e) {
+                continue
+              }
+            }
+            
+            if (!staffMemberFound) {
               // Staff member not found in hierarchical structure either
+              console.warn('[UserStore] Staff member not found in hierarchical structure')
               // Only clear userData if staff creation is not in progress
               if (!isStaffCreationInProgress) {
                 this.userData = null
               }
             }
           } catch (staffError: any) {
-            console.warn('[UserStore] Could not fetch staff member from hierarchical structure:', staffError.message)
+            console.warn('[UserStore] Could not search hierarchical structure for staff member:', staffError.message)
             // Only clear userData if staff creation is not in progress
             if (!isStaffCreationInProgress) {
               this.userData = null

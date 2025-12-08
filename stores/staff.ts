@@ -967,11 +967,67 @@ export const useStaffStore = defineStore('staff', {
         }
         
         // If still not found, we need to search hierarchically
-        // But we don't know which superadmin, so we'll need to search all
-        // For now, return null and the caller should handle it
+        // Search through all superadmins' stores to find this staff member
         if (!superadminUserId) {
-          console.warn('[StaffStore] Could not get superadmin UID - staff member may need to be loaded via fetchStaff first')
-          return null
+          console.log('[StaffStore] Superadmin UID not found in cache/legacy - searching all hierarchical structures...')
+          try {
+            // Get all superadmin users from top-level users collection
+            const usersRef = collection(db, 'users')
+            const usersSnapshot = await getDocs(usersRef)
+            
+            for (const userDoc of usersSnapshot.docs) {
+              const potentialSuperadminId = userDoc.id
+              const userData = userDoc.data()
+              
+              // Only search superadmins
+              if (userData.role !== 'superAdmin') continue
+              
+              try {
+                const { getStoresCollection } = await import('~/composables/useFirestorePaths')
+                const storesRef = getStoresCollection(db, potentialSuperadminId)
+                const storesSnapshot = await getDocs(storesRef)
+                
+                for (const storeDoc of storesSnapshot.docs) {
+                  const storeId = storeDoc.id
+                  const { getDepartmentsCollection } = await import('~/composables/useFirestorePaths')
+                  const departmentsRef = getDepartmentsCollection(db, potentialSuperadminId, storeId)
+                  const departmentsSnapshot = await getDocs(departmentsRef)
+                  
+                  for (const deptDoc of departmentsSnapshot.docs) {
+                    const departmentId = deptDoc.id
+                    try {
+                      const staffRef = getStaffCollection(db, potentialSuperadminId, storeId, departmentId)
+                      const staffSnapshot = await getDocs(staffRef)
+                      
+                      for (const staffDoc of staffSnapshot.docs) {
+                        const staffData = staffDoc.data()
+                        if (staffData.authUid === authStore.currentUser.uid) {
+                          // Found the staff member!
+                          superadminUserId = potentialSuperadminId
+                          console.log('[StaffStore] Found staff member in hierarchical structure, superadmin UID:', superadminUserId)
+                          break
+                        }
+                      }
+                      if (superadminUserId) break
+                    } catch (e) {
+                      continue
+                    }
+                  }
+                  if (superadminUserId) break
+                }
+                if (superadminUserId) break
+              } catch (e) {
+                continue
+              }
+            }
+          } catch (searchError: any) {
+            console.warn('[StaffStore] Error searching hierarchical structure:', searchError.message)
+          }
+          
+          if (!superadminUserId) {
+            console.warn('[StaffStore] Could not find staff member in any hierarchical structure')
+            return null
+          }
         }
 
         // Now search through all stores and departments under this superadmin
