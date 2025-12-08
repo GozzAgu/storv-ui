@@ -5,13 +5,13 @@
     <!-- Welcome Header - Mobile Optimized -->
     <div class="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex-1">
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
-        <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
+        <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
+        <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
       <div class="flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
-          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base"
+          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-base"
         >
           <PlusIcon class="w-5 h-5" />
           <span>Add Product</span>
@@ -75,8 +75,8 @@
       <Card class="lg:col-span-2">
         <div class="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Last 30 days performance</p>
+            <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
+            <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Last 30 days performance</p>
           </div>
         </div>
         <div class="h-64 sm:h-80 relative">
@@ -100,52 +100,52 @@
 
       <!-- Quick Stats -->
       <Card>
-        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 sm:mb-6">Quick Stats</h2>
-        <div class="space-y-4 sm:space-y-6">
+        <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-6">Quick Stats</h2>
+        <div class="space-y-3 sm:space-y-6">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                <CheckCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircleIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
               </div>
           <div class="min-w-0 flex-1">
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
-                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
+                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                <ClockIcon class="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                <ClockIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
-                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
+                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
           </div>
         </div>
       </div>
 
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                <XCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                <XCircleIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
               </div>
           <div class="min-w-0 flex-1">
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Refunded</p>
-                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Refunded</p>
+                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                <BuildingOfficeIcon class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                <BuildingOfficeIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">Departments</p>
-                <p class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
+                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Departments</p>
+                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
               </div>
             </div>
           </div>
@@ -158,8 +158,8 @@
       <!-- Recent Transactions -->
       <Card>
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-          <NuxtLink to="/dashboard/receipts" class="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
+          <NuxtLink to="/dashboard/receipts" class="text-[10px] sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
         <div class="space-y-3 sm:space-y-4">
           <div v-if="recentTransactions.length === 0" class="text-center py-6 sm:py-8">
@@ -171,12 +171,12 @@
                 <component :is="transaction.icon" :class="['w-4 h-4 sm:w-5 sm:h-5', transaction.iconColor]" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
+                <p class="text-[10px] sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
+                <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
               </div>
             </div>
             <div class="text-right flex-shrink-0 ml-2">
-              <p :class="['text-xs sm:text-sm font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
+              <p :class="['text-[10px] sm:text-sm font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
             </div>
           </div>
         </div>
@@ -185,8 +185,8 @@
       <!-- Top Selling Products -->
       <Card>
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
-          <NuxtLink to="/dashboard/inventory" class="text-xs sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
     </div>
         <div class="space-y-3 sm:space-y-4">
           <div v-if="topSellingItems.length === 0" class="text-center py-6 sm:py-8">
@@ -197,11 +197,11 @@
               {{ index + 1 }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
+              <p class="text-[10px] sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+              <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
             </div>
             <div class="text-right flex-shrink-0">
-              <p class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
+              <p class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
             </div>
           </div>
         </div>
@@ -210,13 +210,13 @@
       <!-- Inventory Status -->
       <Card>
         <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
+          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
         </div>
         <div class="space-y-4 sm:space-y-6">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">In Stock</span>
-              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
+              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">In Stock</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
               <div class="bg-green-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${inStockPercentage}%`"></div>
@@ -225,8 +225,8 @@
           
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Low Stock</span>
-              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
+              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Low Stock</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
               <div class="bg-orange-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${lowStockPercentage}%`"></div>
@@ -235,8 +235,8 @@
 
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>
-              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
+              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>
+              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
               <div class="bg-red-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${outOfStockPercentage}%`"></div>
@@ -245,8 +245,8 @@
 
           <div class="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Items</span>
-              <span class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
+              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Total Items</span>
+              <span class="text-sm sm:text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
             </div>
           </div>
         </div>

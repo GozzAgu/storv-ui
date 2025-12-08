@@ -16,10 +16,10 @@
               <h1 v-if="isLoadingFolder" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 Loading...
               </h1>
-              <h1 v-else class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+              <h1 v-else class="text-lg sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
                 {{ folder?.name || 'Folder' }}
               </h1>
-              <p v-if="!isLoadingFolder" class="mt-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+              <p v-if="!isLoadingFolder" class="mt-1.5 text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                 {{ folder?.description || 'No description' }}
               </p>
             </div>
@@ -27,11 +27,11 @@
           <div class="flex items-center gap-3 sm:gap-4 mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
             <div class="flex items-center gap-1.5 sm:gap-2">
               <CalendarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-              <span class="truncate">Created {{ formatDate(folder?.createdAt) }}</span>
+              <span class="truncate text-[10px] sm:text-xs">Created {{ formatDate(folder?.createdAt) }}</span>
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2">
               <CubeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-              <span>{{ folder?.itemCount || 0 }} items</span>
+              <span class="text-[10px] sm:text-xs">{{ folder?.itemCount || 0 }} items</span>
             </div>
           </div>
         </div>
@@ -56,11 +56,11 @@
       <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Items</p>
-            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Items</p>
+            <p class="mt-1 sm:mt-2 text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {{ folder?.itemCount || 0 }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
+            <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
           </div>
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
@@ -71,11 +71,11 @@
       <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Value</p>
-            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Value</p>
+            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {{ formatCurrency(totalInventoryValue) }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
+            <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
           </div>
           <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
@@ -101,14 +101,14 @@
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Search by name, SKU..."
-            class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                placeholder="Search by name, SKU..."
+                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </div>
         <div class="flex items-center gap-3">
           <select
             v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="name">Sort by Name</option>
             <option value="price">Sort by Price</option>
@@ -182,7 +182,7 @@
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-3 py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
@@ -202,7 +202,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-3 py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -213,7 +213,7 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
+              <th v-if="canManageInventoryItems" class="px-3 py-2 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
                     Actions
                   </th>
             </tr>
@@ -231,37 +231,37 @@
               >
                 <div v-if="colIndex === 0" class="flex items-center gap-3">
                   <!-- First column shows avatar and value -->
-                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
                     {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
                   </div>
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                      <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                         {{ getItemDisplayValue(item[column.key]) }}
                       </div>
                       <span
                         v-if="item.swapIn"
-                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                        class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0"
                         title="Swapped-in item"
                       >
                         Swap-In
                       </span>
                     </div>
-                    <div v-if="columns.length > 1 && columns[1]" class="text-xs text-gray-500 dark:text-gray-400">
+                    <div v-if="columns.length > 1 && columns[1]" class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
                       {{ getItemDisplayValue(item[columns[1].key]) }}
                     </div>
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="'type' in column && column.type === 'currency'" class="text-sm">
+                  <div v-if="'type' in column && column.type === 'currency'" class="text-xs sm:text-sm">
                     <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                       <span class="font-semibold text-green-600 dark:text-green-400">
                         {{ formatCurrency(item.discountedPrice) }}
                       </span>
-                      <span class="text-xs text-gray-400 dark:text-gray-500 line-through">
+                      <span class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 line-through">
                         {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                       </span>
-                      <span class="text-xs text-red-600 dark:text-red-400 font-medium">
+                      <span class="text-[10px] sm:text-xs text-red-600 dark:text-red-400 font-medium">
                         {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                       </span>
                     </div>
@@ -269,10 +269,10 @@
                       {{ formatCurrency(item[column.key] || 0) }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'number'" class="text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'number'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     {{ formatNumber(item[column.key]) }}
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'date'" class="text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'date'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -280,7 +280,7 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -288,17 +288,17 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'availability'" class="text-sm">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  <div v-else-if="column.key === 'availability'" class="text-xs sm:text-sm">
+                    <span class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
                       :class="getItemAvailability(item).class">
                       {{ getItemAvailability(item).label }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
                     :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                     {{ item[column.key] ? 'Yes' : 'No' }}
                   </div>
-                  <div v-else class="text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     {{ getItemDisplayValue(item[column.key]) }}
                   </div>
                 </div>

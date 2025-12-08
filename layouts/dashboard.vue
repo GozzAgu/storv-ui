@@ -41,7 +41,7 @@
           </div>
           <span 
             v-if="!sidebarCollapsed" 
-            class="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
+            class="text-xl sm:text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
           >
           Storv
           </span>
@@ -102,7 +102,7 @@
                     ]"
                   />
                   <span 
-                    class="relative z-10 whitespace-nowrap text-[15px] font-semibold transition-colors"
+                    class="relative z-10 whitespace-nowrap text-xs sm:text-[15px] font-semibold transition-colors"
                     :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
                   >
                     {{ item.name }}
@@ -130,7 +130,7 @@
                   <NuxtLink
                     :to="`/dashboard/inventory/${folder.id}`"
                     :class="[
-                      'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                      'group relative flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-200',
                       route.params.id === folder.id
                         ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200',
@@ -201,7 +201,7 @@
               />
               <span 
                 v-if="!sidebarCollapsed" 
-                class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold transition-colors"
+                class="relative z-10 flex-1 whitespace-nowrap text-xs sm:text-[15px] font-semibold transition-colors"
                 :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
               >
                 {{ item.name }}
@@ -222,7 +222,7 @@
           <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div class="space-y-1">
               <div class="px-5 mb-3">
-                <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stores</p>
+                <p class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stores</p>
               </div>
               
               <!-- Store items -->
@@ -266,7 +266,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <span 
-                      class="relative z-10 whitespace-nowrap text-sm font-semibold truncate transition-colors"
+                      class="relative z-10 whitespace-nowrap text-xs sm:text-sm font-semibold truncate transition-colors"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                         ? 'text-primary-700 dark:text-primary-300'
                         : currentStore?.id === store.id
@@ -276,7 +276,7 @@
                             : 'text-gray-700 dark:text-gray-300'"
                     >
                       {{ store.name }}
-                      <span v-if="store.id !== storesStore.currentStoreId" class="ml-2 text-xs text-gray-400 dark:text-gray-500 italic">(Inactive)</span>
+                      <span v-if="store.id !== storesStore.currentStoreId" class="ml-2 text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 italic">(Inactive)</span>
                     </span>
                   </NuxtLink>
                   <button
@@ -309,7 +309,7 @@
                     <!-- Department header -->
                     <div
                       :class="[
-                        'group relative flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                        'group relative flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-200',
                         route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                           ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
@@ -354,7 +354,7 @@
                       <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
                         <NuxtLink
                           :to="department.isActive === false ? '#' : `/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center px-3 py-2 text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                          class="group relative flex items-center px-3 py-2 text-[10px] sm:text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
                           :class="{ 
                             'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (department.isActive === false)
                           }"
@@ -415,7 +415,7 @@
           />
           <span 
             v-if="!sidebarCollapsed" 
-            class="relative z-10 flex-1 whitespace-nowrap text-[15px] font-semibold tracking-tight"
+            class="relative z-10 flex-1 whitespace-nowrap text-xs sm:text-[15px] font-semibold tracking-tight"
           >
             Sign out
           </span>
@@ -554,7 +554,7 @@
                   <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                   <button
                     @click="handleSignOut"
-                    class="block w-full text-left px-4 py-2.5 sm:py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
+                    class="block w-full text-left px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                   >
                     Sign out
                   </button>

@@ -15,8 +15,8 @@
     <template v-else>
     <!-- Page Header - Mobile Optimized -->
       <div>
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Sales</h1>
-      <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
+      <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Sales</h1>
+      <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
     <!-- Tab Navigation - Mobile Optimized -->
@@ -178,14 +178,14 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search receipts..."
-                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
             <!-- Filter Row -->
             <div class="flex items-center gap-2 sm:gap-3">
               <select
                 v-model="statusFilter"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
               >
                 <option value="all">All Status</option>
                 <option value="completed">Completed</option>
@@ -194,7 +194,7 @@
               </select>
               <select
                 v-model="dateFilter"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
               >
                 <option value="all">All Dates</option>
                 <option value="today">Today</option>
@@ -203,7 +203,7 @@
               </select>
               <button
                 @click="resetFilters"
-                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl sm:rounded-lg transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
+                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl sm:rounded-lg transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
                 title="Reset filters"
               >
                 <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
@@ -223,7 +223,7 @@
             <tr>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-3 py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('receiptNumber') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
@@ -397,7 +397,7 @@
                   </template>
                 </div>
               </th>
-              <th class="px-3 sm:px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[160px]">
+              <th class="px-3 sm:px-3 py-2 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[160px]">
                 Actions
               </th>
             </tr>
@@ -409,13 +409,13 @@
               class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
               <td class="px-3 py-2 whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div class="flex items-center gap-1.5 sm:gap-2">
+                  <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
                     {{ receipt.receiptNumber }}
                   </div>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                     title="Swap-in transaction"
                   >
                     Swap
@@ -423,54 +423,54 @@
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
+                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
                   {{ receipt.customerName }}
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
+                <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                   {{ receipt.customerEmail }}
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
+                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
                   {{ formatDate(receipt.date) }}
                 </div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">
+                <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
                   {{ formatTime(receipt.date) }}
                 </div>
               </td>
               <td class="px-3 py-2">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-1">
+                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-0.5 sm:space-y-1">
                     <div 
                       v-for="(item, idx) in receipt.items.slice(0, 3)" 
                       :key="idx"
-                      class="text-sm"
+                      class="text-xs sm:text-sm"
                     >
                       {{ item.itemName }}<span v-if="item.quantity > 1" class="text-gray-500 dark:text-gray-400"> × {{ item.quantity }}</span>
                     </div>
-                    <div v-if="receipt.items.length > 3" class="text-xs text-gray-500 dark:text-gray-400 italic">
+                    <div v-if="receipt.items.length > 3" class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 italic">
                       and {{ receipt.items.length - 3 }} more item{{ receipt.items.length - 3 > 1 ? 's' : '' }}
                     </div>
                   </div>
-                  <span v-else class="text-gray-500 dark:text-gray-400">
+                  <span v-else class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400">
                   {{ receipt.itemsCount }} items
                 </span>
                 </div>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">
                   ${{ formatCurrency(receipt.total) }}
                 </span>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-sm text-gray-600 dark:text-gray-300">
+                <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                   {{ receipt.paymentMethod }}
                 </span>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
                 <span
                   :class="[
-                    'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium',
+                    'inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium',
                     receipt.status === 'completed'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : receipt.status === 'pending'
@@ -482,7 +482,7 @@
                 </span>
               </td>
               <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
+                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
@@ -636,14 +636,14 @@
                 <input
                   v-model="customersSearchQuery"
                   type="text"
-                  placeholder="Search customers..."
-                  class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                placeholder="Search customers..."
+                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                 />
               </div>
               <!-- Sort Select -->
               <select
                 v-model="customersSortBy"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
               >
                 <option value="name">Sort by Name</option>
                 <option value="orders">Sort by Orders</option>
@@ -661,13 +661,13 @@
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 w-12"></th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Customer</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Contact</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Orders</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Total Spent</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Last Order</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Actions</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 w-12"></th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Customer</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Contact</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Orders</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Total Spent</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Last Order</th>
+                <th class="px-3 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -683,37 +683,37 @@
                       />
                     </button>
                   </td>
-                  <td class="px-4 py-3">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold">
+                  <td class="px-3 sm:px-4 py-2 sm:py-3">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                      <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
                         {{ customer.name.charAt(0).toUpperCase() }}
                       </div>
-                      <div>
-                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ customer.name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
+                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-3">
-                    <div class="space-y-1">
-                      <p v-if="customer.email" class="text-sm text-gray-900 dark:text-gray-100">{{ customer.email }}</p>
-                      <p v-if="customer.phone" class="text-sm text-gray-600 dark:text-gray-400">{{ customer.phone }}</p>
-                      <p v-if="!customer.email && !customer.phone" class="text-xs text-gray-400 dark:text-gray-500 italic">No contact info</p>
+                  <td class="px-3 sm:px-4 py-2 sm:py-3">
+                    <div class="space-y-0.5 sm:space-y-1">
+                      <p v-if="customer.email" class="text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate">{{ customer.email }}</p>
+                      <p v-if="customer.phone" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">{{ customer.phone }}</p>
+                      <p v-if="!customer.email && !customer.phone" class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 italic">No contact info</p>
                     </div>
                   </td>
-                  <td class="px-4 py-3">
-                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
+                  <td class="px-3 sm:px-4 py-2 sm:py-3">
+                    <span class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
                   </td>
-                  <td class="px-4 py-3">
-                    <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
+                  <td class="px-3 sm:px-4 py-2 sm:py-3">
+                    <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
-                  <td class="px-4 py-3">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
+                  <td class="px-3 sm:px-4 py-2 sm:py-3">
+                    <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
-                  <td class="px-4 py-3 text-right">
+                  <td class="px-3 sm:px-4 py-2 sm:py-3 text-right">
                     <button
                       @click="viewCustomerReceipts(customer)"
-                      class="px-3 sm:px-3 py-2 sm:py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-lg transition-colors touch-manipulation"
+                      class="px-2 sm:px-3 py-1.5 sm:py-1.5 text-[10px] sm:text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-lg transition-colors touch-manipulation"
                     >
                       View Receipts
                     </button>

@@ -2,8 +2,8 @@
   <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
     <!-- Page Header - Mobile Optimized -->
     <div>
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
-      <p class="mt-1.5 text-sm sm:text-base text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
+      <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
+      <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
     </div>
 
     <!-- Search and Filter - Mobile Optimized -->
@@ -96,7 +96,7 @@
               <FolderIcon class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+              <h3 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                 {{ folder.name }}
               </h3>
             </div>
@@ -122,35 +122,35 @@
         <!-- Card Body - Mobile Optimized -->
         <div class="p-3 sm:p-4">
           <!-- Description -->
-          <p class="text-xs sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 sm:mb-4 min-h-[2rem]">
+          <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 sm:mb-4 min-h-[1.5rem]">
             {{ folder.description || 'No description' }}
           </p>
           
           <!-- Folder Stats - Mobile Optimized -->
-          <div class="space-y-2.5 sm:space-y-2">
+          <div class="space-y-2 sm:space-y-2">
             <div class="flex items-center justify-between py-1">
-              <div class="flex items-center gap-2">
-                <CubeIcon class="w-4 h-4 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Items</span>
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <CubeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Items</span>
               </div>
-              <span class="text-sm sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
             </div>
             
             <div class="flex items-center justify-between py-1">
-              <div class="flex items-center gap-2">
-                <CurrencyDollarIcon class="w-4 h-4 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Value</span>
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <CurrencyDollarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Value</span>
               </div>
-              <span class="text-sm sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
+              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
             </div>
           </div>
 
           <!-- Low Stock Warning - Mobile Optimized -->
           <div
             v-if="folder.lowStockCount > 0"
-            class="mt-3 p-2.5 sm:p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
+            class="mt-3 p-2 sm:p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
           >
-            <p class="text-xs font-medium text-orange-700 dark:text-orange-300">
+            <p class="text-[10px] sm:text-xs font-medium text-orange-700 dark:text-orange-300">
               ⚠ {{ folder.lowStockCount }} low stock
             </p>
           </div>
@@ -158,16 +158,16 @@
           <!-- Department Access Info - Mobile Optimized -->
           <div
             v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
-            class="mt-3 p-2.5 sm:p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            class="mt-3 p-2 sm:p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
           >
-            <p class="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1.5 sm:mb-1">
+            <p class="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-300 mb-1 sm:mb-1">
               Accessible to:
             </p>
-            <div class="flex flex-wrap gap-1.5 sm:gap-1">
+            <div class="flex flex-wrap gap-1 sm:gap-1">
               <span
                 v-for="deptId in folder.allowedDepartments"
                 :key="deptId"
-                class="inline-block px-2 py-1 sm:py-0.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-md sm:rounded"
+                class="inline-block px-1.5 sm:px-2 py-0.5 sm:py-0.5 text-[10px] sm:text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-md sm:rounded"
               >
                 {{ getDepartmentName(deptId) }}
               </span>
@@ -183,12 +183,12 @@
         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
           <FolderIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           <span v-if="selectedDepartmentId">No folders found for {{ getDepartmentName(selectedDepartmentId) }}</span>
           <span v-else-if="searchQuery">No folders found</span>
           <span v-else>No folders yet</span>
         </h3>
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
+        <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
           <span v-if="selectedDepartmentId">Try selecting a different department or clear the filter</span>
           <span v-else-if="searchQuery">Try adjusting your search criteria</span>
           <span v-else>Create your first folder to organize your inventory</span>
