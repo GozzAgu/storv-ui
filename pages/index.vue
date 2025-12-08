@@ -790,7 +790,7 @@
           </p>
         </div>
         
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto items-start">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto items-start">
           <!-- Free Tier -->
           <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 hover:shadow-xl h-full flex flex-col">
             <div class="mb-6 sm:mb-8">
@@ -799,7 +799,7 @@
                 <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$0</span>
                 <span class="text-gray-600 ml-2 text-base sm:text-lg">/month</span>
               </div>
-              <p class="text-gray-600 mt-4 text-sm sm:text-base">Perfect for getting started</p>
+              <p class="text-gray-600 mt-4 text-sm sm:text-base">Try it out risk-free</p>
             </div>
             
             <NuxtLink to="/signup" class="block w-full bg-gray-100 text-gray-900 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-colors mb-6 sm:mb-8 text-sm sm:text-base text-center">
@@ -809,19 +809,23 @@
             <ul class="space-y-3 sm:space-y-4 flex-1">
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Up to 100 items</span>
+                <span class="text-gray-600 text-sm sm:text-base">1 store location</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Basic inventory tracking</span>
+                <span class="text-gray-600 text-sm sm:text-base">Up to 50 items</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">1 user</span>
+                <span class="text-gray-600 text-sm sm:text-base">1 user account</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Mobile app access</span>
+                <span class="text-gray-600 text-sm sm:text-base">Basic receipts & sales</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Customer tracking</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
@@ -830,7 +834,7 @@
             </ul>
           </div>
 
-          <!-- Starter Tier - $10/month -->
+          <!-- Starter Tier - $15/month -->
           <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-primary-500 shadow-xl sm:shadow-2xl transform lg:scale-105 z-10 h-full flex flex-col sm:-mt-2 sm:mb-2">
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
               <span class="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-lg whitespace-nowrap">
@@ -840,10 +844,10 @@
             <div class="mb-6 sm:mb-8 pt-2">
               <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Starter</h3>
               <div class="flex items-baseline">
-                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$10</span>
+                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$15</span>
                 <span class="text-gray-600 ml-2 text-base sm:text-lg">/month</span>
               </div>
-              <p class="text-gray-600 mt-4 text-sm sm:text-base">Ideal for small businesses</p>
+              <p class="text-gray-600 mt-4 text-sm sm:text-base">Perfect for small businesses</p>
             </div>
             
             <NuxtLink to="/signup" class="block w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 mb-6 sm:mb-8 text-sm sm:text-base text-center">
@@ -853,44 +857,52 @@
             <ul class="space-y-3 sm:space-y-4 flex-1">
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Up to 1,000 items</span>
+                <span class="text-gray-600 text-sm sm:text-base">1 store location</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Real-time tracking</span>
+                <span class="text-gray-600 text-sm sm:text-base">Up to 2,500 items</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Basic analytics</span>
+                <span class="text-gray-600 text-sm sm:text-base">Up to 3 users</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Up to 5 users</span>
+                <span class="text-gray-600 text-sm sm:text-base">Advanced inventory management</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Smart alerts</span>
+                <span class="text-gray-600 text-sm sm:text-base">Discounts & swap-ins</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Priority support</span>
+                <span class="text-gray-600 text-sm sm:text-base">Returns & refunds</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Data export</span>
+                <span class="text-gray-600 text-sm sm:text-base">Real-time analytics</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Excel import/export</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Priority email support</span>
               </li>
             </ul>
           </div>
 
-          <!-- Pro Tier - $35/month -->
-          <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 hover:shadow-xl h-full flex flex-col sm:col-span-2 lg:col-span-1">
+          <!-- Professional Tier - $39/month -->
+          <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 hover:shadow-xl h-full flex flex-col">
             <div class="mb-6 sm:mb-8">
-              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Pro</h3>
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Professional</h3>
               <div class="flex items-baseline">
-                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$35</span>
+                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$39</span>
                 <span class="text-gray-600 ml-2 text-base sm:text-lg">/month</span>
               </div>
-              <p class="text-gray-600 mt-4 text-sm sm:text-base">For growing enterprises</p>
+              <p class="text-gray-600 mt-4 text-sm sm:text-base">For growing businesses</p>
             </div>
             
             <NuxtLink to="/signup" class="block w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-colors mb-6 sm:mb-8 text-sm sm:text-base text-center">
@@ -900,15 +912,66 @@
             <ul class="space-y-3 sm:space-y-4 flex-1">
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Up to 3 store locations</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Up to 10,000 items</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Up to 10 users</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Team & department management</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Role-based permissions</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Advanced analytics & reports</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Multi-currency support</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Activity notifications</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Priority support</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Enterprise Tier - $99/month -->
+          <div class="relative bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 hover:shadow-xl h-full flex flex-col">
+            <div class="mb-6 sm:mb-8">
+              <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+              <div class="flex items-baseline">
+                <span class="text-4xl sm:text-5xl font-extrabold text-gray-900">$99</span>
+                <span class="text-gray-600 ml-2 text-base sm:text-lg">/month</span>
+              </div>
+              <p class="text-gray-600 mt-4 text-sm sm:text-base">For large operations</p>
+            </div>
+            
+            <NuxtLink to="/signup" class="block w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-colors mb-6 sm:mb-8 text-sm sm:text-base text-center">
+              Start Free Trial
+            </NuxtLink>
+            
+            <ul class="space-y-3 sm:space-y-4 flex-1">
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Unlimited store locations</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm sm:text-base">Unlimited items</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Advanced analytics</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">Custom reports</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
@@ -916,11 +979,11 @@
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">API access</span>
+                <span class="text-gray-600 text-sm sm:text-base">API access & webhooks</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                <span class="text-gray-600 text-sm sm:text-base">24/7 priority support</span>
+                <span class="text-gray-600 text-sm sm:text-base">Custom reports & analytics</span>
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
@@ -928,7 +991,15 @@
               </li>
               <li class="flex items-start gap-3">
                 <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">24/7 priority support</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm sm:text-base">Dedicated account manager</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <CheckIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+                <span class="text-gray-600 text-sm sm:text-base">Custom onboarding & training</span>
               </li>
             </ul>
           </div>
