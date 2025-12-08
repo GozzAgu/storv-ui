@@ -2033,13 +2033,17 @@ const loadFolderData = async () => {
       // Load items for this folder
       await loadItems()
     } else {
-      // Folder not found, redirect back
+      // Folder not found, show error and redirect back
+      toast.error('Folder not found or you do not have access to this folder')
       navigateTo('/dashboard/inventory')
     }
   } catch (error: any) {
     console.error('Error loading folder:', error)
-    alert(error.message || 'Failed to load folder')
-    navigateTo('/dashboard/inventory')
+    toast.error(error.message || 'Failed to load folder')
+    // Don't redirect immediately - let user see the error
+    setTimeout(() => {
+      navigateTo('/dashboard/inventory')
+    }, 2000)
   } finally {
     isLoadingFolder.value = false
   }

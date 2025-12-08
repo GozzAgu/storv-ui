@@ -337,6 +337,12 @@ export const useInventoryStore = defineStore('inventory', {
         const folderSnap = await getDoc(folderRef)
 
         if (!folderSnap.exists()) {
+          console.warn('[InventoryStore] Folder not found in hierarchical path:', {
+            folderId,
+            userId,
+            storeId,
+            path: `users/${userId}/stores/${storeId}/inventoryFolders/${folderId}`
+          })
           return null
         }
 
@@ -349,50 +355,39 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         // Verify ownership or department access
-        if (data.createdBy !== authStore.currentUser.uid) {
-          // Check if user is staff and folder belongs to their super admin
-          if (userStore.userData?.role === 'staff') {
-            const staffRef = collection(db, 'staff')
-            const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-            const staffSnapshot = await getDocs(staffQuery)
-            
-            if (!staffSnapshot.empty && staffSnapshot.docs[0]) {
-              const staffData = staffSnapshot.docs[0].data()
-              // Check if folder belongs to super admin
-              if (staffData.createdBy !== data.createdBy) {
-                throw new Error('Folder not found')
-              }
-              
-              // Check department access
-              const allowedDepartments = data.allowedDepartments || []
-              if (allowedDepartments.length > 0) {
-                const staffDepartmentId = staffData.departmentId
-                if (!staffDepartmentId || !allowedDepartments.includes(staffDepartmentId)) {
-                  throw new Error('Access denied: Your department does not have access to this folder')
-                }
-              }
-            } else {
-              throw new Error('Folder not found')
-            }
-          } else {
+        if (userStore.userData?.role === 'staff') {
+          // For staff, folders created by their superadmin are accessible
+          // Verify folder belongs to staff's superadmin (using userId from getQueryUserId)
+          if (data.createdBy !== userId) {
+            console.warn('[InventoryStore] Folder createdBy does not match superadmin UID:', {
+              folderCreatedBy: data.createdBy,
+              superadminUID: userId
+            })
             throw new Error('Folder not found')
           }
-        } else if (userStore.userData?.role === 'staff') {
-          // Even if created by super admin, check department access for staff
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
           
-          if (!staffSnapshot.empty && staffSnapshot.docs[0]) {
-            const staffData = staffSnapshot.docs[0].data()
-            const allowedDepartments = data.allowedDepartments || []
-            if (allowedDepartments.length > 0) {
-              const staffDepartmentId = staffData.departmentId
-              if (!staffDepartmentId || !allowedDepartments.includes(staffDepartmentId)) {
-                throw new Error('Access denied: Your department does not have access to this folder')
-              }
+          // Get staff member data to check department access
+          const { useStaffStore } = await import('./staff')
+          const staffStore = useStaffStore()
+          const staffMember = await staffStore.fetchCurrentStaffMember()
+          
+          if (!staffMember) {
+            console.warn('[InventoryStore] Staff member not found for folder access check')
+            throw new Error('Folder not found')
+          }
+          
+          // Check department access if folder has allowedDepartments set
+          const allowedDepartments = data.allowedDepartments || []
+          if (allowedDepartments.length > 0) {
+            const staffDepartmentId = staffMember.departmentId
+            if (!staffDepartmentId || !allowedDepartments.includes(staffDepartmentId)) {
+              throw new Error('Access denied: Your department does not have access to this folder')
             }
           }
+          // If allowedDepartments is empty, staff can access (folder is accessible to all departments in store)
+        } else if (data.createdBy !== authStore.currentUser.uid) {
+          // For superadmin, folder must be created by them
+          throw new Error('Folder not found')
         }
 
         return {
@@ -1124,8 +1119,12 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
-      // Get userId and storeId for hierarchical path
-      const userId = authStore.currentUser.uid
+      // Get userId for hierarchical path (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+      
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
@@ -1173,8 +1172,12 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
-      // Get userId and storeId for hierarchical path
-      const userId = authStore.currentUser.uid
+      // Get userId for hierarchical path (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+      
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
