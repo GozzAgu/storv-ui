@@ -7,8 +7,15 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
           <div class="flex items-center">
-            <NuxtLink to="/" class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-              Storv
+            <NuxtLink to="/" class="flex items-center space-x-3 group hover:opacity-80 transition-opacity">
+              <img
+                src="/storv logo.png"
+                alt="Storv Logo"
+                class="h-8 w-auto object-contain"
+              />
+              <span class="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight">
+                Storv
+              </span>
             </NuxtLink>
           </div>
           <div class="hidden md:flex items-center space-x-8">

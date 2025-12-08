@@ -67,7 +67,7 @@ export const useStaffStore = defineStore('staff', {
         return
       }
 
-      try {
+        try {
         // For hierarchical structure, we need to query all departments in the store
         // and get staff from each department
         // Path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff
@@ -96,9 +96,9 @@ export const useStaffStore = defineStore('staff', {
                     id: staffDoc.id,
                     ...staffData,
                     departmentId: departmentId, // Ensure departmentId is set
-                  } as Staff)
-                }
-              })
+            } as Staff)
+          }
+        })
             } catch (error: any) {
               console.warn(`[StaffStore] Error fetching staff for department ${departmentId}:`, error.message)
             }
@@ -262,34 +262,34 @@ export const useStaffStore = defineStore('staff', {
           const departmentId = deptDoc.id
           try {
             const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-            const staffSnap = await getDoc(staffRef)
-            
+        const staffSnap = await getDoc(staffRef)
+
             if (staffSnap.exists()) {
-              const data = staffSnap.data()
-              
-              // Only return staff if it belongs to this user
+        const data = staffSnap.data()
+
+        // Only return staff if it belongs to this user
               if (data.createdBy === userId) {
-                const staffData = {
-                  id: staffSnap.id,
-                  ...data,
+        const staffData = {
+          id: staffSnap.id,
+          ...data,
                   departmentId: departmentId,
-                } as Staff
+        } as Staff
 
                 // Get department name
-                const departmentsStore = useDepartmentsStore()
+        const departmentsStore = useDepartmentsStore()
                 const department = departmentsStore.getDepartmentById(departmentId) || await departmentsStore.fetchDepartment(departmentId)
-                
+        
                 if (department) {
                   staffData.departmentName = department.name
-                }
+        }
 
-                // Update in store if exists
-                const index = this.staff.findIndex(s => s.id === staffId)
-                if (index > -1) {
-                  this.staff[index] = staffData
-                }
+        // Update in store if exists
+        const index = this.staff.findIndex(s => s.id === staffId)
+        if (index > -1) {
+          this.staff[index] = staffData
+        }
 
-                return staffData
+        return staffData
               }
             }
           } catch (error: any) {
@@ -656,20 +656,20 @@ export const useStaffStore = defineStore('staff', {
                 }
               }
               
-              Promise.all([
+          Promise.all([
                 // Refresh staff list for the department (most important for table display)
                 this.fetchStaffByDepartment(staffData.departmentId).catch(err => {
-                  console.warn('[Staff Creation] Background refresh: Failed to refresh department staff:', err)
+              console.warn('[Staff Creation] Background refresh: Failed to refresh department staff:', err)
                   return null // Return null instead of throwing
                 }),
-                // Refresh overall staff list for consistency across pages
+            // Refresh overall staff list for consistency across pages
                 this.fetchStaff().catch(err => {
-                  console.warn('[Staff Creation] Background refresh: Failed to refresh staff list:', err)
+              console.warn('[Staff Creation] Background refresh: Failed to refresh staff list:', err)
                   return null // Return null instead of throwing
                 }),
                 // Refresh department to update staff count - pass storeId directly to avoid "No store selected" error
                 departmentsStore.fetchDepartment(staffData.departmentId, storeId).catch(err => {
-                  console.warn('[Staff Creation] Background refresh: Failed to refresh department:', err)
+              console.warn('[Staff Creation] Background refresh: Failed to refresh department:', err)
                   return null // Return null instead of throwing
                 }),
                 // Refresh departments list to ensure it loads properly
@@ -677,12 +677,12 @@ export const useStaffStore = defineStore('staff', {
                   console.warn('[Staff Creation] Background refresh: Failed to refresh departments:', err)
                   return null // Return null instead of throwing
                 }),
-              ]).then(() => {
+          ]).then(() => {
                 console.log('[Staff Creation] ✅ Background refresh completed - staff should now be visible in table')
-              }).catch(err => {
+          }).catch(err => {
                 // All errors are already caught above, this should not happen
                 console.warn('[Staff Creation] Unexpected error in background refresh:', err)
-              })
+          })
             } catch (syncError) {
               // Catch any synchronous errors in the setTimeout callback
               console.warn('[Staff Creation] Error in background refresh setup:', syncError)
@@ -741,21 +741,21 @@ export const useStaffStore = defineStore('staff', {
 
         // If department is being changed, verify new department belongs to user and update counts
         if (updates.departmentId && updates.departmentId !== departmentId) {
-          const departmentsStore = useDepartmentsStore()
-          
-          // Verify new department belongs to this user
-          const newDept = departmentsStore.getDepartmentById(updates.departmentId) || await departmentsStore.fetchDepartment(updates.departmentId)
+            const departmentsStore = useDepartmentsStore()
+            
+            // Verify new department belongs to this user
+            const newDept = departmentsStore.getDepartmentById(updates.departmentId) || await departmentsStore.fetchDepartment(updates.departmentId)
           if (!newDept || newDept.createdBy !== userId) {
-            throw new Error('Department not found or access denied')
-          }
-          
-          // Decrease old department count (verify it belongs to user)
+              throw new Error('Department not found or access denied')
+            }
+            
+            // Decrease old department count (verify it belongs to user)
           const oldDept = departmentsStore.getDepartmentById(departmentId)
           if (oldDept && oldDept.createdBy === userId) {
             // Pass storeId from old department
             await departmentsStore.updateStaffCount(departmentId, Math.max(0, oldDept.staffCount - 1), oldDept.storeId)
-          }
-          
+            }
+            
           // Increase new department count - pass storeId from new department
           await departmentsStore.updateStaffCount(updates.departmentId, newDept.staffCount + 1, newDept.storeId)
           
@@ -780,10 +780,10 @@ export const useStaffStore = defineStore('staff', {
         } else {
           // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
-          await updateDoc(staffRef, {
-            ...updates,
-            updatedAt: serverTimestamp(),
-          })
+        await updateDoc(staffRef, {
+          ...updates,
+          updatedAt: serverTimestamp(),
+        })
         }
 
         // Update in local state
@@ -933,11 +933,11 @@ export const useStaffStore = defineStore('staff', {
         let superadminUserId: string | null = null
         
         // First try legacy collection
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-          
+      try {
+        const staffRef = collection(db, 'staff')
+        const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+        const staffSnapshot = await getDocs(staffQuery)
+
           if (!staffSnapshot.empty && staffSnapshot.docs[0]) {
             const staffData = staffSnapshot.docs[0].data()
             if (staffData.createdBy) {
@@ -1026,8 +1026,8 @@ export const useStaffStore = defineStore('staff', {
           
           if (!superadminUserId) {
             console.warn('[StaffStore] Could not find staff member in any hierarchical structure')
-            return null
-          }
+          return null
+        }
         }
 
         // Now search through all stores and departments under this superadmin
@@ -1052,7 +1052,7 @@ export const useStaffStore = defineStore('staff', {
                   const staffData = staffDoc.data()
                   if (staffData.authUid === authStore.currentUser.uid) {
                     const foundStaff: Staff = {
-                      id: staffDoc.id,
+          id: staffDoc.id,
                       firstName: staffData.firstName || '',
                       lastName: staffData.lastName || '',
                       email: staffData.email || '',
@@ -1069,9 +1069,9 @@ export const useStaffStore = defineStore('staff', {
                       updatedAt: staffData.updatedAt,
                       createdBy: staffData.createdBy || superadminUserId,
                     }
-                    
-                    // Get department name
-                    const departmentsStore = useDepartmentsStore()
+
+        // Get department name
+        const departmentsStore = useDepartmentsStore()
                     const department = departmentsStore.getDepartmentById(departmentId)
                     if (department) {
                       foundStaff.departmentName = department.name
@@ -1087,7 +1087,7 @@ export const useStaffStore = defineStore('staff', {
                     return foundStaff
                   }
                 }
-              } catch (e) {
+          } catch (e) {
                 continue
               }
             }
@@ -1132,10 +1132,10 @@ export const useStaffStore = defineStore('staff', {
                   // Get department name
                   const departmentsStore = useDepartmentsStore()
                   const department = departmentsStore.getDepartmentById(departmentId)
-                  if (department) {
+        if (department) {
                     foundStaff.departmentName = department.name
-                  }
-                  
+        }
+
                   return foundStaff
                 }
               }
