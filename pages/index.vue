@@ -89,7 +89,7 @@
                 </span>
               </h1>
               <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Complete inventory management, sales tracking, customer management, team organization, and business analytics—all in one powerful, intuitive platform. Built for modern retailers and businesses of all sizes.
+                Complete inventory management, sales tracking, customer management, team organization, and business analytics all in one powerful, intuitive platform. Built for modern retailers and businesses of all sizes.
               </p>
             </div>
             <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
