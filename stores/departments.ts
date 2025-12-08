@@ -169,7 +169,7 @@ export const useDepartmentsStore = defineStore('departments', {
     },
 
     // Get a single department
-    async fetchDepartment(departmentId: string): Promise<Department | null> {
+    async fetchDepartment(departmentId: string, storeId?: string): Promise<Department | null> {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -180,9 +180,9 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('User must be authenticated')
       }
 
-      // Get current store ID
-      const storeId = await getCurrentStoreId()
-      if (!storeId) {
+      // Get current store ID - use provided storeId or get from context
+      const currentStoreId = storeId || await getCurrentStoreId()
+      if (!currentStoreId) {
         throw new Error('No store selected')
       }
 
@@ -194,7 +194,7 @@ export const useDepartmentsStore = defineStore('departments', {
 
       try {
         // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
-        const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
+        const departmentRef = getDepartmentDocument(db, userId, currentStoreId, departmentId)
         const departmentSnap = await getDoc(departmentRef)
 
         if (!departmentSnap.exists()) {

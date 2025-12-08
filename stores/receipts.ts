@@ -107,31 +107,15 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          // Find the staff document for this user
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // Use the super admin's UID who created this staff member
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-                console.log('[ReceiptsStore] Staff user detected, using super admin UID:', userId)
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[ReceiptsStore] Could not fetch staff document, using current user UID:', error.message)
-        }
+      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
+        this.loading = false
+        return
       }
+      
+      console.log('[ReceiptsStore] Using userId (superadmin UID for staff):', userId, 'isStaff:', userStore.userData?.role === 'staff')
 
       // Get current store ID to filter receipts
       const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
@@ -151,20 +135,38 @@ export const useReceiptsStore = defineStore('receipts', {
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get receipts for this user
-          const q = query(
-            receiptsRef,
-            where('createdBy', '==', userId),
-            orderBy('createdAt', 'desc')
-          )
+          // For staff: Get all receipts in store (no createdBy filter) - they see receipts from anyone in their store
+          // For superadmin: Filter by createdBy
+          let q
+          if (userStore.userData?.role === 'staff') {
+            // Staff sees all receipts in their store
+            q = query(
+              receiptsRef,
+              orderBy('createdAt', 'desc')
+            )
+          } else {
+            // Superadmin sees only their receipts
+            q = query(
+              receiptsRef,
+              where('createdBy', '==', userId),
+              orderBy('createdAt', 'desc')
+            )
+          }
           querySnapshot = await getDocs(q)
         } catch (orderByError: any) {
           // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            const q = query(
-              receiptsRef,
-              where('createdBy', '==', userId)
-            )
+            let q
+            if (userStore.userData?.role === 'staff') {
+              // Staff sees all receipts in their store
+              q = query(receiptsRef)
+            } else {
+              // Superadmin sees only their receipts
+              q = query(
+                receiptsRef,
+                where('createdBy', '==', userId)
+              )
+            }
             querySnapshot = await getDocs(q)
           } else {
             throw orderByError
@@ -172,7 +174,7 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         const allReceipts = querySnapshot.docs
-        console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId + ')')
+        console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
         // Process and filter receipts by storeId client-side
         let receipts = allReceipts.map((doc) => {

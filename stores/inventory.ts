@@ -105,27 +105,12 @@ export const useInventoryStore = defineStore('inventory', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[InventoryStore] Could not fetch staff document, using current user UID:', error.message)
-        }
+      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
+        this.loading = false
+        return
       }
 
       // Get current store ID to filter folders
@@ -157,26 +142,58 @@ export const useInventoryStore = defineStore('inventory', {
         }
       }
 
+      // Get staff departmentId if user is staff
+      let staffDepartmentId: string | undefined
+      if (userStore.userData?.role === 'staff') {
+        try {
+          const { useStaffStore } = await import('./staff')
+          const staffStore = useStaffStore()
+          const staffMember = await staffStore.fetchCurrentStaffMember()
+          staffDepartmentId = staffMember?.departmentId
+          console.log('[InventoryStore] Staff departmentId:', staffDepartmentId)
+        } catch (e) {
+          console.warn('[InventoryStore] Could not fetch staff member:', e)
+        }
+      }
+
       try {
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders
         const foldersRef = getInventoryFoldersCollection(db, userId, currentStoreId)
         let querySnapshot
 
         try {
-          // Filter by createdBy to only get folders for this user
-          const q = query(
-            foldersRef,
-            where('createdBy', '==', userId),
-            orderBy('createdAt', 'desc')
-          )
+          // For staff: Get all folders in store (no createdBy filter)
+          // For superadmin: Filter by createdBy
+          let q
+          if (userStore.userData?.role === 'staff') {
+            // Staff sees all folders in their store
+            q = query(
+              foldersRef,
+              orderBy('createdAt', 'desc')
+            )
+          } else {
+            // Superadmin sees only their folders
+            q = query(
+              foldersRef,
+              where('createdBy', '==', userId),
+              orderBy('createdAt', 'desc')
+            )
+          }
           querySnapshot = await getDocs(q)
         } catch (orderByError: any) {
           // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            const q = query(
-              foldersRef,
-              where('createdBy', '==', userId)
-            )
+            let q
+            if (userStore.userData?.role === 'staff') {
+              // Staff sees all folders in their store
+              q = query(foldersRef)
+            } else {
+              // Superadmin sees only their folders
+              q = query(
+                foldersRef,
+                where('createdBy', '==', userId)
+              )
+            }
             querySnapshot = await getDocs(q)
           } else {
             throw orderByError
@@ -184,7 +201,7 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const allFolders = querySnapshot.docs
-        console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId + ')')
+        console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
         // Process the results
         let folders = allFolders.map((doc) => {
@@ -207,6 +224,19 @@ export const useInventoryStore = defineStore('inventory', {
             allowedDepartments: data.allowedDepartments || undefined,
           } as InventoryFolder
         })
+
+        // For staff: Filter folders by department access
+        if (userStore.userData?.role === 'staff' && staffDepartmentId) {
+          folders = folders.filter(folder => {
+            // If folder has allowedDepartments, check if staff's department has access
+            if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
+              return folder.allowedDepartments.includes(staffDepartmentId)
+            }
+            // If no allowedDepartments specified, staff can see it (folder is accessible to all departments)
+            return true
+          })
+          console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
+        }
 
         // No need to filter by storeId since we're already querying from the store's subcollection
         // All folders returned are already in the correct store
@@ -595,55 +625,46 @@ export const useInventoryStore = defineStore('inventory', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
+      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
+      const queryUserId = await getQueryUserId()
+      if (!queryUserId) {
+        throw new Error('User ID not available')
+      }
+      
+      // Get staff departmentId if user is staff
       let staffDepartmentId: string | undefined
-
-      // If the current user is staff, get the super admin UID from the staff document and department ID
       if (userStore.userData?.role === 'staff') {
         try {
-          // Find the staff document for this user
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              // Use the super admin's UID who created this staff member
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-                console.log('[InventoryStore] Staff user detected, using super admin UID for fetchItems:', userId)
+          const { useStaffStore } = await import('./staff')
+          const staffStore = useStaffStore()
+          const staffMember = await staffStore.fetchCurrentStaffMember()
+          staffDepartmentId = staffMember?.departmentId
+          console.log('[InventoryStore] Staff user detected, using super admin UID for fetchItems:', queryUserId, 'departmentId:', staffDepartmentId)
+          
+          // Verify department access to the folder
+          if (staffDepartmentId) {
+            const folder = this.getFolderById(folderId)
+            if (folder) {
+              // If folder has allowedDepartments, verify staff's department has access
+              if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
+                if (!folder.allowedDepartments.includes(staffDepartmentId)) {
+                  throw new Error('Access denied: Your department does not have access to items in this folder')
+                }
               }
-              // Get department ID for access check
-              staffDepartmentId = staffData.departmentId
+            } else {
+              // Folder not in store, fetch it to check access
+              try {
+                const folderData = await this.fetchFolder(folderId)
+                if (!folderData) {
+                  throw new Error('Folder not found')
+                }
+              } catch (error: any) {
+                throw new Error(error.message || 'Access denied: Cannot access items in this folder')
+              }
             }
           }
         } catch (error: any) {
-          console.warn('[InventoryStore] Could not fetch staff document for items, using current user UID:', error.message)
-        }
-
-        // Verify department access to the folder
-        if (staffDepartmentId) {
-          const folder = this.getFolderById(folderId)
-          if (folder) {
-            // If folder has allowedDepartments, verify staff's department has access
-            if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
-              if (!folder.allowedDepartments.includes(staffDepartmentId)) {
-                throw new Error('Access denied: Your department does not have access to items in this folder')
-              }
-            }
-          } else {
-            // Folder not in store, fetch it to check access
-            try {
-              const folderData = await this.fetchFolder(folderId)
-              if (!folderData) {
-                throw new Error('Folder not found')
-              }
-            } catch (error: any) {
-              throw new Error(error.message || 'Access denied: Cannot access items in this folder')
-            }
-          }
+          console.warn('[InventoryStore] Could not fetch staff member for items:', error.message)
         }
       }
 
@@ -658,25 +679,47 @@ export const useInventoryStore = defineStore('inventory', {
 
       try {
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
-        const itemsRef = getInventoryItemsCollection(db, userId, storeId)
+        // Use queryUserId (superadmin's UID) for the hierarchical path
+        const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
         
         // Query items by folderId
+        // For staff: Get all items in folder (no createdBy filter) - they see items from anyone in their store
+        // For superadmin: Filter by createdBy
         let q
         try {
-          q = query(
-            itemsRef,
-            where('folderId', '==', folderId),
-            where('createdBy', '==', userId),
-            orderBy('createdAt', 'desc')
-          )
-        } catch (orderByError: any) {
-          // If orderBy fails, try without it
-          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+          if (userStore.userData?.role === 'staff') {
+            // Staff sees all items in folder
             q = query(
               itemsRef,
               where('folderId', '==', folderId),
-              where('createdBy', '==', userId)
+              orderBy('createdAt', 'desc')
             )
+            } else {
+              // Superadmin sees only their items
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId),
+                where('createdBy', '==', queryUserId),
+                orderBy('createdAt', 'desc')
+              )
+            }
+        } catch (orderByError: any) {
+          // If orderBy fails, try without it
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            if (userStore.userData?.role === 'staff') {
+              // Staff sees all items in folder
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId)
+              )
+            } else {
+              // Superadmin sees only their items
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId),
+                where('createdBy', '==', queryUserId)
+              )
+            }
           } else {
             throw orderByError
           }
@@ -698,14 +741,12 @@ export const useInventoryStore = defineStore('inventory', {
             dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : (data.dateOut ? new Date(data.dateOut) : undefined),
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
             updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
-            createdBy: data.createdBy || userId,
+            createdBy: data.createdBy || queryUserId,
           } as InventoryItem
         })
 
-        // For staff: Filter items to only show those created by their super admin
-        if (userStore.userData?.role === 'staff') {
-          fetchedItems = fetchedItems.filter(item => item.createdBy === userId)
-        }
+        // Staff sees all items in folder (no filtering needed - query already returns all items for staff)
+        // Superadmin sees only their items (already filtered by createdBy in query)
 
         // Sort by createdAt if orderBy failed
         fetchedItems.sort((a, b) => {
@@ -758,14 +799,25 @@ export const useInventoryStore = defineStore('inventory', {
             }
             
             // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
-            const itemsRef = getInventoryItemsCollection(db, userId, storeId)
+            // Use queryUserId (superadmin's UID) for the hierarchical path
+            const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
             
             // Query items by folderId
-            let q = query(
-              itemsRef,
-              where('folderId', '==', folderId),
-              where('createdBy', '==', userId)
-            )
+            // For staff: Get all items (no createdBy filter)
+            // For superadmin: Filter by createdBy
+            let q
+            if (userStore.userData?.role === 'staff') {
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId)
+              )
+            } else {
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId),
+                where('createdBy', '==', queryUserId)
+              )
+            }
 
             const querySnapshot = await getDocs(q)
             let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
@@ -788,14 +840,12 @@ export const useInventoryStore = defineStore('inventory', {
                 discountedPrice: data.discountedPrice || undefined,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
                 updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
-                createdBy: data.createdBy || userId,
+                createdBy: data.createdBy || queryUserId,
               } as InventoryItem
             })
 
-            // For staff: Filter items to only show those created by their super admin
-            if (userStore.userData?.role === 'staff') {
-              fetchedItems = fetchedItems.filter(item => item.createdBy === userId)
-            }
+            // Staff sees all items in folder (no filtering needed - query already returns all items for staff)
+            // Superadmin sees only their items (already filtered by createdBy in query)
 
             fetchedItems.sort((a, b) => {
               const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)

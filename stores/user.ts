@@ -45,6 +45,7 @@ export const useUserStore = defineStore('user', {
       }
 
       try {
+        // First try top-level users collection (for superadmins)
         const userRef = doc(db, 'users', userId)
         const userSnap = await getDoc(userRef)
 
@@ -68,9 +69,40 @@ export const useUserStore = defineStore('user', {
             this.userData = fetchedData
           }
         } else {
-          // Only clear userData if staff creation is not in progress
-          if (!isStaffCreationInProgress) {
-            this.userData = null
+          // If not found in top-level users collection, try hierarchical structure for staff
+          // Staff members are stored at: users/{superadminUID}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
+          // We need to find the staff member by their authUid
+          try {
+            const { useStaffStore } = await import('./staff')
+            const staffStore = useStaffStore()
+            const staffMember = await staffStore.fetchCurrentStaffMember()
+            
+            if (staffMember) {
+              // Convert staff member data to UserData format
+              const staffUserData: UserData = {
+                uid: userId,
+                email: staffMember.email,
+                name: `${staffMember.firstName} ${staffMember.lastName}`,
+                role: 'staff',
+                hasCompletedOnboarding: true,
+                hasCompletedTutorial: false,
+              }
+              
+              this.userData = staffUserData
+              console.log('[UserStore] Found staff member in hierarchical structure, using staff data')
+            } else {
+              // Staff member not found in hierarchical structure either
+              // Only clear userData if staff creation is not in progress
+              if (!isStaffCreationInProgress) {
+                this.userData = null
+              }
+            }
+          } catch (staffError: any) {
+            console.warn('[UserStore] Could not fetch staff member from hierarchical structure:', staffError.message)
+            // Only clear userData if staff creation is not in progress
+            if (!isStaffCreationInProgress) {
+              this.userData = null
+            }
           }
         }
       } catch (error: any) {

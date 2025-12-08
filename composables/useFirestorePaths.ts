@@ -126,10 +126,12 @@ export async function getQueryUserId(): Promise<string | null> {
   let userId = authStore.currentUser.uid
 
   // If staff, get the super admin UID from the staff document
+  // First try legacy collection (for migration), then try cache, then search hierarchical structure
   if (userStore.userData?.role === 'staff') {
     const { useFirestore } = await import('./useFirestore')
     const db = useFirestore().getFirestoreInstance()
     if (db) {
+      // First try legacy collection (faster if staff exists there)
       try {
         const { collection, query, where, getDocs } = await import('firebase/firestore')
         const staffRef = collection(db, 'staff')
@@ -140,11 +142,31 @@ export async function getQueryUserId(): Promise<string | null> {
           const staffData = staffSnapshot.docs[0].data()
           if (staffData.createdBy) {
             userId = staffData.createdBy
+            console.log('[useFirestorePaths] Staff detected in legacy collection, using superadmin UID:', userId)
+            return userId
           }
         }
       } catch (error: any) {
-        console.warn('[useFirestorePaths] Could not fetch staff document:', error.message)
+        console.warn('[useFirestorePaths] Could not fetch from legacy collection:', error.message)
       }
+
+      // Try to get from staff store cache (avoids circular dependency)
+      try {
+        const { useStaffStore } = await import('~/stores/staff')
+        const staffStore = useStaffStore()
+        const cachedStaff = staffStore.getCurrentStaffMember
+        if (cachedStaff?.createdBy) {
+          userId = cachedStaff.createdBy
+          console.log('[useFirestorePaths] Staff found in cache, using superadmin UID:', userId)
+          return userId
+        }
+      } catch (error: any) {
+        console.warn('[useFirestorePaths] Could not get from cache:', error.message)
+      }
+
+      // If not found, we can't search hierarchically here without creating a circular dependency
+      // Return null and let fetchCurrentStaffMember handle the full search
+      console.warn('[useFirestorePaths] Staff member not found in legacy collection or cache')
     }
   }
 
