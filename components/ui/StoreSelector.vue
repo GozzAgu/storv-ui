@@ -28,13 +28,19 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="max-w-[100px] sm:max-w-[120px] truncate text-xs sm:text-sm">
+      <span class="max-w-[100px] sm:max-w-[120px] truncate text-xs sm:text-sm flex items-center gap-1.5">
         <span class="hidden sm:inline">
           {{ switchingStore ? 'Switching...' : (currentStore?.name || 'No Store') }}
         </span>
         <span class="sm:hidden">
           {{ switchingStore ? '...' : (currentStore?.name?.substring(0, 8) || 'Store') }}
         </span>
+        <!-- Green online indicator for active store -->
+        <span 
+          v-if="!switchingStore && currentStore"
+          class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"
+          title="Active store"
+        ></span>
       </span>
       <svg v-if="!switchingStore" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -80,7 +86,15 @@
           >
             <div class="flex items-start justify-between gap-3">
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-900 dark:text-gray-100 break-words pr-2">{{ store.name || 'Unnamed Store' }}</p>
+                <p class="font-medium text-gray-900 dark:text-gray-100 break-words pr-2 flex items-center gap-2">
+                  {{ store.name || 'Unnamed Store' }}
+                  <!-- Green online indicator for active store -->
+                  <span 
+                    v-if="currentStore?.id === store.id"
+                    class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                    title="Active store"
+                  ></span>
+                </p>
                 <p class="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5" v-if="store.description">
                   {{ store.description }}
                 </p>

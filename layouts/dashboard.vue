@@ -266,7 +266,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <span 
-                      class="relative z-10 whitespace-nowrap text-xs sm:text-sm font-semibold truncate transition-colors"
+                      class="relative z-10 whitespace-nowrap text-xs sm:text-sm font-semibold truncate transition-colors flex items-center gap-2"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                         ? 'text-primary-700 dark:text-primary-300'
                         : currentStore?.id === store.id
@@ -276,6 +276,12 @@
                             : 'text-gray-700 dark:text-gray-300'"
                     >
                       {{ store.name }}
+                      <!-- Green online indicator for active store -->
+                      <span 
+                        v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId"
+                        class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                        title="Active store"
+                      ></span>
                       <span v-if="store.id !== storesStore.currentStoreId" class="ml-2 text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 italic">(Inactive)</span>
                     </span>
                   </NuxtLink>
@@ -401,29 +407,31 @@
         <button
           @click="handleSignOut"
           :class="[
-            'group relative flex items-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden w-full',
-            sidebarCollapsed ? 'justify-center py-3' : 'justify-start px-5 py-3',
-            'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+            'group relative flex items-center justify-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden w-full py-3',
+            sidebarCollapsed ? 'px-3' : 'px-5',
+            'text-red-600 dark:text-red-400',
+            'border border-red-200/50 dark:border-red-800/50',
+            'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
+            'hover:from-red-50 hover:to-red-100/80 dark:hover:from-red-900/20 dark:hover:to-red-900/15',
+            'hover:border-red-300 dark:hover:border-red-700',
+            'hover:shadow-md hover:shadow-red-500/10',
+            'active:scale-[0.98]'
           ]"
-          :title="sidebarCollapsed ? 'Sign out' : ''"
+          title="Sign out"
         >
+          <!-- Animated background gradient -->
+          <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
           <ArrowRightOnRectangleIcon 
             :class="[
-              'relative z-10 transition-all duration-300',
-              sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4'
+              'relative z-10 transition-all duration-300 w-6 h-6',
+              'group-hover:scale-110 group-hover:rotate-[-5deg]'
             ]"
           />
-          <span 
-            v-if="!sidebarCollapsed" 
-            class="relative z-10 flex-1 whitespace-nowrap text-xs sm:text-[15px] font-semibold tracking-tight"
-          >
-            Sign out
-          </span>
           
-          <!-- Tooltip for collapsed state -->
+          <!-- Tooltip -->
           <div
-            v-if="sidebarCollapsed"
-            class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+            class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
           >
             Sign out
             <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>

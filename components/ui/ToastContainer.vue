@@ -3,14 +3,14 @@
     <TransitionGroup
       tag="div"
       name="toast"
-      class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"
+      class="fixed top-20 right-4 z-[9999] flex flex-col gap-3 pointer-events-none"
       style="max-width: 420px;"
     >
       <div
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto relative flex items-start gap-3 p-4 rounded-xl shadow-lg border backdrop-blur-sm animate-slide-in',
+          'pointer-events-auto relative flex items-start gap-3 p-4 rounded-xl border backdrop-blur-xl animate-slide-in',
           getToastClasses(toast.type)
         ]"
         role="alert"
@@ -49,15 +49,15 @@ const { toasts, removeToast } = useToast()
 const getToastClasses = (type: ToastType) => {
   switch (type) {
     case 'success':
-      return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+      return 'bg-green-50/60 dark:bg-green-900/20 border-green-200/40 dark:border-green-800/40 shadow-lg shadow-green-500/10'
     case 'error':
-      return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+      return 'bg-red-50/60 dark:bg-red-900/20 border-red-200/40 dark:border-red-800/40 shadow-lg shadow-red-500/10'
     case 'warning':
-      return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+      return 'bg-yellow-50/60 dark:bg-yellow-900/20 border-yellow-200/40 dark:border-yellow-800/40 shadow-lg shadow-yellow-500/10'
     case 'info':
-      return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+      return 'bg-blue-50/60 dark:bg-blue-900/20 border-blue-200/40 dark:border-blue-800/40 shadow-lg shadow-blue-500/10'
     default:
-      return 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800'
+      return 'bg-white/60 dark:bg-gray-900/20 border-gray-200/40 dark:border-gray-800/40 shadow-lg shadow-gray-500/10'
   }
 }
 

@@ -344,15 +344,27 @@
                   </button>
                   <button
                     @click="handleEditItem(item)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
-                    title="Edit item"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
+                      isItemSold(item)
+                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                        : 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                   >
                     <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
-                    class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Delete item"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
+                      isItemSold(item)
+                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                        : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
                   >
                     <TrashIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
