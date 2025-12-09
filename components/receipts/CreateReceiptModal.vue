@@ -241,17 +241,53 @@
         <!-- Step 3: Receipt Details -->
         <div v-if="currentStep === 2" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div class="relative">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Customer Name *
               </label>
-              <input
-                v-model="receiptForm.customerName"
-                type="text"
-                required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="John Doe"
-              />
+              <div class="relative">
+                <input
+                  v-model="receiptForm.customerName"
+                  type="text"
+                  required
+                  @input="handleCustomerNameInput"
+                  @focus="showCustomerSuggestions = true"
+                  @blur="handleCustomerNameBlur"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="John Doe"
+                />
+                <MagnifyingGlassIcon 
+                  v-if="receiptForm.customerName && matchingCustomers.length > 0"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
+                />
+                <!-- Customer Suggestions Dropdown -->
+                <div
+                  v-if="showCustomerSuggestions && receiptForm.customerName && matchingCustomers.length > 0"
+                  class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                >
+                  <div
+                    v-for="customer in matchingCustomers"
+                    :key="customer.id"
+                    @mousedown.prevent="selectCustomer(customer)"
+                    class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex-1">
+                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                          {{ customer.name }}
+                        </p>
+                        <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          <span v-if="customer.email">{{ customer.email }}</span>
+                          <span v-if="customer.phone">{{ customer.phone }}</span>
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-400 dark:text-gray-500 ml-4">
+                        {{ customer.totalOrders }} order{{ customer.totalOrders !== 1 ? 's' : '' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -624,6 +660,8 @@ const selectedItems = ref<Array<{ id: string; quantity: number; item: InventoryI
 const availableItems = ref<InventoryItem[]>([])
 const folderSearchQuery = ref('')
 const itemSearchQuery = ref('')
+const showCustomerSuggestions = ref(false)
+const allCustomers = ref<Array<{ id: string; name: string; email?: string; phone?: string; address?: string; totalOrders: number }>>([])
 
 const receiptForm = ref({
   customerName: '',
@@ -647,6 +685,20 @@ const splitPayments = ref<Array<{ method: string; amount: number }>>([
 ])
 
 const folders = computed(() => inventoryStore.folders)
+
+const matchingCustomers = computed(() => {
+  if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 2) {
+    return []
+  }
+  const query = receiptForm.value.customerName.toLowerCase().trim()
+  return allCustomers.value
+    .filter(customer => 
+      customer.name.toLowerCase().includes(query) ||
+      customer.email?.toLowerCase().includes(query) ||
+      customer.phone?.includes(query)
+    )
+    .slice(0, 5) // Limit to 5 suggestions
+})
 
 const filteredFolders = computed(() => {
   if (!folderSearchQuery.value.trim()) {
@@ -746,10 +798,11 @@ const totalSelectedQuantity = computed(() => {
 })
 
 // Watch for modal opening to reset state
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, async (isOpen) => {
   if (isOpen) {
     resetForm()
     loadFolders()
+    await loadCustomers()
   }
 })
 
@@ -800,6 +853,47 @@ const loadFolders = async () => {
       loadingFolders.value = false
     }
   }
+}
+
+const loadCustomers = async () => {
+  try {
+    await customersStore.fetchCustomers()
+    allCustomers.value = customersStore.customers.map(customer => ({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      totalOrders: customer.totalOrders,
+    }))
+  } catch (error) {
+    console.error('Error loading customers:', error)
+  }
+}
+
+const handleCustomerNameInput = () => {
+  showCustomerSuggestions.value = true
+}
+
+const handleCustomerNameBlur = () => {
+  // Delay hiding suggestions to allow click events to fire
+  setTimeout(() => {
+    showCustomerSuggestions.value = false
+  }, 200)
+}
+
+const selectCustomer = (customer: { id: string; name: string; email?: string; phone?: string; address?: string }) => {
+  receiptForm.value.customerName = customer.name
+  if (customer.email) {
+    receiptForm.value.customerEmail = customer.email
+  }
+  if (customer.phone) {
+    receiptForm.value.customerPhone = customer.phone
+  }
+  if (customer.address) {
+    receiptForm.value.customerAddress = customer.address
+  }
+  showCustomerSuggestions.value = false
 }
 
 const selectFolder = async (folder: InventoryFolder) => {
@@ -991,6 +1085,8 @@ const resetForm = () => {
   // Reset split payment state
   useSplitPayment.value = false
   splitPayments.value = [{ method: '', amount: 0 }]
+  // Reset customer suggestions
+  showCustomerSuggestions.value = false
 }
 
 const handleCancel = () => {
