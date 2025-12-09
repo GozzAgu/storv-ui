@@ -76,14 +76,50 @@
         <div class="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
-            <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">Last 30 days performance</p>
+            <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">{{ chartSubtitle }}</p>
+          </div>
+          <!-- View Selector -->
+          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button
+              @click="chartView = 'daily'"
+              :class="[
+                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                chartView === 'daily'
+                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              ]"
+            >
+              Daily
+            </button>
+            <button
+              @click="chartView = 'weekly'"
+              :class="[
+                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                chartView === 'weekly'
+                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              ]"
+            >
+              Weekly
+            </button>
+            <button
+              @click="chartView = 'monthly'"
+              :class="[
+                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                chartView === 'monthly'
+                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              ]"
+            >
+              Monthly
+            </button>
           </div>
         </div>
         <div class="h-64 sm:h-80 relative">
-          <p v-if="dailyRevenueData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
+          <p v-if="chartData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
           <ClientOnly>
             <apexchart
-              v-if="dailyRevenueData.length > 0"
+              v-if="chartData.length > 0"
               type="area"
               :height="chartHeight"
               :options="chartOptions"
@@ -324,6 +360,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 
 const isLoading = ref(true)
+const chartView = ref<'daily' | 'weekly' | 'monthly'>('daily')
 
 // User name for welcome message
 const userName = computed(() => {
@@ -549,17 +586,156 @@ const dailyRevenueData = computed(() => {
     .sort((a, b) => a.date.getTime() - b.date.getTime())
 })
 
+// Weekly revenue data aggregation (last 12 weeks)
+const weeklyRevenueData = computed(() => {
+  const twelveWeeksAgo = new Date()
+  twelveWeeksAgo.setHours(0, 0, 0, 0)
+  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - (12 * 7))
+  
+  // Get Monday of the week for twelveWeeksAgo
+  const dayOfWeek = twelveWeeksAgo.getDay()
+  const diff = twelveWeeksAgo.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Adjust to Monday
+  const startOfWeek = new Date(twelveWeeksAgo.setDate(diff))
+  startOfWeek.setHours(0, 0, 0, 0)
+  
+  const weeklyTotals = new Map<string, { revenue: number; startDate: Date; endDate: Date }>()
+  
+  // Initialize all weeks with 0
+  for (let i = 0; i < 12; i++) {
+    const weekStart = new Date(startOfWeek)
+    weekStart.setDate(weekStart.getDate() + (i * 7))
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 6)
+    
+    const weekKey = `Week ${i + 1}`
+    weeklyTotals.set(weekKey, {
+      revenue: 0,
+      startDate: new Date(weekStart),
+      endDate: new Date(weekEnd)
+    })
+  }
+  
+  // Aggregate receipts by week
+  receiptsStore.receipts.forEach(receipt => {
+    if (receipt.status !== 'completed') return
+    
+    const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
+    receiptDate.setHours(0, 0, 0, 0)
+    
+    if (receiptDate >= startOfWeek) {
+      // Find which week this receipt belongs to
+      const daysDiff = Math.floor((receiptDate.getTime() - startOfWeek.getTime()) / (1000 * 60 * 60 * 24))
+      const weekIndex = Math.floor(daysDiff / 7)
+      
+      if (weekIndex >= 0 && weekIndex < 12) {
+        const weekKey = `Week ${weekIndex + 1}`
+        const weekData = weeklyTotals.get(weekKey)
+        if (weekData) {
+          weekData.revenue += receipt.total
+        }
+      }
+    }
+  })
+  
+  // Convert to array and sort by date
+  return Array.from(weeklyTotals.values())
+    .map((week, index) => ({
+      date: week.startDate,
+      revenue: week.revenue,
+      dateKey: `Week ${index + 1}`,
+      endDate: week.endDate
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+})
+
+// Monthly revenue data aggregation (last 12 months)
+const monthlyRevenueData = computed(() => {
+  const twelveMonthsAgo = new Date()
+  twelveMonthsAgo.setHours(0, 0, 0, 0)
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+  twelveMonthsAgo.setDate(1) // First day of the month
+  
+  const monthlyTotals = new Map<string, { revenue: number; date: Date }>()
+  
+  // Initialize all months with 0
+  for (let i = 0; i < 12; i++) {
+    const monthDate = new Date(twelveMonthsAgo)
+    monthDate.setMonth(monthDate.getMonth() + i)
+    const monthKey = monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    
+    monthlyTotals.set(monthKey, {
+      revenue: 0,
+      date: new Date(monthDate)
+    })
+  }
+  
+  // Aggregate receipts by month
+  receiptsStore.receipts.forEach(receipt => {
+    if (receipt.status !== 'completed') return
+    
+    const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
+    receiptDate.setHours(0, 0, 0, 0)
+    
+    if (receiptDate >= twelveMonthsAgo) {
+      const monthKey = receiptDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      const monthData = monthlyTotals.get(monthKey)
+      if (monthData) {
+        monthData.revenue += receipt.total
+      }
+    }
+  })
+  
+  // Convert to array and sort by date
+  return Array.from(monthlyTotals.values())
+    .map(month => ({
+      date: month.date,
+      revenue: month.revenue,
+      dateKey: month.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+})
+
+// Chart data based on selected view
+const chartData = computed(() => {
+  switch (chartView.value) {
+    case 'weekly':
+      return weeklyRevenueData.value
+    case 'monthly':
+      return monthlyRevenueData.value
+    default:
+      return dailyRevenueData.value
+  }
+})
+
+// Chart subtitle based on view
+const chartSubtitle = computed(() => {
+  switch (chartView.value) {
+    case 'weekly':
+      return 'Last 12 weeks performance'
+    case 'monthly':
+      return 'Last 12 months performance'
+    default:
+      return 'Last 30 days performance'
+  }
+})
+
 const totalRevenue30Days = computed(() => {
   return dailyRevenueData.value.reduce((sum, day) => sum + day.revenue, 0)
 })
 
 // ApexCharts configuration
 const chartSeries = computed(() => {
-  if (dailyRevenueData.value.length === 0) return []
+  if (chartData.value.length === 0) return []
+  
+  const seriesName = chartView.value === 'weekly' 
+    ? 'Weekly Revenue' 
+    : chartView.value === 'monthly' 
+      ? 'Monthly Revenue' 
+      : 'Daily Revenue'
   
   return [{
-    name: 'Daily Revenue',
-    data: dailyRevenueData.value.map(day => day.revenue)
+    name: seriesName,
+    data: chartData.value.map(item => item.revenue)
   }]
 })
 
@@ -625,15 +801,22 @@ const chartOptions = computed(() => {
       }
     },
     xaxis: {
-      categories: dailyRevenueData.value.map(day => 
-        day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      ),
+      categories: chartData.value.map(item => {
+        if (chartView.value === 'weekly') {
+          const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
+          return `${week.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${week.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+        } else if (chartView.value === 'monthly') {
+          return item.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+        } else {
+          return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        }
+      }),
       labels: {
         style: {
           colors: isDark ? '#9CA3AF' : '#6B7280',
           fontSize: '12px'
         },
-        rotate: -45,
+        rotate: chartView.value === 'monthly' ? 0 : -45,
         rotateAlways: false
       },
       axisBorder: {
@@ -695,13 +878,24 @@ const chartOptions = computed(() => {
       x: {
         formatter: (value: string) => {
           const index = parseInt(value)
-          if (dailyRevenueData.value[index]) {
-            return dailyRevenueData.value[index].date.toLocaleDateString('en-US', {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })
+          if (chartData.value[index]) {
+            const item = chartData.value[index]
+            if (chartView.value === 'weekly') {
+              const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
+              return `Week: ${week.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${week.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+            } else if (chartView.value === 'monthly') {
+              return item.date.toLocaleDateString('en-US', {
+                month: 'long',
+                year: 'numeric'
+              })
+            } else {
+              return item.date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })
+            }
           }
           return value
         }
