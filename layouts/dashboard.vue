@@ -14,7 +14,7 @@
       :class="[
         'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 flex flex-col',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        sidebarCollapsed ? 'w-20' : 'w-72'
+        sidebarCollapsed ? 'w-20' : 'w-64'
       ]"
     >
       <!-- Background Gradient -->
@@ -450,7 +450,7 @@
 
     <!-- Main Content -->
     <div 
-      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72']"
+      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64']"
       class="w-full"
       style="min-width: 0; max-width: 100vw;"
     >
