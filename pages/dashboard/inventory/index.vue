@@ -264,26 +264,26 @@
         <form @submit.prevent="handleSaveFolder" class="space-y-6">
         <!-- Folder Basic Info -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Folder Name *
             </label>
             <input
               v-model="folderForm.name"
               type="text"
               required
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="Enter folder name"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Type *
             </label>
             <select
               v-model="folderForm.type"
               required
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
             >
               <option value="">Select type</option>
               <option value="general">General</option>
@@ -297,28 +297,28 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Description
           </label>
           <textarea
             v-model="folderForm.description"
             rows="3"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
+            class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
             placeholder="Describe the folder's purpose"
           ></textarea>
         </div>
 
         <!-- Color Selector -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Color
           </label>
           <div class="flex items-center gap-3">
             <input
               v-model="folderForm.color"
               type="color"
-              class="w-16 h-12 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer"
+              class="w-16 h-12 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer transition-all hover:border-gray-300 dark:hover:border-gray-500"
             />
             <span class="text-sm text-gray-600 dark:text-gray-400">{{ folderForm.color }}</span>
           </div>
@@ -343,7 +343,7 @@
         </div>
 
         <!-- Department Access Control -->
-        <div v-if="canCreateInventoryFolders" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+        <div v-if="canCreateInventoryFolders" class="p-4 bg-blue-50/50 dark:bg-blue-900/20 rounded-xl border border-blue-200/60 dark:border-blue-800">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Department Access
           </label>
@@ -383,7 +383,7 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Table Template *
           </label>
-          <div class="p-4 bg-primary-50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-xl mb-4">
+          <div class="p-4 bg-primary-50/50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-xl mb-4">
             <div class="flex items-center gap-2 mb-1">
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Custom Template
@@ -399,7 +399,7 @@
         </div>
 
         <!-- Template Editor -->
-        <div v-if="selectedTemplate" class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+        <div v-if="selectedTemplate" class="p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
           <div class="flex items-center justify-between mb-4">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Customize Template Fields
@@ -417,41 +417,41 @@
             <div
               v-for="(field, index) in editableFields"
               :key="field.id"
-              class="flex flex-col sm:flex-row items-start gap-3 sm:gap-3 p-4 sm:p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+              class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
             >
-              <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-end">
+                <div class="sm:col-span-3">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Field Name *
                   </label>
                   <input
                     v-model="field.name"
                     type="text"
                     required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
                     placeholder="fieldName"
                   />
                 </div>
-                <div>
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <div class="sm:col-span-3">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Label *
                   </label>
                   <input
                     v-model="field.label"
                     type="text"
                     required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
                     placeholder="Display Name"
                   />
                 </div>
-                <div>
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <div class="sm:col-span-3">
+                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Field Type *
                   </label>
                   <select
                     v-model="field.type"
                     required
-                    class="w-full px-3 sm:px-4 py-2 sm:py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
                   >
                     <option value="text">Text</option>
                     <option value="number">Number</option>
@@ -461,33 +461,33 @@
                     <option value="currency">Currency</option>
                   </select>
                 </div>
-              </div>
-              <div class="flex items-center gap-2 pt-3 sm:pt-6 w-full sm:w-auto justify-between sm:justify-start">
-                <label class="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    v-model="field.required"
-                    type="checkbox"
-                    class="w-4 h-4 sm:w-3 sm:h-3 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
-                  />
-                  <span class="text-xs sm:text-xs text-gray-600 dark:text-gray-400">Required</span>
-                </label>
-                <!-- Default fields cannot be removed -->
-                <button
-                  v-if="!['name', 'price'].includes(field.name)"
-                  type="button"
-                  @click="handleRemoveField(index)"
-                  class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  title="Remove field"
-                >
-                  <TrashIcon class="w-4 h-4" />
-                </button>
-                <span
-                  v-else
-                  class="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
-                  title="Default field - cannot be removed"
-                >
-                  Default
-                </span>
+                <div class="sm:col-span-3 flex items-center gap-2 sm:gap-3 justify-start sm:justify-end pl-0 sm:pl-6 sm:ml-2">
+                  <label class="flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+                    <input
+                      v-model="field.required"
+                      type="checkbox"
+                      class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-0 cursor-pointer transition-all hover:border-primary-400 dark:hover:border-primary-500 flex-shrink-0"
+                    />
+                    <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Required</span>
+                  </label>
+                  <!-- Default fields cannot be removed -->
+                  <button
+                    v-if="!['name', 'price'].includes(field.name)"
+                    type="button"
+                    @click="handleRemoveField(index)"
+                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                    title="Remove field"
+                  >
+                    <TrashIcon class="w-4 h-4" />
+                  </button>
+                  <span
+                    v-else
+                    class="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded whitespace-nowrap"
+                    title="Default field - cannot be removed"
+                  >
+                    D
+                  </span>
+                </div>
               </div>
             </div>
             

@@ -32,7 +32,7 @@
             <div
               v-if="modelValue"
               :class="[
-                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
+                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
                 sizeClasses
               ]"
               @click.stop

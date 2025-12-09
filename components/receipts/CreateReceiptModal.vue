@@ -18,6 +18,7 @@
               <div
                 :class="[
                   'w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all',
+                  'aspect-square',
                   currentStep >= index
                     ? 'bg-primary-600 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'

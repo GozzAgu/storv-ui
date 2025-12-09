@@ -8,11 +8,11 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full overflow-x-hidden relative">
+  <div v-else class="min-h-screen bg-white dark:bg-gray-900 w-full overflow-x-hidden relative">
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 shadow-xl flex flex-col',
+        'fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-800 border-r border-gray-200/60 dark:border-gray-700/60 transform transition-all duration-300 ease-in-out lg:translate-x-0 flex flex-col',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         sidebarCollapsed ? 'w-20' : 'w-72'
       ]"
@@ -60,7 +60,7 @@
       <!-- Toggle button - minimal design matching Dribbble, positioned outside and lower -->
       <button
         @click="toggleSidebar"
-        class="absolute top-16 -right-3 hidden lg:flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 transition-all z-10"
+        class="absolute top-16 -right-3 hidden lg:flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all z-10"
         :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
       >
         <ChevronRightIcon v-if="sidebarCollapsed" class="w-5 h-5" />
@@ -210,7 +210,7 @@
               <!-- Tooltip for collapsed state -->
               <div
                 v-if="sidebarCollapsed"
-                class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
               >
                 {{ item.name }}
                 <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
@@ -534,7 +534,7 @@
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="absolute right-0 mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
+                  class="absolute right-0 mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
                   style="min-width: 160px; max-width: min(224px, calc(100vw - 2rem));"
                 >
                   <NuxtLink

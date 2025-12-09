@@ -11,7 +11,7 @@
       <div class="flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
-          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:shadow-lg hover:shadow-primary-500/50 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-base"
+          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-base"
         >
           <PlusIcon class="w-5 h-5" />
           <span>Add Product</span>

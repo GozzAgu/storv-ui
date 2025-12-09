@@ -16,11 +16,11 @@
     <div
       :class="[
         'relative flex items-center justify-center rounded-lg border-2 transition-all duration-200 ease-out',
-        'shadow-sm transform',
+        'transform',
         size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5',
         modelValue
-          ? 'bg-gradient-to-br from-primary-500 to-primary-600 border-primary-500 shadow-md shadow-primary-500/30 scale-100'
-          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400 dark:group-hover:border-primary-500 group-hover:shadow-sm scale-100',
+          ? 'bg-gradient-to-br from-primary-500 to-primary-600 border-primary-500 scale-100'
+          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400 dark:group-hover:border-primary-500 scale-100',
         !disabled && 'group-hover:scale-105 active:scale-95',
         disabled && 'cursor-not-allowed'
       ]"
