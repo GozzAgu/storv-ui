@@ -1,11 +1,11 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4 sm:space-y-5">
     <!-- Page Header -->
     <div>
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
-          <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your store and application preferences</p>
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+          <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage your store and application preferences</p>
         </div>
         <div v-if="!canEditSettings" class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
           <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">View Only Mode</p>
@@ -14,13 +14,13 @@
       </div>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-5">
       <!-- Stores Management (for super admins) -->
       <Card v-if="userStore.isSuperAdmin">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-5">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Stores Management</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Create, edit, and delete your stores</p>
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Stores Management</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Create, edit, and delete your stores</p>
           </div>
           <Button @click="showCreateModal = true" v-if="!isStaff">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
           <Card
             v-for="store in stores"
             :key="store.id"
@@ -156,7 +156,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Store Name
@@ -264,7 +264,7 @@
           </div>
         </div>
 
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-5">
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex-1">
               <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Low Stock Alert Threshold</p>
@@ -347,7 +347,7 @@
           </div>
         </div>
 
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-5">
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex-1">
               <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Receipt Prefix</p>
@@ -423,7 +423,7 @@
           </div>
       </div>
 
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-5">
           <div class="py-4">
             <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">Available Payment Methods</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Select the payment methods you accept for sales transactions</p>

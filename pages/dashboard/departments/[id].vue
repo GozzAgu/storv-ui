@@ -1,86 +1,86 @@
 <template>
-  <div class="space-y-6 pb-24">
-    <!-- Header with Back Button -->
-    <div class="flex items-center gap-4">
+  <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full">
+    <!-- Header with Back Button - Mobile Optimized -->
+    <div class="flex items-center gap-2 sm:gap-4">
       <button
         @click="navigateTo('/dashboard/departments')"
-        class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+        class="p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg sm:rounded-xl transition-colors flex-shrink-0"
         title="Back to departments"
       >
-        <ArrowLeftIcon class="w-5 h-5" />
+        <ArrowLeftIcon class="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
-      <div class="flex-1">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+      <div class="flex-1 min-w-0">
+        <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
           {{ department?.name || 'Loading...' }}
         </h1>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <p class="mt-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Department Management
         </p>
       </div>
     </div>
 
-    <!-- Department Info Card -->
-    <Card padding="md">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Department Info Card - Mobile Optimized -->
+    <Card padding="sm" extra-class="sm:p-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <div>
-          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Department Type</p>
-          <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Department Type</p>
+          <p class="mt-1 text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
             {{ department?.departmentType || '-' }}
           </p>
         </div>
         <div>
-          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Manager</p>
-          <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Manager</p>
+          <p class="mt-1 text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
             {{ department?.manager || 'Not assigned' }}
           </p>
         </div>
         <div>
-          <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
-          <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
+          <p class="mt-1 text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
             {{ department?.staffCount || 0 }} members
           </p>
         </div>
       </div>
     </Card>
 
-    <!-- Stats Cards - Hidden on large screens -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:hidden">
-      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
+    <!-- Stats Cards - Mobile Optimized -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 lg:hidden">
+      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Staff</p>
+            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               {{ staff.length }}
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <UsersIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <UsersIcon class="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
-      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Managers</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Managers</p>
+            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               {{ totalManagers }}
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <UserCircleIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <UserCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
       </Card>
-      <Card padding="md" extra-class="border-l-4 border-l-green-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
         <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Active</p>
+            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
               {{ activeStaff }}
             </p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <CheckCircleIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CheckCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </Card>
@@ -117,37 +117,37 @@
         </div>
       </div>
 
-      <!-- Staff Table -->
-      <div v-if="isLoadingStaff" class="text-center py-8">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading staff...</p>
+      <!-- Staff Table - Mobile Optimized -->
+      <div v-if="isLoadingStaff" class="text-center py-6 sm:py-8">
+        <div class="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary-600"></div>
+        <p class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">Loading staff...</p>
       </div>
 
-      <div v-else-if="staff.length === 0" class="text-center py-8">
-        <UsersIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No staff members in this department yet</p>
+      <div v-else-if="staff.length === 0" class="text-center py-6 sm:py-8">
+        <UsersIcon class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-3" />
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 px-4">No staff members in this department yet</p>
       </div>
 
-      <div v-else class="overflow-x-auto mb-6">
+      <div v-else class="overflow-x-auto mb-4 sm:mb-6">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
-              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-2 sm:px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Name
               </th>
-              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-2 sm:px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden sm:table-cell">
                 Position
               </th>
-              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-2 sm:px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Role
               </th>
-              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-2 sm:px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden md:table-cell">
                 Email
               </th>
-              <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-2 sm:px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th v-if="canManageDepartments" class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[100px]">
+              <th v-if="canManageDepartments" class="px-2 sm:px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[80px] sm:min-w-[100px]">
                 Actions
               </th>
             </tr>
@@ -158,28 +158,31 @@
               :key="member.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap">
+                <div class="flex items-center gap-2 sm:gap-3">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
                     {{ member.firstName.charAt(0).toUpperCase() }}{{ member.lastName.charAt(0).toUpperCase() }}
                   </div>
-                  <div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                       {{ member.firstName }} {{ member.lastName }}
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
                       {{ member.phone || 'No phone' }}
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate sm:hidden mt-0.5">
+                      {{ member.position }}
                     </div>
                   </div>
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-sm text-gray-900 dark:text-gray-100">
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap hidden sm:table-cell">
+                <span class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
                   {{ member.position }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap">
+                <span class="inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-xs font-medium capitalize"
                   :class="[
                     member.role === 'manager'
                       ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300'
@@ -191,15 +194,15 @@
                   {{ member.role }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap hidden md:table-cell">
+                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate max-w-[150px]">
                   {{ member.email }}
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap">
                 <span
                   :class="[
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                    'inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-xs font-medium capitalize',
                     member.status === 'active'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : member.status === 'on_leave'
@@ -210,7 +213,7 @@
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap text-right min-w-[100px]">
+              <td class="px-2 sm:px-3 py-2 whitespace-nowrap text-right min-w-[80px] sm:min-w-[100px]">
                 <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
                   <button
                     v-if="canManageDepartments"
@@ -218,7 +221,7 @@
                     class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                     title="Edit"
                   >
-                    <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
+                    <PencilSquareIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canManageDepartments"
@@ -226,7 +229,7 @@
                     class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     title="Delete"
                   >
-                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
+                    <TrashIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   </button>
                 </div>
               </td>
@@ -236,10 +239,10 @@
       </div>
     </Card>
 
-    <!-- Fixed Staff Pagination -->
+    <!-- Fixed Staff Pagination - Mobile Optimized -->
     <div
       v-if="staff.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300"
+      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
       <Pagination
@@ -250,14 +253,14 @@
       />
     </div>
 
-    <!-- Floating Action Button -->
+    <!-- Floating Action Button - Mobile Optimized -->
     <button
       v-if="canManageDepartments && !isLoadingStaff"
       @click="openCreateStaffModal"
-      class="fixed bottom-24 right-6 w-11 h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 z-40"
+      class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
       title="Add new staff"
     >
-      <PlusIcon class="w-5 h-5" />
+      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
     </button>
 
     <!-- Staff Modal -->

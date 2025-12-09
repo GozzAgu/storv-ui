@@ -81,7 +81,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div class="text-center lg:text-left space-y-8">
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-5">
               <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 leading-tight tracking-tight">
                 Complete Store
                 <span class="block bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent">
@@ -106,7 +106,7 @@
           
           <!-- Dashboard Preview -->
           <div class="relative hidden lg:block">
-            <div class="relative bg-white rounded-3xl shadow-2xl p-6 border border-gray-100 transform hover:scale-[1.02] transition-transform duration-500">
+            <div class="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-5 lg:p-6 border border-gray-100 transform hover:scale-[1.02] transition-transform duration-500">
               <!-- Browser Window -->
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-3 h-3 rounded-full bg-red-400"></div>
@@ -121,7 +121,7 @@
                   <div class="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-4 h-20"></div>
                   <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 h-20"></div>
                 </div>
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 h-40"></div>
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6 h-32 sm:h-36 lg:h-40"></div>
                 <div class="grid grid-cols-2 gap-3">
                   <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 h-28"></div>
                   <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-4 h-28"></div>
@@ -146,8 +146,8 @@
         </div>
         
         <!-- Main Features Grid -->
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16">
-          <div class="group relative bg-white p-6 sm:p-8 rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
+          <div class="group relative bg-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
               <CubeIcon class="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
@@ -318,7 +318,7 @@
 
         <!-- Additional Features Grid -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-12 sm:pt-16 pb-12 sm:pb-16">
-          <h3 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-8 sm:mb-12 text-center">
+          <h3 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-6 sm:mb-8 lg:mb-12 text-center">
             <span class="bg-gradient-to-r from-primary-600 via-primary-600 to-primary-600 bg-clip-text text-transparent">Additional Powerful Features</span>
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
@@ -623,13 +623,13 @@
         <div class="max-w-4xl mx-auto">
           <div class="space-y-8">
             <!-- Step 1 -->
-            <div class="flex flex-col sm:flex-row gap-6 items-start">
+            <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
               <div class="flex-shrink-0">
-                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
                   1
                 </div>
               </div>
-              <div class="flex-1 bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
+              <div class="flex-1 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Create Your Account & Setup</h3>
                 <p class="text-gray-600 mb-4">
                   Sign up for free and complete the quick onboarding process. Set up your store information, choose your preferences (currency, region, language, timezone), and configure your settings.
@@ -658,7 +658,7 @@
                   2
                 </div>
               </div>
-              <div class="flex-1 bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
+              <div class="flex-1 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Organize Your Inventory</h3>
                 <p class="text-gray-600 mb-4">
                   Create inventory folders and add your products. Use custom templates with dynamic fields, track serial numbers, or bulk import from Excel spreadsheets.
@@ -687,7 +687,7 @@
                   3
                 </div>
               </div>
-              <div class="flex-1 bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
+              <div class="flex-1 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Manage Your Team (Optional)</h3>
                 <p class="text-gray-600 mb-4">
                   Set up departments and add staff members. Assign roles (Manager or Staff) and configure access permissions for inventory folders.
@@ -716,7 +716,7 @@
                   4
                 </div>
               </div>
-              <div class="flex-1 bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
+              <div class="flex-1 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Start Processing Sales</h3>
                 <p class="text-gray-600 mb-4">
                   Create receipts for sales transactions. Apply discounts, handle swap-ins, track payments, and generate professional receipts. Customers are automatically created and tracked.
@@ -745,7 +745,7 @@
                   5
                 </div>
               </div>
-              <div class="flex-1 bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-200">
+              <div class="flex-1 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200">
                 <h3 class="text-xl font-bold text-gray-900 mb-3">Monitor & Analyze</h3>
                 <p class="text-gray-600 mb-4">
                   Use the dashboard to track revenue, view sales trends, monitor inventory status, and access customer insights. Process returns, manage notifications, and export data when needed.

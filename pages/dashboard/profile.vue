@@ -1,18 +1,18 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4 sm:space-y-5">
     <!-- Page Header -->
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
+      <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
       <!-- Profile Card -->
       <Card class="lg:col-span-1">
         <div class="flex flex-col items-center text-center">
           <!-- Avatar -->
           <div class="relative mb-4">
-            <div class="w-24 h-24 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg">
               {{ profileData.firstName[0] }}{{ profileData.lastName[0] }}
             </div>
             <button 
@@ -49,24 +49,24 @@
           <!-- Stats -->
           <div class="grid grid-cols-3 gap-4 w-full mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div>
-              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                 <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
-              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
+              <p v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Orders</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                 <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
               <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Products</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
                 <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
-              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
+              <p v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Customers</p>
             </div>
           </div>
@@ -74,7 +74,7 @@
       </Card>
 
       <!-- Main Content -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-4 sm:space-y-5">
         <!-- Personal Information -->
         <Card>
           <div class="flex items-center justify-between mb-6">
@@ -106,7 +106,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 First Name
@@ -577,7 +577,7 @@
 
     <!-- Notifications Settings Modal -->
     <Modal v-model="showNotificationsModal" title="Notification Preferences" size="lg">
-      <div class="space-y-6">
+      <div class="space-y-4 sm:space-y-5">
         <div class="space-y-4">
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div>

@@ -18,12 +18,12 @@
       <!-- Form Card -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-10 border border-gray-200 dark:border-gray-700">
         <!-- Step 1: Store Name -->
-        <div v-if="currentStep === 1" class="space-y-6">
-          <div class="text-center mb-8">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4">
-              <BuildingStorefrontIcon class="h-8 w-8 text-white" />
+        <div v-if="currentStep === 1" class="space-y-4 sm:space-y-5">
+          <div class="text-center mb-6 sm:mb-8">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
+              <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Welcome to Storv!
             </h1>
             <p class="text-gray-600 dark:text-gray-400">
@@ -47,10 +47,10 @@
         </div>
 
         <!-- Step 2: Store Details -->
-        <div v-if="currentStep === 2" class="space-y-6">
-          <div class="text-center mb-8">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4">
-              <InformationCircleIcon class="h-8 w-8 text-white" />
+        <div v-if="currentStep === 2" class="space-y-4 sm:space-y-5">
+          <div class="text-center mb-6 sm:mb-8">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
+              <InformationCircleIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Store Details

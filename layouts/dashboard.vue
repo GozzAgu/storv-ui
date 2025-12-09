@@ -403,12 +403,12 @@
       </nav>
       
       <!-- Bottom Section (Logout + Collapse/Expand) -->
-      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
+      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0 flex items-center justify-center" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
         <button
           @click="handleSignOut"
           :class="[
-            'group relative flex items-center justify-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden w-full py-3',
-            sidebarCollapsed ? 'px-3' : 'px-5',
+            'group relative flex items-center justify-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden py-2.5',
+            sidebarCollapsed ? 'px-3 w-auto' : 'px-4 w-auto',
             'text-red-600 dark:text-red-400',
             'border border-red-200/50 dark:border-red-800/50',
             'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
@@ -424,13 +424,15 @@
           
           <ArrowRightOnRectangleIcon 
             :class="[
-              'relative z-10 transition-all duration-300 w-6 h-6',
+              'relative z-10 transition-all duration-300',
+              sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5',
               'group-hover:scale-110 group-hover:rotate-[-5deg]'
             ]"
           />
           
-          <!-- Tooltip -->
+          <!-- Tooltip (only show when collapsed) -->
           <div
+            v-if="sidebarCollapsed"
             class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
           >
             Sign out
@@ -456,42 +458,42 @@
     >
       <!-- Top Navigation -->
       <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center space-x-3">
+        <div class="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-6">
+          <div class="flex items-center space-x-2 sm:space-x-3">
           <button
             @click="sidebarOpen = true"
-              class="lg:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              class="lg:hidden p-1.5 sm:p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <Bars3Icon class="w-6 h-6" />
+            <Bars3Icon class="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
             <!-- Page Name -->
-            <div class="hidden md:flex items-center space-x-2">
-              <component :is="currentPageIcon" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <div class="hidden md:flex items-center space-x-1.5 sm:space-x-2">
+              <component :is="currentPageIcon" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+              <h1 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {{ currentPageName }}
               </h1>
             </div>
           </div>
 
-          <div class="flex items-center space-x-3 ml-auto">
+          <div class="flex items-center space-x-2 sm:space-x-3 ml-auto">
             <!-- Global Search Button -->
             <button
               @click="searchStore.openSearch()"
-              class="hidden md:flex items-center gap-2 px-4 py-2 w-64 border border-gray-300 dark:border-gray-700 rounded-xl hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              class="hidden md:flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 w-56 sm:w-64 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-xl hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
               title="Search (Cmd/Ctrl+K)"
             >
-              <MagnifyingGlassIcon class="w-5 h-5 flex-shrink-0" />
+              <MagnifyingGlassIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span class="flex-1 text-left">Search anything...</span>
-              <kbd class="hidden lg:inline-flex px-2 py-0.5 text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd>
+              <kbd class="hidden lg:inline-flex px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd>
             </button>
             
             <!-- Mobile Search Button -->
             <button
               @click="searchStore.openSearch()"
-              class="md:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              class="md:hidden p-1.5 sm:p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Search"
             >
-              <MagnifyingGlassIcon class="w-6 h-6" />
+              <MagnifyingGlassIcon class="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
             <!-- Store Selector (for super admins) -->
@@ -503,13 +505,13 @@
             <!-- Notifications -->
             <NuxtLink
               to="/dashboard/notifications"
-              class="relative p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              class="relative p-1.5 sm:p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Notifications"
             >
-              <BellIcon class="w-6 h-6" />
+              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6" />
               <span
                 v-if="unreadNotificationCount > 0"
-                class="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center px-1.5"
+                class="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 min-w-[16px] h-[16px] sm:min-w-[18px] sm:h-[18px] bg-red-500 text-white text-[10px] sm:text-xs font-semibold rounded-full flex items-center justify-center px-1 sm:px-1.5"
               >
                 {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
               </span>
@@ -519,16 +521,16 @@
             <div class="relative" ref="profileMenuRef">
               <button
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex items-center space-x-2 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="flex items-center space-x-1.5 sm:space-x-2 p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
                   {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left">
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
+                  <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
+                  <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
                 </div>
-                <ChevronDownIcon class="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <ChevronDownIcon class="hidden md:block w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500" />
               </button>
 
               <!-- Profile Dropdown Menu -->
@@ -574,7 +576,7 @@
       </header>
 
       <!-- Page Content -->
-      <main class="px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
+      <main class="px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
         <slot />
       </main>
     </div>

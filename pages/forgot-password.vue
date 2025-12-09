@@ -29,7 +29,7 @@
             Storv
           </h1>
         </NuxtLink>
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Reset your password
         </h2>
         <p class="text-gray-600 dark:text-gray-400 text-base">
@@ -39,7 +39,7 @@
 
       <!-- Forgot Password Form Card -->
       <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
-        <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-6">
+        <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4 sm:space-y-5">
           <div>
             <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Email address
@@ -80,7 +80,7 @@
         </form>
 
         <!-- Success Message -->
-        <div v-else class="text-center space-y-6">
+        <div v-else class="text-center space-y-4 sm:space-y-5">
           <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
             <CheckCircleIcon class="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>

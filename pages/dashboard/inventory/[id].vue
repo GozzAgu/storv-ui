@@ -13,10 +13,10 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-2">
             <div class="flex-1 min-w-0">
-              <h1 v-if="isLoadingFolder" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <h1 v-if="isLoadingFolder" class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 Loading...
               </h1>
-              <h1 v-else class="text-lg sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+              <h1 v-else class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
                 {{ folder?.name || 'Folder' }}
               </h1>
               <p v-if="!isLoadingFolder" class="mt-1.5 text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
@@ -57,7 +57,7 @@
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Items</p>
-            <p class="mt-1 sm:mt-2 text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {{ folder?.itemCount || 0 }}
             </p>
             <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
@@ -72,7 +72,7 @@
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Value</p>
-            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {{ formatCurrency(totalInventoryValue) }}
             </p>
             <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
@@ -133,7 +133,7 @@
       <div v-if="!isLoadingFolder" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
           <!-- Compact Stats -->
-          <div class="flex items-center gap-6">
+          <div class="flex items-center gap-3 sm:gap-4">
             <div class="flex items-center gap-2">
               <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
@@ -467,7 +467,7 @@
       :title="editingItem ? 'Edit Item' : (folder?.hasSerialNumbers && !editingItem ? 'Add Items with Serial Numbers' : 'Add New Item')"
       size="lg"
     >
-      <form @submit.prevent="handleSaveItem" class="space-y-6">
+      <form @submit.prevent="handleSaveItem" class="space-y-4 sm:space-y-5">
         <!-- Bulk Add Mode for Serial Numbers -->
         <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-4">
           <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">

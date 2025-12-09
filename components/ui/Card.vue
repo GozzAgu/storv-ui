@@ -20,9 +20,9 @@ const props = withDefaults(defineProps<{
 const paddingClass = computed(() => {
   const paddingMap: Record<string, string> = {
     none: '',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8'
+    sm: 'p-3 sm:p-4',
+    md: 'p-4 sm:p-5',
+    lg: 'p-5 sm:p-6'
   }
   const basePadding = paddingMap[props.padding] || paddingMap.md
   return props.extraClass ? `${basePadding} ${props.extraClass}` : basePadding

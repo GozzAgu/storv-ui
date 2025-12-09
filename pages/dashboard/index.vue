@@ -3,17 +3,17 @@
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
     <!-- Welcome Header - Mobile Optimized -->
-    <div class="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex-1">
-        <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
-        <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
+        <h1 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
+        <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
       <div class="flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
-          class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-2xl font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-base"
+          class="w-full sm:w-auto px-4 py-2 sm:py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl sm:rounded-2xl font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm"
         >
-          <PlusIcon class="w-5 h-5" />
+          <PlusIcon class="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Add Product</span>
         </NuxtLink>
       </div>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Key Metrics Cards - Mobile Optimized -->
-    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
       <StatCard
         label="Total Revenue"
         :value="formatCurrency(totalRevenue)"
@@ -70,20 +70,20 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
       <!-- Revenue Chart -->
       <Card class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-4 sm:mb-6">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
           <div>
-            <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
-            <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 sm:mt-1">{{ chartSubtitle }}</p>
+            <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
+            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ chartSubtitle }}</p>
           </div>
           <!-- View Selector -->
-          <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div class="flex items-center gap-0.5 sm:gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 sm:p-1">
             <button
               @click="chartView = 'daily'"
               :class="[
-                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'daily'
                   ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -94,7 +94,7 @@
             <button
               @click="chartView = 'weekly'"
               :class="[
-                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'weekly'
                   ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -105,7 +105,7 @@
             <button
               @click="chartView = 'monthly'"
               :class="[
-                'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all',
+                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'monthly'
                   ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -115,7 +115,7 @@
             </button>
           </div>
         </div>
-        <div class="h-64 sm:h-80 relative">
+        <div class="h-48 sm:h-64 lg:h-72 relative">
           <p v-if="chartData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
           <ClientOnly>
             <apexchart
@@ -136,52 +136,52 @@
 
       <!-- Quick Stats -->
       <Card>
-        <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-6">Quick Stats</h2>
-        <div class="space-y-3 sm:space-y-6">
+        <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Quick Stats</h2>
+        <div class="space-y-2 sm:space-y-3">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                <CheckCircleIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                <CheckCircleIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
               </div>
           <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
-                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
+                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                <ClockIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                <ClockIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 dark:text-orange-400" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
-                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
+                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
           </div>
         </div>
       </div>
 
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                <XCircleIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                <XCircleIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600 dark:text-red-400" />
               </div>
           <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Refunded</p>
-                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
+                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Refunded</p>
+                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
               </div>
             </div>
           </div>
           
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                <BuildingOfficeIcon class="w-3.5 h-3.5 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                <BuildingOfficeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 truncate">Departments</p>
-                <p class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
+                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Departments</p>
+                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
               </div>
             </div>
           </div>
@@ -190,14 +190,14 @@
       </div>
 
     <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
       <!-- Recent Transactions -->
       <Card>
-        <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-          <NuxtLink to="/dashboard/receipts" class="text-[10px] sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
+          <NuxtLink to="/dashboard/receipts" class="text-[10px] sm:text-xs text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
-        <div class="space-y-3 sm:space-y-4">
+        <div class="space-y-2 sm:space-y-3">
           <div v-if="recentTransactions.length === 0" class="text-center py-6 sm:py-8">
             <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No recent transactions</p>
           </div>

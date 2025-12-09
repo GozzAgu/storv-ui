@@ -2,8 +2,8 @@
   <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
     <!-- Page Header - Mobile Optimized -->
     <div>
-      <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
-      <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
+      <h1 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
+      <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
     </div>
 
     <!-- Search and Filter - Mobile Optimized -->
@@ -80,7 +80,7 @@
     </Card>
 
     <!-- Folders Grid - Mobile Optimized -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
@@ -261,7 +261,7 @@
       </template>
       
       <div class="max-h-[60vh] overflow-y-auto pr-2 -mr-2">
-        <form @submit.prevent="handleSaveFolder" class="space-y-6">
+        <form @submit.prevent="handleSaveFolder" class="space-y-4 sm:space-y-5">
         <!-- Folder Basic Info -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1.5">
@@ -419,7 +419,7 @@
               :key="field.id"
               class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
             >
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6 items-end">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
                 <div class="sm:col-span-3">
                   <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     Field Name *

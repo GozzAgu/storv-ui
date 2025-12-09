@@ -31,7 +31,7 @@
             class="h-16 w-auto mx-auto object-contain"
           />
         </NuxtLink>
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Welcome back
         </h2>
         <p class="text-gray-600 dark:text-gray-400 text-base">
