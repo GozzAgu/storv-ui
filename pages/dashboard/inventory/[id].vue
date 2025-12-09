@@ -404,7 +404,7 @@
     <div
       v-if="sortedFilteredItems.length > 0"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'"
+      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
       <div class="px-4 sm:px-6">
         <Pagination

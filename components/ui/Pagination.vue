@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+  <div class="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
     <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
       <span>Showing</span>
       <span class="font-medium">{{ startIndex + 1 }}</span>
