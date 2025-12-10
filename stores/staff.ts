@@ -1003,17 +1003,31 @@ export const useStaffStore = defineStore('staff', {
         // Search through all superadmins' stores to find this staff member
         if (!superadminUserId) {
           console.log('[StaffStore] Superadmin UID not found in cache/legacy - searching all hierarchical structures...')
+          console.log('[StaffStore] This search may take a moment and may hit permission errors for unrelated superadmins...')
           try {
             // Get all superadmin users from top-level users collection
+            // Note: Staff members can read the users collection (rule allows authenticated users)
             const usersRef = collection(db, 'users')
             const usersSnapshot = await getDocs(usersRef)
+            
+            if (usersSnapshot.empty) {
+              console.warn('[StaffStore] No users found in users collection')
+              return null
+            }
+            
+            console.log(`[StaffStore] Found ${usersSnapshot.docs.length} users to search through`)
             
             for (const userDoc of usersSnapshot.docs) {
               const potentialSuperadminId = userDoc.id
               const userData = userDoc.data()
               
               // Only search superadmins
-              if (userData.role !== 'superAdmin') continue
+              if (userData.role !== 'superAdmin') {
+                console.log(`[StaffStore] Skipping user ${potentialSuperadminId} - not a superAdmin (role: ${userData.role})`)
+                continue
+              }
+              
+              console.log(`[StaffStore] Searching under superadmin: ${potentialSuperadminId}`)
               
               try {
                 const { getStoresCollection } = await import('~/composables/useFirestorePaths')
@@ -1030,7 +1044,17 @@ export const useStaffStore = defineStore('staff', {
                     const departmentId = deptDoc.id
                     try {
                       const staffRef = getStaffCollection(db, potentialSuperadminId, storeId, departmentId)
-                      const staffSnapshot = await getDocs(staffRef)
+                      // Try to query with where clause first (more efficient if Firestore rules allow it)
+                      let staffSnapshot
+                      try {
+                        const { query, where } = await import('firebase/firestore')
+                        const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+                        staffSnapshot = await getDocs(staffQuery)
+                      } catch (queryError: any) {
+                        // If query fails (permission or index issue), fall back to getting all docs
+                        console.log('[StaffStore] Query with where clause failed, falling back to get all docs:', queryError.message)
+                        staffSnapshot = await getDocs(staffRef)
+                      }
                       
                       for (const staffDoc of staffSnapshot.docs) {
                         const staffData = staffDoc.data()
@@ -1042,25 +1066,48 @@ export const useStaffStore = defineStore('staff', {
                         }
                       }
                       if (superadminUserId) break
-                    } catch (e) {
+                    } catch (e: any) {
+                      // Log the error for debugging
+                      if (e.code === 'permission-denied') {
+                        console.error(`[StaffStore] Permission denied when querying staff in store ${storeId}, dept ${departmentId}. This indicates a Firestore rules issue. Staff members should be able to query collections to find their own documents.`)
+                      } else {
+                        console.warn(`[StaffStore] Error querying staff in store ${storeId}, dept ${departmentId}:`, e.message)
+                      }
                       continue
                     }
                   }
                   if (superadminUserId) break
                 }
                 if (superadminUserId) break
-              } catch (e) {
+              } catch (e: any) {
+                // Log error but continue searching other superadmins
+                if (e.code === 'permission-denied') {
+                  console.warn(`[StaffStore] Permission denied when searching under superadmin ${potentialSuperadminId}:`, e.message)
+                } else {
+                  console.warn(`[StaffStore] Error searching under superadmin ${potentialSuperadminId}:`, e.message)
+                }
                 continue
               }
             }
+            
+            if (superadminUserId) {
+              console.log(`[StaffStore] Successfully found superadmin UID: ${superadminUserId}`)
+            }
           } catch (searchError: any) {
-            console.warn('[StaffStore] Error searching hierarchical structure:', searchError.message)
+            console.error('[StaffStore] Error searching hierarchical structure:', searchError.message)
+            if (searchError.code === 'permission-denied') {
+              console.error('[StaffStore] Permission denied when searching. Check Firestore rules allow staff to query users collection and staff subcollections.')
+            }
           }
           
           if (!superadminUserId) {
-            console.warn('[StaffStore] Could not find staff member in any hierarchical structure')
-          return null
-        }
+            console.error('[StaffStore] Could not find staff member in any hierarchical structure')
+            console.error('[StaffStore] This means the staff member\'s document either:')
+            console.error('  1. Does not exist in Firestore')
+            console.error('  2. Has incorrect authUid field')
+            console.error('  3. Is blocked by Firestore rules')
+            return null
+          }
         }
 
         // Now search through all stores and departments under this superadmin
@@ -1079,7 +1126,17 @@ export const useStaffStore = defineStore('staff', {
               const departmentId = deptDoc.id
               try {
                 const staffRef = getStaffCollection(db, superadminUserId, storeId, departmentId)
-                const staffSnapshot = await getDocs(staffRef)
+                // Try to query with where clause first (more efficient if Firestore rules allow it)
+                let staffSnapshot
+                try {
+                  const { query, where } = await import('firebase/firestore')
+                  const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
+                  staffSnapshot = await getDocs(staffQuery)
+                } catch (queryError: any) {
+                  // If query fails (permission or index issue), fall back to getting all docs
+                  console.log('[StaffStore] Query with where clause failed, falling back to get all docs:', queryError.message)
+                  staffSnapshot = await getDocs(staffRef)
+                }
                 
                 for (const staffDoc of staffSnapshot.docs) {
                   const staffData = staffDoc.data()

@@ -178,15 +178,25 @@ export async function getQueryUserId(): Promise<string | null> {
           } catch (fetchError: any) {
             (staffStore as any).__fetchingStaffMember = false
             console.warn('[useFirestorePaths] Could not fetch staff member:', fetchError.message)
+            // If it's a permission error, log it clearly
+            if (fetchError.code === 'permission-denied' || fetchError.message?.includes('permission')) {
+              console.error('[useFirestorePaths] Permission denied when fetching staff member. Check Firestore rules allow staff to query collections.')
+            }
           }
         } else {
-          // If already fetching, wait a bit and check cache again
-          await new Promise(resolve => setTimeout(resolve, 100))
-          const retryCachedStaff = staffStore.getCurrentStaffMember
-          if (retryCachedStaff?.createdBy) {
-            userId = retryCachedStaff.createdBy
-            console.log('[useFirestorePaths] Staff found in cache after wait, using superadmin UID:', userId)
-            return userId
+          // If already fetching, wait a bit and check cache again (with retries)
+          for (let i = 0; i < 10; i++) {
+            await new Promise(resolve => setTimeout(resolve, 100))
+            const retryCachedStaff = staffStore.getCurrentStaffMember
+            if (retryCachedStaff?.createdBy) {
+              userId = retryCachedStaff.createdBy
+              console.log('[useFirestorePaths] Staff found in cache after wait, using superadmin UID:', userId)
+              return userId
+            }
+            // Check if fetch completed
+            if (!(staffStore as any).__fetchingStaffMember) {
+              break
+            }
           }
         }
       } catch (error: any) {
@@ -196,7 +206,33 @@ export async function getQueryUserId(): Promise<string | null> {
       // If still not found, log warning but return null to indicate failure
       // This will cause operations to fail gracefully rather than using wrong UID
       if (userStore.userData?.role === 'staff') {
-        console.warn('[useFirestorePaths] Staff member not found in legacy collection or cache. Staff data may need to be loaded first.')
+        console.error('[useFirestorePaths] Staff member not found in legacy collection or cache. This will prevent data from loading.')
+        console.error('[useFirestorePaths] Possible causes:')
+        console.error('  1. Staff document does not exist in Firestore')
+        console.error('  2. Firestore rules are blocking the query')
+        console.error('  3. Staff document has incorrect authUid field')
+        console.error('[useFirestorePaths] Attempting to fetch staff data proactively...')
+        
+        // Try one more time to fetch staff data proactively
+        try {
+          const { useStaffStore } = await import('~/stores/staff')
+          const staffStore = useStaffStore()
+          // Try fetching all staff first, which might populate the cache
+          try {
+            await staffStore.fetchStaff()
+            const retryCachedStaff = staffStore.getCurrentStaffMember
+            if (retryCachedStaff?.createdBy) {
+              userId = retryCachedStaff.createdBy
+              console.log('[useFirestorePaths] Staff found after fetching all staff, using superadmin UID:', userId)
+              return userId
+            }
+          } catch (fetchAllError: any) {
+            console.warn('[useFirestorePaths] Could not fetch all staff:', fetchAllError.message)
+          }
+        } catch (proactiveError: any) {
+          console.warn('[useFirestorePaths] Error in proactive fetch:', proactiveError.message)
+        }
+        
         return null
       }
     }

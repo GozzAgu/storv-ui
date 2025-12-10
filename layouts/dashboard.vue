@@ -831,10 +831,26 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
     }
   } else if (finalUserData?.role === 'staff') {
     // Fetch staff member data first to ensure getQueryUserId works correctly
+    // This is critical - without this, getQueryUserId will fail and data won't load
     try {
-      await staffStore.fetchCurrentStaffMember()
+      const staffMember = await staffStore.fetchCurrentStaffMember()
+      if (!staffMember) {
+        console.error('[Dashboard] Staff member not found - this will cause data loading issues')
+        // Try to fetch all staff to see if we can find them
+        try {
+          await staffStore.fetchStaff()
+          const retryStaffMember = staffStore.getCurrentStaffMember
+          if (!retryStaffMember) {
+            console.error('[Dashboard] Staff member still not found after fetching all staff')
+          }
+        } catch (fetchErr) {
+          console.error('[Dashboard] Error fetching all staff:', fetchErr)
+        }
+      } else {
+        console.log('[Dashboard] Staff member found:', staffMember.storeId)
+      }
     } catch (err) {
-      console.warn('[Dashboard] Error fetching staff member:', err)
+      console.error('[Dashboard] Error fetching staff member:', err)
     }
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()

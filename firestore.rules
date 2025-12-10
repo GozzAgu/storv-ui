@@ -37,6 +37,7 @@ service cloud.firestore {
         // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
         // 2. User owns the store (ownerId matches auth.uid)
         // 3. Staff member belongs to this store
+        // Note: The exists() check allows staff to query stores to find where they belong
         allow read: if isAuthenticated() && 
                      (userId == request.auth.uid || 
                       resource.data.ownerId == request.auth.uid || 
@@ -80,14 +81,24 @@ service cloud.firestore {
           
           // Staff subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           match /staff/{staffId} {
-            // Allow read if:
+            // Helper function to check if this is the staff member's own document
+            function isOwnStaffDocument() {
+              return resource.data.authUid == request.auth.uid
+            }
+            
+            // Allow read (both get and list) if:
             // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
-            // 2. Staff member was created by the current user
+            // 2. Staff member was created by the current user  
             // 3. It's the staff member's own document (for staff login)
+            //
+            // CRITICAL: For collection queries, Firestore evaluates this rule for each document.
+            // When a staff member queries with where('authUid', '==', request.auth.uid), Firestore
+            // will only return documents where isOwnStaffDocument() is true, even if userId doesn't match.
+            // The OR condition allows the query to proceed, and Firestore filters results automatically.
             allow read: if isAuthenticated() && 
                          (userId == request.auth.uid || 
                           resource.data.createdBy == request.auth.uid || 
-                          resource.data.authUid == request.auth.uid);
+                          isOwnStaffDocument());
             
             // Allow create if user is the super admin (userId in path) creating staff in their store
             allow create: if isAuthenticated() && 
