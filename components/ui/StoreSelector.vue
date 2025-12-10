@@ -57,7 +57,7 @@
     >
       <div
         v-if="dropdownOpen"
-        class="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-64 max-w-none sm:max-w-[320px] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-[50] max-h-[calc(100vh-7rem)] sm:max-h-[400px] overflow-y-auto"
+        class="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-64 max-w-none sm:max-w-[320px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-[50] max-h-[calc(100vh-7rem)] sm:max-h-[400px] overflow-y-auto"
         @click.stop
       >
         <div class="px-4 py-2.5 border-b border-gray-200 dark:border-gray-700">

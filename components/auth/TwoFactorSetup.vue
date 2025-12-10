@@ -10,7 +10,7 @@
           <button
             @click="selectMethod('totp')"
             :class="[
-              'p-6 rounded-xl border-2 transition-all text-left',
+              'p-6 rounded-md border-2 transition-all text-left',
               selectedMethod === 'totp'
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -33,7 +33,7 @@
           <button
             @click="selectMethod('phone')"
             :class="[
-              'p-6 rounded-xl border-2 transition-all text-left',
+              'p-6 rounded-md border-2 transition-all text-left',
               selectedMethod === 'phone'
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -64,10 +64,10 @@
           
           <!-- QR Code -->
           <div class="flex justify-center mb-4">
-            <div v-if="qrCodeUrl" class="p-4 bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700">
+            <div v-if="qrCodeUrl" class="p-4 bg-white dark:bg-gray-800 rounded-md border-2 border-gray-200 dark:border-gray-700">
               <img :src="qrCodeUrl" alt="2FA QR Code" class="w-64 h-64" />
             </div>
-            <div v-else class="w-64 h-64 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+            <div v-else class="w-64 h-64 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
               <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-2"></div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Generating QR code...</p>
@@ -110,7 +110,7 @@
           <input
             v-model="phoneNumber"
             type="tel"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="+1234567890"
           />
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -139,7 +139,7 @@
             v-model="verificationCode"
             type="text"
             maxlength="6"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-2xl tracking-widest font-mono"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-2xl tracking-widest font-mono"
             placeholder="000000"
             @input="formatCode"
           />

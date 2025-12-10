@@ -16,14 +16,14 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search folders..."
-              class="w-full pl-10 pr-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full pl-10 pr-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
         </div>
         <div class="flex items-center gap-3">
           <select
             v-model="selectedDepartmentId"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="">All Departments</option>
             <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -32,7 +32,7 @@
           </select>
           <select
             v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Sort by Name</option>
             <option value="items">Sort by Items</option>
@@ -84,7 +84,7 @@
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative bg-white dark:bg-gray-800 rounded-2xl sm:rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
+        class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
         @click="navigateToFolder(folder.id)"
       >
         <!-- Card Header - Mobile Optimized -->
@@ -272,7 +272,7 @@
               v-model="folderForm.name"
               type="text"
               required
-              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
+              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="Enter folder name"
             />
           </div>
@@ -283,7 +283,7 @@
             <select
               v-model="folderForm.type"
               required
-              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
+              class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
             >
               <option value="">Select type</option>
               <option value="general">General</option>
@@ -322,7 +322,7 @@
             v-model="folderForm.description"
             @input="aiError = null"
             rows="3"
-            class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
+            class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
             placeholder="Describe the folder's purpose"
           ></textarea>
           <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
@@ -344,7 +344,7 @@
         </div>
 
         <!-- Serial Number Management -->
-        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
           <Checkbox
             v-model="folderForm.hasSerialNumbers"
             size="sm"
@@ -362,7 +362,7 @@
         </div>
 
         <!-- Department Access Control -->
-        <div v-if="canCreateInventoryFolders" class="p-4 bg-blue-50/50 dark:bg-blue-900/20 rounded-xl border border-blue-200/60 dark:border-blue-800">
+        <div v-if="canCreateInventoryFolders" class="p-4 bg-blue-50/50 dark:bg-blue-900/20 rounded-md border border-blue-200/60 dark:border-blue-800">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Department Access
           </label>
@@ -402,7 +402,7 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Table Template *
           </label>
-          <div class="p-4 bg-primary-50/50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-xl mb-4">
+          <div class="p-4 bg-primary-50/50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-md mb-4">
             <div class="flex items-center gap-2 mb-1">
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Custom Template
@@ -418,7 +418,7 @@
         </div>
 
         <!-- Template Editor -->
-        <div v-if="selectedTemplate" class="p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
+        <div v-if="selectedTemplate" class="p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
           <div class="flex items-center justify-between mb-4">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Customize Template Fields

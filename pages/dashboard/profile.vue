@@ -116,7 +116,7 @@
                 type="text"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
                     ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                     : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -133,7 +133,7 @@
                 type="text"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
                     ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                     : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -150,7 +150,7 @@
                 type="email"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
                     ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                     : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -167,7 +167,7 @@
                 type="tel"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
                     ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                     : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -184,7 +184,7 @@
                 rows="3"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none',
+                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none',
                   isEditingPersonalInfo
                     ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                     : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -458,7 +458,7 @@
 
           <div class="space-y-4">
             <!-- Role Description -->
-            <div class="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-xl">
+            <div class="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-md">
               <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">
                 {{ profileData.role === 'staff' ? 'Staff Member' : 'Super Admin' }}
               </p>
@@ -519,7 +519,7 @@
             :key="themeOption.value"
             @click="selectTheme(themeOption.value as 'light' | 'dark' | 'system')"
             :class="[
-              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              'w-full p-4 rounded-md border-2 transition-all text-left',
               currentThemeValue === themeOption.value
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -552,7 +552,7 @@
             :key="lang.code"
             @click="selectLanguage(lang.code, lang.name)"
             :class="[
-              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              'w-full p-4 rounded-md border-2 transition-all text-left',
               accountSettings.language === lang.name
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -659,7 +659,7 @@
             <input
               v-model="passwordForm.currentPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Enter current password"
             />
           </div>
@@ -670,7 +670,7 @@
             <input
               v-model="passwordForm.newPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Enter new password"
             />
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters</p>
@@ -682,7 +682,7 @@
             <input
               v-model="passwordForm.confirmPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Confirm new password"
             />
             <p v-if="passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="text-xs text-red-500 mt-1">
@@ -724,7 +724,7 @@
           <div
             v-for="(session, index) in activeSessions"
             :key="index"
-            class="p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            class="p-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
           >
             <div class="flex items-center justify-between">
               <div class="flex-1">
@@ -765,7 +765,7 @@
             :key="region.code"
             @click="selectRegion(region.code, region.name)"
             :class="[
-              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              'w-full p-4 rounded-md border-2 transition-all text-left',
               accountSettings.region === region.name
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -801,7 +801,7 @@
             :key="currency.code"
             @click="selectCurrency(currency.code, currency.name, currency.symbol)"
             :class="[
-              'w-full p-4 rounded-xl border-2 transition-all text-left',
+              'w-full p-4 rounded-md border-2 transition-all text-left',
               accountSettings.currency === currency.code
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -834,7 +834,7 @@
           </label>
           <select
             v-model="selectedTimezone"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
             <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
               {{ tz.label }}
@@ -868,7 +868,7 @@
           <input
             v-model="disable2FAPassword"
             type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="Enter your password"
             @keyup.enter="handleDisable2FA"
           />

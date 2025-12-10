@@ -50,7 +50,7 @@
           <!-- Mobile close button -->
         <button
           @click="sidebarOpen = false"
-            class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all duration-200"
+            class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200"
         >
           <XMarkIcon class="w-6 h-6" />
         </button>
@@ -69,13 +69,13 @@
 
       <!-- Navigation -->
       <nav class="relative flex-1 py-6 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
-        <div class="space-y-1.5 min-h-0">
+        <div class="space-y-1 min-h-0">
           <template v-for="item in navigation" :key="item.name">
             <!-- Special handling for Inventory - expandable with folders -->
             <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
               <div
                 :class="[
-                  'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-4',
+                  'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-5 py-2.5',
                   isActive(item.href)
                     ? 'bg-primary-50 dark:bg-primary-900/20'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -89,7 +89,7 @@
                   <!-- Active indicator -->
                   <div 
                     v-if="isActive(item.href)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                   ></div>
                   
                   <component 
@@ -168,8 +168,8 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
               :to="item.href"
               :class="[
-                'group relative flex items-center font-medium rounded-xl transition-all duration-200',
-                sidebarCollapsed ? 'justify-center w-full py-3.5' : 'justify-start px-5 py-4',
+                'group relative flex items-center font-medium rounded-md transition-all duration-200',
+                sidebarCollapsed ? 'justify-center w-full py-2.5' : 'justify-start px-5 py-2.5',
                 isActive(item.href)
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50',
@@ -180,13 +180,13 @@
               <!-- Active indicator -->
               <div 
                 v-if="isActive(item.href) && !sidebarCollapsed"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-600 dark:bg-primary-500 rounded-r-full"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
               ></div>
               
               <!-- Active indicator for collapsed -->
               <div 
                 v-if="isActive(item.href) && sidebarCollapsed"
-                class="absolute inset-0 rounded-xl bg-primary-50 dark:bg-primary-900/20"
+                class="absolute inset-0 rounded-md bg-primary-50 dark:bg-primary-900/20"
               ></div>
               
               <component 
@@ -230,7 +230,7 @@
                 <!-- Store header -->
                 <div
                   :class="[
-                    'group relative flex items-center justify-between w-full font-medium rounded-xl transition-all duration-200 px-5 py-3',
+                    'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-5 py-2.5',
                     route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                       ? 'bg-primary-50 dark:bg-primary-900/20'
                       : currentStore?.id === store.id
@@ -479,7 +479,7 @@
             <!-- Global Search Button -->
             <button
               @click="searchStore.openSearch()"
-              class="hidden md:flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 w-56 sm:w-64 border border-gray-300 dark:border-gray-700 rounded-lg sm:rounded-xl hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+              class="hidden md:flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 w-56 sm:w-64 border border-gray-300 dark:border-gray-700 rounded-md hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-xs sm:text-sm bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
               title="Search (Cmd/Ctrl+K)"
             >
               <MagnifyingGlassIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
@@ -521,7 +521,7 @@
             <div class="relative" ref="profileMenuRef">
               <button
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex items-center space-x-1.5 sm:space-x-2 p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="flex items-center space-x-1.5 sm:space-x-2 p-1.5 sm:p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
                   {{ userInitials }}
@@ -544,28 +544,31 @@
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="absolute right-0 mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
+                  class="absolute right-0 mt-2 w-48 sm:w-56 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 py-2 z-50"
                   style="min-width: 160px; max-width: min(224px, calc(100vw - 2rem));"
                 >
                   <NuxtLink
                     to="/dashboard/profile"
-                    class="block px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
+                    class="flex items-center gap-2.5 sm:gap-3 px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
+                    <UserCircleIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     Profile
                   </NuxtLink>
                   <NuxtLink
                     to="/dashboard/settings"
-                    class="block px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
+                    class="flex items-center gap-2.5 sm:gap-3 px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
+                    <Cog6ToothIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     Settings
                   </NuxtLink>
                   <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                   <button
                     @click="handleSignOut"
-                    class="block w-full text-left px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
+                    class="flex items-center gap-2.5 sm:gap-3 w-full text-left px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                   >
+                    <ArrowRightOnRectangleIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                     Sign out
                   </button>
                 </div>

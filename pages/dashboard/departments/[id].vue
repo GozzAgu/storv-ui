@@ -4,7 +4,7 @@
     <div class="flex items-center gap-2 sm:gap-4">
       <button
         @click="navigateTo('/dashboard/departments')"
-        class="p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg sm:rounded-xl transition-colors flex-shrink-0"
+        class="p-1.5 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors flex-shrink-0"
         title="Back to departments"
       >
         <ArrowLeftIcon class="w-4 h-4 sm:w-5 sm:h-5" />
@@ -53,7 +53,7 @@
               {{ staff.length }}
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <UsersIcon class="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
@@ -66,7 +66,7 @@
               {{ totalManagers }}
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <UserCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
@@ -79,7 +79,7 @@
               {{ activeStaff }}
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CheckCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>

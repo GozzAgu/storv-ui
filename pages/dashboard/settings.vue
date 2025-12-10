@@ -166,7 +166,7 @@
               type="text"
               :disabled="!canEditSettings || !isEditingStore"
               :class="[
-                'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
                   ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                   : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -183,7 +183,7 @@
               type="text"
               :disabled="!canEditSettings || !isEditingStore"
               :class="[
-                'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
                   ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                   : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -200,7 +200,7 @@
               type="email"
               :disabled="!canEditSettings || !isEditingStore"
               :class="[
-                'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
                   ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                   : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -217,7 +217,7 @@
               type="tel"
               :disabled="!canEditSettings || !isEditingStore"
               :class="[
-                'w-full px-4 py-2.5 border rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
                 isEditingStore
                   ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
                   : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
@@ -631,7 +631,7 @@
             v-model="storeForm.name"
             type="text"
             required
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="My Store"
           />
         </div>
@@ -643,7 +643,7 @@
           <textarea
             v-model="storeForm.description"
             rows="3"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="Store description..."
           />
         </div>
@@ -655,7 +655,7 @@
           <input
             v-model="storeForm.address"
             type="text"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="123 Main St, City, State ZIP"
           />
         </div>
@@ -668,7 +668,7 @@
             <input
               v-model="storeForm.phone"
               type="tel"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="+1234567890"
             />
           </div>
@@ -679,7 +679,7 @@
             <input
               v-model="storeForm.email"
               type="email"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="store@example.com"
             />
           </div>
@@ -744,7 +744,7 @@
             v-for="store in stores"
             :key="store.id"
             @click="handleStoreSelection(store.id)"
-            class="w-full text-left p-4 border-2 rounded-xl transition-all"
+            class="w-full text-left p-4 border-2 rounded-md transition-all"
             :class="
               newlyCreatedStoreId === store.id
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'

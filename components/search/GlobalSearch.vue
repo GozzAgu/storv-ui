@@ -27,7 +27,7 @@
     >
       <div
         v-if="searchStore.isOpen"
-        class="fixed inset-x-4 top-20 md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl w-full max-h-[80vh] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+        class="fixed inset-x-4 top-20 md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl w-full max-h-[80vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden"
         @click.stop
       >
         <!-- Search Input -->
@@ -39,7 +39,7 @@
               v-model="searchStore.query"
               type="text"
               placeholder="Search receipts, inventory, customers, departments, staff..."
-              class="w-full pl-10 pr-20 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full pl-10 pr-20 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               @input="handleSearchInput"
               @keydown.esc="searchStore.closeSearch()"
               @keydown.enter="handleEnter"

@@ -70,7 +70,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <ReceiptPercentIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
     </div>
@@ -85,7 +85,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time revenue</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
@@ -104,7 +104,7 @@
               <span v-else>{{ todayReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CalendarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
@@ -123,7 +123,7 @@
               <span v-else>{{ monthReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <ChartBarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
@@ -178,14 +178,14 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search receipts..."
-                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               />
             </div>
             <!-- Filter Row -->
             <div class="flex items-center gap-2 sm:gap-3">
               <select
                 v-model="statusFilter"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
               >
                 <option value="all">All Status</option>
                 <option value="completed">Completed</option>
@@ -194,7 +194,7 @@
               </select>
               <select
                 v-model="dateFilter"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[120px]"
               >
                 <option value="all">All Dates</option>
                 <option value="today">Today</option>
@@ -203,7 +203,7 @@
               </select>
               <button
                 @click="resetFilters"
-                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-xl sm:rounded-lg transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
+                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-md transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
                 title="Reset filters"
               >
                 <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
@@ -635,13 +635,13 @@
                   v-model="customersSearchQuery"
                   type="text"
                 placeholder="Search customers..."
-                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                 />
               </div>
               <!-- Sort Select -->
               <select
                 v-model="customersSortBy"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-xl sm:rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
+                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
               >
                 <option value="name">Sort by Name</option>
                 <option value="orders">Sort by Orders</option>

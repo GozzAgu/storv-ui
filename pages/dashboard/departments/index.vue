@@ -17,7 +17,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Active departments</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
             <BuildingOfficeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
@@ -32,7 +32,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All departments</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
             <UsersIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
@@ -47,7 +47,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Department heads</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
             <UserCircleIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
@@ -62,7 +62,7 @@
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Per department</p>
           </div>
-          <div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+          <div class="w-12 h-12 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
             <ChartBarIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
@@ -105,7 +105,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search departments by name, manager..."
-            class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </div>
         <Button
@@ -207,7 +207,7 @@
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
+            <div class="w-12 h-12 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
               {{ department.name.charAt(0) }}
             </div>
             <div>

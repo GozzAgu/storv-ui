@@ -40,7 +40,7 @@
       </div>
 
       <!-- Sign Up Form Card -->
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
         <form @submit.prevent="handleSignUp" class="space-y-5">
           <div>
             <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -129,7 +129,7 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <div class="text-sm text-red-600 dark:text-red-400">
               <p class="font-semibold mb-2">⚠️ Error</p>
               <div class="whitespace-pre-line text-left">{{ errorMessage }}</div>

@@ -88,7 +88,7 @@
                 :key="folder.id"
                 @click="selectFolder(folder)"
                 :class="[
-                  'p-4 border-2 rounded-xl transition-all text-left',
+                  'p-4 border-2 rounded-md transition-all text-left',
                   selectedFolder?.id === folder.id
                     ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700'

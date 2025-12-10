@@ -5,7 +5,7 @@
       <div class="flex items-start gap-2.5 sm:gap-4 flex-1 min-w-0">
         <button
           @click="navigateTo('/dashboard/inventory')"
-          class="mt-1 p-2 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors touch-manipulation flex-shrink-0"
+          class="mt-1 p-2 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors touch-manipulation flex-shrink-0"
           title="Back to folders"
         >
           <ArrowLeftIcon class="w-5 h-5" />
@@ -40,7 +40,7 @@
         <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 flex-shrink-0 ml-2">
           <button
             @click="openBulkDiscountModal"
-            class="px-3 sm:px-4 py-2 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-xl transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium touch-manipulation"
+            class="px-3 sm:px-4 py-2 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-md transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium touch-manipulation"
             title="Apply bulk discount"
           >
             <TagIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
@@ -62,7 +62,7 @@
             </p>
             <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
@@ -77,7 +77,7 @@
             </p>
             <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
             <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
           </div>
         </div>
@@ -102,13 +102,13 @@
             v-model="searchQuery"
             type="text"
                 placeholder="Search by name, SKU..."
-                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </div>
         <div class="flex items-center gap-3">
           <select
             v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           >
             <option value="name">Sort by Name</option>
             <option value="price">Sort by Price</option>
@@ -494,7 +494,7 @@
                   v-model="itemForm[field.name]"
                   type="text"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <!-- Number Input -->
@@ -503,7 +503,7 @@
                   v-model.number="itemForm[field.name]"
                   type="number"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <!-- Currency Input -->
@@ -515,7 +515,7 @@
                     step="0.01"
                     min="0"
                     :required="field.required"
-                    class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || '0.00'"
                   />
                 </div>
@@ -525,7 +525,7 @@
                   v-model="itemForm[field.name]"
                   type="date"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                 />
                 <!-- Select Input -->
                 <select
@@ -563,14 +563,14 @@
                 Add Serial Number
               </Button>
             </div>
-            <div v-if="serialNumbers.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
+            <div v-if="serialNumbers.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
               No serial numbers added. Click "Add Serial Number" to start.
             </div>
             <div v-else class="space-y-2 max-h-64 overflow-y-auto">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
-                class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
+                class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
               >
                 <input
                   v-model="serialNumbers[index]"

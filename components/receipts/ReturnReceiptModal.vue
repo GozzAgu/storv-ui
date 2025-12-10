@@ -6,7 +6,7 @@
   >
     <template #header>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
           <ArrowPathIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
         </div>
         <div>
@@ -27,7 +27,7 @@
 
     <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
       <!-- Warning Message -->
-      <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+      <div class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md">
         <div class="flex items-start gap-3">
           <ExclamationTriangleIcon class="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
           <div>

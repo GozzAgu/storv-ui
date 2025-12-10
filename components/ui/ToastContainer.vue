@@ -10,7 +10,7 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto relative flex items-start gap-3 p-4 rounded-xl border backdrop-blur-xl animate-slide-in',
+          'pointer-events-auto relative flex items-start gap-3 p-4 rounded-md border backdrop-blur-xl animate-slide-in',
           getToastClasses(toast.type)
         ]"
         role="alert"

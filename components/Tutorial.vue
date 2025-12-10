@@ -10,7 +10,7 @@
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
       <div 
         ref="tutorialCard"
-        class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 pointer-events-auto transform transition-all duration-300"
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 sm:p-8 pointer-events-auto transform transition-all duration-300"
         :style="cardPosition"
       >
         <!-- Step Indicator -->

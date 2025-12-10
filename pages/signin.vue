@@ -40,7 +40,7 @@
       </div>
 
       <!-- Sign In Form Card -->
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
         <form @submit.prevent="handleSignIn" class="space-y-5">
           <div class="space-y-2">
             <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -53,7 +53,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
+                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
                 placeholder="Enter your email"
               />
             </div>
@@ -107,7 +107,7 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <div class="text-sm text-red-600 dark:text-red-400">
               <p class="font-semibold mb-2">⚠️ Error</p>
               <div class="whitespace-pre-line text-left">{{ errorMessage }}</div>
@@ -125,7 +125,7 @@
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-xl font-semibold text-base hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
+            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-md font-semibold text-base hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
           >
             <span v-if="!isLoading" class="flex items-center gap-2">
               Sign in
@@ -146,7 +146,7 @@
           <button
             type="button"
             @click="showPhoneSignIn = !showPhoneSignIn"
-            class="w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:shadow-md"
+            class="w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:shadow-md"
           >
             <PhoneIcon class="w-5 h-5 mr-2" />
             <span>Sign in with Phone</span>

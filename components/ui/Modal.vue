@@ -32,7 +32,7 @@
             <div
               v-if="modelValue"
               :class="[
-                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
+                'relative w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
                 sizeClasses
               ]"
               @click.stop
@@ -67,7 +67,7 @@
               <!-- Footer -->
               <div
                 v-if="$slots.footer"
-                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl flex-shrink-0"
+                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-lg flex-shrink-0"
               >
                 <slot name="footer" />
               </div>
