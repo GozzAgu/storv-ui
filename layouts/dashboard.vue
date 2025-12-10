@@ -402,44 +402,67 @@
         </div>
       </nav>
       
-      <!-- Bottom Section (Logout + Collapse/Expand) -->
-      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0 flex items-center justify-center" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
-        <button
-          @click="handleSignOut"
-          :class="[
-            'group relative flex items-center justify-center font-medium rounded-xl transition-all duration-300 ease-out overflow-hidden py-2.5',
-            sidebarCollapsed ? 'px-3 w-auto' : 'px-4 w-auto',
-            'text-red-600 dark:text-red-400',
-            'border border-red-200/50 dark:border-red-800/50',
-            'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
-            'hover:from-red-50 hover:to-red-100/80 dark:hover:from-red-900/20 dark:hover:to-red-900/15',
-            'hover:border-red-300 dark:hover:border-red-700',
-            'hover:shadow-md hover:shadow-red-500/10',
-            'active:scale-[0.98]'
-          ]"
-          title="Sign out"
-        >
-          <!-- Animated background gradient -->
-          <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
-          <ArrowRightOnRectangleIcon 
-            :class="[
-              'relative z-10 transition-all duration-300',
-              sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5',
-              'group-hover:scale-110 group-hover:rotate-[-5deg]'
-            ]"
-          />
-          
-          <!-- Tooltip (only show when collapsed) -->
-          <div
-            v-if="sidebarCollapsed"
-            class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
-          >
-            Sign out
-            <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+      <!-- Bottom Section (User Profile + Logout) -->
+      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
+        <div class="space-y-3">
+          <!-- User Profile -->
+          <div class="group relative flex items-center gap-2.5 sm:gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
+              {{ userInitials }}
+            </div>
+            <div v-if="!sidebarCollapsed" class="flex-1 min-w-0">
+              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
+              <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
+            </div>
+            <!-- Tooltip for collapsed state -->
+            <div
+              v-if="sidebarCollapsed"
+              class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
+            >
+              <p class="font-medium">{{ userName }}</p>
+              <p class="text-xs text-gray-300">{{ userEmail }}</p>
+              <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+            </div>
           </div>
-        </button>
-        
+          
+          <!-- Logout Button -->
+          <button
+            @click="handleSignOut"
+            :class="[
+              'group relative flex items-center justify-center font-medium rounded-md transition-all duration-300 ease-out overflow-hidden py-2.5',
+              sidebarCollapsed ? 'px-3 w-auto' : 'px-4 w-full',
+              'text-red-600 dark:text-red-400',
+              'border border-red-200/50 dark:border-red-800/50',
+              'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
+              'hover:from-red-50 hover:to-red-100/80 dark:hover:from-red-900/20 dark:hover:to-red-900/15',
+              'hover:border-red-300 dark:hover:border-red-700',
+              'hover:shadow-md hover:shadow-red-500/10',
+              'active:scale-[0.98]'
+            ]"
+            title="Sign out"
+          >
+            <!-- Animated background gradient -->
+            <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <ArrowRightOnRectangleIcon 
+              :class="[
+                'relative z-10 transition-all duration-300',
+                sidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-2',
+                'group-hover:scale-110 group-hover:rotate-[-5deg]'
+              ]"
+            />
+            <span v-if="!sidebarCollapsed" class="relative z-10 text-xs sm:text-sm font-medium">Sign out</span>
+            
+            <!-- Tooltip (only show when collapsed) -->
+            <div
+              v-if="sidebarCollapsed"
+              class="absolute left-full ml-3 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none border border-gray-700 dark:border-gray-600"
+            >
+              Sign out
+              <div class="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+            </div>
+          </button>
+        </div>
       </div>
     </aside>
 

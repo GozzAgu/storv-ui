@@ -31,9 +31,9 @@
               <div class="h-2.5 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
             </div>
             <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
-          </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
+    </div>
 
       <!-- Charts Row Skeleton -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
