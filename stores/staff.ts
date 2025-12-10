@@ -999,195 +999,127 @@ export const useStaffStore = defineStore('staff', {
           }
         }
         
-        // If still not found, we need to search hierarchically
-        // Search through all superadmins' stores to find this staff member
+        // If still not found, use collection group query to search ALL staff collections
+        // This is more efficient and avoids permission issues with hierarchical paths
         if (!superadminUserId) {
-          console.log('[StaffStore] Superadmin UID not found in cache/legacy - searching all hierarchical structures...')
-          console.log('[StaffStore] This search may take a moment and may hit permission errors for unrelated superadmins...')
+          console.log('[StaffStore] Superadmin UID not found in cache/legacy - using collection group query...')
           try {
-            // Get all superadmin users from top-level users collection
-            // Note: Staff members can read the users collection (rule allows authenticated users)
-            const usersRef = collection(db, 'users')
-            const usersSnapshot = await getDocs(usersRef)
+            // Use collectionGroup to search across ALL staff collections regardless of path
+            // This avoids permission issues when querying other superadmins' collections
+            const { collectionGroup, query, where, getDocs } = await import('firebase/firestore')
+            const staffCollectionGroup = collectionGroup(db, 'staff')
+            const staffQuery = query(staffCollectionGroup, where('authUid', '==', authStore.currentUser.uid))
+            const staffSnapshot = await getDocs(staffQuery)
             
-            if (usersSnapshot.empty) {
-              console.warn('[StaffStore] No users found in users collection')
-              return null
-            }
-            
-            console.log(`[StaffStore] Found ${usersSnapshot.docs.length} users to search through`)
-            
-            for (const userDoc of usersSnapshot.docs) {
-              const potentialSuperadminId = userDoc.id
-              const userData = userDoc.data()
-              
-              // Only search superadmins
-              if (userData.role !== 'superAdmin') {
-                console.log(`[StaffStore] Skipping user ${potentialSuperadminId} - not a superAdmin (role: ${userData.role})`)
-                continue
+            if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
+              // Found the staff member!
+              const staffDoc = staffSnapshot.docs[0]
+              if (!staffDoc) {
+                console.warn('[StaffStore] Collection group query returned empty document')
+                return null
               }
               
-              console.log(`[StaffStore] Searching under superadmin: ${potentialSuperadminId}`)
+              const staffData = staffDoc.data()
+              if (!staffData) {
+                console.warn('[StaffStore] Staff document has no data')
+                return null
+              }
               
-              try {
-                const { getStoresCollection } = await import('~/composables/useFirestorePaths')
-                const storesRef = getStoresCollection(db, potentialSuperadminId)
-                const storesSnapshot = await getDocs(storesRef)
+              if (staffData.createdBy) {
+                superadminUserId = staffData.createdBy
+                console.log('[StaffStore] Found staff member via collection group query, superadmin UID:', superadminUserId)
                 
-                for (const storeDoc of storesSnapshot.docs) {
-                  const storeId = storeDoc.id
-                  const { getDepartmentsCollection } = await import('~/composables/useFirestorePaths')
-                  const departmentsRef = getDepartmentsCollection(db, potentialSuperadminId, storeId)
-                  const departmentsSnapshot = await getDocs(departmentsRef)
+                // Extract path information from the document reference
+                // Path format: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
+                const pathParts = staffDoc.ref.path.split('/')
+                let extractedStoreId: string | undefined
+                let extractedDepartmentId: string | undefined
+                
+                if (pathParts.length >= 6) {
+                  const extractedSuperadminId = pathParts[1] // users/{userId}
+                  extractedStoreId = pathParts[3] // stores/{storeId}
+                  extractedDepartmentId = pathParts[5] // departments/{departmentId}
                   
-                  for (const deptDoc of departmentsSnapshot.docs) {
-                    const departmentId = deptDoc.id
-                    try {
-                      const staffRef = getStaffCollection(db, potentialSuperadminId, storeId, departmentId)
-                      // Try to query with where clause first (more efficient if Firestore rules allow it)
-                      let staffSnapshot
-                      try {
-                        const { query, where } = await import('firebase/firestore')
-                        const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-                        staffSnapshot = await getDocs(staffQuery)
-                      } catch (queryError: any) {
-                        // If query fails (permission or index issue), fall back to getting all docs
-                        console.log('[StaffStore] Query with where clause failed, falling back to get all docs:', queryError.message)
-                        staffSnapshot = await getDocs(staffRef)
-                      }
-                      
-                      for (const staffDoc of staffSnapshot.docs) {
-                        const staffData = staffDoc.data()
-                        if (staffData.authUid === authStore.currentUser.uid) {
-                          // Found the staff member!
-                          superadminUserId = potentialSuperadminId
-                          console.log('[StaffStore] Found staff member in hierarchical structure, superadmin UID:', superadminUserId)
-                          break
-                        }
-                      }
-                      if (superadminUserId) break
-                    } catch (e: any) {
-                      // Log the error for debugging
-                      if (e.code === 'permission-denied') {
-                        console.error(`[StaffStore] Permission denied when querying staff in store ${storeId}, dept ${departmentId}. This indicates a Firestore rules issue. Staff members should be able to query collections to find their own documents.`)
-                      } else {
-                        console.warn(`[StaffStore] Error querying staff in store ${storeId}, dept ${departmentId}:`, e.message)
-                      }
-                      continue
-                    }
+                  console.log('[StaffStore] Extracted from path - superadmin:', extractedSuperadminId, 'store:', extractedStoreId, 'dept:', extractedDepartmentId)
+                  
+                  // Verify the extracted superadmin matches createdBy
+                  if (extractedSuperadminId === superadminUserId) {
+                    console.log('[StaffStore] Path verification successful')
+                  } else {
+                    console.warn('[StaffStore] Path superadmin ID does not match createdBy, using createdBy:', superadminUserId)
                   }
-                  if (superadminUserId) break
                 }
-                if (superadminUserId) break
-              } catch (e: any) {
-                // Log error but continue searching other superadmins
-                if (e.code === 'permission-denied') {
-                  console.warn(`[StaffStore] Permission denied when searching under superadmin ${potentialSuperadminId}:`, e.message)
+                
+                // Build the staff object from the found document
+                const foundStaff: Staff = {
+                  id: staffDoc.id,
+                  firstName: staffData.firstName || '',
+                  lastName: staffData.lastName || '',
+                  email: staffData.email || '',
+                  phone: staffData.phone,
+                  departmentId: extractedDepartmentId || staffData.departmentId || '',
+                  storeId: extractedStoreId || staffData.storeId || '',
+                  position: staffData.position || '',
+                  role: staffData.role || 'staff',
+                  hireDate: staffData.hireDate || '',
+                  salary: staffData.salary,
+                  status: staffData.status || 'active',
+                  authUid: staffData.authUid,
+                  createdAt: staffData.createdAt,
+                  updatedAt: staffData.updatedAt,
+                  createdBy: staffData.createdBy || superadminUserId,
+                }
+                
+                // Get department name if available
+                if (foundStaff.departmentId) {
+                  const departmentsStore = useDepartmentsStore()
+                  const department = departmentsStore.getDepartmentById(foundStaff.departmentId)
+                  if (department) {
+                    foundStaff.departmentName = department.name
+                  }
+                }
+                
+                // Add to local state for future lookups
+                const existingIndex = this.staff.findIndex(s => s.id === foundStaff.id)
+                if (existingIndex === -1) {
+                  this.staff.push(foundStaff)
                 } else {
-                  console.warn(`[StaffStore] Error searching under superadmin ${potentialSuperadminId}:`, e.message)
+                  // Update existing entry
+                  this.staff[existingIndex] = foundStaff
                 }
-                continue
+                
+                console.log('[StaffStore] Staff member loaded and cached:', foundStaff.storeId)
+                return foundStaff
+              } else {
+                console.warn('[StaffStore] Staff document found but missing createdBy field')
               }
+            } else {
+              console.warn('[StaffStore] Collection group query returned no results')
             }
-            
-            if (superadminUserId) {
-              console.log(`[StaffStore] Successfully found superadmin UID: ${superadminUserId}`)
-            }
-          } catch (searchError: any) {
-            console.error('[StaffStore] Error searching hierarchical structure:', searchError.message)
-            if (searchError.code === 'permission-denied') {
-              console.error('[StaffStore] Permission denied when searching. Check Firestore rules allow staff to query users collection and staff subcollections.')
+          } catch (collectionGroupError: any) {
+            console.error('[StaffStore] Error with collection group query:', collectionGroupError.message)
+            if (collectionGroupError.code === 'permission-denied') {
+              console.error('[StaffStore] Permission denied on collection group query. Check Firestore rules allow collection group queries for staff.')
+            } else if (collectionGroupError.code === 'failed-precondition') {
+              console.error('[StaffStore] Collection group index missing. Deploy firestore.indexes.json to create the required index.')
             }
           }
           
           if (!superadminUserId) {
-            console.error('[StaffStore] Could not find staff member in any hierarchical structure')
+            console.error('[StaffStore] Could not find staff member via collection group query')
             console.error('[StaffStore] This means the staff member\'s document either:')
             console.error('  1. Does not exist in Firestore')
             console.error('  2. Has incorrect authUid field')
             console.error('  3. Is blocked by Firestore rules')
+            console.error('  4. Collection group index is missing (deploy firestore.indexes.json)')
             return null
           }
-        }
-
-        // Now search through all stores and departments under this superadmin
-        try {
-          const { getStoresCollection } = await import('~/composables/useFirestorePaths')
-          const storesRef = getStoresCollection(db, superadminUserId)
-          const storesSnapshot = await getDocs(storesRef)
           
-          for (const storeDoc of storesSnapshot.docs) {
-            const storeId = storeDoc.id
-            const { getDepartmentsCollection } = await import('~/composables/useFirestorePaths')
-            const departmentsRef = getDepartmentsCollection(db, superadminUserId, storeId)
-            const departmentsSnapshot = await getDocs(departmentsRef)
-            
-            for (const deptDoc of departmentsSnapshot.docs) {
-              const departmentId = deptDoc.id
-              try {
-                const staffRef = getStaffCollection(db, superadminUserId, storeId, departmentId)
-                // Try to query with where clause first (more efficient if Firestore rules allow it)
-                let staffSnapshot
-                try {
-                  const { query, where } = await import('firebase/firestore')
-                  const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-                  staffSnapshot = await getDocs(staffQuery)
-                } catch (queryError: any) {
-                  // If query fails (permission or index issue), fall back to getting all docs
-                  console.log('[StaffStore] Query with where clause failed, falling back to get all docs:', queryError.message)
-                  staffSnapshot = await getDocs(staffRef)
-                }
-                
-                for (const staffDoc of staffSnapshot.docs) {
-                  const staffData = staffDoc.data()
-                  if (staffData.authUid === authStore.currentUser.uid) {
-                    const foundStaff: Staff = {
-          id: staffDoc.id,
-                      firstName: staffData.firstName || '',
-                      lastName: staffData.lastName || '',
-                      email: staffData.email || '',
-                      phone: staffData.phone,
-                      departmentId: departmentId,
-                      storeId: staffData.storeId || storeId,
-                      position: staffData.position || '',
-                      role: staffData.role || 'staff',
-                      hireDate: staffData.hireDate || '',
-                      salary: staffData.salary,
-                      status: staffData.status || 'active',
-                      authUid: staffData.authUid,
-                      createdAt: staffData.createdAt,
-                      updatedAt: staffData.updatedAt,
-                      createdBy: staffData.createdBy || superadminUserId,
-                    }
-
-        // Get department name
-        const departmentsStore = useDepartmentsStore()
-                    const department = departmentsStore.getDepartmentById(departmentId)
-                    if (department) {
-                      foundStaff.departmentName = department.name
-                    }
-                    
-                    // Add to local state for future lookups
-                    const existingIndex = this.staff.findIndex(s => s.id === foundStaff.id)
-                    if (existingIndex === -1) {
-                      this.staff.push(foundStaff)
-                    }
-                    
-                    console.log('[StaffStore] Found staff member in hierarchical structure:', foundStaff.storeId)
-                    return foundStaff
-                  }
-                }
-          } catch (e) {
-                continue
-              }
-            }
-          }
-        } catch (error: any) {
-          console.error('[StaffStore] Error searching hierarchical structure for staff member:', error)
+          // If we found superadminUserId but didn't return the staff member above,
+          // it means the document was missing createdBy. This shouldn't happen, but handle it.
+          console.error('[StaffStore] Found superadminUserId but staff document was incomplete')
+          return null
         }
-
-        console.warn('[StaffStore] Could not find staff member in hierarchical structure')
-        return null
       }
       
       // For superadmin, search through all their stores and departments

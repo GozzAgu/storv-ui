@@ -3,6 +3,8 @@ import { collection, doc, setDoc, getDocs, query, where, orderBy, serverTimestam
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
+import { getNotificationsCollection, getNotificationDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getCurrentStoreId } from '~/composables/useCurrentStore'
 
 export type NotificationType = 
   | 'receipt_created'
@@ -83,43 +85,30 @@ export const useNotificationsStore = defineStore('notifications', {
         return
       }
 
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
+      // Get userId (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        console.error('User ID not available')
+        return
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData?.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('Could not fetch staff document for notification creation:', error.message)
-        }
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        console.error('No store selected. Please select a store first.')
+        return
       }
 
       try {
-        const notificationsRef = collection(db, 'notifications')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/notifications
+        const notificationsRef = getNotificationsCollection(db, userId, storeId)
         const newNotificationRef = doc(notificationsRef)
 
         const notification: Omit<Notification, 'id'> = {
           type,
           title,
           message,
-          userId,
+          userId, // Keep for backward compatibility
           actorId: actorId || authStore.currentUser.uid,
           read: false,
           metadata: metadata || {},
@@ -161,42 +150,30 @@ export const useNotificationsStore = defineStore('notifications', {
         return
       }
 
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
+      // Get userId (superadmin's UID for staff)
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
+        this.loading = false
+        return
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID from the staff document
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData?.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('Could not fetch staff document for notifications:', error.message)
-        }
+      // Get current store ID
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        this.loading = false
+        return
       }
 
       this.loading = true
       this.error = null
 
       try {
-        const notificationsRef = collection(db, 'notifications')
+        // Use hierarchical path: users/{userId}/stores/{storeId}/notifications
+        const notificationsRef = getNotificationsCollection(db, userId, storeId)
         let notificationsQuery = query(
           notificationsRef,
-          where('userId', '==', userId),
           orderBy('createdAt', 'desc'),
           limit(20)
         )
@@ -204,7 +181,6 @@ export const useNotificationsStore = defineStore('notifications', {
         if (loadMore && this.lastDoc) {
           notificationsQuery = query(
             notificationsRef,
-            where('userId', '==', userId),
             orderBy('createdAt', 'desc'),
             startAfter(this.lastDoc),
             limit(20)
@@ -245,7 +221,6 @@ export const useNotificationsStore = defineStore('notifications', {
             
             const fallbackQuery = query(
               notificationsRef,
-              where('userId', '==', userId),
               limit(100) // Limit to reasonable number for in-memory sort
             )
             snapshot = await getDocs(fallbackQuery)
@@ -303,8 +278,22 @@ export const useNotificationsStore = defineStore('notifications', {
         return
       }
 
+      // Get userId and storeId for hierarchical path
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
+        return
+      }
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        return
+      }
+
       try {
-        const notificationRef = doc(db, 'notifications', notificationId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/notifications/{notificationId}
+        const notificationRef = getNotificationDocument(db, userId, storeId, notificationId)
         await updateDoc(notificationRef, {
           read: true,
         })
@@ -329,37 +318,17 @@ export const useNotificationsStore = defineStore('notifications', {
         return
       }
 
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        this.error = 'User must be authenticated'
+      // Get userId and storeId for hierarchical path
+      const userId = await getQueryUserId()
+      if (!userId) {
+        this.error = 'User ID not available'
         return
       }
 
-      const userStore = useUserStore()
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-
-      let userId = authStore.currentUser.uid
-
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData?.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('Could not fetch staff document:', error.message)
-        }
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        this.error = 'No store selected. Please select a store first.'
+        return
       }
 
       try {
@@ -368,7 +337,8 @@ export const useNotificationsStore = defineStore('notifications', {
 
         const batch = writeBatch(db)
         unreadNotifications.forEach(notification => {
-          const notificationRef = doc(db, 'notifications', notification.id)
+          // Use hierarchical path: users/{userId}/stores/{storeId}/notifications/{notificationId}
+          const notificationRef = getNotificationDocument(db, userId, storeId, notification.id)
           batch.update(notificationRef, { read: true })
         })
 

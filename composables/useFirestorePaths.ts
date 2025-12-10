@@ -105,6 +105,20 @@ export function getCustomerDocument(db: Firestore, userId: string, storeId: stri
 }
 
 /**
+ * Get notifications collection path: users/{userId}/stores/{storeId}/notifications
+ */
+export function getNotificationsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'notifications')
+}
+
+/**
+ * Get a specific notification document: users/{userId}/stores/{storeId}/notifications/{notificationId}
+ */
+export function getNotificationDocument(db: Firestore, userId: string, storeId: string, notificationId: string): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'notifications', notificationId)
+}
+
+/**
  * Helper to get userId for queries (superadmin's UID)
  * For staff, returns their superadmin's UID from staff document
  */

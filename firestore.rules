@@ -6,6 +6,13 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    // Collection group queries for staff - allows searching across all staff collections
+    // This is used when staff members need to find their own documents
+    match /{path=**}/staff/{staffId} {
+      // Allow read if it's the staff member's own document (for collection group queries)
+      allow read: if isAuthenticated() && resource.data.authUid == request.auth.uid;
+    }
+    
     // Helper function to check if user owns the document
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
@@ -213,6 +220,33 @@ service cloud.firestore {
           // Allow delete if user owns the customer
           allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
         }
+        
+        // Notifications subcollection: users/{userId}/stores/{storeId}/notifications/{notificationId}
+        match /notifications/{notificationId} {
+          // Allow read if:
+          // 1. User is the super admin (userId in path matches auth.uid)
+          // 2. Staff member belongs to this store
+          allow read: if isAuthenticated() && 
+                       (userId == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow create if:
+          // 1. User is the super admin (userId in path)
+          // 2. Staff member belongs to this store
+          allow create: if isAuthenticated() && 
+                         (userId == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow update if:
+          // 1. User is the super admin (userId in path)
+          // 2. Staff member belongs to this store
+          allow update: if isAuthenticated() && 
+                         (userId == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          
+          // Allow delete if user is the super admin (userId in path)
+          allow delete: if isAuthenticated() && userId == request.auth.uid;
+        }
       }
     }
     
@@ -244,6 +278,10 @@ service cloud.firestore {
     
     match /customers/{customerId} {
       allow read, write: if false; // Deny all access to legacy customers collection
+    }
+    
+    match /notifications/{notificationId} {
+      allow read, write: if false; // Deny all access to legacy notifications collection
     }
     
     // Deny all other access by default
