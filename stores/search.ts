@@ -108,9 +108,39 @@ export const useSearchStore = defineStore('search', {
       this.results = []
 
       const searchQuery = this.query.toLowerCase().trim()
-      const entityTypes = this.filters.entityTypes.includes('all')
+      
+      // Check if user is staff
+      const authStore = useAuthStore()
+      const userStore = useUserStore()
+      if (!userStore.userData && authStore.currentUser) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      const isStaff = userStore.userData?.role === 'staff'
+      const currentStaffAuthUid = isStaff ? authStore.currentUser?.uid : null
+      
+      // Get staff member data if staff
+      let currentStaffMember = null
+      if (isStaff && currentStaffAuthUid) {
+        const staffStore = useStaffStore()
+        if (staffStore.staff.length === 0) {
+          await staffStore.fetchStaff()
+        }
+        currentStaffMember = staffStore.getCurrentStaffMember
+      }
+      
+      // Filter entity types - remove departments and staff for staff users
+      let entityTypes = this.filters.entityTypes.includes('all')
         ? ['receipts', 'inventory', 'customers', 'departments', 'staff']
         : this.filters.entityTypes.filter(t => t !== 'all') as string[]
+      
+      // Remove departments and staff from search for staff/intern (but keep customers)
+      if (isStaff) {
+        entityTypes = entityTypes.filter(t => t !== 'departments' && t !== 'staff')
+        // If 'all' was selected and we removed departments/staff, ensure we still have other types
+        if (this.filters.entityTypes.includes('all') && entityTypes.length === 0) {
+          entityTypes = ['receipts', 'inventory', 'customers']
+        }
+      }
 
       try {
         const results: SearchResult[] = []
@@ -123,6 +153,13 @@ export const useSearchStore = defineStore('search', {
           }
 
           receiptsStore.receipts.forEach(receipt => {
+            // For staff: only show receipts created by them
+            if (isStaff && currentStaffAuthUid) {
+              const receiptCreator = (receipt as any).actualCreator || receipt.createdBy
+              if (receiptCreator !== currentStaffAuthUid) {
+                return // Skip receipts not created by this staff member
+              }
+            }
             const matchesQuery = !searchQuery ||
               receipt.receiptNumber.toLowerCase().includes(searchQuery) ||
               receipt.customerName.toLowerCase().includes(searchQuery) ||
@@ -227,7 +264,22 @@ export const useSearchStore = defineStore('search', {
           if (customersStore.customers.length === 0) {
             await customersStore.fetchCustomers()
           }
+          
+          // Debug logging
+          console.log('[SearchStore] Searching customers - isStaff:', isStaff, 'customers count:', customersStore.customers.length, 'error:', customersStore.error, 'entityTypes:', entityTypes, 'searchQuery:', searchQuery)
+          
+          // If there was an error fetching customers, log it but continue
+          if (customersStore.error) {
+            console.warn('[SearchStore] Error fetching customers:', customersStore.error)
+            // Don't return - continue to search with empty array
+          }
+          
+          // If no customers found, log for debugging
+          if (customersStore.customers.length === 0) {
+            console.warn('[SearchStore] No customers found in store. This might be expected if no customers exist yet.')
+          }
 
+          // Staff can search for all customers in their store (no filtering needed)
           customersStore.customers.forEach(customer => {
             const matchesQuery = !searchQuery ||
               customer.name.toLowerCase().includes(searchQuery) ||
@@ -259,8 +311,8 @@ export const useSearchStore = defineStore('search', {
           })
         }
 
-        // Search departments
-        if (entityTypes.includes('departments')) {
+        // Search departments (only for non-staff)
+        if (entityTypes.includes('departments') && !isStaff) {
           const departmentsStore = useDepartmentsStore()
           if (departmentsStore.departments.length === 0) {
             await departmentsStore.fetchDepartments()
@@ -288,8 +340,8 @@ export const useSearchStore = defineStore('search', {
           })
         }
 
-        // Search staff
-        if (entityTypes.includes('staff')) {
+        // Search staff (only for non-staff)
+        if (entityTypes.includes('staff') && !isStaff) {
           const staffStore = useStaffStore()
           if (staffStore.staff.length === 0) {
             await staffStore.fetchStaff()
@@ -450,13 +502,27 @@ export const useSearchStore = defineStore('search', {
 
       try {
         const savedSearchesRef = collection(db, 'savedSearches')
-        const q = query(
-          savedSearchesRef,
-          where('createdBy', '==', userId),
-          orderBy('updatedAt', 'desc')
-        )
-
-        const querySnapshot = await getDocs(q)
+        let querySnapshot
+        
+        try {
+          const q = query(
+            savedSearchesRef,
+            where('createdBy', '==', userId),
+            orderBy('updatedAt', 'desc')
+          )
+          querySnapshot = await getDocs(q)
+        } catch (orderByError: any) {
+          // If orderBy fails (missing index), try without orderBy
+          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
+            const q = query(
+              savedSearchesRef,
+              where('createdBy', '==', userId)
+            )
+            querySnapshot = await getDocs(q)
+          } else {
+            throw orderByError
+          }
+        }
         const searches: SavedSearch[] = []
 
         querySnapshot.forEach((docSnapshot) => {

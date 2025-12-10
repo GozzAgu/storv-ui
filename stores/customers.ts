@@ -369,22 +369,41 @@ export const useCustomersStore = defineStore('customers', {
         const customersRef = getCustomersCollection(db, userId, storeId)
         let querySnapshot
 
+        // For staff: Get all customers in store (no createdBy filter) - they see customers from anyone in their store
+        // For superadmin: Filter by createdBy
+        const isStaff = userStore.userData?.role === 'staff'
+        
         try {
-          // Filter by createdBy to only get customers for this user
-          const q = query(
-            customersRef,
-            where('createdBy', '==', userId),
-            orderBy('lastOrderDate', 'desc')
-          )
-          querySnapshot = await getDocs(q)
+          if (isStaff) {
+            // Staff sees all customers in store
+            const q = query(
+              customersRef,
+              orderBy('lastOrderDate', 'desc')
+            )
+            querySnapshot = await getDocs(q)
+          } else {
+            // Superadmin sees only their customers
+            const q = query(
+              customersRef,
+              where('createdBy', '==', userId),
+              orderBy('lastOrderDate', 'desc')
+            )
+            querySnapshot = await getDocs(q)
+          }
         } catch (orderByError: any) {
           // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            const q = query(
-              customersRef,
-              where('createdBy', '==', userId)
-            )
-            querySnapshot = await getDocs(q)
+            if (isStaff) {
+              // Staff sees all customers in store
+              querySnapshot = await getDocs(customersRef)
+            } else {
+              // Superadmin sees only their customers
+              const q = query(
+                customersRef,
+                where('createdBy', '==', userId)
+              )
+              querySnapshot = await getDocs(q)
+            }
           } else {
             throw orderByError
           }

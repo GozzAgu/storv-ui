@@ -858,6 +858,8 @@ const loadFolders = async () => {
 const loadCustomers = async () => {
   try {
     await customersStore.fetchCustomers()
+    
+    // Staff can search for all customers in their store (no filtering needed)
     allCustomers.value = customersStore.customers.map(customer => ({
       id: customer.id,
       name: customer.name,

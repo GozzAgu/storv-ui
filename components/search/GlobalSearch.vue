@@ -288,10 +288,12 @@ import {
   ArrowDownIcon,
 } from '@heroicons/vue/24/outline'
 import { useSearchStore, type SearchEntityType } from '~/stores/search'
+import { useUserStore } from '~/stores/user'
 import SavedSearchesModal from '~/components/search/SavedSearchesModal.vue'
 
 const router = useRouter()
 const searchStore = useSearchStore()
+const userStore = useUserStore()
 const searchInput = ref<HTMLInputElement | null>(null)
 const showAdvancedFilters = ref(false)
 const showSavedSearchesModal = ref(false)
@@ -299,14 +301,26 @@ const selectedIndex = ref(-1)
 const startDate = ref('')
 const endDate = ref('')
 
-const entityTypes = [
-  { value: 'all', label: 'All', icon: 'MagnifyingGlassIcon' },
-  { value: 'receipts', label: 'Receipts', icon: 'ReceiptPercentIcon' },
-  { value: 'inventory', label: 'Inventory', icon: 'CubeIcon' },
-  { value: 'customers', label: 'Customers', icon: 'UserCircleIcon' },
-  { value: 'departments', label: 'Departments', icon: 'BuildingOfficeIcon' },
-  { value: 'staff', label: 'Staff', icon: 'UserIcon' },
-]
+// Check if user is staff to filter entity types
+const isStaff = computed(() => userStore.userData?.role === 'staff')
+
+const entityTypes = computed(() => {
+  const baseTypes = [
+    { value: 'all', label: 'All', icon: 'MagnifyingGlassIcon' },
+    { value: 'receipts', label: 'Receipts', icon: 'ReceiptPercentIcon' },
+    { value: 'inventory', label: 'Inventory', icon: 'CubeIcon' },
+    { value: 'customers', label: 'Customers', icon: 'UserCircleIcon' },
+    { value: 'departments', label: 'Departments', icon: 'BuildingOfficeIcon' },
+    { value: 'staff', label: 'Staff', icon: 'UserIcon' },
+  ]
+  
+  // Remove departments and staff from search for staff users
+  if (isStaff.value) {
+    return baseTypes.filter(t => t.value !== 'departments' && t.value !== 'staff')
+  }
+  
+  return baseTypes
+})
 
 const receiptStatuses = [
   { value: 'completed', label: 'Completed' },

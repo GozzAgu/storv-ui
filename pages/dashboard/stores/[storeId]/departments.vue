@@ -510,6 +510,20 @@ onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
   
+  // Wait for auth and user data to load
+  let attempts = 0
+  while ((authStore.loading || !userStore.userData) && attempts < 100) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    attempts++
+  }
+  
+  // Check if user is staff/intern and redirect
+  if (userStore.userData?.role === 'staff') {
+    console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
+    await navigateTo('/dashboard')
+    return
+  }
+  
   console.log('[StoreDepartmentsPage] onMounted - Starting load process')
   
   const loadData = async () => {
