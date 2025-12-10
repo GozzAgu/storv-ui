@@ -20,14 +20,109 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-      <Card v-for="i in 4" :key="i" padding="md" class="sm:p-6">
-        <div class="animate-pulse">
-          <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-3 sm:mb-4"></div>
-          <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-        </div>
-      </Card>
-    </div>
+    <template v-if="isLoading">
+      <!-- Stats Cards Skeleton -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+        <Card v-for="i in 4" :key="i" padding="sm" class="sm:p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
+              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+              <div class="h-2.5 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+            </div>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+          </div>
+        </Card>
+      </div>
+
+      <!-- Charts Row Skeleton -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        <!-- Revenue Chart Skeleton -->
+        <Card class="lg:col-span-2">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <div>
+              <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 mb-2 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-24 animate-pulse"></div>
+            </div>
+            <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
+              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
+              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+          <div class="h-48 sm:h-64 lg:h-72 bg-gray-100 dark:bg-gray-800 rounded-md animate-pulse"></div>
+        </Card>
+
+        <!-- Quick Stats Skeleton -->
+        <Card>
+          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-24 mb-4 animate-pulse"></div>
+          <div class="space-y-3">
+            <div v-for="i in 4" :key="i" class="flex items-center justify-between">
+              <div class="flex items-center gap-2 flex-1">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div class="flex-1">
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 mb-1 animate-pulse"></div>
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <!-- Bottom Row Skeleton -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        <!-- Recent Transactions Skeleton -->
+        <Card>
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+          </div>
+          <div class="space-y-3">
+            <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-3 flex-1">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div class="flex-1">
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-32 mb-2 animate-pulse"></div>
+                  <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+                </div>
+              </div>
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Top Selling Products Skeleton -->
+        <Card>
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-36 animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+          </div>
+          <div class="space-y-3">
+            <div v-for="i in 3" :key="i" class="flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1">
+                <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div class="flex-1">
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-24 mb-1 animate-pulse"></div>
+                  <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+                </div>
+              </div>
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Inventory Status Skeleton -->
+        <Card>
+          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-28 mb-4 animate-pulse"></div>
+          <div class="space-y-3">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+          </div>
+        </Card>
+      </div>
+    </template>
 
     <!-- Key Metrics Cards - Mobile Optimized -->
     <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">

@@ -10,8 +10,11 @@
         <ArrowLeftIcon class="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
       <div class="flex-1 min-w-0">
-        <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
-          {{ department?.name || 'Loading...' }}
+        <h1 v-if="isLoadingDepartment" class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+          <span class="inline-block h-8 sm:h-9 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+        </h1>
+        <h1 v-else class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+          {{ department?.name || 'Department' }}
         </h1>
         <p class="mt-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Department Management
@@ -21,7 +24,13 @@
 
     <!-- Department Info Card - Mobile Optimized -->
     <Card padding="sm" extra-class="sm:p-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div v-if="isLoadingDepartment" class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div v-for="i in 3" :key="i">
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-24 mb-2 animate-pulse"></div>
+          <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 animate-pulse"></div>
+        </div>
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <div>
           <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Department Type</p>
           <p class="mt-1 text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
@@ -42,6 +51,19 @@
         </div>
       </div>
     </Card>
+
+    <!-- Stats Cards Skeleton -->
+    <div v-if="isLoadingDepartment" class="grid grid-cols-3 gap-3 sm:gap-4 lg:hidden">
+      <Card v-for="i in 3" :key="i" padding="sm" extra-class="sm:p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
+            <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+        </div>
+      </Card>
+    </div>
 
     <!-- Stats Cards - Mobile Optimized -->
     <div class="grid grid-cols-3 gap-3 sm:gap-4 lg:hidden">
@@ -118,9 +140,24 @@
       </div>
 
       <!-- Staff Table - Mobile Optimized -->
-      <div v-if="isLoadingStaff" class="text-center py-6 sm:py-8">
-        <div class="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary-600"></div>
-        <p class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">Loading staff...</p>
+      <!-- Staff Loading Skeleton -->
+      <div v-if="isLoadingStaff" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800/50">
+            <tr>
+              <th v-for="i in 5" :key="i" class="px-2 sm:px-3 py-2">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="i in 5" :key="i">
+              <td v-for="j in 5" :key="j" class="px-2 sm:px-3 py-3">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div v-else-if="staff.length === 0" class="text-center py-6 sm:py-8">

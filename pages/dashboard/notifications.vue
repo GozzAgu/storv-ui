@@ -20,10 +20,18 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="notificationsStore.loading && notifications.length === 0" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading notifications...</p>
+    <!-- Loading State - Skeleton -->
+    <div v-if="notificationsStore.loading && notifications.length === 0" class="space-y-3">
+      <Card v-for="i in 5" :key="i" padding="sm" extra-class="sm:p-4">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
+          </div>
+        </div>
+      </Card>
     </div>
 
     <!-- Empty State -->

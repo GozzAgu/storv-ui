@@ -395,9 +395,10 @@
             </div>
           </div>
 
-          <div v-if="isLoadingProfile" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading store information...</p>
+          <div v-if="isLoadingProfile" class="space-y-4">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
           </div>
 
           <div v-else-if="storeInfo.storeName" class="space-y-4">
@@ -713,9 +714,14 @@
     <Modal v-model="showSessionsModal" title="Active Sessions" size="lg">
       <div class="space-y-4">
         <p class="text-sm text-gray-600 dark:text-gray-400">Manage devices where you're currently signed in</p>
-        <div v-if="isLoadingSessions" class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading sessions...</p>
+        <div v-if="isLoadingSessions" class="space-y-3">
+          <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/4 animate-pulse"></div>
+            </div>
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+          </div>
         </div>
         <div v-else-if="activeSessions.length === 0" class="text-center py-8">
           <p class="text-sm text-gray-500 dark:text-gray-400">No active sessions found</p>

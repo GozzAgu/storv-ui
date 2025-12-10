@@ -85,13 +85,64 @@
 
     </div>
 
-    <!-- Loading State -->
-    <Card v-if="isLoadingFolder" padding="md">
-      <div class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Loading folder...</p>
+    <!-- Loading State - Skeleton -->
+    <template v-if="isLoadingFolder">
+      <!-- Stats Cards Skeleton -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+        <Card v-for="i in 2" :key="i" padding="sm" extra-class="sm:p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
+              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+            </div>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+          </div>
+        </Card>
       </div>
-    </Card>
+
+      <!-- Header Skeleton -->
+      <Card padding="sm" class="sm:p-4">
+        <div class="space-y-4">
+          <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
+        </div>
+      </Card>
+
+      <!-- Filters Skeleton -->
+      <Card padding="sm" class="sm:p-4">
+        <div class="space-y-3">
+          <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+          <div class="flex gap-3">
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md flex-1 animate-pulse"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md flex-1 animate-pulse"></div>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Items Table Skeleton -->
+      <Card padding="none">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800/50">
+              <tr>
+                <th v-for="i in 6" :key="i" class="px-3 py-2">
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr v-for="i in 5" :key="i">
+                <td v-for="j in 6" :key="j" class="px-3 py-3">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </template>
 
     <!-- Enhanced Filters Section - Mobile Optimized -->
     <Card v-else padding="sm" class="lg:hidden sm:p-4">

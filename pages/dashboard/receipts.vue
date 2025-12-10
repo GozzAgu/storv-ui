@@ -2,14 +2,59 @@
   <ClientOnly>
     <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full">
       <!-- Loading State -->
-      <div v-if="isInitialLoading">
+      <template v-if="isInitialLoading">
+        <!-- Stats Cards Skeleton -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:hidden">
+          <Card v-for="i in 4" :key="i" padding="sm" extra-class="sm:p-4">
+            <div class="flex items-center justify-between">
+              <div class="flex-1 min-w-0">
+                <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
+                <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+              </div>
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+            </div>
+          </Card>
+        </div>
+
+        <!-- Table Skeleton -->
         <Card padding="none">
-          <div class="p-8 sm:p-12 text-center">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
+          <div class="border-b border-gray-200 dark:border-gray-700">
+            <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
+              <div class="flex items-center flex-wrap gap-3 sm:gap-4">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-24 animate-pulse"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+              </div>
+            </div>
+            <div class="px-4 sm:px-6 py-3 sm:py-4">
+              <div class="flex items-center gap-3">
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-32 animate-pulse"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-24 animate-pulse"></div>
+                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-24 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-800/50">
+                <tr>
+                  <th v-for="i in 6" :key="i" class="px-3 py-2">
+                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="i in 5" :key="i">
+                  <td v-for="j in 6" :key="j" class="px-3 py-3">
+                    <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </Card>
-      </div>
+      </template>
     
     <!-- Actual Content -->
     <template v-else>
@@ -65,7 +110,7 @@
           <div class="flex-1 min-w-0">
             <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Receipts</p>
             <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading">-</span>
+              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>{{ receipts.length }}</span>
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time</p>
@@ -96,11 +141,11 @@
           <div class="flex-1 min-w-0">
             <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Today's Sales</p>
             <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading">-</span>
+              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>${{ formatCurrency(todaySales) }}</span>
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
-              <span v-if="receiptsStore.loading">-</span>
+              <span v-if="receiptsStore.loading" class="inline-block h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>{{ todayReceipts }} receipts</span>
             </p>
           </div>
@@ -115,11 +160,11 @@
           <div class="flex-1 min-w-0">
             <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
             <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading">-</span>
+              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>${{ formatCurrency(monthSales) }}</span>
             </p>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
-              <span v-if="receiptsStore.loading">-</span>
+              <span v-if="receiptsStore.loading" class="inline-block h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>{{ monthReceipts }} receipts</span>
             </p>
           </div>
@@ -213,9 +258,24 @@
           </div>
         </div>
       </div>
-      <div v-if="receiptsStore.loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
+      <!-- Table Loading Skeleton -->
+      <div v-if="receiptsStore.loading" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-800/50">
+            <tr>
+              <th v-for="i in 6" :key="i" class="px-3 py-2">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="i in 5" :key="i">
+              <td v-for="j in 6" :key="j" class="px-3 py-3">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-else class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

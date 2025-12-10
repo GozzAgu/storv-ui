@@ -79,8 +79,44 @@
       </div>
     </Card>
 
+    <!-- Loading State - Folders Skeleton -->
+    <div v-if="inventoryStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div
+        v-for="i in 8"
+        :key="i"
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+      >
+        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center gap-2.5 sm:gap-3 flex-1">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+        <div class="p-3 sm:p-4">
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full mb-2 animate-pulse"></div>
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-4 animate-pulse"></div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Folders Grid - Mobile Optimized -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"

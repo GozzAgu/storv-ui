@@ -140,13 +140,38 @@
       </div>
     </Card>
 
-    <!-- Loading State -->
-    <Card v-else-if="departmentsStore.loading">
-      <div class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading departments...</p>
+    <!-- Loading State - Skeleton -->
+    <template v-else-if="departmentsStore.loading">
+      <!-- Stats Cards Skeleton -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+        <Card v-for="i in 4" :key="i" padding="sm" extra-class="sm:p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
+              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+            </div>
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+          </div>
+        </Card>
       </div>
-    </Card>
+
+      <!-- Departments Grid Skeleton -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card v-for="i in 8" :key="i" padding="sm" extra-class="sm:p-4">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="flex-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-2 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
+          </div>
+        </Card>
+      </div>
+    </template>
 
     <!-- Compact Header (Visible only on large screens) -->
     <Card v-if="!departmentsStore.loading && !departmentsStore.error" padding="sm" class="hidden lg:block mb-4">
