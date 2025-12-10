@@ -806,6 +806,10 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
     await storesStore.fetchStores()
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()
+    // Fetch all staff so sidebar can display them
+    await staffStore.fetchStaff().catch(err => {
+      console.warn('[Dashboard] Error fetching staff:', err)
+    })
     // Fetch inventory and receipts in parallel
     await Promise.all([
       inventoryStore.fetchFolders(),
@@ -867,6 +871,10 @@ onMounted(async () => {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
       await departmentsStore.fetchDepartments()
+      // Fetch all staff so sidebar can display them
+      await staffStore.fetchStaff().catch(err => {
+        console.warn('[Dashboard] Error fetching staff on mount:', err)
+      })
       // Fetch inventory and receipts in parallel
       await Promise.all([
         inventoryStore.fetchFolders(),

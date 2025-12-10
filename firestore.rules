@@ -33,47 +33,77 @@ service cloud.firestore {
       
       // Stores subcollection: users/{userId}/stores/{storeId}
       match /stores/{storeId} {
-        // Allow read if user owns the store OR if staff member belongs to this store
+        // Allow read if:
+        // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
+        // 2. User owns the store (ownerId matches auth.uid)
+        // 3. Staff member belongs to this store
         allow read: if isAuthenticated() && 
-                     (resource.data.ownerId == request.auth.uid || 
+                     (userId == request.auth.uid || 
+                      resource.data.ownerId == request.auth.uid || 
                       exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
         
-        // Allow create if user is creating their own store
-        allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+        // Allow create if user is the super admin (userId in path) creating store in their account
+        allow create: if isAuthenticated() && 
+                       userId == request.auth.uid && 
+                       request.resource.data.ownerId == request.auth.uid;
         
-        // Allow update/delete if user owns the store
-        allow update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+        // Allow update/delete if user is the super admin (userId in path) who owns the store
+        allow update, delete: if isAuthenticated() && 
+                               userId == request.auth.uid && 
+                               resource.data.ownerId == request.auth.uid;
         
         // Departments subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}
         match /departments/{departmentId} {
-          // Allow read if user owns the store OR if staff member belongs to this department
+          // Allow read if:
+          // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
+          // 2. Department was created by the current user
+          // 3. Staff member belongs to this department
           allow read: if isAuthenticated() && 
-                       (resource.data.createdBy == request.auth.uid || 
+                       (userId == request.auth.uid || 
+                        resource.data.createdBy == request.auth.uid || 
                         exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(departmentId)/staff/$(request.auth.uid)));
           
-          // Allow create if user is creating their own department
-          allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+          // Allow create if user is the super admin (userId in path) creating department in their store
+          allow create: if isAuthenticated() && 
+                         userId == request.auth.uid && 
+                         request.resource.data.createdBy == request.auth.uid;
           
-          // Allow update if user owns the department
-          allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow update if user is the super admin (userId in path) who created the department
+          allow update: if isAuthenticated() && 
+                         userId == request.auth.uid && 
+                         resource.data.createdBy == request.auth.uid;
           
-          // Allow delete if user owns the department
-          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow delete if user is the super admin (userId in path) who created the department
+          allow delete: if isAuthenticated() && 
+                         userId == request.auth.uid && 
+                         resource.data.createdBy == request.auth.uid;
           
           // Staff subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
           match /staff/{staffId} {
-            // Allow read if user owns the staff member OR if it's the staff member's own document (for staff login)
+            // Allow read if:
+            // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
+            // 2. Staff member was created by the current user
+            // 3. It's the staff member's own document (for staff login)
             allow read: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid || resource.data.authUid == request.auth.uid);
+                         (userId == request.auth.uid || 
+                          resource.data.createdBy == request.auth.uid || 
+                          resource.data.authUid == request.auth.uid);
             
-            // Allow create if user is creating their own staff member
-            allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+            // Allow create if user is the super admin (userId in path) creating staff in their store
+            allow create: if isAuthenticated() && 
+                           userId == request.auth.uid && 
+                           request.resource.data.createdBy == request.auth.uid;
             
-            // Allow update if user owns the staff member
-            allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+            // Allow update if user is the super admin (userId in path) OR staff member updating their own document
+            allow update: if isAuthenticated() && 
+                           (userId == request.auth.uid || 
+                            resource.data.createdBy == request.auth.uid ||
+                            resource.data.authUid == request.auth.uid);
             
-            // Allow delete if user owns the staff member
-            allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+            // Allow delete if user is the super admin (userId in path) who created the staff member
+            allow delete: if isAuthenticated() && 
+                           userId == request.auth.uid && 
+                           resource.data.createdBy == request.auth.uid;
           }
         }
         

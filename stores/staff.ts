@@ -209,16 +209,24 @@ export const useStaffStore = defineStore('staff', {
         
         // Verify department belongs to this user
         if (department && department.createdBy !== userId) {
-          this.staff = []
+          // Remove staff from this department if department doesn't belong to user
+          this.staff = this.staff.filter(s => s.departmentId !== departmentId)
           return []
         }
 
-        this.staff = staff.map(s => ({
+        // Merge/update staff for this department instead of replacing entire array
+        // Remove existing staff from this department
+        this.staff = this.staff.filter(s => s.departmentId !== departmentId)
+        
+        // Add newly fetched staff for this department
+        const staffWithDepartmentName = staff.map(s => ({
           ...s,
           departmentName: department?.name || 'Unknown',
         }))
+        
+        this.staff.push(...staffWithDepartmentName)
 
-        return this.staff
+        return staffWithDepartmentName
       } catch (error: any) {
         console.error('Error getting staff by department:', error)
         this.error = error.message || 'Failed to fetch staff'
