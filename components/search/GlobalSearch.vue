@@ -27,45 +27,45 @@
     >
       <div
         v-if="searchStore.isOpen"
-        class="fixed inset-x-4 top-20 md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl w-full max-h-[80vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden"
+        class="fixed inset-x-2 top-16 sm:inset-x-4 sm:top-20 md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl z-50 flex flex-col overflow-hidden"
         @click.stop
       >
         <!-- Search Input -->
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500" />
             <input
               ref="searchInput"
               v-model="searchStore.query"
               type="text"
-              placeholder="Search receipts, inventory, customers, departments, staff..."
-              class="w-full pl-10 pr-20 py-3 text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Search receipts, inventory, customers..."
+              class="w-full pl-9 pr-16 sm:pl-10 sm:pr-20 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               @input="handleSearchInput"
               @keydown.esc="searchStore.closeSearch()"
               @keydown.enter="handleEnter"
               @keydown.down.prevent="navigateResults(1)"
               @keydown.up.prevent="navigateResults(-1)"
             />
-            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-              <kbd class="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">Esc</kbd>
+            <div class="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1 sm:gap-2">
+              <kbd class="px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hidden sm:inline-block">Esc</kbd>
             </div>
           </div>
 
           <!-- Quick Filters -->
-          <div class="flex items-center gap-2 mt-3 flex-wrap">
+          <div class="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3 flex-wrap">
             <button
               v-for="entityType in entityTypes"
               :key="entityType.value"
               @click="toggleEntityType(entityType.value)"
               :class="[
-                'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+                'px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-medium rounded-lg transition-colors',
                 isEntityTypeSelected(entityType.value)
                   ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               ]"
             >
-              <component :is="entityType.icon" class="w-4 h-4 inline-block mr-1.5" />
-              {{ entityType.label }}
+              <component :is="entityType.icon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-1.5" />
+              <span class="hidden xs:inline">{{ entityType.label }}</span>
             </button>
             <button
               v-if="searchStore.hasActiveFilters"
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Advanced Filters Toggle -->
-        <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+        <div class="px-3 sm:px-4 py-1.5 sm:py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
           <button
             @click="showAdvancedFilters = !showAdvancedFilters"
             class="flex items-center justify-between w-full text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
@@ -100,7 +100,7 @@
           leave-from-class="opacity-100 max-h-96"
           leave-to-class="opacity-0 max-h-0"
         >
-          <div v-if="showAdvancedFilters" class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 space-y-3">
+          <div v-if="showAdvancedFilters" class="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 space-y-2 sm:space-y-3">
             <!-- Date Range -->
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -148,23 +148,23 @@
         <!-- Results -->
         <div class="flex-1 overflow-y-auto">
           <!-- Loading State -->
-          <div v-if="searchStore.loading" class="p-8 text-center">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Searching...</p>
+          <div v-if="searchStore.loading" class="p-6 sm:p-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary-600"></div>
+            <p class="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">Searching...</p>
           </div>
 
           <!-- No Results -->
-          <div v-else-if="!searchStore.hasResults && searchStore.query.trim()" class="p-8 text-center">
-            <MagnifyingGlassIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
+          <div v-else-if="!searchStore.hasResults && searchStore.query.trim()" class="p-6 sm:p-8 text-center">
+            <MagnifyingGlassIcon class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-3" />
+            <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Try adjusting your search query or filters</p>
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-8">
-            <div class="text-center mb-6">
-              <MagnifyingGlassIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
+          <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-4 sm:p-8">
+            <div class="text-center mb-4 sm:mb-6">
+              <MagnifyingGlassIcon class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-3" />
+              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">Search across all your data</p>
             </div>
 
@@ -201,55 +201,55 @@
               :key="result.id"
               @click="handleResultClick(result)"
               :class="[
-                'w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
+                'w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
                 selectedIndex === index ? 'bg-primary-50 dark:bg-primary-900/20' : ''
               ]"
             >
-              <div class="flex items-start gap-3">
+              <div class="flex items-start gap-2 sm:gap-3">
                 <div :class="[
-                  'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
+                  'w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center flex-shrink-0',
                   getEntityTypeColor(result.type)
                 ]">
-                  <component :is="getEntityIcon(result.icon)" class="w-5 h-5 text-white" />
+                  <component :is="getEntityIcon(result.icon)" class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2 mb-1">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                    <p class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {{ result.title }}
                     </p>
                     <span :class="[
-                      'px-2 py-0.5 text-xs font-medium rounded',
+                      'px-1.5 sm:px-2 py-0.5 text-xs font-medium rounded',
                       getEntityTypeBadgeColor(result.type)
                     ]">
                       {{ getEntityTypeLabel(result.type) }}
                     </span>
                   </div>
-                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate mb-1">
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate mb-0.5 sm:mb-1">
                     {{ result.subtitle }}
                   </p>
-                  <p v-if="result.description" class="text-xs text-gray-500 dark:text-gray-500">
+                  <p v-if="result.description" class="text-xs text-gray-500 dark:text-gray-500 line-clamp-1">
                     {{ result.description }}
                   </p>
                 </div>
-                <ArrowRightIcon class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
               </div>
             </button>
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
-          <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-            <span class="flex items-center gap-1">
+        <div class="px-3 sm:px-4 py-2 sm:py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
+          <div class="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
+            <span class="hidden sm:flex items-center gap-1">
               <ArrowUpIcon class="w-3 h-3" />
               <ArrowDownIcon class="w-3 h-3" />
               Navigate
             </span>
-            <span class="flex items-center gap-1">
+            <span class="hidden sm:flex items-center gap-1">
               <span class="text-xs">↵</span>
               Select
             </span>
-            <span class="flex items-center gap-1">
+            <span class="hidden sm:flex items-center gap-1">
               <kbd class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded">/</kbd>
               Save
             </span>
