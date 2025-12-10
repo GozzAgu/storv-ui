@@ -147,23 +147,39 @@ service cloud.firestore {
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
         match /receipts/{receiptId} {
-          // Allow read if user owns the store OR if staff member belongs to this store
+          // Allow read if:
+          // 1. User is the super admin (userId in path matches auth.uid)
+          // 2. User created the receipt
+          // 3. Staff member belongs to this store
           allow read: if isAuthenticated() && 
-                       (resource.data.createdBy == request.auth.uid || 
+                       (userId == request.auth.uid || 
+                        resource.data.createdBy == request.auth.uid || 
                         exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
           
-          // Allow create if user is creating their own receipt OR if staff member belongs to this store
+          // Allow create if:
+          // 1. User is the super admin (userId in path)
+          // 2. User is creating their own receipt
+          // 3. Staff member belongs to this store (all staff can create receipts)
           allow create: if isAuthenticated() && 
-                         (request.resource.data.createdBy == request.auth.uid || 
+                         (userId == request.auth.uid || 
+                          request.resource.data.createdBy == request.auth.uid || 
                           exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
           
-          // Allow update if user owns the receipt OR if staff member belongs to this store
+          // Allow update if:
+          // 1. User is the super admin (userId in path) who created the receipt
+          // 2. Staff member belongs to this store (application code enforces manager-only restriction)
+          // Note: Application-level checks prevent non-managers from updating
           allow update: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid || 
+                         (userId == request.auth.uid && resource.data.createdBy == request.auth.uid || 
                           exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
           
-          // Allow delete if user owns the receipt
-          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow delete if:
+          // 1. User is the super admin (userId in path) who created the receipt
+          // 2. Staff member belongs to this store (application code enforces manager-only restriction)
+          // Note: Application-level checks prevent non-managers from deleting
+          allow delete: if isAuthenticated() && 
+                         (userId == request.auth.uid && resource.data.createdBy == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}

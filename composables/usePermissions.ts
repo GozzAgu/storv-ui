@@ -45,6 +45,26 @@ export const usePermissions = () => {
     return !!authStore.currentUser
   })
 
+  // Check if user can edit receipts - only super admins and managers
+  const canEditReceipts = computed(() => {
+    // Super admins can always edit receipts
+    if (!isStaff.value) return true
+    
+    // Managers can also edit receipts
+    // Staff and interns cannot edit receipts
+    return isManager.value
+  })
+
+  // Check if user can delete receipts - only super admins and managers
+  const canDeleteReceipts = computed(() => {
+    // Super admins can always delete receipts
+    if (!isStaff.value) return true
+    
+    // Managers can also delete receipts
+    // Staff and interns cannot delete receipts
+    return isManager.value
+  })
+
   // Check if user can manage inventory items - super admins and managers can manage
   const canManageInventoryItems = computed(() => {
     // Super admins can always manage inventory items
@@ -65,14 +85,24 @@ export const usePermissions = () => {
     return isManager.value
   })
 
+  // Check if user can create staff - only super admins (managers cannot create staff)
+  const canCreateStaff = computed(() => {
+    // Only super admins can create staff
+    // Managers have all other permissions but cannot create staff
+    return !isStaff.value
+  })
+
   return {
     isStaff,
     isManager,
     canManage,
     isReadOnly,
     canCreate,
+    canEditReceipts,
+    canDeleteReceipts,
     canManageInventoryItems,
     canCreateInventoryFolders,
+    canCreateStaff,
   }
 }
 

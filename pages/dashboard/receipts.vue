@@ -556,7 +556,7 @@
                     <PrinterIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
-                    v-if="receipt.status === 'completed' && canManage"
+                    v-if="receipt.status === 'completed' && canEditReceipts"
                     @click="handleRefundReceipt(receipt)"
                     class="flex-shrink-0 p-2 sm:p-1.5 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 active:bg-orange-100 dark:active:bg-orange-900/30 rounded-lg transition-colors touch-manipulation"
                     title="Refund"
@@ -564,7 +564,7 @@
                     <ArrowPathIcon class="w-5 h-5 flex-shrink-0" />
                   </button>
                   <button
-                    v-if="canManage"
+                    v-if="canDeleteReceipts"
                     @click="handleDeleteReceipt(receipt)"
                     class="flex-shrink-0 p-2 sm:p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded-lg transition-colors touch-manipulation"
                     title="Delete"
@@ -949,7 +949,7 @@ useHead({
 const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
-const { canManage, canCreate } = usePermissions()
+const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
 const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()

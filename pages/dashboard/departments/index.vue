@@ -445,7 +445,9 @@ if (import.meta.client) {
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
-const canManageDepartments = computed(() => !isStaff.value) // Only non-staff can manage
+const { canCreateStaff, canManage } = usePermissions()
+const canManageDepartments = computed(() => canManage.value) // Super admins and managers can manage
+const canCreateNewStaff = computed(() => canCreateStaff.value) // Only super admins can create staff
 
 // Current staff member data (for staff users)
 const currentStaffMember = ref<Staff | null>(null)

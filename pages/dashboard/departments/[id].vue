@@ -292,7 +292,7 @@
 
     <!-- Floating Action Button - Mobile Optimized -->
     <button
-      v-if="canManageDepartments && !isLoadingStaff"
+      v-if="canCreateNewStaff && !isLoadingStaff"
       @click="openCreateStaffModal"
       class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
       title="Add new staff"
@@ -422,8 +422,12 @@ const isManager = computed(() => {
   return currentStaffMember.value.role === 'manager' && 
          currentStaffMember.value.departmentId === department.value.id
 })
-// Only super admins who are not managers can manage (edit/delete staff)
-const canManageDepartments = computed(() => !isStaff.value && !isManager.value)
+// Get permissions
+const { canCreateStaff, canManage } = usePermissions()
+// Only super admins can create staff (managers cannot create staff)
+// Managers can edit/delete staff but not create new staff
+const canManageDepartments = computed(() => canManage.value)
+const canCreateNewStaff = computed(() => canCreateStaff.value)
 
 // Current staff member (for staff users and to check manager status)
 const currentStaffMember = ref<Staff | null>(null)
