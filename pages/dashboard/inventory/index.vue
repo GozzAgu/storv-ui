@@ -298,15 +298,34 @@
         </div>
 
         <div class="space-y-1.5">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Description
-          </label>
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <button
+              type="button"
+              @click="handleGenerateDescription"
+              :disabled="!folderForm.name || isGeneratingDescription"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Generate description with AI"
+            >
+              <SparklesIcon 
+                :class="[
+                  'w-4 h-4 transition-transform',
+                  isGeneratingDescription ? 'animate-spin' : ''
+                ]"
+              />
+              <span class="hidden sm:inline">{{ isGeneratingDescription ? 'Generating...' : 'AI Generate' }}</span>
+            </button>
+          </div>
           <textarea
             v-model="folderForm.description"
+            @input="aiError = null"
             rows="3"
             class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
             placeholder="Describe the folder's purpose"
           ></textarea>
+          <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
         </div>
 
         <!-- Color Selector -->
@@ -520,6 +539,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
   ExclamationTriangleIcon,
+  SparklesIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
@@ -532,6 +552,7 @@ import { useInventoryStore, type InventoryFolder, type Template, type TemplateFi
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
+import { useAI } from '~/composables/useAI'
 
 definePageMeta({
   layout: 'dashboard'
@@ -628,6 +649,20 @@ const folderForm = reactive({
   hasSerialNumbers: false,
   allowedDepartments: [] as string[], // Array of department IDs
 })
+
+// AI generation
+const { generateDescription, isGenerating: isGeneratingDescription, error: aiError } = useAI()
+
+const handleGenerateDescription = async () => {
+  if (!folderForm.name || folderForm.name.trim().length === 0) {
+    return
+  }
+
+  const description = await generateDescription(folderForm.name, folderForm.type)
+  if (description) {
+    folderForm.description = description
+  }
+}
 
 // Default fields that should always be included
 const getDefaultFields = (): TemplateField[] => {
@@ -1007,6 +1042,10 @@ const handleCancelFolder = () => {
   folderForm.hasSerialNumbers = false
   folderForm.allowedDepartments = []
   editableFields.value = getDefaultFields()
+  // Clear AI error when closing modal
+  if (aiError.value) {
+    aiError.value = null
+  }
 }
 
 const handleAddField = () => {

@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     // Private keys (only available on server-side)
+    openaiApiKey: process.env.OPENAI_API_KEY || '',
     // Public keys (exposed to client-side)
     public: {
       firebase: {
