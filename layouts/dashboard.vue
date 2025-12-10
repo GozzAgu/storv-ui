@@ -1113,9 +1113,64 @@ watch(() => authStore.currentUser, async (user) => {
 
 // Cache user profile info to prevent UI flickering during staff creation (sign out/sign in process)
 // Store the super admin's info when they first load, and preserve it during staff creation
-const cachedUserName = ref<string | null>(null)
-const cachedUserEmail = ref<string | null>(null)
-const cachedUserId = ref<string | null | undefined>(null)
+// Persist to localStorage to survive page refreshes
+const getCachedUserName = (): string | null => {
+  if (!import.meta.client) return null
+  const stored = localStorage.getItem('cached_user_name')
+  const storedUserId = localStorage.getItem('cached_user_id')
+  const currentUserId = authStore.currentUser?.uid
+  // Only return cached name if it's for the current user
+  if (stored && storedUserId === currentUserId) {
+    return stored
+  }
+  return null
+}
+
+const getCachedUserEmail = (): string | null => {
+  if (!import.meta.client) return null
+  const stored = localStorage.getItem('cached_user_email')
+  const storedUserId = localStorage.getItem('cached_user_id')
+  const currentUserId = authStore.currentUser?.uid
+  // Only return cached email if it's for the current user
+  if (stored && storedUserId === currentUserId) {
+    return stored
+  }
+  return null
+}
+
+const getCachedUserId = (): string | null | undefined => {
+  if (!import.meta.client) return null
+  const stored = localStorage.getItem('cached_user_id')
+  return stored || null
+}
+
+const setCachedUserName = (name: string | null, userId: string | null | undefined) => {
+  if (!import.meta.client) return
+  if (name && userId) {
+    localStorage.setItem('cached_user_name', name)
+    localStorage.setItem('cached_user_id', userId)
+  }
+}
+
+const setCachedUserEmail = (email: string | null, userId: string | null | undefined) => {
+  if (!import.meta.client) return
+  if (email && userId) {
+    localStorage.setItem('cached_user_email', email)
+    localStorage.setItem('cached_user_id', userId)
+  }
+}
+
+const clearCachedUser = () => {
+  if (!import.meta.client) return
+  localStorage.removeItem('cached_user_name')
+  localStorage.removeItem('cached_user_email')
+  localStorage.removeItem('cached_user_id')
+}
+
+// Initialize from localStorage on mount
+const cachedUserName = ref<string | null>(getCachedUserName())
+const cachedUserEmail = ref<string | null>(getCachedUserEmail())
+const cachedUserId = ref<string | null | undefined>(getCachedUserId())
 
 // Watch userStore.userData to cache super admin info when it's first loaded
 watch(() => userStore.userData, (userData, oldUserData) => {
@@ -1136,11 +1191,13 @@ watch(() => userStore.userData, (userData, oldUserData) => {
       if (userData.name) {
         cachedUserName.value = userData.name
         cachedUserId.value = userData.uid
+        setCachedUserName(userData.name, userData.uid)
       }
       // Cache email from auth if available
       if (authStore.currentUser?.email && authStore.currentUser.uid === userData.uid) {
         cachedUserEmail.value = authStore.currentUser.email
         cachedUserId.value = authStore.currentUser.uid
+        setCachedUserEmail(authStore.currentUser.email, authStore.currentUser.uid)
       }
     }
   }
@@ -1161,8 +1218,20 @@ const userName = computed(() => {
   }
   
   // If we have a cached name for the same user, keep using it (prevents flicker)
+  // Also check localStorage in case ref was reset on refresh
   if (cachedUserName.value && cachedUserId.value === currentUserId) {
     return cachedUserName.value
+  }
+  
+  // Check localStorage if ref cache is empty (e.g., after page refresh)
+  if (!cachedUserName.value && currentUserId) {
+    const storedName = getCachedUserName()
+    const storedUserId = getCachedUserId()
+    if (storedName && storedUserId === currentUserId) {
+      cachedUserName.value = storedName
+      cachedUserId.value = storedUserId
+      return storedName
+    }
   }
   
   // If no current user but we have cached data, use cache (prevents flicker during sign out)
@@ -1186,6 +1255,7 @@ const userName = computed(() => {
       if (!isStaffCreationInProgress) {
         cachedUserName.value = name
         cachedUserId.value = currentUserId ?? null
+        setCachedUserName(name, currentUserId ?? null)
       }
       return name
     }
@@ -1196,17 +1266,30 @@ const userName = computed(() => {
     if (name) {
       cachedUserName.value = name
       cachedUserId.value = currentUserId ?? null
+      setCachedUserName(name, currentUserId ?? null)
       return name
     }
   }
-  // Fallback to email prefix (part before @)
+  // Fallback to email prefix (part before @) - but only if we don't have a cached name
+  // This prevents overwriting a cached name with email prefix on refresh
   const currentEmail = authStore.currentUser?.email
   if (currentEmail && currentUserId && !isStaffCreationInProgress) {
-    const emailPrefix = currentEmail.split('@')[0]!
-    cachedUserName.value = emailPrefix
-    cachedUserEmail.value = currentEmail
-    cachedUserId.value = currentUserId ?? null
-    return emailPrefix
+    // Only use email prefix if we don't have a cached name in localStorage
+    const storedName = getCachedUserName()
+    if (!storedName || getCachedUserId() !== currentUserId) {
+      const emailPrefix = currentEmail.split('@')[0]!
+      cachedUserName.value = emailPrefix
+      cachedUserEmail.value = currentEmail
+      cachedUserId.value = currentUserId ?? null
+      setCachedUserName(emailPrefix, currentUserId ?? null)
+      setCachedUserEmail(currentEmail, currentUserId ?? null)
+      return emailPrefix
+    } else {
+      // Use the stored name instead of email prefix
+      cachedUserName.value = storedName
+      cachedUserId.value = currentUserId ?? null
+      return storedName
+    }
   }
   
   // If no current user but we have cached data, use cache (prevents flicker)
@@ -1231,8 +1314,20 @@ const userEmail = computed(() => {
   }
   
   // If we have cached email for the same user, keep using it
+  // Also check localStorage in case ref was reset on refresh
   if (cachedUserEmail.value && cachedUserId.value === currentUserId) {
     return cachedUserEmail.value
+  }
+  
+  // Check localStorage if ref cache is empty (e.g., after page refresh)
+  if (!cachedUserEmail.value && currentUserId) {
+    const storedEmail = getCachedUserEmail()
+    const storedUserId = getCachedUserId()
+    if (storedEmail && storedUserId === currentUserId) {
+      cachedUserEmail.value = storedEmail
+      cachedUserId.value = storedUserId
+      return storedEmail
+    }
   }
   
   // If no current user but we have cached data, use cache (prevents flicker during sign out)
@@ -1248,6 +1343,7 @@ const userEmail = computed(() => {
     if (userStore.userData?.role === 'superAdmin' || !userStore.userData) {
       cachedUserEmail.value = email
       cachedUserId.value = currentUserId ?? null
+      setCachedUserEmail(email, currentUserId ?? null)
     }
   }
   
@@ -1287,12 +1383,15 @@ const userInitials = computed(() => {
 const handleSignOut = async () => {
   const { signOut } = useFirebaseAuth()
   try {
+    // Clear cached user data from localStorage on sign out
+    clearCachedUser()
     await signOut()
     navigateTo('/signin')
   } catch (error) {
     console.error('Sign out error:', error)
     // Still navigate even if sign out fails
-  navigateTo('/signin')
+    clearCachedUser()
+    navigateTo('/signin')
   }
 }
 
@@ -1368,6 +1467,25 @@ onMounted(async () => {
   // Check authentication first
   if (import.meta.client) {
     await checkAuth()
+    
+    // Initialize cache from localStorage after auth loads
+    const currentUserId = authStore.currentUser?.uid
+    if (currentUserId) {
+      const storedName = getCachedUserName()
+      const storedEmail = getCachedUserEmail()
+      const storedUserId = getCachedUserId()
+      
+      // Only use stored values if they match the current user
+      if (storedUserId === currentUserId) {
+        if (storedName) {
+          cachedUserName.value = storedName
+        }
+        if (storedEmail) {
+          cachedUserEmail.value = storedEmail
+        }
+        cachedUserId.value = storedUserId
+      }
+    }
   }
   
   // Fetch user data if authenticated and not already loaded
@@ -1419,6 +1537,25 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
   if (user?.uid) {
     const hasUserData = userStore.userData && userStore.userData.uid === user.uid
     const userChanged = oldUser?.uid !== user.uid
+    
+    // If user changed, clear old cache and load new user's cache
+    if (userChanged && !isStaffCreationInProgress) {
+      // Clear old cache
+      cachedUserName.value = null
+      cachedUserEmail.value = null
+      cachedUserId.value = null
+      
+      // Load new user's cache from localStorage
+      const storedName = getCachedUserName()
+      const storedEmail = getCachedUserEmail()
+      const storedUserId = getCachedUserId()
+      
+      if (storedUserId === user.uid) {
+        if (storedName) cachedUserName.value = storedName
+        if (storedEmail) cachedUserEmail.value = storedEmail
+        cachedUserId.value = storedUserId
+      }
+    }
     
     // Only fetch if we don't have data for this user or if user actually changed
     // Don't fetch during staff creation to prevent overwriting super admin data
