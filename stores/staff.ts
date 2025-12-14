@@ -1104,12 +1104,36 @@ export const useStaffStore = defineStore('staff', {
               // Extract index creation URL from error message
               const indexUrlMatch = collectionGroupError.message?.match(/https:\/\/[^\s]+/)
               const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-              console.error('[StaffStore] Collection group index missing for staff collection group query on authUid.')
+              
+              console.error('')
+              console.error('🚨 [StaffStore] COLLECTION GROUP INDEX MISSING 🚨')
+              console.error('[StaffStore] The query requires a COLLECTION_GROUP index for staff/authUid')
+              console.error('')
+              
               if (indexUrl) {
-                console.error('[StaffStore] ⚠️  CREATE THE INDEX HERE:', indexUrl)
-                console.error('[StaffStore] Click the link above to create the required index, then refresh the page.')
+                console.error('⚠️  ⚠️  ⚠️  ACTION REQUIRED ⚠️  ⚠️  ⚠️')
+                console.error('[StaffStore] Click this link to create the index automatically:')
+                console.error('')
+                console.error('👉', indexUrl)
+                console.error('')
+                console.error('[StaffStore] After clicking the link:')
+                console.error('  1. Click "Create Index" in the Firebase Console')
+                console.error('  2. Wait for the index to build (may take a few minutes)')
+                console.error('  3. Refresh this page')
+                console.error('')
               } else {
-                console.error('[StaffStore] Go to Firebase Console > Firestore > Indexes to create a collection group index for staff/authUid')
+                // Fallback: provide direct link to Firebase Console indexes
+                const config = useRuntimeConfig()
+                const projectId = config.public.firebase.projectId || 'storv-ux'
+                const fallbackUrl = `https://console.firebase.google.com/project/${projectId}/firestore/indexes`
+                console.error('[StaffStore] Go to Firebase Console > Firestore > Indexes:')
+                console.error('👉', fallbackUrl)
+                console.error('')
+                console.error('[StaffStore] Create a COLLECTION_GROUP index for:')
+                console.error('  - Collection Group: staff')
+                console.error('  - Field: authUid (Ascending)')
+                console.error('  - Query Scope: COLLECTION_GROUP')
+                console.error('')
               }
             }
           }
