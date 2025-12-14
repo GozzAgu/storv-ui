@@ -33,6 +33,16 @@
       ]
     },
     {
+      "collectionGroup": "staff",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "authUid",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "inventoryFolders",
       "queryScope": "COLLECTION",
       "fields": [
