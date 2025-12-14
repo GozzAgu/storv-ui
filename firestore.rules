@@ -8,9 +8,20 @@ service cloud.firestore {
     
     // Collection group queries for staff - allows searching across all staff collections
     // This is used when staff members need to find their own documents
+    // IMPORTANT: For collection group queries, Firestore evaluates the query against potential results
+    // The query where('authUid', '==', request.auth.uid) must only match documents where
+    // resource.data.authUid == request.auth.uid is true. This rule ensures that.
+    // The {path=**} pattern matches any path, allowing collection group queries across all stores
+    // This rule MUST come before the nested staff rules to ensure collection group queries work
     match /{path=**}/staff/{staffId} {
-      // Allow read if it's the staff member's own document (for collection group queries)
-      allow read: if isAuthenticated() && resource.data.authUid == request.auth.uid;
+      // Allow read (covers both get and list/collection group operations) if:
+      // 1. User is authenticated
+      // 2. The document's authUid matches the authenticated user's UID
+      // This allows staff members to find their own documents via collection group queries
+      // When querying with where('authUid', '==', request.auth.uid), Firestore will only
+      // return documents where this condition evaluates to true
+      allow read: if isAuthenticated() && 
+                   resource.data.authUid == request.auth.uid;
     }
     
     // Helper function to check if user owns the document

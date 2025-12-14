@@ -1101,7 +1101,16 @@ export const useStaffStore = defineStore('staff', {
             if (collectionGroupError.code === 'permission-denied') {
               console.error('[StaffStore] Permission denied on collection group query. Check Firestore rules allow collection group queries for staff.')
             } else if (collectionGroupError.code === 'failed-precondition') {
-              console.error('[StaffStore] Collection group index missing. Deploy firestore.indexes.json to create the required index.')
+              // Extract index creation URL from error message
+              const indexUrlMatch = collectionGroupError.message?.match(/https:\/\/[^\s]+/)
+              const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
+              console.error('[StaffStore] Collection group index missing for staff collection group query on authUid.')
+              if (indexUrl) {
+                console.error('[StaffStore] ⚠️  CREATE THE INDEX HERE:', indexUrl)
+                console.error('[StaffStore] Click the link above to create the required index, then refresh the page.')
+              } else {
+                console.error('[StaffStore] Go to Firebase Console > Firestore > Indexes to create a collection group index for staff/authUid')
+              }
             }
           }
           
