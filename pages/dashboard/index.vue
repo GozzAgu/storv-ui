@@ -1,19 +1,19 @@
 <template>
-  <div class="space-y-4 sm:space-y-6 pb-6 sm:pb-8">
+  <div class="space-y-3 pb-6 sm:pb-8">
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
-    <!-- Welcome Header - Mobile Optimized -->
-    <div class="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <!-- Welcome Header - Compact -->
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex-1">
-        <h1 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
-        <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
+        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
+        <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
       <div class="flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
-          class="w-full sm:w-auto px-4 py-2 sm:py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm"
+          class="w-full sm:w-auto px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-1.5 text-xs"
         >
-          <PlusIcon class="w-4 h-4 sm:w-5 sm:h-5" />
+          <PlusIcon class="w-4 h-4" />
           <span>Add Product</span>
         </NuxtLink>
       </div>
@@ -21,16 +21,16 @@
 
     <!-- Loading State -->
     <template v-if="isLoading">
-      <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-        <Card v-for="i in 4" :key="i" padding="sm" class="sm:p-4">
+      <!-- Stats Cards Skeleton - Compact -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <Card v-for="i in 4" :key="i" padding="sm" class="p-2.5">
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
-              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
-              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
-              <div class="h-2.5 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-1.5 animate-pulse"></div>
+              <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
             </div>
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+            <div class="w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
         </div>
       </Card>
     </div>
@@ -124,8 +124,8 @@
       </div>
     </template>
 
-    <!-- Key Metrics Cards - Mobile Optimized -->
-    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+    <!-- Key Metrics Cards - Compact -->
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       <StatCard
         label="Total Revenue"
         :value="formatCurrency(totalRevenue)"

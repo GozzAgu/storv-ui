@@ -8,14 +8,14 @@
             v-for="column in columns"
             :key="column.key"
             :class="[
-              'px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+              'px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
               column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none' : '',
               column.class || '',
               headerClass
             ]"
             @click="column.sortable ? handleSort(column.key) : null"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <span>{{ column.label }}</span>
               <span
                 v-if="column.sortable"
@@ -42,7 +42,7 @@
           </th>
           <th
             v-if="showActions"
-            class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            class="px-2 py-1.5 text-right text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
           >
             Actions
           </th>
@@ -62,7 +62,7 @@
           <td
             v-for="column in columns"
             :key="column.key"
-            :class="['px-3 py-2 whitespace-nowrap text-sm', column.class || '', cellClass]"
+            :class="['px-2 py-1.5 whitespace-nowrap text-xs', column.class || '', cellClass]"
           >
             <slot
               :name="`cell-${column.key}`"
@@ -77,21 +77,21 @@
           </td>
           <td
             v-if="showActions"
-            class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium"
+            class="px-2 py-1.5 whitespace-nowrap text-right text-xs font-medium"
           >
             <slot
               name="actions"
               :row="row"
               :index="index"
             >
-              <div class="flex items-center justify-end gap-2">
+              <div class="flex items-center justify-end gap-1.5">
                 <button
                   v-if="onEdit"
                   @click="handleEdit(row, index)"
                   class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
                   title="Edit"
                 >
-                  <PencilSquareIcon class="w-5 h-5" />
+                  <PencilSquareIcon class="w-4 h-4" />
                 </button>
                 <button
                   v-if="onDelete"
@@ -99,7 +99,7 @@
                   class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   title="Delete"
                 >
-                  <TrashIcon class="w-5 h-5" />
+                  <TrashIcon class="w-4 h-4" />
                 </button>
               </div>
             </slot>
@@ -110,15 +110,15 @@
         <tr v-if="!sortedData || sortedData.length === 0">
           <td
             :colspan="(columns?.length || 0) + (showActions ? 1 : 0)"
-            class="px-3 py-12 text-center"
+            class="px-2 py-8 text-center"
           >
             <slot name="empty">
               <div class="flex flex-col items-center justify-center">
-                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
-                  <InboxIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2">
+                  <InboxIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 </div>
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No data available</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">There are no items to display</p>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">No data available</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">There are no items to display</p>
               </div>
             </slot>
           </td>

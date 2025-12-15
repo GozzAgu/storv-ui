@@ -1,50 +1,50 @@
 <template>
-  <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
-    <!-- Enhanced Header - Mobile Optimized -->
-    <div class="flex items-start justify-between gap-3 sm:gap-4">
-      <div class="flex items-start gap-2.5 sm:gap-4 flex-1 min-w-0">
+  <div class="space-y-3 pb-24 sm:pb-20">
+    <!-- Enhanced Header - Compact -->
+    <div class="flex items-start justify-between gap-2">
+      <div class="flex items-start gap-2 flex-1 min-w-0">
         <button
           @click="navigateTo('/dashboard/inventory')"
-          class="mt-1 p-2 sm:p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors touch-manipulation flex-shrink-0"
+          class="mt-0.5 p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors flex-shrink-0"
           title="Back to folders"
         >
-          <ArrowLeftIcon class="w-5 h-5" />
+          <ArrowLeftIcon class="w-4 h-4" />
         </button>
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3 mb-2">
+          <div class="flex items-center gap-2 mb-1">
             <div class="flex-1 min-w-0">
-              <h1 v-if="isLoadingFolder" class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <h1 v-if="isLoadingFolder" class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 Loading...
               </h1>
-              <h1 v-else class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+              <h1 v-else class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
                 {{ folder?.name || 'Folder' }}
               </h1>
-              <p v-if="!isLoadingFolder" class="mt-1.5 text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+              <p v-if="!isLoadingFolder" class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                 {{ folder?.description || 'No description' }}
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-3 sm:gap-4 mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <CalendarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-              <span class="truncate text-[10px] sm:text-xs">Created {{ formatDate(folder?.createdAt) }}</span>
+          <div class="flex items-center gap-2 mt-1.5 text-[10px] text-gray-600 dark:text-gray-400 flex-wrap">
+            <div class="flex items-center gap-1">
+              <CalendarIcon class="w-3 h-3 flex-shrink-0" />
+              <span class="truncate">Created {{ formatDate(folder?.createdAt) }}</span>
             </div>
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <CubeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-              <span class="text-[10px] sm:text-xs">{{ folder?.itemCount || 0 }} items</span>
+            <div class="flex items-center gap-1">
+              <CubeIcon class="w-3 h-3 flex-shrink-0" />
+              <span>{{ folder?.itemCount || 0 }} items</span>
             </div>
           </div>
         </div>
         
-        <!-- Bulk Discount Button (if items selected) - Mobile Optimized -->
-        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 flex-shrink-0 ml-2">
+        <!-- Bulk Discount Button - Compact -->
+        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-1.5 flex-shrink-0 ml-2">
           <button
             @click="openBulkDiscountModal"
-            class="px-3 sm:px-4 py-2 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-md transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium touch-manipulation"
+            class="px-2.5 py-1.5 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium"
             title="Apply bulk discount"
           >
-            <TagIcon class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-            <span class="hidden sm:inline">Bulk Discount ({{ selectedItemsForBulk.length }})</span>
+            <TagIcon class="w-4 h-4 flex-shrink-0" />
+            <span class="hidden sm:inline">({{ selectedItemsForBulk.length }})</span>
             <span class="sm:hidden">({{ selectedItemsForBulk.length }})</span>
           </button>
         </div>
@@ -144,22 +144,22 @@
       </Card>
     </template>
 
-    <!-- Enhanced Filters Section - Mobile Optimized -->
-    <Card v-else padding="sm" class="lg:hidden sm:p-4">
-      <div class="flex flex-col gap-3">
+    <!-- Enhanced Filters Section - Compact -->
+    <Card v-else padding="sm" class="lg:hidden p-2.5">
+      <div class="flex flex-col gap-2">
         <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             v-model="searchQuery"
             type="text"
                 placeholder="Search by name, SKU..."
-                class="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <select
             v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="flex-1 px-2.5 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Sort by Name</option>
             <option value="price">Sort by Price</option>
@@ -169,7 +169,7 @@
             variant="outline"
             @click="resetFilters"
             :icon="ArrowPathIcon"
-            class="flex-shrink-0 px-3 sm:px-4"
+            class="flex-shrink-0 px-2.5 py-2 text-xs"
           >
             <span class="hidden sm:inline">Reset</span>
             <span class="sm:hidden">↻</span>
@@ -233,27 +233,27 @@
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-3 py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   {{ column.label }}
                   <template v-if="column.sortable">
                     <ChevronUpIcon
                       v-if="currentSort.key === column.key && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === column.key && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 py-2 text-center text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-2 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -264,7 +264,7 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 py-2 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
+              <th v-if="canManageInventoryItems" class="px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[120px]">
                     Actions
                   </th>
             </tr>
@@ -278,33 +278,33 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-3 py-2 whitespace-nowrap"
+                class="px-2 py-1.5 whitespace-nowrap"
               >
-                <div v-if="colIndex === 0" class="flex items-center gap-3">
+                <div v-if="colIndex === 0" class="flex items-center gap-2">
                   <!-- First column shows avatar and value -->
-                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
+                  <div class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                     {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1.5 sm:gap-2">
-                      <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <div class="flex items-center gap-1.5">
+                      <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                         {{ getItemDisplayValue(item[column.key]) }}
                       </div>
                       <span
                         v-if="item.swapIn"
-                        class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0"
+                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0"
                         title="Swapped-in item"
                       >
                         Swap-In
                       </span>
                     </div>
-                    <div v-if="columns.length > 1 && columns[1]" class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <div v-if="columns.length > 1 && columns[1]" class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
                       {{ getItemDisplayValue(item[columns[1].key]) }}
                     </div>
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="'type' in column && column.type === 'currency'" class="text-xs sm:text-sm">
+                  <div v-if="'type' in column && column.type === 'currency'" class="text-xs">
                     <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                       <span class="font-semibold text-green-600 dark:text-green-400">
                         {{ formatCurrency(item.discountedPrice) }}
@@ -320,10 +320,10 @@
                       {{ formatCurrency(item[column.key] || 0) }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'number'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'number'" class="text-xs text-gray-600 dark:text-gray-300">
                     {{ formatNumber(item[column.key]) }}
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'date'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'date'" class="text-xs text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -331,7 +331,7 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-xs text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -339,8 +339,8 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'availability'" class="text-xs sm:text-sm">
-                    <span class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
+                  <div v-else-if="column.key === 'availability'" class="text-xs">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium"
                       :class="getItemAvailability(item).class">
                       {{ getItemAvailability(item).label }}
                     </span>
@@ -354,7 +354,7 @@
                   </div>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-3 py-2 whitespace-nowrap text-center">
+              <td v-if="canManageInventoryItems" class="px-2 py-1.5 whitespace-nowrap text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -364,20 +364,20 @@
                   :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
                 />
               </td>
-                  <td v-if="canManageInventoryItems" class="px-3 py-2 whitespace-nowrap text-right min-w-[140px]">
-                <div class="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0">
+                  <td v-if="canManageInventoryItems" class="px-2 py-1.5 whitespace-nowrap text-right min-w-[120px]">
+                <div class="flex items-center justify-end gap-1 flex-shrink-0">
                   <button
                     @click="handleApplyDiscount(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
+                      'flex-shrink-0 p-1 rounded-md transition-colors',
                       isItemSold(item)
                         ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
                         : 'text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                     ]"
                     :title="isItemSold(item) ? 'Cannot apply discount to sold item' : (item.discountedPrice ? 'Edit discount' : 'Apply discount')"
                   >
-                    <TagIcon class="w-5 h-5 flex-shrink-0" />
+                    <TagIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     v-if="item.discountedPrice"

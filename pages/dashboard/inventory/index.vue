@@ -1,9 +1,9 @@
 <template>
-  <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20">
-    <!-- Page Header - Mobile Optimized -->
+  <div class="space-y-3 pb-24 sm:pb-20">
+    <!-- Page Header - Compact -->
     <div>
-      <h1 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
-      <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
+      <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
     </div>
 
     <!-- Search and Filter - Mobile Optimized -->
@@ -43,24 +43,24 @@
     </Card>
 
     <!-- Compact Header (Visible only on large screens) -->
-    <Card v-if="!inventoryStore.loading" padding="sm" class="hidden lg:block mb-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Folders: <span class="font-semibold">{{ filteredFolders.length }}</span></span>
-        </div>
+    <Card v-if="!inventoryStore.loading" padding="sm" class="hidden lg:block mb-3 p-2.5">
+      <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
+          <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Folders: <span class="font-semibold text-gray-900 dark:text-gray-100">{{ filteredFolders.length }}</span></span>
+        </div>
+        <div class="flex items-center gap-2">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search folders..."
-              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+              class="pl-9 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-56"
             />
           </div>
           <select
             v-model="selectedDepartmentId"
-            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[180px]"
+            class="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[140px]"
           >
             <option value="">All Departments</option>
             <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -69,7 +69,7 @@
           </select>
           <select
             v-model="sortBy"
-            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Sort by Name</option>
             <option value="items">Sort by Items</option>
@@ -79,133 +79,138 @@
       </div>
     </Card>
 
-    <!-- Loading State - Folders Skeleton -->
-    <div v-if="inventoryStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <!-- Loading State - Folders Skeleton (Compact) -->
+    <div v-if="inventoryStore.loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
       <div
         v-for="i in 8"
         :key="i"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+        class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
       >
-        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-2.5 sm:gap-3 flex-1">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+        <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
+          <div class="flex items-center gap-2 flex-1">
+            <div class="w-7 h-7 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
             <div class="flex-1">
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-0.5 animate-pulse"></div>
             </div>
           </div>
-          <div class="flex gap-1">
-            <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
-            <div class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+          <div class="flex gap-0.5">
+            <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+            <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
           </div>
         </div>
-        <div class="p-3 sm:p-4">
-          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full mb-2 animate-pulse"></div>
-          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-4 animate-pulse"></div>
-          <div class="space-y-2">
+        <div class="p-2.5">
+          <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-full mb-1.5 animate-pulse"></div>
+          <div class="space-y-1.5">
             <div class="flex items-center justify-between">
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-8 animate-pulse"></div>
             </div>
             <div class="flex items-center justify-between">
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Folders Grid - Mobile Optimized -->
-    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <!-- Folders Grid - Compact -->
+    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
+        class="group relative bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Card Header - Mobile Optimized -->
-        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+        <!-- Card Header - Compact -->
+        <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
+          <div class="flex items-center gap-2 flex-1 min-w-0">
             <div
-              class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0"
+              class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 flex items-center justify-center flex-shrink-0"
             >
-              <FolderIcon class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-400" />
+              <FolderIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <h3 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+              <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                 {{ folder.name }}
               </h3>
             </div>
           </div>
-          <div v-if="canManage" class="flex items-center gap-1 flex-shrink-0 ml-2">
+          <div v-if="canManage" class="flex items-center gap-0.5 flex-shrink-0 ml-1">
             <button
               @click.stop="handleEditFolder(folder)"
-              class="flex-shrink-0 p-2 sm:p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
+              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors"
               title="Edit folder"
             >
-              <PencilSquareIcon class="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
+              <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
             </button>
             <button
               @click.stop="handleDeleteFolder(folder)"
-              class="flex-shrink-0 p-2 sm:p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
+              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors"
               title="Delete folder"
             >
-              <TrashIcon class="w-4 h-4 sm:w-4 sm:h-4 flex-shrink-0" />
+              <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
             </button>
           </div>
         </div>
 
-        <!-- Card Body - Mobile Optimized -->
-        <div class="p-3 sm:p-4">
+        <!-- Card Body - Compact -->
+        <div class="p-2.5">
           <!-- Description -->
-          <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 sm:mb-4 min-h-[1.5rem]">
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1 mb-2 min-h-[0.75rem]">
             {{ folder.description || 'No description' }}
           </p>
           
-          <!-- Folder Stats - Mobile Optimized -->
-          <div class="space-y-2 sm:space-y-2">
-            <div class="flex items-center justify-between py-1">
-              <div class="flex items-center gap-1.5 sm:gap-2">
-                <CubeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Items</span>
+          <!-- Folder Stats - Compact -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <CubeIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Items</span>
               </div>
-              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
             </div>
             
-            <div class="flex items-center justify-between py-1">
-              <div class="flex items-center gap-1.5 sm:gap-2">
-                <CurrencyDollarIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Value</span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <CurrencyDollarIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Value</span>
               </div>
-              <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
             </div>
           </div>
 
-          <!-- Low Stock Warning - Mobile Optimized -->
+          <!-- Low Stock Warning - Compact -->
           <div
             v-if="folder.lowStockCount > 0"
-            class="mt-3 p-2 sm:p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
+            class="mt-2 p-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md"
           >
-            <p class="text-[10px] sm:text-xs font-medium text-orange-700 dark:text-orange-300">
+            <p class="text-[10px] font-medium text-orange-700 dark:text-orange-300">
               ⚠ {{ folder.lowStockCount }} low stock
             </p>
           </div>
 
-          <!-- Department Access Info - Mobile Optimized -->
+          <!-- Department Access Info - Compact -->
           <div
             v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
-            class="mt-3 p-2 sm:p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+            class="mt-2 p-1.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md"
           >
-            <p class="text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-300 mb-1 sm:mb-1">
+            <p class="text-[10px] font-medium text-blue-700 dark:text-blue-300 mb-1">
               Accessible to:
             </p>
-            <div class="flex flex-wrap gap-1 sm:gap-1">
+            <div class="flex flex-wrap gap-1">
               <span
-                v-for="deptId in folder.allowedDepartments"
+                v-for="deptId in folder.allowedDepartments.slice(0, 2)"
                 :key="deptId"
-                class="inline-block px-1.5 sm:px-2 py-0.5 sm:py-0.5 text-[10px] sm:text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-md sm:rounded"
+                class="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
               >
                 {{ getDepartmentName(deptId) }}
+              </span>
+              <span
+                v-if="folder.allowedDepartments.length > 2"
+                class="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
+              >
+                +{{ folder.allowedDepartments.length - 2 }}
               </span>
             </div>
           </div>
@@ -213,18 +218,18 @@
       </div>
     </div>
 
-    <!-- Empty State - Mobile Optimized -->
-    <Card v-else>
-      <div class="text-center py-8 sm:py-12">
-        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
-          <FolderIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
+    <!-- Empty State - Compact -->
+    <Card v-else padding="sm" extra-class="p-4">
+      <div class="text-center py-6">
+        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
+          <FolderIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           <span v-if="selectedDepartmentId">No folders found for {{ getDepartmentName(selectedDepartmentId) }}</span>
           <span v-else-if="searchQuery">No folders found</span>
           <span v-else>No folders yet</span>
         </h3>
-        <p class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-4">
           <span v-if="selectedDepartmentId">Try selecting a different department or clear the filter</span>
           <span v-else-if="searchQuery">Try adjusting your search criteria</span>
           <span v-else>Create your first folder to organize your inventory</span>

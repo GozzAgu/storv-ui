@@ -58,10 +58,10 @@
     
     <!-- Actual Content -->
     <template v-else>
-    <!-- Page Header - Mobile Optimized -->
+    <!-- Page Header - Compact -->
       <div>
-      <h1 class="text-xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">Sales</h1>
-      <p class="mt-1.5 text-xs sm:text-base text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Sales</h1>
+      <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
     <!-- Tab Navigation - Mobile Optimized -->
@@ -103,22 +103,22 @@
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
 
-    <!-- Stats Cards - Mobile Optimized -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:hidden">
-      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
+    <!-- Stats Cards - Compact -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 lg:hidden">
+      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 p-2.5">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Receipts</p>
-            <p class="mt-1.5 sm:mt-2 text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Total Receipts</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <span v-if="receiptsStore.loading" class="inline-block h-5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>{{ receipts.length }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time</p>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">All time</p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <ReceiptPercentIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+          <div class="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-    </div>
+        </div>
       </Card>
 
       <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
@@ -136,40 +136,40 @@
         </div>
       </Card>
 
-      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 sm:p-4">
+      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 p-2.5">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Today's Sales</p>
-            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Today's Sales</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <span v-if="receiptsStore.loading" class="inline-block h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>${{ formatCurrency(todaySales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
-              <span v-if="receiptsStore.loading" class="inline-block h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">
+              <span v-if="receiptsStore.loading" class="inline-block h-2.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
               <span v-else>{{ todayReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CalendarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 dark:text-primary-400" />
+          <div class="w-8 h-8 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <CurrencyDollarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="sm" extra-class="border-l-4 border-l-orange-500 sm:p-4">
+      <Card padding="sm" extra-class="border-l-4 border-l-orange-500 p-2.5">
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
-            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 min-h-[2rem] sm:min-h-[2.5rem] leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-6 sm:h-8 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>${{ formatCurrency(monthSales) }}</span>
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <span v-if="receiptsStore.loading" class="inline-block h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+              <span v-else>${{ formatCurrency(monthSales || thisMonthSales) }}</span>
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 min-h-[1rem] truncate">
-              <span v-if="receiptsStore.loading" class="inline-block h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>{{ monthReceipts }} receipts</span>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">
+              <span v-if="receiptsStore.loading" class="inline-block h-2.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+              <span v-else>{{ monthReceipts || thisMonthReceipts }} receipts</span>
             </p>
           </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <ChartBarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 dark:text-orange-400" />
+          <div class="w-8 h-8 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
+            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
       </Card>
@@ -208,7 +208,7 @@
               <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
-                <span v-else>${{ formatCurrency(monthSales) }}</span>
+                <span v-else>${{ formatCurrency(monthSales || thisMonthSales) }}</span>
               </span>
             </div>
           </div>
@@ -283,149 +283,149 @@
             <tr>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('receiptNumber') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Receipt #
                   <template v-if="isColumnSortable('receiptNumber')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'receiptNumber' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'receiptNumber' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('customerName') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('customerName') && toggleSort('customerName')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Customer
                   <template v-if="isColumnSortable('customerName')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'customerName' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'customerName' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('date') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('date') && toggleSort('date')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Date
                   <template v-if="isColumnSortable('date')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'date' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'date' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('itemsCount') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Items
                   <template v-if="isColumnSortable('itemsCount')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'itemsCount' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'itemsCount' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('total') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('total') && toggleSort('total')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Total
                   <template v-if="isColumnSortable('total')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'total' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'total' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('paymentMethod') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('paymentMethod') && toggleSort('paymentMethod')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Payment
                   <template v-if="isColumnSortable('paymentMethod')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'paymentMethod' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'paymentMethod' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('status') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('status') && toggleSort('status')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Status
                   <template v-if="isColumnSortable('status')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'status' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'status' && currentSort.order === 'desc'"
@@ -457,7 +457,7 @@
                   </template>
                 </div>
               </th>
-              <th class="px-3 sm:px-3 py-2 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[160px]">
+              <th class="px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[140px]">
                 Actions
               </th>
             </tr>
@@ -468,9 +468,9 @@
               :key="receipt.id"
               class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="flex items-center gap-1.5 sm:gap-2">
-                  <div class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <div class="flex items-center gap-1.5">
+                  <div class="text-xs font-medium text-gray-900 dark:text-gray-100">
                     {{ receipt.receiptNumber }}
                   </div>
                   <span
@@ -569,22 +569,22 @@
                     class="flex-shrink-0 p-2 sm:p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded-lg transition-colors touch-manipulation"
                     title="Delete"
                   >
-                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
+                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                 </div>
               </td>
             </tr>
             <!-- Empty State - Mobile Optimized -->
             <tr v-if="sortedFilteredReceipts.length === 0" class="bg-white dark:bg-gray-800">
-              <td colspan="9" class="px-4 sm:px-6 py-8 sm:py-12">
+              <td colspan="9" class="px-3 py-6">
                 <div class="text-center">
-                  <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <ReceiptPercentIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
+                  <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
+                    <ReceiptPercentIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
                     {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
                   </h3>
-                  <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-5 sm:mb-6 px-4">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-4">
                     {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first receipt to get started' }}
                   </p>
                   <Button
@@ -661,47 +661,47 @@
       <Card padding="none">
         <!-- Header with Stats and Filters -->
         <div v-if="!receiptsStore.loading" class="border-b border-gray-200 dark:border-gray-700">
-          <!-- Stats - Mobile Optimized -->
-          <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
-            <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
-              <div class="flex items-center gap-1.5 sm:gap-2">
+          <!-- Stats - Compact -->
+          <div class="px-3 py-2 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex items-center flex-wrap gap-2.5">
+              <div class="flex items-center gap-1.5">
                 <UsersIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Customers:</span>
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Customers:</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                   {{ uniqueCustomers.length }}
                 </span>
               </div>
-              <div class="flex items-center gap-1.5 sm:gap-2">
+              <div class="flex items-center gap-1.5">
                 <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Revenue:</span>
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Revenue:</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
               </div>
-              <div class="hidden sm:flex items-center gap-2">
+              <div class="hidden sm:flex items-center gap-1.5">
                 <ChartBarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Avg. Order:</span>
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Avg. Order:</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                   ${{ formatCurrency(customersAverageOrderValue) }}
                 </span>
               </div>
             </div>
           </div>
-          <!-- Filters - Mobile Optimized with Card-like Design -->
-          <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 lg:bg-gray-50 lg:dark:bg-gray-800/50 lg:border-t-0">
-            <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-3">
+          <!-- Filters - Compact -->
+          <div class="px-3 py-2 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 lg:bg-gray-50 lg:dark:bg-gray-800/50 lg:border-t-0">
+            <div class="space-y-2 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-2">
               <!-- Search Input -->
               <div class="relative flex-1 sm:flex-initial">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="customersSearchQuery"
                   type="text"
                 placeholder="Search customers..."
-                class="w-full sm:w-48 pl-10 sm:pl-9 pr-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                class="w-full sm:w-48 pl-9 pr-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
               <!-- Sort Select -->
               <select
                 v-model="customersSortBy"
-                class="flex-1 sm:flex-initial px-3 py-2.5 sm:py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[160px]"
+                class="flex-1 sm:flex-initial px-2.5 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-0 sm:min-w-[140px]"
               >
                 <option value="name">Sort by Name</option>
                 <option value="orders">Sort by Orders</option>
@@ -711,99 +711,99 @@
             </div>
           </div>
         </div>
-        <div v-if="receiptsStore.loading" class="text-center py-12">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading customers...</p>
+        <div v-if="receiptsStore.loading" class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading customers...</p>
         </div>
         <div v-else class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
               <tr>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 w-12"></th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Customer</th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Contact</th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Orders</th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Total Spent</th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Last Order</th>
-                <th class="px-3 sm:px-4 py-2 sm:py-3 text-right text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Actions</th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 w-10"></th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Customer</th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Contact</th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Orders</th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Total Spent</th>
+                <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Last Order</th>
+                <th class="px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               <template v-for="customer in paginatedCustomers" :key="customer.id">
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td class="px-4 py-3">
+                  <td class="px-2 py-1.5">
                     <button
                       @click="toggleCustomerExpanded(customer.id)"
-                      class="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                      class="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                       <ChevronRightIcon
-                        :class="['w-5 h-5 transition-transform', expandedCustomers[customer.id] ? 'rotate-90' : '']"
+                        :class="['w-4 h-4 transition-transform', expandedCustomers[customer.id] ? 'rotate-90' : '']"
                       />
                     </button>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3">
-                    <div class="flex items-center gap-2 sm:gap-3">
-                      <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
+                  <td class="px-2 py-1.5">
+                    <div class="flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                         {{ customer.name.charAt(0).toUpperCase() }}
                       </div>
                       <div class="min-w-0 flex-1">
-                        <p class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
-                        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
+                        <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
                       </div>
                     </div>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3">
-                    <div class="space-y-0.5 sm:space-y-1">
-                      <p v-if="customer.email" class="text-xs sm:text-sm text-gray-900 dark:text-gray-100 truncate">{{ customer.email }}</p>
-                      <p v-if="customer.phone" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">{{ customer.phone }}</p>
-                      <p v-if="!customer.email && !customer.phone" class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 italic">No contact info</p>
+                  <td class="px-2 py-1.5">
+                    <div class="space-y-0.5">
+                      <p v-if="customer.email" class="text-xs text-gray-900 dark:text-gray-100 truncate">{{ customer.email }}</p>
+                      <p v-if="customer.phone" class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ customer.phone }}</p>
+                      <p v-if="!customer.email && !customer.phone" class="text-[10px] text-gray-400 dark:text-gray-500 italic">No contact info</p>
                     </div>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3">
-                    <span class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
+                  <td class="px-2 py-1.5">
+                    <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3">
-                    <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
+                  <td class="px-2 py-1.5">
+                    <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3">
-                    <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
+                  <td class="px-2 py-1.5">
+                    <span class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 sm:py-3 text-right">
+                  <td class="px-2 py-1.5 text-right">
                     <button
                       @click="viewCustomerReceipts(customer)"
-                      class="px-2 sm:px-3 py-1.5 sm:py-1.5 text-[10px] sm:text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-lg transition-colors touch-manipulation"
+                      class="px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-md transition-colors"
                     >
                       View Receipts
                     </button>
                   </td>
                 </tr>
-                <!-- Expanded Row: Purchased Items -->
+                <!-- Expanded Row: Purchased Items - Compact -->
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50 dark:bg-gray-900/50">
-                  <td colspan="7" class="px-4 py-4">
-                    <div class="space-y-4">
-                      <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Purchased Items</h4>
-                      <div class="space-y-3">
+                  <td colspan="7" class="px-3 py-3">
+                    <div class="space-y-2.5">
+                      <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-2">Purchased Items</h4>
+                      <div class="space-y-2">
                         <div
                           v-for="receipt in getCustomerReceipts(customer.id)"
                           :key="receipt.id"
-                          class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+                          class="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 p-2.5"
                         >
-                          <div class="flex items-center justify-between mb-3">
+                          <div class="flex items-center justify-between mb-2">
                             <div>
-                              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                                 Receipt #{{ receipt.receiptNumber }}
                               </p>
-                              <p class="text-xs text-gray-500 dark:text-gray-400">
+                              <p class="text-[10px] text-gray-500 dark:text-gray-400">
                                 {{ formatDate(receipt.date) }} • {{ formatTime(receipt.date) }}
                               </p>
                             </div>
                             <div class="text-right">
-                              <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                                 ${{ formatCurrency(receipt.total) }}
                               </p>
                               <span
                                 :class="[
-                                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                                  'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium',
                                   receipt.status === 'completed'
                                     ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                     : receipt.status === 'pending'
@@ -815,23 +815,23 @@
                               </span>
                             </div>
                           </div>
-                          <div class="space-y-2">
+                          <div class="space-y-1.5">
                             <div
                               v-for="(item, index) in receipt.items"
                               :key="index"
-                              class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                              class="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0"
                             >
                               <div class="flex-1">
-                                <p class="text-sm text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                  Quantity: {{ item.quantity }} • Price: ${{ formatCurrency(item.price) }}
+                                <p class="text-xs text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                                  Qty: {{ item.quantity }} • ${{ formatCurrency(item.price) }}
                                   <span v-if="item.hasDiscount" class="text-green-600 dark:text-green-400">
                                     ({{ item.discountPercentage }}% off)
                                   </span>
                                 </p>
                               </div>
                               <div class="text-right">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                                   ${{ formatCurrency(item.price * item.quantity) }}
                                 </p>
                               </div>
@@ -843,17 +843,17 @@
                   </td>
                 </tr>
               </template>
-              <!-- Empty State - Mobile Optimized -->
+              <!-- Empty State - Compact -->
               <tr v-if="filteredCustomers.length === 0" class="bg-white dark:bg-gray-800">
-                <td colspan="7" class="px-4 sm:px-6 py-8 sm:py-12">
+                <td colspan="7" class="px-3 py-6">
                   <div class="text-center">
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                      <UsersIcon class="w-7 h-7 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500" />
+                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
+                      <UsersIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
                       {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
                     </h3>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 px-4">
                       {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once receipts are created' }}
                     </p>
                   </div>

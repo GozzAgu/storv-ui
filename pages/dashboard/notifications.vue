@@ -1,81 +1,82 @@
 <template>
-  <div class="space-y-4 sm:space-y-5">
-    <!-- Page Header -->
+  <div class="space-y-3">
+    <!-- Page Header - Compact -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
+        <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
           Track all activities and updates in your store
         </p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <button
           v-if="unreadNotifications.length > 0"
           @click="handleMarkAllAsRead"
           :disabled="notificationsStore.loading"
-          class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Mark all as read
         </button>
       </div>
     </div>
 
-    <!-- Loading State - Skeleton -->
-    <div v-if="notificationsStore.loading && notifications.length === 0" class="space-y-3">
-      <Card v-for="i in 5" :key="i" padding="sm" extra-class="sm:p-4">
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
-          <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
+    <!-- Loading State - Skeleton (Compact) -->
+    <div v-if="notificationsStore.loading && notifications.length === 0" class="space-y-2">
+      <Card v-for="i in 5" :key="i" padding="sm" extra-class="p-2.5">
+        <div class="flex items-start gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
+          <div class="flex-1 space-y-1.5">
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
           </div>
         </div>
       </Card>
     </div>
 
-    <!-- Empty State -->
-    <Card v-else-if="notifications.length === 0">
-      <div class="text-center py-12">
-        <BellIcon class="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+    <!-- Empty State - Compact -->
+    <Card v-else-if="notifications.length === 0" padding="sm" extra-class="p-4">
+      <div class="text-center py-6">
+        <BellIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           No notifications yet
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
           Your activity notifications will appear here
         </p>
       </div>
     </Card>
 
-    <!-- Notifications List -->
-    <div v-else class="space-y-3">
+    <!-- Notifications List - Compact -->
+    <div v-else class="space-y-2">
       <Card
         v-for="notification in notifications"
         :key="notification.id"
-        padding="md"
-        :extra-class="`transition-all duration-200 cursor-pointer hover:shadow-md ${!notification.read ? 'bg-primary-50/50 dark:bg-primary-900/10 border-primary-200 dark:border-primary-800' : ''}`"
+        padding="sm"
+        extra-class="p-2.5 transition-all duration-200 cursor-pointer hover:shadow-md"
+        :class="!notification.read ? 'bg-primary-50/50 dark:bg-primary-900/10 border-primary-200 dark:border-primary-800' : ''"
         @click="handleNotificationClick(notification)"
       >
-        <div class="flex items-start gap-4">
+        <div class="flex items-start gap-2.5">
           <!-- Icon -->
           <div :class="[
-            'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+            'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
             getIconClasses(notification.type)
           ]">
-            <component :is="getIcon(notification.type)" class="w-5 h-5" />
+            <component :is="getIcon(notification.type)" class="w-4 h-4" />
           </div>
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-2">
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                   {{ notification.title }}
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">
                   {{ notification.message }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
                   {{ formatTime(notification.createdAt) }}
                 </p>
               </div>
@@ -83,19 +84,19 @@
               <!-- Unread indicator -->
               <div
                 v-if="!notification.read"
-                class="flex-shrink-0 w-2 h-2 bg-primary-500 rounded-full mt-2"
+                class="flex-shrink-0 w-1.5 h-1.5 bg-primary-500 rounded-full mt-1"
               ></div>
             </div>
           </div>
         </div>
       </Card>
 
-      <!-- Load More Button -->
-      <div v-if="notificationsStore.hasMore" class="text-center pt-4">
+      <!-- Load More Button - Compact -->
+      <div v-if="notificationsStore.hasMore" class="text-center pt-3">
         <button
           @click="loadMoreNotifications"
           :disabled="notificationsStore.loading"
-          class="px-6 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {{ notificationsStore.loading ? 'Loading...' : 'Load more' }}
         </button>

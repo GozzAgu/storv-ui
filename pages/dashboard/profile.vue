@@ -1,18 +1,18 @@
 <template>
-  <div class="space-y-4 sm:space-y-5">
-    <!-- Page Header -->
+  <div class="space-y-3">
+    <!-- Page Header - Compact -->
     <div>
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Profile</h1>
-      <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Profile</h1>
+      <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Manage your account settings and preferences</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <!-- Profile Card -->
-      <Card class="lg:col-span-1">
+      <Card class="lg:col-span-1 p-3">
         <div class="flex flex-col items-center text-center">
           <!-- Avatar -->
-          <div class="relative mb-4">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shadow-lg">
+          <div class="relative mb-3">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
               {{ profileData.firstName[0] }}{{ profileData.lastName[0] }}
             </div>
             <button 
@@ -37,78 +37,78 @@
             <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
           <div v-else>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">
               {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ profileData.email || 'No email' }}</p>
-            <p class="text-sm font-medium text-primary-600 dark:text-primary-400">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ profileData.email || 'No email' }}</p>
+            <p class="text-xs font-medium text-primary-600 dark:text-primary-400 mt-0.5">
               {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </p>
           </div>
           
           <!-- Stats -->
-          <div class="grid grid-cols-3 gap-4 w-full mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-3 gap-3 w-full mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div>
-              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              <p v-if="isLoadingStats" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
-              <p v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Orders</p>
+              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              <p v-if="isLoadingStats" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
-              <p v-else class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Products</p>
+              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                <span class="inline-block h-6 w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
+              <p v-if="isLoadingStats" class="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <span class="inline-block h-5 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></span>
               </p>
-              <p v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Customers</p>
+              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
             </div>
           </div>
         </div>
       </Card>
 
       <!-- Main Content -->
-      <div class="lg:col-span-2 space-y-4 sm:space-y-5">
+      <div class="lg:col-span-2 space-y-3">
         <!-- Personal Information -->
-        <Card>
-          <div class="flex items-center justify-between mb-6">
+        <Card padding="sm" extra-class="p-3">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Personal Information</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Update your personal details</p>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Personal Information</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
             </div>
-            <div v-if="!isEditingPersonalInfo" class="flex gap-2">
+            <div v-if="!isEditingPersonalInfo" class="flex gap-1.5">
               <button 
                 @click="enableEditing('personal')"
-                class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors"
               >
                 Edit
               </button>
             </div>
-            <div v-else class="flex gap-2">
+            <div v-else class="flex gap-1.5">
               <button 
                 @click="cancelEditing('personal')"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 Cancel
               </button>
               <button 
                 @click="savePersonalInfo"
-                class="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white dark:text-white rounded-lg transition-colors shadow-sm"
+                class="px-3 py-1.5 text-xs font-medium bg-primary-600 hover:bg-primary-700 text-white dark:text-white rounded-md transition-colors shadow-sm"
               >
                 Save Changes
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 First Name
               </label>
               <input
@@ -116,16 +116,16 @@
                 type="text"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-3 py-2 text-xs border rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
-                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
                 ]"
                 placeholder="Enter first name"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Last Name
               </label>
               <input
@@ -133,16 +133,16 @@
                 type="text"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-3 py-2 text-xs border rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
-                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
                 ]"
                 placeholder="Enter last name"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Email Address
               </label>
               <input
@@ -150,16 +150,16 @@
                 type="email"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-3 py-2 text-xs border rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
-                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
                 ]"
                 placeholder="Enter email address"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Phone Number
               </label>
               <input
@@ -167,27 +167,27 @@
                 type="tel"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+                  'w-full px-3 py-2 text-xs border rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500',
                   isEditingPersonalInfo
-                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
                 ]"
                 placeholder="Enter phone number"
               />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Bio
               </label>
               <textarea
                 v-model="profileData.bio"
-                rows="3"
+                rows="2"
                 :disabled="!isEditingPersonalInfo"
                 :class="[
-                  'w-full px-4 py-2.5 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none',
+                  'w-full px-3 py-2 text-xs border rounded-md transition-colors focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-none',
                   isEditingPersonalInfo
-                    ? 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
-                    : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed'
                 ]"
                 placeholder="Tell us about yourself"
               ></textarea>
@@ -196,118 +196,118 @@
         </Card>
 
         <!-- Account Settings -->
-        <Card>
-          <div class="flex items-center justify-between mb-6">
+        <Card padding="sm" extra-class="p-3">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Account Settings</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your account preferences</p>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account Settings</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <LanguageIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <LanguageIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Language</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Language</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
                 </div>
               </div>
               <button 
                 @click="showLanguageModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Change
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <GlobeAltIcon class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <GlobeAltIcon class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Region</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Region</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
                 </div>
               </div>
               <button 
                 @click="showRegionModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Change
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <CurrencyDollarIcon class="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <CurrencyDollarIcon class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Currency</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Currency</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
                 </div>
               </div>
               <button 
                 @click="showCurrencyModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Change
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <BellIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <BellIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Notifications</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
                 </div>
               </div>
               <button 
                 @click="showNotificationsModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Manage
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <MoonIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <MoonIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Theme</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Theme</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
                 </div>
               </div>
               <button 
                 @click="showThemeModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Change
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <CalendarIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <CalendarIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Timezone</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Timezone</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
                 </div>
               </div>
               <button 
                 @click="showTimezoneModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Change
               </button>
@@ -316,69 +316,69 @@
         </Card>
 
         <!-- Security -->
-        <Card>
-          <div class="flex items-center justify-between mb-6">
+        <Card padding="sm" extra-class="p-3">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Security</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your security settings</p>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Security</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <KeyIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <KeyIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Password</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
                 </div>
               </div>
               <button 
                 @click="showPasswordModal = true"
-                class="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors"
               >
                 Change
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <ShieldCheckIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <ShieldCheckIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
                 </div>
               </div>
               <button 
                 @click="handle2FAToggle"
                 :class="[
-                  'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                  'px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
                   securitySettings.twoFactor
                     ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    : 'border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                 ]"
               >
                 {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
               </button>
             </div>
 
-            <div class="flex items-center justify-between py-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <DevicePhoneMobileIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <DevicePhoneMobileIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Active Sessions</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active Sessions</p>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
                 </div>
               </div>
               <button 
                 @click="showSessionsModal = true"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline"
               >
                 View All
               </button>
@@ -387,11 +387,11 @@
         </Card>
 
         <!-- Store Information -->
-        <Card v-if="storeInfo.storeName || isLoadingProfile">
-          <div class="flex items-center justify-between mb-6">
+        <Card v-if="storeInfo.storeName || isLoadingProfile" padding="sm" extra-class="p-3">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Store Information</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Your store details from onboarding</p>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Store Information</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
             </div>
           </div>
 
@@ -401,44 +401,44 @@
             <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
           </div>
 
-          <div v-else-if="storeInfo.storeName" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div v-else-if="storeInfo.storeName" class="space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store Name</p>
-                <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
+                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Store Name</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
               </div>
               <div v-if="storeInfo.storeEmail">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store Email</p>
-                <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeEmail }}</p>
+                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Store Email</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeEmail }}</p>
               </div>
               <div v-if="storeInfo.storePhone">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store Phone</p>
-                <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storePhone }}</p>
+                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Store Phone</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storePhone }}</p>
               </div>
               <div v-if="storeInfo.storeDescription">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</p>
-                <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeDescription }}</p>
+                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Description</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeDescription }}</p>
               </div>
             </div>
             <div v-if="storeInfo.storeAddress">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address</p>
-              <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
+              <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Address</p>
+              <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
             </div>
-            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="pt-2.5 border-t border-gray-200 dark:border-gray-700">
               <NuxtLink
                 to="/dashboard/settings"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1"
+                class="text-xs text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1"
               >
                 Manage store settings →
               </NuxtLink>
             </div>
           </div>
 
-          <div v-else class="text-center py-8">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
+          <div v-else class="text-center py-6">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">No store information available.</p>
             <NuxtLink
               to="/dashboard/settings"
-              class="inline-block px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+              class="inline-block px-3 py-1.5 text-xs font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors"
             >
               Set up store information
             </NuxtLink>
@@ -446,24 +446,24 @@
         </Card>
 
         <!-- Roles & Permissions -->
-        <Card>
-          <div class="flex items-center justify-between mb-6">
+        <Card padding="sm" extra-class="p-3">
+          <div class="flex items-center justify-between mb-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-50">Roles & Permissions</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-300 mt-1">Your current role and access permissions</p>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Roles & Permissions</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-300 mt-0.5">Your current role and access permissions</p>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/60 dark:to-primary-800/60 text-primary-700 dark:text-primary-50 rounded-full border border-primary-300 dark:border-primary-600 shadow-sm">
+            <span class="px-2.5 py-1 text-xs font-medium bg-gradient-to-r from-primary-100 to-primary-200 dark:from-primary-900/60 dark:to-primary-800/60 text-primary-700 dark:text-primary-50 rounded-full border border-primary-300 dark:border-primary-600 shadow-sm">
               {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-2.5">
             <!-- Role Description -->
-            <div class="p-4 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-md">
-              <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">
+            <div class="p-2.5 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-md">
+              <p class="text-xs text-primary-900 dark:text-primary-50 font-medium mb-1.5">
                 {{ profileData.role === 'staff' ? 'Staff Member' : 'Super Admin' }}
               </p>
-              <p class="text-xs text-primary-700 dark:text-primary-100 leading-relaxed">
+              <p class="text-[10px] text-primary-700 dark:text-primary-100 leading-relaxed">
                 <template v-if="profileData.role === 'staff'">
                   As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
                 </template>
@@ -475,26 +475,26 @@
 
             <!-- Permissions List -->
             <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-50 mb-3">Your Permissions:</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-50 mb-2">Your Permissions:</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 <div 
                   v-for="permission in (profileData.role === 'staff' ? staffPermissions : superAdminPermissions)" 
                   :key="permission"
-                  class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                  class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
                 >
-                  <CheckCircleIcon class="w-5 h-5 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  <span class="text-sm text-gray-700 dark:text-gray-100 leading-relaxed">{{ permission }}</span>
+                  <CheckCircleIcon class="w-3.5 h-3.5 text-green-500 dark:text-green-400 flex-shrink-0" />
+                  <span class="text-xs text-gray-700 dark:text-gray-100 leading-relaxed">{{ permission }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Additional Info -->
-            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <div class="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800/50">
-                <InformationCircleIcon class="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div class="pt-2.5 border-t border-gray-200 dark:border-gray-700">
+              <div class="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800/50">
+                <InformationCircleIcon class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-50 mb-1">About Your Role</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-200 leading-relaxed">
+                  <p class="text-[10px] font-medium text-gray-900 dark:text-gray-50 mb-0.5">About Your Role</p>
+                  <p class="text-[10px] text-gray-600 dark:text-gray-200 leading-relaxed">
                     <template v-if="profileData.role === 'staff'">
                       You are a staff member with access to your assigned store and department. Contact your Super Admin if you need additional permissions or have questions about your access.
                     </template>

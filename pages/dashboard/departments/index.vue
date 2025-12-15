@@ -1,93 +1,97 @@
 <template>
-  <div class="space-y-6 pb-24">
-    <!-- Page Header -->
+  <div class="space-y-3 pb-24">
+    <!-- Page Header - Compact -->
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Departments</h1>
-      <p class="mt-1 text-gray-600 dark:text-gray-400">Manage your store departments and staff</p>
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Departments</h1>
+      <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Manage your store departments and staff</p>
     </div>
 
-    <!-- Stats Cards - Hidden on large screens -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:hidden">
-      <Card padding="md" extra-class="border-l-4 border-l-blue-500">
+    <!-- Stats Cards - Compact (Hidden on large screens) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 lg:hidden">
+      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 p-2.5">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Departments</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Total Departments</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
               {{ departmentsStore.totalDepartments }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Active departments</p>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">Active departments</p>
           </div>
-          <div class="w-12 h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <BuildingOfficeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div class="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-green-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-green-500 p-2.5">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
               {{ totalStaff }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">All departments</p>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">All departments</p>
           </div>
-          <div class="w-12 h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <UsersIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+          <div class="w-8 h-8 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <UsersIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-primary-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 p-2.5">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Managers</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Managers</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
               {{ totalManagers }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Department heads</p>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">Department heads</p>
           </div>
-          <div class="w-12 h-12 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <UserCircleIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div class="w-8 h-8 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </Card>
 
-      <Card padding="md" extra-class="border-l-4 border-l-orange-500">
+      <Card padding="sm" extra-class="border-l-4 border-l-orange-500 p-2.5">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Staff/Dept</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Avg. Staff/Dept</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
               {{ averageStaffPerDept }}
             </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500">Per department</p>
+            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">Per department</p>
           </div>
-          <div class="w-12 h-12 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <ChartBarIcon class="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          <div class="w-8 h-8 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
       </Card>
     </div>
 
-    <!-- Staff Member Banner (only for staff users) -->
-    <Card v-if="isStaff && currentStaffMember" padding="md" extra-class="bg-gradient-to-r from-primary-50 to-primary-50 dark:from-primary-900/20 dark:to-primary-900/20 border-l-4 border-l-primary-500">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
-            <UsersIcon class="w-6 h-6" />
+    <!-- Staff Member Banner - Compact (only for staff users) -->
+    <Card
+      v-if="isStaff && currentStaffMember"
+      padding="sm"
+      extra-class="bg-gradient-to-r from-primary-50 to-primary-50 dark:from-primary-900/20 dark:to-primary-900/20 border-l-4 border-l-primary-500 p-2.5"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm">
+            <UsersIcon class="w-5 h-5" />
           </div>
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
               You are a member of {{ currentStaffMember.departmentName || 'a department' }}
             </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">
               Position: {{ currentStaffMember.position }} • Role: {{ currentStaffMember.role }}
             </p>
           </div>
         </div>
         <NuxtLink
           :to="currentDepartment && currentDepartment.isActive === false ? '#' : `/dashboard/departments/${currentStaffMember.departmentId}`"
-          class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+          class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-xs font-medium transition-colors"
           :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': currentDepartment && currentDepartment.isActive === false }"
           :title="currentDepartment && currentDepartment.isActive === false ? 'This department is inactive' : ''"
         >
@@ -96,123 +100,143 @@
       </div>
     </Card>
 
-    <!-- Filters - Hidden on large screens -->
-    <Card padding="md" class="lg:hidden">
-      <div class="flex flex-col md:flex-row gap-4">
+    <!-- Filters - Compact (Hidden on large screens) -->
+    <Card padding="sm" class="lg:hidden p-2.5">
+      <div class="flex flex-col md:flex-row gap-2">
         <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search departments by name, manager..."
-            class="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </div>
         <Button
           variant="outline"
           @click="resetFilters"
           :icon="ArrowPathIcon"
+          class="w-full md:w-auto text-xs py-2"
         >
           Reset
         </Button>
       </div>
     </Card>
 
-    <!-- Error State -->
-    <Card v-if="departmentsStore.error && !departmentsStore.loading">
-      <div class="text-center py-12">
-        <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
-          <BuildingOfficeIcon class="w-8 h-8 text-red-600 dark:text-red-400" />
+    <!-- Error State - Compact -->
+    <Card v-if="departmentsStore.error && !departmentsStore.loading" padding="sm" extra-class="p-4">
+      <div class="text-center py-6">
+        <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-2">
+          <BuildingOfficeIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           Error Loading Departments
         </h3>
-        <p class="text-sm text-red-600 dark:text-red-400 mb-6 max-w-md mx-auto">
+        <p class="text-xs text-red-600 dark:text-red-400 mb-4 max-w-md mx-auto px-4">
           {{ departmentsStore.error }}
         </p>
         <Button
           variant="primary"
           :icon="ArrowPathIcon"
           @click="handleRetryFetch"
+          class="text-xs"
         >
           Retry
         </Button>
       </div>
     </Card>
 
-    <!-- Loading State - Skeleton -->
+    <!-- Loading State - Skeleton (Compact) -->
     <template v-else-if="departmentsStore.loading">
       <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
-        <Card v-for="i in 4" :key="i" padding="sm" extra-class="sm:p-4">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-3">
+        <Card v-for="i in 4" :key="i" padding="sm" extra-class="p-2.5">
           <div class="flex items-center justify-between">
             <div class="flex-1 min-w-0">
-              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
-              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-1.5 animate-pulse"></div>
+              <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
             </div>
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+            <div class="w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
           </div>
         </Card>
       </div>
 
       <!-- Departments Grid Skeleton -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card v-for="i in 8" :key="i" padding="sm" extra-class="sm:p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            <div class="flex-1">
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-2 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+        >
+          <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
+            <div class="flex items-center gap-2 flex-1">
+              <div class="w-7 h-7 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+              <div class="flex-1">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+              </div>
+            </div>
+            <div class="flex gap-0.5">
+              <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
             </div>
           </div>
-          <div class="space-y-2">
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
+          <div class="p-2.5">
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div>
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-16 animate-pulse"></div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-12 animate-pulse"></div>
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-8 animate-pulse"></div>
+              </div>
+            </div>
           </div>
-        </Card>
+        </div>
       </div>
     </template>
 
     <!-- Compact Header (Visible only on large screens) -->
-    <Card v-if="!departmentsStore.loading && !departmentsStore.error" padding="sm" class="hidden lg:block mb-4">
-      <div class="flex items-center justify-between">
+    <Card v-if="!departmentsStore.loading && !departmentsStore.error" padding="sm" class="hidden lg:block mb-3 p-2.5">
+      <div class="flex items-center justify-between gap-4">
         <!-- Compact Stats -->
-        <div class="flex items-center gap-6">
-          <div class="flex items-center gap-2">
-            <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-1.5">
+            <BuildingOfficeIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span class="text-xs text-gray-600 dark:text-gray-400">Departments:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <UsersIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+          <div class="flex items-center gap-1.5">
+            <UsersIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
             <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+          <div class="flex items-center gap-1.5">
+            <UserCircleIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
             <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+          <div class="flex items-center gap-1.5">
+            <ChartBarIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
             <span class="text-xs text-gray-600 dark:text-gray-400">Avg/Dept:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</span>
           </div>
         </div>
         <!-- Compact Search -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search departments..."
-              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
+              class="pl-9 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-56"
             />
           </div>
           <button
             @click="resetFilters"
-            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
             title="Reset filters"
           >
             <ArrowPathIcon class="w-4 h-4" />
@@ -221,85 +245,102 @@
       </div>
     </Card>
 
-    <!-- Departments Grid -->
-    <div v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card
+    <!-- Departments Grid - Compact -->
+    <div
+      v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length > 0"
+      class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4"
+    >
+      <div
         v-for="department in paginatedDepartments"
         :key="department.id"
-        padding="md"
-        :extra-class="`group transition-shadow relative ${department.isActive === false ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg cursor-pointer'}`"
+        class="group relative bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
+        :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false }"
         @click="department.isActive === false ? null : navigateToDepartment(department.id)"
       >
-        <div class="flex items-start justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-lg">
-              {{ department.name.charAt(0) }}
+        <!-- Compact Card Header -->
+        <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
+          <div class="flex items-center gap-2 flex-1 min-w-0">
+            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 flex items-center justify-center flex-shrink-0">
+              <BuildingOfficeIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
             </div>
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+            <div class="min-w-0 flex-1">
+              <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                 {{ department.name }}
               </h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ department.departmentType || 'N/A' }}
-              </p>
             </div>
           </div>
-          <div v-if="canManageDepartments" class="flex items-center gap-1 z-10 flex-shrink-0">
+          <div v-if="canManageDepartments" class="flex items-center gap-0.5 flex-shrink-0 ml-1">
             <button
               @click.stop="department.isActive === false ? null : handleEditDepartment(department)"
               :disabled="department.isActive === false"
-              class="flex-shrink-0 p-1.5 sm:p-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               :title="department.isActive === false ? 'Department is inactive' : 'Edit'"
             >
-              <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
+              <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
             </button>
             <button
               @click.stop="department.isActive === false ? null : handleDeleteDepartment(department)"
               :disabled="department.isActive === false"
-              class="flex-shrink-0 p-1.5 sm:p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               :title="department.isActive === false ? 'Department is inactive' : 'Delete'"
             >
-              <TrashIcon class="w-5 h-5 flex-shrink-0" />
+              <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
             </button>
           </div>
           <div v-if="department.isActive === false" class="absolute top-2 right-2 z-10">
-            <span class="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">Inactive</span>
+            <span class="px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">
+              Inactive
+            </span>
           </div>
         </div>
 
-        <div class="space-y-3">
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600 dark:text-gray-400">Manager:</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">
-              {{ department.manager || 'Not assigned' }}
-            </span>
-          </div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600 dark:text-gray-400">Staff Count:</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">
-              {{ department.staffCount }} members
-            </span>
-          </div>
-          <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-600 dark:text-gray-400">Type:</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">
-              {{ department.departmentType || 'N/A' }}
-            </span>
+        <!-- Compact Card Body -->
+        <div class="p-2.5">
+          <!-- Department Type - Compact -->
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1 mb-2.5 min-h-[0.875rem]">
+            {{ department.departmentType || 'N/A' }}
+          </p>
+
+          <!-- Department Stats - Compact Horizontal Layout -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <UserCircleIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Manager</span>
+              </div>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate ml-1 max-w-[60%]">
+                {{ department.manager || 'Not assigned' }}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1">
+                <UsersIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span class="text-[10px] text-gray-600 dark:text-gray-400">Staff</span>
+              </div>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                {{ department.staffCount }}
+              </span>
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <Card v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length === 0 && filteredDepartments.length === 0">
-      <div class="text-center py-12">
-        <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-          <BuildingOfficeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+    <!-- Empty State - Compact -->
+    <Card
+      v-if="!departmentsStore.loading && !departmentsStore.error && paginatedDepartments.length === 0 && filteredDepartments.length === 0"
+      padding="sm"
+      extra-class="p-4"
+    >
+      <div class="text-center py-6">
+        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
+          <BuildingOfficeIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-4">
           {{ searchQuery ? 'Try adjusting your search' : 'Create your first department to organize your store' }}
         </p>
         <Button
@@ -307,6 +348,7 @@
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateDepartmentModal"
+          class="text-xs"
         >
           Create First Department
         </Button>
