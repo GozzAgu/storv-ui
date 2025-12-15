@@ -23,27 +23,27 @@
 
     <div class="max-w-md w-full relative z-10">
       <!-- Logo and Header -->
-      <div class="text-center mb-8">
-        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-4">
+      <div class="text-center mb-6">
+        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-3">
           <img
             src="/storv logo.png"
             alt="Storv Logo"
-            class="h-16 w-auto mx-auto object-contain"
+            class="h-12 w-auto mx-auto object-contain"
           />
         </NuxtLink>
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
           Create your account
         </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-base">
+        <p class="text-gray-600 dark:text-gray-400 text-sm">
           Get started with Storv today
         </p>
       </div>
 
       <!-- Sign Up Form Card -->
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
-        <form @submit.prevent="handleSignUp" class="space-y-5">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-6 sm:p-7 border border-white/50 dark:border-gray-700/50">
+        <form @submit.prevent="handleSignUp" class="space-y-4">
           <div>
-            <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="name" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Full name
             </label>
             <input
@@ -52,13 +52,13 @@
               type="text"
               autocomplete="name"
               required
-              class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
+              class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="email" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Email address
             </label>
             <input
@@ -67,13 +67,13 @@
               type="email"
               autocomplete="email"
               required
-              class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
+              class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="password" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Password
             </label>
             <div class="relative">
@@ -83,25 +83,25 @@
                 :type="showPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 required
-                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12 hover:border-gray-300 dark:hover:border-gray-500"
+                class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-10 hover:border-gray-300 dark:hover:border-gray-500"
                 placeholder="Create a password"
               />
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
-                <EyeIcon v-if="!showPassword" class="w-5 h-5" />
-                <EyeSlashIcon v-else class="w-5 h-5" />
+                <EyeIcon v-if="!showPassword" class="w-4 h-4" />
+                <EyeSlashIcon v-else class="w-4 h-4" />
               </button>
             </div>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
               Must be at least 8 characters
             </p>
           </div>
 
           <div>
-            <label for="confirmPassword" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="confirmPassword" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Confirm password
             </label>
             <div class="relative">
@@ -111,44 +111,44 @@
                 :type="showConfirmPassword ? 'text' : 'password'"
                 autocomplete="new-password"
                 required
-                class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12 hover:border-gray-300 dark:hover:border-gray-500"
+                class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-10 hover:border-gray-300 dark:hover:border-gray-500"
                 placeholder="Confirm your password"
               />
               <button
                 type="button"
                 @click="showConfirmPassword = !showConfirmPassword"
-                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
               >
-                <EyeIcon v-if="!showConfirmPassword" class="w-5 h-5" />
-                <EyeSlashIcon v-else class="w-5 h-5" />
+                <EyeIcon v-if="!showConfirmPassword" class="w-4 h-4" />
+                <EyeSlashIcon v-else class="w-4 h-4" />
               </button>
             </div>
-            <p v-if="form.password && form.confirmPassword && form.password !== form.confirmPassword" class="mt-1 text-xs text-red-500">
+            <p v-if="form.password && form.confirmPassword && form.password !== form.confirmPassword" class="mt-1 text-[11px] text-red-500">
               Passwords do not match
             </p>
           </div>
 
           <!-- Error Message -->
-          <div v-if="errorMessage" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <div class="text-sm text-red-600 dark:text-red-400">
-              <p class="font-semibold mb-2">⚠️ Error</p>
+          <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+            <div class="text-xs sm:text-sm text-red-600 dark:text-red-400">
+              <p class="font-semibold mb-1.5">⚠️ Error</p>
               <div class="whitespace-pre-line text-left">{{ errorMessage }}</div>
-              <div v-if="errorMessage.includes('Firestore')" class="mt-4 space-y-2">
+              <div v-if="errorMessage.includes('Firestore')" class="mt-3 space-y-2">
                 <a 
                   href="https://console.firebase.google.com/project/storv-ux/firestore/rules" 
                   target="_blank"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-colors"
                 >
                   🔧 Open Firestore Rules in Firebase Console →
                 </a>
                 <div class="flex items-center gap-2">
                   <button
                     @click="copyRulesToClipboard"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-colors"
                   >
                     📋 Copy Rules to Clipboard
                   </button>
-                  <span v-if="rulesCopied" class="text-xs text-green-600 dark:text-green-400">✓ Copied!</span>
+                  <span v-if="rulesCopied" class="text-[11px] text-green-600 dark:text-green-400">✓ Copied!</span>
                 </div>
               </div>
             </div>
@@ -160,9 +160,9 @@
               v-model="form.acceptTerms"
               type="checkbox"
               required
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded mt-1 cursor-pointer"
+              class="h-3.5 w-3.5 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded mt-0.5 cursor-pointer"
             />
-            <label for="terms" class="ml-2 block text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            <label for="terms" class="ml-2 block text-xs sm:text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
               I agree to the
               <NuxtLink to="/terms" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300">Terms of Service</NuxtLink>
               and
@@ -173,14 +173,14 @@
           <button
             type="submit"
             :disabled="isLoading || !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)"
-            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-xl font-semibold text-base hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
+            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center justify-center gap-2 group"
           >
             <span v-if="!isLoading" class="flex items-center gap-2">
               Create account
-              <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRightIcon class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
             <span v-else class="flex items-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -190,25 +190,25 @@
         </form>
 
         <!-- Phone Sign Up Option -->
-        <div class="mt-6">
+        <div class="mt-5">
           <button
             type="button"
             @click="showPhoneSignIn = !showPhoneSignIn"
-            class="w-full inline-flex justify-center items-center py-3 px-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:shadow-md"
+            class="w-full inline-flex justify-center items-center py-2.5 px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:scale-[1.02]"
           >
-            <PhoneIcon class="w-5 h-5 mr-2" />
+            <PhoneIcon class="w-4 h-4 mr-2" />
             <span>Sign up with Phone</span>
           </button>
         </div>
 
         <!-- Phone Sign In Component -->
-        <div v-if="showPhoneSignIn" class="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div v-if="showPhoneSignIn" class="pt-3 border-t border-gray-200 dark:border-gray-700">
           <PhoneSignIn @success="handlePhoneSignUpSuccess" @error="handlePhoneSignInError" />
         </div>
 
         <!-- Sign In Link -->
-        <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+        <div class="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+          <p class="text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             Already have an account?
             <NuxtLink
               to="/signin"

@@ -1,31 +1,31 @@
 <template>
-  <Modal :modelValue="props.modelValue" @update:modelValue="(value: boolean) => emit('update:modelValue', value)" title="Set Up Two-Factor Authentication" size="lg">
-    <div class="space-y-6">
+  <Modal :modelValue="props.modelValue" @update:modelValue="(value: boolean) => emit('update:modelValue', value)" title="Set Up Two-Factor Authentication" size="md">
+    <div class="space-y-4">
       <!-- Step 1: Choose Method -->
-      <div v-if="step === 1" class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="step === 1" class="space-y-3">
+        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Choose your preferred 2FA method. We recommend using an authenticator app for better security.
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             @click="selectMethod('totp')"
             :class="[
-              'p-6 rounded-md border-2 transition-all text-left',
+              'p-4 rounded-md border transition-all text-left',
               selectedMethod === 'totp'
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <ShieldCheckIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                <ShieldCheckIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p class="font-semibold text-gray-900 dark:text-gray-100">Authenticator App</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Recommended</p>
+                <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">Authenticator App</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">Recommended</p>
               </div>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Use apps like Google Authenticator, Authy, or Microsoft Authenticator
             </p>
           </button>
@@ -33,19 +33,19 @@
           <button
             @click="selectMethod('phone')"
             :class="[
-              'p-6 rounded-md border-2 transition-all text-left',
+              'p-4 rounded-md border transition-all text-left',
               selectedMethod === 'phone'
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
-            <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <DevicePhoneMobileIcon class="w-6 h-6 text-green-600 dark:text-green-400" />
+            <div class="flex items-center gap-2 mb-1.5">
+              <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <DevicePhoneMobileIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <p class="font-semibold text-gray-900 dark:text-gray-100">SMS</p>
+              <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">SMS</p>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Receive verification codes via SMS
             </p>
           </button>
@@ -53,48 +53,48 @@
       </div>
 
       <!-- Step 2: TOTP Setup -->
-      <div v-if="step === 2 && selectedMethod === 'totp'" class="space-y-6">
+      <div v-if="step === 2 && selectedMethod === 'totp'" class="space-y-4">
         <div class="text-center">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
             Scan QR Code
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
             Scan this QR code with your authenticator app
           </p>
           
           <!-- QR Code -->
           <div class="flex justify-center mb-4">
-            <div v-if="qrCodeUrl" class="p-4 bg-white dark:bg-gray-800 rounded-md border-2 border-gray-200 dark:border-gray-700">
-              <img :src="qrCodeUrl" alt="2FA QR Code" class="w-64 h-64" />
+            <div v-if="qrCodeUrl" class="p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+              <img :src="qrCodeUrl" alt="2FA QR Code" class="w-56 h-56" />
             </div>
-            <div v-else class="w-64 h-64 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
+            <div v-else class="w-56 h-56 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
               <div class="text-center">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mb-2"></div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Generating QR code...</p>
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mb-2"></div>
+                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Generating QR code...</p>
               </div>
             </div>
           </div>
 
           <!-- Manual Entry -->
-          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+            <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Can't scan? Enter this code manually:
             </p>
             <div class="flex items-center justify-between gap-2">
-              <code class="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-mono text-gray-900 dark:text-gray-100 break-all">
+              <code class="flex-1 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 break-all">
                 {{ secretKey }}
               </code>
               <button
                 @click="copySecret"
-                class="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
               >
                 Copy
               </button>
             </div>
           </div>
 
-          <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p class="text-sm text-blue-900 dark:text-blue-100">
+          <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p class="text-xs sm:text-sm text-blue-900 dark:text-blue-100">
               <strong>Popular authenticator apps:</strong> Google Authenticator, Microsoft Authenticator, Authy, 1Password
             </p>
           </div>
@@ -102,18 +102,18 @@
       </div>
 
       <!-- Step 2: Phone Setup -->
-      <div v-if="step === 2 && selectedMethod === 'phone'" class="space-y-4">
+      <div v-if="step === 2 && selectedMethod === 'phone'" class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Phone Number
           </label>
           <input
             v-model="phoneNumber"
             type="tel"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
             placeholder="+1234567890"
           />
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
             Enter your phone number with country code
           </p>
         </div>
@@ -121,53 +121,53 @@
       </div>
 
       <!-- Step 3: Verify -->
-      <div v-if="step === 3" class="space-y-4">
+      <div v-if="step === 3" class="space-y-3">
         <div class="text-center">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
             Verify Setup
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
             Enter the {{ selectedMethod === 'totp' ? '6-digit code' : 'verification code' }} from your {{ selectedMethod === 'totp' ? 'authenticator app' : 'phone' }}
           </p>
         </div>
         
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Verification Code
           </label>
           <input
             v-model="verificationCode"
             type="text"
             maxlength="6"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-2xl tracking-widest font-mono"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-xl tracking-widest font-mono"
             placeholder="000000"
             @input="formatCode"
           />
         </div>
 
-        <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p class="text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p class="text-xs sm:text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
         </div>
       </div>
 
       <!-- Step 4: Backup Codes -->
-      <div v-if="step === 4" class="space-y-4">
+      <div v-if="step === 4" class="space-y-3">
         <div class="text-center">
-          <CheckCircleIcon class="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <CheckCircleIcon class="w-12 h-12 text-green-500 mx-auto mb-3" />
+          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
             Two-Factor Authentication Enabled!
           </h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4">
             Save these backup codes in a safe place. You can use them if you lose access to your authenticator app.
           </p>
         </div>
 
-        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border-2 border-dashed border-gray-300 dark:border-gray-700">
-          <div class="grid grid-cols-2 gap-2">
+        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-dashed border-gray-300 dark:border-gray-700">
+          <div class="grid grid-cols-2 gap-1.5">
             <div
               v-for="(code, index) in backupCodes"
               :key="index"
-              class="px-3 py-2 bg-white dark:bg-gray-900 rounded text-sm font-mono text-gray-900 dark:text-gray-100 text-center"
+              class="px-2.5 py-1.5 bg-white dark:bg-gray-900 rounded text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 text-center"
             >
               {{ code }}
             </div>
@@ -177,20 +177,20 @@
         <div class="flex gap-2">
           <button
             @click="copyBackupCodes"
-            class="flex-1 px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
           >
             Copy Codes
           </button>
           <button
             @click="downloadBackupCodes"
-            class="flex-1 px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
           >
             Download
           </button>
         </div>
 
-        <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-          <p class="text-sm text-yellow-900 dark:text-yellow-100">
+        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+          <p class="text-xs sm:text-sm text-yellow-900 dark:text-yellow-100">
             <strong>Important:</strong> Each backup code can only be used once. Store them securely.
           </p>
         </div>

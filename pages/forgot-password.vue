@@ -23,25 +23,25 @@
 
     <div class="max-w-md w-full relative z-10">
       <!-- Logo and Header -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-6">
         <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent mb-4">
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent mb-3">
             Storv
           </h1>
         </NuxtLink>
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
           Reset your password
         </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-base">
+        <p class="text-gray-600 dark:text-gray-400 text-sm">
           Enter your email address and we'll send you a link to reset your password
         </p>
       </div>
 
       <!-- Forgot Password Form Card -->
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-8 sm:p-10 border border-white/50 dark:border-gray-700/50">
-        <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4 sm:space-y-5">
+      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-6 sm:p-7 border border-white/50 dark:border-gray-700/50">
+        <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4">
           <div>
-            <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="email" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Email address
             </label>
             <input
@@ -50,27 +50,27 @@
               type="email"
               autocomplete="email"
               required
-              class="w-full px-4 py-3.5 bg-white/80 dark:bg-gray-700/80 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
+              class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="you@example.com"
             />
           </div>
 
           <!-- Error Message -->
-          <div v-if="errorMessage && !emailSent" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p class="text-sm text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
+          <div v-if="errorMessage && !emailSent" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+            <p class="text-xs sm:text-sm text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
           </div>
 
           <button
             type="submit"
             :disabled="isLoading"
-            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-4 rounded-xl font-semibold text-base hover:shadow-xl hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group"
+            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center justify-center gap-2 group"
           >
             <span v-if="!isLoading" class="flex items-center gap-2">
               Send reset link
-              <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRightIcon class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </span>
             <span v-else class="flex items-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -80,27 +80,27 @@
         </form>
 
         <!-- Success Message -->
-        <div v-else class="text-center space-y-4 sm:space-y-5">
-          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
-            <CheckCircleIcon class="h-8 w-8 text-green-600 dark:text-green-400" />
+        <div v-else class="text-center space-y-3">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/30">
+            <CheckCircleIcon class="h-6 w-6 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
               Check your email
             </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               We've sent a password reset link to
               <span class="font-medium text-gray-900 dark:text-gray-100">{{ form.email }}</span>
             </p>
           </div>
-          <div class="space-y-3">
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+          <div class="space-y-2">
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
               Didn't receive the email? Check your spam folder or
             </p>
             <button
               @click="resendEmail"
               :disabled="isResending"
-              class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors disabled:opacity-50"
+              class="text-xs sm:text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors disabled:opacity-50"
             >
               {{ isResending ? 'Resending...' : 'Resend email' }}
             </button>
@@ -108,12 +108,12 @@
         </div>
 
         <!-- Back to Sign In -->
-        <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+        <div class="mt-5 pt-5 border-t border-gray-200 dark:border-gray-700 text-center">
           <NuxtLink
             to="/signin"
-            class="inline-flex items-center text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+            class="inline-flex items-center text-xs sm:text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
           >
-            <ArrowLeftIcon class="w-4 h-4 mr-1" />
+            <ArrowLeftIcon class="w-3.5 h-3.5 mr-1" />
             Back to sign in
           </NuxtLink>
         </div>
