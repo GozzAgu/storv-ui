@@ -20,12 +20,12 @@
       <!-- Background Gradient -->
       <div class="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 dark:from-gray-900/50 dark:via-gray-800 dark:to-gray-900/50 pointer-events-none"></div>
       <!-- Logo -->
-      <div class="relative flex items-center justify-between h-20 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm" :class="sidebarCollapsed ? 'px-3' : 'px-6'">
+      <div class="relative flex items-center justify-between h-16 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm" :class="sidebarCollapsed ? 'px-3' : 'px-4'">
         <NuxtLink 
           to="/dashboard" 
           :class="[
             'flex items-center transition-all duration-300 group',
-            sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'
+            sidebarCollapsed ? 'justify-center w-full' : 'space-x-2.5'
           ]"
         >
           <div class="relative flex-shrink-0">
@@ -34,14 +34,14 @@
               alt="Storv Logo"
               :class="[
                 'transition-all duration-300 object-contain',
-                sidebarCollapsed ? 'h-8 w-8' : 'h-8 w-auto'
+                sidebarCollapsed ? 'h-7 w-7' : 'h-7 w-auto'
               ]"
             />
             <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-primary-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
           <span 
             v-if="!sidebarCollapsed" 
-            class="text-xl sm:text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
+            class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
           >
           Storv
           </span>
@@ -60,22 +60,22 @@
       <!-- Toggle button - minimal design matching Dribbble, positioned outside and lower -->
       <button
         @click="toggleSidebar"
-        class="absolute top-16 -right-3 hidden lg:flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all z-10"
+        class="absolute top-14 -right-3 hidden lg:flex items-center justify-center w-7 h-7 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all z-10"
         :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-5 h-5" />
-        <ChevronLeftIcon v-else class="w-5 h-5" />
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-4 h-4" />
+        <ChevronLeftIcon v-else class="w-4 h-4" />
       </button>
 
       <!-- Navigation -->
-      <nav class="relative flex-1 py-6 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-3' : 'px-5'">
+      <nav class="relative flex-1 py-4 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
         <div class="space-y-1 min-h-0">
           <template v-for="item in navigation" :key="item.name">
             <!-- Special handling for Inventory - expandable with folders -->
             <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
               <div
                 :class="[
-                  'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-5 py-2.5',
+                  'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-3 py-2',
                   isActive(item.href)
                     ? 'bg-primary-50 dark:bg-primary-900/20'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -89,20 +89,20 @@
                   <!-- Active indicator -->
                   <div 
                     v-if="isActive(item.href)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                   ></div>
                   
                   <component 
                     :is="item.icon" 
                     :class="[
-                      'relative z-10 transition-colors w-6 h-6 mr-4',
+                      'relative z-10 transition-colors w-5 h-5 mr-3',
                       isActive(item.href)
                         ? 'text-primary-600 dark:text-primary-400' 
                         : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                     ]"
                   />
                   <span 
-                    class="relative z-10 whitespace-nowrap text-xs sm:text-[15px] font-semibold transition-colors"
+                    class="relative z-10 whitespace-nowrap text-xs font-medium transition-colors"
                     :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
                   >
                     {{ item.name }}
@@ -125,14 +125,14 @@
               </div>
               
               <!-- Folders tree structure - matches Dribbble design -->
-              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="pl-9 pr-5 space-y-0.5 mt-1">
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="pl-7 pr-3 space-y-0.5 mt-1">
                 <div v-for="folder in recentFolders.slice(0, 5)" :key="folder.id" class="relative">
                   <NuxtLink
                     :to="`/dashboard/inventory/${folder.id}`"
                     :class="[
-                      'group relative flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-200',
+                      'group relative flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg transition-all duration-200',
                       route.params.id === folder.id
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-medium'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200',
                       { 'pointer-events-none opacity-50': switchingStore }
                     ]"
@@ -140,13 +140,13 @@
                     <!-- Active indicator bar -->
                     <div 
                       v-if="route.params.id === folder.id"
-                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-primary-600 dark:bg-primary-500 rounded-r-full"
                     ></div>
                     
-                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
                       <FolderIcon 
                         :class="[
-                          'w-4 h-4 flex-shrink-0 transition-colors',
+                          'w-3.5 h-3.5 flex-shrink-0 transition-colors',
                           route.params.id === folder.id
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
@@ -156,7 +156,7 @@
                     </div>
                     <ArrowRightIcon 
                       v-if="route.params.id === folder.id"
-                      class="w-4 h-4 flex-shrink-0 text-primary-600 dark:text-primary-400"
+                      class="w-3.5 h-3.5 flex-shrink-0 text-primary-600 dark:text-primary-400"
                     />
                   </NuxtLink>
                 </div>
@@ -169,7 +169,7 @@
               :to="item.href"
               :class="[
                 'group relative flex items-center font-medium rounded-md transition-all duration-200',
-                sidebarCollapsed ? 'justify-center w-full py-2.5' : 'justify-start px-5 py-2.5',
+                sidebarCollapsed ? 'justify-center w-full py-2' : 'justify-start px-3 py-2',
                 isActive(item.href)
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50',
@@ -180,7 +180,7 @@
               <!-- Active indicator -->
               <div 
                 v-if="isActive(item.href) && !sidebarCollapsed"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-600 dark:bg-primary-500 rounded-r-full"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary-600 dark:bg-primary-500 rounded-r-full"
               ></div>
               
               <!-- Active indicator for collapsed -->
@@ -193,7 +193,7 @@
                 :is="item.icon" 
                 :class="[
                   'relative z-10 transition-colors',
-                  sidebarCollapsed ? 'w-6 h-6' : 'w-6 h-6 mr-4',
+                  sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
                   isActive(item.href)
                     ? 'text-primary-600 dark:text-primary-400' 
                     : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
@@ -201,7 +201,7 @@
               />
               <span 
                 v-if="!sidebarCollapsed" 
-                class="relative z-10 flex-1 whitespace-nowrap text-xs sm:text-[15px] font-semibold transition-colors"
+                class="relative z-10 flex-1 whitespace-nowrap text-xs font-medium transition-colors"
                 :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300'"
               >
                 {{ item.name }}
@@ -219,10 +219,10 @@
           </template>
           
           <!-- Stores Tree (for super admins) -->
-          <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="space-y-1">
-              <div class="px-5 mb-3">
-                <p class="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stores</p>
+              <div class="px-3 mb-2">
+                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stores</p>
               </div>
               
               <!-- Store items -->
@@ -230,7 +230,7 @@
                 <!-- Store header -->
                 <div
                   :class="[
-                    'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-5 py-2.5',
+                    'group relative flex items-center justify-between w-full font-medium rounded-md transition-all duration-200 px-3 py-2',
                     route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                       ? 'bg-primary-50 dark:bg-primary-900/20'
                       : currentStore?.id === store.id
@@ -251,7 +251,7 @@
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
                     <svg 
-                      class="w-5 h-5 mr-3 flex-shrink-0"
+                      class="w-4 h-4 mr-2.5 flex-shrink-0"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                         ? 'text-primary-600 dark:text-primary-400'
                         : currentStore?.id === store.id
@@ -266,7 +266,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <span 
-                      class="relative z-10 whitespace-nowrap text-xs sm:text-sm font-semibold truncate transition-colors flex items-center gap-2"
+                      class="relative z-10 whitespace-nowrap text-xs font-medium truncate transition-colors flex items-center gap-1.5"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                         ? 'text-primary-700 dark:text-primary-300'
                         : currentStore?.id === store.id
@@ -310,12 +310,12 @@
                 </div>
                 
                 <!-- Departments under store - only show for current store -->
-                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="pl-9 pr-5 space-y-0.5 mt-1">
+                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="pl-7 pr-3 space-y-0.5 mt-1">
                   <div v-for="department in getDepartmentsForStore(store.id)" :key="department.id" class="space-y-0.5">
                     <!-- Department header -->
                     <div
                       :class="[
-                        'group relative flex items-center justify-between px-3 py-2.5 text-xs sm:text-sm rounded-lg transition-all duration-200',
+                        'group relative flex items-center justify-between px-2.5 py-1.5 text-xs rounded-lg transition-all duration-200',
                         route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                           ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-semibold'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
@@ -328,7 +328,7 @@
                       >
                         <BuildingOfficeIcon 
                           :class="[
-                            'w-4 h-4 flex-shrink-0 transition-colors',
+                            'w-3.5 h-3.5 flex-shrink-0 transition-colors',
                             route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                               ? 'text-primary-600 dark:text-primary-400'
                               : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
@@ -338,7 +338,7 @@
                       </NuxtLink>
                       <button
                         @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-2 flex-shrink-0"
+                        class="p-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ml-1.5 flex-shrink-0"
                         :class="[
                           route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                             ? 'text-primary-600 dark:text-primary-400'
@@ -356,11 +356,11 @@
                     </div>
                     
                     <!-- Staff under department -->
-                    <div v-if="expandedDepartments[department.id]" class="pl-7 pr-5 space-y-0.5 mt-1">
+                    <div v-if="expandedDepartments[department.id]" class="pl-6 pr-3 space-y-0.5 mt-1">
                       <div v-for="staff in getStaffForDepartment(department.id)" :key="staff.id">
                         <NuxtLink
                           :to="department.isActive === false ? '#' : `/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center px-3 py-2 text-[10px] sm:text-xs rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
+                          class="group relative flex items-center px-2.5 py-1.5 text-[10px] rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200"
                           :class="{ 
                             'pointer-events-none opacity-50 cursor-not-allowed': switchingStore || (department.isActive === false)
                           }"
@@ -368,12 +368,12 @@
                           @click.prevent="department.isActive === false ? null : null"
                         >
                           <UsersIcon 
-                            class="w-3.5 h-3.5 flex-shrink-0 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                            class="w-3 h-3 flex-shrink-0 mr-1.5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
                           />
                           <span class="truncate">{{ staff.firstName }} {{ staff.lastName }}</span>
                         </NuxtLink>
                       </div>
-                      <div v-if="getStaffForDepartment(department.id).length === 0" class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 italic">
+                      <div v-if="getStaffForDepartment(department.id).length === 0" class="px-2.5 py-1.5 text-[10px] text-gray-500 dark:text-gray-400 italic">
                         No staff
                       </div>
                     </div>
@@ -381,7 +381,7 @@
                   <NuxtLink
                     v-if="getDepartmentsForStore(store.id).length === 0"
                     :to="`/dashboard/stores/${store.id}/departments`"
-                    class="block px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    class="block px-2.5 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     :class="{ 'pointer-events-none opacity-50': switchingStore && store.id !== storesStore.currentStoreId }"
                   >
                     <span class="italic">No departments</span>
@@ -391,7 +391,7 @@
               </div>
               
               <!-- No stores message -->
-              <div v-if="storesList.length === 0" class="px-5 py-3 text-xs text-gray-500 dark:text-gray-400">
+              <div v-if="storesList.length === 0" class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
                 No stores available
               </div>
             </div>
@@ -403,16 +403,16 @@
       </nav>
       
       <!-- Bottom Section (User Profile + Logout) -->
-      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0" :class="sidebarCollapsed ? 'px-3 py-3' : 'px-5 py-4'">
-        <div class="space-y-3">
+      <div class="relative mt-auto border-t border-gray-200/60 dark:border-gray-700/60 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm flex-shrink-0" :class="sidebarCollapsed ? 'px-2 py-2.5' : 'px-3 py-3'">
+        <div class="space-y-2">
           <!-- User Profile -->
-          <div class="group relative flex items-center gap-2.5 sm:gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0">
+          <div class="group relative flex items-center gap-2" :class="sidebarCollapsed ? 'justify-center' : ''">
+            <div class="w-7 h-7 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-medium text-xs flex-shrink-0">
               {{ userInitials }}
             </div>
             <div v-if="!sidebarCollapsed" class="flex-1 min-w-0">
-              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
-              <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
             </div>
             <!-- Tooltip for collapsed state -->
             <div
@@ -429,8 +429,8 @@
           <button
             @click="handleSignOut"
             :class="[
-              'group relative flex items-center justify-center font-medium rounded-md transition-all duration-300 ease-out overflow-hidden py-2.5',
-              sidebarCollapsed ? 'px-3 w-auto' : 'px-4 w-full',
+              'group relative flex items-center justify-center font-medium rounded-md transition-all duration-300 ease-out overflow-hidden py-2',
+              sidebarCollapsed ? 'px-2.5 w-auto' : 'px-3 w-full',
               'text-red-600 dark:text-red-400',
               'border border-red-200/50 dark:border-red-800/50',
               'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
@@ -447,11 +447,11 @@
             <ArrowRightOnRectangleIcon 
               :class="[
                 'relative z-10 transition-all duration-300',
-                sidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4 mr-2',
+                sidebarCollapsed ? 'w-4 h-4' : 'w-4 h-4 mr-1.5',
                 'group-hover:scale-110 group-hover:rotate-[-5deg]'
               ]"
             />
-            <span v-if="!sidebarCollapsed" class="relative z-10 text-xs sm:text-sm font-medium">Sign out</span>
+            <span v-if="!sidebarCollapsed" class="relative z-10 text-xs font-medium">Sign out</span>
             
             <!-- Tooltip (only show when collapsed) -->
             <div
