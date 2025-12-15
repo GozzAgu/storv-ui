@@ -135,13 +135,15 @@ export const useReceiptsStore = defineStore('receipts', {
         let querySnapshot
 
         try {
-          // For staff: Get all receipts in store (no createdBy filter) - they see receipts from anyone in their store
+          // For staff: Get all receipts in store (filter by createdBy to match security rule)
           // For superadmin: Filter by createdBy
+          // Note: All receipts in a store have createdBy == userId (super admin UID)
           let q
           if (userStore.userData?.role === 'staff') {
-            // Staff sees all receipts in their store
+            // Staff sees all receipts in their store (where createdBy matches the super admin UID)
             q = query(
               receiptsRef,
+              where('createdBy', '==', userId),
               orderBy('createdAt', 'desc')
             )
           } else {
@@ -158,8 +160,11 @@ export const useReceiptsStore = defineStore('receipts', {
           if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
             let q
             if (userStore.userData?.role === 'staff') {
-              // Staff sees all receipts in their store
-              q = query(receiptsRef)
+              // Staff sees all receipts in their store (where createdBy matches the super admin UID)
+              q = query(
+                receiptsRef,
+                where('createdBy', '==', userId)
+              )
             } else {
               // Superadmin sees only their receipts
               q = query(

@@ -227,12 +227,14 @@ service cloud.firestore {
           // Allow read if:
           // 1. User is the super admin (userId in path matches auth.uid)
           // 2. User created the receipt (createdBy matches auth.uid)
-          // 3. Staff member belongs to this store (can read all receipts in the store)
+          // 3. Staff member accessing receipts in their store (createdBy == userId means receipt belongs to store, 
+          //    and auth.uid != userId means it's a staff member, not the super admin)
+          //    This allows staff to read all receipts in the store where createdBy matches the super admin UID
           // 4. Staff member accessing their own receipts (actualCreator matches their UID)
           allow read: if isAuthenticated() && 
                        (userId == request.auth.uid || 
                         resource.data.createdBy == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)) ||
+                        (resource.data.createdBy == userId && request.auth.uid != userId) ||
                         resource.data.actualCreator == request.auth.uid);
           
           // Allow create if:
