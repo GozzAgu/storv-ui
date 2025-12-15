@@ -2,13 +2,13 @@
   <Modal
     :model-value="props.modelValue"
     title="Create New Receipt"
-    size="xl"
+    size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div class="space-y-6">
+      <div class="space-y-4">
         <!-- Step Indicator -->
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4">
           <div
             v-for="(step, index) in steps"
             :key="step.id"
@@ -17,7 +17,7 @@
             <div class="flex items-center flex-1">
               <div
                 :class="[
-                  'w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all',
+                  'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all',
                   'aspect-square',
                   currentStep >= index
                     ? 'bg-primary-600 text-white'
@@ -26,10 +26,10 @@
               >
                 {{ index + 1 }}
               </div>
-              <div class="ml-3 hidden sm:block">
+              <div class="ml-2 hidden sm:block">
                 <p
                   :class="[
-                    'text-sm font-medium',
+                    'text-xs font-medium',
                     currentStep >= index
                       ? 'text-gray-900 dark:text-gray-100'
                       : 'text-gray-500 dark:text-gray-400'
@@ -42,7 +42,7 @@
             <div
               v-if="index < steps.length - 1"
               :class="[
-                'hidden sm:block h-0.5 flex-1 mx-4 transition-all',
+                'hidden sm:block h-0.5 flex-1 mx-3 transition-all',
                 currentStep > index ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
               ]"
             ></div>
@@ -50,68 +50,68 @@
         </div>
 
         <!-- Step 1: Select Folder -->
-        <div v-if="currentStep === 0" class="space-y-4">
+        <div v-if="currentStep === 0" class="space-y-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Select Inventory Folder
             </label>
             
             <!-- Search Bar for Folders -->
-            <div class="mb-4">
+            <div class="mb-3">
               <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="folderSearchQuery"
                   type="text"
                   placeholder="Search folders..."
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 />
               </div>
             </div>
             
-            <div v-if="loadingFolders" class="text-center py-8">
-              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading folders...</p>
+            <div v-if="loadingFolders" class="text-center py-6">
+              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading folders...</p>
             </div>
             <div
               v-else-if="filteredFolders.length === 0"
-              class="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg"
+              class="text-center py-5 border border-gray-200 dark:border-gray-700 rounded-md"
             >
-              <FolderIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+              <FolderIcon class="w-9 h-9 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+              <p class="text-xs text-gray-500 dark:text-gray-400">
                 {{ folderSearchQuery ? 'No folders found matching your search' : 'No inventory folders found' }}
               </p>
             </div>
-            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto">
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto">
               <button
                 v-for="folder in filteredFolders"
                 :key="folder.id"
                 @click="selectFolder(folder)"
                 :class="[
-                  'p-4 border-2 rounded-md transition-all text-left',
+                  'p-3 border-2 rounded-md transition-all text-left',
                   selectedFolder?.id === folder.id
                     ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700'
                 ]"
               >
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5">
                   <div
                     :class="[
-                      'w-10 h-10 rounded-lg flex items-center justify-center',
+                      'w-8 h-8 rounded-md flex items-center justify-center',
                       getFolderColorClass(folder.color)
                     ]"
                   >
-                    <FolderIcon class="w-5 h-5 text-white" />
+                    <FolderIcon class="w-4 h-4 text-white" />
                   </div>
                   <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ folder.name }}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder.name }}</h3>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
                       {{ folder.itemCount }} items
                     </p>
                   </div>
                   <CheckCircleIcon
                     v-if="selectedFolder?.id === folder.id"
-                    class="w-5 h-5 text-primary-600"
+                    class="w-4 h-4 text-primary-600"
                   />
                 </div>
               </button>
@@ -120,49 +120,49 @@
         </div>
 
         <!-- Step 2: Select Items -->
-        <div v-if="currentStep === 1" class="space-y-4">
+        <div v-if="currentStep === 1" class="space-y-3">
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="flex items-center justify-between mb-3">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Select Items from {{ selectedFolder?.name }}
               </label>
               <button
                 @click="loadItems"
-                class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
               >
                 Refresh
               </button>
             </div>
             
             <!-- Search Bar for Items -->
-            <div class="mb-4">
+            <div class="mb-3">
               <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="itemSearchQuery"
                   type="text"
                   :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by item name or serial number...' : 'Search by item name...'"
-                  class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 />
               </div>
             </div>
-            <div v-if="loadingItems" class="text-center py-8">
-              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading items...</p>
+            <div v-if="loadingItems" class="text-center py-6">
+              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
             </div>
             <div
               v-else-if="availableItems.length === 0"
-              class="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg"
+              class="text-center py-5 border border-gray-200 dark:border-gray-700 rounded-md"
             >
-              <CubeIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
-              <p class="text-sm text-gray-500 dark:text-gray-400">No items available in this folder</p>
+              <CubeIcon class="w-9 h-9 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+              <p class="text-xs text-gray-500 dark:text-gray-400">No items available in this folder</p>
             </div>
-            <div v-else class="max-h-[400px] overflow-y-auto space-y-2">
+            <div v-else class="max-h-[360px] overflow-y-auto space-y-2">
               <div
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
                 :class="[
-                  'p-4 border rounded-lg transition-all cursor-pointer',
+                  'p-3 border rounded-md transition-all cursor-pointer',
                   selectedItems.find(si => si.id === item.id)
                     ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700'
@@ -171,7 +171,7 @@
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2.5">
                       <Checkbox
                         :model-value="selectedItems.find(si => si.id === item.id) !== undefined"
                         @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -179,10 +179,10 @@
                         size="sm"
                       />
                       <div class="flex-1">
-                        <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                        <h4 class="text-xs font-medium text-gray-900 dark:text-gray-100">
                           {{ getItemDisplayName(item) }}
                         </h4>
-                        <div class="flex items-center gap-4 mt-1 text-xs flex-wrap">
+                        <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
                           <span v-if="(selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) && (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))" class="text-gray-500 dark:text-gray-400">
                             Serial: {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
                           </span>
@@ -209,8 +209,8 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="selectedItems.find(si => si.id === item.id) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <div v-if="selectedItems.find(si => si.id === item.id) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate" class="mt-2.5 pt-2.5 border-t border-gray-200 dark:border-gray-700">
+                      <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Quantity
                       </label>
                       <input
@@ -220,7 +220,7 @@
                         @click.stop
                         min="1"
                         :max="getItemField(item, 'stock') || 1"
-                        class="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                       />
                     </div>
                   </div>
@@ -228,21 +228,21 @@
               </div>
             </div>
           </div>
-          <div v-if="selectedItems.length > 0" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div v-if="selectedItems.length > 0" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Selected Items ({{ totalSelectedQuantity }})
             </p>
-            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Total: {{ formatCurrency(receiptTotal) }}
             </p>
           </div>
         </div>
 
         <!-- Step 3: Receipt Details -->
-        <div v-if="currentStep === 2" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-if="currentStep === 2" class="space-y-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div class="relative">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Customer Name *
               </label>
               <div class="relative">
@@ -253,7 +253,7 @@
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 placeholder="John Doe"
               />
                 <MagnifyingGlassIcon 

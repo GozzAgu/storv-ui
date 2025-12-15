@@ -518,25 +518,25 @@
       :title="editingItem ? 'Edit Item' : (folder?.hasSerialNumbers && !editingItem ? 'Add Items with Serial Numbers' : 'Add New Item')"
       size="lg"
     >
-      <form @submit.prevent="handleSaveItem" class="space-y-4 sm:space-y-5">
+      <form @submit.prevent="handleSaveItem" class="space-y-3 sm:space-y-4">
         <!-- Bulk Add Mode for Serial Numbers -->
-        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-4">
-          <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-            <p class="text-sm text-blue-800 dark:text-blue-200">
+        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-3">
+          <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+            <p class="text-xs text-blue-800 dark:text-blue-200">
               <strong>Bulk Add Mode:</strong> Enter the item details once, then add multiple serial numbers below. Each serial number will create a separate item with the same details.
             </p>
           </div>
 
           <!-- Common Fields (all items share these) -->
-          <div class="space-y-4">
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Item Details (Shared)</h4>
+          <div class="space-y-3">
+            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Item Details (Shared)</h4>
             <div
               v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo') || []"
               :key="field.id"
-              :class="['grid gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']"
+              :class="['grid gap-3', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']"
             >
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   {{ field.label || field.name }} {{ field.required ? '*' : '' }}
                 </label>
                 <!-- Text Input -->
@@ -545,7 +545,7 @@
                   v-model="itemForm[field.name]"
                   type="text"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <!-- Number Input -->
@@ -554,19 +554,19 @@
                   v-model.number="itemForm[field.name]"
                   type="number"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <!-- Currency Input -->
                 <div v-else-if="field.type === 'currency'" class="relative">
-                  <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
                   <input
                     v-model.number="itemForm[field.name]"
                     type="number"
                     step="0.01"
                     min="0"
                     :required="field.required"
-                    class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || '0.00'"
                   />
                 </div>
@@ -576,14 +576,14 @@
                   v-model="itemForm[field.name]"
                   type="date"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                 />
                 <!-- Select Input -->
                 <select
                   v-else-if="field.type === 'select' && field.options"
                   v-model="itemForm[field.name]"
                   :required="field.required"
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                 >
                   <option value="">Select {{ field.label || field.name }}</option>
                   <option v-for="option in field.options" :key="option" :value="option">
@@ -602,9 +602,9 @@
           </div>
 
           <!-- Serial Numbers List -->
-          <div class="space-y-4">
+          <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Serial Numbers</h4>
+              <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial Numbers</h4>
               <Button
                 variant="outline"
                 size="sm"
@@ -614,25 +614,25 @@
                 Add Serial Number
               </Button>
             </div>
-            <div v-if="serialNumbers.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            <div v-if="serialNumbers.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
               No serial numbers added. Click "Add Serial Number" to start.
             </div>
             <div v-else class="space-y-2 max-h-64 overflow-y-auto">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
-                class="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
+                class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
               >
                 <input
                   v-model="serialNumbers[index]"
                   type="text"
                   :placeholder="`Serial Number ${index + 1}`"
-                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  class="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                 />
                 <button
                   type="button"
                   @click="removeSerialNumber(index)"
-                  class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                   title="Remove serial number"
                 >
                   <TrashIcon class="w-4 h-4" />
