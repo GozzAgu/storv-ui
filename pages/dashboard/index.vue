@@ -285,29 +285,29 @@
       </div>
 
     <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
       <!-- Recent Transactions -->
       <Card>
-        <div class="flex items-center justify-between mb-3 sm:mb-4">
-          <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-          <NuxtLink to="/dashboard/receipts" class="text-[10px] sm:text-xs text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
+          <NuxtLink to="/dashboard/receipts" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
-        <div class="space-y-2 sm:space-y-3">
-          <div v-if="recentTransactions.length === 0" class="text-center py-6 sm:py-8">
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No recent transactions</p>
+        <div class="space-y-1.5">
+          <div v-if="recentTransactions.length === 0" class="text-center py-4">
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">No recent transactions</p>
           </div>
-          <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-2.5 sm:py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
-            <div class="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div :class="['w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0', transaction.iconBg]">
-                <component :is="transaction.icon" :class="['w-4 h-4 sm:w-5 sm:h-5', transaction.iconColor]" />
+          <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <div :class="['w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0', transaction.iconBg]">
+                <component :is="transaction.icon" :class="['w-3.5 h-3.5', transaction.iconColor]" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
-                <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
+                <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
+                <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
               </div>
             </div>
-            <div class="text-right flex-shrink-0 ml-2">
-              <p :class="['text-[10px] sm:text-sm font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
+            <div class="text-right flex-shrink-0 ml-1.5">
+              <p :class="['text-[10px] font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
             </div>
           </div>
         </div>
@@ -315,24 +315,24 @@
 
       <!-- Top Selling Products -->
       <Card>
-        <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] sm:text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
+          <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
     </div>
-        <div class="space-y-3 sm:space-y-4">
-          <div v-if="topSellingItems.length === 0" class="text-center py-6 sm:py-8">
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">No products sold yet</p>
+        <div class="space-y-2">
+          <div v-if="topSellingItems.length === 0" class="text-center py-4">
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">No products sold yet</p>
           </div>
-          <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-3 sm:gap-4">
-            <div class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+          <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
+            <div class="flex-shrink-0 w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-[10px]">
               {{ index + 1 }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-[10px] sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
-              <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
+              <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+              <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
             </div>
             <div class="text-right flex-shrink-0">
-              <p class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
+              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
             </div>
           </div>
         </div>
@@ -340,44 +340,44 @@
 
       <!-- Inventory Status -->
       <Card>
-        <div class="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
         </div>
-        <div class="space-y-4 sm:space-y-6">
+        <div class="space-y-2.5">
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">In Stock</span>
-              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] text-gray-600 dark:text-gray-400">In Stock</span>
+              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
-              <div class="bg-green-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${inStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div class="bg-green-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${inStockPercentage}%`"></div>
             </div>
           </div>
           
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Low Stock</span>
-              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] text-gray-600 dark:text-gray-400">Low Stock</span>
+              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
-              <div class="bg-orange-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${lowStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div class="bg-orange-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${lowStockPercentage}%`"></div>
         </div>
       </div>
 
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Out of Stock</span>
-              <span class="text-[10px] sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] text-gray-600 dark:text-gray-400">Out of Stock</span>
+              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
             </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 sm:h-2.5">
-              <div class="bg-red-500 h-2 sm:h-2.5 rounded-full transition-all duration-300" :style="`width: ${outOfStockPercentage}%`"></div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div class="bg-red-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${outOfStockPercentage}%`"></div>
         </div>
       </div>
 
-          <div class="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Total Items</span>
-              <span class="text-sm sm:text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
+              <span class="text-[10px] text-gray-600 dark:text-gray-400">Total Items</span>
+              <span class="text-[11px] font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
             </div>
           </div>
         </div>
