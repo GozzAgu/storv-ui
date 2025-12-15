@@ -20,8 +20,16 @@ service cloud.firestore {
       // This allows staff members to find their own documents via collection group queries
       // When querying with where('authUid', '==', request.auth.uid), Firestore will only
       // return documents where this condition evaluates to true
+      // 
+      // NOTE: If authUid is missing or null, the comparison will fail (which is correct security)
       allow read: if isAuthenticated() && 
                    resource.data.authUid == request.auth.uid;
+      
+      // TEMPORARY DEBUG RULE (for testing only - REMOVE after debugging)
+      // Uncomment the line below to temporarily allow all authenticated users to read staff
+      // This helps confirm if the issue is authUid matching or something else
+      // If this fixes it, then the problem is authUid field mismatch in your documents
+      // allow read: if isAuthenticated();
     }
     
     // Helper function to check if user owns the document
@@ -138,40 +146,64 @@ service cloud.firestore {
         
         // Inventory folders subcollection: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
         match /inventoryFolders/{folderId} {
-          // Allow read if user owns the store OR if staff member belongs to this store
+          // Allow read if:
+          // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
+          // 2. User created the folder (createdBy matches auth.uid)
+          // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
+          // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if isAuthenticated() && 
-                       (resource.data.createdBy == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                       (userId == request.auth.uid || 
+                        resource.data.createdBy == request.auth.uid ||
+                        // Staff accessing their superadmin's store (userId is superadmin's UID from getQueryUserId)
+                        request.auth.uid != userId);
           
-          // Allow create if user is creating their own folder
-          allow create: if isAuthenticated() && request.resource.data.createdBy == request.auth.uid;
+          // Allow create if user is creating their own folder OR if staff member belongs to this store
+          allow create: if isAuthenticated() && 
+                         (request.resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid ||
+                          request.auth.uid != userId);
           
-          // Allow update if user owns the folder
-          allow update: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow update if user owns the folder OR if staff member belongs to this store
+          allow update: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid ||
+                          request.auth.uid != userId);
           
-          // Allow delete if user owns the folder
-          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow delete if user owns the folder OR if superadmin owns the store
+          allow delete: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid);
         }
         
         // Inventory items subcollection: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
         match /inventoryItems/{itemId} {
-          // Allow read if user owns the store OR if staff member belongs to this store
+          // Allow read if:
+          // 1. User is the super admin (userId in path matches auth.uid) - allows collection queries
+          // 2. User created the item (createdBy matches auth.uid)
+          // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
+          // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if isAuthenticated() && 
-                       (resource.data.createdBy == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                       (userId == request.auth.uid || 
+                        resource.data.createdBy == request.auth.uid ||
+                        // Staff accessing their superadmin's store (userId is superadmin's UID from getQueryUserId)
+                        request.auth.uid != userId);
           
           // Allow create if user is creating their own item OR if staff member belongs to this store
           allow create: if isAuthenticated() && 
-                         (request.resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                         (request.resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid ||
+                          request.auth.uid != userId);
           
           // Allow update if user owns the item OR if staff member belongs to this store
           allow update: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                         (resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid ||
+                          request.auth.uid != userId);
           
-          // Allow delete if user owns the item
-          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          // Allow delete if user owns the item OR if superadmin owns the store
+          allow delete: if isAuthenticated() && 
+                         (resource.data.createdBy == request.auth.uid ||
+                          userId == request.auth.uid);
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}

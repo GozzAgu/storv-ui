@@ -220,19 +220,29 @@ const handleSignIn = async () => {
     const user = await signIn(form.value.email, form.value.password)
     
     if (user) {
-      // Get user document to check role and onboarding status
+      // Get user data - this will automatically check for staff members via authUid
+      // fetchUserData checks:
+      // 1. First, looks for user document in users/{userId}
+      // 2. If not found, searches for staff member where authUid === userId using collection group query
+      // This allows staff to login based on authUid even without a user document
       await userStore.fetchUserData(user.uid)
-      const userData = userStore.userData || await getUserDocument(user.uid)
+      const userData = userStore.userData
+      
+      if (!userData) {
+        // User document not found and staff member not found via authUid
+        errorMessage.value = 'Account not found. Please contact your administrator.'
+        return
+      }
       
       // If user is super admin, store credentials for staff creation
-      if (userData && userData.role === 'superAdmin') {
+      if (userData.role === 'superAdmin') {
         storeCredentials(form.value.email, form.value.password)
       }
       
-      if (userData && !userData.hasCompletedOnboarding) {
+      if (!userData.hasCompletedOnboarding) {
         // Redirect to onboarding
         await navigateTo('/dashboard/onboarding')
-      } else if (userData && !userData.hasCompletedTutorial) {
+      } else if (!userData.hasCompletedTutorial) {
         // Redirect to tutorial
         await navigateTo('/dashboard')
       } else {
