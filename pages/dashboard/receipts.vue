@@ -429,31 +429,31 @@
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'status' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
               <th
                 :class="[
-                  'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
                   isColumnSortable('createdBy') && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
                 ]"
                 @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
               >
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                   Created By
                   <template v-if="isColumnSortable('createdBy')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'createdBy' && currentSort.order === 'asc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'createdBy' && currentSort.order === 'desc'"
-                      class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
                     />
-                    <BarsArrowUpIcon v-else class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-50" />
+                    <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
                 </div>
               </th>
@@ -470,67 +470,67 @@
             >
               <td class="px-2 py-1.5 whitespace-nowrap">
                 <div class="flex items-center gap-1.5">
-                  <div class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                  <div class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
                     {{ receipt.receiptNumber }}
                   </div>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                    class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
                     title="Swap-in transaction"
                   >
                     Swap
                   </span>
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <div class="text-[11px] text-gray-900 dark:text-gray-100">
                   {{ receipt.customerName }}
                 </div>
-                <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                <div class="text-[9px] text-gray-500 dark:text-gray-400">
                   {{ receipt.customerEmail }}
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <div class="text-[11px] text-gray-900 dark:text-gray-100">
                   {{ formatDate(receipt.date) }}
                 </div>
-                <div class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+                <div class="text-[9px] text-gray-500 dark:text-gray-400">
                   {{ formatTime(receipt.date) }}
                 </div>
               </td>
-              <td class="px-3 py-2">
-                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
-                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-0.5 sm:space-y-1">
+              <td class="px-2 py-1.5">
+                <div class="text-[11px] text-gray-900 dark:text-gray-100">
+                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-0.5">
                     <div 
                       v-for="(item, idx) in receipt.items.slice(0, 3)" 
                       :key="idx"
-                      class="text-xs sm:text-sm"
+                      class="text-[11px]"
                     >
                       {{ item.itemName }}<span v-if="item.quantity > 1" class="text-gray-500 dark:text-gray-400"> × {{ item.quantity }}</span>
                     </div>
-                    <div v-if="receipt.items.length > 3" class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 italic">
+                    <div v-if="receipt.items.length > 3" class="text-[9px] text-gray-500 dark:text-gray-400 italic">
                       and {{ receipt.items.length - 3 }} more item{{ receipt.items.length - 3 > 1 ? 's' : '' }}
                     </div>
                   </div>
-                  <span v-else class="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400">
+                  <span v-else class="text-[9px] text-gray-500 dark:text-gray-400">
                   {{ receipt.itemsCount }} items
                 </span>
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
                   ${{ formatCurrency(receipt.total) }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <span class="text-[11px] text-gray-600 dark:text-gray-300">
                   {{ receipt.paymentMethod }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
+              <td class="px-2 py-1.5 whitespace-nowrap">
                 <span
                   :class="[
-                    'inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium',
+                    'inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium',
                     receipt.status === 'completed'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : receipt.status === 'pending'
@@ -541,35 +541,35 @@
                   {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                 </span>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap">
-                <div class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+              <td class="px-2 py-1.5 whitespace-nowrap">
+                <div class="text-[11px] text-gray-900 dark:text-gray-100">
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
-              <td class="px-3 py-2 whitespace-nowrap text-right min-w-[160px]">
-                <div class="flex items-center justify-end gap-1.5 sm:gap-2 flex-shrink-0">
+              <td class="px-2 py-1.5 whitespace-nowrap text-right min-w-[140px]">
+                <div class="flex items-center justify-end gap-1 flex-shrink-0">
                   <button
                     @click="handlePrintReceipt(receipt)"
-                    class="flex-shrink-0 p-2 sm:p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors touch-manipulation"
+                    class="flex-shrink-0 p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors touch-manipulation"
                     title="View/Print"
                   >
-                    <PrinterIcon class="w-5 h-5 flex-shrink-0" />
+                    <PrinterIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     v-if="receipt.status === 'completed' && canEditReceipts"
                     @click="handleRefundReceipt(receipt)"
-                    class="flex-shrink-0 p-2 sm:p-1.5 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 active:bg-orange-100 dark:active:bg-orange-900/30 rounded-lg transition-colors touch-manipulation"
+                    class="flex-shrink-0 p-1.5 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 active:bg-orange-100 dark:active:bg-orange-900/30 rounded-md transition-colors touch-manipulation"
                     title="Refund"
                   >
-                    <ArrowPathIcon class="w-5 h-5 flex-shrink-0" />
+                    <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canDeleteReceipts"
                     @click="handleDeleteReceipt(receipt)"
-                    class="flex-shrink-0 p-2 sm:p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded-lg transition-colors touch-manipulation"
+                    class="flex-shrink-0 p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 rounded-md transition-colors touch-manipulation"
                     title="Delete"
                   >
-                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
+                    <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                 </div>
               </td>
@@ -737,41 +737,41 @@
                       class="p-0.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
                     >
                       <ChevronRightIcon
-                        :class="['w-4 h-4 transition-transform', expandedCustomers[customer.id] ? 'rotate-90' : '']"
+                        :class="['w-3.5 h-3.5 transition-transform', expandedCustomers[customer.id] ? 'rotate-90' : '']"
                       />
                     </button>
                   </td>
                   <td class="px-2 py-1.5">
-                    <div class="flex items-center gap-2">
-                      <div class="w-7 h-7 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                    <div class="flex items-center gap-1.5">
+                      <div class="w-6 h-6 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-[10px] flex-shrink-0">
                         {{ customer.name.charAt(0).toUpperCase() }}
                       </div>
                       <div class="min-w-0 flex-1">
-                        <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
-                        <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
+                        <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
+                        <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
                       </div>
                     </div>
                   </td>
                   <td class="px-2 py-1.5">
                     <div class="space-y-0.5">
-                      <p v-if="customer.email" class="text-xs text-gray-900 dark:text-gray-100 truncate">{{ customer.email }}</p>
-                      <p v-if="customer.phone" class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ customer.phone }}</p>
-                      <p v-if="!customer.email && !customer.phone" class="text-[10px] text-gray-400 dark:text-gray-500 italic">No contact info</p>
+                      <p v-if="customer.email" class="text-[11px] text-gray-900 dark:text-gray-100 truncate">{{ customer.email }}</p>
+                      <p v-if="customer.phone" class="text-[11px] text-gray-600 dark:text-gray-400 truncate">{{ customer.phone }}</p>
+                      <p v-if="!customer.email && !customer.phone" class="text-[9px] text-gray-400 dark:text-gray-500 italic">No contact info</p>
                     </div>
                   </td>
                   <td class="px-2 py-1.5">
-                    <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
+                    <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
                   </td>
                   <td class="px-2 py-1.5">
-                    <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
+                    <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
                   <td class="px-2 py-1.5">
-                    <span class="text-xs text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
+                    <span class="text-[11px] text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
                   <td class="px-2 py-1.5 text-right">
                     <button
                       @click="viewCustomerReceipts(customer)"
-                      class="px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-md transition-colors"
+                      class="px-2 py-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:bg-primary-100 dark:active:bg-primary-900/30 rounded-md transition-colors"
                     >
                       View Receipts
                     </button>
@@ -779,31 +779,31 @@
                 </tr>
                 <!-- Expanded Row: Purchased Items - Compact -->
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50 dark:bg-gray-900/50">
-                  <td colspan="7" class="px-3 py-3">
-                    <div class="space-y-2.5">
-                      <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-2">Purchased Items</h4>
-                      <div class="space-y-2">
+                  <td colspan="7" class="px-2.5 py-2.5">
+                    <div class="space-y-2">
+                      <h4 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 mb-1.5">Purchased Items</h4>
+                      <div class="space-y-1.5">
                         <div
                           v-for="receipt in getCustomerReceipts(customer.id)"
                           :key="receipt.id"
-                          class="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 p-2.5"
+                          class="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 p-2"
                         >
-                          <div class="flex items-center justify-between mb-2">
+                          <div class="flex items-center justify-between mb-1.5">
                             <div>
-                              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                              <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
                                 Receipt #{{ receipt.receiptNumber }}
                               </p>
-                              <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                              <p class="text-[9px] text-gray-500 dark:text-gray-400">
                                 {{ formatDate(receipt.date) }} • {{ formatTime(receipt.date) }}
                               </p>
                             </div>
                             <div class="text-right">
-                              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                              <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
                                 ${{ formatCurrency(receipt.total) }}
                               </p>
                               <span
                                 :class="[
-                                  'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium',
+                                  'inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium',
                                   receipt.status === 'completed'
                                     ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                     : receipt.status === 'pending'
@@ -815,15 +815,15 @@
                               </span>
                             </div>
                           </div>
-                          <div class="space-y-1.5">
+                          <div class="space-y-1">
                             <div
                               v-for="(item, index) in receipt.items"
                               :key="index"
-                              class="flex items-center justify-between py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                              class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700 last:border-0"
                             >
                               <div class="flex-1">
-                                <p class="text-xs text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
-                                <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                                <p class="text-[11px] text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
+                                <p class="text-[9px] text-gray-500 dark:text-gray-400">
                                   Qty: {{ item.quantity }} • ${{ formatCurrency(item.price) }}
                                   <span v-if="item.hasDiscount" class="text-green-600 dark:text-green-400">
                                     ({{ item.discountPercentage }}% off)
@@ -831,7 +831,7 @@
                                 </p>
                               </div>
                               <div class="text-right">
-                                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                                <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
                                   ${{ formatCurrency(item.price * item.quantity) }}
                                 </p>
                               </div>

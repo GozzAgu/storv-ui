@@ -37,9 +37,24 @@
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Description
-          </label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <button
+              type="button"
+              @click="generateAIDescription"
+              :disabled="isGeneratingDescription || !formData.name || !formData.departmentType"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <SparklesIcon v-if="!isGeneratingDescription" class="w-3 h-3" />
+              <svg v-else class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isGeneratingDescription ? 'Generating...' : 'AI Complete' }}
+            </button>
+          </div>
           <textarea
             v-model="formData.description"
             rows="3"
@@ -72,12 +87,14 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { SparklesIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
 import type { Department } from '~/composables/useDepartments'
+import { useToast } from '~/composables/useToast'
 
 interface Props {
   modelValue: boolean
@@ -98,6 +115,7 @@ const emit = defineEmits<{
 
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
+const toast = useToast()
 
 const coreDepartments = CORE_DEPARTMENTS
 
@@ -109,8 +127,44 @@ const formData = ref({
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const isGeneratingDescription = ref(false)
 
 const isEdit = computed(() => !!props.department)
+
+const generateAIDescription = async () => {
+  if (!formData.value.name?.trim() || !formData.value.departmentType?.trim()) {
+    toast.error('Please enter department name and type first')
+    return
+  }
+
+  isGeneratingDescription.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await $fetch<{ success: boolean; description?: string; error?: string }>('/api/ai/generate-description', {
+      method: 'POST',
+      body: {
+        folderName: formData.value.name.trim(),
+        folderType: formData.value.departmentType.trim().toLowerCase()
+      }
+    })
+
+    if (response.success && response.description) {
+      formData.value.description = response.description
+      errorMessage.value = ''
+      toast.success('Description generated successfully')
+    } else {
+      errorMessage.value = response.error || 'Failed to generate description. Please try again.'
+      toast.error(errorMessage.value)
+    }
+  } catch (err: any) {
+    console.error('AI generation error:', err)
+    errorMessage.value = err.message || 'Failed to generate description. Please try again.'
+    toast.error(errorMessage.value)
+  } finally {
+    isGeneratingDescription.value = false
+  }
+}
 
 // Reset form when modal opens/closes
 watch(() => props.modelValue, (isOpen) => {

@@ -52,7 +52,7 @@
             <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
               <InformationCircleIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Store Details
             </h1>
             <p class="text-gray-600 dark:text-gray-400">
@@ -100,14 +100,29 @@
           </div>
 
           <div>
-            <label for="storeDescription" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Store Description
-            </label>
+            <div class="flex items-center justify-between mb-2">
+              <label for="storeDescription" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Store Description
+              </label>
+              <button
+                type="button"
+                @click="generateAIDescription"
+                :disabled="isGeneratingDescription || !storeDetails.storeName"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
+                <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ isGeneratingDescription ? 'Generating...' : 'AI Complete' }}
+              </button>
+            </div>
             <textarea
               id="storeDescription"
               v-model="storeDetails.storeDescription"
-              rows="4"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              rows="2"
+              class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
@@ -134,14 +149,14 @@
             @click="nextStep"
             :disabled="isLoading || (currentStep === 1 && !storeDetails.storeName)"
             type="button"
-            class="px-8 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center gap-2"
+            class="px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
           >
             <span v-if="!isLoading">
               {{ currentStep === totalSteps ? 'Complete Setup' : 'Continue' }}
-              <ArrowRightIcon class="inline-block w-5 h-5 ml-1" />
+              <ArrowRightIcon class="inline-block w-4 h-4 ml-1" />
             </span>
             <span v-else class="flex items-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -156,7 +171,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
-import { BuildingStorefrontIcon, InformationCircleIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { BuildingStorefrontIcon, InformationCircleIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 
@@ -172,6 +187,7 @@ const currentStep = ref(1)
 const totalSteps = 2
 const isLoading = ref(false)
 const errorMessage = ref('')
+const isGeneratingDescription = ref(false)
 
 const storeDetails = ref<StoreDetails>({
   storeName: '',
@@ -180,6 +196,39 @@ const storeDetails = ref<StoreDetails>({
   storeEmail: '',
   storeDescription: ''
 })
+
+const generateAIDescription = async () => {
+  if (!storeDetails.value.storeName?.trim()) {
+    errorMessage.value = 'Please enter a store name first'
+    return
+  }
+
+  isGeneratingDescription.value = true
+  errorMessage.value = ''
+
+  try {
+    const response = await $fetch<{ success: boolean; description?: string; error?: string }>('/api/ai/generate-store-description', {
+      method: 'POST',
+      body: {
+        storeName: storeDetails.value.storeName.trim(),
+        storeAddress: storeDetails.value.storeAddress?.trim() || '',
+        storeType: 'general'
+      }
+    })
+
+    if (response.success && response.description) {
+      storeDetails.value.storeDescription = response.description
+      errorMessage.value = ''
+    } else {
+      errorMessage.value = response.error || 'Failed to generate description. Please try again.'
+    }
+  } catch (err: any) {
+    console.error('AI generation error:', err)
+    errorMessage.value = err.message || 'Failed to generate description. Please try again.'
+  } finally {
+    isGeneratingDescription.value = false
+  }
+}
 
 onMounted(async () => {
   // Redirect if not authenticated

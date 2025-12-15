@@ -622,64 +622,79 @@
       :title="editingStore ? 'Edit Store' : 'Create Store'"
       size="lg"
     >
-      <div class="space-y-6">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Store Name <span class="text-red-500">*</span>
           </label>
           <input
             v-model="storeForm.name"
             type="text"
             required
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="My Store"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Description
-          </label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <button
+              type="button"
+              @click="generateAIDescription"
+              :disabled="isGeneratingDescription || !storeForm.name"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
+              <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ isGeneratingDescription ? 'Generating...' : 'AI Complete' }}
+            </button>
+          </div>
           <textarea
             v-model="storeForm.description"
-            rows="3"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            rows="2"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
             placeholder="Store description..."
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Address
           </label>
           <input
             v-model="storeForm.address"
             type="text"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="123 Main St, City, State ZIP"
           />
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Phone
             </label>
             <input
               v-model="storeForm.phone"
               type="tel"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="+1234567890"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Email
             </label>
             <input
               v-model="storeForm.email"
               type="email"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="store@example.com"
             />
           </div>
@@ -690,9 +705,9 @@
             <input
               v-model="storeForm.isActive"
               type="checkbox"
-              class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              class="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+            <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
           </label>
         </div>
       </div>
@@ -784,6 +799,7 @@ import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   TrashIcon,
+  SparklesIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
@@ -853,6 +869,7 @@ const storeToDelete = ref<Store | null>(null)
 const isSubmittingStore = ref(false)
 const isDeletingStore = ref(false)
 const newlyCreatedStoreId = ref<string | null>(null)
+const isGeneratingDescription = ref(false)
 
 const storeForm = ref({
   name: '',
@@ -862,6 +879,38 @@ const storeForm = ref({
   email: '',
   isActive: true,
 })
+
+const generateAIDescription = async () => {
+  if (!storeForm.value.name?.trim()) {
+    toast.error('Please enter a store name first')
+    return
+  }
+
+  isGeneratingDescription.value = true
+
+  try {
+    const response = await $fetch<{ success: boolean; description?: string; error?: string }>('/api/ai/generate-store-description', {
+      method: 'POST',
+      body: {
+        storeName: storeForm.value.name.trim(),
+        storeAddress: storeForm.value.address?.trim() || '',
+        storeType: 'general'
+      }
+    })
+
+    if (response.success && response.description) {
+      storeForm.value.description = response.description
+      toast.success('Description generated successfully')
+    } else {
+      toast.error(response.error || 'Failed to generate description. Please try again.')
+    }
+  } catch (err: any) {
+    console.error('AI generation error:', err)
+    toast.error(err.message || 'Failed to generate description. Please try again.')
+  } finally {
+    isGeneratingDescription.value = false
+  }
+}
 
 // Inventory settings
 const inventorySettings = reactive({

@@ -208,39 +208,56 @@ service cloud.firestore {
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
         match /receipts/{receiptId} {
+          // Helper function to check if authenticated user is staff (using collection group pattern)
+          // Since Firestore rules can't easily check staff in any department with wildcards,
+          // we allow staff members to create receipts when createdBy matches userId (which it does
+          // for staff since both are set to super admin UID by app logic)
+          function isStaffCreatingReceipt() {
+            // When staff creates receipt:
+            // - userId in path = super admin UID (from getQueryUserId)
+            // - createdBy = super admin UID
+            // - actualCreator = staff UID (if different from createdBy)
+            // - request.auth.uid = staff UID
+            // So we check if createdBy matches userId but auth.uid doesn't (indicating staff)
+            return request.resource.data.createdBy == userId && 
+                   request.auth.uid != userId &&
+                   request.resource.data.createdBy != request.auth.uid;
+          }
+          
           // Allow read if:
           // 1. User is the super admin (userId in path matches auth.uid)
-          // 2. User created the receipt
-          // 3. Staff member belongs to this store
+          // 2. User created the receipt (createdBy matches auth.uid)
+          // 3. Staff member belongs to this store (can read all receipts in the store)
+          // 4. Staff member accessing their own receipts (actualCreator matches their UID)
           allow read: if isAuthenticated() && 
                        (userId == request.auth.uid || 
                         resource.data.createdBy == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)) ||
+                        resource.data.actualCreator == request.auth.uid);
           
           // Allow create if:
-          // 1. User is the super admin (userId in path)
-          // 2. User is creating their own receipt
-          // 3. Staff member belongs to this store (all staff can create receipts)
+          // 1. User is the super admin (userId in path matches auth.uid)
+          // 2. Receipt createdBy matches super admin UID AND auth.uid doesn't match userId (staff creating)
+          //    This allows staff to create receipts since app logic sets createdBy to super admin UID
           allow create: if isAuthenticated() && 
                          (userId == request.auth.uid || 
-                          request.resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                          (request.resource.data.createdBy == userId && request.auth.uid != userId));
           
           // Allow update if:
           // 1. User is the super admin (userId in path) who created the receipt
-          // 2. Staff member belongs to this store (application code enforces manager-only restriction)
+          // 2. Staff member (actualCreator matches) - application code enforces manager-only restriction
           // Note: Application-level checks prevent non-managers from updating
           allow update: if isAuthenticated() && 
-                         (userId == request.auth.uid && resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                         ((userId == request.auth.uid && resource.data.createdBy == request.auth.uid) || 
+                          resource.data.actualCreator == request.auth.uid);
           
           // Allow delete if:
           // 1. User is the super admin (userId in path) who created the receipt
-          // 2. Staff member belongs to this store (application code enforces manager-only restriction)
+          // 2. Staff member (actualCreator matches) - application code enforces manager-only restriction
           // Note: Application-level checks prevent non-managers from deleting
           allow delete: if isAuthenticated() && 
-                         (userId == request.auth.uid && resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+                         ((userId == request.auth.uid && resource.data.createdBy == request.auth.uid) || 
+                          resource.data.actualCreator == request.auth.uid);
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}

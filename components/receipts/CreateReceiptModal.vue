@@ -258,30 +258,30 @@
               />
                 <MagnifyingGlassIcon 
                   v-if="receiptForm.customerName && matchingCustomers.length > 0"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
+                  class="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500"
                 />
                 <!-- Customer Suggestions Dropdown -->
                 <div
                   v-if="showCustomerSuggestions && receiptForm.customerName && matchingCustomers.length > 0"
-                  class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                  class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
                 >
                   <div
                     v-for="customer in matchingCustomers"
                     :key="customer.id"
                     @mousedown.prevent="selectCustomer(customer)"
-                    class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                    class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                   >
                     <div class="flex items-center justify-between">
                       <div class="flex-1">
-                        <p class="font-medium text-gray-900 dark:text-gray-100">
+                        <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
                           {{ customer.name }}
                         </p>
-                        <div class="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
                           <span v-if="customer.email">{{ customer.email }}</span>
                           <span v-if="customer.phone">{{ customer.phone }}</span>
                         </div>
                       </div>
-                      <div class="text-xs text-gray-400 dark:text-gray-500 ml-4">
+                      <div class="text-[10px] text-gray-400 dark:text-gray-500 ml-3">
                         {{ customer.totalOrders }} order{{ customer.totalOrders !== 1 ? 's' : '' }}
                       </div>
                     </div>
@@ -290,41 +290,41 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Customer Email
               </label>
               <input
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 placeholder="john@example.com"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Customer Phone
               </label>
               <input
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 placeholder="+1 234 567 8900"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Customer Address
               </label>
               <input
                 v-model="receiptForm.customerAddress"
                 type="text"
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 placeholder="123 Main St, City, State"
               />
             </div>
             <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Payment Method *
               </label>
                 <Checkbox
@@ -339,7 +339,7 @@
               <select
                 v-model="receiptForm.paymentMethod"
                 required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
               >
                 <option value="">Select payment method</option>
                 <option value="Cash">Cash</option>
@@ -350,16 +350,16 @@
               </div>
 
               <!-- Split Payment Methods -->
-              <div v-else class="space-y-3">
+              <div v-else class="space-y-2">
                 <div
                   v-for="(payment, index) in splitPayments"
                   :key="index"
-                  class="flex items-center gap-3"
+                  class="flex items-center gap-2"
                 >
                   <select
                     v-model="payment.method"
                     required
-                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    class="flex-1 px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                   >
                     <option value="">Select method</option>
                     <option value="Cash">Cash</option>
@@ -367,8 +367,8 @@
                     <option value="Mobile Money">Mobile Money</option>
                     <option value="Bank Transfer">Bank Transfer</option>
                   </select>
-                  <div class="relative w-32">
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+                  <div class="relative w-28">
+                    <span class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
                     <input
                       v-model.number="payment.amount"
                       type="number"
@@ -376,7 +376,7 @@
                       min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      class="w-full pl-6 pr-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                       placeholder="0.00"
                     />
                   </div>
@@ -384,25 +384,25 @@
                     v-if="splitPayments.length > 1"
                     @click="removeSplitPayment(index)"
                     type="button"
-                    class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                   >
-                    <XMarkIcon class="w-5 h-5" />
+                    <XMarkIcon class="w-4 h-4" />
                   </button>
                 </div>
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="w-full px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg border border-primary-300 dark:border-primary-700 transition-colors"
+                  class="w-full px-3 py-1.5 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md border border-primary-300 dark:border-primary-700 transition-colors"
                 >
                   + Add Payment Method
                 </button>
-                <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total:</span>
+                <div class="flex justify-between items-center p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+                  <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Total:</span>
                   <div class="text-right">
-                    <span class="text-sm font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    <span class="text-xs font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                       ${{ formatCurrency(splitPaymentsTotal) }} / ${{ formatCurrency(receiptTotal) }}
                     </span>
-                    <p v-if="splitPaymentsTotal !== receiptTotal" class="text-xs text-red-600 dark:text-red-400 mt-1">
+                    <p v-if="splitPaymentsTotal !== receiptTotal" class="text-[10px] text-red-600 dark:text-red-400 mt-0.5">
                       Amount must equal total
                     </p>
                   </div>
@@ -410,13 +410,13 @@
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                 Status *
               </label>
               <select
                 v-model="receiptForm.status"
                 required
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
               >
                 <option value="completed">Completed</option>
                 <option value="pending">Pending</option>
@@ -424,44 +424,44 @@
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Notes (Optional)
             </label>
             <textarea
               v-model="receiptForm.notes"
-              rows="3"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              rows="2"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60 resize-none"
               placeholder="Additional notes..."
             ></textarea>
           </div>
 
           <!-- Swap-In Section -->
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <Checkbox
               v-model="isSwapIn"
               label="This is a swap-in transaction"
               size="sm"
             />
 
-            <div v-if="isSwapIn" class="space-y-4 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div v-if="isSwapIn" class="space-y-3 mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Select Folder for Swapped-In Device *
                 </label>
-                <div v-if="loadingFolders" class="text-center py-4">
-                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+                <div v-if="loadingFolders" class="text-center py-3">
+                  <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
                 </div>
                 <div
                   v-else-if="folders.length === 0"
-                  class="text-center py-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  class="text-center py-3 border border-gray-200 dark:border-gray-700 rounded-md"
                 >
-                  <p class="text-sm text-gray-500 dark:text-gray-400">No inventory folders found</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">No inventory folders found</p>
                 </div>
                 <select
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 >
                   <option value="">Select folder for swapped-in device</option>
                   <option
@@ -476,16 +476,16 @@
 
               <!-- Swap-In Device Form Fields -->
               <div v-if="swapInFolderId && swapInFolder">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Swapped-In Device Details
                 </label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div
                     v-for="field in swapInFolder.template?.fields || []"
                     :key="field.id || field.name"
                     :class="field.type === 'boolean' ? 'md:col-span-2' : ''"
                   >
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       {{ field.label || field.name }}
                       <span v-if="field.required" class="text-red-500">*</span>
                     </label>
@@ -496,7 +496,7 @@
                       :required="field.required"
                       type="text"
                       :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                     />
                     <!-- Number/Currency Input -->
                     <input
@@ -506,7 +506,7 @@
                       type="number"
                       step="any"
                       :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                     />
                     <!-- Date Input -->
                     <input
@@ -514,14 +514,14 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                     >
                       <option value="">Select {{ field.label || field.name }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
@@ -537,24 +537,24 @@
                     />
                   </div>
                 </div>
-                <p v-if="!swapInFolder.template?.fields || swapInFolder.template.fields.length === 0" class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                <p v-if="!swapInFolder.template?.fields || swapInFolder.template.fields.length === 0" class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                   No template fields defined for this folder.
                 </p>
               </div>
             </div>
           </div>
-          <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Items</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ totalSelectedQuantity }}</span>
+          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs text-gray-600 dark:text-gray-400">Items</span>
+              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ totalSelectedQuantity }}</span>
             </div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
+            <div class="flex justify-between items-center mb-1.5">
+              <span class="text-xs text-gray-600 dark:text-gray-400">Subtotal</span>
+              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
             </div>
-            <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
-              <span class="text-base font-semibold text-gray-900 dark:text-gray-100">Total</span>
-              <span class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
+            <div class="flex justify-between items-center pt-1.5 border-t border-gray-200 dark:border-gray-700">
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Total</span>
+              <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
             </div>
           </div>
         </div>
