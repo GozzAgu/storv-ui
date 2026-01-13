@@ -161,11 +161,11 @@
             <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
             <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
               <span v-if="receiptsStore.loading" class="inline-block h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>${{ formatCurrency(monthSales || thisMonthSales) }}</span>
+              <span v-else>${{ formatCurrency(monthSales) }}</span>
             </p>
             <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">
               <span v-if="receiptsStore.loading" class="inline-block h-2.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>{{ monthReceipts || thisMonthReceipts }} receipts</span>
+              <span v-else>{{ monthReceipts }} receipts</span>
             </p>
           </div>
           <div class="w-8 h-8 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
@@ -208,7 +208,7 @@
               <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
-                <span v-else>${{ formatCurrency(monthSales || thisMonthSales) }}</span>
+                <span v-else>${{ formatCurrency(monthSales) }}</span>
               </span>
             </div>
           </div>
