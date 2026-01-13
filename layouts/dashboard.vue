@@ -481,7 +481,7 @@
     >
       <!-- Top Navigation -->
       <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between h-10 sm:h-11 px-2 sm:px-3 lg:px-4">
+        <div class="flex items-center justify-between h-16 px-2 sm:px-3 lg:px-4">
           <div class="flex items-center space-x-1.5 sm:space-x-2">
           <button
             @click="sidebarOpen = true"
