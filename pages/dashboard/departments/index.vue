@@ -414,7 +414,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Departments - Storv',
+  title: 'Departments - Storvv',
 })
 
 const showDepartmentModal = ref(false)

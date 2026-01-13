@@ -2046,7 +2046,7 @@ const loadFolderData = async () => {
     if (fetchedFolder) {
       folder.value = fetchedFolder
       useHead({
-        title: `${folder.value?.name || 'Folder'} - Inventory - Storv`,
+        title: `${folder.value?.name || 'Folder'} - Inventory - Storvv`,
       })
       // Load items for this folder
       await loadItems()

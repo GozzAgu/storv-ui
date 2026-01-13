@@ -351,7 +351,7 @@ const generateTOTPSecret = async () => {
     // Get user email for QR code
     const { currentUser } = useFirebaseAuth()
     const email = currentUser.value?.email || 'user'
-    const issuer = 'Storv'
+    const issuer = 'Storvv'
     
     // Create TOTP URI
     const totpUri = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(email)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`
@@ -470,13 +470,13 @@ const copyBackupCodes = async () => {
 }
 
 const downloadBackupCodes = () => {
-  const codesText = `Storv - Two-Factor Authentication Backup Codes\n\nGenerated: ${new Date().toLocaleString()}\n\n${backupCodes.value.map((code, i) => `${i + 1}. ${code}`).join('\n')}\n\nKeep these codes safe. Each code can only be used once.`
+  const codesText = `Storvv - Two-Factor Authentication Backup Codes\n\nGenerated: ${new Date().toLocaleString()}\n\n${backupCodes.value.map((code, i) => `${i + 1}. ${code}`).join('\n')}\n\nKeep these codes safe. Each code can only be used once.`
   
   const blob = new Blob([codesText], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'storv-2fa-backup-codes.txt'
+  a.download = 'storvv-2fa-backup-codes.txt'
   document.body.appendChild(a)
   a.click()
   document.body.removeChild(a)

@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
           <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-            Storv
+            Storvv
           </NuxtLink>
           <NuxtLink to="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
             Back to Home
@@ -25,14 +25,14 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Agreement to Terms</h2>
               <p class="mb-4">
-                By accessing or using Storv ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.
+                By accessing or using Storvv ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.
               </p>
             </section>
 
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">2. Description of Service</h2>
               <p class="mb-4">
-                Storv is an inventory management platform that allows businesses to track, organize, and manage their inventory. We provide various features including real-time tracking, analytics, alerts, and reporting tools.
+                Storvv is an inventory management platform that allows businesses to track, organize, and manage their inventory. We provide various features including real-time tracking, analytics, alerts, and reporting tools.
               </p>
             </section>
 
@@ -52,7 +52,7 @@
 
               <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">3.2 Account Eligibility</h3>
               <p class="mb-4">
-                You must be at least 18 years old to use our Service. By using Storv, you represent and warrant that you meet this age requirement.
+                You must be at least 18 years old to use our Service. By using Storvv, you represent and warrant that you meet this age requirement.
               </p>
             </section>
 
@@ -97,7 +97,7 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">6. Intellectual Property</h2>
               <p class="mb-4">
-                The Service and its original content, features, and functionality are owned by Storv and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. You may not use our trademarks, logos, or other proprietary information without our prior written consent.
+                The Service and its original content, features, and functionality are owned by Storvv and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. You may not use our trademarks, logos, or other proprietary information without our prior written consent.
               </p>
             </section>
 
@@ -145,21 +145,21 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">12. Limitation of Liability</h2>
               <p class="mb-4">
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, STORV SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, STORVV SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
               </p>
             </section>
 
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">13. Indemnification</h2>
               <p class="mb-4">
-                You agree to indemnify and hold harmless Storv, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising out of or relating to your use of the Service, violation of these Terms, or infringement of any rights of another.
+                You agree to indemnify and hold harmless Storvv, its officers, directors, employees, and agents from any claims, damages, losses, liabilities, and expenses (including legal fees) arising out of or relating to your use of the Service, violation of these Terms, or infringement of any rights of another.
               </p>
             </section>
 
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">14. Governing Law</h2>
               <p class="mb-4">
-                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Storv operates, without regard to its conflict of law provisions.
+                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Storvv operates, without regard to its conflict of law provisions.
               </p>
             </section>
 
@@ -177,7 +177,7 @@
               </p>
               <ul class="list-none mb-4 space-y-2">
                 <li><strong>Email:</strong> legal@storv.com</li>
-                <li><strong>Address:</strong> Storv, Inc.</li>
+                <li><strong>Address:</strong> Storvv, Inc.</li>
               </ul>
             </section>
           </div>
@@ -190,10 +190,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-3 sm:mb-4 inline-block">
-            Storv
+            Storvv
           </NuxtLink>
           <p class="text-gray-500 text-sm">
-            &copy; 2025 Storv. All rights reserved.
+            &copy; 2025 Storvv. All rights reserved.
           </p>
         </div>
       </div>
@@ -203,11 +203,11 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Terms of Service - Storv',
+  title: 'Terms of Service - Storvv',
   meta: [
     {
       name: 'description',
-      content: 'Terms of Service for Storv inventory management service'
+      content: 'Terms of Service for Storvv inventory management service'
     }
   ]
 })

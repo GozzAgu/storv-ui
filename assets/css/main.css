@@ -21,6 +21,8 @@
     min-height: 100vh;
     /* Prevent horizontal scroll during load */
     overflow-x: hidden;
+    /* Prevent layout shift during load */
+    position: relative;
   }
   
   /* Prevent layout shift - ensure smooth transition */
@@ -36,6 +38,8 @@
     width: 100%;
     position: relative;
     overflow-x: hidden;
+    /* Prevent layout shift */
+    display: block;
   }
   
   /* Ensure layout stability during hydration */
@@ -62,6 +66,20 @@
   /* Prevent overflow causing layout shifts */
   * {
     max-width: 100%;
+  }
+  
+  /* Smooth reveal animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  html.styles-loaded #__nuxt {
+    animation: fadeIn 0.15s ease-in;
   }
 }
 

@@ -4,6 +4,15 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
+  // Optimize CSS loading to prevent FOUC
+  experimental: {
+    payloadExtraction: false,
+  },
+  vite: {
+    css: {
+      devSourcemap: false,
+    },
+  },
   runtimeConfig: {
     // Private keys (only available on server-side)
     openaiApiKey: process.env.OPENAI_API_KEY || '',

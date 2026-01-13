@@ -27,7 +27,7 @@
         <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-3">
           <img
             src="/storv logo.png"
-            alt="Storv Logo"
+            alt="Storvv Logo"
             class="h-12 w-auto mx-auto object-contain"
           />
         </NuxtLink>
@@ -35,7 +35,7 @@
           Create your account
         </h2>
         <p class="text-gray-600 dark:text-gray-400 text-sm">
-          Get started with Storv today
+          Get started with Storvv today
         </p>
       </div>
 
@@ -397,11 +397,11 @@ const handlePhoneSignInError = (error: string) => {
 }
 
 useHead({
-  title: 'Sign Up - Storv',
+  title: 'Sign Up - Storvv',
   meta: [
     {
       name: 'description',
-      content: 'Create your Storv account'
+      content: 'Create your Storvv account'
     }
   ]
 })

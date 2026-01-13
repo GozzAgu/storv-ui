@@ -474,7 +474,7 @@ const loadDepartmentData = async () => {
     if (dept) {
       department.value = dept
       useHead({
-        title: `${dept.name || 'Department'} - Department Management - Storv`,
+        title: `${dept.name || 'Department'} - Department Management - Storvv`,
       })
     } else {
       // Department not found, redirect

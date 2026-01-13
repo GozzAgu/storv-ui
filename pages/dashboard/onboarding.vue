@@ -24,7 +24,7 @@
               <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Welcome to Storv!
+              Welcome to Storvv!
             </h1>
             <p class="text-gray-600 dark:text-gray-400">
               Let's set up your store. First, tell us your store name.

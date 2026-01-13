@@ -600,7 +600,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Inventory Folders - Storv',
+  title: 'Inventory Folders - Storvv',
 })
 
 const searchQuery = ref('')

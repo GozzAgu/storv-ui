@@ -10,11 +10,11 @@
             <NuxtLink to="/" class="flex items-center space-x-2 group hover:opacity-80 transition-opacity">
               <img
                 src="/storv logo.png"
-                alt="Storv Logo"
+                alt="Storvv Logo"
                 class="h-6 w-auto object-contain"
               />
               <span class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight">
-                Storv
+                Storvv
               </span>
             </NuxtLink>
           </div>
@@ -508,7 +508,7 @@
       </div>
     </section>
 
-    <!-- What Storv Includes Section -->
+    <!-- What Storvv Includes Section -->
     <section class="py-12 sm:py-16 lg:py-20 bg-gray-50 relative z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8 sm:mb-12">
@@ -516,7 +516,7 @@
             Everything You Need in One Platform
           </h2>
           <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            Storv combines all essential store management tools into a single, powerful solution
+            Storvv combines all essential store management tools into a single, powerful solution
           </p>
         </div>
 
@@ -1015,7 +1015,7 @@
           Ready to Transform Your Store Operations?
         </h2>
         <p class="text-base sm:text-lg text-white/90 mb-6 sm:mb-8">
-          Join stores using Storv to manage inventory, sales, customers, and teams all in one place
+          Join stores using Storvv to manage inventory, sales, customers, and teams all in one place
         </p>
         <NuxtLink to="/signup" class="bg-white text-primary-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base hover:brightness-110 hover:scale-[1.05] transition-all duration-200 inline-flex items-center gap-2">
           Get Started Free
@@ -1040,7 +1040,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-6 sm:mb-8">
           <div class="col-span-2">
             <h3 class="text-xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-3">
-              Storv
+              Storvv
             </h3>
             <p class="text-gray-500 max-w-sm text-xs sm:text-sm">
               Complete store management solution with advanced inventory tracking, sales management, customer relationships, returns processing, team organization, discounts, swap-ins, and powerful analytics—all in one intuitive platform.
@@ -1077,7 +1077,7 @@
         
         <div class="border-t border-gray-800 pt-4 sm:pt-6 text-center">
           <p class="text-gray-500 text-xs sm:text-sm">
-            &copy; 2025 Storv. All rights reserved.
+            &copy; 2025 Storvv. All rights reserved.
           </p>
         </div>
       </div>
@@ -1166,7 +1166,7 @@ onUnmounted(() => {
 
 // SEO and metadata
 useHead({
-  title: 'Storv - Complete Store Management System',
+  title: 'Storvv - Complete Store Management System',
   meta: [
     {
       name: 'description',

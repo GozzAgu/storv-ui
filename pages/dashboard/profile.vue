@@ -934,7 +934,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Profile - Storv',
+  title: 'Profile - Storvv',
 })
 
 // Profile data

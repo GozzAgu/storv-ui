@@ -1232,6 +1232,6 @@ watch(() => authStore.currentUser, async (newUser) => {
 }, { immediate: false })
 
 useHead({
-  title: 'Dashboard - Storv',
+  title: 'Dashboard - Storvv',
 })
 </script>

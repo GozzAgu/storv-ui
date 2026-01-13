@@ -48,66 +48,134 @@
       }();
     </script>
     
-    <!-- CRITICAL: Block all rendering until styles load -->
+    <!-- CRITICAL: Block ALL rendering until styles load - SIMPLE & AGGRESSIVE -->
     <style id="fouc-blocker">
-      html:not(.styles-loaded) { visibility: hidden !important; opacity: 0 !important; }
-      html.styles-loaded { visibility: visible !important; opacity: 1 !important; transition: opacity 0.2s; }
-      /* Prevent white flash - set dark background if dark class is present */
-      html.dark { background-color: #111827; }
-      html:not(.dark) { background-color: #ffffff; }
-      body { background-color: inherit; }
+      /* Hide everything until styles are loaded - use display:none for complete hiding */
+      html:not(.styles-loaded) { 
+        display: none !important;
+      }
+      html:not(.styles-loaded) body { 
+        display: none !important;
+      }
+      /* Reveal when ready */
+      html.styles-loaded { 
+        display: block !important;
+        opacity: 1 !important; 
+        transition: opacity 0.15s ease-in;
+      }
+      html.styles-loaded body { 
+        display: block !important;
+        opacity: 1 !important; 
+      }
+      /* Background colors */
+      html.dark { background-color: #111827 !important; }
+      html:not(.dark) { background-color: #ffffff !important; }
+      body { 
+        background-color: inherit !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+      }
+      /* Critical layout */
+      #__nuxt { 
+        min-height: 100vh; 
+        width: 100%; 
+        position: relative; 
+        overflow-x: hidden; 
+      }
+      * { box-sizing: border-box; }
     </style>
     
-    <!-- Blocking script - runs immediately -->
+    <!-- SIMPLE & RELIABLE: Hide immediately, reveal when window loads -->
     <script>
       (function() {
         'use strict';
         var html = document.documentElement;
-        
-        // Hide content immediately
-        html.style.setProperty('visibility', 'hidden', 'important');
-        html.style.setProperty('opacity', '0', 'important');
-        
-        // Ensure theme is still applied (double-check for consistency)
-        try {
-          var theme = localStorage.getItem('theme');
-          var isDark = false;
-          
-          if (theme === 'dark') {
-            isDark = true;
-          } else if (theme === 'light') {
-            isDark = false;
-          } else {
-            // 'system' or null - check system preference
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              isDark = true;
-            }
-          }
-          
-          // Only update if different from current state
-          var hasDark = html.classList.contains('dark');
-          if (isDark && !hasDark) {
-            html.classList.add('dark');
-          } else if (!isDark && hasDark) {
-            html.classList.remove('dark');
-          }
-        } catch(e) {}
-        
         var revealed = false;
+        
+        // HIDE IMMEDIATELY - before anything renders - use display:none
+        html.style.cssText = 'display: none !important;';
+        
+        // Hide body as soon as it exists
+        function hideBody() {
+          if (document.body) {
+            document.body.style.cssText = 'display: none !important;';
+          }
+        }
+        hideBody();
+        
+        // Watch for body creation
+        if (document.readyState === 'loading') {
+          var bodyObserver = new MutationObserver(function() {
+            if (document.body) {
+              hideBody();
+              bodyObserver.disconnect();
+            }
+          });
+          bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
+        }
+        
         function reveal() {
           if (revealed) return;
           revealed = true;
           html.classList.add('styles-loaded');
-          html.style.removeProperty('visibility');
-          html.style.removeProperty('opacity');
+          html.style.removeProperty('display');
+          if (document.body) {
+            document.body.style.removeProperty('display');
+          }
         }
         
-        if (document.readyState === 'complete') {
-          setTimeout(reveal, 500);
-        } else {
-          window.addEventListener('load', function() { setTimeout(reveal, 500); }, {once:true});
-          setTimeout(reveal, 3000);
+        // Test Tailwind is working
+        function testTailwind() {
+          try {
+            if (!document.body) return false;
+            var test = document.createElement('div');
+            test.className = 'flex';
+            test.style.cssText = 'position:absolute;visibility:hidden;top:-9999px;';
+            document.body.appendChild(test);
+            var style = window.getComputedStyle(test);
+            var works = style.display === 'flex' || style.display === '-webkit-box';
+            document.body.removeChild(test);
+            return works;
+          } catch(e) {
+            return false;
+          }
         }
+        
+        // Wait for window load (all resources including CSS)
+        window.addEventListener('load', function() {
+          // Check Tailwind multiple times
+          var attempts = 0;
+          var maxAttempts = 20; // 1 second total
+          var checkInterval = setInterval(function() {
+            attempts++;
+            if (testTailwind() || attempts >= maxAttempts) {
+              clearInterval(checkInterval);
+              reveal();
+            }
+          }, 50);
+        }, {once: true});
+        
+        // DOMContentLoaded fallback - start checking earlier
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(function() {
+            if (!revealed) {
+              var attempts = 0;
+              var maxAttempts = 30; // 1.5 seconds
+              var checkInterval = setInterval(function() {
+                attempts++;
+                if (testTailwind() || attempts >= maxAttempts) {
+                  clearInterval(checkInterval);
+                  if (!revealed) reveal();
+                }
+              }, 50);
+            }
+          }, 300);
+        }, {once: true});
+        
+        // Absolute safety fallback - never hide forever
+        setTimeout(function() {
+          if (!revealed) reveal();
+        }, 2000);
       })();
     </script>
     

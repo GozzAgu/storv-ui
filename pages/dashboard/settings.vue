@@ -818,7 +818,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Settings - Storv',
+  title: 'Settings - Storvv',
 })
 
 // Store information

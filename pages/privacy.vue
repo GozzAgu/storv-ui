@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
           <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-500 to-primary-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-            Storv
+            Storvv
           </NuxtLink>
           <NuxtLink to="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
             Back to Home
@@ -25,7 +25,7 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Introduction</h2>
               <p class="mb-4">
-                Welcome to Storv ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our inventory management service.
+                Welcome to Storvv ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our inventory management service.
               </p>
             </section>
 
@@ -144,7 +144,7 @@
               </p>
               <ul class="list-none mb-4 space-y-2">
                 <li><strong>Email:</strong> privacy@storv.com</li>
-                <li><strong>Address:</strong> Storv, Inc.</li>
+                <li><strong>Address:</strong> Storvv, Inc.</li>
               </ul>
             </section>
           </div>
@@ -157,10 +157,10 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-3 sm:mb-4 inline-block">
-            Storv
+            Storvv
           </NuxtLink>
           <p class="text-gray-500 text-sm">
-            &copy; 2025 Storv. All rights reserved.
+            &copy; 2025 Storvv. All rights reserved.
           </p>
         </div>
       </div>
@@ -170,11 +170,11 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'Privacy Policy - Storv',
+  title: 'Privacy Policy - Storvv',
   meta: [
     {
       name: 'description',
-      content: 'Privacy Policy for Storv inventory management service'
+      content: 'Privacy Policy for Storvv inventory management service'
     }
   ]
 })

@@ -31,7 +31,7 @@
           <div class="relative flex-shrink-0">
             <img
               src="/storv logo.png"
-              alt="Storv Logo"
+              alt="Storvv Logo"
               :class="[
                 'transition-all duration-300 object-contain',
                 sidebarCollapsed ? 'h-7 w-7' : 'h-7 w-auto'
@@ -43,7 +43,7 @@
             v-if="!sidebarCollapsed" 
             class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
           >
-          Storv
+          Storvv
           </span>
         </NuxtLink>
         <div class="flex items-center gap-2">

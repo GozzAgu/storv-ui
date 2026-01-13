@@ -943,7 +943,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Receipts - Storv',
+  title: 'Receipts - Storvv',
 })
 
 const receiptsStore = useReceiptsStore()

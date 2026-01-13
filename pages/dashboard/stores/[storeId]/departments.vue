@@ -370,7 +370,7 @@ const route = useRoute()
 const storeId = computed(() => route.params.storeId as string)
 
 useHead({
-  title: `Departments - Storv`,
+  title: `Departments - Storvv`,
 })
 
 const showDepartmentModal = ref(false)
