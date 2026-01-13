@@ -1106,9 +1106,114 @@ export const useInventoryStore = defineStore('inventory', {
         if (index > -1 && this.folders[index]) {
           this.folders[index].itemCount = actualCount
         }
+
+        // Also update low stock count
+        await this.updateLowStockCount(folderId)
       } catch (error: any) {
         console.error('Error updating item count:', error)
         // Don't throw error, just log it - we don't want to break item creation/deletion
+      }
+    },
+
+    // Update low stock count for a folder
+    async updateLowStockCount(folderId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        console.warn('[InventoryStore] Cannot update low stock count: Firestore not initialized')
+        return
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        console.warn('[InventoryStore] Cannot update low stock count: user not authenticated')
+        return
+      }
+
+      try {
+        // Get user settings to get lowStockThreshold
+        const { useUser } = await import('~/composables/useUser')
+        const { getUserDocument } = useUser()
+        const userId = await getQueryUserId()
+        if (!userId) {
+          console.warn('[InventoryStore] Cannot update low stock count: user ID not available')
+          return
+        }
+
+        const userData = await getUserDocument(userId)
+        const lowStockThreshold = userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
+
+        // Get folder items
+        const folderItems = this.items[folderId] || []
+        const folder = this.getFolderById(folderId)
+        if (!folder) {
+          console.warn('[InventoryStore] Cannot update low stock count: folder not found')
+          return
+        }
+
+        // Find quantity field name from template
+        const quantityField = folder.template?.fields?.find(f => 
+          f.name.toLowerCase() === 'quantity' ||
+          f.name.toLowerCase() === 'qty'
+        )?.name
+
+        let lowStockCount = 0
+
+        // For serial number folders: count total available items
+        if (folder.hasSerialNumbers) {
+          // Count available (not sold) items
+          let availableCount = 0
+          folderItems.forEach(item => {
+            const dateOutValue = item.dateOut
+            const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+            if (!hasDateOut) {
+              availableCount++
+            }
+          })
+          
+          // Folder is low stock if available count is below threshold
+          if (availableCount > 0 && availableCount <= lowStockThreshold) {
+            lowStockCount = availableCount // For serial number folders, this represents total available items below threshold
+          }
+        } else {
+          // For bulk items: count items with low quantity
+          folderItems.forEach(item => {
+            // Skip sold items (items with dateOut)
+            const dateOutValue = item.dateOut
+            const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+            if (hasDateOut) return
+
+            // For bulk items, check quantity field
+            if (quantityField && item[quantityField] !== undefined) {
+              const quantity = typeof item[quantityField] === 'number' 
+                ? item[quantityField] 
+                : parseFloat(String(item[quantityField])) || 0
+              
+              // Item is low stock if quantity is greater than 0 but less than or equal to threshold
+              if (quantity > 0 && quantity <= lowStockThreshold) {
+                lowStockCount++
+              }
+            }
+          })
+        }
+
+        // Update in Firestore
+        const storeId = await getCurrentStoreId()
+        if (storeId) {
+          const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
+          await updateDoc(folderRef, {
+            lowStockCount,
+            updatedAt: serverTimestamp(),
+          })
+        }
+
+        // Update in local state
+        const index = this.folders.findIndex(f => f.id === folderId)
+        if (index > -1 && this.folders[index]) {
+          this.folders[index].lowStockCount = lowStockCount
+        }
+      } catch (error: any) {
+        console.error('[InventoryStore] Error updating low stock count:', error)
+        // Don't throw error, just log it - we don't want to break other operations
       }
     },
 

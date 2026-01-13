@@ -124,8 +124,10 @@
       </div>
     </template>
 
-    <!-- Key Metrics Cards - Compact -->
-    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+    <!-- Actual Content (shown when not loading) -->
+    <template v-else>
+      <!-- Key Metrics Cards - Compact -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       <StatCard
         label="Total Revenue"
         :value="formatCurrency(totalRevenue)"
@@ -162,10 +164,10 @@
         icon-bg-class="bg-primary-100 dark:bg-primary-900/30"
         icon-class="text-primary-600 dark:text-primary-400"
       />
-    </div>
+      </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
       <!-- Revenue Chart -->
       <Card class="lg:col-span-2">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
@@ -284,8 +286,8 @@
       </Card>
       </div>
 
-    <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+      <!-- Bottom Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
       <!-- Recent Transactions -->
       <Card>
         <div class="flex items-center justify-between mb-2">
@@ -338,6 +340,40 @@
         </div>
       </Card>
 
+      <!-- Low Stock Items -->
+      <Card v-if="lowStockItems.length > 0">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Low Stock Items</h2>
+          <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+        </div>
+        <div class="space-y-2">
+          <div v-for="item in lowStockItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
+            <div class="flex-shrink-0 w-7 h-7 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+              <ExclamationTriangleIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">
+                {{ item.isSerialNumber ? item.name : item.name }}
+              </p>
+              <p class="text-[9px] text-gray-500 dark:text-gray-400">
+                <span v-if="item.isSerialNumber">{{ item.quantity }} available</span>
+                <span v-else>{{ item.folderName }}</span>
+              </p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <p class="text-[10px] font-semibold text-orange-600 dark:text-orange-400">
+                <span v-if="item.isSerialNumber">{{ item.quantity }}</span>
+                <span v-else>{{ item.quantity }}</span>
+              </p>
+              <p class="text-[8px] text-gray-500 dark:text-gray-400">
+                <span v-if="item.isSerialNumber">items left</span>
+                <span v-else>of {{ item.threshold }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <!-- Inventory Status -->
       <Card>
         <div class="flex items-center justify-between mb-2">
@@ -383,6 +419,7 @@
         </div>
       </Card>
     </div>
+    </template>
   </div>
 </template>
 
@@ -402,6 +439,7 @@ import {
   HomeIcon,
   BuildingOfficeIcon,
   Cog6ToothIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -636,6 +674,100 @@ const topSellingItems = computed(() => {
       id: `item-${index}`,
       ...item
     }))
+})
+
+// Low stock items - get actual items that are low on stock
+const lowStockItems = computed(() => {
+  const lowStockItemsList: Array<{
+    id: string
+    name: string
+    quantity: number
+    folderName: string
+    folderId: string
+    threshold: number
+    isSerialNumber: boolean
+  }> = []
+
+  // Get low stock threshold from user settings
+  const userStore = useUserStore()
+  const lowStockThreshold = userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
+
+  inventoryStore.folders.forEach(folder => {
+    const items = inventoryStore.items[folder.id] || []
+    
+    // For serial number folders: check total available items
+    if (folder.hasSerialNumbers) {
+      // Count available (not sold) items
+      let availableCount = 0
+      items.forEach(item => {
+        const dateOutValue = item.dateOut
+        const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+        if (!hasDateOut) {
+          availableCount++
+        }
+      })
+      
+      // Folder is low stock if available count is below threshold
+      if (availableCount > 0 && availableCount <= lowStockThreshold) {
+        lowStockItemsList.push({
+          id: folder.id,
+          name: folder.name,
+          quantity: availableCount,
+          folderName: folder.name,
+          folderId: folder.id,
+          threshold: lowStockThreshold,
+          isSerialNumber: true
+        })
+      }
+    } else {
+      // For bulk items: check individual item quantities
+      // Find quantity field name from template
+      const quantityField = folder.template?.fields?.find(f => 
+        f.name.toLowerCase() === 'quantity' ||
+        f.name.toLowerCase() === 'qty'
+      )?.name
+
+      if (!quantityField) return // No quantity field, skip
+
+      items.forEach(item => {
+        // Skip sold items
+        const dateOutValue = item.dateOut
+        const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+        if (hasDateOut) return
+
+        // Check if item has quantity field
+        if (item[quantityField] !== undefined) {
+          const quantity = typeof item[quantityField] === 'number' 
+            ? item[quantityField] 
+            : parseFloat(String(item[quantityField])) || 0
+          
+          // Item is low stock if quantity > 0 and <= threshold
+          if (quantity > 0 && quantity <= lowStockThreshold) {
+            // Get item name from template (usually 'name' field)
+            const nameField = folder.template?.fields?.find(f => 
+              f.name.toLowerCase() === 'name' ||
+              f.name.toLowerCase() === 'item'
+            )?.name || 'name'
+            
+            const itemName = item[nameField] || item.name || 'Unnamed Item'
+            
+            lowStockItemsList.push({
+              id: item.id,
+              name: String(itemName),
+              quantity,
+              folderName: folder.name,
+              folderId: folder.id,
+              threshold: lowStockThreshold,
+              isSerialNumber: false
+            })
+          }
+        }
+      })
+    }
+  })
+
+  // Sort by quantity (lowest first)
+  return lowStockItemsList.sort((a, b) => a.quantity - b.quantity)
 })
 
 // Daily revenue data aggregation (last 30 days)
