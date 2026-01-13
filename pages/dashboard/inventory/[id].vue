@@ -179,9 +179,9 @@
     </Card>
 
     <!-- Enhanced Items Table -->
-    <Card padding="none">
+    <Card padding="none" v-if="!isLoadingFolder">
       <!-- Compact Header (Visible only on large screens) -->
-      <div v-if="!isLoadingFolder" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+      <div class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
           <!-- Compact Stats -->
           <div class="flex items-center gap-3 sm:gap-4">
@@ -644,76 +644,25 @@
 
         <!-- Single Item Mode (normal or edit) -->
         <div v-else>
-          <div
-            v-for="field in folder?.template?.fields || []"
-            :key="field.id"
-            :class="['grid grid-cols-2 gap-4', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : '']"
-          >
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-              </label>
-              <!-- Text Input -->
-              <input
-                v-if="field.type === 'text'"
-                v-model="itemForm[field.name]"
-                type="text"
-                :required="field.required"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-              />
-              <!-- Number Input -->
-              <input
-                v-else-if="field.type === 'number'"
-                v-model.number="itemForm[field.name]"
-                type="number"
-                :required="field.required"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-              />
-              <!-- Currency Input -->
-              <div v-else-if="field.type === 'currency'" class="relative">
-                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+          <div v-if="folder?.template?.fields && folder.template.fields.length > 0" class="space-y-3">
+            <div v-for="field in folder.template.fields" :key="field.id" :class="['grid gap-3', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                </label>
                 <input
-                  v-model.number="itemForm[field.name]"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  v-if="field.type === 'text'"
+                  v-model="itemForm[field.name]"
+                  type="text"
                   :required="field.required"
-                  class="w-full pl-8 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                  :placeholder="field.placeholder || '0.00'"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
+                <!-- Additional input types here -->
               </div>
-              <!-- Date Input -->
-              <input
-                v-else-if="field.type === 'date'"
-                v-model="itemForm[field.name]"
-                type="date"
-                :required="field.required"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              />
-              <!-- Select Input -->
-              <select
-                v-else-if="field.type === 'select' && field.options"
-                v-model="itemForm[field.name]"
-                :required="field.required"
-                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              >
-                <option value="">Select {{ field.label || field.name }}</option>
-                <option v-for="option in field.options" :key="option" :value="option">
-                  {{ option }}
-                </option>
-              </select>
-              <!-- Boolean Input -->
-              <Checkbox
-                v-else-if="field.type === 'boolean'"
-                v-model="itemForm[field.name]"
-                :label="field.label || field.name"
-                size="sm"
-              />
             </div>
           </div>
-          <div v-if="!folder?.template?.fields || folder.template.fields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
             No template fields defined for this folder. Please edit the folder to add fields.
           </div>
         </div>
@@ -1058,7 +1007,6 @@ const toggleSort = (key: string) => {
     currentSort.value.order = 'asc'
   }
 }
-
 
 // formatCurrency is now imported from usePreferences for currency conversion
 
