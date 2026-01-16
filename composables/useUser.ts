@@ -26,15 +26,9 @@ export interface StoreDetails {
   settings?: StoreSettings
 }
 
-export interface UserPreferences {
-  currency: string
-  currencySymbol?: string
-  region: string
-  language: string
-  timezone: string
-  dateFormat: string
-  timeFormat: '12h' | '24h'
-}
+// UserPreferences is exported from usePreferences.ts to avoid duplication
+// Re-export for backward compatibility
+export type { UserPreferences } from '~/composables/usePreferences'
 
 export interface UserData {
   uid: string

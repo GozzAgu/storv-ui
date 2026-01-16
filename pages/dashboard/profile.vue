@@ -696,7 +696,7 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="secondary" @click="showPasswordModal = false; passwordError = ''; passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' }">Cancel</Button>
+        <Button variant="secondary" @click="showPasswordModal = false; passwordError = ''; passwordForm.currentPassword = ''; passwordForm.newPassword = ''; passwordForm.confirmPassword = ''">Cancel</Button>
         <Button @click="handlePasswordChange" :disabled="isChangingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirmPassword">
           <span v-if="isChangingPassword" class="flex items-center gap-2">
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

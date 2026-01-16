@@ -1,4 +1,6 @@
-export type Theme = 'light' | 'dark' | 'system'
+// Theme type is exported from stores/theme.ts to avoid duplication
+// Re-export for backward compatibility
+export type { Theme } from '~/stores/theme'
 
 export const useTheme = () => {
   const theme = useState<Theme>('theme', () => 'system')

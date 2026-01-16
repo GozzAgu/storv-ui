@@ -6,8 +6,7 @@ import { useUserStore } from './user'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getDepartmentsCollection, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Department } from '~/composables/useDepartments'
-
-export { CORE_DEPARTMENTS } from '~/composables/useDepartments'
+// CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
 export const useDepartmentsStore = defineStore('departments', {
   state: () => ({
