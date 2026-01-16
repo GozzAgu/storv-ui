@@ -1,16 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "app.storvv.com"
-        }
-      ],
-      "destination": "/dashboard"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

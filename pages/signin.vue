@@ -241,88 +241,13 @@ const handleSignIn = async () => {
         storeCredentials(form.value.email, form.value.password)
       }
       
-      // Clear ALL redirect flags to prevent loops
-      if (import.meta.client) {
-        sessionStorage.removeItem('auth_redirect_in_progress')
-        sessionStorage.removeItem('auth_redirect_from')
-        sessionStorage.removeItem('auth_redirect_count')
-        sessionStorage.removeItem('guest_redirect_in_progress')
-        sessionStorage.removeItem('guest_redirect_count')
-        sessionStorage.removeItem('page_auth_redirect_in_progress')
-        sessionStorage.removeItem('page_auth_redirect_count')
-        sessionStorage.removeItem('dashboard_layout_redirect')
-        sessionStorage.removeItem('dashboard_watch_redirect')
-        sessionStorage.removeItem('dashboard_redirect_count')
-        // Set sign-in time for grace period
-        sessionStorage.setItem('last_signin_time', Date.now().toString())
-        // Store user data in sessionStorage temporarily to help with loading on redirect
-        sessionStorage.setItem('signed_in_user_id', user.uid)
-        sessionStorage.setItem('signed_in_user_data', JSON.stringify(userData))
-      }
-      
-      // CRITICAL: Ensure auth state is fully persisted before cross-domain redirect
-      // Firebase Auth needs time to save the auth state to localStorage/IndexedDB
-      // Get the auth token to pass it in the redirect URL for cross-domain transfer
-      let authToken = ''
-      try {
-        const auth = authStore.getAuthInstance()
-        if (auth && user) {
-          // Get the ID token to pass in redirect URL
-          authToken = await user.getIdToken(true) // Force refresh to ensure token is fresh
-          console.log('[SignIn] Auth token obtained for cross-domain transfer')
-          
-          // Store token in sessionStorage as backup
-          if (import.meta.client) {
-            sessionStorage.setItem('auth_token_temp', authToken)
-            sessionStorage.setItem('auth_token_time', Date.now().toString())
-          }
-        }
-      } catch (error) {
-        console.warn('[SignIn] Error getting auth token:', error)
-      }
-      
-      // Wait a moment to ensure auth state is fully persisted to localStorage/IndexedDB
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // Redirect to app domain dashboard using window.location for cross-domain
-      // Pass auth token in URL hash so app domain can restore auth state
-      const host = typeof window !== 'undefined' ? window.location.host : ''
-      const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
-      
-      // Build redirect URL with auth token
-      const buildRedirectUrl = (path: string) => {
-        if (isAppDomain) {
-          return path
-        }
-        const url = new URL(`https://app.storvv.com${path}`)
-        if (authToken) {
-          // Pass token in hash (more secure than query param, not sent to server)
-          url.hash = `auth_token=${authToken}`
-        }
-        return url.toString()
-      }
-      
+      // Redirect based on onboarding status
       if (!userData.hasCompletedOnboarding) {
-        // Redirect to onboarding
-        if (isAppDomain) {
-          await navigateTo('/dashboard/onboarding')
-        } else {
-          window.location.href = buildRedirectUrl('/dashboard/onboarding')
-        }
+        await navigateTo('/dashboard/onboarding')
       } else if (!userData.hasCompletedTutorial) {
-        // Redirect to tutorial
-        if (isAppDomain) {
-          await navigateTo('/dashboard')
-        } else {
-          window.location.href = buildRedirectUrl('/dashboard')
-        }
+        await navigateTo('/dashboard')
       } else {
-        // Redirect to dashboard
-        if (isAppDomain) {
-          await navigateTo('/dashboard')
-        } else {
-          window.location.href = buildRedirectUrl('/dashboard')
-        }
+        await navigateTo('/dashboard')
       }
     }
   } catch (error: any) {
@@ -366,45 +291,13 @@ const handlePhoneSignInSuccess = async (user: any) => {
       userData = await getUserDocument(user.uid)
     }
     
-    // Clear ALL redirect flags to prevent loops
-    if (import.meta.client) {
-      sessionStorage.removeItem('auth_redirect_in_progress')
-      sessionStorage.removeItem('auth_redirect_from')
-      sessionStorage.removeItem('auth_redirect_count')
-      sessionStorage.removeItem('guest_redirect_in_progress')
-      sessionStorage.removeItem('guest_redirect_count')
-      sessionStorage.removeItem('page_auth_redirect_in_progress')
-      sessionStorage.removeItem('page_auth_redirect_count')
-      sessionStorage.removeItem('dashboard_layout_redirect')
-      sessionStorage.removeItem('dashboard_watch_redirect')
-      sessionStorage.removeItem('dashboard_redirect_count')
-      // Set sign-in time for grace period
-      sessionStorage.setItem('last_signin_time', Date.now().toString())
-    }
-    
-    // Redirect to app domain dashboard using window.location for cross-domain
-    const host = typeof window !== 'undefined' ? window.location.host : ''
-    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
-    
     // Redirect based on onboarding status
     if (userData && !userData.hasCompletedOnboarding) {
-      if (isAppDomain) {
-        await navigateTo('/dashboard/onboarding')
-      } else {
-        window.location.href = 'https://app.storvv.com/dashboard/onboarding'
-      }
+      await navigateTo('/dashboard/onboarding')
     } else if (userData && !userData.hasCompletedTutorial) {
-      if (isAppDomain) {
-        await navigateTo('/dashboard')
-      } else {
-        window.location.href = 'https://app.storvv.com/dashboard'
-      }
+      await navigateTo('/dashboard')
     } else {
-      if (isAppDomain) {
-        await navigateTo('/dashboard')
-      } else {
-        window.location.href = 'https://app.storvv.com/dashboard'
-      }
+      await navigateTo('/dashboard')
     }
   } catch (error: any) {
     console.error('Error handling phone sign-in:', error)

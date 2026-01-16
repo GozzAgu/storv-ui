@@ -1461,16 +1461,6 @@ const checkAuth = async () => {
   
   checkingAuth.value = true
   
-  // Add a grace period after cross-domain redirect to allow auth to initialize
-  const lastSignInTime = sessionStorage.getItem('last_signin_time')
-  const gracePeriod = 3000 // 3 seconds grace period after sign-in
-  const now = Date.now()
-  
-  if (lastSignInTime && (now - parseInt(lastSignInTime)) < gracePeriod) {
-    // Recently signed in - wait a bit before checking auth
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }
-  
   // Wait for auth to finish loading
   if (authStore.loading) {
     await new Promise<void>((resolve) => {
@@ -1531,22 +1521,13 @@ const checkAuth = async () => {
       sessionStorage.removeItem('dashboard_redirect_count')
     }, 3000)
     
-    // Redirect to signin on main domain
-    const host = typeof window !== 'undefined' ? window.location.host : ''
-    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
-    
-    if (isAppDomain) {
-      return navigateTo('https://storvv.com/signin', { external: true })
-    } else {
-      return navigateTo('/signin')
-    }
+    return navigateTo('/signin')
   }
   
   // Clear redirect flags if user is authenticated
   if (authStore.currentUser) {
     sessionStorage.removeItem('dashboard_layout_redirect')
     sessionStorage.removeItem('dashboard_redirect_count')
-    sessionStorage.removeItem('last_signin_time')
   }
   
   checkingAuth.value = false
@@ -1557,16 +1538,6 @@ onMounted(async () => {
   
   // Check authentication first
   if (import.meta.client) {
-    // Wait for auth to be ready (especially important after cross-domain redirect)
-    // Firebase Auth needs time to restore state after page reload
-    if (authStore.loading) {
-      let attempts = 0
-      while (authStore.loading && attempts < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100))
-        attempts++
-      }
-    }
-    
     await checkAuth()
     
     // Initialize cache from localStorage after auth loads
@@ -1589,68 +1560,14 @@ onMounted(async () => {
     }
     
     // Fetch user data if authenticated and not already loaded
-    // CRITICAL: Wait for auth to be ready before fetching user data
     if (authStore.currentUser?.uid && !authStore.loading) {
-      // Always fetch if we don't have userData or if userData doesn't match current user
       if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
         try {
-          // Check if we have user data in sessionStorage from sign-in (helps with cross-domain redirects)
-          const signedInUserId = sessionStorage.getItem('signed_in_user_id')
-          const signedInUserData = sessionStorage.getItem('signed_in_user_data')
-          
-          if (signedInUserId === authStore.currentUser.uid && signedInUserData) {
-            try {
-              const parsedData = JSON.parse(signedInUserData)
-              // Set user data immediately from sessionStorage
-              userStore.userData = parsedData
-              console.log('[Dashboard] User data loaded from sessionStorage:', parsedData)
-              // Still fetch fresh data in background
-              userStore.fetchUserData(authStore.currentUser.uid).catch(err => {
-                console.error('[Dashboard] Error fetching fresh user data:', err)
-              })
-            } catch (e) {
-              console.error('[Dashboard] Error parsing sessionStorage user data:', e)
-              // Fall back to fetching from Firestore
-              await userStore.fetchUserData(authStore.currentUser.uid)
-            }
-          } else {
-            // No cached data, fetch from Firestore
-            await userStore.fetchUserData(authStore.currentUser.uid)
-          }
+          await userStore.fetchUserData(authStore.currentUser.uid)
           console.log('[Dashboard] User data fetched successfully:', userStore.userData)
-          
-          // Clear sessionStorage after successful load
-          sessionStorage.removeItem('signed_in_user_id')
-          sessionStorage.removeItem('signed_in_user_data')
         } catch (err) {
           console.error('[Dashboard] Error fetching user data:', err)
         }
-      }
-    } else if (!authStore.currentUser && !authStore.loading) {
-      // Check if we have signed-in user data in sessionStorage (might be from recent sign-in)
-      const signedInUserId = sessionStorage.getItem('signed_in_user_id')
-      const signedInUserData = sessionStorage.getItem('signed_in_user_data')
-      
-      if (signedInUserId && signedInUserData) {
-        try {
-          const parsedData = JSON.parse(signedInUserData) as any
-          // Wait a bit more for auth to restore
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          // Check again if auth is ready
-          const currentUser = authStore.currentUser
-          if (currentUser && (currentUser as any).uid === signedInUserId) {
-            userStore.userData = parsedData
-            console.log('[Dashboard] User data loaded from sessionStorage after wait:', parsedData)
-            sessionStorage.removeItem('signed_in_user_id')
-            sessionStorage.removeItem('signed_in_user_data')
-          }
-        } catch (e) {
-          console.error('[Dashboard] Error handling sessionStorage user data:', e)
-        }
-      } else {
-        // Auth is ready but no user - this shouldn't happen if we're on dashboard
-        console.warn('[Dashboard] No authenticated user after auth loaded')
       }
     }
   }
@@ -1693,15 +1610,7 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     sessionStorage.setItem(redirectKey, 'true')
     setTimeout(() => sessionStorage.removeItem(redirectKey), 3000)
     
-    // Redirect to signin on main domain
-    const host = typeof window !== 'undefined' ? window.location.host : ''
-    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
-    
-    if (isAppDomain) {
-      return navigateTo('https://storvv.com/signin', { external: true })
-    } else {
-      return navigateTo('/signin')
-    }
+    return navigateTo('/signin')
   }
   
   // During staff creation, don't fetch or update userData to preserve super admin's profile info
@@ -1710,41 +1619,10 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     return
   }
   
-  // CRITICAL: Wait for auth to finish loading before processing
-  // This is especially important after cross-domain redirects
-  if (authStore.loading) {
-    // Wait for auth to be ready
-    await new Promise<void>((resolve) => {
-      let resolved = false
-      const maxWait = 5000 // 5 seconds max wait
-      const startTime = Date.now()
-      
-      const checkAuth = () => {
-        if (!authStore.loading) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        if (Date.now() - startTime > maxWait) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        setTimeout(checkAuth, 50)
-      }
-      checkAuth()
-    })
-  }
-  
   // Only fetch if:
   // 1. User exists
   // 2. We don't have userData OR the user changed (not just signed back in)
   // 3. Staff creation is not in progress
-  // 4. Auth has finished loading
   if (user?.uid && !authStore.loading) {
     const hasUserData = userStore.userData && userStore.userData.uid === user.uid
     const userChanged = oldUser?.uid !== user.uid
