@@ -497,6 +497,11 @@ const chartView = ref<'daily' | 'weekly' | 'monthly'>('daily')
 
 // User name for welcome message
 const userName = computed(() => {
+  // During SSR, return a safe default to prevent hydration mismatch
+  if (import.meta.server) {
+    return 'User'
+  }
+  
   if (userStore.userData?.name) {
     return userStore.userData.name.split(' ')[0] || 'User'
   }
@@ -1181,23 +1186,34 @@ const onTutorialComplete = () => {
 const loadDashboardData = async () => {
   isLoading.value = true
   try {
-    // Wait for auth
+    // Wait for auth to be ready (especially important after cross-domain redirect)
     if (authStore.loading) {
       let attempts = 0
-      while (authStore.loading && attempts < 50) {
+      const maxAttempts = 100 // Increased to 10 seconds
+      while (authStore.loading && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100))
         attempts++
+      }
+      if (authStore.loading) {
+        console.warn('[Dashboard] Auth still loading after timeout')
       }
     }
     
     if (!authStore.currentUser) {
+      console.warn('[Dashboard] No authenticated user after auth loaded')
       isLoading.value = false
       return
     }
     
+    console.log('[Dashboard] Auth ready, user:', authStore.currentUser.uid)
+    
     // Fetch user data if not loaded
-    if (!userStore.userData) {
+    if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
+      console.log('[Dashboard] Fetching user data for:', authStore.currentUser.uid)
       await userStore.fetchUserData(authStore.currentUser.uid)
+      console.log('[Dashboard] User data fetched:', userStore.userData)
+    } else {
+      console.log('[Dashboard] User data already loaded:', userStore.userData)
     }
     
     // Fetch all stores in parallel

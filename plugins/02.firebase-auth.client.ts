@@ -58,21 +58,22 @@ export default defineNuxtPlugin(() => {
   const setupAuthListener = (auth: Auth) => {
     const loadingTimeout = setTimeout(() => {
       if (loading.value) {
-        console.warn('Firebase auth loading timeout')
+        console.warn('[Firebase Auth] Loading timeout - auth state may not be restored')
         loading.value = false
         authStore.loading = false
       }
-    }, 3000)
+    }, 5000) // Increased to 5 seconds for cross-domain redirects
 
     onAuthStateChanged(auth, (user) => {
       // Update both useState (for backward compatibility) and Pinia store
+      console.log('[Firebase Auth] Auth state changed:', user ? `User: ${user.uid}` : 'No user')
       currentUser.value = user
       authStore.currentUser = user
       loading.value = false
       authStore.loading = false
       clearTimeout(loadingTimeout)
     }, (error) => {
-      console.error('Auth state change error:', error)
+      console.error('[Firebase Auth] Auth state change error:', error)
       loading.value = false
       authStore.loading = false
       clearTimeout(loadingTimeout)

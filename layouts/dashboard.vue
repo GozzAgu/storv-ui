@@ -781,8 +781,8 @@ const expandedStores = reactive<Record<string, boolean>>({})
 const expandedDepartments = reactive<Record<string, boolean>>({})
 
 // Load stores and departments when user data is available
-watch([() => authStore.currentUser, () => userStore.userData], async ([user, userData]) => {
-  if (!user) return
+watch([() => authStore.currentUser, () => userStore.userData, () => authStore.loading], async ([user, userData, loading]) => {
+  if (!user || loading) return // Wait for auth to be ready
   
   // Check if staff creation is in progress - don't update userData during this time
   const isStaffCreationInProgress = import.meta.client 
@@ -796,8 +796,14 @@ watch([() => authStore.currentUser, () => userStore.userData], async ([user, use
   }
   
   // Fetch user data if not loaded (only if not during staff creation)
-  if (!userData && user && !isStaffCreationInProgress) {
-    await userStore.fetchUserData(user.uid)
+  // IMPORTANT: Only fetch when auth is ready (not loading)
+  if (!userData && user && !isStaffCreationInProgress && !loading) {
+    try {
+      await userStore.fetchUserData(user.uid)
+      console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
+    } catch (err) {
+      console.error('[Dashboard] Error fetching user data in stores watch:', err)
+    }
   }
   
   const finalUserData = userStore.userData
@@ -1229,6 +1235,11 @@ watch(() => userStore.userData, (userData, oldUserData) => {
 
 // User profile data - use cached values during staff creation to prevent UI bug
 const userName = computed(() => {
+  // During SSR, return a safe default to prevent hydration mismatch
+  if (import.meta.server) {
+    return 'User'
+  }
+  
   const currentUserId = authStore.currentUser?.uid
   
   // Check if staff creation is in progress - preserve cached super admin name
@@ -1325,6 +1336,11 @@ const userName = computed(() => {
 })
 
 const userEmail = computed(() => {
+  // During SSR, return a safe default to prevent hydration mismatch
+  if (import.meta.server) {
+    return ''
+  }
+  
   const currentUserId = authStore.currentUser?.uid
   
   // Check if staff creation is in progress - preserve cached super admin email
@@ -1541,6 +1557,16 @@ onMounted(async () => {
   
   // Check authentication first
   if (import.meta.client) {
+    // Wait for auth to be ready (especially important after cross-domain redirect)
+    // Firebase Auth needs time to restore state after page reload
+    if (authStore.loading) {
+      let attempts = 0
+      while (authStore.loading && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100))
+        attempts++
+      }
+    }
+    
     await checkAuth()
     
     // Initialize cache from localStorage after auth loads
@@ -1561,11 +1587,23 @@ onMounted(async () => {
         cachedUserId.value = storedUserId
       }
     }
-  }
-  
-  // Fetch user data if authenticated and not already loaded
-  if (authStore.currentUser?.uid && !userStore.userData) {
-    userStore.fetchUserData(authStore.currentUser.uid)
+    
+    // Fetch user data if authenticated and not already loaded
+    // CRITICAL: Wait for auth to be ready before fetching user data
+    if (authStore.currentUser?.uid && !authStore.loading) {
+      // Always fetch if we don't have userData or if userData doesn't match current user
+      if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
+        try {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+          console.log('[Dashboard] User data fetched successfully:', userStore.userData)
+        } catch (err) {
+          console.error('[Dashboard] Error fetching user data:', err)
+        }
+      }
+    } else if (!authStore.currentUser && !authStore.loading) {
+      // Auth is ready but no user - this shouldn't happen if we're on dashboard
+      console.warn('[Dashboard] No authenticated user after auth loaded')
+    }
   }
   
   // Fetch inventory folders if on inventory route
@@ -1623,11 +1661,42 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     return
   }
   
+  // CRITICAL: Wait for auth to finish loading before processing
+  // This is especially important after cross-domain redirects
+  if (authStore.loading) {
+    // Wait for auth to be ready
+    await new Promise<void>((resolve) => {
+      let resolved = false
+      const maxWait = 5000 // 5 seconds max wait
+      const startTime = Date.now()
+      
+      const checkAuth = () => {
+        if (!authStore.loading) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
+        }
+        if (Date.now() - startTime > maxWait) {
+          if (!resolved) {
+            resolved = true
+            resolve()
+          }
+          return
+        }
+        setTimeout(checkAuth, 50)
+      }
+      checkAuth()
+    })
+  }
+  
   // Only fetch if:
   // 1. User exists
   // 2. We don't have userData OR the user changed (not just signed back in)
   // 3. Staff creation is not in progress
-  if (user?.uid) {
+  // 4. Auth has finished loading
+  if (user?.uid && !authStore.loading) {
     const hasUserData = userStore.userData && userStore.userData.uid === user.uid
     const userChanged = oldUser?.uid !== user.uid
     
@@ -1652,8 +1721,14 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     
     // Only fetch if we don't have data for this user or if user actually changed
     // Don't fetch during staff creation to prevent overwriting super admin data
+    // IMPORTANT: Always fetch when user is available and auth is ready
     if ((!hasUserData || userChanged) && !isStaffCreationInProgress) {
-      userStore.fetchUserData(user.uid)
+      try {
+        await userStore.fetchUserData(user.uid)
+        console.log('[Dashboard] User data fetched in watch:', userStore.userData)
+      } catch (err) {
+        console.error('[Dashboard] Error fetching user data in watch:', err)
+      }
     }
   }
 }, { immediate: true })
