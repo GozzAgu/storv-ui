@@ -62,11 +62,26 @@ export default defineNuxtPlugin(() => {
         loading.value = false
         authStore.loading = false
       }
-    }, 5000) // Increased to 5 seconds for cross-domain redirects
+    }, 8000) // Increased to 8 seconds for cross-domain redirects
 
-    onAuthStateChanged(auth, (user) => {
+    // CRITICAL: onAuthStateChanged automatically restores auth state from Firebase servers
+    // This works across domains because Firebase stores auth state on their servers
+    // When called on a new domain, it checks with Firebase servers and restores the session
+    onAuthStateChanged(auth, async (user) => {
       // Update both useState (for backward compatibility) and Pinia store
       console.log('[Firebase Auth] Auth state changed:', user ? `User: ${user.uid}` : 'No user')
+      
+      // If user is restored, verify the token is valid
+      if (user) {
+        try {
+          // Force token refresh to ensure it's valid on this domain
+          await user.getIdToken(true)
+          console.log('[Firebase Auth] Auth token refreshed successfully')
+        } catch (error) {
+          console.error('[Firebase Auth] Error refreshing token:', error)
+        }
+      }
+      
       currentUser.value = user
       authStore.currentUser = user
       loading.value = false

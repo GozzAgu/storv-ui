@@ -182,6 +182,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { useUserStore } from '~/stores/user'
+import { useAuthStore } from '~/stores/auth'
 import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 
 definePageMeta({
@@ -206,6 +207,7 @@ const { signIn } = useFirebaseAuth()
 const { getUserDocument, createUserDocument } = useUser()
 const { storeCredentials } = useAdminCredentials()
 const userStore = useUserStore()
+const authStore = useAuthStore()
 
 const handleSignIn = async () => {
   if (!form.value.email || !form.value.password) {
@@ -258,11 +260,26 @@ const handleSignIn = async () => {
         sessionStorage.setItem('signed_in_user_data', JSON.stringify(userData))
       }
       
-      // Wait a moment to ensure auth state is fully set
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // CRITICAL: Ensure auth state is fully persisted before cross-domain redirect
+      // Firebase Auth needs time to save the auth state to localStorage/IndexedDB
+      // Get the auth token to ensure it's available for cross-domain transfer
+      try {
+        const auth = authStore.getAuthInstance()
+        if (auth && user) {
+          // Get the ID token to ensure auth state is ready
+          await user.getIdToken(true) // Force refresh to ensure token is fresh
+          console.log('[SignIn] Auth token obtained, auth state should be persisted')
+        }
+      } catch (error) {
+        console.warn('[SignIn] Error getting auth token:', error)
+      }
+      
+      // Wait a moment to ensure auth state is fully persisted to localStorage/IndexedDB
+      await new Promise(resolve => setTimeout(resolve, 300))
       
       // Redirect to app domain dashboard using window.location for cross-domain
       // This is more reliable than navigateTo for cross-domain redirects
+      // Firebase Auth will automatically restore auth state on the new domain via onAuthStateChanged
       const host = typeof window !== 'undefined' ? window.location.host : ''
       const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
       
