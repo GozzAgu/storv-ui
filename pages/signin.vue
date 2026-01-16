@@ -239,15 +239,40 @@ const handleSignIn = async () => {
         storeCredentials(form.value.email, form.value.password)
       }
       
+      // Clear any redirect flags to prevent loops
+      if (import.meta.client) {
+        sessionStorage.removeItem('auth_redirect_in_progress')
+        sessionStorage.removeItem('auth_redirect_from')
+        sessionStorage.removeItem('auth_redirect_count')
+        sessionStorage.removeItem('guest_redirect_in_progress')
+      }
+      
+      // Redirect to app domain dashboard using window.location for cross-domain
+      // This is more reliable than navigateTo for cross-domain redirects
+      const host = typeof window !== 'undefined' ? window.location.host : ''
+      const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+      
       if (!userData.hasCompletedOnboarding) {
         // Redirect to onboarding
-        await navigateTo('/dashboard/onboarding')
+        if (isAppDomain) {
+          await navigateTo('/dashboard/onboarding')
+        } else {
+          window.location.href = 'https://app.storvv.com/dashboard/onboarding'
+        }
       } else if (!userData.hasCompletedTutorial) {
         // Redirect to tutorial
-        await navigateTo('/dashboard')
+        if (isAppDomain) {
+          await navigateTo('/dashboard')
+        } else {
+          window.location.href = 'https://app.storvv.com/dashboard'
+        }
       } else {
         // Redirect to dashboard
-        await navigateTo('/dashboard')
+        if (isAppDomain) {
+          await navigateTo('/dashboard')
+        } else {
+          window.location.href = 'https://app.storvv.com/dashboard'
+        }
       }
     }
   } catch (error: any) {
@@ -291,13 +316,37 @@ const handlePhoneSignInSuccess = async (user: any) => {
       userData = await getUserDocument(user.uid)
     }
     
+    // Clear any redirect flags to prevent loops
+    if (import.meta.client) {
+      sessionStorage.removeItem('auth_redirect_in_progress')
+      sessionStorage.removeItem('auth_redirect_from')
+      sessionStorage.removeItem('auth_redirect_count')
+      sessionStorage.removeItem('guest_redirect_in_progress')
+    }
+    
+    // Redirect to app domain dashboard using window.location for cross-domain
+    const host = typeof window !== 'undefined' ? window.location.host : ''
+    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+    
     // Redirect based on onboarding status
     if (userData && !userData.hasCompletedOnboarding) {
-      await navigateTo('/dashboard/onboarding')
+      if (isAppDomain) {
+        await navigateTo('/dashboard/onboarding')
+      } else {
+        window.location.href = 'https://app.storvv.com/dashboard/onboarding'
+      }
     } else if (userData && !userData.hasCompletedTutorial) {
-      await navigateTo('/dashboard')
+      if (isAppDomain) {
+        await navigateTo('/dashboard')
+      } else {
+        window.location.href = 'https://app.storvv.com/dashboard'
+      }
     } else {
-      await navigateTo('/dashboard')
+      if (isAppDomain) {
+        await navigateTo('/dashboard')
+      } else {
+        window.location.href = 'https://app.storvv.com/dashboard'
+      }
     }
   } catch (error: any) {
     console.error('Error handling phone sign-in:', error)

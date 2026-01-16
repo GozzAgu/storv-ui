@@ -2,6 +2,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side
   if (import.meta.server) return
   
+  // Prevent redirect loops - check if we're already on an auth page
+  // If so, don't redirect at all - let authenticated users stay on signin if they want
+  const isAuthPage = ['/signin', '/signup', '/forgot-password'].includes(to.path)
+  
+  // If we're on an auth page, don't redirect authenticated users
+  // This prevents loops - let them manually navigate or use the signin form
+  if (isAuthPage) {
+    return // Don't redirect from auth pages - prevents loops
+  }
+  
   // Use Pinia store directly for more reliable state
   const authStore = useAuthStore()
   
@@ -9,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   if (authStore.loading) {
     await new Promise<void>((resolve) => {
       let resolved = false
-      const maxWait = 5000 // 5 seconds max wait
+      const maxWait = 2000 // Reduced to 2 seconds to prevent long waits
       const startTime = Date.now()
       
       const checkAuth = () => {
@@ -39,9 +49,29 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       checkAuth()
     })
   }
-  
+
   // Only redirect if auth has finished loading and user is authenticated
+  // And we're NOT on an auth page (already checked above)
   if (!authStore.loading && authStore.currentUser) {
+    // Check if we're already going to dashboard to prevent loops
+    if (to.path.startsWith('/dashboard')) {
+      return // Already going to dashboard, don't redirect
+    }
+    
+    // Check if we just came from a redirect to prevent loops
+    const redirectKey = 'guest_redirect_in_progress'
+    if (import.meta.client && sessionStorage.getItem(redirectKey) === 'true') {
+      // Clear the flag after a short delay
+      setTimeout(() => sessionStorage.removeItem(redirectKey), 1000)
+      return // Don't redirect if we're already in a redirect
+    }
+    
+    // Set flag to prevent redirect loops
+    if (import.meta.client) {
+      sessionStorage.setItem(redirectKey, 'true')
+      setTimeout(() => sessionStorage.removeItem(redirectKey), 2000)
+    }
+    
     // Redirect to dashboard on app domain
     const host = typeof window !== 'undefined' ? window.location.host : ''
     const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')

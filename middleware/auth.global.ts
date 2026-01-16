@@ -54,56 +54,23 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // ============================================
   // AUTHENTICATION CHECK (for dashboard routes)
   // ============================================
-  // Only check authentication for dashboard routes on app domain
+  // CRITICAL: On app domain, we DO NOT check auth in global middleware
+  // This prevents redirect loops when auth state is still initializing after cross-domain redirects
+  // Page-level auth middleware (auth.ts) will handle authentication checks
+  // This is the key to preventing loops - let pages load first, then check auth
   
+  // For dashboard routes on app domain, just allow them through
+  // The page-level 'auth' middleware will handle authentication
   if (isDashboardRoute && isAppDomain) {
-    // Only run auth check on client side (Firebase Auth is client-only)
-    if (import.meta.server) return
-
-    // Use Pinia store for authentication state
-    const authStore = useAuthStore()
-
-    // Wait for auth to finish loading (with proper timeout)
-    if (authStore.loading) {
-      await new Promise<void>((resolve) => {
-        let resolved = false
-        const maxWait = 5000 // 5 seconds max wait
-        const startTime = Date.now()
-        
-        const checkAuth = () => {
-          // If loading is complete, resolve
-          if (!authStore.loading) {
-            if (!resolved) {
-              resolved = true
-              resolve()
-            }
-            return
-          }
-          
-          // If we've exceeded max wait time, resolve anyway
-          if (Date.now() - startTime > maxWait) {
-            if (!resolved) {
-              resolved = true
-              resolve()
-            }
-            return
-          }
-          
-          // Check again after a short delay
-          setTimeout(checkAuth, 50)
-        }
-        
-        // Start checking
-        checkAuth()
-      })
+    // Clear any redirect flags when successfully reaching dashboard
+    if (import.meta.client) {
+      sessionStorage.removeItem('auth_redirect_in_progress')
+      sessionStorage.removeItem('auth_redirect_from')
+      sessionStorage.removeItem('auth_redirect_count')
+      sessionStorage.removeItem('guest_redirect_in_progress')
     }
-
-    // Redirect to signin if not authenticated
-    if (!authStore.loading && !authStore.currentUser) {
-      // Redirect to signin on main domain (since we're blocking dashboard on main domain)
-      // Or redirect to app domain signin if you want signin on app domain
-      return navigateTo('https://storvv.com/signin', { external: true })
-    }
+    // Let the page load - page-level middleware will handle auth
+    return
   }
 
   // ============================================
@@ -112,18 +79,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Handle root path based on domain and auth status
   if (isLandingRoute) {
     if (isAppDomain) {
-      // On app domain root, redirect to dashboard if authenticated, otherwise signin
-      if (import.meta.client) {
-        const authStore = useAuthStore()
-        if (!authStore.loading) {
-          if (authStore.currentUser) {
-            return navigateTo('/dashboard')
-          } else {
-            return navigateTo('https://storvv.com/signin', { external: true })
-          }
-        }
-      }
-      // If still loading or server-side, redirect to dashboard (will be handled by auth check)
+      // On app domain root, always redirect to dashboard
+      // The dashboard page-level auth middleware will handle authentication
+      // This prevents loops by not checking auth state here
       return navigateTo('/dashboard')
     }
     // Main domain root - allow landing page

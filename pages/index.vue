@@ -24,7 +24,7 @@
             <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
               Contact
             </a>
-            <NuxtLink to="/signup" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-colors">
+            <NuxtLink to="/signin" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-colors">
               Start Free Trial
             </NuxtLink>
           </div>
@@ -57,7 +57,7 @@
             <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block text-gray-700 hover:text-gray-900 font-medium py-2">
               Contact
             </a>
-            <NuxtLink to="/signup" class="block w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold mt-2 text-center" @click="mobileMenuOpen = false">
+            <NuxtLink to="/signin" class="block w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold mt-2 text-center" @click="mobileMenuOpen = false">
               Start Free Trial
             </NuxtLink>
           </div>
@@ -120,7 +120,7 @@
           
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <NuxtLink to="/signup" class="group bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center justify-center gap-2 min-w-[200px]">
+            <NuxtLink to="/signin" class="group bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center justify-center gap-2 min-w-[200px]">
               Start Free Trial
               <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
             </NuxtLink>
@@ -583,7 +583,7 @@
               <div class="text-4xl font-bold text-gray-900 mb-1">$29</div>
               <p class="text-gray-600 text-sm">per month</p>
               </div>
-            <NuxtLink to="/signup" class="block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 text-center">
+            <NuxtLink to="/signin" class="block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 text-center">
               Start Free Trial
             </NuxtLink>
             <ul class="space-y-3">
@@ -638,7 +638,7 @@
               <div class="text-4xl font-bold text-gray-900 mb-1">$99</div>
               <p class="text-gray-600 text-sm">per month</p>
               </div>
-            <NuxtLink to="/signup" class="block w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-6 text-center">
+            <NuxtLink to="/signin" class="block w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-6 text-center">
               Start Free Trial
             </NuxtLink>
             <ul class="space-y-3">
@@ -928,7 +928,7 @@
         <p class="text-lg sm:text-xl text-gray-600 mb-8">
           Create your free account and discover how Storvv can transform your store operations.
         </p>
-        <NuxtLink to="/signup" class="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-primary-700 transition-colors inline-flex items-center gap-2">
+        <NuxtLink to="/signin" class="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-primary-700 transition-colors inline-flex items-center gap-2">
           Start Free Trial
           <ArrowRightIcon class="w-5 h-5 flex-shrink-0" />
         </NuxtLink>
@@ -948,8 +948,8 @@
           <a href="mailto:gozieagu1@gmail.com" class="text-2xl sm:text-3xl font-semibold text-primary-600 hover:text-primary-700 transition-colors">
             gozieagu1@gmail.com
           </a>
-        </div>
-      </div>
+          </div>
+          </div>
     </section>
 
     <!-- Footer -->

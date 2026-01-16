@@ -1479,7 +1479,15 @@ const checkAuth = async () => {
   // Redirect to signin if no user after loading completes
   if (!authStore.loading && !authStore.currentUser) {
     checkingAuth.value = false
-    return navigateTo('/signin')
+    // Redirect to signin on main domain
+    const host = typeof window !== 'undefined' ? window.location.host : ''
+    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+    
+    if (isAppDomain) {
+      return navigateTo('https://storvv.com/signin', { external: true })
+    } else {
+      return navigateTo('/signin')
+    }
   }
   
   checkingAuth.value = false
@@ -1545,7 +1553,15 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
   
   // Redirect to signin if user logs out (but not during staff creation)
   if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress) {
-    return navigateTo('/signin')
+    // Redirect to signin on main domain
+    const host = typeof window !== 'undefined' ? window.location.host : ''
+    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+    
+    if (isAppDomain) {
+      return navigateTo('https://storvv.com/signin', { external: true })
+    } else {
+      return navigateTo('/signin')
+    }
   }
   
   // During staff creation, don't fetch or update userData to preserve super admin's profile info
