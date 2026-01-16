@@ -528,8 +528,33 @@
           <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             From small shops to large operations, we have a plan that fits your needs
           </p>
-        </div>
-        
+          
+          <!-- Billing Toggle -->
+          <div class="flex items-center justify-center gap-4 mb-8">
+            <span :class="['text-sm font-medium transition-colors', isYearly ? 'text-gray-500' : 'text-gray-900']">Monthly</span>
+            <button
+              @click="isYearly = !isYearly"
+              :class="[
+                'relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+                isYearly ? 'bg-primary-600' : 'bg-gray-300'
+              ]"
+              role="switch"
+              :aria-checked="isYearly"
+            >
+              <span
+                :class="[
+                  'inline-block h-6 w-6 transform rounded-full bg-white transition-transform',
+                  isYearly ? 'translate-x-7' : 'translate-x-1'
+                ]"
+              />
+            </button>
+            <span :class="['text-sm font-medium transition-colors', isYearly ? 'text-gray-900' : 'text-gray-500']">
+              Yearly
+              <span class="ml-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Save 15%</span>
+            </span>
+              </div>
+            </div>
+            
         <div class="grid sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <!-- Basic Plan -->
           <div class="bg-white rounded-lg border-2 border-gray-200 p-8">
@@ -580,9 +605,13 @@
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Professional</h3>
               <p class="text-gray-600 mb-4">Perfect for Growing Retail Operations</p>
-              <div class="text-4xl font-bold text-gray-900 mb-1">$29</div>
-              <p class="text-gray-600 text-sm">per month</p>
+              <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-4xl font-bold text-gray-900">{{ isYearly ? '$153' : '$15' }}</div>
+                <span v-if="isYearly" class="text-lg text-gray-500 line-through">$180</span>
               </div>
+              <p class="text-gray-600 text-sm">{{ isYearly ? 'per year' : 'per month' }}</p>
+              <p v-if="isYearly" class="text-green-600 text-xs font-medium mt-1">Save $27/year</p>
+            </div>
             <NuxtLink to="/signin" class="block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 text-center">
               Start Free Trial
             </NuxtLink>
@@ -635,9 +664,13 @@
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
               <p class="text-gray-600 mb-4">For Multi-Location Retail Chains</p>
-              <div class="text-4xl font-bold text-gray-900 mb-1">$99</div>
-              <p class="text-gray-600 text-sm">per month</p>
+              <div class="flex items-baseline gap-2 mb-1">
+                <div class="text-4xl font-bold text-gray-900">{{ isYearly ? '$255' : '$25' }}</div>
+                <span v-if="isYearly" class="text-lg text-gray-500 line-through">$300</span>
               </div>
+              <p class="text-gray-600 text-sm">{{ isYearly ? 'per year' : 'per month' }}</p>
+              <p v-if="isYearly" class="text-green-600 text-xs font-medium mt-1">Save $45/year</p>
+            </div>
             <NuxtLink to="/signin" class="block w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-6 text-center">
               Start Free Trial
             </NuxtLink>
@@ -1025,6 +1058,7 @@ import {
 
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
+const isYearly = ref(false)
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
