@@ -1,5 +1,11 @@
+/**
+ * Page-level auth middleware
+ * This is used by individual pages that need authentication
+ * The global auth.global.ts middleware handles most routing logic
+ * This middleware is for pages that explicitly require auth via definePageMeta
+ */
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Only run on client side
+  // Only run on client side (Firebase Auth is client-only)
   if (import.meta.server) return
   
   // Use Pinia store directly for more reliable state
@@ -43,7 +49,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only redirect if auth has finished loading and there's no user
   // If still loading, allow navigation to proceed (auth will resolve during page load)
   if (!authStore.loading && !authStore.currentUser) {
-    return navigateTo('/signin')
+    // Redirect to signin on main domain
+    return navigateTo('https://storvv.com/signin')
   }
 })
 

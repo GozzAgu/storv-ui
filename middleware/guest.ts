@@ -42,7 +42,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   
   // Only redirect if auth has finished loading and user is authenticated
   if (!authStore.loading && authStore.currentUser) {
-    return navigateTo('/dashboard')
+    // Redirect to dashboard on app domain
+    const host = typeof window !== 'undefined' ? window.location.host : ''
+    const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+    
+    if (isAppDomain) {
+      return navigateTo('/dashboard')
+    } else {
+      // If on main domain, redirect to app domain dashboard
+      return navigateTo('https://app.storvv.com/dashboard')
+    }
   }
 })
 
