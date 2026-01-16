@@ -51,27 +51,36 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return navigateTo('/')
   }
 
-  // ============================================
-  // AUTHENTICATION CHECK (for dashboard routes)
-  // ============================================
-  // CRITICAL: On app domain, we DO NOT check auth in global middleware
-  // This prevents redirect loops when auth state is still initializing after cross-domain redirects
-  // Page-level auth middleware (auth.ts) will handle authentication checks
-  // This is the key to preventing loops - let pages load first, then check auth
-  
-  // For dashboard routes on app domain, just allow them through
-  // The page-level 'auth' middleware will handle authentication
-  if (isDashboardRoute && isAppDomain) {
-    // Clear any redirect flags when successfully reaching dashboard
-    if (import.meta.client) {
-      sessionStorage.removeItem('auth_redirect_in_progress')
-      sessionStorage.removeItem('auth_redirect_from')
-      sessionStorage.removeItem('auth_redirect_count')
-      sessionStorage.removeItem('guest_redirect_in_progress')
-    }
-    // Let the page load - page-level middleware will handle auth
-    return
-  }
+      // ============================================
+      // AUTHENTICATION CHECK (for dashboard routes)
+      // ============================================
+      // CRITICAL: On app domain, we DO NOT check auth in global middleware
+      // This prevents redirect loops when auth state is still initializing after cross-domain redirects
+      // Page-level auth middleware (auth.ts) will handle authentication checks
+      // This is the key to preventing loops - let pages load first, then check auth
+      
+      // For dashboard routes on app domain, just allow them through
+      // The page-level 'auth' middleware will handle authentication
+      if (isDashboardRoute && isAppDomain) {
+        // Clear any redirect flags when successfully reaching dashboard
+        if (import.meta.client) {
+          sessionStorage.removeItem('auth_redirect_in_progress')
+          sessionStorage.removeItem('auth_redirect_from')
+          sessionStorage.removeItem('auth_redirect_count')
+          sessionStorage.removeItem('guest_redirect_in_progress')
+          
+          // Check if we have signed-in user data (from recent sign-in)
+          // This helps ensure user data is available even if auth state is still initializing
+          const signedInUserId = sessionStorage.getItem('signed_in_user_id')
+          if (signedInUserId) {
+            // User just signed in - allow through without checking auth
+            // The dashboard layout will handle loading user data
+            return
+          }
+        }
+        // Let the page load - page-level middleware will handle auth
+        return
+      }
 
   // ============================================
   // ROOT PATH HANDLING

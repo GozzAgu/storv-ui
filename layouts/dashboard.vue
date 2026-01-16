@@ -1594,15 +1594,64 @@ onMounted(async () => {
       // Always fetch if we don't have userData or if userData doesn't match current user
       if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
         try {
-          await userStore.fetchUserData(authStore.currentUser.uid)
+          // Check if we have user data in sessionStorage from sign-in (helps with cross-domain redirects)
+          const signedInUserId = sessionStorage.getItem('signed_in_user_id')
+          const signedInUserData = sessionStorage.getItem('signed_in_user_data')
+          
+          if (signedInUserId === authStore.currentUser.uid && signedInUserData) {
+            try {
+              const parsedData = JSON.parse(signedInUserData)
+              // Set user data immediately from sessionStorage
+              userStore.userData = parsedData
+              console.log('[Dashboard] User data loaded from sessionStorage:', parsedData)
+              // Still fetch fresh data in background
+              userStore.fetchUserData(authStore.currentUser.uid).catch(err => {
+                console.error('[Dashboard] Error fetching fresh user data:', err)
+              })
+            } catch (e) {
+              console.error('[Dashboard] Error parsing sessionStorage user data:', e)
+              // Fall back to fetching from Firestore
+              await userStore.fetchUserData(authStore.currentUser.uid)
+            }
+          } else {
+            // No cached data, fetch from Firestore
+            await userStore.fetchUserData(authStore.currentUser.uid)
+          }
           console.log('[Dashboard] User data fetched successfully:', userStore.userData)
+          
+          // Clear sessionStorage after successful load
+          sessionStorage.removeItem('signed_in_user_id')
+          sessionStorage.removeItem('signed_in_user_data')
         } catch (err) {
           console.error('[Dashboard] Error fetching user data:', err)
         }
       }
     } else if (!authStore.currentUser && !authStore.loading) {
-      // Auth is ready but no user - this shouldn't happen if we're on dashboard
-      console.warn('[Dashboard] No authenticated user after auth loaded')
+      // Check if we have signed-in user data in sessionStorage (might be from recent sign-in)
+      const signedInUserId = sessionStorage.getItem('signed_in_user_id')
+      const signedInUserData = sessionStorage.getItem('signed_in_user_data')
+      
+      if (signedInUserId && signedInUserData) {
+        try {
+          const parsedData = JSON.parse(signedInUserData) as any
+          // Wait a bit more for auth to restore
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          // Check again if auth is ready
+          const currentUser = authStore.currentUser
+          if (currentUser && (currentUser as any).uid === signedInUserId) {
+            userStore.userData = parsedData
+            console.log('[Dashboard] User data loaded from sessionStorage after wait:', parsedData)
+            sessionStorage.removeItem('signed_in_user_id')
+            sessionStorage.removeItem('signed_in_user_data')
+          }
+        } catch (e) {
+          console.error('[Dashboard] Error handling sessionStorage user data:', e)
+        }
+      } else {
+        // Auth is ready but no user - this shouldn't happen if we're on dashboard
+        console.warn('[Dashboard] No authenticated user after auth loaded')
+      }
     }
   }
   

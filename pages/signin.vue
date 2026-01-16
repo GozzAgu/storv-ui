@@ -253,7 +253,13 @@ const handleSignIn = async () => {
         sessionStorage.removeItem('dashboard_redirect_count')
         // Set sign-in time for grace period
         sessionStorage.setItem('last_signin_time', Date.now().toString())
+        // Store user data in sessionStorage temporarily to help with loading on redirect
+        sessionStorage.setItem('signed_in_user_id', user.uid)
+        sessionStorage.setItem('signed_in_user_data', JSON.stringify(userData))
       }
+      
+      // Wait a moment to ensure auth state is fully set
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       // Redirect to app domain dashboard using window.location for cross-domain
       // This is more reliable than navigateTo for cross-domain redirects
