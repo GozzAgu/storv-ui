@@ -262,47 +262,66 @@ const handleSignIn = async () => {
       
       // CRITICAL: Ensure auth state is fully persisted before cross-domain redirect
       // Firebase Auth needs time to save the auth state to localStorage/IndexedDB
-      // Get the auth token to ensure it's available for cross-domain transfer
+      // Get the auth token to pass it in the redirect URL for cross-domain transfer
+      let authToken = ''
       try {
         const auth = authStore.getAuthInstance()
         if (auth && user) {
-          // Get the ID token to ensure auth state is ready
-          await user.getIdToken(true) // Force refresh to ensure token is fresh
-          console.log('[SignIn] Auth token obtained, auth state should be persisted')
+          // Get the ID token to pass in redirect URL
+          authToken = await user.getIdToken(true) // Force refresh to ensure token is fresh
+          console.log('[SignIn] Auth token obtained for cross-domain transfer')
+          
+          // Store token in sessionStorage as backup
+          if (import.meta.client) {
+            sessionStorage.setItem('auth_token_temp', authToken)
+            sessionStorage.setItem('auth_token_time', Date.now().toString())
+          }
         }
       } catch (error) {
         console.warn('[SignIn] Error getting auth token:', error)
       }
       
       // Wait a moment to ensure auth state is fully persisted to localStorage/IndexedDB
-      await new Promise(resolve => setTimeout(resolve, 300))
+      await new Promise(resolve => setTimeout(resolve, 500))
       
       // Redirect to app domain dashboard using window.location for cross-domain
-      // This is more reliable than navigateTo for cross-domain redirects
-      // Firebase Auth will automatically restore auth state on the new domain via onAuthStateChanged
+      // Pass auth token in URL hash so app domain can restore auth state
       const host = typeof window !== 'undefined' ? window.location.host : ''
       const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
+      
+      // Build redirect URL with auth token
+      const buildRedirectUrl = (path: string) => {
+        if (isAppDomain) {
+          return path
+        }
+        const url = new URL(`https://app.storvv.com${path}`)
+        if (authToken) {
+          // Pass token in hash (more secure than query param, not sent to server)
+          url.hash = `auth_token=${authToken}`
+        }
+        return url.toString()
+      }
       
       if (!userData.hasCompletedOnboarding) {
         // Redirect to onboarding
         if (isAppDomain) {
           await navigateTo('/dashboard/onboarding')
         } else {
-          window.location.href = 'https://app.storvv.com/dashboard/onboarding'
+          window.location.href = buildRedirectUrl('/dashboard/onboarding')
         }
       } else if (!userData.hasCompletedTutorial) {
         // Redirect to tutorial
         if (isAppDomain) {
           await navigateTo('/dashboard')
         } else {
-          window.location.href = 'https://app.storvv.com/dashboard'
+          window.location.href = buildRedirectUrl('/dashboard')
         }
       } else {
         // Redirect to dashboard
         if (isAppDomain) {
           await navigateTo('/dashboard')
         } else {
-          window.location.href = 'https://app.storvv.com/dashboard'
+          window.location.href = buildRedirectUrl('/dashboard')
         }
       }
     }

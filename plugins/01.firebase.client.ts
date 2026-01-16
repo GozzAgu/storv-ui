@@ -71,6 +71,15 @@ export default defineNuxtPlugin(() => {
       // Initialize Firebase only if it hasn't been initialized
       if (!getApps().length) {
         app = initializeApp(firebaseConfig)
+        
+        // CRITICAL: Ensure authDomain is set correctly for cross-subdomain auth
+        // Firebase Auth should automatically work across subdomains if authDomain is configured correctly
+        // The authDomain should be the main domain (e.g., 'storvv.com' or 'storvv.firebaseapp.com')
+        // Both storvv.com and app.storvv.com should use the same authDomain
+        if (firebaseConfig.authDomain && import.meta.dev) {
+          console.log('[Firebase] Auth Domain configured:', firebaseConfig.authDomain)
+          console.log('[Firebase] Current host:', typeof window !== 'undefined' ? window.location.host : 'server')
+        }
       } else {
         app = getApps()[0]
       }
