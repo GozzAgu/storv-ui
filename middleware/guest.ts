@@ -50,7 +50,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       return navigateTo('/dashboard')
     } else {
       // If on main domain, redirect to app domain dashboard
-      return navigateTo('https://app.storvv.com/dashboard')
+      return navigateTo('https://app.storvv.com/dashboard', { external: true })
     }
   }
 })

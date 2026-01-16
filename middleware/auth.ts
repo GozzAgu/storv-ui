@@ -50,7 +50,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // If still loading, allow navigation to proceed (auth will resolve during page load)
   if (!authStore.loading && !authStore.currentUser) {
     // Redirect to signin on main domain
-    return navigateTo('https://storvv.com/signin')
+    return navigateTo('https://storvv.com/signin', { external: true })
   }
 })
 

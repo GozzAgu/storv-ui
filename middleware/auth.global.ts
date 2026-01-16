@@ -30,7 +30,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (!isDashboardRoute) {
       // If trying to access auth pages on app domain, redirect to main domain
       if (isAuthRoute) {
-        return navigateTo(`https://storvv.com${to.path}`)
+        return navigateTo(`https://storvv.com${to.path}`, { external: true })
       }
       // Redirect to dashboard if trying to access landing pages
       return navigateTo('/dashboard')
@@ -102,7 +102,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (!authStore.loading && !authStore.currentUser) {
       // Redirect to signin on main domain (since we're blocking dashboard on main domain)
       // Or redirect to app domain signin if you want signin on app domain
-      return navigateTo('https://storvv.com/signin')
+      return navigateTo('https://storvv.com/signin', { external: true })
     }
   }
 
@@ -119,7 +119,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
           if (authStore.currentUser) {
             return navigateTo('/dashboard')
           } else {
-            return navigateTo('https://storvv.com/signin')
+            return navigateTo('https://storvv.com/signin', { external: true })
           }
         }
       }
