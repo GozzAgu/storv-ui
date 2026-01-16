@@ -13,15 +13,50 @@ import ToastContainer from '~/components/ui/ToastContainer.vue'
 
 // Global error handler for unhandled promise rejections
 if (import.meta.client) {
+  // Suppress Vercel Analytics zustand deprecation warning
+  const originalWarn = console.warn
+  console.warn = (...args: any[]) => {
+    const message = args.join(' ')
+    // Filter out Vercel Analytics zustand deprecation warning
+    if (message.includes('[DEPRECATED] Default export is deprecated') && 
+        message.includes('zustand')) {
+      return // Suppress this specific warning
+    }
+    // Call original warn for all other messages
+    originalWarn.apply(console, args)
+  }
+
+  // Suppress console.error for browser extension and Vercel feedback widget errors
+  const originalError = console.error
+  console.error = (...args: any[]) => {
+    const message = args.join(' ')
+    // Filter out browser extension and Vercel feedback widget errors
+    if (message.includes('message channel closed') || 
+        message.includes('listener indicated an asynchronous response') ||
+        message.includes('feedback.html') ||
+        message.includes('about:srcdoc')) {
+      return // Suppress these specific errors
+    }
+    // Call original error for all other messages
+    originalError.apply(console, args)
+  }
+
   // Handle unhandled promise rejections
   window.addEventListener('unhandledrejection', (event) => {
-    // Check if it's the specific browser extension error we want to ignore
+    // Check if it's the specific browser extension or Vercel feedback widget error we want to ignore
     const errorMessage = event.reason?.message || String(event.reason || '')
+    const errorStack = event.reason?.stack || ''
+    const fullError = errorMessage + ' ' + errorStack
     
-    // Ignore browser extension related errors
+    // Ignore browser extension related errors and Vercel feedback widget errors
     if (errorMessage.includes('message channel closed') || 
-        errorMessage.includes('listener indicated an asynchronous response')) {
+        errorMessage.includes('listener indicated an asynchronous response') ||
+        fullError.includes('feedback.html') ||
+        fullError.includes('about:srcdoc') ||
+        event.reason?.source === 'extension' ||
+        event.reason?.source === 'feedback') {
       event.preventDefault() // Prevent the error from showing in console
+      event.stopPropagation() // Stop event propagation
       return
     }
     
@@ -31,13 +66,36 @@ if (import.meta.client) {
 
   // Handle general errors
   window.addEventListener('error', (event) => {
-    // Ignore browser extension related errors
+    // Ignore browser extension related errors and Vercel feedback widget errors
     const errorMessage = event.message || String(event.error || '')
+    const errorSource = event.filename || ''
+    const fullError = errorMessage + ' ' + errorSource
+    
     if (errorMessage.includes('message channel closed') || 
-        errorMessage.includes('listener indicated an asynchronous response')) {
+        errorMessage.includes('listener indicated an asynchronous response') ||
+        fullError.includes('feedback.html') ||
+        fullError.includes('about:srcdoc') ||
+        errorSource.includes('extension') ||
+        errorSource.includes('feedback')) {
       event.preventDefault()
+      event.stopPropagation()
       return
     }
-  })
+  }, true) // Use capture phase to catch errors earlier
+
+  // Also handle errors from iframes and other sources
+  window.addEventListener('error', (event) => {
+    const errorMessage = event.message || String(event.error || '')
+    const errorSource = event.filename || ''
+    
+    if (errorMessage.includes('message channel closed') || 
+        errorMessage.includes('listener indicated an asynchronous response') ||
+        errorSource.includes('feedback') ||
+        errorSource.includes('about:srcdoc')) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+  }, false) // Also listen in bubble phase
 }
 </script>
