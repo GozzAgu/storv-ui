@@ -239,12 +239,20 @@ const handleSignIn = async () => {
         storeCredentials(form.value.email, form.value.password)
       }
       
-      // Clear any redirect flags to prevent loops
+      // Clear ALL redirect flags to prevent loops
       if (import.meta.client) {
         sessionStorage.removeItem('auth_redirect_in_progress')
         sessionStorage.removeItem('auth_redirect_from')
         sessionStorage.removeItem('auth_redirect_count')
         sessionStorage.removeItem('guest_redirect_in_progress')
+        sessionStorage.removeItem('guest_redirect_count')
+        sessionStorage.removeItem('page_auth_redirect_in_progress')
+        sessionStorage.removeItem('page_auth_redirect_count')
+        sessionStorage.removeItem('dashboard_layout_redirect')
+        sessionStorage.removeItem('dashboard_watch_redirect')
+        sessionStorage.removeItem('dashboard_redirect_count')
+        // Set sign-in time for grace period
+        sessionStorage.setItem('last_signin_time', Date.now().toString())
       }
       
       // Redirect to app domain dashboard using window.location for cross-domain
@@ -316,12 +324,20 @@ const handlePhoneSignInSuccess = async (user: any) => {
       userData = await getUserDocument(user.uid)
     }
     
-    // Clear any redirect flags to prevent loops
+    // Clear ALL redirect flags to prevent loops
     if (import.meta.client) {
       sessionStorage.removeItem('auth_redirect_in_progress')
       sessionStorage.removeItem('auth_redirect_from')
       sessionStorage.removeItem('auth_redirect_count')
       sessionStorage.removeItem('guest_redirect_in_progress')
+      sessionStorage.removeItem('guest_redirect_count')
+      sessionStorage.removeItem('page_auth_redirect_in_progress')
+      sessionStorage.removeItem('page_auth_redirect_count')
+      sessionStorage.removeItem('dashboard_layout_redirect')
+      sessionStorage.removeItem('dashboard_watch_redirect')
+      sessionStorage.removeItem('dashboard_redirect_count')
+      // Set sign-in time for grace period
+      sessionStorage.setItem('last_signin_time', Date.now().toString())
     }
     
     // Redirect to app domain dashboard using window.location for cross-domain

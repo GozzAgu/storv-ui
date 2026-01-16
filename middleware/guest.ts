@@ -66,10 +66,23 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       return // Don't redirect if we're already in a redirect
     }
     
+    // Check redirect count to prevent loops
+    const redirectCount = parseInt(sessionStorage.getItem('guest_redirect_count') || '0')
+    if (redirectCount >= 2) {
+      // Too many redirects - break the loop
+      sessionStorage.removeItem('guest_redirect_count')
+      sessionStorage.removeItem(redirectKey)
+      return // Don't redirect, let user stay on signin
+    }
+    
     // Set flag to prevent redirect loops
     if (import.meta.client) {
       sessionStorage.setItem(redirectKey, 'true')
-      setTimeout(() => sessionStorage.removeItem(redirectKey), 2000)
+      sessionStorage.setItem('guest_redirect_count', String(redirectCount + 1))
+      setTimeout(() => {
+        sessionStorage.removeItem(redirectKey)
+        sessionStorage.removeItem('guest_redirect_count')
+      }, 3000)
     }
     
     // Redirect to dashboard on app domain
@@ -81,6 +94,14 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     } else {
       // If on main domain, redirect to app domain dashboard
       return navigateTo('https://app.storvv.com/dashboard', { external: true })
+    }
+  }
+  
+  // Clear redirect flags if user is not authenticated
+  if (!authStore.loading && !authStore.currentUser) {
+    if (import.meta.client) {
+      sessionStorage.removeItem('guest_redirect_in_progress')
+      sessionStorage.removeItem('guest_redirect_count')
     }
   }
 })

@@ -1445,6 +1445,16 @@ const checkAuth = async () => {
   
   checkingAuth.value = true
   
+  // Add a grace period after cross-domain redirect to allow auth to initialize
+  const lastSignInTime = sessionStorage.getItem('last_signin_time')
+  const gracePeriod = 3000 // 3 seconds grace period after sign-in
+  const now = Date.now()
+  
+  if (lastSignInTime && (now - parseInt(lastSignInTime)) < gracePeriod) {
+    // Recently signed in - wait a bit before checking auth
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
+  
   // Wait for auth to finish loading
   if (authStore.loading) {
     await new Promise<void>((resolve) => {
@@ -1477,8 +1487,34 @@ const checkAuth = async () => {
   }
   
   // Redirect to signin if no user after loading completes
+  // But add loop prevention
   if (!authStore.loading && !authStore.currentUser) {
     checkingAuth.value = false
+    
+    // Prevent redirect loops
+    const redirectKey = 'dashboard_layout_redirect'
+    if (sessionStorage.getItem(redirectKey) === 'true') {
+      // Already redirecting, don't redirect again
+      return
+    }
+    
+    // Check redirect count
+    const redirectCount = parseInt(sessionStorage.getItem('dashboard_redirect_count') || '0')
+    if (redirectCount >= 2) {
+      // Too many redirects - break the loop
+      sessionStorage.removeItem('dashboard_redirect_count')
+      sessionStorage.removeItem(redirectKey)
+      return // Allow page to load
+    }
+    
+    // Set flag to prevent loops
+    sessionStorage.setItem(redirectKey, 'true')
+    sessionStorage.setItem('dashboard_redirect_count', String(redirectCount + 1))
+    setTimeout(() => {
+      sessionStorage.removeItem(redirectKey)
+      sessionStorage.removeItem('dashboard_redirect_count')
+    }, 3000)
+    
     // Redirect to signin on main domain
     const host = typeof window !== 'undefined' ? window.location.host : ''
     const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
@@ -1488,6 +1524,13 @@ const checkAuth = async () => {
     } else {
       return navigateTo('/signin')
     }
+  }
+  
+  // Clear redirect flags if user is authenticated
+  if (authStore.currentUser) {
+    sessionStorage.removeItem('dashboard_layout_redirect')
+    sessionStorage.removeItem('dashboard_redirect_count')
+    sessionStorage.removeItem('last_signin_time')
   }
   
   checkingAuth.value = false
@@ -1553,6 +1596,16 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
   
   // Redirect to signin if user logs out (but not during staff creation)
   if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress) {
+    // Prevent redirect loops
+    const redirectKey = 'dashboard_watch_redirect'
+    if (sessionStorage.getItem(redirectKey) === 'true') {
+      return // Already redirecting
+    }
+    
+    // Set flag
+    sessionStorage.setItem(redirectKey, 'true')
+    setTimeout(() => sessionStorage.removeItem(redirectKey), 3000)
+    
     // Redirect to signin on main domain
     const host = typeof window !== 'undefined' ? window.location.host : ''
     const isAppDomain = host && (host.startsWith('app.') || host === 'app.storvv.com')
