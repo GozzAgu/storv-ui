@@ -6,13 +6,10 @@
         <div class="flex justify-between items-center h-16 lg:h-20">
             <NuxtLink to="/" class="flex items-center space-x-2 group hover:opacity-80 transition-opacity">
               <img
-                src="/storv logo.png"
-              alt="Storvv Logo"
-              class="h-8 w-auto object-contain"
+                :src="logoSource"
+                alt="Storvv Logo 2"
+                class="h-10 w-auto object-contain"
               />
-            <span class="text-2xl font-bold text-gray-900 tracking-tight">
-              Storvv
-              </span>
             </NuxtLink>
           <div class="hidden md:flex items-center space-x-8">
             <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
@@ -1026,7 +1023,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useTheme } from '~/composables/useTheme'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -1055,6 +1053,12 @@ import {
   KeyIcon,
   ArrowUpIcon,
 } from '@heroicons/vue/24/outline'
+
+const { actualTheme } = useTheme()
+
+const logoSource = computed(() => {
+  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+})
 
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)

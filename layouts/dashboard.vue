@@ -30,21 +30,15 @@
         >
           <div class="relative flex-shrink-0">
             <img
-              src="/storv logo.png"
+              :src="logoSource"
               alt="Storvv Logo"
               :class="[
                 'transition-all duration-300 object-contain',
-                sidebarCollapsed ? 'h-7 w-7' : 'h-7 w-auto'
+                sidebarCollapsed ? 'h-12 w-12' : 'h-10 w-24'
               ]"
             />
             <div class="absolute inset-0 bg-gradient-to-br from-primary-400/20 to-primary-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
-          <span 
-            v-if="!sidebarCollapsed" 
-            class="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-700 via-primary-500 to-primary-600 bg-clip-text text-transparent tracking-tight"
-          >
-          Storvv
-          </span>
         </NuxtLink>
         <div class="flex items-center gap-2">
           <!-- Mobile close button -->
@@ -655,6 +649,10 @@ import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
 
 const { actualTheme } = useTheme()
+
+const logoSource = computed(() => {
+  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+})
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()

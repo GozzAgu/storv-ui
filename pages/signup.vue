@@ -26,9 +26,9 @@
       <div class="text-center mb-6">
         <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-3">
           <img
-            src="/storv logo.png"
+            :src="logoSource"
             alt="Storvv Logo"
-            class="h-12 w-auto mx-auto object-contain"
+            class="h-10 w-auto mx-auto object-contain"
           />
         </NuxtLink>
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
@@ -224,8 +224,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
+import { useTheme } from '~/composables/useTheme'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
@@ -233,6 +234,12 @@ import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 definePageMeta({
   layout: false,
   middleware: 'guest'
+})
+
+const { actualTheme } = useTheme()
+
+const logoSource = computed(() => {
+  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 })
 
 const form = ref({
