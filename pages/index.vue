@@ -829,7 +829,7 @@
               </div>
               <div class="flex-1">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">How does customer tracking work?</h3>
-                <p class="text-gray-600">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer—all without manual data entry.</p>
+                <p class="text-gray-600">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer all without manual data entry.</p>
               </div>
             </div>
           </div>
