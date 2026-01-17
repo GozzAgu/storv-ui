@@ -785,7 +785,7 @@
               </div>
               <div class="flex-1">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">Is Storvv difficult to learn?</h3>
-                <p class="text-gray-600">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward—if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+                <p class="text-gray-600">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
               </div>
             </div>
           </div>
