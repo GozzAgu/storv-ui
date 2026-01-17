@@ -32,7 +32,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       checkAuth()
     })
   }
-
+  
   // Only redirect if auth has finished loading and user is authenticated
   if (!authStore.loading && authStore.currentUser) {
     // Check if we're already going to dashboard to prevent loops

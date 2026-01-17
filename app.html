@@ -109,7 +109,7 @@
             if (document.body) {
               hideBody();
               bodyObserver.disconnect();
-            }
+          }
           });
           bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
         }
@@ -121,7 +121,7 @@
           html.style.removeProperty('display');
           if (document.body) {
             document.body.style.removeProperty('display');
-          }
+        }
         }
         
         // Test Tailwind is working

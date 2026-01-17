@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-white antialiased">
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <nav :class="['fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 transition-all duration-300', isScrolled ? 'shadow-lg' : 'shadow-sm']">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
             <NuxtLink to="/" class="flex items-center space-x-2 group hover:opacity-80 transition-opacity">
@@ -12,18 +12,21 @@
               />
             </NuxtLink>
           <div class="hidden md:flex items-center space-x-8">
-            <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
-              Features
+            <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 hover:scale-105 relative group">
+              <span>Features</span>
+              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
-            <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
-              About
+            <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 hover:scale-105 relative group">
+              <span>About</span>
+              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
-            <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-colors">
-              Contact
+            <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 hover:scale-105 relative group">
+              <span>Contact</span>
+              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
-            <NuxtLink to="/signin" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-colors">
+            <button @click="showLaunchModal = true" class="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg">
               Start Free Trial
-            </NuxtLink>
+            </button>
           </div>
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen"
@@ -54,9 +57,9 @@
             <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block text-gray-700 hover:text-gray-900 font-medium py-2">
               Contact
             </a>
-            <NuxtLink to="/signin" class="block w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold mt-2 text-center" @click="mobileMenuOpen = false">
+            <button @click="showLaunchModal = true; mobileMenuOpen = false" class="block w-full bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold mt-2 text-center">
               Start Free Trial
-            </NuxtLink>
+            </button>
           </div>
         </Transition>
       </div>
@@ -64,9 +67,13 @@
 
     <!-- Hero Section -->
     <section class="relative pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-36 min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <!-- Background Image -->
+      <!-- Background Image with Parallax -->
       <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/hero-img.jpg'); transform: scale(1.05);"></div>
+        <div 
+          ref="heroBackground"
+          class="absolute inset-0 bg-cover bg-center bg-no-repeat hero-parallax" 
+          style="background-image: url('/hero-img.jpg'); transform: scale(1.1);"
+        ></div>
         <!-- Dark overlay -->
         <div class="absolute inset-0 bg-black/50"></div>
         <!-- Subtle gradient overlay for depth -->
@@ -77,19 +84,19 @@
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="max-w-4xl mx-auto text-center">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-md text-primary-700 rounded-full text-sm font-bold mb-8 shadow-lg border border-primary-200/50">
-            <SparklesIcon class="w-4 h-4 flex-shrink-0" />
+          <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-md text-primary-700 rounded-full text-sm font-bold mb-8 shadow-lg border border-primary-200/50 animate-fade-in-down hover:scale-105 transition-transform duration-300">
+            <SparklesIcon class="w-4 h-4 flex-shrink-0 animate-pulse" />
             <span>Complete Store Management Platform</span>
           </div>
           
           <!-- Main Heading -->
-          <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-8 leading-tight tracking-tight">
-            <span class="block mb-3 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">Complete Store Management</span>
-            <span class="block bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(59,130,246,0.6)]">Your Way</span>
+          <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-8 leading-tight tracking-tight animate-fade-in-down">
+            <span class="block mb-3 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] animate-fade-in-down stagger-1">Complete Store Management</span>
+            <span class="block bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(59,130,246,0.6)] animate-gradient animate-fade-in-down stagger-2">Your Way</span>
               </h1>
           
           <!-- Description -->
-          <p class="text-xl sm:text-2xl lg:text-2xl text-white/90 mb-12 leading-relaxed font-medium max-w-3xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+          <p class="text-xl sm:text-2xl lg:text-2xl text-white/90 mb-12 leading-relaxed font-medium max-w-3xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] animate-fade-in-up stagger-3">
             Build custom inventory systems that match your products. Process sales with professional receipts. Track customers automatically. Manage your team with precision.
           </p>
           
@@ -116,12 +123,12 @@
               </div>
           
           <!-- CTA Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <NuxtLink to="/signin" class="group bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center justify-center gap-2 min-w-[200px]">
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up stagger-4">
+            <button @click="showLaunchModal = true" class="group bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2 min-w-[200px] animate-pulse-glow">
               Start Free Trial
               <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-            </NuxtLink>
-            <button class="bg-white/95 backdrop-blur-md text-gray-900 border-2 border-gray-300 px-8 py-4 rounded-xl font-bold text-lg hover:border-primary-500 hover:text-primary-600 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 min-w-[200px]">
+            </button>
+            <button class="bg-white/95 backdrop-blur-md text-gray-900 border-2 border-gray-300 px-8 py-4 rounded-xl font-bold text-lg hover:border-primary-500 hover:text-primary-600 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 min-w-[200px]">
               <DocumentTextIcon class="w-5 h-5 flex-shrink-0" />
               Learn More
             </button>
@@ -131,7 +138,7 @@
     </section>
 
     <!-- Problem/Solution Section -->
-    <section class="py-20 sm:py-24 lg:py-32 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 relative overflow-hidden">
+    <section data-section-id="problem" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-32 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 relative overflow-hidden">
       <!-- Animated background elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-20 left-10 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
@@ -220,7 +227,7 @@
     </section>
 
     <!-- How It Works Section -->
-    <section id="features" class="py-16 sm:py-20 lg:py-24 bg-white">
+    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up py-16 sm:py-20 lg:py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -233,7 +240,7 @@
 
         <div class="max-w-5xl mx-auto space-y-12">
           <!-- Step 1 -->
-          <div class="flex flex-col sm:flex-row gap-6 items-start group">
+          <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex flex-col sm:flex-row gap-6 items-start group">
             <div class="flex-shrink-0 relative">
               <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
                 1
@@ -254,7 +261,7 @@
                 </div>
 
           <!-- Step 2 -->
-          <div class="flex flex-col sm:flex-row gap-6 items-start group">
+          <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex flex-col sm:flex-row gap-6 items-start group">
             <div class="flex-shrink-0 relative">
               <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
                 2
@@ -275,7 +282,7 @@
             </div>
 
           <!-- Step 3 -->
-          <div class="flex flex-col sm:flex-row gap-6 items-start group">
+          <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex flex-col sm:flex-row gap-6 items-start group">
             <div class="flex-shrink-0 relative">
               <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
                 3
@@ -296,7 +303,7 @@
             </div>
 
           <!-- Step 4 -->
-          <div class="flex flex-col sm:flex-row gap-6 items-start group">
+          <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex flex-col sm:flex-row gap-6 items-start group">
             <div class="flex-shrink-0 relative">
               <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
                 4
@@ -317,7 +324,7 @@
             </div>
 
           <!-- Step 5 -->
-          <div class="flex flex-col sm:flex-row gap-6 items-start group">
+          <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex flex-col sm:flex-row gap-6 items-start group">
             <div class="flex-shrink-0 relative">
               <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform">
                 5
@@ -338,7 +345,7 @@
     </section>
 
     <!-- Save Time Section -->
-    <section class="py-20 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
+    <section data-section-id="features-list" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
       <!-- Subtle background pattern -->
       <div class="absolute inset-0 opacity-[0.02] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgb(0 0 0) 1px, transparent 0); background-size: 48px 48px;"></div>
       
@@ -362,7 +369,7 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-primary-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div class="scroll-animate scroll-animate-scale stagger-1 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-primary-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-primary-500/20">
@@ -373,7 +380,7 @@
             </div>
           </div>
 
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div class="scroll-animate scroll-animate-scale stagger-2 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-blue-500/20">
@@ -384,7 +391,7 @@
             </div>
           </div>
 
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-green-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div class="scroll-animate scroll-animate-scale stagger-3 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-green-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-green-50/0 to-green-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-green-500/20">
@@ -513,7 +520,7 @@
     </section>
 
     <!-- Pricing Section -->
-    <section id="pricing" class="py-16 sm:py-20 lg:py-24 bg-gray-50">
+    <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-16 sm:py-20 lg:py-24 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-6">
@@ -554,16 +561,16 @@
             
         <div class="grid sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <!-- Basic Plan -->
-          <div class="bg-white rounded-lg border-2 border-gray-200 p-8">
+          <div class="scroll-animate scroll-animate-scale stagger-1 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Starter</h3>
               <p class="text-gray-600 mb-4">Ideal for Small Shops Getting Started</p>
               <div class="text-4xl font-bold text-gray-900 mb-1">FREE</div>
               <p class="text-gray-600 text-sm">to get started</p>
               </div>
-            <NuxtLink to="/signup" class="block w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors mb-6 text-center">
+            <button @click="showLaunchModal = true" class="block w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors mb-6 text-center">
               Get Started
-            </NuxtLink>
+            </button>
             <ul class="space-y-3">
               <li class="flex items-start gap-2">
                 <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -593,7 +600,7 @@
           </div>
 
           <!-- Pro Plan -->
-          <div class="bg-white rounded-lg border-2 border-primary-600 p-8 relative transform scale-105 shadow-lg">
+          <div class="scroll-animate scroll-animate-scale stagger-2 bg-white rounded-lg border-2 border-primary-600 p-8 relative transform scale-105 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300">
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <span class="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                 POPULAR
@@ -609,9 +616,9 @@
               <p class="text-gray-600 text-sm">{{ isYearly ? 'per year' : 'per month' }}</p>
               <p v-if="isYearly" class="text-green-600 text-xs font-medium mt-1">Save $27/year</p>
             </div>
-            <NuxtLink to="/signin" class="block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 text-center">
+            <button @click="showLaunchModal = true" class="block w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors mb-6 text-center">
               Start Free Trial
-            </NuxtLink>
+            </button>
             <ul class="space-y-3">
               <li class="flex items-start gap-2">
                 <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -657,7 +664,7 @@
           </div>
 
           <!-- Premium Plan -->
-          <div class="bg-white rounded-lg border-2 border-gray-200 p-8">
+          <div class="scroll-animate scroll-animate-scale stagger-3 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
               <p class="text-gray-600 mb-4">For Multi-Location Retail Chains</p>
@@ -668,9 +675,9 @@
               <p class="text-gray-600 text-sm">{{ isYearly ? 'per year' : 'per month' }}</p>
               <p v-if="isYearly" class="text-green-600 text-xs font-medium mt-1">Save $45/year</p>
             </div>
-            <NuxtLink to="/signin" class="block w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-6 text-center">
+            <button @click="showLaunchModal = true" class="block w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-6 text-center">
               Start Free Trial
-            </NuxtLink>
+            </button>
             <ul class="space-y-3">
               <li class="flex items-start gap-2">
                 <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -745,7 +752,7 @@
     </section>
 
     <!-- FAQ Section -->
-    <section class="py-16 sm:py-20 lg:py-24 bg-gray-50">
+    <section data-section-id="faq" class="scroll-animate scroll-animate-up py-16 sm:py-20 lg:py-24 bg-gray-50">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
           <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-6">
@@ -771,9 +778,9 @@
               </div>
             </div>
           </div>
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+          <div class="scroll-animate scroll-animate-scale stagger-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+              <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 group-hover:scale-110 transition-all duration-300">
                 <SparklesIcon class="w-5 h-5 text-green-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
@@ -782,9 +789,9 @@
               </div>
             </div>
           </div>
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+          <div class="scroll-animate scroll-animate-scale stagger-3 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+              <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-300">
                 <ChartBarIcon class="w-5 h-5 text-blue-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
@@ -942,11 +949,11 @@
         <p class="text-lg font-semibold mb-8">
           Experience the difference a truly flexible system makes.
         </p>
-        <NuxtLink to="/signup" class="group bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold text-base hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center gap-2">
+        <button @click="showLaunchModal = true" class="group bg-white text-primary-600 px-8 py-4 rounded-lg font-semibold text-base hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center gap-2">
           Get Started Now
           <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-        </NuxtLink>
-      </div>
+        </button>
+          </div>
     </section>
 
     <!-- Final CTA -->
@@ -958,15 +965,15 @@
         <p class="text-lg sm:text-xl text-gray-600 mb-8">
           Create your free account and discover how Storvv can transform your store operations.
         </p>
-        <NuxtLink to="/signin" class="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-primary-700 transition-colors inline-flex items-center gap-2">
+        <button @click="showLaunchModal = true" class="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-primary-700 transition-colors inline-flex items-center gap-2">
           Start Free Trial
           <ArrowRightIcon class="w-5 h-5 flex-shrink-0" />
-        </NuxtLink>
+        </button>
       </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 sm:py-24 lg:py-32 bg-gray-50">
+    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-32 bg-gray-50">
       <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
           Get in Touch
@@ -979,7 +986,7 @@
             gozieagu1@gmail.com
           </a>
           </div>
-          </div>
+      </div>
     </section>
 
     <!-- Footer -->
@@ -1019,12 +1026,51 @@
         <ArrowUpIcon class="w-6 h-6 flex-shrink-0" />
     </button>
     </Transition>
+
+    <!-- Launching Soon Modal -->
+    <Modal
+      :model-value="showLaunchModal"
+      @update:model-value="showLaunchModal = $event"
+      size="md"
+    >
+      <template #header>
+        <div class="text-center w-full">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+            <SparklesIcon class="w-8 h-8 text-white" />
+          </div>
+          </div>
+      </template>
+      <template #default>
+        <div class="text-center py-6 px-4">
+          <h3 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
+            Storvv is Launching Soon!
+          </h3>
+          <div class="h-1 w-20 bg-gradient-to-r from-primary-500 to-primary-600 mx-auto mb-6 rounded-full"></div>
+          <p class="text-lg text-gray-700 dark:text-gray-300 mb-3 leading-relaxed max-w-lg mx-auto font-medium">
+            We're putting the final touches on our platform to deliver an exceptional experience for your store management needs.
+          </p>
+          <p class="text-base text-gray-600 dark:text-gray-400 mb-8 leading-relaxed max-w-md mx-auto">
+            Be among the first to know when we go live. Get notified as soon as Storvv is ready to transform your business.
+          </p>
+          <button
+            @click="showLaunchModal = false"
+            class="w-full max-w-xs mx-auto bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-3.5 rounded-lg font-semibold text-base hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Understood, Thank You!
+          </button>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-6 font-medium">
+            We'll be back soon with something amazing.
+          </p>
+        </div>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useTheme } from '~/composables/useTheme'
+import Modal from '~/components/ui/Modal.vue'
 import {
   Bars3Icon,
   XMarkIcon,
@@ -1063,6 +1109,9 @@ const logoSource = computed(() => {
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
 const isYearly = ref(false)
+const showLaunchModal = ref(false)
+const visibleSections = ref<Set<string>>(new Set())
+const heroBackground = ref<HTMLElement | null>(null)
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -1079,15 +1128,72 @@ const scrollToSection = (sectionId: string) => {
 }
 
 const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
-}
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }
+
+const isScrolled = ref(false)
+
+let rafId: number | null = null
 
 const handleScroll = () => {
   // Show button when user scrolls down more than 400px
   showBackToTop.value = window.scrollY > 400
+  // Update nav shadow based on scroll
+  isScrolled.value = window.scrollY > 20
+  
+  // Use requestAnimationFrame for smooth parallax
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+  }
+  
+  rafId = requestAnimationFrame(() => {
+    // Parallax effect for hero background
+    if (heroBackground.value) {
+      const scrolled = window.scrollY
+      const heroHeight = heroBackground.value.parentElement?.parentElement?.offsetHeight || 0
+      
+      // Only apply parallax when scrolling within hero section
+      if (scrolled < heroHeight) {
+        const parallaxSpeed = 0.3 // Slower parallax for smoother effect
+        const translateY = scrolled * parallaxSpeed
+        heroBackground.value.style.transform = `translate3d(0, ${translateY}px, 0) scale(1.1)`
+      } else {
+        // Lock position when past hero section
+        const maxTranslate = heroHeight * 0.3
+        heroBackground.value.style.transform = `translate3d(0, ${maxTranslate}px, 0) scale(1.1)`
+      }
+    }
+  })
+}
+
+// Intersection Observer for scroll animations
+const setupScrollAnimations = () => {
+  if (!import.meta.client) return
+  
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('data-section-id')
+          if (id) {
+            visibleSections.value.add(id)
+            entry.target.classList.add('visible')
+          }
+        }
+      })
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px',
+    }
+  )
+  
+  // Observe all scroll-animate elements
+  const animateElements = document.querySelectorAll('[data-section-id]')
+  animateElements.forEach((el) => observer.observe(el))
 }
 
 onMounted(() => {
@@ -1103,6 +1209,11 @@ onMounted(() => {
     window.addEventListener('scroll', handleScroll)
     // Check initial scroll position
     handleScroll()
+  
+    // Setup scroll animations
+    setTimeout(() => {
+      setupScrollAnimations()
+    }, 100)
   }
 })
 
@@ -1110,6 +1221,9 @@ onUnmounted(() => {
   // Clean up scroll event listener
   if (import.meta.client) {
     window.removeEventListener('scroll', handleScroll)
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+    }
   }
 })
 

@@ -126,7 +126,7 @@
 
     <!-- Actual Content (shown when not loading) -->
     <template v-else>
-      <!-- Key Metrics Cards - Compact -->
+    <!-- Key Metrics Cards - Compact -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       <StatCard
         label="Total Revenue"
@@ -164,10 +164,10 @@
         icon-bg-class="bg-primary-100 dark:bg-primary-900/30"
         icon-class="text-primary-600 dark:text-primary-400"
       />
-      </div>
+    </div>
 
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
       <!-- Revenue Chart -->
       <Card class="lg:col-span-2">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
@@ -286,8 +286,8 @@
       </Card>
       </div>
 
-      <!-- Bottom Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+    <!-- Bottom Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
       <!-- Recent Transactions -->
       <Card>
         <div class="flex items-center justify-between mb-2">
