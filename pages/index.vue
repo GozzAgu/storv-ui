@@ -8,7 +8,7 @@
               <img
                 :src="logoSource"
                 alt="Storvv Logo 2"
-                class="h-10 w-auto object-contain"
+                class="h-6 sm:h-10 w-auto object-contain"
               />
             </NuxtLink>
           <div class="hidden md:flex items-center space-x-8">
@@ -84,7 +84,7 @@
       <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div class="max-w-4xl mx-auto text-center">
           <!-- Badge -->
-          <div class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-md text-primary-700 rounded-full text-sm font-bold mb-8 shadow-lg border border-primary-200/50 animate-fade-in-down hover:scale-105 transition-transform duration-300">
+          <div class="inline-flex items-center gap-2 px-5 py-2.5 glassmorphism text-white rounded-full text-sm font-bold mb-8 shadow-lg border border-white/20 backdrop-blur-lg animate-fade-in-down hover:scale-105 hover:border-white/30 transition-all duration-300">
             <SparklesIcon class="w-4 h-4 flex-shrink-0 animate-pulse" />
             <span>Complete Store Management Platform</span>
           </div>
@@ -92,7 +92,7 @@
           <!-- Main Heading -->
           <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-8 leading-tight tracking-tight animate-fade-in-down">
             <span class="block mb-3 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] animate-fade-in-down stagger-1">Complete Store Management</span>
-            <span class="block bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(59,130,246,0.6)] animate-gradient animate-fade-in-down stagger-2">Your Way</span>
+            <span class="block text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] animate-fade-in-down stagger-2">Your Way</span>
               </h1>
           
           <!-- Description -->
@@ -102,21 +102,21 @@
           
           <!-- Feature Pills -->
           <div class="flex flex-wrap gap-3 justify-center items-center mb-14">
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-800 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-full border border-gray-200/80 shadow-md hover:shadow-lg transition-all hover:scale-105">
-              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <FolderIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
+              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
+                <FolderIcon class="w-4 h-4 text-white flex-shrink-0" />
             </div>
               <span>Flexible inventory</span>
             </div>
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-800 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-full border border-gray-200/80 shadow-md hover:shadow-lg transition-all hover:scale-105">
-              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <UsersIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
+              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
+                <UsersIcon class="w-4 h-4 text-white flex-shrink-0" />
           </div>
               <span>Auto customer tracking</span>
               </div>
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-gray-800 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-full border border-gray-200/80 shadow-md hover:shadow-lg transition-all hover:scale-105">
-              <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <UserGroupIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
+              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
+                <UserGroupIcon class="w-4 h-4 text-white flex-shrink-0" />
                 </div>
               <span>Team collaboration</span>
                 </div>
@@ -124,11 +124,11 @@
           
           <!-- CTA Buttons -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up stagger-4">
-            <button @click="showLaunchModal = true" class="group bg-primary-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2 min-w-[200px] animate-pulse-glow">
+            <button @click="showLaunchModal = true" class="group glassmorphism-button bg-primary-600/90 backdrop-blur-lg text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700/90 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2 min-w-[200px] animate-pulse-glow border border-white/20">
               Start Free Trial
               <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
             </button>
-            <button class="bg-white/95 backdrop-blur-md text-gray-900 border-2 border-gray-300 px-8 py-4 rounded-xl font-bold text-lg hover:border-primary-500 hover:text-primary-600 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 min-w-[200px]">
+            <button class="glassmorphism bg-white/10 backdrop-blur-lg text-white border-2 border-white/30 px-8 py-4 rounded-xl font-bold text-lg hover:border-white/50 hover:bg-white/20 transition-all inline-flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 min-w-[200px]">
               <DocumentTextIcon class="w-5 h-5 flex-shrink-0" />
               Learn More
             </button>
@@ -369,7 +369,7 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          <div class="scroll-animate scroll-animate-scale stagger-1 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-primary-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div data-section-id="feature-1" class="scroll-animate scroll-animate-scale stagger-1 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-primary-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-primary-500/20">
@@ -380,7 +380,7 @@
             </div>
           </div>
 
-          <div class="scroll-animate scroll-animate-scale stagger-2 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div data-section-id="feature-2" class="scroll-animate scroll-animate-scale stagger-2 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-blue-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-blue-500/20">
@@ -391,7 +391,7 @@
             </div>
           </div>
 
-          <div class="scroll-animate scroll-animate-scale stagger-3 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-green-300/50 transition-all duration-300 transform hover:-translate-y-1">
+          <div data-section-id="feature-3" class="scroll-animate scroll-animate-scale stagger-3 group relative bg-white p-8 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-xl hover:border-green-300/50 transition-all duration-300 transform hover:-translate-y-1">
             <div class="absolute inset-0 bg-gradient-to-br from-green-50/0 to-green-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative">
               <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg shadow-green-500/20">
@@ -561,7 +561,7 @@
             
         <div class="grid sm:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <!-- Basic Plan -->
-          <div class="scroll-animate scroll-animate-scale stagger-1 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
+          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Starter</h3>
               <p class="text-gray-600 mb-4">Ideal for Small Shops Getting Started</p>
@@ -600,7 +600,7 @@
           </div>
 
           <!-- Pro Plan -->
-          <div class="scroll-animate scroll-animate-scale stagger-2 bg-white rounded-lg border-2 border-primary-600 p-8 relative transform scale-105 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300">
+          <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white rounded-lg border-2 border-primary-600 p-8 relative transform scale-105 shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300">
             <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <span class="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                 POPULAR
@@ -664,7 +664,7 @@
           </div>
 
           <!-- Premium Plan -->
-          <div class="scroll-animate scroll-animate-scale stagger-3 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
+          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white rounded-lg border-2 border-gray-200 p-8 hover:shadow-xl hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
             <div class="mb-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">Enterprise</h3>
               <p class="text-gray-600 mb-4">For Multi-Location Retail Chains</p>
@@ -767,9 +767,9 @@
         </div>
 
         <div class="space-y-6">
-          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all group">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-200 group-hover:scale-110 transition-all duration-300">
                 <ClockIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
@@ -778,7 +778,7 @@
               </div>
             </div>
           </div>
-          <div class="scroll-animate scroll-animate-scale stagger-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-4">
               <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 group-hover:scale-110 transition-all duration-300">
                 <SparklesIcon class="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -789,7 +789,7 @@
               </div>
             </div>
           </div>
-          <div class="scroll-animate scroll-animate-scale stagger-3 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-4">
               <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-300">
                 <ChartBarIcon class="w-5 h-5 text-blue-600 flex-shrink-0" />
@@ -953,22 +953,6 @@
           Get Started Now
           <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
         </button>
-          </div>
-    </section>
-
-    <!-- Final CTA -->
-    <section class="py-16 sm:py-20 lg:py-24 bg-white">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-          Begin Managing Smarter Today
-        </h2>
-        <p class="text-lg sm:text-xl text-gray-600 mb-8">
-          Create your free account and discover how Storvv can transform your store operations.
-        </p>
-        <button @click="showLaunchModal = true" class="bg-primary-600 text-white px-8 py-4 rounded-lg font-semibold text-base hover:bg-primary-700 transition-colors inline-flex items-center gap-2">
-          Start Free Trial
-          <ArrowRightIcon class="w-5 h-5 flex-shrink-0" />
-        </button>
       </div>
     </section>
 
@@ -993,8 +977,12 @@
     <footer id="about" class="bg-gray-900 text-gray-400 py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
-          <NuxtLink to="/" class="inline-block mb-4">
-            <span class="text-2xl font-bold text-white">Storvv</span>
+          <NuxtLink to="/" class="inline-block mb-4 group hover:opacity-80 transition-opacity">
+            <img
+              src="/storvv logo.png"
+              alt="Storvv Logo"
+              class="h-12 w-auto object-contain mx-auto"
+            />
           </NuxtLink>
           <p class="text-gray-500 max-w-2xl mx-auto">
             Complete store management solution designed for modern retailers.
@@ -1191,9 +1179,17 @@ const setupScrollAnimations = () => {
     }
   )
   
-  // Observe all scroll-animate elements
-  const animateElements = document.querySelectorAll('[data-section-id]')
-  animateElements.forEach((el) => observer.observe(el))
+  // Observe all scroll-animate elements with data-section-id
+  const animateElements = document.querySelectorAll('.scroll-animate[data-section-id]')
+  animateElements.forEach((el) => {
+    // Check if element is already in viewport on load
+    const rect = el.getBoundingClientRect()
+    const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+    if (isInViewport) {
+      el.classList.add('visible')
+    }
+    observer.observe(el)
+  })
 }
 
 onMounted(() => {
