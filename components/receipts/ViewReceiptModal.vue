@@ -14,6 +14,14 @@
         </h3>
         <div class="flex items-center gap-2">
           <button
+            @click="showEmailModal = true"
+            :disabled="isSendingEmail || !receipt"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+          >
+            <EnvelopeIcon class="w-4 h-4" />
+            <span>{{ isSendingEmail ? 'Sending...' : 'Send Email' }}</span>
+          </button>
+          <button
             @click="handlePrintPDF"
             :disabled="isPrinting || !receipt"
             class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
@@ -197,11 +205,51 @@
       </div>
     </div>
   </Modal>
+
+  <!-- Email Input Modal -->
+  <Modal
+    :model-value="showEmailModal"
+    @update:model-value="showEmailModal = $event"
+    size="sm"
+    title="Send Receipt via Email"
+  >
+    <template #default>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email Address
+          </label>
+          <input
+            v-model="emailToSend"
+            type="email"
+            placeholder="Enter email address"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            @keyup.enter="handleSendEmail"
+          />
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button
+            @click="showEmailModal = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleSendEmail"
+            :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-md transition-colors"
+          >
+            {{ isSendingEmail ? 'Sending...' : 'Send' }}
+          </button>
+        </div>
+      </div>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { PrinterIcon } from '@heroicons/vue/24/outline'
+import { PrinterIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import type { Receipt } from '~/stores/receipts'
 import { useUserStore } from '~/stores/user'
@@ -222,6 +270,9 @@ const emit = defineEmits<{
 
 const receiptContent = ref<HTMLElement | null>(null)
 const isPrinting = ref(false)
+const isSendingEmail = ref(false)
+const showEmailModal = ref(false)
+const emailToSend = ref('')
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const { formatCurrency } = usePreferences()
@@ -264,6 +315,13 @@ const calculateTotalDiscount = computed(() => {
     return total
   }, 0)
 })
+
+// Pre-fill email when receipt changes
+watch(() => props.receipt, (receipt) => {
+  if (receipt?.customerEmail) {
+    emailToSend.value = receipt.customerEmail
+  }
+}, { immediate: true })
 
 // Load user data and folders if not already loaded
 watch(() => props.modelValue, async (isOpen) => {
@@ -366,6 +424,106 @@ const handlePrintPDF = async () => {
     alert('Failed to generate PDF. Please try again.')
   } finally {
     isPrinting.value = false
+  }
+}
+
+const isValidEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+const generateReceiptPDF = async (): Promise<string> => {
+  if (!receiptContent.value || !props.receipt) {
+    throw new Error('Receipt content is required')
+  }
+
+  // Dynamically import jsPDF and html2canvas
+  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+    import('jspdf'),
+    import('html2canvas')
+  ])
+
+  // Create canvas from receipt content
+  const canvas = await html2canvas(receiptContent.value, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: '#ffffff',
+  })
+
+  // Calculate PDF dimensions (A4: 210 x 297 mm)
+  const imgWidth = 210
+  const pageHeight = 297
+  const imgHeight = (canvas.height * imgWidth) / canvas.width
+  let heightLeft = imgHeight
+
+  // Create PDF
+  const pdf = new jsPDF('p', 'mm', 'a4')
+  let position = 0
+
+  // Add image to PDF
+  const imgData = canvas.toDataURL('image/png')
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+  heightLeft -= pageHeight
+
+  // Add additional pages if needed
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight
+    pdf.addPage()
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+    heightLeft -= pageHeight
+  }
+
+  // Convert PDF to base64 string
+  const dataUri = pdf.output('datauristring')
+  const base64 = dataUri.split(',')[1] // Remove data:application/pdf;base64, prefix
+  if (!base64) {
+    throw new Error('Failed to generate PDF base64')
+  }
+  return base64
+}
+
+const handleSendEmail = async () => {
+  if (!props.receipt) {
+    alert('Receipt data is required')
+    return
+  }
+
+  if (!emailToSend.value || !isValidEmail(emailToSend.value)) {
+    alert('Please enter a valid email address')
+    return
+  }
+
+  isSendingEmail.value = true
+  try {
+    // Generate PDF first
+    const pdfBase64 = await generateReceiptPDF()
+
+    // Send email with PDF attachment
+    const response = await $fetch('/api/receipts/send-email', {
+      method: 'POST',
+      body: {
+        receiptId: props.receipt.id,
+        receiptNumber: props.receipt.receiptNumber,
+        customerEmail: emailToSend.value,
+        receiptData: props.receipt,
+        pdfBase64: pdfBase64,
+      },
+    })
+
+    if (!response.success) {
+      const errorMessage = ('error' in response && response.error) ? String(response.error) : 'Failed to send email'
+      throw new Error(errorMessage)
+    }
+
+    alert('Receipt sent to email successfully!')
+    showEmailModal.value = false
+    emailToSend.value = ''
+  } catch (error: any) {
+    console.error('Error sending receipt email:', error)
+    alert(`Failed to send email: ${error.message || 'Unknown error'}`)
+  } finally {
+    isSendingEmail.value = false
   }
 }
 </script>

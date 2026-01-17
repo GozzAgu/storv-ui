@@ -603,6 +603,46 @@
       </div>
     </template>
   </Modal>
+
+  <!-- Email Input Modal -->
+  <Modal
+    :model-value="showEmailModal"
+    @update:model-value="showEmailModal = $event"
+    size="sm"
+    title="Send Receipt via Email"
+  >
+    <template #default>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email Address
+          </label>
+          <input
+            v-model="emailToSend"
+            type="email"
+            placeholder="Enter email address"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
+          />
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button
+            @click="showEmailModal = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
+            :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-md transition-colors"
+          >
+            {{ isSendingEmail ? 'Sending...' : 'Send' }}
+          </button>
+        </div>
+      </div>
+    </template>
+  </Modal>
 </template>
 
 <script setup lang="ts">
@@ -613,6 +653,7 @@ import {
   CheckCircleIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
+  EnvelopeIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -644,6 +685,12 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency } = usePreferences()
+
+const isSendingEmail = ref(false)
+const showEmailModal = ref(false)
+const emailToSend = ref('')
+const lastCreatedReceiptId = ref('')
+const lastCreatedReceiptData = ref<any>(null)
 
 const steps = [
   { id: 'folder', label: 'Select Folder' },
@@ -1245,6 +1292,16 @@ const handleCreateReceipt = async () => {
     }
 
     emit('receipt-created', { ...receiptData, id: receiptId })
+    
+    // Store receipt data for email sending
+    lastCreatedReceiptId.value = receiptId
+    lastCreatedReceiptData.value = receiptData
+    
+    // Show email prompt after receipt creation
+    const emailAddress = receiptForm.value.customerEmail || ''
+    emailToSend.value = emailAddress // Pre-fill if available
+    showEmailModal.value = true
+    
     resetForm()
     emit('update:modelValue', false)
   } catch (error: any) {
@@ -1252,6 +1309,52 @@ const handleCreateReceipt = async () => {
     alert(`Error creating receipt: ${error.message || 'Unknown error'}`)
   } finally {
     isCreating.value = false
+  }
+}
+
+const isValidEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+const sendReceiptEmail = async (receiptId: string, receiptData: any) => {
+  if (!emailToSend.value || !isValidEmail(emailToSend.value)) {
+    alert('Please enter a valid email address')
+    return
+  }
+
+  isSendingEmail.value = true
+  try {
+    // Note: For CreateReceiptModal, we send receiptData only
+    // The server can generate PDF from receipt data if needed
+    // For now, we'll rely on the HTML email body
+    // To attach PDF, you would need to either:
+    // 1. Open ViewReceiptModal to generate PDF from DOM
+    // 2. Generate PDF on server side from receipt data
+    const response = await $fetch('/api/receipts/send-email', {
+      method: 'POST',
+      body: {
+        receiptId,
+        receiptNumber: receiptData.receiptNumber,
+        customerEmail: emailToSend.value,
+        receiptData,
+        // pdfBase64 is optional - only sent if available
+      },
+    })
+
+    if (!response.success) {
+      const errorMessage = ('error' in response && response.error) ? String(response.error) : 'Failed to send email'
+      throw new Error(errorMessage)
+    }
+
+    alert('Receipt sent to email successfully!')
+    showEmailModal.value = false
+    emailToSend.value = ''
+  } catch (error: any) {
+    console.error('Error sending receipt email:', error)
+    throw error
+  } finally {
+    isSendingEmail.value = false
   }
 }
 </script>
