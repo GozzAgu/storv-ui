@@ -8,7 +8,7 @@
               <img
                 :src="logoSource"
                 alt="Storvv Logo 2"
-                class="h-6 sm:h-10 w-auto object-contain"
+                class="h-5 sm:h-8 w-auto object-contain"
               />
             </NuxtLink>
           <div class="hidden md:flex items-center space-x-8">
@@ -1030,7 +1030,7 @@
             <img
               src="/storvv logo.png"
               alt="Storvv Logo"
-              class="h-12 w-auto object-contain mx-auto"
+              class="h-8 w-auto object-contain mx-auto"
             />
           </NuxtLink>
           <p class="text-gray-500 max-w-2xl mx-auto">
