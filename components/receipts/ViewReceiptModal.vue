@@ -40,80 +40,68 @@
 
     <div v-else class="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-6">
       <!-- Receipt Content (will be used for PDF) -->
-      <div ref="receiptContent" class="receipt-content bg-white text-gray-900 p-6 max-w-2xl mx-auto" style="font-family: 'Courier New', Courier, monospace;">
+      <div ref="receiptContent" class="receipt-content bg-white text-gray-900 p-6 max-w-lg mx-auto">
         <!-- Store Header -->
-        <div class="text-center mb-6 pb-4 border-b-2 border-gray-300">
+        <div class="text-center mb-4 pb-3 border-b border-gray-400">
           <h1 class="text-xl font-bold mb-1">{{ storeName || 'Store Name' }}</h1>
-          <p v-if="storeAddress" class="text-xs text-gray-600 mb-0.5">{{ storeAddress }}</p>
-          <p v-if="storePhone" class="text-xs text-gray-600 mb-0.5">Phone: {{ storePhone }}</p>
-          <p v-if="storeEmail" class="text-xs text-gray-600">Email: {{ storeEmail }}</p>
+          <p v-if="storeAddress" class="text-xs mb-0.5">{{ storeAddress }}</p>
+          <p v-if="storePhone" class="text-xs mb-0.5">Phone: {{ storePhone }}</p>
+          <p v-if="storeEmail" class="text-xs">Email: {{ storeEmail }}</p>
         </div>
 
         <!-- Receipt Info -->
-        <div class="mb-5">
-          <div class="flex justify-between items-start mb-3">
+        <div class="mb-4 pb-3 border-b border-gray-400">
+          <div class="flex justify-between mb-2">
             <div>
-              <p class="text-xs text-gray-600 mb-0.5">Receipt Number</p>
-              <div class="flex items-center gap-2">
-                <p class="text-sm font-semibold">{{ receipt.receiptNumber }}</p>
-                <span
-                  v-if="receipt.isSwapIn"
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                  title="Swap-in transaction"
-                >
-                  Swap-in
-                </span>
-              </div>
+              <p class="text-xs mb-0.5">Receipt: {{ receipt.receiptNumber }}</p>
+              <span v-if="receipt.isSwapIn" class="text-xs">(Swap-in)</span>
             </div>
             <div class="text-right">
-              <p class="text-xs text-gray-600 mb-0.5">Date</p>
-              <p class="text-sm font-semibold">{{ formatReceiptDate(receipt.date) }}</p>
-              <p class="text-xs text-gray-600 mt-0.5">{{ formatReceiptTime(receipt.date) }}</p>
+              <p class="text-xs">{{ formatReceiptDate(receipt.date) }}</p>
+              <p class="text-xs">{{ formatReceiptTime(receipt.date) }}</p>
             </div>
           </div>
-
-          <div class="mt-3 pt-3 border-t border-gray-300">
-            <p class="text-xs text-gray-600 mb-0.5">Customer</p>
-            <p class="text-sm font-semibold">{{ receipt.customerName }}</p>
-            <p v-if="receipt.customerEmail" class="text-xs text-gray-600">{{ receipt.customerEmail }}</p>
+          <div class="mt-2">
+            <p class="text-xs mb-0.5">Customer: {{ receipt.customerName }}</p>
+            <p v-if="receipt.customerEmail" class="text-xs">{{ receipt.customerEmail }}</p>
           </div>
         </div>
 
         <!-- Items Table -->
-        <div class="mb-5">
-          <table class="w-full border-collapse text-xs">
+        <div class="mb-4">
+          <table class="w-full border-collapse">
             <thead>
-              <tr class="border-b-2 border-gray-300">
-                <th class="text-left py-2 px-2 font-semibold">Item</th>
-                <th class="text-center py-2 px-2 font-semibold">Qty</th>
-                <th class="text-right py-2 px-2 font-semibold">Price</th>
-                <th class="text-right py-2 px-2 font-semibold">Total</th>
+              <tr class="border-b border-gray-400">
+                <th class="text-left py-1 text-xs font-bold">Item</th>
+                <th class="text-center py-1 text-xs font-bold">Qty</th>
+                <th class="text-right py-1 text-xs font-bold">Price</th>
+                <th class="text-right py-1 text-xs font-bold">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="(item, index) in receipt.items"
                 :key="index"
-                class="border-b border-gray-200"
+                class="border-b border-gray-300"
               >
-                <td class="py-2 px-2">
+                <td class="py-1 text-xs">
                   <div>{{ item.itemName }}</div>
-                  <div v-if="item.hasDiscount" class="text-xs text-red-600 mt-0.5">
+                  <div v-if="item.hasDiscount" class="text-xs">
                     Discount: {{ item.discountPercentage ? `${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                   </div>
                 </td>
-                <td class="py-2 px-2 text-center">{{ item.quantity }}</td>
-                <td class="py-2 px-2 text-right">
+                <td class="py-1 text-xs text-center">{{ item.quantity }}</td>
+                <td class="py-1 text-xs text-right">
                   <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
-                    <span class="font-semibold text-green-600">{{ formatCurrency(item.price) }}</span>
+                    <span class="text-xs line-through">{{ formatCurrency(item.originalPrice) }}</span>
+                    <span>{{ formatCurrency(item.price) }}</span>
                   </div>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
-                <td class="py-2 px-2 text-right font-semibold">
+                <td class="py-1 text-xs text-right">
                   <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
-                    <span class="text-green-600">{{ formatCurrency(item.price * item.quantity) }}</span>
+                    <span class="text-xs line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                    <span>{{ formatCurrency(item.price * item.quantity) }}</span>
                   </div>
                   <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
                 </td>
@@ -123,84 +111,70 @@
         </div>
 
         <!-- Totals -->
-        <div class="mb-5 pt-3 border-t-2 border-gray-300">
+        <div class="mb-4 pb-3 border-b border-gray-400">
           <div class="flex justify-end">
-            <div class="w-48 space-y-1.5">
-              <!-- Calculate totals with discounts -->
+            <div class="w-48 space-y-1">
               <template v-if="hasAnyDiscount">
-                <div class="flex justify-between">
-                  <span class="text-xs text-gray-600">Subtotal:</span>
-                  <span class="text-xs font-semibold">{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
+                <div class="flex justify-between text-xs">
+                  <span>Subtotal:</span>
+                  <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-xs text-red-600">Total Discount:</span>
-                  <span class="text-xs font-semibold text-red-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
+                <div class="flex justify-between text-xs">
+                  <span>Total Discount:</span>
+                  <span>-{{ formatCurrency(calculateTotalDiscount) }}</span>
                 </div>
               </template>
-              <div v-else class="flex justify-between">
-                <span class="text-xs text-gray-600">Subtotal:</span>
-                <span class="text-xs font-semibold">{{ formatCurrency(receipt.total) }}</span>
+              <div v-else class="flex justify-between text-xs">
+                <span>Subtotal:</span>
+                <span>{{ formatCurrency(receipt.total) }}</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-xs text-gray-600">Payment Method:</span>
-                <span class="text-xs font-semibold capitalize">{{ receipt.paymentMethod }}</span>
+              <div class="flex justify-between text-xs pt-1 border-t border-gray-400">
+                <span>Payment Method:</span>
+                <span class="capitalize">{{ receipt.paymentMethod }}</span>
               </div>
-              <div class="flex justify-between pt-1.5 border-t border-gray-300">
-                <span class="text-sm font-bold">Total:</span>
-                <span class="text-sm font-bold">{{ formatCurrency(receipt.total) }}</span>
+              <div class="flex justify-between text-xs pt-1 border-t-2 border-gray-600">
+                <span class="font-bold">Total:</span>
+                <span class="font-bold">{{ formatCurrency(receipt.total) }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Status Badge -->
-        <div class="mb-5 text-center">
-          <span
-            :class="[
-              'inline-block px-3 py-1 rounded-full text-xs font-semibold',
-              receipt.status === 'completed'
-                ? 'bg-green-100 text-green-800'
-                : receipt.status === 'pending'
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-red-100 text-red-800'
-            ]"
-          >
-            {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
-          </span>
+        <!-- Status -->
+        <div class="mb-4 text-center">
+          <span class="text-xs font-bold">Status: {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}</span>
         </div>
 
         <!-- Notes -->
-        <div v-if="receipt.notes" class="mb-5 pt-3 border-t border-gray-300">
-          <p class="text-xs font-semibold text-gray-600 mb-1">Notes:</p>
-          <p class="text-xs text-gray-700 whitespace-pre-wrap">{{ receipt.notes }}</p>
+        <div v-if="receipt.notes" class="mb-4 pb-3 border-b border-gray-400">
+          <p class="text-xs font-bold mb-1">Notes:</p>
+          <p class="text-xs whitespace-pre-wrap">{{ receipt.notes }}</p>
         </div>
 
         <!-- Swap-In Information -->
-        <div v-if="receipt.isSwapIn && swapInFolderName" class="mb-5 pt-3 border-t border-gray-300">
-          <p class="text-xs font-semibold text-gray-600 mb-1">Swap-In:</p>
-          <p class="text-xs text-gray-700">
-            A device was swapped in and added to inventory folder: <strong>{{ swapInFolderName }}</strong>
+        <div v-if="receipt.isSwapIn && swapInFolderName" class="mb-4 pb-3 border-b border-gray-400">
+          <p class="text-xs font-bold mb-1">Swap-In Information:</p>
+          <p class="text-xs">
+            A device was swapped in and added to inventory folder: {{ swapInFolderName }}
           </p>
         </div>
 
         <!-- Store Branch and User Info -->
-        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="mt-5 pt-3 border-t border-gray-300">
-          <div class="flex justify-between text-xs text-gray-600">
+        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="mb-4 pb-3 border-b border-gray-400">
+          <div class="flex justify-between text-xs">
             <div v-if="receipt.storeBranchName">
-              <span class="font-semibold">Branch:</span>
-              <span class="ml-1">{{ receipt.storeBranchName }}</span>
+              <span>Branch: {{ receipt.storeBranchName }}</span>
             </div>
             <div v-if="receipt.createdByUserName">
-              <span class="font-semibold">Generated by:</span>
-              <span class="ml-1">{{ receipt.createdByUserName }}</span>
+              <span>Generated by: {{ receipt.createdByUserName }}</span>
             </div>
           </div>
         </div>
 
         <!-- Footer -->
-        <div class="mt-6 pt-4 border-t-2 border-gray-300 text-center text-xs text-gray-500">
-          <p>Thank you for your business!</p>
-          <p class="mt-1">This is a computer-generated receipt.</p>
+        <div class="mt-4 pt-3 border-t border-gray-400 text-center">
+          <p class="text-xs mb-0.5">Thank you for your business!</p>
+          <p class="text-xs">This is a computer-generated receipt.</p>
         </div>
       </div>
     </div>
@@ -531,28 +505,34 @@ const handleSendEmail = async () => {
 <style scoped>
 .receipt-content {
   font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #1f2937;
+  letter-spacing: 0.3px;
 }
 
 .receipt-content h1 {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 700;
   letter-spacing: 1px;
+  line-height: 1.2;
+  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
 }
 
 .receipt-content .text-xs {
   font-size: 10px;
+  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
 }
 
 .receipt-content .text-sm {
-  font-size: 11px;
+  font-size: 12px;
+  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
 }
 
 .receipt-content table {
-  font-size: 11px;
+  font-size: 12px;
   border-collapse: collapse;
+  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
 }
 
 .receipt-content th,
@@ -561,10 +541,32 @@ const handleSendEmail = async () => {
   padding: 4px 8px;
 }
 
+.receipt-content th {
+  font-weight: 700;
+}
+
+.receipt-content * {
+  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+}
+
 /* Print styles */
 @media print {
   .receipt-content {
     page-break-inside: avoid;
+    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  
+  .receipt-content .shadow-xl {
+    box-shadow: none;
+  }
+  
+  .receipt-content .rounded-lg {
+    border-radius: 0;
+  }
+  
+  .receipt-content * {
     font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
   }
 }

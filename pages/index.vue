@@ -179,7 +179,7 @@
           
           <p class="text-lg sm:text-xl text-gray-700 mb-14 leading-relaxed max-w-3xl mx-auto">
             Create inventory folders with custom templates that match your exact product structure. Track serial numbers when needed, handle bulk items when you don't. Process complex transactions like swaps and discounts effortlessly. Let the system automatically build your customer database from every sale.
-          </p>
+            </p>
           
           <!-- Enhanced Feature Cards -->
           <div class="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -1003,7 +1003,7 @@
         </h2>
           <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
             Have questions? We'd love to hear from you.
-          </p>
+        </p>
         </div>
 
         <!-- Contact Card -->
@@ -1249,7 +1249,7 @@ onMounted(() => {
       scrollToSection(sectionId)
     }, 100)
   }
-  
+
   // Add scroll event listener
   if (import.meta.client) {
     window.addEventListener('scroll', handleScroll)

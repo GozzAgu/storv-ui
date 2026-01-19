@@ -530,8 +530,37 @@
           <!-- Common Fields (all items share these) -->
           <div class="space-y-3">
             <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Item Details (Shared)</h4>
+            
+            <!-- Brand and Model Fields (default when serial numbers enabled) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Brand *
+                </label>
+                <input
+                  v-model="itemForm.brand"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  placeholder="Enter brand name"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Model *
+                </label>
+                <input
+                  v-model="itemForm.model"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  placeholder="Enter model name"
+                />
+              </div>
+            </div>
+            
             <div
-              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo') || []"
+              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
               :key="field.id"
               :class="['grid gap-3', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']"
             >
@@ -1179,10 +1208,23 @@ watch(() => route.params.id, (newFolderId) => {
 const openAddItemModal = () => {
   editingItem.value = null
   serialNumbers.value = []
+  // Reset form
+  Object.keys(itemForm).forEach(key => delete itemForm[key])
+  
+  // If serial numbers are enabled, initialize brand and model fields by default
+  if (folder.value?.hasSerialNumbers) {
+    itemForm.brand = ''
+    itemForm.model = ''
+  }
+  
   // Initialize form with empty values for all template fields
   if (folder.value?.template?.fields) {
-    Object.keys(itemForm).forEach(key => delete itemForm[key])
     folder.value.template.fields.forEach(field => {
+      // Skip brand and model if serial numbers enabled (they're already added above)
+      if (folder.value?.hasSerialNumbers && (field.name === 'brand' || field.name === 'model')) {
+        return
+      }
+      
       if (field.type === 'number' || field.type === 'currency') {
         itemForm[field.name] = 0
       } else if (field.type === 'boolean') {
@@ -1240,9 +1282,21 @@ const removeSerialNumber = (index: number) => {
 }
 
 const handleSaveItem = async () => {
+  // Validate brand and model when serial numbers are enabled
+  if (folder.value?.hasSerialNumbers && !editingItem.value) {
+    if (!itemForm.brand || itemForm.brand.toString().trim() === '') {
+      toast.warning('Please enter a brand name')
+      return
+    }
+    if (!itemForm.model || itemForm.model.toString().trim() === '') {
+      toast.warning('Please enter a model name')
+      return
+    }
+  }
+  
   // Validate required fields based on template
   if (folder.value?.template?.fields) {
-    const requiredFields = folder.value.template.fields.filter(f => f.required && f.name !== 'serialNo')
+    const requiredFields = folder.value.template.fields.filter(f => f.required && f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model')
     for (const field of requiredFields) {
       if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
         toast.warning(`Please fill in the required field: ${field.label || field.name}`)

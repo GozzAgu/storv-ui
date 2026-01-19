@@ -461,14 +461,17 @@
             <!-- Role Description -->
             <div class="p-2.5 bg-gradient-to-r from-primary-50 to-primary-100/50 dark:from-primary-900/40 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-md">
               <p class="text-xs text-primary-900 dark:text-primary-50 font-medium mb-1.5">
-                {{ profileData.role === 'staff' ? 'Staff Member' : 'Super Admin' }}
+                {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
               <p class="text-[10px] text-primary-700 dark:text-primary-100 leading-relaxed">
                 <template v-if="profileData.role === 'staff'">
                   As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
                 </template>
-                <template v-else>
+                <template v-else-if="profileData.role === 'superAdmin' || !profileData.role">
                   As a Super Admin, you have full access to all features and settings in the system. You are the account owner and have complete control over your store operations.
+                </template>
+                <template v-else>
+                  Your role: {{ profileData.role }}. Contact your administrator for more information about your permissions.
                 </template>
               </p>
             </div>
@@ -476,9 +479,12 @@
             <!-- Permissions List -->
             <div>
               <p class="text-xs font-medium text-gray-900 dark:text-gray-50 mb-2">Your Permissions:</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <div v-if="userPermissions.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-2">
+                Loading permissions...
+              </div>
+              <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                 <div 
-                  v-for="permission in (profileData.role === 'staff' ? staffPermissions : superAdminPermissions)" 
+                  v-for="permission in userPermissions" 
                   :key="permission"
                   class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
                 >
@@ -925,6 +931,7 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
 import { useAuthStore } from '~/stores/auth'
+import { usePermissions } from '~/composables/usePermissions'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
@@ -944,7 +951,7 @@ const profileData = reactive({
   email: '',
   phone: '',
   bio: '',
-  role: 'Super Admin',
+  role: '',
 })
 
 // Store information
@@ -1277,34 +1284,66 @@ const themeOptions = [
 
 const currentThemeValue = computed(() => theme.value || 'system')
 
-// Staff Permissions
-const staffPermissions = [
-  'View and manage inventory items',
-  'View and manage receipts',
-  'View customer information',
-  'Create and process sales',
-  'View inventory folders in assigned department',
-  'Process returns and exchanges',
-]
+// Get permissions
+const {
+  isStaff,
+  isManager,
+  canManage,
+  isReadOnly,
+  canCreate,
+  canEditReceipts,
+  canDeleteReceipts,
+  canManageInventoryItems,
+  canCreateInventoryFolders,
+  canCreateStaff,
+} = usePermissions()
 
-// Super Admin Permissions
-const superAdminPermissions = [
-  'Full access to all features',
-  'Manage store information and settings',
-  'Manage team members and roles',
-  'View and manage all inventory',
-  'View and manage all customers',
-  'View and manage all receipts and sales',
-  'View and manage all returns',
-  'Access all reports and analytics',
-  'Manage departments and staff',
-  'Configure payment settings',
-  'Export and import all data',
-  'Delete all data',
-  'Manage leave requests',
-  'Access system settings',
-  'Manage user permissions',
-]
+// Computed property for user's actual permissions
+const userPermissions = computed(() => {
+  const permissions: string[] = []
+  
+  // Super Admin permissions
+  if (!isStaff.value) {
+    permissions.push('Full access to all features')
+    permissions.push('Manage store information and settings')
+    permissions.push('Manage team members and roles')
+    permissions.push('View and manage all inventory')
+    permissions.push('View and manage all customers')
+    permissions.push('View and manage all receipts and sales')
+    permissions.push('View and manage all returns')
+    permissions.push('Access all reports and analytics')
+    permissions.push('Manage departments and staff')
+    permissions.push('Configure payment settings')
+    permissions.push('Export and import all data')
+    permissions.push('Delete all data')
+    permissions.push('Manage leave requests')
+    permissions.push('Access system settings')
+    permissions.push('Manage user permissions')
+    permissions.push('Create inventory folders')
+    permissions.push('Create and process sales')
+  } else {
+    // Staff permissions (all staff can view and create)
+    permissions.push('View inventory items')
+    permissions.push('View receipts')
+    permissions.push('View customer information')
+    permissions.push('Create and process sales')
+    
+    // Manager-specific permissions
+    if (isManager.value) {
+      permissions.push('Manage inventory items')
+      permissions.push('Edit receipts')
+      permissions.push('Delete receipts')
+      permissions.push('Create inventory folders')
+      permissions.push('Manage department operations')
+    } else {
+      // Regular staff (read-only)
+      permissions.push('View inventory folders in assigned department')
+      permissions.push('Process returns and exchanges')
+    }
+  }
+  
+  return permissions
+})
 
 // Modal states (simplified - would be actual modals in production)
 const showLanguageModal = ref(false)

@@ -717,6 +717,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
 ]

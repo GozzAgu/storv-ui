@@ -403,217 +403,6 @@
           </div>
         </div>
       </Card>
-
-      <!-- Payment Settings -->
-      <Card padding="sm" extra-class="p-3">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Payment Settings</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Configure available payment methods</p>
-          </div>
-          <Button 
-            v-if="canEditSettings"
-            @click="savePaymentSettings" 
-            variant="primary"
-          >
-            Save Changes
-          </Button>
-          <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            View Only
-          </div>
-      </div>
-
-            <div class="space-y-2.5">
-          <div class="py-2.5">
-            <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2.5">Available Payment Methods</p>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-2.5">Select the payment methods you accept for sales transactions</p>
-            <div class="space-y-2">
-              <label :class="['flex items-center gap-2', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
-                <input
-                  v-model="paymentSettings.paymentMethods"
-                  type="checkbox"
-                  value="cash"
-                  :disabled="!canEditSettings"
-                  class="w-3.5 h-3.5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <span class="text-xs text-gray-700 dark:text-gray-300">Cash</span>
-              </label>
-              <label :class="['flex items-center gap-2', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
-                <input
-                  v-model="paymentSettings.paymentMethods"
-                  type="checkbox"
-                  value="card"
-                  :disabled="!canEditSettings"
-                  class="w-3.5 h-3.5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <span class="text-xs text-gray-700 dark:text-gray-300">Card Payment</span>
-              </label>
-              <label :class="['flex items-center gap-2', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
-                <input
-                  v-model="paymentSettings.paymentMethods"
-                  type="checkbox"
-                  value="mobile"
-                  :disabled="!canEditSettings"
-                  class="w-3.5 h-3.5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <span class="text-xs text-gray-700 dark:text-gray-300">Mobile Money</span>
-              </label>
-              <label :class="['flex items-center gap-2', canEditSettings ? 'cursor-pointer' : 'cursor-not-allowed opacity-60']">
-                <input
-                  v-model="paymentSettings.paymentMethods"
-                  type="checkbox"
-                  value="bank"
-                  :disabled="!canEditSettings"
-                  class="w-3.5 h-3.5 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <span class="text-xs text-gray-700 dark:text-gray-300">Bank Transfer</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <!-- Data Management -->
-      <Card padding="sm" extra-class="p-3">
-        <div class="flex items-center justify-between mb-3">
-              <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Data Management</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Backup, export, and manage your data</p>
-          </div>
-        </div>
-
-        <div class="space-y-2.5">
-          <!-- Export Section -->
-          <div class="pb-2.5 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center gap-2 mb-2.5">
-              <div class="w-7 h-7 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <ArrowDownTrayIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div class="flex-1">
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Export Data</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">Download your data as CSV or JSON</p>
-              </div>
-            </div>
-            <div class="ml-9 space-y-1.5">
-              <p class="text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">Available exports:</p>
-              <div class="grid grid-cols-2 gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  Products/Inventory
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  Customers
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  Sales/Receipts
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  Returns
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  Suppliers
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-primary-500"></span>
-                  All Data (Backup)
-                </div>
-              </div>
-            </div>
-            <div class="ml-9 mt-2.5">
-              <button 
-                @click="handleExport"
-                :disabled="!canEditSettings"
-                :class="[
-                  'px-3 py-1.5 text-xs font-medium border rounded-md transition-colors',
-                  canEditSettings
-                    ? 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed opacity-60'
-                ]"
-              >
-                Export All Data
-              </button>
-            </div>
-          </div>
-
-          <!-- Import Section -->
-          <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <ArrowUpTrayIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Import Data</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Import data from CSV or JSON file</p>
-              </div>
-            </div>
-            <div class="ml-9 space-y-1.5">
-              <p class="text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1.5">Supported imports:</p>
-              <div class="grid grid-cols-2 gap-1.5 text-[10px] text-gray-600 dark:text-gray-400">
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-green-500"></span>
-                  Products/Inventory (CSV)
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-green-500"></span>
-                  Customers (CSV)
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span class="w-1 h-1 rounded-full bg-green-500"></span>
-                  Full Backup (JSON)
-                </div>
-              </div>
-            </div>
-            <div class="ml-9 mt-2.5">
-              <input
-                ref="importFileInput"
-                type="file"
-                accept=".csv,.json"
-                @change="handleImport"
-                class="hidden"
-              />
-              <button 
-                @click="triggerImport"
-                :disabled="!canEditSettings"
-                :class="[
-                  'px-3 py-1.5 text-xs font-medium border rounded-md transition-colors',
-                  canEditSettings
-                    ? 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-500 cursor-not-allowed opacity-60'
-                ]"
-              >
-                Choose File to Import
-              </button>
-            </div>
-          </div>
-
-          <!-- Delete Section -->
-          <div class="flex items-center justify-between py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <TrashIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Delete All Data</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Permanently delete all store data (cannot be undone)</p>
-              </div>
-            </div>
-            <button 
-              v-if="canEditSettings"
-              @click="handleDeleteAll"
-              class="px-4 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-            >
-              Delete All
-            </button>
-            <div v-else class="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              View Only
-            </div>
-          </div>
-        </div>
-      </Card>
     </div>
 
     <!-- Create/Edit Store Modal -->
@@ -796,9 +585,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
-  TrashIcon,
   SparklesIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -832,7 +618,6 @@ const storeInfo = reactive({
 
 const backupStoreInfo = reactive({ ...storeInfo })
 const isEditingStore = ref(false)
-const importFileInput = ref<HTMLInputElement | null>(null)
 const isLoadingStoreInfo = ref(true)
 
 // Get user data and load store info
@@ -924,11 +709,6 @@ const receiptSettings = reactive({
   prefix: 'REC-',
   nextNumber: 1001,
   autoPrint: false,
-})
-
-// Payment settings
-const paymentSettings = reactive({
-  paymentMethods: ['cash', 'card'],
 })
 
 const switchStore = async (storeId: string) => {
@@ -1121,10 +901,6 @@ onMounted(async () => {
             receiptSettings.nextNumber = settings.receipt.nextNumber ?? 1001
             receiptSettings.autoPrint = settings.receipt.autoPrint ?? false
           }
-          
-          if (settings.payment) {
-            paymentSettings.paymentMethods = settings.payment.paymentMethods || ['cash', 'card']
-          }
         }
       }
     } catch (error) {
@@ -1260,94 +1036,6 @@ const saveReceiptSettings = async () => {
   })
 }
 
-// Save payment settings
-const savePaymentSettings = async () => {
-  if (!canEditSettings.value) {
-    toast.error('Only super admins can edit settings')
-    return
-  }
-  
-  await updateStoreSettings({
-    payment: {
-      paymentMethods: paymentSettings.paymentMethods,
-    },
-  })
-}
 
-// Data Management Functions
-const handleExport = () => {
-  if (!canEditSettings.value) {
-    toast.error('Only super admins can export data')
-    return
-  }
-  
-  // In production, this would generate and download files
-  const exportData = {
-    products: 'Export includes: Name, SKU, Category, Price, Quantity, Cost, Supplier, etc.',
-    customers: 'Export includes: Name, Email, Phone, Address, Total Orders, Total Spent, etc.',
-    receipts: 'Export includes: Receipt #, Date, Customer, Items, Total, Payment Method, etc.',
-    returns: 'Export includes: Return #, Original Receipt, Items, Reason, Date, Status, etc.',
-    suppliers: 'Export includes: Name, Contact, Email, Products Supplied, Payment Terms, etc.',
-    settings: 'Export includes: Store Info, Inventory Settings, Payment Methods, etc.',
-  }
-  
-  console.log('Exporting data:', exportData)
-  // Simulate download
-  toast.info('Data export started! This would download:\n- Products.csv\n- Customers.csv\n- Receipts.csv\n- Returns.csv\n- Suppliers.csv\n- Settings.json\n\nAll files would be downloaded as a ZIP archive.', 5000)
-}
-
-const triggerImport = () => {
-  if (!canEditSettings.value) {
-    toast.error('Only super admins can import data')
-    return
-  }
-  importFileInput.value?.click()
-}
-
-const handleImport = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    const fileType = file.name.split('.').pop()?.toLowerCase()
-    console.log('Importing file:', file.name, 'Type:', fileType)
-    
-    if (fileType === 'csv') {
-      toast.info(`Importing ${file.name}...\n\nCSV files should have columns matching:\n- Products: Name, SKU, Category, Price, Quantity\n- Customers: Name, Email, Phone, Address`, 5000)
-    } else if (fileType === 'json') {
-      toast.info(`Importing backup file ${file.name}...\n\nThis will restore all data from the backup file.`, 5000)
-    } else {
-      toast.error('Unsupported file type. Please use CSV or JSON files.')
-    }
-    
-    // Reset file input
-    if (target) target.value = ''
-  }
-}
-
-const handleDeleteAll = () => {
-  if (!canEditSettings.value) {
-    toast.error('Only super admins can delete data')
-    return
-  }
-  
-  const confirmed = confirm(
-    '⚠️ WARNING: This will permanently delete ALL your data!\n\n' +
-    'This includes:\n' +
-    '- All products/inventory\n' +
-    '- All customers\n' +
-    '- All receipts and sales history\n' +
-    '- All returns\n' +
-    '- All suppliers\n\n' +
-    'This action CANNOT be undone. Are you absolutely sure?'
-  )
-  
-  if (confirmed) {
-    const doubleConfirm = confirm('Last chance! Type "DELETE" in the next prompt to confirm.')
-    if (doubleConfirm) {
-      console.log('Deleting all data...')
-      alert('All data has been deleted. (This is a demo - no data was actually deleted)')
-    }
-  }
-}
 </script>
 
