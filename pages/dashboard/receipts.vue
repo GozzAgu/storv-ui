@@ -64,41 +64,33 @@
       <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
-    <!-- Tab Navigation - Mobile Optimized -->
-    <Card padding="none" class="overflow-hidden">
-      <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="flex -mb-px">
-          <button
-            @click="activeTab = 'receipts'"
-            :class="[
-              'flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors touch-manipulation active:bg-gray-50 dark:active:bg-gray-800/50',
-              activeTab === 'receipts'
-                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            ]"
-          >
-            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
-              <ReceiptPercentIcon class="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Receipts</span>
-            </div>
-          </button>
-          <button
-            @click="activeTab = 'customers'"
-            :class="[
-              'flex-1 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium border-b-2 transition-colors touch-manipulation active:bg-gray-50 dark:active:bg-gray-800/50',
-              activeTab === 'customers'
-                ? 'border-primary-600 text-primary-600 dark:text-primary-400 dark:border-primary-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            ]"
-          >
-            <div class="flex items-center justify-center gap-1.5 sm:gap-2">
-              <UsersIcon class="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Customers</span>
-            </div>
-          </button>
-        </nav>
-      </div>
-    </Card>
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200 dark:border-gray-700">
+      <nav class="-mb-px flex space-x-4">
+        <button
+          @click="activeTab = 'receipts'"
+          :class="[
+            'px-4 py-2 text-xs font-medium border-b-2 transition-colors',
+            activeTab === 'receipts'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+          ]"
+        >
+          Receipts
+        </button>
+        <button
+          @click="activeTab = 'customers'"
+          :class="[
+            'px-4 py-2 text-xs font-medium border-b-2 transition-colors',
+            activeTab === 'customers'
+              ? 'border-primary-500 text-primary-600 dark:text-primary-400'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+          ]"
+        >
+          Customers
+        </button>
+      </nav>
+    </div>
 
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
