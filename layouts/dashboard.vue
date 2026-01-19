@@ -429,7 +429,7 @@
             @click="handleSignOut"
             :class="[
               'group relative flex items-center justify-center font-medium rounded-md transition-all duration-300 ease-out overflow-hidden py-2',
-              sidebarCollapsed ? 'px-2.5 w-auto' : 'px-3 w-full',
+              sidebarCollapsed ? 'px-2.5 w-auto mx-auto' : 'px-3 w-full',
               'text-red-600 dark:text-red-400',
               'border border-red-200/50 dark:border-red-800/50',
               'bg-gradient-to-r from-red-50/50 to-red-50/30 dark:from-red-900/10 dark:to-red-900/5',
