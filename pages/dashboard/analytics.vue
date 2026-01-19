@@ -617,69 +617,110 @@ const revenueChartSeries = computed(() => {
   }]
 })
 
-const revenueChartOptions = computed(() => ({
-  chart: {
-    type: 'line',
-    toolbar: { show: false },
-    zoom: { enabled: false }
-  },
-  colors: ['#2563eb'],
-  stroke: {
-    curve: 'smooth',
-    width: 2
-  },
-  xaxis: {
-    categories: revenueChartSeries.value[0]?.data.map((_, i) => {
-      if (selectedPeriod.value === 'daily') {
-        const date = new Date()
-        date.setDate(date.getDate() - (29 - i))
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      } else if (selectedPeriod.value === 'weekly') {
-        return `Week ${i + 1}`
-      } else {
-        const date = new Date()
-        date.setMonth(date.getMonth() - (11 - i))
-        return date.toLocaleDateString('en-US', { month: 'short' })
+const revenueChartOptions = computed(() => {
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
+  
+  return {
+    chart: {
+      type: 'line',
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      background: 'transparent'
+    },
+    colors: ['#2563eb'],
+    stroke: {
+      curve: 'smooth',
+      width: 2
+    },
+    xaxis: {
+      categories: revenueChartSeries.value[0]?.data.map((_, i) => {
+        if (selectedPeriod.value === 'daily') {
+          const date = new Date()
+          date.setDate(date.getDate() - (29 - i))
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        } else if (selectedPeriod.value === 'weekly') {
+          return `Week ${i + 1}`
+        } else {
+          const date = new Date()
+          date.setMonth(date.getMonth() - (11 - i))
+          return date.toLocaleDateString('en-US', { month: 'short' })
+        }
+      }) || [],
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
+      },
+      axisTicks: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
       }
-    }) || []
-  },
-  yaxis: {
-    labels: {
-      formatter: (val: number) => formatCurrency(val)
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        },
+        formatter: (val: number) => formatCurrency(val)
+      }
+    },
+    grid: {
+      borderColor: isDark ? '#374151' : '#E5E7EB',
+      strokeDashArray: 4
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => formatCurrency(val)
+      }
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light'
     }
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => formatCurrency(val)
-    }
-  },
-  theme: {
-    mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   }
-}))
+})
 
 const topProductsChartSeries = computed(() => {
   return topProducts.value.slice(0, 5).map(p => p.revenue)
 })
 
-const topProductsChartOptions = computed(() => ({
-  chart: {
-    type: 'donut'
-  },
-  labels: topProducts.value.slice(0, 5).map(p => p.name),
-  colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
-  legend: {
-    position: 'bottom'
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => formatCurrency(val)
+const topProductsChartOptions = computed(() => {
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
+  
+  return {
+    chart: {
+      type: 'donut',
+      background: 'transparent'
+    },
+    labels: topProducts.value.slice(0, 5).map(p => p.name),
+    colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
+    legend: {
+      position: 'bottom',
+      labels: {
+        colors: isDark ? '#9CA3AF' : '#1F2937'
+      }
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => formatCurrency(val)
+      }
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light'
     }
-  },
-  theme: {
-    mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   }
-}))
+})
 
 const inventoryTurnoverChartSeries = computed(() => {
   const folders = inventoryStore.folders
@@ -708,24 +749,63 @@ const inventoryTurnoverChartSeries = computed(() => {
   }]
 })
 
-const inventoryTurnoverChartOptions = computed(() => ({
-  chart: {
-    type: 'bar',
-    toolbar: { show: false }
-  },
-  colors: ['#7c3aed'],
-  xaxis: {
-    categories: inventoryStore.folders.map(f => f.name)
-  },
-  yaxis: {
-    title: {
-      text: 'Turnover Rate (%)'
+const inventoryTurnoverChartOptions = computed(() => {
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
+  
+  return {
+    chart: {
+      type: 'bar',
+      toolbar: { show: false },
+      background: 'transparent'
+    },
+    colors: ['#7c3aed'],
+    xaxis: {
+      categories: inventoryStore.folders.map(f => f.name),
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
+      },
+      axisTicks: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
+      }
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        }
+      },
+      title: {
+        text: 'Turnover Rate (%)',
+        style: {
+          color: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px',
+          fontWeight: 500
+        }
+      }
+    },
+    grid: {
+      borderColor: isDark ? '#374151' : '#E5E7EB',
+      strokeDashArray: 4
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light'
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light'
     }
-  },
-  theme: {
-    mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   }
-}))
+})
 
 const customerChartSeries = computed(() => {
   return [{
@@ -734,29 +814,59 @@ const customerChartSeries = computed(() => {
   }]
 })
 
-const customerChartOptions = computed(() => ({
-  chart: {
-    type: 'bar',
-    toolbar: { show: false }
-  },
-  colors: ['#059669'],
-  xaxis: {
-    categories: topCustomers.value.slice(0, 5).map(c => c.name.split(' ')[0])
-  },
-  yaxis: {
-    labels: {
-      formatter: (val: number) => formatCurrency(val)
+const customerChartOptions = computed(() => {
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
+  
+  return {
+    chart: {
+      type: 'bar',
+      toolbar: { show: false },
+      background: 'transparent'
+    },
+    colors: ['#059669'],
+    xaxis: {
+      categories: topCustomers.value.slice(0, 5).map(c => c.name.split(' ')[0]),
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        }
+      },
+      axisBorder: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
+      },
+      axisTicks: {
+        show: true,
+        color: isDark ? '#374151' : '#E5E7EB'
+      }
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: isDark ? '#9CA3AF' : '#1F2937',
+          fontSize: '12px'
+        },
+        formatter: (val: number) => formatCurrency(val)
+      }
+    },
+    grid: {
+      borderColor: isDark ? '#374151' : '#E5E7EB',
+      strokeDashArray: 4
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => formatCurrency(val)
+      }
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light'
     }
-  },
-  tooltip: {
-    y: {
-      formatter: (val: number) => formatCurrency(val)
-    }
-  },
-  theme: {
-    mode: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   }
-}))
+})
 
 // Functions
 const loadAnalytics = async () => {
