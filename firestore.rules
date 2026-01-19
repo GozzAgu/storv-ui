@@ -43,6 +43,14 @@ service cloud.firestore {
              exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(request.resource.data.departmentId)/staff/$(request.auth.uid));
     }
     
+    // Helper function to check if user owns the store (super admin)
+    function ownsStore(userId, storeId) {
+      return isAuthenticated() && 
+             userId == request.auth.uid &&
+             exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)) &&
+             get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)).data.ownerId == request.auth.uid;
+    }
+    
     // Users collection - users can read/write their own document
     match /users/{userId} {
       // Allow read if user is authenticated
@@ -188,22 +196,64 @@ service cloud.firestore {
                         // Staff accessing their superadmin's store (userId is superadmin's UID from getQueryUserId)
                         request.auth.uid != userId);
           
-          // Allow create if user is creating their own item OR if staff member belongs to this store
+          // Allow create if:
+          // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
+          //    CRITICAL: userId == request.auth.uid allows super admin to create items in any of their stores
+          // 2. User is creating their own item (createdBy matches auth.uid)
+          // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
+          // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
           allow create: if isAuthenticated() && 
-                         (request.resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid ||
+                         (userId == request.auth.uid ||
+                          request.resource.data.createdBy == request.auth.uid ||
                           request.auth.uid != userId);
           
-          // Allow update if user owns the item OR if staff member belongs to this store
+          // Allow update if:
+          // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
+          //    CRITICAL: userId == request.auth.uid allows super admin to update ANY item in their stores
+          //    This is essential for transfers - super admin can update items they didn't create
+          // 2. User owns the item (createdBy matches auth.uid)
+          // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
+          // Note: userId == request.auth.uid means the super admin is accessing their own stores
+          // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
           allow update: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid ||
-                          request.auth.uid != userId);
+                         (userId == request.auth.uid ||
+                          resource.data.createdBy == request.auth.uid ||
+                          (request.auth.uid != userId && request.resource.data.createdBy == userId));
           
           // Allow delete if user owns the item OR if superadmin owns the store
           allow delete: if isAuthenticated() && 
                          (resource.data.createdBy == request.auth.uid ||
                           userId == request.auth.uid);
+        }
+        
+        // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
+        // This collection stores transfer history for multi-store operations
+        match /storeTransfers/{transferId} {
+          // Allow read if user is the super admin (userId in path matches auth.uid)
+          allow read: if isAuthenticated() && userId == request.auth.uid;
+          
+          // Allow create if user is the super admin (userId in path matches auth.uid) creating transfer record
+          allow create: if isAuthenticated() && 
+                         userId == request.auth.uid && 
+                         request.resource.data.createdBy == request.auth.uid;
+          
+          // Allow update/delete if user is the super admin (userId in path matches auth.uid)
+          allow update, delete: if isAuthenticated() && userId == request.auth.uid;
+        }
+        
+        // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
+        // This collection stores sync history for multi-store operations
+        match /storeSyncs/{syncId} {
+          // Allow read if user is the super admin (userId in path matches auth.uid)
+          allow read: if isAuthenticated() && userId == request.auth.uid;
+          
+          // Allow create if user is the super admin (userId in path matches auth.uid) creating sync record
+          allow create: if isAuthenticated() && 
+                         userId == request.auth.uid && 
+                         request.resource.data.createdBy == request.auth.uid;
+          
+          // Allow update/delete if user is the super admin (userId in path matches auth.uid)
+          allow update, delete: if isAuthenticated() && userId == request.auth.uid;
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}

@@ -64,7 +64,7 @@
       <!-- Navigation -->
       <nav class="relative flex-1 py-4 overflow-y-auto overflow-x-hidden" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
         <div class="space-y-1 min-h-0">
-          <template v-for="item in navigation" :key="item.name">
+          <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Special handling for Inventory - expandable with folders -->
             <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
               <div
@@ -631,6 +631,7 @@ import {
   FolderIcon,
   ArrowRightIcon,
   ChartBarIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
@@ -718,9 +719,20 @@ const navigation = [
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
+  { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
 ]
+
+// Filter navigation based on user role
+const filteredNavigation = computed(() => {
+  return navigation.filter(item => {
+    if (item.requiresSuperAdmin) {
+      return userStore.isSuperAdmin
+    }
+    return true
+  })
+})
 
 const route = useRoute()
 
