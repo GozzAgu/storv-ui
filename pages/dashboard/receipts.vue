@@ -899,20 +899,6 @@
         </Card>
   </div>
     </template>
-    
-    <!-- Floating Action Button -->
-    <FloatingActionButton
-      v-if="activeTab === 'receipts' && canCreate"
-      :actions="[]"
-      :main-action="{
-        id: 'create-receipt',
-        label: 'Create Receipt',
-        icon: PlusIcon,
-        action: openCreateReceiptModal,
-        color: 'primary'
-      }"
-      position="bottom-right"
-    />
   </ClientOnly>
 </template>
 
@@ -951,7 +937,6 @@ import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
-import FloatingActionButton from '~/components/ui/FloatingActionButton.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useRecentItems } from '~/composables/useRecentItems'
 import { useAuthStore } from '~/stores/auth'
