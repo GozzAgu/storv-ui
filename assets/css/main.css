@@ -4,8 +4,12 @@
 
 @layer base {
   html {
-    font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    text-rendering: optimizeLegibility;
   }
   
   html.styles-loaded {
@@ -15,7 +19,7 @@
   }
   
   body {
-    font-family: 'Comic Neue', 'Comic Sans MS', cursive;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -23,6 +27,11 @@
     overflow-x: hidden;
     /* Prevent layout shift during load */
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.01em;
   }
   
   /* Prevent layout shift - ensure smooth transition */
