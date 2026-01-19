@@ -3,19 +3,6 @@
     <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full">
       <!-- Loading State -->
       <template v-if="isInitialLoading">
-        <!-- Stats Cards Skeleton -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:hidden">
-          <Card v-for="i in 4" :key="i" padding="sm" extra-class="sm:p-4">
-            <div class="flex items-center justify-between">
-              <div class="flex-1 min-w-0">
-                <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
-                <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
-                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
-              </div>
-              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
-            </div>
-          </Card>
-        </div>
 
         <!-- Table Skeleton -->
         <Card padding="none">
@@ -95,77 +82,6 @@
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
 
-    <!-- Stats Cards - Compact -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 lg:hidden">
-      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Total Receipts</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>{{ receipts.length }}</span>
-            </p>
-            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">All time</p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Sales</p>
-            <p class="mt-1.5 sm:mt-2 text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              ${{ formatCurrency(totalSales) }}
-            </p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">All time revenue</p>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Today's Sales</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>${{ formatCurrency(todaySales) }}</span>
-            </p>
-            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">
-              <span v-if="receiptsStore.loading" class="inline-block h-2.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>{{ todayReceipts }} receipts</span>
-            </p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CurrencyDollarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-          </div>
-        </div>
-      </Card>
-
-      <Card padding="sm" extra-class="border-l-4 border-l-orange-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">This Month</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              <span v-if="receiptsStore.loading" class="inline-block h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>${{ formatCurrency(monthSales) }}</span>
-            </p>
-            <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500 truncate">
-              <span v-if="receiptsStore.loading" class="inline-block h-2.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
-              <span v-else>{{ monthReceipts }} receipts</span>
-            </p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
-          </div>
-        </div>
-      </Card>
-    </div>
 
     <!-- Receipts Table -->
     <Card padding="none">
