@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Multi-Store Sync</h1>
-        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Sync inventory across stores and transfer items</p>
+        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Transfer items between stores and view consolidated reports</p>
       </div>
     </div>
 
@@ -47,29 +47,6 @@
           </div>
         </Card>
 
-        <Card padding="sm" class="p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Items Synced</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1">{{ totalItemsSynced }}</p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <CubeIcon class="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-        </Card>
-
-        <Card padding="sm" class="p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs text-gray-600 dark:text-gray-400">Active Syncs</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1">{{ activeSyncsCount }}</p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <ArrowsRightLeftIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            </div>
-          </div>
-        </Card>
       </div>
 
       <!-- Tabs -->
@@ -85,17 +62,6 @@
             ]"
           >
             Transfer Items
-          </button>
-          <button
-            @click="activeTab = 'sync'"
-            :class="[
-              'px-4 py-2 text-xs font-medium border-b-2 transition-colors',
-              activeTab === 'sync'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
-          >
-            Sync Inventory
           </button>
           <button
             @click="activeTab = 'reports'"
@@ -257,91 +223,6 @@
               <ArrowPathIcon v-if="isTransferring" class="w-4 h-4 animate-spin" />
               <ArrowsRightLeftIcon v-else class="w-4 h-4" />
               {{ isTransferring ? 'Transferring...' : 'Transfer Items' }}
-            </button>
-          </div>
-        </div>
-      </Card>
-
-      <!-- Sync Inventory Tab -->
-      <Card v-if="activeTab === 'sync'" padding="sm" extra-class="p-4">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Sync Inventory Across Stores</h2>
-        
-        <div class="space-y-4">
-          <!-- Source Store -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Source Store (Master)</label>
-            <select
-              v-model="syncForm.sourceStoreId"
-              @change="loadSourceStoreInventory"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            >
-              <option value="">Select source store</option>
-              <option v-for="store in stores" :key="store.id" :value="store.id">
-                {{ store.name || store.branchName || store.id }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Destination Stores -->
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Destination Stores</label>
-            <div class="border border-gray-200 dark:border-gray-700 rounded-md p-3 max-h-48 overflow-y-auto">
-              <div v-for="store in stores.filter(s => s.id !== syncForm.sourceStoreId)" :key="store.id" class="flex items-center mb-2">
-                <input
-                  :id="`sync-store-${store.id}`"
-                  v-model="syncForm.destinationStoreIds"
-                  type="checkbox"
-                  :value="store.id"
-                  class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <label :for="`sync-store-${store.id}`" class="ml-2 text-xs text-gray-700 dark:text-gray-300">
-                  {{ store.name || store.branchName || store.id }}
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sync Options -->
-          <div class="space-y-2">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Sync Options</label>
-            <div class="space-y-2">
-              <label class="flex items-center">
-                <input
-                  v-model="syncForm.syncAllFolders"
-                  type="checkbox"
-                  class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <span class="ml-2 text-xs text-gray-700 dark:text-gray-300">Sync all inventory folders</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="syncForm.createMissingFolders"
-                  type="checkbox"
-                  class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <span class="ml-2 text-xs text-gray-700 dark:text-gray-300">Create missing folders in destination stores</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="syncForm.overwriteExisting"
-                  type="checkbox"
-                  class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <span class="ml-2 text-xs text-gray-700 dark:text-gray-300">Overwrite existing items (if same name/brand/model)</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Sync Button -->
-          <div class="flex justify-end">
-            <button
-              @click="handleSync"
-              :disabled="!canSync || isSyncing"
-              class="px-4 py-2 text-xs font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              <ArrowPathIcon v-if="isSyncing" class="w-4 h-4 animate-spin" />
-              <ArrowsRightLeftIcon v-else class="w-4 h-4" />
-              {{ isSyncing ? 'Syncing...' : 'Sync Inventory' }}
             </button>
           </div>
         </div>
@@ -521,14 +402,13 @@ const { isStaff } = usePermissions()
 const canAccess = computed(() => !isStaff.value)
 
 // State
-const activeTab = ref<'transfer' | 'sync' | 'reports' | 'history'>('transfer')
+const activeTab = ref<'transfer' | 'reports' | 'history'>('transfer')
 const stores = ref<any[]>([])
 const sourceFolders = ref<any[]>([])
 const destinationFolders = ref<any[]>([])
 const availableItems = ref<any[]>([])
 const transferHistory = ref<any[]>([])
 const isTransferring = ref(false)
-const isSyncing = ref(false)
 
 // Transfer Form
 const transferForm = ref({
@@ -538,15 +418,6 @@ const transferForm = ref({
   destinationFolderId: '',
   items: {} as Record<string, number>,
   notes: '',
-})
-
-// Sync Form
-const syncForm = ref({
-  sourceStoreId: '',
-  destinationStoreIds: [] as string[],
-  syncAllFolders: true,
-  createMissingFolders: true,
-  overwriteExisting: false,
 })
 
 // Report Filters
@@ -575,20 +446,26 @@ const canTransfer = computed(() => {
   )
 })
 
-const canSync = computed(() => {
-  return (
-    syncForm.value.sourceStoreId &&
-    syncForm.value.destinationStoreIds.length > 0
-  )
-})
 
-const totalItemsSynced = computed(() => {
-  return transferHistory.value.reduce((sum, t) => sum + (t.itemsCount || 0), 0)
-})
-
-const activeSyncsCount = computed(() => {
-  return transferHistory.value.filter(t => t.status === 'in_progress').length
-})
+// Helper function to remove undefined values from object (Firestore doesn't allow undefined)
+const removeUndefined = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return null
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefined)
+  }
+  if (typeof obj === 'object') {
+    const cleaned: any = {}
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = removeUndefined(value)
+      }
+    }
+    return cleaned
+  }
+  return obj
+}
 
 // Methods
 const loadStores = async () => {
@@ -601,9 +478,9 @@ const loadStores = async () => {
 }
 
 const loadSourceStoreInventory = async () => {
-  if (!transferForm.value.sourceStoreId && !syncForm.value.sourceStoreId) return
+  if (!transferForm.value.sourceStoreId) return
   
-  const storeId = transferForm.value.sourceStoreId || syncForm.value.sourceStoreId
+  const storeId = transferForm.value.sourceStoreId
   
   try {
     // Switch to source store temporarily to load inventory
@@ -814,12 +691,14 @@ const handleTransfer = async () => {
           
           // Create new item in destination store
           // Set createdBy to current user to ensure Firestore rules allow it
-          const { createdBy: _, dateOut: __, id: ___, ...itemDataWithoutSystemFields } = sourceItem
+          const { createdBy: _createdBy, dateOut: _dateOut, id: _id, ...itemDataWithoutSystemFields } = sourceItem
+          // Remove undefined values before setting document (Firestore doesn't allow undefined)
+          const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
           console.log('[Transfer] Moving serial item to destination store:', transferForm.value.destinationStoreId, 'pathUserId:', pathUserId, 'createdBy:', userId, 'auth.uid:', authStore.currentUser?.uid)
           try {
             // First create in destination store
             await setDoc(newItemRef, {
-              ...itemDataWithoutSystemFields,
+              ...cleanedItemData,
               id: newItemRef.id,
               folderId: transferForm.value.destinationFolderId,
               storeId: transferForm.value.destinationStoreId,
@@ -893,8 +772,10 @@ const handleTransfer = async () => {
             const { doc: createDoc } = await import('firebase/firestore')
             const newItemRef = createDoc(destItemsRef)
             const { createdBy: _, ...itemDataWithoutCreatedBy } = sourceItem
+            // Remove undefined values before setting document (Firestore doesn't allow undefined)
+            const cleanedItemData = removeUndefined(itemDataWithoutCreatedBy)
             await setDoc(newItemRef, {
-              ...itemDataWithoutCreatedBy,
+              ...cleanedItemData,
               id: newItemRef.id,
               folderId: transferForm.value.destinationFolderId,
               storeId: transferForm.value.destinationStoreId,
@@ -1000,69 +881,107 @@ const handleTransfer = async () => {
   }
 }
 
-const handleSync = async () => {
-  if (!canSync.value) return
-  
-  isSyncing.value = true
-  try {
-    // Get current user ID
-    const authStore = useAuthStore()
-    const userId = authStore.currentUser?.uid
-    
-    if (!userId) {
-      throw new Error('User not authenticated')
-    }
-    
-    const response = await $fetch('/api/stores/sync-inventory', {
-      method: 'POST',
-      body: {
-        userId,
-        sourceStoreId: syncForm.value.sourceStoreId,
-        destinationStoreIds: syncForm.value.destinationStoreIds,
-        syncAllFolders: syncForm.value.syncAllFolders,
-        createMissingFolders: syncForm.value.createMissingFolders,
-        overwriteExisting: syncForm.value.overwriteExisting,
-      },
-    })
-    
-    if (response.success) {
-      toast.success('Inventory synced successfully!')
-      // Reset form
-      syncForm.value = {
-        sourceStoreId: '',
-        destinationStoreIds: [],
-        syncAllFolders: true,
-        createMissingFolders: true,
-        overwriteExisting: false,
-      }
-      // Reload history
-      await loadTransferHistory()
-    } else {
-      const errorMessage = ('error' in response && response.error) ? String(response.error) : 'Sync failed'
-      throw new Error(errorMessage)
-    }
-  } catch (error: any) {
-    toast.error('Sync failed: ' + error.message)
-  } finally {
-    isSyncing.value = false
-  }
-}
-
 const loadTransferHistory = async () => {
   try {
     const authStore = useAuthStore()
     const userId = authStore.currentUser?.uid
     
-    if (!userId) return
+    if (!userId) {
+      console.log('[TransferHistory] No user ID')
+      return
+    }
+
+    // Wait for user data to be loaded if not already
+    if (!userStore.userData) {
+      await userStore.fetchUserData(userId)
+    }
+
+    // Verify user is super admin
+    if (userStore.userData?.role !== 'superAdmin') {
+      console.log('[TransferHistory] User is not super admin, role:', userStore.userData?.role)
+      return
+    }
+
+    // Get Firestore instance
+    const db = useFirestore().getFirestoreInstance()
+    if (!db) {
+      console.error('[TransferHistory] Firestore not initialized')
+      return
+    }
+
+    // Import Firebase functions
+    const { collection, query, orderBy, getDocs } = await import('firebase/firestore')
+    const pathUserId = userId
+
+    console.log('[TransferHistory] Loading transfer history for userId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid)
+
+    // Fetch transfer history from Firestore
+    // The path must match: users/{userId}/storeTransfers where userId == request.auth.uid
+    const transfersRef = collection(db, 'users', pathUserId, 'storeTransfers')
     
-    const response = await $fetch('/api/stores/transfer-history', {
-      query: { userId }
-    })
-    if (response.success && 'history' in response) {
-      transferHistory.value = response.history || []
+    try {
+      // Try with orderBy first, if it fails due to missing index, try without
+      let transfersQuery
+      try {
+        transfersQuery = query(transfersRef, orderBy('createdAt', 'desc'))
+      } catch (queryError: any) {
+        // If orderBy fails, try without it (might be missing index)
+        console.warn('[TransferHistory] orderBy failed, trying without:', queryError.message)
+        transfersQuery = query(transfersRef)
+      }
+      
+      const transfersSnap = await getDocs(transfersQuery)
+
+      console.log('[TransferHistory] Successfully loaded', transfersSnap.docs.length, 'transfers')
+
+      // Sort manually if orderBy didn't work
+      const transfers = transfersSnap.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+        }
+      })
+
+      // Sort by createdAt descending if available
+      transferHistory.value = transfers.sort((a: any, b: any) => {
+        const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt ? new Date(a.createdAt) : new Date(0))
+        const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt ? new Date(b.createdAt) : new Date(0))
+        return bDate.getTime() - aDate.getTime()
+      })
+    } catch (queryError: any) {
+      console.error('[TransferHistory] Query error:', queryError)
+      // If it's a permission error, provide more helpful message
+      if (queryError.code === 'permission-denied' || queryError.message?.includes('permission')) {
+        console.error('[TransferHistory] Permission denied. Check:')
+        console.error('  1. User is logged in as super admin:', userStore.userData?.role)
+        console.error('  2. pathUserId matches auth.uid:', pathUserId, '===', authStore.currentUser?.uid)
+        console.error('  3. Firestore rules allow read access to users/{userId}/storeTransfers')
+        // Don't show error toast if it's just that there are no transfers yet
+        if (queryError.message?.includes('index')) {
+          throw new Error('Firestore index required. Please create a composite index for storeTransfers collection on createdAt field.')
+        }
+        throw new Error('Permission denied. Please ensure you are logged in as a super admin and Firestore rules are properly configured.')
+      }
+      // If it's an index error, try without orderBy
+      if (queryError.code === 'failed-precondition' || queryError.message?.includes('index')) {
+        console.log('[TransferHistory] Index error, trying without orderBy')
+        const transfersQuery = query(transfersRef)
+        const transfersSnap = await getDocs(transfersQuery)
+        transferHistory.value = transfersSnap.docs.map(doc => ({
+          id: doc.id,
+          ...(doc.data() as object),
+        }))
+        return
+      }
+      throw queryError
     }
   } catch (error: any) {
-    console.error('Failed to load transfer history:', error)
+    console.error('[TransferHistory] Failed to load transfer history:', error)
+    // Only show toast if it's not a silent return
+    if (error.message && !error.message.includes('No user ID') && !error.message.includes('not super admin')) {
+      toast.error('Failed to load transfer history: ' + error.message)
+    }
   }
 }
 
@@ -1072,21 +991,82 @@ const loadConsolidatedReports = async () => {
     const userId = authStore.currentUser?.uid
     
     if (!userId) return
-    
-    const response = await $fetch('/api/stores/consolidated-report', {
-      method: 'POST',
-      body: {
-        userId,
-        dateRange: reportFilters.value.dateRange,
-        storeIds: reportFilters.value.storeIds === 'all' ? null : [reportFilters.value.storeIds],
-      },
-    })
-    
-    if (response.success && 'report' in response) {
-      consolidatedReport.value = response.report
+
+    // Verify user is super admin
+    if (userStore.userData?.role !== 'superAdmin') {
+      return
+    }
+
+    // Get Firestore instance
+    const db = useFirestore().getFirestoreInstance()
+    if (!db) {
+      console.error('Firestore not initialized')
+      return
+    }
+
+    // Import Firebase functions
+    const { collection, query, where, getDocs, Timestamp } = await import('firebase/firestore')
+    const { getReceiptsCollection } = await import('~/composables/useFirestorePaths')
+    const pathUserId = userId
+
+    // Calculate date range
+    const days = reportFilters.value.dateRange === 'all' ? null : parseInt(reportFilters.value.dateRange)
+    const startDate = days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000) : null
+
+    // Get stores to include
+    const storesToInclude = reportFilters.value.storeIds === 'all' 
+      ? stores.value 
+      : stores.value.filter(s => s.id === reportFilters.value.storeIds)
+
+    let totalRevenue = 0
+    let totalSales = 0
+    let totalItems = 0
+    const storeBreakdown: any[] = []
+
+    // Aggregate data from each store
+    for (const store of storesToInclude) {
+      const receiptsRef = getReceiptsCollection(db, pathUserId, store.id)
+      let receiptsQuery: any = query(receiptsRef)
+      
+      if (startDate) {
+        receiptsQuery = query(receiptsRef, where('date', '>=', Timestamp.fromDate(startDate)))
+      }
+      
+      const receiptsSnap = await getDocs(receiptsQuery)
+      const receipts = receiptsSnap.docs.map(doc => ({
+        id: doc.id,
+        ...(doc.data() as object),
+      }))
+
+      const storeRevenue = receipts.reduce((sum, r: any) => sum + (r.total || 0), 0)
+      const storeSales = receipts.length
+      const storeItems = receipts.reduce((sum, r: any) => sum + (r.itemsCount || 0), 0)
+
+      totalRevenue += storeRevenue
+      totalSales += storeSales
+      totalItems += storeItems
+
+      storeBreakdown.push({
+        id: store.id,
+        name: store.name || store.branchName || store.id,
+        revenue: storeRevenue,
+        sales: storeSales,
+        items: storeItems,
+      })
+    }
+
+    const avgOrderValue = totalSales > 0 ? totalRevenue / totalSales : 0
+
+    consolidatedReport.value = {
+      totalRevenue,
+      totalSales,
+      totalItems,
+      avgOrderValue,
+      storeBreakdown,
     }
   } catch (error: any) {
     console.error('Failed to load consolidated report:', error)
+    toast.error('Failed to load consolidated report: ' + error.message)
   }
 }
 
@@ -1099,23 +1079,75 @@ const exportConsolidatedReport = async () => {
       toast.error('User not authenticated')
       return
     }
-    
-    const response = await $fetch('/api/stores/export-report', {
-      method: 'POST',
-      body: {
-        userId,
-        dateRange: reportFilters.value.dateRange,
-        storeIds: reportFilters.value.storeIds === 'all' ? null : [reportFilters.value.storeIds],
-      },
-    })
-    
-    if (response.success && 'downloadUrl' in response && response.downloadUrl) {
-      window.open(response.downloadUrl, '_blank')
-      toast.success('Report exported successfully!')
-    } else {
-      toast.info('Report export functionality is being implemented')
+
+    // Load report data first if not already loaded
+    if (consolidatedReport.value.totalSales === 0 && consolidatedReport.value.storeBreakdown.length === 0) {
+      await loadConsolidatedReports()
     }
+
+    // Generate PDF using jsPDF
+    const { default: jsPDF } = await import('jspdf')
+
+    const doc = new jsPDF()
+    
+    // Add title
+    doc.setFontSize(18)
+    doc.text('Consolidated Report', 14, 20)
+    
+    // Add date range
+    doc.setFontSize(10)
+    const dateRangeText = reportFilters.value.dateRange === 'all' 
+      ? 'All Time' 
+      : `Last ${reportFilters.value.dateRange} days`
+    doc.text(`Date Range: ${dateRangeText}`, 14, 30)
+    
+    // Add summary
+    doc.setFontSize(12)
+    doc.text('Summary', 14, 40)
+    doc.setFontSize(10)
+    doc.text(`Total Revenue: ${formatCurrency(consolidatedReport.value.totalRevenue)}`, 14, 48)
+    doc.text(`Total Sales: ${consolidatedReport.value.totalSales}`, 14, 54)
+    doc.text(`Total Items: ${consolidatedReport.value.totalItems}`, 14, 60)
+    doc.text(`Average Order Value: ${formatCurrency(consolidatedReport.value.avgOrderValue)}`, 14, 66)
+
+    // Add store breakdown table (simple table without autoTable)
+    if (consolidatedReport.value.storeBreakdown.length > 0) {
+      let yPos = 80
+      doc.setFontSize(12)
+      doc.text('Store Breakdown', 14, yPos)
+      yPos += 8
+      
+      // Table header
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Store', 14, yPos)
+      doc.text('Revenue', 70, yPos)
+      doc.text('Sales', 120, yPos)
+      doc.text('Items', 150, yPos)
+      yPos += 6
+      
+      // Table rows
+      doc.setFont('helvetica', 'normal')
+      for (const store of consolidatedReport.value.storeBreakdown) {
+        if (yPos > 280) {
+          doc.addPage()
+          yPos = 20
+        }
+      doc.text(store.name || '', 14, yPos)
+      doc.text(formatCurrency(store.revenue || 0), 70, yPos)
+      doc.text((store.sales || 0).toString(), 120, yPos)
+      doc.text((store.items || 0).toString(), 150, yPos)
+        yPos += 6
+      }
+    }
+
+    // Save PDF
+    const fileName = `consolidated-report-${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+    
+    toast.success('Report exported successfully!')
   } catch (error: any) {
+    console.error('Export error:', error)
     toast.error('Export failed: ' + error.message)
   }
 }
@@ -1135,7 +1167,10 @@ const formatDate = (date: any) => {
 onMounted(async () => {
   if (canAccess.value) {
     await loadStores()
-    await loadTransferHistory()
+    // Load transfer history after a short delay to ensure user data is loaded
+    setTimeout(async () => {
+      await loadTransferHistory()
+    }, 500)
     await loadConsolidatedReports()
   }
 })

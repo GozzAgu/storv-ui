@@ -473,6 +473,13 @@
                   <div class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
                     {{ receipt.receiptNumber }}
                   </div>
+                  <button
+                    @click.stop="copyReceiptNumber(receipt.receiptNumber)"
+                    class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    title="Copy receipt number"
+                  >
+                    <ClipboardDocumentIcon class="w-3.5 h-3.5" />
+                  </button>
                   <span
                     v-if="receipt.isSwapIn"
                     class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
@@ -747,7 +754,16 @@
                         {{ customer.name.charAt(0).toUpperCase() }}
                       </div>
                       <div class="min-w-0 flex-1">
-                        <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
+                        <div class="flex items-center gap-1.5">
+                          <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 truncate">{{ customer.name }}</p>
+                          <button
+                            @click.stop="copyCustomerId(customer.id)"
+                            class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
+                            title="Copy customer ID"
+                          >
+                            <ClipboardDocumentIcon class="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                         <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>
                       </div>
                     </div>
@@ -891,6 +907,20 @@
         </Card>
   </div>
     </template>
+    
+    <!-- Floating Action Button -->
+    <FloatingActionButton
+      v-if="activeTab === 'receipts' && canCreate"
+      :actions="[]"
+      :main-action="{
+        id: 'create-receipt',
+        label: 'Create Receipt',
+        icon: PlusIcon,
+        action: openCreateReceiptModal,
+        color: 'primary'
+      }"
+      position="bottom-right"
+    />
   </ClientOnly>
 </template>
 
@@ -916,6 +946,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   BarsArrowUpIcon,
+  ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -928,7 +959,9 @@ import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
+import FloatingActionButton from '~/components/ui/FloatingActionButton.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
+import { useRecentItems } from '~/composables/useRecentItems'
 import { useAuthStore } from '~/stores/auth'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
@@ -936,6 +969,7 @@ import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { useStaffStore } from '~/stores/staff'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
+import { useCopy } from '~/composables/useCopy'
 
 definePageMeta({
   layout: 'dashboard',
@@ -953,6 +987,16 @@ const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissi
 const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
+const { copyToClipboard } = useCopy()
+
+// Copy functions
+const copyReceiptNumber = (receiptNumber: string) => {
+  copyToClipboard(receiptNumber, 'Receipt number')
+}
+
+const copyCustomerId = (customerId: string) => {
+  copyToClipboard(customerId, 'Customer ID')
+}
 
 // Store creator names by UID
 const creatorNames = ref<Record<string, string>>({})
@@ -1496,9 +1540,23 @@ const showReturnReceiptModal = ref(false)
 const showDeleteReceiptModal = ref(false)
 
 
+const { addRecentItem } = useRecentItems()
+
 const handlePrintReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
   showViewReceiptModal.value = true
+  
+  // Track as recent item
+  addRecentItem({
+    id: receipt.id,
+    type: 'receipt',
+    name: `Receipt #${receipt.receiptNumber}`,
+    path: `/dashboard/receipts?receipt=${receipt.id}`,
+    metadata: {
+      receiptNumber: receipt.receiptNumber,
+    },
+  })
+  
   // Small delay to allow modal to open, then trigger print
   setTimeout(() => {
     const printBtn = document.querySelector('[data-print-pdf]') as HTMLButtonElement

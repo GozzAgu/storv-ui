@@ -290,6 +290,14 @@
                       <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                         {{ getItemDisplayValue(item[column.key]) }}
                       </div>
+                      <button
+                        v-if="column.key === 'id' || column.key === 'itemId'"
+                        @click.stop="copyItemId(item.id)"
+                        class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
+                        title="Copy item ID"
+                      >
+                        <ClipboardDocumentIcon class="w-3.5 h-3.5" />
+                      </button>
                       <span
                         v-if="item.swapIn"
                         class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0"
@@ -756,6 +764,7 @@ import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
 import { usePreferences } from '~/composables/usePreferences'
+import { useCopy } from '~/composables/useCopy'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -776,6 +785,11 @@ const authStore = useAuthStore()
 const { canManage, canManageInventoryItems } = usePermissions()
 const toast = useToast()
 const { formatCurrency } = usePreferences()
+const { copyToClipboard } = useCopy()
+
+const copyItemId = (itemId: string) => {
+  copyToClipboard(itemId, 'Item ID')
+}
 
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)

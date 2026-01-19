@@ -1301,7 +1301,7 @@ const {
 // Computed property for user's actual permissions
 const userPermissions = computed(() => {
   const permissions: string[] = []
-  
+
   // Super Admin permissions
   if (!isStaff.value) {
     permissions.push('Full access to all features')

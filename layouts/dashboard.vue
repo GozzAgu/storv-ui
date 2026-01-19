@@ -394,6 +394,11 @@
           <!-- Staff view (for staff members - show only their store/department) - HIDDEN FOR STAFF -->
           <!-- "My Store" section removed for staff as requested -->
         </div>
+        
+        <!-- Recent Items Widget -->
+        <div v-if="!sidebarCollapsed" class="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
+          <RecentItemsWidget />
+        </div>
       </nav>
       
       <!-- Bottom Section (User Profile + Logout) -->
@@ -637,6 +642,7 @@ import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
+import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
@@ -810,7 +816,7 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
   // IMPORTANT: Only fetch when auth is ready (not loading)
   if (!userData && user && !isStaffCreationInProgress && !loading) {
     try {
-      await userStore.fetchUserData(user.uid)
+    await userStore.fetchUserData(user.uid)
       console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
     } catch (err) {
       console.error('[Dashboard] Error fetching user data in stores watch:', err)
@@ -1567,10 +1573,10 @@ onMounted(async () => {
           cachedUserEmail.value = storedEmail
         }
         cachedUserId.value = storedUserId
-      }
     }
-    
-    // Fetch user data if authenticated and not already loaded
+  }
+  
+  // Fetch user data if authenticated and not already loaded
     if (authStore.currentUser?.uid && !authStore.loading) {
       if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
         try {

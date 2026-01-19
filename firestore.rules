@@ -65,6 +65,36 @@ service cloud.firestore {
       // Only allow delete by the document owner
       allow delete: if isOwner(userId);
       
+      // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
+      // This collection stores transfer history for multi-store operations
+      match /storeTransfers/{transferId} {
+        // Allow read if user is the super admin (userId in path matches auth.uid)
+        allow read: if isAuthenticated() && userId == request.auth.uid;
+        
+        // Allow create if user is the super admin (userId in path matches auth.uid) creating transfer record
+        allow create: if isAuthenticated() && 
+                       userId == request.auth.uid && 
+                       request.resource.data.createdBy == request.auth.uid;
+        
+        // Allow update/delete if user is the super admin (userId in path matches auth.uid)
+        allow update, delete: if isAuthenticated() && userId == request.auth.uid;
+      }
+      
+      // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
+      // This collection stores sync history for multi-store operations
+      match /storeSyncs/{syncId} {
+        // Allow read if user is the super admin (userId in path matches auth.uid)
+        allow read: if isAuthenticated() && userId == request.auth.uid;
+        
+        // Allow create if user is the super admin (userId in path matches auth.uid) creating sync record
+        allow create: if isAuthenticated() && 
+                       userId == request.auth.uid && 
+                       request.resource.data.createdBy == request.auth.uid;
+        
+        // Allow update/delete if user is the super admin (userId in path matches auth.uid)
+        allow update, delete: if isAuthenticated() && userId == request.auth.uid;
+      }
+      
       // Stores subcollection: users/{userId}/stores/{storeId}
       match /stores/{storeId} {
         // Allow read if:
@@ -224,36 +254,6 @@ service cloud.firestore {
           allow delete: if isAuthenticated() && 
                          (resource.data.createdBy == request.auth.uid ||
                           userId == request.auth.uid);
-        }
-        
-        // Store transfers subcollection: users/{userId}/storeTransfers/{transferId}
-        // This collection stores transfer history for multi-store operations
-        match /storeTransfers/{transferId} {
-          // Allow read if user is the super admin (userId in path matches auth.uid)
-          allow read: if isAuthenticated() && userId == request.auth.uid;
-          
-          // Allow create if user is the super admin (userId in path matches auth.uid) creating transfer record
-          allow create: if isAuthenticated() && 
-                         userId == request.auth.uid && 
-                         request.resource.data.createdBy == request.auth.uid;
-          
-          // Allow update/delete if user is the super admin (userId in path matches auth.uid)
-          allow update, delete: if isAuthenticated() && userId == request.auth.uid;
-        }
-        
-        // Store syncs subcollection: users/{userId}/storeSyncs/{syncId}
-        // This collection stores sync history for multi-store operations
-        match /storeSyncs/{syncId} {
-          // Allow read if user is the super admin (userId in path matches auth.uid)
-          allow read: if isAuthenticated() && userId == request.auth.uid;
-          
-          // Allow create if user is the super admin (userId in path matches auth.uid) creating sync record
-          allow create: if isAuthenticated() && 
-                         userId == request.auth.uid && 
-                         request.resource.data.createdBy == request.auth.uid;
-          
-          // Allow update/delete if user is the super admin (userId in path matches auth.uid)
-          allow update, delete: if isAuthenticated() && userId == request.auth.uid;
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}

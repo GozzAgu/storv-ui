@@ -9,9 +9,19 @@
   >
     <template #header>
       <div class="flex items-center justify-between w-full">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Receipt {{ receipt?.receiptNumber }}
-        </h3>
+        <div class="flex items-center gap-2">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Receipt {{ receipt?.receiptNumber }}
+          </h3>
+          <button
+            v-if="receipt"
+            @click="copyReceiptNumber(receipt.receiptNumber)"
+            class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            title="Copy receipt number"
+          >
+            <ClipboardDocumentIcon class="w-4 h-4" />
+          </button>
+        </div>
         <div class="flex items-center gap-2">
           <button
             @click="showEmailModal = true"
@@ -52,8 +62,15 @@
         <!-- Receipt Info -->
         <div class="mb-4 pb-3 border-b border-gray-400">
           <div class="flex justify-between mb-2">
-            <div>
+            <div class="flex items-center gap-1.5">
               <p class="text-xs mb-0.5">Receipt: {{ receipt.receiptNumber }}</p>
+              <button
+                @click="copyReceiptNumber(receipt.receiptNumber)"
+                class="p-0.5 text-gray-600 hover:text-gray-900 transition-colors"
+                title="Copy receipt number"
+              >
+                <ClipboardDocumentIcon class="w-3 h-3" />
+              </button>
               <span v-if="receipt.isSwapIn" class="text-xs">(Swap-in)</span>
             </div>
             <div class="text-right">
@@ -223,13 +240,14 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { PrinterIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
+import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import type { Receipt } from '~/stores/receipts'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useInventoryStore } from '~/stores/inventory'
 import { usePreferences } from '~/composables/usePreferences'
+import { useCopy } from '~/composables/useCopy'
 
 interface Props {
   modelValue: boolean
@@ -247,6 +265,11 @@ const isPrinting = ref(false)
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
 const emailToSend = ref('')
+const { copyToClipboard } = useCopy()
+
+const copyReceiptNumber = (receiptNumber: string) => {
+  copyToClipboard(receiptNumber, 'Receipt number')
+}
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const { formatCurrency } = usePreferences()
