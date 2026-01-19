@@ -2,13 +2,13 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
   if (import.meta.server) return
 
-  // // TEMPORARY: Block access to signin, signup, and dashboard routes
-  // const blockedRoutes = ['/signin', '/signup', '/dashboard']
-  // const isBlockedRoute = blockedRoutes.some(route => to.path.startsWith(route))
+  // TEMPORARY: Block access to signin, signup, and dashboard routes
+  const blockedRoutes = ['/signin', '/signup', '/dashboard']
+  const isBlockedRoute = blockedRoutes.some(route => to.path.startsWith(route))
   
-  // if (isBlockedRoute) {
-  //   return navigateTo('/')
-  // }
+  if (isBlockedRoute) {
+    return navigateTo('/')
+  }
 
   // Define route categories
   const isDashboardRoute = to.path.startsWith('/dashboard')
