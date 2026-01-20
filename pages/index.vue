@@ -65,424 +65,438 @@
       </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="relative pt-24 pb-20 sm:pt-32 sm:pb-28 lg:pt-40 lg:pb-36 min-h-[90vh] flex items-center justify-center overflow-hidden">
-      <!-- Background Image with Parallax -->
-      <div class="absolute inset-0 z-0">
-        <div 
-          ref="heroBackground"
-          class="absolute inset-0 bg-cover bg-center bg-no-repeat hero-parallax" 
-          style="background-image: url('/hero-img.jpg'); transform: scale(1.1);"
-        ></div>
-        <!-- Dark overlay -->
-        <div class="absolute inset-0 bg-black/50"></div>
-        <!-- Subtle gradient overlay for depth -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60"></div>
+    <!-- Hero Section (NNPC-style) -->
+    <section class="relative pt-24 sm:pt-28 lg:pt-32 pb-20 sm:pb-24 min-h-screen flex items-center overflow-hidden">
+      <!-- Background -->
+      <div class="absolute inset-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(20,63,141,0.35),transparent_55%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.22),transparent_55%)]"></div>
       </div>
-      
-      <!-- Content -->
-      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div class="max-w-4xl mx-auto text-center">
-          <!-- Badge -->
-          <div class="inline-flex items-center gap-2 px-5 py-2.5 glassmorphism text-white rounded-full text-sm font-bold mb-8 shadow-lg border border-white/20 backdrop-blur-lg animate-fade-in-down hover:scale-105 hover:border-white/30 transition-all duration-300">
-            <SparklesIcon class="w-4 h-4 flex-shrink-0 animate-pulse" />
-            <span>Complete Store Management Platform</span>
-          </div>
-          
-          <!-- Main Heading -->
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-8 leading-tight tracking-tight animate-fade-in-down">
-            <span class="block mb-3 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] animate-fade-in-down stagger-1">Complete Store Management</span>
-            <span class="block text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] animate-fade-in-down stagger-2">Your Way</span>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+          <!-- Left: Copy -->
+          <div class="max-w-xl">
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur px-4 py-2 text-[11px] font-semibold text-white/80">
+              <SparklesIcon class="w-4 h-4 text-primary-300" />
+              <span>Effortless store operations, built for modern teams</span>
+            </div>
+
+            <h1 class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.05] text-white">
+              <span class="block text-white/90">Power Your Store</span>
+              <span class="block">
+                With <span class="text-primary-300">Storvv</span>
+                </span>
               </h1>
-          
-          <!-- Description -->
-          <p class="text-lg sm:text-xl lg:text-xl text-white/90 mb-12 leading-relaxed font-medium max-w-3xl mx-auto drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] animate-fade-in-up stagger-3">
-            Build custom inventory systems that match your products. Process sales with professional receipts. Track customers automatically. Manage your team with precision.
-          </p>
-          
-          <!-- Feature Pills -->
-          <div class="flex flex-wrap gap-3 justify-center items-center mb-14">
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
-              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
-                <FolderIcon class="w-4 h-4 text-white flex-shrink-0" />
+
+            <p class="mt-5 text-base sm:text-lg text-white/70 leading-relaxed">
+              Build inventory your way, generate clean receipts, track customers automatically, and collaborate with your team—all in one system.
+            </p>
+
+            <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <button
+                @click="showLaunchModal = true"
+                class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 transition-colors"
+              >
+                Get Started
+              </button>
+              <button
+                @click="scrollToSection('features')"
+                class="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold px-6 py-3 transition-colors"
+              >
+                See Features
+              </button>
             </div>
-              <span>Flexible inventory</span>
-            </div>
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
-              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
-                <UsersIcon class="w-4 h-4 text-white flex-shrink-0" />
           </div>
-              <span>Auto customer tracking</span>
-              </div>
-            <div class="flex items-center gap-2.5 text-sm font-semibold text-white glassmorphism px-4 py-2.5 rounded-full border border-white/20 shadow-lg hover:shadow-xl hover:border-white/30 transition-all hover:scale-105 backdrop-blur-lg">
-              <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0 border border-white/30">
-                <UserGroupIcon class="w-4 h-4 text-white flex-shrink-0" />
-                </div>
-              <span>Team collaboration</span>
-                </div>
-              </div>
           
-          <!-- CTA Buttons -->
-          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up stagger-4">
-            <button @click="showLaunchModal = true" class="group glassmorphism-button bg-primary-600/90 backdrop-blur-lg text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-primary-700/90 transition-all transform hover:scale-105 active:scale-95 inline-flex items-center justify-center gap-2 min-w-[200px] animate-pulse-glow border border-white/20">
-              Start Free Trial
-              <ArrowRightIcon class="w-5 h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-            </button>
-            <button class="glassmorphism bg-white/10 backdrop-blur-lg text-white border-2 border-white/30 px-8 py-4 rounded-xl font-bold text-lg hover:border-white/50 hover:bg-white/20 transition-all inline-flex items-center justify-center gap-2 hover:scale-105 active:scale-95 min-w-[200px]">
-              <DocumentTextIcon class="w-5 h-5 flex-shrink-0" />
-              Learn More
-            </button>
+          <!-- Right: Image + floating callouts -->
+          <div class="relative">
+            <!-- Circular gradient -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-[360px] h-[360px] sm:w-[430px] sm:h-[430px] rounded-full bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.22),transparent_60%)]"></div>
+              </div>
+              
+            <!-- Image circle -->
+            <div class="relative mx-auto w-[340px] h-[340px] sm:w-[420px] sm:h-[420px]">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary-500/20 via-primary-500/15 to-transparent blur-2xl"></div>
+              <div class="relative rounded-full overflow-hidden border border-white/10 bg-white/5 backdrop-blur">
+                <img
+                  ref="heroBackground"
+                  src="/hero-img.jpg"
+                  alt="Storvv hero"
+                  class="w-full h-full object-cover hero-parallax scale-[1.02]"
+                />
+                </div>
+                </div>
+
+            <!-- Floating cards -->
+            <div class="absolute left-0 top-8 sm:top-10">
+              <div class="w-[170px] sm:w-[210px] rounded-lg border border-primary-400/30 bg-slate-950/40 backdrop-blur px-4 py-3">
+                <div class="flex items-center gap-2 text-white/90 text-xs font-semibold">
+                  <FolderIcon class="w-4 h-4 text-primary-300" />
+                  <span>Flexible Inventory</span>
+              </div>
+                <p class="mt-1 text-[11px] text-white/70 leading-snug">
+                  Build folders and templates that fit your products.
+                </p>
+            </div>
+          </div>
+
+            <div class="absolute right-0 top-6 sm:top-8">
+              <div class="w-[170px] sm:w-[210px] rounded-lg border border-primary-400/30 bg-slate-950/40 backdrop-blur px-4 py-3">
+                <div class="flex items-center gap-2 text-white/90 text-xs font-semibold">
+                  <UsersIcon class="w-4 h-4 text-primary-300" />
+                  <span>Auto Tracking</span>
+                </div>
+                <p class="mt-1 text-[11px] text-white/70 leading-snug">
+                  Customers and sales history captured automatically.
+                </p>
+              </div>
+        </div>
+        
+            <div class="absolute left-12 sm:left-16 bottom-4 sm:bottom-6">
+              <div class="w-[190px] sm:w-[230px] rounded-lg border border-white/15 bg-slate-950/40 backdrop-blur px-4 py-3">
+                <div class="flex items-center gap-2 text-white/90 text-xs font-semibold">
+                  <UserGroupIcon class="w-4 h-4 text-white/80" />
+                  <span>Team Collaboration</span>
+            </div>
+                <p class="mt-1 text-[11px] text-white/70 leading-snug">
+                  Roles, permissions, and shared workflows in one place.
+                </p>
+          </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Problem/Solution Section -->
-    <section data-section-id="problem" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-32 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20 relative overflow-hidden">
-      <!-- Animated background elements -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-20 left-10 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div class="absolute bottom-20 right-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+    <!-- Problem/Solution Section (NNPC-style "Why Join" layout) -->
+    <section
+      data-section-id="problem"
+      class="scroll-animate scroll-animate-up py-24 sm:py-28 lg:py-32 bg-white text-gray-900 relative overflow-hidden"
+    >
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10 sm:mb-14">
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+            Why Choose <span class="text-primary-600">Storvv</span>?
+          </h2>
+          <p class="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            A modern operations layer for inventory, sales, customers, and teams—built to stay fast, clean, and flexible as you scale.
+          </p>
         </div>
         
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-4xl mx-auto">
-          <!-- Animated Icon -->
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl mb-8 shadow-2xl transform hover:scale-110 transition-transform animate-pulse">
-            <ArrowPathIcon class="w-10 h-10 text-white animate-spin-slow" />
+        <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+          <!-- Left: stacked imagery -->
+          <div class="relative">
+            <div class="relative h-[320px] sm:h-[380px] lg:h-[420px]">
+              <div class="absolute left-0 top-0 w-[82%] h-[68%] rounded-2xl overflow-hidden border border-gray-200 bg-white">
+                <img src="/hero-img.jpg" alt="Storvv preview" class="w-full h-full object-cover" />
             </div>
-          
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8 leading-tight">
-            <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-              Stop Struggling with
-            </span>
-            <br />
-            <span class="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 bg-clip-text text-transparent">
-              Rigid Systems
-            </span>
-          </h2>
-          
-          <p class="text-lg sm:text-xl text-gray-700 mb-10 leading-relaxed font-medium">
-            Most inventory systems force you to fit their structure. You end up working around limitations, using multiple tools, and spending hours on manual tasks. Your products are unique your management system should be too.
-          </p>
-          
-          <!-- Highlighted Solution Statement -->
-          <div class="inline-flex items-center gap-4 bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 px-8 py-4 rounded-2xl mb-10 shadow-2xl transform hover:scale-105 transition-all border-2 border-primary-400/50">
-            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <SparklesIcon class="w-6 h-6 text-white animate-pulse flex-shrink-0" />
-            </div>
-            <p class="text-lg sm:text-xl font-bold text-white">
-              Storvv adapts to your business, not the other way around.
-            </p>
+              <div class="absolute left-10 sm:left-16 top-12 w-[82%] h-[68%] rounded-2xl overflow-hidden border border-gray-200 bg-white">
+                <img src="/questions.jpg" alt="Insights" class="w-full h-full object-cover" />
           </div>
-          
-          <p class="text-lg sm:text-xl text-gray-700 mb-14 leading-relaxed max-w-3xl mx-auto">
-            Create inventory folders with custom templates that match your exact product structure. Track serial numbers when needed, handle bulk items when you don't. Process complex transactions like swaps and discounts effortlessly. Let the system automatically build your customer database from every sale.
-            </p>
-          
-          <!-- Enhanced Feature Cards -->
-          <div class="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div class="group relative bg-gradient-to-br from-white to-blue-50/50 p-8 rounded-2xl border-2 border-primary-200 transition-all transform hover:scale-105 hover:-translate-y-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div class="relative text-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all">
-                  <KeyIcon class="w-8 h-8 text-white flex-shrink-0" />
+              <div class="absolute left-5 sm:left-10 top-24 w-[82%] h-[68%] rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.15)]">
+                <img src="/nasa-Q1p7bh3SHj8-unsplash.jpg" alt="Operations" class="w-full h-full object-cover" />
             </div>
-            <div class="text-2xl font-extrabold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mb-3">
-            Complete Control
-          </div>
-                <p class="text-gray-700 font-medium leading-relaxed">Design inventory systems that fit your products perfectly</p>
             </div>
           </div>
           
-            <div class="group relative bg-gradient-to-br from-white to-green-50/50 p-8 rounded-2xl border-2 border-green-200 transition-all transform hover:scale-105 hover:-translate-y-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div class="relative text-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all">
-                  <SparklesIcon class="w-8 h-8 text-white animate-pulse flex-shrink-0" />
+          <!-- Right: timeline -->
+          <div class="relative">
+            <div class="absolute left-[9px] top-2 bottom-2 w-px bg-primary-600/30"></div>
+
+            <div class="space-y-10">
+              <div class="relative pl-10">
+                <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
+                  <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
             </div>
-                <div class="text-2xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-700 bg-clip-text text-transparent mb-3">
-                  Zero Manual Work
-                </div>
-                <p class="text-gray-700 font-medium leading-relaxed">Customers tracked automatically, inventory updates instantly</p>
+                <h3 class="text-lg sm:text-xl font-bold">Career Growth for Your Team</h3>
+                <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Give staff the right tools and permissions, reduce errors, and keep work flowing smoothly with clear roles and guided processes.
+                </p>
+          </div>
+          
+              <div class="relative pl-10">
+                <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
+                  <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
+            </div>
+                <h3 class="text-lg sm:text-xl font-bold">Global-Level Visibility</h3>
+                <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
+                  See sales trends, top products, low stock alerts, and customer insights in one dashboard—so decisions are always data-backed.
+                </p>
+          </div>
+          
+              <div class="relative pl-10">
+                <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
+                  <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
+            </div>
+                <h3 class="text-lg sm:text-xl font-bold">Sustainably Simple Operations</h3>
+                <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Less manual work, fewer tools, cleaner workflows—Storvv keeps your store consistent and scalable without adding complexity.
+                </p>
+          </div>
+          
+              <div class="pt-2">
+                <button
+                  @click="showLaunchModal = true"
+                  class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 transition-colors"
+                >
+                  Get Started
+                </button>
+            </div>
           </div>
         </div>
-
-            <div class="group relative bg-gradient-to-br from-white to-blue-50/50 p-8 rounded-2xl border-2 border-blue-200 transition-all transform hover:scale-105 hover:-translate-y-2">
-              <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div class="relative text-center">
-                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:rotate-6 transition-all">
-                  <ServerIcon class="w-8 h-8 text-white flex-shrink-0" />
-                </div>
-                <div class="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-700 bg-clip-text text-transparent mb-3">
-                  One System
-                </div>
-                <p class="text-gray-700 font-medium leading-relaxed">Inventory, sales, customers, and team all connected</p>
-              </div>
-            </div>
                 </div>
                 </div>
-              </div>
     </section>
 
     <!-- How It Works Section -->
-    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-gradient-to-b from-white to-gray-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="text-center mb-16">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-primary-50 rounded-2xl mb-8 border border-primary-100">
-            <ClipboardDocumentCheckIcon class="w-10 h-10 text-primary-600 flex-shrink-0" />
-                </div>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-            Getting Started is Simple
-          </h2>
-          <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
-            Five simple steps to get your store running smoothly
-          </p>
-                </div>
+    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up relative overflow-hidden">
+      <div class="grid lg:grid-cols-2 min-h-[600px]">
+        <!-- Left: Content (Dark Background) -->
+        <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 sm:py-20 lg:py-24 flex flex-col justify-center">
+          <div class="max-w-xl mx-auto lg:mx-0">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
+              Getting Started is Simple
+            </h2>
+            <p class="text-lg sm:text-xl text-gray-300 mb-12 leading-relaxed">
+              Five simple steps to get your store running smoothly
+            </p>
 
-        <!-- Steps -->
-        <div class="max-w-5xl mx-auto space-y-8">
-          <!-- Step 1 -->
-          <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex flex-col sm:flex-row gap-8 items-start group">
-            <div class="flex-shrink-0 relative">
-              <div class="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                1
-              </div>
-              <div class="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                <CheckIcon class="w-4 h-4 text-white flex-shrink-0" />
-            </div>
-                </div>
-            <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center">
+            <!-- Steps -->
+            <div class="space-y-8">
+              <!-- Step 1 -->
+              <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4 group">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <BuildingOfficeIcon class="w-6 h-6 text-white flex-shrink-0" />
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Set Up Your Store</h3>
-              </div>
-              <p class="text-gray-600 leading-relaxed">
-                Begin by configuring your store information. Choose your currency, set your timezone, define payment methods, and customize settings to match your business needs. Your inventory system will be ready to use right away.
-              </p>
-              </div>
             </div>
+                <div class="flex-1">
+                  <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Set Up Your Store</h3>
+                  <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Begin by configuring your store information. Choose your currency, set your timezone, define payment methods, and customize settings to match your business needs.
+                  </p>
+          </div>
+        </div>
 
-          <!-- Step 2 -->
-          <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex flex-col sm:flex-row gap-8 items-start group">
-            <div class="flex-shrink-0 relative">
-              <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                2
-                </div>
-              <div class="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                <CheckIcon class="w-4 h-4 text-white flex-shrink-0" />
-                </div>
-              </div>
-            <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-green-300 transition-all duration-300 transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <!-- Step 2 -->
+              <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4 group">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <UserGroupIcon class="w-6 h-6 text-white flex-shrink-0" />
-            </div>
-                <h3 class="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">Create Departments & Add Staff</h3>
                 </div>
-              <p class="text-gray-600 leading-relaxed">
-                Organize your team by creating departments (like Sales, Warehouse, or Admin). Then add staff members and assign them roles like Super Admin for full access, Manager for department control, or Staff for limited access. Set folder-level permissions so each team member sees only what they need.
-              </p>
+                <div class="flex-1">
+                  <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Create Departments & Add Staff</h3>
+                  <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Organize your team by creating departments. Add staff members and assign roles like Super Admin, Manager, or Staff with folder-level permissions.
+                  </p>
               </div>
             </div>
 
-          <!-- Step 3 -->
-          <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex flex-col sm:flex-row gap-8 items-start group">
-            <div class="flex-shrink-0 relative">
-              <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                3
-                </div>
-              <div class="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                <CheckIcon class="w-4 h-4 text-white flex-shrink-0" />
-                </div>
-              </div>
-            <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+              <!-- Step 3 -->
+              <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4 group">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <FolderIcon class="w-6 h-6 text-white flex-shrink-0" />
-            </div>
-                <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Organize Your Inventory</h3>
                 </div>
-              <p class="text-gray-600 leading-relaxed">
-                Build inventory folders tailored to your products. Design custom templates with flexible field types that capture exactly what you need. Import items in bulk from Excel or add them individually. Turn on serial number tracking when you need to track unique items.
-              </p>
-                </div>
+                <div class="flex-1">
+                  <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Organize Your Inventory</h3>
+                  <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Build inventory folders tailored to your products. Design custom templates with flexible field types. Import items in bulk from Excel or add them individually.
+                  </p>
               </div>
-
-          <!-- Step 4 -->
-          <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex flex-col sm:flex-row gap-8 items-start group">
-            <div class="flex-shrink-0 relative">
-              <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                4
             </div>
-              <div class="absolute -bottom-2 -right-2 w-7 h-7 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
-                <CheckIcon class="w-4 h-4 text-white flex-shrink-0" />
-          </div>
-        </div>
-            <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+
+              <!-- Step 4 -->
+              <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4 group">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <ShoppingCartIcon class="w-6 h-6 text-white flex-shrink-0" />
-      </div>
-                <h3 class="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">Handle Sales Transactions</h3>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Handle Sales Transactions</h3>
+                  <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Process sales with professional receipts. Apply discounts, manage exchanges, and record various payment types. Every transaction automatically builds your customer database.
+                  </p>
               </div>
-              <p class="text-gray-600 leading-relaxed">
-                Process sales with professional receipts formatted for A4 printing. Apply percentage or fixed discounts, manage item exchanges and swaps, and record various payment types. Every transaction automatically builds your customer database.
-              </p>
             </div>
-        </div>
 
-          <!-- Step 5 -->
-          <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex flex-col sm:flex-row gap-8 items-start group">
-            <div class="flex-shrink-0 relative">
-              <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                5
-              </div>
-              </div>
-            <div class="flex-1 bg-white p-8 rounded-2xl border-2 border-gray-200 hover:border-orange-300 transition-all duration-300 transform hover:-translate-y-1">
-              <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center">
+              <!-- Step 5 -->
+              <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4 group">
+                <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <ChartBarIcon class="w-6 h-6 text-white flex-shrink-0" />
-            </div>
-                <h3 class="text-xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors">Monitor & Analyze</h3>
-          </div>
-              <p class="text-gray-600 leading-relaxed">
-                Access comprehensive dashboards showing revenue trends, sales patterns, and inventory health. View low stock alerts, track customer purchase history, process returns, and export reports when needed. Make data-driven decisions with real-time insights.
-                </p>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Monitor & Analyze</h3>
+                  <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+                    Access comprehensive dashboards showing revenue trends, sales patterns, and inventory health. Make data-driven decisions with real-time insights.
+                  </p>
+                </div>
+              </div>
+                </div>
               </div>
             </div>
+
+        <!-- Right: Laptop Image (Bright Background) -->
+        <div class="bg-primary-500 relative flex items-center justify-center p-8 sm:p-12 lg:p-16">
+          <!-- Decorative plus signs -->
+          <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-10 right-20 w-8 h-8 text-white/20 text-4xl font-light">+</div>
+            <div class="absolute top-32 right-32 w-6 h-6 text-white/20 text-3xl font-light">+</div>
+            <div class="absolute bottom-20 right-16 w-8 h-8 text-white/20 text-4xl font-light">+</div>
+            <div class="absolute bottom-32 right-40 w-6 h-6 text-white/20 text-3xl font-light">+</div>
+                </div>
+          
+          <!-- Laptop Mockup -->
+          <div class="relative z-10 w-full max-w-2xl">
+            <div class="relative">
+              <!-- Laptop Frame -->
+              <div class="bg-gray-800 rounded-lg p-2 shadow-2xl">
+                <div class="bg-white rounded overflow-hidden">
+                  <!-- Browser Bar -->
+                  <div class="bg-gray-100 px-4 py-2 flex items-center gap-2 border-b border-gray-200">
+                    <div class="flex gap-1.5">
+                      <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                      <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                      <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                    <div class="flex-1 bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
+                      storvv.com/dashboard
+              </div>
+            </div>
+                  <!-- Dashboard Preview -->
+                  <div class="bg-gray-50 p-6 min-h-[400px]">
+                    <div class="flex items-center gap-3 mb-6">
+                      <div class="w-8 h-8 bg-primary-600 rounded-lg"></div>
+                      <div>
+                        <div class="h-3 bg-gray-300 rounded w-24 mb-2"></div>
+                        <div class="h-2 bg-gray-200 rounded w-16"></div>
+                </div>
+                </div>
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                      <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
+                        <div class="h-6 bg-primary-600 rounded w-20"></div>
+              </div>
+                      <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
+                        <div class="h-6 bg-primary-600 rounded w-20"></div>
+            </div>
+                      <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
+                        <div class="h-6 bg-primary-600 rounded w-20"></div>
+                </div>
+                </div>
+                    <div class="bg-white rounded-lg p-4 border border-gray-200">
+                      <div class="h-2 bg-gray-200 rounded w-32 mb-4"></div>
+                      <div class="space-y-2">
+                        <div class="h-2 bg-gray-200 rounded"></div>
+                        <div class="h-2 bg-gray-200 rounded w-5/6"></div>
+                        <div class="h-2 bg-gray-200 rounded w-4/6"></div>
+              </div>
+            </div>
+                </div>
+                </div>
+              </div>
+              <!-- Laptop Base -->
+              <div class="h-2 bg-gray-700 rounded-b-lg mx-auto w-[95%]"></div>
+              <div class="h-1 bg-gray-600 rounded-b-lg mx-auto w-[90%]"></div>
+            </div>
           </div>
+        </div>
       </div>
     </section>
 
     <!-- Save Time Section -->
     <section data-section-id="features-list" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-32 bg-white relative overflow-hidden">
-      <!-- Subtle background pattern -->
-      <div class="absolute inset-0 opacity-[0.02] pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgb(0 0 0) 1px, transparent 0); background-size: 48px 48px;"></div>
-      
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div class="text-center mb-16">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-500/10 to-primary-600/10 rounded-3xl mb-8 backdrop-blur-sm border border-primary-200/50">
-            <CubeIcon class="w-10 h-10 text-primary-600" />
-              </div>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-            <span class="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent">
-              Everything You Need,
-            </span>
-            <br />
-            <span class="bg-gradient-to-r from-primary-600 via-primary-600 to-primary-700 bg-clip-text text-transparent">
-              Nothing You Don't
-            </span>
+        <!-- Header with CTA on right -->
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-12">
+          <div class="flex-1">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              Everything You Need, Nothing You Don't
           </h2>
-          <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium">
-            Consolidate your tools, simplify your workflow, and reduce costs with one comprehensive solution.
-                </p>
-              </div>
-
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          <div data-section-id="feature-1" class="scroll-animate scroll-animate-scale stagger-1 group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-primary-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-primary-50/0 to-primary-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <FolderIcon class="w-7 h-7 text-white flex-shrink-0" />
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Custom Inventory Folders</h3>
-              <p class="text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products exactly.</p>
-            </div>
-          </div>
-
-          <div data-section-id="feature-2" class="scroll-animate scroll-animate-scale stagger-2 group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-blue-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-blue-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <TagIcon class="w-7 h-7 text-white flex-shrink-0" />
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">Serial Number Tracking</h3>
-              <p class="text-gray-600 leading-relaxed">Track individual items with serial numbers. Perfect for electronics, devices, or any product that requires unique identification.</p>
-            </div>
-          </div>
-
-          <div data-section-id="feature-3" class="scroll-animate scroll-animate-scale stagger-3 group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-green-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-green-50/0 to-green-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <DocumentTextIcon class="w-7 h-7 text-white flex-shrink-0" />
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">Excel Import/Export</h3>
-              <p class="text-gray-600 leading-relaxed">Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.</p>
-            </div>
-          </div>
-
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-purple-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-purple-50/0 to-purple-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <ReceiptPercentIcon class="w-7 h-7 text-white flex-shrink-0" />
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">Professional Receipt System</h3>
-              <p class="text-gray-600 leading-relaxed">Generate A4-optimized receipts with automatic customer tracking. Handle discounts, swap-ins, and multiple payment methods seamlessly.</p>
-              </div>
-            </div>
-
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-pink-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-pink-50/0 to-pink-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <UsersIcon class="w-7 h-7 text-white flex-shrink-0" />
-          </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors">Automatic Customer Management</h3>
-              <p class="text-gray-600 leading-relaxed">Customers are automatically created from receipts. Track purchase history, total spending, and order counts effortlessly.</p>
+            <p class="text-base sm:text-lg text-gray-600 leading-relaxed max-w-3xl">
+              Consolidate your tools, simplify your workflow, and reduce costs with one comprehensive solution. Storvv's features are designed to help you overcome your store management challenges while transforming how you operate.
+          </p>
         </div>
-      </div>
+          <div class="flex-shrink-0">
+            <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-base sm:text-lg transition-colors">
+              Explore our features
+              <ArrowRightIcon class="w-5 h-5" />
+            </a>
+            </div>
+          </div>
 
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-orange-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-50/0 to-orange-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <ArrowPathIcon class="w-7 h-7 text-white flex-shrink-0" />
-        </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">Returns & Refunds</h3>
-              <p class="text-gray-600 leading-relaxed">Process returns and refunds with ease. Automatic inventory restoration and customer history updates built right in.</p>
-                </div>
-              </div>
+        <!-- Carousel Container -->
+        <div class="relative">
+          <!-- Navigation Arrows -->
+          <button
+            @click="previousFeature"
+            :disabled="currentFeatureIndex === 0"
+            :class="[
+              'absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-300 shadow-lg flex items-center justify-center transition-all',
+              currentFeatureIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 hover:border-gray-400'
+            ]"
+            aria-label="Previous feature"
+          >
+            <ChevronLeftIcon class="w-6 h-6 text-gray-700" />
+          </button>
           
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-indigo-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/0 to-indigo-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <UserGroupIcon class="w-7 h-7 text-white flex-shrink-0" />
+          <button
+            @click="nextFeature"
+            :disabled="currentFeatureIndex >= features.length - visibleFeatures"
+            :class="[
+              'absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-300 shadow-lg flex items-center justify-center transition-all',
+              currentFeatureIndex >= features.length - visibleFeatures ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 hover:border-gray-400'
+            ]"
+            aria-label="Next feature"
+          >
+            <ChevronRightIcon class="w-6 h-6 text-gray-700" />
+          </button>
+
+          <!-- Carousel -->
+          <div class="overflow-hidden px-12">
+            <div
+              class="flex transition-transform duration-500 ease-in-out"
+              :style="{ transform: `translateX(-${currentFeatureIndex * (100 / visibleFeatures)}%)` }"
+            >
+              <div
+                v-for="(feature, index) in features"
+                :key="index"
+                class="flex-shrink-0 px-3"
+                :style="{ width: `${100 / visibleFeatures}%` }"
+              >
+                <div class="bg-white border border-gray-200 rounded-lg p-6 h-full flex flex-col hover:border-gray-300 transition-colors">
+                  <h3 class="text-xl font-bold text-gray-900 mb-4">{{ feature.title }}</h3>
+                  <p class="text-gray-600 leading-relaxed mb-6 flex-1">{{ feature.description }}</p>
+                  <a
+                    href="#"
+                    @click.prevent
+                    class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors mt-auto"
+                  >
+                    Explore
+                    <ArrowRightIcon class="w-4 h-4" />
+                  </a>
+              </div>
+              </div>
+            </div>
           </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">Team & Department Management</h3>
-              <p class="text-gray-600 leading-relaxed">Organize staff into departments with granular role-based permissions. Control folder access for managers and staff members.</p>
-              </div>
-            </div>
 
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-cyan-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-50/0 to-cyan-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <ChartBarIcon class="w-7 h-7 text-white flex-shrink-0" />
-                </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-cyan-600 transition-colors">Real-Time Analytics Dashboard</h3>
-              <p class="text-gray-600 leading-relaxed">Comprehensive dashboard with revenue charts, sales trends, inventory status, and low stock alerts at a glance.</p>
-              </div>
-            </div>
-
-          <div class="group relative bg-white p-8 rounded-2xl border border-gray-200/80 hover:border-red-300/50 transition-all duration-300 transform hover:-translate-y-1">
-            <div class="absolute inset-0 bg-gradient-to-br from-red-50/0 to-red-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                <BellAlertIcon class="w-7 h-7 text-white flex-shrink-0" />
-                </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">Low Stock Alerts</h3>
-              <p class="text-gray-600 leading-relaxed">Automatically track low stock items. Get alerts when inventory falls below your threshold for both serial numbers and bulk items.</p>
-              </div>
-              </div>
-            </div>
+          <!-- Dot Indicators -->
+          <div class="flex justify-center items-center gap-2 mt-8">
+            <button
+              v-for="(dot, index) in totalDots"
+              :key="index"
+              @click="goToFeature(index * visibleFeatures)"
+              :class="[
+                'w-2 h-2 rounded-full transition-all',
+                Math.floor(currentFeatureIndex / visibleFeatures) === index
+                  ? 'bg-primary-600 w-8'
+                  : 'bg-gray-300 hover:bg-gray-400'
+              ]"
+              :aria-label="`Go to slide ${index + 1}`"
+            />
+          </div>
+        </div>
       </div>
     </section>
 
@@ -517,8 +531,8 @@
             <p class="text-gray-600">Automatically track low stock items. Get alerts when inventory falls below your threshold for both serial numbers and bulk items.</p>
             </div>
           <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl border border-gray-200 transition-all group">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <DocumentTextIcon class="w-6 h-6 text-green-600 flex-shrink-0" />
+            <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <DocumentTextIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
           </div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">Excel Import/Export</h3>
             <p class="text-gray-600">Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.</p>
@@ -570,7 +584,7 @@
             </button>
             <span :class="['text-sm font-semibold transition-colors px-4 py-2 rounded-full', isYearly ? 'text-gray-900 bg-gray-100' : 'text-gray-600']">
               Yearly
-              <span class="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Save 15%</span>
+              <span class="ml-2 text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full font-medium">Save 15%</span>
             </span>
               </div>
             </div>
@@ -592,27 +606,27 @@
             </button>
             <ul class="space-y-4 flex-1">
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">1 store location</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Up to 50 inventory items</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Custom inventory folders with templates</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Professional receipt generation</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Automatic customer tracking</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Basic analytics dashboard</span>
               </li>
             </ul>
@@ -634,7 +648,7 @@
                   <span v-if="isYearly" class="text-xl text-gray-400 line-through">$180</span>
               </div>
                 <p class="text-gray-500 text-sm mt-1">{{ isYearly ? 'per year' : 'per month' }}</p>
-                <p v-if="isYearly" class="text-green-600 text-xs font-semibold mt-2">Save $27/year</p>
+                <p v-if="isYearly" class="text-primary-600 text-xs font-semibold mt-2">Save $27/year</p>
             </div>
             </div>
             <button @click="showLaunchModal = true" class="w-full bg-primary-600 text-white py-3.5 rounded-xl font-semibold hover:bg-primary-700 transition-colors mb-8 text-center">
@@ -642,43 +656,43 @@
             </button>
             <ul class="space-y-4 flex-1">
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Everything in Starter</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">1 store location</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Up to 2,500 inventory items</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Up to 3 users with role-based permissions</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Department and staff management</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Discounts and swap-in transactions</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Returns and refunds processing</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Excel import/export</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Low stock alerts</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Advanced analytics and reports</span>
               </li>
             </ul>
@@ -695,7 +709,7 @@
                   <span v-if="isYearly" class="text-xl text-gray-400 line-through">$300</span>
               </div>
                 <p class="text-gray-500 text-sm mt-1">{{ isYearly ? 'per year' : 'per month' }}</p>
-                <p v-if="isYearly" class="text-green-600 text-xs font-semibold mt-2">Save $45/year</p>
+                <p v-if="isYearly" class="text-primary-600 text-xs font-semibold mt-2">Save $45/year</p>
             </div>
             </div>
             <button @click="showLaunchModal = true" class="w-full bg-gray-900 text-white py-3.5 rounded-xl font-semibold hover:bg-gray-800 transition-colors mb-8 text-center">
@@ -703,35 +717,35 @@
             </button>
             <ul class="space-y-4 flex-1">
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Everything in Professional</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Unlimited inventory items</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Up to 3 store locations</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Up to 10 users with advanced permissions</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Folder-level access control for departments</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Multi-currency support</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Comprehensive analytics and forecasting</span>
               </li>
               <li class="flex items-start gap-3">
-                <CheckIcon class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckIcon class="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                 <span class="text-gray-600 text-sm leading-relaxed">Priority customer support</span>
               </li>
             </ul>
@@ -812,13 +826,13 @@
               </div>
             </div>
           </div>
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-green-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-primary-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">Is Storvv difficult to learn?</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Is Storvv difficult to learn?</h3>
                 <p class="text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
               </div>
             </div>
@@ -900,13 +914,13 @@
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-emerald-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
+          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-primary-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
             <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <BuildingOfficeIcon class="w-7 h-7 text-white flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-emerald-600 transition-colors">Can I manage multiple stores?</h3>
+                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Can I manage multiple stores?</h3>
                 <p class="text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
               </div>
             </div>
@@ -1136,6 +1150,8 @@ import {
   KeyIcon,
   ArrowUpIcon,
   EnvelopeIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/vue/24/outline'
 
 const { actualTheme } = useTheme()
@@ -1150,6 +1166,69 @@ const isYearly = ref(false)
 const showLaunchModal = ref(false)
 const visibleSections = ref<Set<string>>(new Set())
 const heroBackground = ref<HTMLElement | null>(null)
+
+// Feature carousel state
+const currentFeatureIndex = ref(0)
+const visibleFeatures = computed(() => {
+  if (typeof window === 'undefined') return 3
+  return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
+})
+
+const features = [
+  {
+    title: 'Custom Inventory Folders',
+    description: 'Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products exactly.'
+  },
+  {
+    title: 'Serial Number Tracking',
+    description: 'Track individual items with serial numbers. Perfect for electronics, devices, or any product that requires unique identification.'
+  },
+  {
+    title: 'Excel Import/Export',
+    description: 'Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.'
+  },
+  {
+    title: 'Professional Receipt System',
+    description: 'Generate A4-optimized receipts with automatic customer tracking. Handle discounts, swap-ins, and multiple payment methods seamlessly.'
+  },
+  {
+    title: 'Automatic Customer Management',
+    description: 'Customers are automatically created from receipts. Track purchase history, total spending, and order counts effortlessly.'
+  },
+  {
+    title: 'Returns & Refunds',
+    description: 'Process returns and refunds with ease. Automatic inventory restoration and customer history updates built right in.'
+  },
+  {
+    title: 'Team & Department Management',
+    description: 'Organize staff into departments with granular role-based permissions. Control folder access for managers and staff members.'
+  },
+  {
+    title: 'Real-Time Analytics Dashboard',
+    description: 'Comprehensive dashboard with revenue charts, sales trends, inventory status, and low stock alerts at a glance.'
+  }
+]
+
+const totalDots = computed(() => {
+  return Math.ceil(features.length / visibleFeatures.value)
+})
+
+const nextFeature = () => {
+  const maxIndex = features.length - visibleFeatures.value
+  if (currentFeatureIndex.value < maxIndex) {
+    currentFeatureIndex.value = Math.min(currentFeatureIndex.value + visibleFeatures.value, maxIndex)
+  }
+}
+
+const previousFeature = () => {
+  if (currentFeatureIndex.value > 0) {
+    currentFeatureIndex.value = Math.max(currentFeatureIndex.value - visibleFeatures.value, 0)
+  }
+}
+
+const goToFeature = (index: number) => {
+  currentFeatureIndex.value = index
+}
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -1188,22 +1267,24 @@ const handleScroll = () => {
   }
   
   rafId = requestAnimationFrame(() => {
-    // Parallax effect for hero background
-    if (heroBackground.value) {
-      const scrolled = window.scrollY
-      const heroHeight = heroBackground.value.parentElement?.parentElement?.offsetHeight || 0
-      
-      // Only apply parallax when scrolling within hero section
-      if (scrolled < heroHeight) {
-        const parallaxSpeed = 0.3 // Slower parallax for smoother effect
-        const translateY = scrolled * parallaxSpeed
-        heroBackground.value.style.transform = `translate3d(0, ${translateY}px, 0) scale(1.1)`
-      } else {
-        // Lock position when past hero section
-        const maxTranslate = heroHeight * 0.3
-        heroBackground.value.style.transform = `translate3d(0, ${maxTranslate}px, 0) scale(1.1)`
-      }
+    // Parallax effect for hero media
+    if (!heroBackground.value) return
+
+    const scrolled = window.scrollY
+    const heroSection = heroBackground.value.closest('section')
+    const heroHeight = heroSection?.offsetHeight || 0
+
+    // Only apply parallax when scrolling within hero section
+    if (heroHeight > 0 && scrolled < heroHeight) {
+      const parallaxSpeed = 0.18
+      const translateY = scrolled * parallaxSpeed
+      heroBackground.value.style.transform = `translate3d(0, ${translateY}px, 0) scale(1.06)`
+      return
     }
+
+    // Lock position when past hero section
+    const maxTranslate = heroHeight * 0.18
+    heroBackground.value.style.transform = `translate3d(0, ${maxTranslate}px, 0) scale(1.06)`
   })
 }
 
