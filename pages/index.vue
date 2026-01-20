@@ -569,7 +569,7 @@
               <BuildingOfficeIcon class="w-20 h-20 text-gray-900 stroke-1" stroke-width="1.5" />
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Multi-Store Support</h3>
-            <p class="text-sm text-gray-600 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
+            <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
               Manage multiple store locations from one account. Centralized control with store-specific inventory and sales tracking.
             </p>
           </div>
@@ -579,7 +579,7 @@
               <BellAlertIcon class="w-20 h-20 text-gray-900 stroke-1" stroke-width="1.5" />
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Low Stock Alerts</h3>
-            <p class="text-sm text-gray-600 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
+            <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
               Automatically track low stock items. Get alerts when inventory falls below your threshold for both serial numbers and bulk items.
             </p>
           </div>
@@ -589,7 +589,7 @@
               <DocumentTextIcon class="w-20 h-20 text-gray-900 stroke-1" stroke-width="1.5" />
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Excel Import/Export</h3>
-            <p class="text-sm text-gray-600 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
+            <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
               Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.
             </p>
           </div>
@@ -599,7 +599,7 @@
               <ChartBarIcon class="w-20 h-20 text-gray-900 stroke-1" stroke-width="1.5" />
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Real-Time Analytics</h3>
-            <p class="text-sm text-gray-600 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
+            <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
               Track revenue, sales trends, inventory values, and customer insights. Make data-driven decisions with comprehensive dashboards.
             </p>
           </div>
@@ -793,21 +793,21 @@
         />
         <!-- Overlay for readability -->
         <div class="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-gray-900/70 to-gray-900/80"></div>
-      </div>
+                </div>
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="text-center mb-16">
           <div class="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-lg rounded-2xl mb-8 border border-white/20">
             <ShieldCheckIcon class="w-10 h-10 text-white flex-shrink-0" />
-          </div>
+              </div>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
             Security You Can Trust
           </h2>
           <p class="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
             Your business data is safeguarded with industry-leading security measures and compliance protocols
           </p>
-        </div>
+              </div>
             
         <!-- Security Cards -->
         <div class="grid sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -833,219 +833,370 @@
     </section>
 
     <!-- FAQ Section -->
-    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-white">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-gradient-to-b from-white to-gray-50">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
-        <div class="text-center mb-16">
-          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-50 rounded-xl mb-6">
+        <div class="text-center mb-16 sm:mb-20">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-50 rounded-2xl mb-6 border border-primary-100">
             <DocumentTextIcon class="w-8 h-8 text-primary-600 flex-shrink-0" />
           </div>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Common Questions
           </h2>
-          <p class="text-base sm:text-lg text-gray-600 leading-relaxed">
+          <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Answers to help you understand Storvv better
           </p>
         </div>
         
         <!-- FAQ Items -->
-        <div class="space-y-3">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <ClockIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+        <div class="space-y-4">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button
+              @click="toggleFaq(0)"
+              class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group"
+            >
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <ClockIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">How quickly can I get started?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">How quickly can I get started?</h3>
+                  <ChevronUpIcon 
+                    :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(0) ? 'rotate-180' : '']" 
+                  />
+                </div>
               </div>
-            </div>
-            </div>
-            
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <SparklesIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+            </button>
+            <Transition
+              enter-active-class="transition-all duration-300 ease-out"
+              enter-from-class="opacity-0 max-h-0"
+              enter-to-class="opacity-100 max-h-[500px]"
+              leave-active-class="transition-all duration-300 ease-in"
+              leave-from-class="opacity-100 max-h-[500px]"
+              leave-to-class="opacity-0 max-h-0"
+            >
+              <div v-show="openFaqItems.has(0)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-20">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
+                </div>
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Is Storvv difficult to learn?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward—if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
-              </div>
-            </div>
-          </div>
-
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <ChartBarIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
-              </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I track in-store and online sales together?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <FolderIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
-            </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">How do custom inventory folders work?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
-              </div>
-            </div>
+            </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <DocumentTextIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(1)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <SparklesIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I import products from Excel?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Is Storvv difficult to learn?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(1) ? 'rotate-180' : '']" />
+                </div>
               </div>
-            </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(1)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward—if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+                </div>
+              </div>
+            </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <UsersIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(2)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <ChartBarIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">How does customer tracking work?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer—all without manual data entry.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Can I track in-store and online sales together?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(2) ? 'rotate-180' : '']" />
+                </div>
               </div>
-            </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(2)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
+                </div>
+              </div>
+            </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <ArrowPathIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
-              </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">What are swap-in transactions?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
-              </div>
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(3)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <FolderIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
             </div>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">How do custom inventory folders work?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(3) ? 'rotate-180' : '']" />
+              </div>
+              </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(3)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
+                </div>
+              </div>
+            </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <KeyIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(4)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <DocumentTextIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">How do role-based permissions work?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Can I import products from Excel?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(4) ? 'rotate-180' : '']" />
+                </div>
               </div>
-            </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(4)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
+                </div>
+              </div>
+            </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <BellAlertIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(5)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <UsersIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">What are low stock alerts?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">How does customer tracking work?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(5) ? 'rotate-180' : '']" />
+                </div>
               </div>
-            </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(5)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer—all without manual data entry.</p>
+                </div>
+              </div>
+            </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <BuildingOfficeIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(6)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <ArrowPathIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I manage multiple stores?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">What are swap-in transactions?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(6) ? 'rotate-180' : '']" />
+                </div>
               </div>
-            </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(6)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
+                </div>
+              </div>
+            </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                <ShieldCheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(7)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <KeyIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
               </div>
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-2">Is my data secure?</h3>
-                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">How do role-based permissions work?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(7) ? 'rotate-180' : '']" />
+                </div>
               </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(7)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(8)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <BellAlertIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
+              </div>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">What are low stock alerts?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(8) ? 'rotate-180' : '']" />
+                </div>
+              </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(8)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
+                </div>
+              </div>
+            </Transition>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(9)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <BuildingOfficeIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
+              </div>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Can I manage multiple stores?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(9) ? 'rotate-180' : '']" />
+                </div>
+              </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(9)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
+                </div>
+              </div>
+            </Transition>
             </div>
+            
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-primary-300 hover:shadow-lg transition-all duration-300">
+            <button @click="toggleFaq(10)" class="w-full p-6 sm:p-8 flex items-start gap-4 sm:gap-5 text-left group">
+              <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl flex items-center justify-center border border-primary-200 transition-transform duration-300">
+                <ShieldCheckIcon class="w-6 h-6 text-primary-600 flex-shrink-0" />
+              </div>
+              <div class="flex-1 pt-0.5">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">Is my data secure?</h3>
+                  <ChevronUpIcon :class="['w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300', openFaqItems.has(10) ? 'rotate-180' : '']" />
+                </div>
+              </div>
+            </button>
+            <Transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-300 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(10)" class="px-6 sm:px-8 pb-6 sm:pb-8">
+                <div class="pl-16 sm:pl-17">
+                  <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
+                </div>
+              </div>
+            </Transition>
           </div>
         </div>
       </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="relative py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
-      <!-- Pattern overlay -->
-      <div class="absolute inset-0 opacity-30 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgb(255 255 255) 1px, transparent 0); background-size: 48px 48px;"></div>
-      <!-- Decorative background elements -->
+    <section class="relative py-20 sm:py-24 lg:py-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+      <!-- Subtle pattern overlay -->
+      <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgb(255 255 255) 1px, transparent 0); background-size: 40px 40px;"></div>
+      
+      <!-- Decorative gradient orbs -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full mix-blend-overlay filter blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full mix-blend-overlay filter blur-3xl"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
       </div>
-      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-6 backdrop-blur-sm">
-          <SparklesIcon class="w-8 h-8 text-white flex-shrink-0" />
-        </div>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">
-          Ready to Build Your Perfect Store System?
+
+      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12 sm:mb-16">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-sm rounded-xl mb-6 border border-white/20">
+            <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
+          </div>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+            Ready to Build Your Perfect Store System?
         </h2>
-        <p class="text-base sm:text-lg text-white/90 mb-8">
-          Start your free trial and see how Storvv adapts to your business needs
+          <p class="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+            Start your free trial and see how Storvv adapts to your business needs
         </p>
-        <p class="text-base mb-8 font-medium">
-          Store owners choose Storvv because it gives them:
-        </p>
-        <ul class="text-left max-w-md mx-auto mb-8 space-y-3">
-          <li class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
+      </div>
+
+        <!-- Features Grid -->
+        <div class="mb-12 sm:mb-16">
+          <p class="text-center text-base sm:text-lg text-white/70 mb-8 font-medium">
+            Store owners choose Storvv because it gives them:
+          </p>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                  <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
+                </div>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
+                  Complete flexibility to organize inventory their way
+                </p>
+              </div>
             </div>
-            <span>Complete flexibility to organize inventory their way</span>
-              </li>
-          <li class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
+            
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                  <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
+                </div>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
+                  Automatic customer tracking from every transaction
+                </p>
+              </div>
             </div>
-            <span>Automatic customer tracking from every transaction</span>
-              </li>
-          <li class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
+            
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                  <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
+                </div>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
+                  Professional receipts that print perfectly every time
+                </p>
+              </div>
             </div>
-            <span>Professional receipts that print perfectly every time</span>
-              </li>
-          <li class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
+            
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                  <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
+                </div>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
+                  Team management with precise access control
+                </p>
+              </div>
             </div>
-            <span>Team management with precise access control</span>
-              </li>
-          <li class="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
-            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
+            
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+              <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                  <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
+                </div>
+                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
+                  Real-time insights into what's actually happening
+                </p>
+              </div>
             </div>
-            <span>Real-time insights into what's actually happening</span>
-              </li>
-            </ul>
-        <p class="text-lg font-semibold mb-8">
-          Experience the difference a truly flexible system makes.
-        </p>
-        <button @click="showLaunchModal = true" class="group bg-white text-primary-600 px-4 sm:px-8 py-2.5 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center gap-2">
-          Get Started Now
-          <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-        </button>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center">
+          <p class="text-lg sm:text-xl font-semibold text-white/90 mb-6">
+            Experience the difference a truly flexible system makes.
+          </p>
+    <button
+            @click="showLaunchModal = true" 
+            class="group inline-flex items-center gap-2 bg-white text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            Get Started Now
+            <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+    </button>
+        </div>
       </div>
     </section>
 
@@ -1057,8 +1208,8 @@
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Need some information? Reach out to us
         </h2>
-      </div>
-
+          </div>
+          
         <!-- Two Column Layout -->
         <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <!-- Left: Image -->
@@ -1076,7 +1227,7 @@
           <div class="order-1 lg:order-2">
             <form @submit.prevent="handleContactSubmit" class="space-y-6">
               <!-- Full Name -->
-              <div>
+          <div>
                 <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">
                   Full Name
                 </label>
@@ -1124,9 +1275,9 @@
                     <option value="partnership">Partnership</option>
                   </select>
                   <ChevronDownIcon class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
           </div>
-          
+        </div>
+        
               <!-- Message -->
           <div>
                 <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
@@ -1300,6 +1451,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
 } from '@heroicons/vue/24/outline'
 
 const { actualTheme } = useTheme()
@@ -1314,6 +1466,15 @@ const isYearly = ref(false)
 const showLaunchModal = ref(false)
 const visibleSections = ref<Set<string>>(new Set())
 const heroBackground = ref<HTMLElement | null>(null)
+const openFaqItems = ref<Set<number>>(new Set())
+
+const toggleFaq = (index: number) => {
+  if (openFaqItems.value.has(index)) {
+    openFaqItems.value.delete(index)
+  } else {
+    openFaqItems.value.add(index)
+  }
+}
 
 // Feature carousel state
 const currentFeatureIndex = ref(0)
