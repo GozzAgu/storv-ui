@@ -91,7 +91,7 @@
               </h1>
 
             <p class="mt-5 text-base sm:text-lg text-white/70 leading-relaxed">
-              Build inventory your way, generate clean receipts, track customers automatically, and collaborate with your team—all in one system.
+              Build inventory your way, generate clean receipts, track customers automatically, and collaborate with your team all in one system.
             </p>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -167,8 +167,8 @@
           </div>
             </div>
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
     </section>
 
     <!-- Problem/Solution Section (NNPC-style "Why Join" layout) -->
@@ -185,8 +185,8 @@
           <p class="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
             A modern operations layer for inventory, sales, customers, and teams—built to stay fast, clean, and flexible as you scale.
           </p>
-        </div>
-        
+          </div>
+          
         <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
           <!-- Left: stacked imagery -->
           <div class="relative">
@@ -200,9 +200,9 @@
               <div class="absolute left-5 sm:left-10 top-24 w-[82%] h-[68%] rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.15)]">
                 <img src="/nasa-Q1p7bh3SHj8-unsplash.jpg" alt="Operations" class="w-full h-full object-cover" />
             </div>
-            </div>
           </div>
-          
+        </div>
+
           <!-- Right: timeline -->
           <div class="relative">
             <div class="absolute left-[9px] top-2 bottom-2 w-px bg-primary-600/30"></div>
@@ -211,32 +211,32 @@
               <div class="relative pl-10">
                 <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
                   <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
-            </div>
+                </div>
                 <h3 class="text-lg sm:text-xl font-bold">Career Growth for Your Team</h3>
                 <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
                   Give staff the right tools and permissions, reduce errors, and keep work flowing smoothly with clear roles and guided processes.
                 </p>
-          </div>
+                </div>
           
               <div class="relative pl-10">
                 <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
                   <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
-            </div>
+              </div>
                 <h3 class="text-lg sm:text-xl font-bold">Global-Level Visibility</h3>
                 <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
-                  See sales trends, top products, low stock alerts, and customer insights in one dashboard—so decisions are always data-backed.
+                  See sales trends, top products, low stock alerts, and customer insights in one dashboard so decisions are always data-backed.
                 </p>
-          </div>
-          
+            </div>
+
               <div class="relative pl-10">
                 <div class="absolute left-0 top-1.5 w-5 h-5 rounded-full bg-primary-100 border border-primary-500/50">
                   <div class="absolute inset-0 m-auto w-2.5 h-2.5 rounded-full bg-primary-600"></div>
-            </div>
+                </div>
                 <h3 class="text-lg sm:text-xl font-bold">Sustainably Simple Operations</h3>
                 <p class="mt-2 text-sm sm:text-base text-gray-600 leading-relaxed">
-                  Less manual work, fewer tools, cleaner workflows—Storvv keeps your store consistent and scalable without adding complexity.
+                  Less manual work, fewer tools, cleaner workflows Storvv keeps your store consistent and scalable without adding complexity.
                 </p>
-          </div>
+                </div>
           
               <div class="pt-2">
                 <button
@@ -245,11 +245,44 @@
                 >
                   Get Started
                 </button>
+              </div>
             </div>
-          </div>
-        </div>
                 </div>
                 </div>
+              </div>
+    </section>
+
+    <!-- Investor Section -->
+    <section class="py-20 sm:py-24 lg:py-28 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <!-- Left: Text Content -->
+          <div class="order-2 lg:order-1">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
+              For investor opportunities in Storvv
+            </h2>
+            <a
+              href="#contact"
+              @click.prevent="scrollToSection('contact')"
+              class="inline-flex items-center gap-2 text-gray-900 hover:text-primary-600 font-semibold text-base sm:text-lg transition-colors group"
+            >
+              <span>GET STARTED</span>
+              <span class="text-xl font-bold group-hover:translate-x-1 transition-transform">>></span>
+            </a>
+            </div>
+
+          <!-- Right: Image -->
+          <div class="order-1 lg:order-2">
+            <div class="relative rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="/nasa-Q1p7bh3SHj8-unsplash.jpg"
+                alt="Business professionals"
+                class="w-full h-[400px] sm:h-[500px] object-cover"
+              />
+                </div>
+                </div>
+              </div>
+            </div>
     </section>
 
     <!-- How It Works Section -->
@@ -271,14 +304,14 @@
               <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4 group">
                 <div class="flex-shrink-0 w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
                   <BuildingOfficeIcon class="w-6 h-6 text-white flex-shrink-0" />
-            </div>
+                </div>
                 <div class="flex-1">
                   <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Set Up Your Store</h3>
                   <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
                     Begin by configuring your store information. Choose your currency, set your timezone, define payment methods, and customize settings to match your business needs.
                   </p>
-          </div>
-        </div>
+              </div>
+            </div>
 
               <!-- Step 2 -->
               <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4 group">
@@ -316,8 +349,8 @@
                   <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
                     Process sales with professional receipts. Apply discounts, manage exchanges, and record various payment types. Every transaction automatically builds your customer database.
                   </p>
+                </div>
               </div>
-            </div>
 
               <!-- Step 5 -->
               <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4 group">
@@ -328,12 +361,12 @@
                   <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Monitor & Analyze</h3>
                   <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
                     Access comprehensive dashboards showing revenue trends, sales patterns, and inventory health. Make data-driven decisions with real-time insights.
-                  </p>
-                </div>
+          </p>
+        </div>
               </div>
-                </div>
               </div>
             </div>
+          </div>
 
         <!-- Right: Laptop Image (Bright Background) -->
         <div class="bg-primary-500 relative flex items-center justify-center p-8 sm:p-12 lg:p-16">
@@ -343,7 +376,7 @@
             <div class="absolute top-32 right-32 w-6 h-6 text-white/20 text-3xl font-light">+</div>
             <div class="absolute bottom-20 right-16 w-8 h-8 text-white/20 text-4xl font-light">+</div>
             <div class="absolute bottom-32 right-40 w-6 h-6 text-white/20 text-3xl font-light">+</div>
-                </div>
+              </div>
           
           <!-- Laptop Mockup -->
           <div class="relative z-10 w-full max-w-2xl">
@@ -357,21 +390,25 @@
                       <div class="w-3 h-3 rounded-full bg-red-400"></div>
                       <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
                       <div class="w-3 h-3 rounded-full bg-green-400"></div>
-                </div>
-                    <div class="flex-1 bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
-                      storvv.com/dashboard
               </div>
+                      <div class="flex-1 bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
+                        storvv.com/dashboard
             </div>
+          </div>
                   <!-- Dashboard Preview -->
                   <div class="bg-gray-50 p-6 min-h-[400px]">
                     <div class="flex items-center gap-3 mb-6">
                       <div class="w-8 h-8 bg-primary-600 rounded-lg"></div>
-                      <div>
-                        <div class="h-3 bg-gray-300 rounded w-24 mb-2"></div>
-                        <div class="h-2 bg-gray-200 rounded w-16"></div>
-                </div>
-                </div>
+              <div>
+                      <div class="h-3 bg-gray-300 rounded w-24 mb-2"></div>
+                      <div class="h-2 bg-gray-200 rounded w-16"></div>
+              </div>
+            </div>
                     <div class="grid grid-cols-3 gap-4 mb-6">
+                      <div class="bg-white rounded-lg p-4 border border-gray-200">
+                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
+                        <div class="h-6 bg-primary-600 rounded w-20"></div>
+          </div>
                       <div class="bg-white rounded-lg p-4 border border-gray-200">
                         <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
                         <div class="h-6 bg-primary-600 rounded w-20"></div>
@@ -379,23 +416,19 @@
                       <div class="bg-white rounded-lg p-4 border border-gray-200">
                         <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
                         <div class="h-6 bg-primary-600 rounded w-20"></div>
+              </div>
             </div>
-                      <div class="bg-white rounded-lg p-4 border border-gray-200">
-                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
-                        <div class="h-6 bg-primary-600 rounded w-20"></div>
-                </div>
-                </div>
                     <div class="bg-white rounded-lg p-4 border border-gray-200">
                       <div class="h-2 bg-gray-200 rounded w-32 mb-4"></div>
                       <div class="space-y-2">
                         <div class="h-2 bg-gray-200 rounded"></div>
                         <div class="h-2 bg-gray-200 rounded w-5/6"></div>
                         <div class="h-2 bg-gray-200 rounded w-4/6"></div>
+          </div>
+              </div>
               </div>
             </div>
-                </div>
-                </div>
-              </div>
+          </div>
               <!-- Laptop Base -->
               <div class="h-2 bg-gray-700 rounded-b-lg mx-auto w-[95%]"></div>
               <div class="h-1 bg-gray-600 rounded-b-lg mx-auto w-[90%]"></div>
@@ -418,13 +451,13 @@
               Consolidate your tools, simplify your workflow, and reduce costs with one comprehensive solution. Storvv's features are designed to help you overcome your store management challenges while transforming how you operate.
           </p>
         </div>
-          <div class="flex-shrink-0">
+              <div class="flex-shrink-0">
             <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-base sm:text-lg transition-colors">
               Explore our features
               <ArrowRightIcon class="w-5 h-5" />
             </a>
+              </div>
             </div>
-          </div>
 
         <!-- Carousel Container -->
         <div class="relative">
@@ -476,10 +509,10 @@
                     Explore
                     <ArrowRightIcon class="w-4 h-4" />
                   </a>
+                </div>
               </div>
               </div>
             </div>
-          </div>
 
           <!-- Dot Indicators -->
           <div class="flex justify-center items-center gap-2 mt-8">
@@ -495,9 +528,9 @@
               ]"
               :aria-label="`Go to slide ${index + 1}`"
             />
-          </div>
-        </div>
-      </div>
+                </div>
+              </div>
+              </div>
     </section>
 
     <!-- Advanced Features Section -->
@@ -794,145 +827,151 @@
     </section>
 
     <!-- FAQ Section -->
-    <section data-section-id="faq" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('/questions.jpg');">
-      <!-- Overlay for readability -->
-      <div class="absolute inset-0 z-0 bg-white/10"></div>
-      
-      <!-- Content -->
-      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-white">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="text-center mb-16">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-primary-50 rounded-2xl mb-8 border border-primary-100">
-            <DocumentTextIcon class="w-10 h-10 text-primary-600 flex-shrink-0" />
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-50 rounded-xl mb-6">
+            <DocumentTextIcon class="w-8 h-8 text-primary-600 flex-shrink-0" />
           </div>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Common Questions
           </h2>
-          <p class="text-lg sm:text-xl text-gray-600 leading-relaxed">
+          <p class="text-base sm:text-lg text-gray-600 leading-relaxed">
             Answers to help you understand Storvv better
           </p>
         </div>
 
         <!-- FAQ Items -->
-        <div class="space-y-4">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-primary-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <ClockIcon class="w-7 h-7 text-white flex-shrink-0" />
+        <div class="space-y-3">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <ClockIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">How quickly can I get started?</h3>
-                <p class="text-gray-600 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">How quickly can I get started?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
               </div>
             </div>
           </div>
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-primary-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <SparklesIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Is Storvv difficult to learn?</h3>
-                <p class="text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Is Storvv difficult to learn?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward—if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
               </div>
             </div>
           </div>
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-blue-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <ChartBarIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <ChartBarIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">Can I track in-store and online sales together?</h3>
-                <p class="text-gray-600 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I track in-store and online sales together?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-purple-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <FolderIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <FolderIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">How do custom inventory folders work?</h3>
-                <p class="text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">How do custom inventory folders work?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-orange-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <DocumentTextIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <DocumentTextIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">Can I import products from Excel?</h3>
-                <p class="text-gray-600 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I import products from Excel?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-pink-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <UsersIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <UsersIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-pink-600 transition-colors">How does customer tracking work?</h3>
-                <p class="text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer all without manual data entry.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">How does customer tracking work?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer—all without manual data entry.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-indigo-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <ArrowPathIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <ArrowPathIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">What are swap-in transactions?</h3>
-                <p class="text-gray-600 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">What are swap-in transactions?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-cyan-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <KeyIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <KeyIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-cyan-600 transition-colors">How do role-based permissions work?</h3>
-                <p class="text-gray-600 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">How do role-based permissions work?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-red-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <BellAlertIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <BellAlertIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">What are low stock alerts?</h3>
-                <p class="text-gray-600 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">What are low stock alerts?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-primary-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <BuildingOfficeIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <BuildingOfficeIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">Can I manage multiple stores?</h3>
-                <p class="text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Can I manage multiple stores?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/50 backdrop-blur-lg p-8 rounded-2xl border-2 border-white/50 hover:border-yellow-300/70 transition-all duration-300 transform hover:-translate-y-1 group">
-            <div class="flex items-start gap-5">
-              <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <ShieldCheckIcon class="w-7 h-7 text-white flex-shrink-0" />
+
+          <div class="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-300 transition-colors group">
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                <ShieldCheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0" />
               </div>
               <div class="flex-1">
-                <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-yellow-600 transition-colors">Is my data secure?</h3>
-                <p class="text-gray-600 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Is my data secure?</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
               </div>
             </div>
           </div>
