@@ -389,60 +389,14 @@
             <div class="absolute bottom-32 right-40 w-6 h-6 text-white/20 text-3xl font-light">+</div>
                 </div>
 
-          <!-- Laptop Mockup -->
+          <!-- Dashboard Image -->
           <div class="relative z-10 w-full max-w-2xl">
-            <div class="relative">
-              <!-- Laptop Frame -->
-              <div class="bg-gray-800 rounded-lg p-2 shadow-2xl">
-                <div class="bg-white rounded overflow-hidden">
-                  <!-- Browser Bar -->
-                  <div class="bg-gray-100 px-4 py-2 flex items-center gap-2 border-b border-gray-200">
-                    <div class="flex gap-1.5">
-                      <div class="w-3 h-3 rounded-full bg-red-400"></div>
-                      <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
-                      <div class="w-3 h-3 rounded-full bg-green-400"></div>
-                </div>
-                      <div class="flex-1 bg-white rounded px-3 py-1 text-xs text-gray-500 text-center">
-                        storvv.com/dashboard
-              </div>
-            </div>
-                  <!-- Dashboard Preview -->
-                  <div class="bg-gray-50 p-6 min-h-[400px]">
-                    <div class="flex items-center gap-3 mb-6">
-                      <div class="w-8 h-8 bg-primary-600 rounded-lg"></div>
-              <div>
-                      <div class="h-3 bg-gray-300 rounded w-24 mb-2"></div>
-                      <div class="h-2 bg-gray-200 rounded w-16"></div>
-                </div>
-                </div>
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                      <div class="bg-white rounded-lg p-4 border border-gray-200">
-                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
-                        <div class="h-6 bg-primary-600 rounded w-20"></div>
-              </div>
-                      <div class="bg-white rounded-lg p-4 border border-gray-200">
-                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
-                        <div class="h-6 bg-primary-600 rounded w-20"></div>
-            </div>
-                      <div class="bg-white rounded-lg p-4 border border-gray-200">
-                        <div class="h-2 bg-gray-200 rounded w-12 mb-3"></div>
-                        <div class="h-6 bg-primary-600 rounded w-20"></div>
-                </div>
-                </div>
-                    <div class="bg-white rounded-lg p-4 border border-gray-200">
-                      <div class="h-2 bg-gray-200 rounded w-32 mb-4"></div>
-                      <div class="space-y-2">
-                        <div class="h-2 bg-gray-200 rounded"></div>
-                        <div class="h-2 bg-gray-200 rounded w-5/6"></div>
-                        <div class="h-2 bg-gray-200 rounded w-4/6"></div>
-              </div>
-            </div>
-                </div>
-                </div>
-              </div>
-              <!-- Laptop Base -->
-              <div class="h-2 bg-gray-700 rounded-b-lg mx-auto w-[95%]"></div>
-              <div class="h-1 bg-gray-600 rounded-b-lg mx-auto w-[90%]"></div>
+            <div class="relative rounded-lg overflow-hidden shadow-2xl">
+              <img
+                src="/dash.png"
+                alt="Storvv Dashboard"
+                class="w-full h-auto object-contain"
+              />
             </div>
           </div>
         </div>
