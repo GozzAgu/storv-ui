@@ -8,6 +8,14 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: false,
   },
+  // For Capacitor: Generate static site
+  ssr: false,
+  nitro: {
+    prerender: {
+      routes: ['/'],
+      crawlLinks: true
+    }
+  },
   vite: {
     css: {
       devSourcemap: false,
@@ -29,7 +37,10 @@ export default defineNuxtConfig({
       }
     }
   },
+  // Ensure proper base path for Capacitor
   app: {
+    baseURL: '/',
+    buildAssetsDir: '/_nuxt/',
     head: {
       link: [
         {

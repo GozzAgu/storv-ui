@@ -24,9 +24,9 @@
               <span>Contact</span>
               <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
-            <button @click="showLaunchModal = true" class="bg-primary-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg">
+            <NuxtLink to="/signin" class="bg-primary-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg">
               Start Free Trial
-            </button>
+            </NuxtLink>
           </div>
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen"
@@ -72,12 +72,13 @@
               </a>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-              <button 
-                @click="showLaunchModal = true; mobileMenuOpen = false" 
-                class="w-full bg-primary-600 text-white px-4 py-3 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              <NuxtLink 
+                to="/signin"
+                @click="mobileMenuOpen = false" 
+                class="w-full bg-primary-600 text-white px-4 py-3 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md block text-center"
               >
                 Start Free Trial
-              </button>
+              </NuxtLink>
             </div>
           </div>
         </Transition>
@@ -114,12 +115,12 @@
             </p>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                @click="showLaunchModal = true"
+              <NuxtLink
+                to="/signin"
                 class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors w-auto"
               >
                 Get Started
-              </button>
+              </NuxtLink>
               <button
                 @click="scrollToSection('features')"
                 class="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors w-auto"
@@ -250,12 +251,12 @@
         </div>
 
               <div class="pt-2">
-                <button
-                  @click="showLaunchModal = true"
+                <NuxtLink
+                  to="/signin"
                   class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors"
                 >
                   Get Started
-                </button>
+                </NuxtLink>
                 </div>
                 </div>
               </div>
@@ -627,9 +628,9 @@
             <div class="mb-6">
               <p class="text-lg font-bold text-gray-900">FREE / {{ isYearly ? 'annually' : 'monthly' }}:</p>
             </div>
-            <button @click="showLaunchModal = true" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors">
+            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
               Get Started
-            </button>
+            </NuxtLink>
             </div>
 
           <!-- Storvv Medium -->
@@ -676,9 +677,9 @@
               </div>
               <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $27/year</p>
             </div>
-            <button @click="showLaunchModal = true" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors">
+            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
               Get Started
-            </button>
+            </NuxtLink>
             </div>
 
           <!-- Storvv Enterprise -->
@@ -728,9 +729,9 @@
             </div>
               <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $45/year</p>
                 </div>
-            <button @click="showLaunchModal = true" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors">
+            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
               Get Started
-            </button>
+            </NuxtLink>
               </div>
               </div>
             </div>
@@ -1121,13 +1122,13 @@
           <p class="text-lg sm:text-xl font-semibold text-white/90 mb-6">
             Experience the difference a truly flexible system makes.
           </p>
-    <button
-            @click="showLaunchModal = true" 
+    <NuxtLink
+            to="/signin"
             class="group inline-flex items-center gap-2 bg-white text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Get Started Now
             <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-    </button>
+    </NuxtLink>
         </div>
       </div>
     </section>
@@ -1308,8 +1309,8 @@
     </button>
     </Transition>
 
-    <!-- Launching Soon Modal -->
-    <Modal
+    <!-- Launching Soon Modal - Disabled -->
+    <!-- <Modal
       :model-value="showLaunchModal"
       @update:model-value="showLaunchModal = $event"
       size="md"
@@ -1344,7 +1345,7 @@
           </p>
         </div>
       </template>
-    </Modal>
+    </Modal> -->
   </div>
 </template>
 
