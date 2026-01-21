@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, writeBatch } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -942,13 +942,113 @@ export const useInventoryStore = defineStore('inventory', {
         }
         this.items[folderId].unshift(itemForState)
 
-        // Update folder item count
-        await this.updateItemCount(folderId)
+        // Update folder item count in background (non-blocking for better performance)
+        this.updateItemCount(folderId).catch(console.error)
+
+        // Optimistically update folder count in local state
+        const folderIndex = this.folders.findIndex(f => f.id === folderId)
+        if (folderIndex > -1 && this.folders[folderIndex]) {
+          this.folders[folderIndex].itemCount = (this.folders[folderIndex].itemCount || 0) + 1
+        }
 
         return newItemRef.id
       } catch (error: any) {
         console.error('Error creating item:', error)
         throw new Error(error.message || 'Failed to create item')
+      }
+    },
+
+    // Create multiple items in a batch (much faster than individual creates)
+    async createItemsBatch(folderId: string, itemsData: Array<Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>>) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated to create items')
+      }
+
+      // Check permissions
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      
+      if (userStore.userData?.role === 'staff') {
+        throw new Error('Only super admins can add items to inventory. Staff have view-only access.')
+      }
+
+      const createdByUid = authStore.currentUser.uid
+      const folder = this.getFolderById(folderId)
+      if (!folder) {
+        throw new Error('Folder not found')
+      }
+
+      let storeId = folder.storeId
+      if (!storeId) {
+        storeId = await getCurrentStoreId() || ''
+        if (!storeId) {
+          throw new Error('No store selected. Please select a store first.')
+        }
+      }
+
+      try {
+        const itemsRef = getInventoryItemsCollection(db, createdByUid, storeId)
+        const batch = writeBatch(db)
+        const now = new Date()
+        const createdItems: InventoryItem[] = []
+
+        // Add all items to batch
+        itemsData.forEach(itemData => {
+          const newItemRef = doc(itemsRef)
+          const newItem: Omit<InventoryItem, 'id'> = {
+            ...itemData,
+            folderId,
+            storeId,
+            dateIn: now,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            createdBy: createdByUid,
+          }
+          batch.set(newItemRef, newItem)
+
+          // Prepare for local state
+          createdItems.push({
+            id: newItemRef.id,
+            ...itemData,
+            folderId,
+            storeId,
+            dateIn: now,
+            createdAt: now,
+            updatedAt: now,
+            createdBy: createdByUid,
+          } as InventoryItem)
+        })
+
+        // Commit batch (all items created in one operation)
+        await batch.commit()
+
+        // Add to local state
+        if (!this.items[folderId]) {
+          this.items[folderId] = []
+        }
+        this.items[folderId].unshift(...createdItems)
+
+        // Update folder item count in background
+        this.updateItemCount(folderId).catch(console.error)
+
+        // Optimistically update folder count
+        const folderIndex = this.folders.findIndex(f => f.id === folderId)
+        if (folderIndex > -1 && this.folders[folderIndex]) {
+          this.folders[folderIndex].itemCount = (this.folders[folderIndex].itemCount || 0) + itemsData.length
+        }
+
+        return createdItems.map(item => item.id)
+      } catch (error: any) {
+        console.error('Error creating items batch:', error)
+        throw new Error(error.message || 'Failed to create items')
       }
     },
 
@@ -1107,8 +1207,8 @@ export const useInventoryStore = defineStore('inventory', {
           this.folders[index].itemCount = actualCount
         }
 
-        // Also update low stock count
-        await this.updateLowStockCount(folderId)
+        // Also update low stock count in background (non-blocking)
+        this.updateLowStockCount(folderId).catch(console.error)
       } catch (error: any) {
         console.error('Error updating item count:', error)
         // Don't throw error, just log it - we don't want to break item creation/deletion

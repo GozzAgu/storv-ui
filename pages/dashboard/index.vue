@@ -167,12 +167,12 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <!-- Revenue Chart -->
-      <Card class="lg:col-span-2">
+      <Card class="lg:col-span-2" padding="sm" extra-class="p-4">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
           <div>
-            <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
+            <h2 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
             <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ chartSubtitle }}</p>
           </div>
           <!-- View Selector -->
@@ -212,7 +212,7 @@
             </button>
           </div>
         </div>
-        <div class="h-48 sm:h-64 lg:h-72 relative">
+        <div class="h-48 sm:h-64 lg:h-72 relative pb-4">
           <p v-if="chartData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
           <ClientOnly>
             <apexchart
@@ -231,65 +231,82 @@
       </div>
       </Card>
 
-      <!-- Quick Stats -->
-      <Card>
-        <h2 class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">Quick Stats</h2>
-        <div class="space-y-2 sm:space-y-3">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                <CheckCircleIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 dark:text-green-400" />
-              </div>
-          <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Completed Orders</p>
-                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-                <ClockIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Pending Orders</p>
-                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
-          </div>
+      <!-- Revenue Breakdown Pie Chart -->
+      <Card padding="sm" extra-class="p-4 overflow-hidden">
+        <div class="mb-2">
+          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Revenue Breakdown</h2>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">By product category</p>
         </div>
-      </div>
+        <div class="h-48 sm:h-64 lg:h-72 relative overflow-hidden">
+          <p v-if="pieChartData.length === 0" class="text-xs text-gray-500 dark:text-gray-400 text-center py-12">No data available</p>
+          <ClientOnly>
+            <apexchart
+              v-if="pieChartData.length > 0"
+              type="donut"
+              :height="isMobile ? 220 : 280"
+              :options="pieChartOptions"
+              :series="pieChartSeries"
+            />
+            <template #fallback>
+              <div class="flex items-center justify-center h-full">
+                <div class="animate-pulse text-gray-400">Loading chart...</div>
+              </div>
+            </template>
+          </ClientOnly>
+        </div>
+      </Card>
+    </div>
 
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                <XCircleIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600 dark:text-red-400" />
-              </div>
-          <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Refunded</p>
-                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
-              </div>
+    <!-- Bottom Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+      <!-- Quick Stats -->
+      <Card padding="sm" extra-class="p-4 h-full">
+        <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 mb-2">Quick Stats</h2>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+              <CheckCircleIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] text-gray-600 dark:text-gray-400">Completed Orders</p>
+              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
             </div>
           </div>
           
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                <BuildingOfficeIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">Departments</p>
-                <p class="text-xs sm:text-base font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
-              </div>
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+              <ClockIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] text-gray-600 dark:text-gray-400">Pending Orders</p>
+              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+              <XCircleIcon class="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] text-gray-600 dark:text-gray-400">Refunded</p>
+              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+              <BuildingOfficeIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] text-gray-600 dark:text-gray-400">Departments</p>
+              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
             </div>
           </div>
         </div>
       </Card>
-      </div>
 
-    <!-- Bottom Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
       <!-- Recent Transactions -->
-      <Card>
+      <Card class="h-full">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
           <NuxtLink to="/dashboard/receipts" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
@@ -316,7 +333,7 @@
       </Card>
 
       <!-- Top Selling Products -->
-      <Card>
+      <Card class="h-full">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
           <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
@@ -341,7 +358,7 @@
       </Card>
 
       <!-- Low Stock Items -->
-      <Card v-if="lowStockItems.length > 0">
+      <Card v-if="lowStockItems.length > 0" class="h-full">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Low Stock Items</h2>
           <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
@@ -375,7 +392,7 @@
       </Card>
 
       <!-- Inventory Status -->
-      <Card>
+      <Card class="h-full">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
         </div>
@@ -493,7 +510,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 
 const isLoading = ref(true)
-const chartView = ref<'daily' | 'weekly' | 'monthly'>('daily')
+const chartView = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 
 // User name for welcome message
 const userName = computed(() => {
@@ -882,22 +899,22 @@ const weeklyRevenueData = computed(() => {
 
 // Monthly revenue data aggregation (last 12 months)
 const monthlyRevenueData = computed(() => {
-  const twelveMonthsAgo = new Date()
-  twelveMonthsAgo.setHours(0, 0, 0, 0)
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-  twelveMonthsAgo.setDate(1) // First day of the month
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  now.setDate(1) // First day of current month
   
-  const monthlyTotals = new Map<string, { revenue: number; date: Date }>()
+  const monthlyTotals: Array<{ revenue: number; date: Date; dateKey: string }> = []
   
-  // Initialize all months with 0
-  for (let i = 0; i < 12; i++) {
-    const monthDate = new Date(twelveMonthsAgo)
-    monthDate.setMonth(monthDate.getMonth() + i)
-    const monthKey = monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+  // Initialize exactly 12 months (current month + 11 previous months)
+  for (let i = 11; i >= 0; i--) {
+    const monthDate = new Date(now)
+    monthDate.setMonth(monthDate.getMonth() - i)
+    const monthKey = monthDate.toLocaleDateString('en-US', { month: 'short' })
     
-    monthlyTotals.set(monthKey, {
+    monthlyTotals.push({
       revenue: 0,
-      date: new Date(monthDate)
+      date: new Date(monthDate),
+      dateKey: monthKey
     })
   }
   
@@ -907,24 +924,19 @@ const monthlyRevenueData = computed(() => {
     
     const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
     receiptDate.setHours(0, 0, 0, 0)
+    receiptDate.setDate(1) // First day of the month
     
-    if (receiptDate >= twelveMonthsAgo) {
-      const monthKey = receiptDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-      const monthData = monthlyTotals.get(monthKey)
-      if (monthData) {
-        monthData.revenue += receipt.total
-      }
+    // Find the matching month in our array
+    const monthIndex = monthlyTotals.findIndex(month => {
+      return month.date.getTime() === receiptDate.getTime()
+    })
+    
+    if (monthIndex >= 0 && monthlyTotals[monthIndex]) {
+      monthlyTotals[monthIndex].revenue += receipt.total
     }
   })
   
-  // Convert to array and sort by date
-  return Array.from(monthlyTotals.values())
-    .map(month => ({
-      date: month.date,
-      revenue: month.revenue,
-      dateKey: month.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
+  return monthlyTotals
 })
 
 // Chart data based on selected view
@@ -965,9 +977,16 @@ const chartSeries = computed(() => {
       ? 'Monthly Revenue' 
       : 'Daily Revenue'
   
+  // For monthly view, ensure we only show exactly 12 months
+  let dataToUse = chartData.value
+  if (chartView.value === 'monthly') {
+    // Ensure we have exactly 12 months
+    dataToUse = chartData.value.slice(-12) // Get last 12 months
+  }
+  
   return [{
     name: seriesName,
-    data: chartData.value.map(item => item.revenue)
+    data: dataToUse.map(item => item.revenue)
   }]
 })
 
@@ -1001,15 +1020,16 @@ const chartOptions = computed(() => {
       sparkline: {
         enabled: false
       },
-      fontFamily: 'inherit'
+      fontFamily: 'inherit',
+      background: 'transparent'
     },
     dataLabels: {
       enabled: false
     },
     stroke: {
       curve: 'smooth',
-      width: 3,
-      colors: ['#667eea']
+      width: 2,
+      colors: ['#2563eb']
     },
     fill: {
       type: 'gradient',
@@ -1021,31 +1041,34 @@ const chartOptions = computed(() => {
         colorStops: [
           {
             offset: 0,
-            color: '#667eea',
+            color: '#2563eb',
             opacity: 0.4
           },
           {
             offset: 100,
-            color: '#667eea',
+            color: '#2563eb',
             opacity: 0.1
           }
         ]
       }
     },
     xaxis: {
-      categories: chartData.value.map(item => {
-        if (chartView.value === 'weekly') {
-          const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
-          return `${week.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${week.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-        } else if (chartView.value === 'monthly') {
-          return item.date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-        } else {
-          return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        }
-      }),
+      categories: (() => {
+        const data = chartView.value === 'monthly' ? chartData.value.slice(-12) : chartData.value
+        return data.map((item, index) => {
+          if (chartView.value === 'weekly') {
+            const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
+            return `Week ${index + 1}`
+          } else if (chartView.value === 'monthly') {
+            return item.date.toLocaleDateString('en-US', { month: 'short' })
+          } else {
+            return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          }
+        })
+      })(),
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#6B7280',
+          colors: isDark ? '#9CA3AF' : '#1F2937',
           fontSize: '12px'
         },
         rotate: chartView.value === 'monthly' ? 0 : -45,
@@ -1063,7 +1086,7 @@ const chartOptions = computed(() => {
     yaxis: {
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#6B7280',
+          colors: isDark ? '#9CA3AF' : '#1F2937',
           fontSize: '12px'
         },
         formatter: (value: number) => {
@@ -1076,7 +1099,7 @@ const chartOptions = computed(() => {
       title: {
         text: 'Revenue',
         style: {
-          color: isDark ? '#9CA3AF' : '#6B7280',
+          color: isDark ? '#9CA3AF' : '#1F2937',
           fontSize: '12px',
           fontWeight: 500
         }
@@ -1133,17 +1156,93 @@ const chartOptions = computed(() => {
         }
       }
     },
-    colors: ['#667eea'],
+    theme: {
+      mode: isDark ? 'dark' : 'light'
+    },
+    colors: ['#2563eb'],
     legend: {
       show: false
     },
     markers: {
       size: 4,
-      colors: ['#667eea'],
+      colors: ['#2563eb'],
       strokeColors: '#fff',
       strokeWidth: 2,
       hover: {
         size: 6
+      }
+    }
+  }
+})
+
+// Pie Chart Data - Revenue by Top Products
+const pieChartData = computed(() => {
+  const productRevenue = new Map<string, number>()
+  
+  receiptsStore.receipts.forEach(receipt => {
+    if (receipt.status === 'completed' && receipt.items) {
+      receipt.items.forEach((item: any) => {
+        const existing = productRevenue.get(item.itemName) || 0
+        productRevenue.set(item.itemName, existing + (item.price * item.quantity))
+      })
+    }
+  })
+  
+  return Array.from(productRevenue.entries())
+    .map(([name, revenue]) => ({ name, revenue }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5)
+})
+
+const pieChartSeries = computed(() => {
+  return pieChartData.value.map(item => item.revenue)
+})
+
+const pieChartOptions = computed(() => {
+  const isDark = import.meta.client 
+    ? (document.documentElement.classList.contains('dark') || themeStore.actualTheme === 'dark')
+    : false
+  
+  return {
+    chart: {
+      type: 'donut',
+      background: 'transparent'
+    },
+    labels: pieChartData.value.map(item => item.name),
+    colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
+    legend: {
+      position: 'bottom',
+      offsetY: 0,
+      height: 40,
+      labels: {
+        colors: isDark ? '#9CA3AF' : '#1F2937',
+        fontSize: '10px',
+        useSeriesColors: false
+      },
+      itemMargin: {
+        horizontal: 8,
+        vertical: 4
+      },
+      formatter: function(seriesName: string, opts: any) {
+        return seriesName.length > 10 ? seriesName.substring(0, 10) + '...' : seriesName
+      }
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number) => `$${formatCurrency(val)}`
+      }
+    },
+    theme: {
+      mode: isDark ? 'dark' : 'light'
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => `${val.toFixed(1)}%`,
+      style: {
+        fontSize: '11px',
+        fontWeight: 500,
+        colors: isDark ? ['#fff'] : ['#1F2937']
       }
     }
   }

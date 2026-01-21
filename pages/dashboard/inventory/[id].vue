@@ -287,7 +287,7 @@
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-1.5">
-                      <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <div class="text-[11px] font-medium text-gray-900 dark:text-gray-100 truncate">
                         {{ getItemDisplayValue(item[column.key]) }}
                       </div>
                       <button
@@ -306,21 +306,21 @@
                         Swap-In
                       </span>
                     </div>
-                    <div v-if="columns.length > 1 && columns[1]" class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                    <div v-if="columns.length > 1 && columns[1]" class="text-[9px] text-gray-500 dark:text-gray-400 truncate">
                       {{ getItemDisplayValue(item[columns[1].key]) }}
                     </div>
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="'type' in column && column.type === 'currency'" class="text-xs">
+                  <div v-if="'type' in column && column.type === 'currency'" class="text-[11px]">
                     <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                       <span class="font-semibold text-green-600 dark:text-green-400">
                         {{ formatCurrency(item.discountedPrice) }}
                       </span>
-                      <span class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 line-through">
+                      <span class="text-[9px] text-gray-400 dark:text-gray-500 line-through">
                         {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                       </span>
-                      <span class="text-[10px] sm:text-xs text-red-600 dark:text-red-400 font-medium">
+                      <span class="text-[9px] text-red-600 dark:text-red-400 font-medium">
                         {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                       </span>
                     </div>
@@ -328,10 +328,10 @@
                       {{ formatCurrency(item[column.key] || 0) }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'number'" class="text-xs text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'number'" class="text-[11px] text-gray-600 dark:text-gray-300">
                     {{ formatNumber(item[column.key]) }}
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'date'" class="text-xs text-gray-600 dark:text-gray-300">
+                  <div v-else-if="'type' in column && column.type === 'date'" class="text-[11px] text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -339,7 +339,7 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-xs text-gray-600 dark:text-gray-300">
+                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
                     <span v-if="item[column.key]">
                       {{ formatItemDate(item[column.key]) }}
                     </span>
@@ -347,17 +347,17 @@
                       -
                     </span>
                   </div>
-                  <div v-else-if="column.key === 'availability'" class="text-xs">
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                  <div v-else-if="column.key === 'availability'" class="text-[11px]">
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium"
                       :class="getItemAvailability(item).class">
                       {{ getItemAvailability(item).label }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-medium"
+                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] font-medium"
                     :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                     {{ item[column.key] ? 'Yes' : 'No' }}
                   </div>
-                  <div v-else class="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                  <div v-else class="text-[11px] text-gray-600 dark:text-gray-300">
                     {{ getItemDisplayValue(item[column.key]) }}
                   </div>
                 </div>
@@ -459,19 +459,34 @@
       </div>
     </Card>
 
-    <!-- Fixed Pagination - Mobile Optimized -->
+    <!-- Load More Button or Pagination -->
     <div
       v-if="sortedFilteredItems.length > 0"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6">
+      <div class="px-4 sm:px-6 py-4">
+        <!-- Load More Button -->
+        <div v-if="showLoadMore" class="flex justify-center">
+          <button
+            @click="loadMoreItems"
+            class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-medium transition-colors text-xs"
+          >
+            Load More ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
+          </button>
+        </div>
+        <!-- Pagination -->
         <Pagination
+          v-else-if="usePagination"
           :current-page="currentPage"
-          :items-per-page="itemsPerPage"
+          :items-per-page="50"
           :total="sortedFilteredItems.length"
           @page-change="handlePageChange"
         />
+        <!-- Show count when in Load More mode but all items are displayed -->
+        <div v-else class="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+          Showing all {{ sortedFilteredItems.length }} items
+        </div>
       </div>
     </div>
 
@@ -851,6 +866,9 @@ const getInitialPage = (): number => {
 }
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(20)
+// Hybrid pagination: Load More (20 → 50) then switch to pagination
+const displayedItemsCount = ref(20)
+const usePagination = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isImporting = ref(false)
 const isExporting = ref(false)
@@ -1037,9 +1055,46 @@ const sortedFilteredItems = computed(() => {
 })
 
 const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return sortedFilteredItems.value.slice(start, end)
+  if (usePagination.value) {
+    // Traditional pagination mode (50 items per page)
+    const start = (currentPage.value - 1) * 50
+    const end = start + 50
+    return sortedFilteredItems.value.slice(start, end)
+  } else {
+    // Load More mode: show up to displayedItemsCount
+    return sortedFilteredItems.value.slice(0, displayedItemsCount.value)
+  }
+})
+
+// Check if we should show Load More button
+const showLoadMore = computed(() => {
+  return !usePagination.value && displayedItemsCount.value < sortedFilteredItems.value.length && displayedItemsCount.value < 50
+})
+
+// Check if we can load more (not at 50 yet)
+const canLoadMore = computed(() => {
+  return displayedItemsCount.value < 50 && displayedItemsCount.value < sortedFilteredItems.value.length
+})
+
+// Load more items
+const loadMoreItems = () => {
+  if (canLoadMore.value) {
+    displayedItemsCount.value = Math.min(displayedItemsCount.value + 10, 50)
+    // If we've reached 50, switch to pagination mode
+    if (displayedItemsCount.value >= 50) {
+      usePagination.value = true
+      currentPage.value = 1
+      itemsPerPage.value = 50
+    }
+  }
+}
+
+// Reset to Load More mode when filters change
+watch([searchQuery, currentSort], () => {
+  displayedItemsCount.value = 20
+  usePagination.value = false
+  currentPage.value = 1
+  itemsPerPage.value = 20
 })
 
 const toggleSort = (key: string) => {
@@ -1160,6 +1215,9 @@ const resetFilters = () => {
   sortBy.value = 'name'
   currentSort.value = { key: 'name', order: 'asc' }
   currentPage.value = 1
+  displayedItemsCount.value = 20
+  usePagination.value = false
+  itemsPerPage.value = 20
   // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {
     try {
@@ -1322,66 +1380,84 @@ const handleSaveItem = async () => {
   try {
     if (editingItem.value) {
       // Update existing item
+      // Close modal immediately for better UX
+      handleCancelItem()
+      toast.success('Updating item...')
+      
       await inventoryStore.updateItem(folderId.value, editingItem.value.id, itemForm)
-      // Reload folder to update stats
-      if (folder.value) {
-        await inventoryStore.fetchFolder(folderId.value)
-        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
-      }
+      
+      // Refresh items list in background (non-blocking)
+      inventoryStore.fetchItems(folderId.value).catch(console.error)
+      
+      toast.success('Item updated successfully!')
     } else {
-      // Check if we're in bulk add mode (hasSerialNumbers and serialNumbers array has items)
-      if (folder.value?.hasSerialNumbers && serialNumbers.value.length > 0) {
-        // Validate serial numbers
-        const validSerialNumbers = serialNumbers.value.filter(sn => sn && sn.trim() !== '')
-        if (validSerialNumbers.length === 0) {
-          toast.warning('Please add at least one serial number')
-          return
-        }
+        // Check if we're in bulk add mode (hasSerialNumbers and serialNumbers array has items)
+        if (folder.value?.hasSerialNumbers && serialNumbers.value.length > 0) {
+          // Validate serial numbers
+          const validSerialNumbers = serialNumbers.value.filter(sn => sn && sn.trim() !== '')
+          if (validSerialNumbers.length === 0) {
+            toast.warning('Please add at least one serial number')
+            return
+          }
 
-        // Check for duplicate serial numbers
-        const uniqueSerials = new Set(validSerialNumbers)
-        if (uniqueSerials.size !== validSerialNumbers.length) {
-          toast.error('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
-          return
-        }
+          // Check for duplicate serial numbers
+          const uniqueSerials = new Set(validSerialNumbers)
+          if (uniqueSerials.size !== validSerialNumbers.length) {
+            toast.error('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
+            return
+          }
 
-        // Create multiple items with different serial numbers
-        const baseItemData = { ...itemForm }
-        // Remove serialNo from base data if it exists (we'll add it per item)
-        delete baseItemData.serialNo
+          // Create multiple items with different serial numbers
+          const baseItemData = { ...itemForm }
+          // Remove serialNo from base data if it exists (we'll add it per item)
+          delete baseItemData.serialNo
 
-        let createdCount = 0
-        for (const serialNo of validSerialNumbers) {
-          const itemData = {
+          // Close modal immediately for better UX
+          handleCancelItem()
+          toast.success(`Creating ${validSerialNumbers.length} item${validSerialNumbers.length !== 1 ? 's' : ''}...`)
+
+          // Create items in batch for much better performance
+          const itemsToCreate = validSerialNumbers.map(serialNo => ({
             ...baseItemData,
             serialNo: serialNo.trim(),
+          }))
+
+          await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
+
+          // Update folder stats locally (optimistic update)
+          if (folder.value) {
+            folder.value.itemCount = (folder.value.itemCount || 0) + validSerialNumbers.length
           }
-          await inventoryStore.createItem(folderId.value, itemData)
-          createdCount++
-        }
 
-        // Reload folder to update stats
-        if (folder.value) {
-          await inventoryStore.fetchFolder(folderId.value)
-          folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
-        }
-        // Refresh folder list to update item counts on the folders page
-        await inventoryStore.fetchFolders()
+          // Refresh items list in background (non-blocking)
+          inventoryStore.fetchItems(folderId.value).catch(console.error)
+          
+          // Refresh folder list in background (non-blocking) - only if needed
+          // inventoryStore.fetchFolders().catch(console.error)
 
-        toast.success(`Successfully created ${createdCount} item${createdCount !== 1 ? 's' : ''}`)
-      } else {
-        // Create single item (normal mode)
-        await inventoryStore.createItem(folderId.value, itemForm)
-        // Reload folder to update stats
-        if (folder.value) {
-          await inventoryStore.fetchFolder(folderId.value)
-          folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+          toast.success(`Successfully created ${validSerialNumbers.length} item${validSerialNumbers.length !== 1 ? 's' : ''}`)
+        } else {
+          // Create single item (normal mode)
+          // Close modal immediately for better UX
+          handleCancelItem()
+          toast.success('Creating item...')
+
+          await inventoryStore.createItem(folderId.value, itemForm)
+
+          // Update folder stats locally (optimistic update)
+          if (folder.value) {
+            folder.value.itemCount = (folder.value.itemCount || 0) + 1
+          }
+
+          // Refresh items list in background (non-blocking)
+          inventoryStore.fetchItems(folderId.value).catch(console.error)
+          
+          // Refresh folder list in background (non-blocking) - only if needed
+          // inventoryStore.fetchFolders().catch(console.error)
+
+          toast.success('Item created successfully!')
         }
-        // Refresh folder list to update item counts on the folders page
-        await inventoryStore.fetchFolders()
       }
-    }
-    handleCancelItem()
   } catch (error: any) {
     toast.error(error.message || 'Failed to save item')
   }

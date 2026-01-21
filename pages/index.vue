@@ -78,7 +78,7 @@
                 class="w-full bg-primary-600 text-white px-4 py-3 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md block text-center"
               >
                 Start Free Trial
-              </NuxtLink>
+            </NuxtLink>
             </div>
           </div>
         </Transition>
@@ -878,7 +878,7 @@
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
                 <FolderIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
-              </div>
+            </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">How do custom inventory folders work?</h3>
               </div>
@@ -891,7 +891,7 @@
                 </div>
               </div>
             </Transition>
-          </div>
+            </div>
             
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
@@ -948,7 +948,7 @@
                 </div>
               </div>
             </Transition>
-          </div>
+            </div>
             
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
@@ -1005,13 +1005,13 @@
                 </div>
               </div>
             </Transition>
-          </div>
+            </div>
             
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
                 <ShieldCheckIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
-              </div>
+          </div>
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Is my data secure?</h3>
               </div>
@@ -1128,7 +1128,7 @@
           >
             Get Started Now
             <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-    </NuxtLink>
+        </NuxtLink>
         </div>
       </div>
     </section>
@@ -1155,7 +1155,7 @@
               />
             </div>
           </div>
-
+          
           <!-- Right: Contact Form -->
           <div class="order-1 lg:order-2">
             <form @submit.prevent="handleContactSubmit" class="space-y-6">

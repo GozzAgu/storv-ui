@@ -519,18 +519,35 @@
       </div>
     </Card>
 
-    <!-- Fixed Pagination - Mobile Optimized -->
+    <!-- Load More Button or Pagination -->
     <div
       v-if="sortedFilteredReceipts.length > 0"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="sortedFilteredReceipts.length"
-        @page-change="handlePageChange"
-      />
+      <div class="px-4 sm:px-6 py-4">
+        <!-- Load More Button -->
+        <div v-if="showLoadMore" class="flex justify-center">
+          <button
+            @click="loadMoreItems"
+            class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-medium transition-colors text-xs"
+          >
+            Load More ({{ displayedItemsCount }} of {{ sortedFilteredReceipts.length }})
+          </button>
+        </div>
+        <!-- Pagination -->
+        <Pagination
+          v-else-if="usePagination"
+          :current-page="currentPage"
+          :items-per-page="50"
+          :total="sortedFilteredReceipts.length"
+          @page-change="handlePageChange"
+        />
+        <!-- Show count when in Load More mode but all items are displayed -->
+        <div v-else class="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+          Showing all {{ sortedFilteredReceipts.length }} items
+        </div>
+      </div>
     </div>
 
     <!-- Floating Action Button - Mobile Optimized -->
@@ -924,6 +941,9 @@ const getInitialPage = (): number => {
 }
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(20)
+// Hybrid pagination: Load More (20 → 50) then switch to pagination
+const displayedItemsCount = ref(20)
+const usePagination = ref(false)
 const sidebarCollapsed = ref(false)
 
 // Sorting state
@@ -1319,9 +1339,46 @@ const sortedFilteredReceipts = computed(() => {
 })
 
 const paginatedReceipts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return sortedFilteredReceipts.value.slice(start, end)
+  if (usePagination.value) {
+    // Traditional pagination mode (50 items per page)
+    const start = (currentPage.value - 1) * 50
+    const end = start + 50
+    return sortedFilteredReceipts.value.slice(start, end)
+  } else {
+    // Load More mode: show up to displayedItemsCount
+    return sortedFilteredReceipts.value.slice(0, displayedItemsCount.value)
+  }
+})
+
+// Check if we should show Load More button
+const showLoadMore = computed(() => {
+  return !usePagination.value && displayedItemsCount.value < sortedFilteredReceipts.value.length && displayedItemsCount.value < 50
+})
+
+// Check if we can load more (not at 50 yet)
+const canLoadMore = computed(() => {
+  return displayedItemsCount.value < 50 && displayedItemsCount.value < sortedFilteredReceipts.value.length
+})
+
+// Load more items
+const loadMoreItems = () => {
+  if (canLoadMore.value) {
+    displayedItemsCount.value = Math.min(displayedItemsCount.value + 10, 50)
+    // If we've reached 50, switch to pagination mode
+    if (displayedItemsCount.value >= 50) {
+      usePagination.value = true
+      currentPage.value = 1
+      itemsPerPage.value = 50
+    }
+  }
+}
+
+// Reset to Load More mode when filters change
+watch([searchQuery, statusFilter, dateFilter, currentSort], () => {
+  displayedItemsCount.value = 20
+  usePagination.value = false
+  currentPage.value = 1
+  itemsPerPage.value = 20
 })
 
 const toggleSort = (key: string) => {
@@ -1366,6 +1423,9 @@ const resetFilters = () => {
   statusFilter.value = 'all'
   dateFilter.value = 'all'
   currentPage.value = 1
+  displayedItemsCount.value = 20
+  usePagination.value = false
+  itemsPerPage.value = 20
   // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {
     try {
