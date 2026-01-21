@@ -28,7 +28,7 @@
           <img
             :src="logoSource"
             alt="Storvv Logo"
-            class="h-10 w-auto mx-auto object-contain"
+            class="h-10 w-auto max-w-[200px] mx-auto object-contain"
           />
         </NuxtLink>
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
@@ -194,7 +194,8 @@ definePageMeta({
 const { actualTheme } = useTheme()
 
 const logoSource = computed(() => {
-  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+  // Use light logo on dark background, dark logo on light background for better contrast
+  return actualTheme.value === 'dark' ? '/storvv logo 2.png' : '/storvv logo.png'
 })
 
 const form = ref({
