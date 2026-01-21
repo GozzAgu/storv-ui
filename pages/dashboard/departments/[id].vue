@@ -40,7 +40,7 @@
         <div>
           <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Manager</p>
           <p class="mt-1 text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
-            {{ department?.manager || 'Not assigned' }}
+            {{ currentManager }}
           </p>
         </div>
         <div>
@@ -254,6 +254,14 @@
                 <div class="flex items-center justify-end gap-1 flex-shrink-0">
                   <button
                     v-if="canManageDepartments"
+                    @click="handleToggleStaffRole(member)"
+                    class="flex-shrink-0 p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                    :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
+                  >
+                    <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
+                  </button>
+                  <button
+                    v-if="canManageDepartments"
                     @click="handleEditStaff(member)"
                     class="flex-shrink-0 p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors"
                     title="Edit"
@@ -324,6 +332,7 @@ import {
   ClockIcon,
   PencilSquareIcon,
   TrashIcon,
+  ArrowPathIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -451,6 +460,15 @@ const onLeaveStaff = computed(() => {
   return staff.value.filter(m => m.status === 'on_leave').length
 })
 
+// Computed property for current manager name
+const currentManager = computed(() => {
+  const manager = staff.value.find(m => m.role === 'manager')
+  if (manager) {
+    return `${manager.firstName} ${manager.lastName}`
+  }
+  return 'Not assigned'
+})
+
 
 // Load department and staff data
 const loadDepartmentData = async () => {
@@ -522,6 +540,61 @@ const openCreateStaffModal = () => {
 const handleEditStaff = (staffMember: Staff) => {
   editingStaff.value = staffMember
   showStaffModal.value = true
+}
+
+const handleToggleStaffRole = async (staffMember: Staff) => {
+  const { useToast } = await import('~/composables/useToast')
+  const toast = useToast()
+  
+  const newRole = staffMember.role === 'manager' ? 'staff' : 'manager'
+  const roleLabel = newRole === 'manager' ? 'Manager' : 'Staff'
+  
+  // Optimistically update the UI
+  const staffIndex = staff.value.findIndex(s => s.id === staffMember.id)
+  let originalRole: 'manager' | 'staff' | 'intern' | null = null
+  
+  if (staffIndex > -1 && staff.value[staffIndex]) {
+    // Store original role for potential revert
+    originalRole = staff.value[staffIndex].role
+    // Update the role in the local array directly
+    staff.value[staffIndex].role = newRole as 'manager' | 'staff' | 'intern'
+  }
+  
+  try {
+    await staffStore.updateStaff(staffMember.id, {
+      role: newRole as 'manager' | 'staff' | 'intern',
+    })
+    
+    // Update department manager field if needed
+    if (department.value) {
+      const manager = staff.value.find(m => m.role === 'manager')
+      if (manager) {
+        department.value.manager = `${manager.firstName} ${manager.lastName}`
+      } else {
+        department.value.manager = 'Not assigned'
+      }
+    }
+    
+    // Refresh from store to ensure consistency (non-blocking)
+    staffStore.fetchStaffByDepartment(departmentId.value).then(() => {
+      staff.value = staffStore.getStaffByDepartment(departmentId.value)
+      // Also refresh department to sync manager field
+      departmentsStore.fetchDepartment(departmentId.value).then(() => {
+        const updatedDept = departmentsStore.getDepartmentById(departmentId.value)
+        if (updatedDept) {
+          department.value = updatedDept
+        }
+      }).catch(console.error)
+    }).catch(console.error)
+    
+    toast.success(`${staffMember.firstName} ${staffMember.lastName} role changed to ${roleLabel}`)
+  } catch (error: any) {
+    // Revert optimistic update on error
+    if (staffIndex > -1 && originalRole !== null && staff.value[staffIndex]) {
+      staff.value[staffIndex].role = originalRole
+    }
+    toast.error(error.message || 'Failed to update staff role')
+  }
 }
 
 const handleDeleteStaff = async (staffMember: Staff) => {

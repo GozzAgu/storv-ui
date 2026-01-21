@@ -273,6 +273,13 @@
       <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
     </button>
 
+    <!-- Delete Folder Modal -->
+    <DeleteFolderModal
+      v-model="showDeleteFolderModal"
+      :folder="selectedFolderForDelete"
+      @deleted="handleConfirmDeleteFolder"
+    />
+
     <!-- Create Folder Modal -->
     <Modal
       v-model="showCreateFolderModal"
@@ -577,6 +584,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import { useAuthStore } from '~/stores/auth'
@@ -586,6 +594,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAI } from '~/composables/useAI'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({
   layout: 'dashboard'
@@ -599,6 +608,8 @@ const searchQuery = ref('')
 const sortBy = ref('name')
 const showCreateFolderModal = ref(false)
 const editingFolder = ref<InventoryFolder | null>(null)
+const showDeleteFolderModal = ref(false)
+const selectedFolderForDelete = ref<InventoryFolder | null>(null)
 
 // Department filter - load from localStorage
 const getInitialDepartment = (): string => {
@@ -669,6 +680,7 @@ const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
+const toast = useToast()
 const { canManage, canCreateInventoryFolders } = usePermissions()
 
 // Get current store ID for filtering
@@ -1065,13 +1077,20 @@ const handleEditFolder = (folder: InventoryFolder) => {
   showCreateFolderModal.value = true
 }
 
-const handleDeleteFolder = async (folder: InventoryFolder) => {
-  if (confirm(`Are you sure you want to delete "${folder.name}"? This will not delete the items in the folder.`)) {
-    try {
-      await inventoryStore.deleteFolder(folder.id)
-    } catch (error: any) {
-      alert(error.message || 'Failed to delete folder')
-    }
+const handleDeleteFolder = (folder: InventoryFolder) => {
+  selectedFolderForDelete.value = folder
+  showDeleteFolderModal.value = true
+}
+
+const handleConfirmDeleteFolder = async (folder: InventoryFolder) => {
+  try {
+    await inventoryStore.deleteFolder(folder.id)
+    toast.success('Folder deleted successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete folder')
+  } finally {
+    showDeleteFolderModal.value = false
+    selectedFolderForDelete.value = null
   }
 }
 

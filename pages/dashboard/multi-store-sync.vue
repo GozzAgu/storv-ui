@@ -161,8 +161,9 @@
                 <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
                   <tr>
                     <th class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Item</th>
-                    <th class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Available</th>
-                    <th class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Transfer Qty</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Available</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Transfer Qty</th>
+                    <th v-else class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Select</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -171,22 +172,19 @@
                       <div>
                         <div class="flex items-center gap-2">
                           <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name || item.itemName || 'Unnamed Item' }}</p>
-                          <span v-if="item.isTransferred || item.transferredTo" class="px-1.5 py-0.5 text-[9px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded">
-                            Transferred
-                          </span>
                         </div>
                         <p v-if="item.brand && item.model" class="text-gray-500 dark:text-gray-400 text-[10px]">
                           {{ item.brand }} {{ item.model }}
                         </p>
-                        <p v-if="item.transferredTo" class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
-                          To: {{ getStoreName(item.transferredTo) }}
+                        <p v-if="item.serialNo || item.serialNumber" class="text-gray-500 dark:text-gray-400 text-[10px]">
+                          Serial: {{ item.serialNo || item.serialNumber }}
                         </p>
                       </div>
                     </td>
-                    <td class="px-3 py-2 text-gray-700 dark:text-gray-300">
+                    <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-gray-700 dark:text-gray-300">
                       {{ getAvailableQuantity(item) }}
                     </td>
-                    <td class="px-3 py-2">
+                    <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2">
                       <input
                         v-model.number="transferForm.items[item.id]"
                         type="number"
@@ -194,6 +192,15 @@
                         min="0"
                         class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
                         placeholder="0"
+                      />
+                    </td>
+                    <td v-else class="px-3 py-2">
+                      <input
+                        v-model="transferForm.items[item.id]"
+                        type="checkbox"
+                        :true-value="1"
+                        :false-value="0"
+                        class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500"
                       />
                     </td>
                   </tr>
@@ -356,7 +363,6 @@
                     <span>
                       {{ item.itemName || 'Item' }}
                       <span v-if="item.serialNumber" class="text-gray-500 dark:text-gray-500">({{ item.serialNumber }})</span>
-                      <span v-if="item.quantity && item.quantity > 1" class="text-gray-500 dark:text-gray-500">× {{ item.quantity }}</span>
                     </span>
                   </div>
                   <div v-if="transfer.items.length > 3" class="text-[10px] text-gray-500 dark:text-gray-500 italic pl-2.5">
@@ -454,6 +460,11 @@ const consolidatedReport = ref({
 })
 
 // Computed
+const currentFolderHasSerialNumbers = computed(() => {
+  const folder = sourceFolders.value.find(f => f.id === transferForm.value.folderId)
+  return folder?.hasSerialNumbers || false
+})
+
 const canTransfer = computed(() => {
   return (
     transferForm.value.sourceStoreId &&
@@ -560,17 +571,28 @@ const loadFolderItems = async () => {
     
     // Filter items based on type
     if (hasSerialNumbers) {
-      // For serial numbers, only show unsold items (no dateOut)
-      availableItems.value = folderItems.filter(item => {
-        const dateOut = item.dateOut
-        return !dateOut || dateOut === null || dateOut === ''
-      })
-    } else {
-      // For bulk items, show items that have available quantity (not sold and quantity > 0)
+      // For serial numbers, only show unsold items (no dateOut) that haven't been transferred
       availableItems.value = folderItems.filter(item => {
         const dateOut = item.dateOut
         const isSold = dateOut && dateOut !== null && dateOut !== ''
         if (isSold) return false
+        
+        // Filter out items that have been transferred
+        const isTransferred = item.isTransferred || item.transferredTo
+        if (isTransferred) return false
+        
+        return true
+      })
+    } else {
+      // For bulk items, show items that have available quantity (not sold and quantity > 0) and haven't been transferred
+      availableItems.value = folderItems.filter(item => {
+        const dateOut = item.dateOut
+        const isSold = dateOut && dateOut !== null && dateOut !== ''
+        if (isSold) return false
+        
+        // Filter out items that have been transferred
+        const isTransferred = item.isTransferred || item.transferredTo
+        if (isTransferred) return false
         
         const quantity = item.quantity || item.Quantity || 0
         return quantity > 0
@@ -709,23 +731,27 @@ const handleTransfer = async () => {
           
           // Create new item in destination store
           // Set createdBy to current user to ensure Firestore rules allow it
+          // Preserve original dateIn from source item
           const { createdBy: _createdBy, dateOut: _dateOut, id: _id, ...itemDataWithoutSystemFields } = sourceItem
           // Remove undefined values before setting document (Firestore doesn't allow undefined)
           const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
           console.log('[Transfer] Moving serial item to destination store:', transferForm.value.destinationStoreId, 'pathUserId:', pathUserId, 'createdBy:', userId, 'auth.uid:', authStore.currentUser?.uid)
           try {
             // First create in destination store
+            // Preserve original dateIn from source item
+            const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
             await setDoc(newItemRef, {
               ...cleanedItemData,
               id: newItemRef.id,
               folderId: transferForm.value.destinationFolderId,
               storeId: transferForm.value.destinationStoreId,
+              dateIn: originalDateIn, // Preserve original dateIn
               createdBy: userId, // Set to current user for Firestore rules
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
               transferredFrom: transferForm.value.sourceStoreId,
               transferredFromFolder: transferForm.value.folderId,
-              transferredAt: serverTimestamp(),
+              transferredAt: serverTimestamp(), // Transfer date
               isTransferred: true, // Mark as transferred item
             })
             console.log('[Transfer] Serial item created in destination store successfully')
@@ -739,12 +765,11 @@ const handleTransfer = async () => {
             throw new Error(`Failed to move item: ${moveError.message}`)
           }
 
-          // Store item details for transfer history
+          // Store item details for transfer history (without quantity)
           const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
           const itemSerial = sourceItem.serialNo || sourceItem.serialNumber || null
           transferredItems.push({ 
             itemId, 
-            quantity: 1,
             itemName,
             serialNumber: itemSerial
           })
@@ -800,11 +825,14 @@ const handleTransfer = async () => {
             const { createdBy: _, ...itemDataWithoutCreatedBy } = sourceItem
             // Remove undefined values before setting document (Firestore doesn't allow undefined)
             const cleanedItemData = removeUndefined(itemDataWithoutCreatedBy)
+            // Preserve original dateIn from source item
+            const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
             await setDoc(newItemRef, {
               ...cleanedItemData,
               id: newItemRef.id,
               folderId: transferForm.value.destinationFolderId,
               storeId: transferForm.value.destinationStoreId,
+              dateIn: originalDateIn, // Preserve original dateIn
               quantity: quantity,
               Quantity: quantity,
               createdBy: userId, // Set to current user for Firestore rules
@@ -812,26 +840,30 @@ const handleTransfer = async () => {
               updatedAt: serverTimestamp(),
               transferredFrom: transferForm.value.sourceStoreId,
               transferredFromFolder: transferForm.value.folderId,
-              transferredAt: serverTimestamp(),
+              transferredAt: serverTimestamp(), // Transfer date
             })
           } else {
             // Update existing item quantity
             const existingItem = existingItemsSnap.docs[0]
             if (existingItem) {
               const existingQty = existingItem.data().quantity || existingItem.data().Quantity || 0
+              const existingData = existingItem.data()
+              // Preserve original dateIn if it doesn't exist, or use the older one
+              const originalDateIn = existingData.dateIn || existingData.DateIn || (sourceItem.dateIn || sourceItem.DateIn || null)
               await updateDoc(existingItem.ref, {
                 quantity: existingQty + quantity,
                 Quantity: existingQty + quantity,
+                dateIn: originalDateIn, // Preserve original dateIn
+                transferredAt: serverTimestamp(), // Update transfer date
                 updatedAt: serverTimestamp(),
               })
             }
           }
 
-          // Store item details for transfer history
+          // Store item details for transfer history (without quantity)
           const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
           transferredItems.push({ 
             itemId, 
-            quantity,
             itemName
           })
         }

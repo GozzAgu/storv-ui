@@ -8,7 +8,7 @@
         <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight" data-tutorial="dashboard">Welcome back, {{ userName }}! 👋</h1>
         <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
-      <div class="flex items-center">
+      <div class="hidden sm:flex items-center">
         <NuxtLink
           to="/dashboard/inventory"
           class="w-full sm:w-auto px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold hover:from-primary-600 hover:to-primary-700 active:scale-95 transition-all duration-200 flex items-center justify-center gap-1.5 text-xs"

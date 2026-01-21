@@ -341,9 +341,13 @@
                     </span>
                   </div>
                   <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
-                    <span v-if="item[column.key]">
-                      {{ formatItemDate(item[column.key]) }}
-                    </span>
+                    <div v-if="item[column.key]" class="flex flex-col">
+                      <span>{{ formatItemDate(item[column.key]) }}</span>
+                      <!-- Show transfer date below original date if item was transferred -->
+                      <span v-if="item.isTransferred && item.transferredAt && column.key === 'dateIn'" class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        Transferred: {{ formatItemDate(item.transferredAt) }}
+                      </span>
+                    </div>
                     <span v-else class="text-gray-400 dark:text-gray-500 italic">
                       -
                     </span>
@@ -744,6 +748,14 @@
       :folder-id="folderId"
       @discount-applied="handleBulkDiscountApplied"
     />
+
+    <!-- Delete Item Modal -->
+    <DeleteItemModal
+      v-model="showDeleteItemModal"
+      :item="selectedItemForDelete"
+      :item-name="selectedItemForDelete ? getItemDisplayName(selectedItemForDelete) : ''"
+      @deleted="handleConfirmDeleteItem"
+    />
   </div>
 </template>
 
@@ -784,6 +796,7 @@ import { useCopy } from '~/composables/useCopy'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
+import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 
 definePageMeta({
   layout: 'dashboard'
@@ -884,6 +897,8 @@ const showDiscountModal = ref(false)
 const showBulkDiscountModal = ref(false)
 const selectedItemForDiscount = ref<InventoryItem | null>(null)
 const selectedItemsForBulk = ref<InventoryItem[]>([])
+const showDeleteItemModal = ref(false)
+const selectedItemForDelete = ref<InventoryItem | null>(null)
 
 // Folder will be loaded from Firestore via inventoryStore
 
@@ -1328,22 +1343,41 @@ const handleEditItem = (item: InventoryItem) => {
   showAddItemModal.value = true
 }
 
-const handleDeleteItem = async (item: InventoryItem) => {
+const getItemDisplayName = (item: InventoryItem) => {
   const firstColumn = columns.value[0]
-  const itemName = firstColumn ? (item[firstColumn.key] || 'this item') : 'this item'
-  if (confirm(`Are you sure you want to delete "${itemName}"? This action cannot be undone.`)) {
-    try {
-      await inventoryStore.deleteItem(folderId.value, item.id)
-      // Reload folder to update stats
-      if (folder.value) {
-        await inventoryStore.fetchFolder(folderId.value)
-        folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
-      }
-      // Refresh folder list to update item counts on the folders page
-      await inventoryStore.fetchFolders()
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to delete item')
+  if (firstColumn && item[firstColumn.key]) {
+    return String(item[firstColumn.key])
+  }
+  if (item.name || item.itemName) {
+    return item.name || item.itemName
+  }
+  if (item.brand && item.model) {
+    return `${item.brand} ${item.model}`
+  }
+  return 'this item'
+}
+
+const handleDeleteItem = (item: InventoryItem) => {
+  selectedItemForDelete.value = item
+  showDeleteItemModal.value = true
+}
+
+const handleConfirmDeleteItem = async (item: InventoryItem) => {
+  try {
+    await inventoryStore.deleteItem(folderId.value, item.id)
+    // Reload folder to update stats
+    if (folder.value) {
+      await inventoryStore.fetchFolder(folderId.value)
+      folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
     }
+    // Refresh folder list to update item counts on the folders page
+    await inventoryStore.fetchFolders()
+    toast.success('Item deleted successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete item')
+  } finally {
+    showDeleteItemModal.value = false
+    selectedItemForDelete.value = null
   }
 }
 

@@ -496,7 +496,7 @@
             @click="sidebarOpen = true"
               class="lg:hidden p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <Bars3Icon class="w-4 h-4 sm:w-4 sm:h-4 stroke-1" stroke-width="1.5" />
+            <Bars3Icon class="w-6 h-6 sm:w-4 sm:h-4 stroke-1" stroke-width="1.5" />
           </button>
             <!-- Page Name -->
             <div class="hidden md:flex items-center space-x-1 sm:space-x-1.5">
