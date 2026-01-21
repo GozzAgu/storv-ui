@@ -1384,10 +1384,15 @@ const handleSaveItem = async () => {
       handleCancelItem()
       toast.success('Updating item...')
       
+      // CRITICAL: Wait for item update to complete (ensures data is saved to Firestore)
       await inventoryStore.updateItem(folderId.value, editingItem.value.id, itemForm)
       
-      // Refresh items list in background (non-blocking)
-      inventoryStore.fetchItems(folderId.value).catch(console.error)
+      // Refresh items list in background (non-blocking) - only for UI sync
+      // Item is already updated in local state, so this is just to ensure consistency
+      inventoryStore.fetchItems(folderId.value).catch((err) => {
+        console.warn('Background items refresh failed (non-critical):', err)
+        // Item is already updated in local state, so this is just a sync issue
+      })
       
       toast.success('Item updated successfully!')
     } else {
@@ -1422,6 +1427,7 @@ const handleSaveItem = async () => {
             serialNo: serialNo.trim(),
           }))
 
+          // CRITICAL: Wait for item creation to complete (ensures data is saved to Firestore)
           await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
 
           // Update folder stats locally (optimistic update)
@@ -1429,11 +1435,12 @@ const handleSaveItem = async () => {
             folder.value.itemCount = (folder.value.itemCount || 0) + validSerialNumbers.length
           }
 
-          // Refresh items list in background (non-blocking)
-          inventoryStore.fetchItems(folderId.value).catch(console.error)
-          
-          // Refresh folder list in background (non-blocking) - only if needed
-          // inventoryStore.fetchFolders().catch(console.error)
+          // Refresh items list in background (non-blocking) - only for UI sync
+          // Item is already in local state, so this is just to ensure consistency
+          inventoryStore.fetchItems(folderId.value).catch((err) => {
+            console.warn('Background items refresh failed (non-critical):', err)
+            // Item is already created and in local state, so this is just a sync issue
+          })
 
           toast.success(`Successfully created ${validSerialNumbers.length} item${validSerialNumbers.length !== 1 ? 's' : ''}`)
         } else {
@@ -1442,6 +1449,7 @@ const handleSaveItem = async () => {
           handleCancelItem()
           toast.success('Creating item...')
 
+          // CRITICAL: Wait for item creation to complete (ensures data is saved to Firestore)
           await inventoryStore.createItem(folderId.value, itemForm)
 
           // Update folder stats locally (optimistic update)
@@ -1449,11 +1457,12 @@ const handleSaveItem = async () => {
             folder.value.itemCount = (folder.value.itemCount || 0) + 1
           }
 
-          // Refresh items list in background (non-blocking)
-          inventoryStore.fetchItems(folderId.value).catch(console.error)
-          
-          // Refresh folder list in background (non-blocking) - only if needed
-          // inventoryStore.fetchFolders().catch(console.error)
+          // Refresh items list in background (non-blocking) - only for UI sync
+          // Item is already in local state, so this is just to ensure consistency
+          inventoryStore.fetchItems(folderId.value).catch((err) => {
+            console.warn('Background items refresh failed (non-critical):', err)
+            // Item is already created and in local state, so this is just a sync issue
+          })
 
           toast.success('Item created successfully!')
         }

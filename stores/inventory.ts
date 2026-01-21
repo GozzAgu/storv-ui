@@ -943,7 +943,12 @@ export const useInventoryStore = defineStore('inventory', {
         this.items[folderId].unshift(itemForState)
 
         // Update folder item count in background (non-blocking for better performance)
-        this.updateItemCount(folderId).catch(console.error)
+        // This updates folder stats (itemCount, lowStockCount) but doesn't affect item creation
+        // If this fails, the item is still created successfully, just folder stats might be slightly off
+        this.updateItemCount(folderId).catch((err) => {
+          console.warn('[InventoryStore] Background folder stats update failed (non-critical):', err)
+          // Item is already created and in local state, so this is just a stats sync issue
+        })
 
         // Optimistically update folder count in local state
         const folderIndex = this.folders.findIndex(f => f.id === folderId)

@@ -1072,7 +1072,8 @@ const chartOptions = computed(() => {
           fontSize: '12px'
         },
         rotate: chartView.value === 'monthly' ? 0 : -45,
-        rotateAlways: false
+        rotateAlways: false,
+        offsetY: 8
       },
       axisBorder: {
         show: true,
@@ -1121,7 +1122,7 @@ const chartOptions = computed(() => {
       padding: {
         top: 0,
         right: 0,
-        bottom: 0,
+        bottom: 20,
         left: 0
       }
     },
