@@ -91,7 +91,7 @@
         <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
           <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
             <div class="flex items-center gap-1.5 sm:gap-2">
-              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Receipts:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
@@ -99,12 +99,12 @@
               </span>
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Sales:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalSales) }}</span>
             </div>
             <div class="hidden sm:flex items-center gap-2">
-              <CalendarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <CalendarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
@@ -112,7 +112,7 @@
               </span>
             </div>
             <div class="hidden lg:flex items-center gap-2">
-              <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+              <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
@@ -126,7 +126,7 @@
           <div class="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:items-center sm:gap-3">
             <!-- Search Input -->
             <div class="relative flex-1 sm:flex-initial">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500" />
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 sm:w-4 sm:h-4 text-gray-400 dark:text-gray-500 stroke-1" stroke-width="1.5" />
               <input
                 v-model="searchQuery"
                 type="text"
@@ -386,7 +386,7 @@
                     class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     title="Copy receipt number"
                   >
-                    <ClipboardDocumentIcon class="w-3.5 h-3.5" />
+                    <ClipboardDocumentIcon class="w-3.5 h-3.5 stroke-1" stroke-width="1.5" />
                   </button>
                   <span
                     v-if="receipt.isSwapIn"
@@ -540,7 +540,7 @@
       class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
       title="Create new receipt"
     >
-      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
+      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5 stroke-1" stroke-width="1.5" />
     </button>
 
       <!-- Create Receipt Modal -->
@@ -587,7 +587,7 @@
                 </span>
               </div>
               <div class="flex items-center gap-1.5">
-                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
                 <span class="text-[10px] text-gray-600 dark:text-gray-400">Revenue:</span>
                 <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
               </div>
@@ -669,7 +669,7 @@
                             class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
                             title="Copy customer ID"
                           >
-                            <ClipboardDocumentIcon class="w-3.5 h-3.5" />
+                            <ClipboardDocumentIcon class="w-3.5 h-3.5 stroke-1" stroke-width="1.5" />
                           </button>
                         </div>
                         <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ customer.receipts.length }} receipt{{ customer.receipts.length !== 1 ? 's' : '' }}</p>

@@ -202,7 +202,7 @@
             Why Choose <span class="text-primary-600">Storvv</span>?
           </h2>
           <p class="mt-3 text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            A modern operations layer for inventory, sales, customers, and teams—built to stay fast, clean, and flexible as you scale.
+            A modern operations layer for inventory, sales, customers, and teams built to stay fast, clean, and flexible as you scale.
           </p>
           </div>
           

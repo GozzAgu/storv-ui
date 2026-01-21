@@ -19,7 +19,7 @@
             class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             title="Copy receipt number"
           >
-            <ClipboardDocumentIcon class="w-4 h-4" />
+            <ClipboardDocumentIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
           </button>
         </div>
         <div class="flex items-center gap-2">
@@ -28,7 +28,7 @@
             :disabled="isSendingEmail || !receipt"
             class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
           >
-            <EnvelopeIcon class="w-4 h-4" />
+            <EnvelopeIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
             <span>{{ isSendingEmail ? 'Sending...' : 'Send Email' }}</span>
           </button>
           <button
@@ -36,7 +36,7 @@
             :disabled="isPrinting || !receipt"
             class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
           >
-            <PrinterIcon class="w-4 h-4" />
+            <PrinterIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
             <span>{{ isPrinting ? 'Generating...' : 'Print PDF' }}</span>
           </button>
         </div>

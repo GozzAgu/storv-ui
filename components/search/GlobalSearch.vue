@@ -65,7 +65,7 @@
               ]"
             >
               <component :is="entityType.icon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-1.5" />
-              <span class="hidden xs:inline">{{ entityType.label }}</span>
+              <span>{{ entityType.label }}</span>
             </button>
             <button
               v-if="searchStore.hasActiveFilters"
@@ -305,13 +305,13 @@ const endDate = ref('')
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 
 const entityTypes = computed(() => {
-  const baseTypes = [
-    { value: 'all', label: 'All', icon: 'MagnifyingGlassIcon' },
-    { value: 'receipts', label: 'Receipts', icon: 'ReceiptPercentIcon' },
-    { value: 'inventory', label: 'Inventory', icon: 'CubeIcon' },
-    { value: 'customers', label: 'Customers', icon: 'UserCircleIcon' },
-    { value: 'departments', label: 'Departments', icon: 'BuildingOfficeIcon' },
-    { value: 'staff', label: 'Staff', icon: 'UserIcon' },
+  const baseTypes: Array<{ value: SearchEntityType; label: string; icon: any }> = [
+    { value: 'all', label: 'All', icon: MagnifyingGlassIcon },
+    { value: 'receipts', label: 'Receipts', icon: ReceiptPercentIcon },
+    { value: 'inventory', label: 'Inventory', icon: CubeIcon },
+    { value: 'customers', label: 'Customers', icon: UserCircleIcon },
+    { value: 'departments', label: 'Departments', icon: BuildingOfficeIcon },
+    { value: 'staff', label: 'Staff', icon: UserIcon },
   ]
   
   // Remove departments and staff from search for staff users
@@ -419,10 +419,10 @@ const loadSavedSearch = async (searchId: string) => {
   showSavedSearchesModal.value = false
   // Update date inputs if date range exists
   if (searchStore.filters.dateRange?.start) {
-    startDate.value = searchStore.filters.dateRange.start.toISOString().split('T')[0]
+    startDate.value = searchStore.filters.dateRange.start.toISOString().split('T')[0] || ''
   }
   if (searchStore.filters.dateRange?.end) {
-    endDate.value = searchStore.filters.dateRange.end.toISOString().split('T')[0]
+    endDate.value = searchStore.filters.dateRange.end.toISOString().split('T')[0] || ''
   }
 }
 

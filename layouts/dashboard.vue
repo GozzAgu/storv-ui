@@ -46,7 +46,7 @@
           @click="sidebarOpen = false"
             class="lg:hidden p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-all duration-200"
         >
-          <XMarkIcon class="w-6 h-6" />
+          <XMarkIcon class="w-6 h-6 stroke-1" stroke-width="1.5" />
         </button>
         </div>
       </div>
@@ -57,8 +57,8 @@
         class="absolute top-14 -right-3 hidden lg:flex items-center justify-center w-7 h-7 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all z-10"
         :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-4 h-4" />
-        <ChevronLeftIcon v-else class="w-4 h-4" />
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-4 h-4 stroke-1" stroke-width="1.5" />
+        <ChevronLeftIcon v-else class="w-4 h-4 stroke-1" stroke-width="1.5" />
       </button>
 
       <!-- Navigation -->
@@ -89,11 +89,12 @@
                   <component 
                     :is="item.icon" 
                     :class="[
-                      'relative z-10 transition-colors w-5 h-5 mr-3',
+                      'relative z-10 transition-colors w-5 h-5 mr-3 stroke-1',
                       isActive(item.href)
                         ? 'text-primary-600 dark:text-primary-400' 
                         : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                     ]"
+                    stroke-width="1.5"
                   />
                   <span 
                     class="relative z-10 whitespace-nowrap text-xs font-medium transition-colors"
@@ -111,9 +112,10 @@
                 >
                   <ChevronDownIcon 
                     :class="[
-                      'w-4 h-4 transition-transform duration-200',
+                      'w-4 h-4 transition-transform duration-200 stroke-1',
                       inventoryExpanded ? 'rotate-180' : ''
                     ]"
+                    stroke-width="1.5"
                   />
                 </button>
               </div>
@@ -140,17 +142,19 @@
                     <div class="flex items-center gap-2 flex-1 min-w-0">
                       <FolderIcon 
                         :class="[
-                          'w-3.5 h-3.5 flex-shrink-0 transition-colors',
+                          'w-3.5 h-3.5 flex-shrink-0 transition-colors stroke-1',
                           route.params.id === folder.id
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                         ]"
+                        stroke-width="1.5"
                       />
                       <span class="truncate">{{ folder.name }}</span>
                     </div>
                     <ArrowRightIcon 
                       v-if="route.params.id === folder.id"
-                      class="w-3.5 h-3.5 flex-shrink-0 text-primary-600 dark:text-primary-400"
+                      class="w-3.5 h-3.5 flex-shrink-0 text-primary-600 dark:text-primary-400 stroke-1"
+                      stroke-width="1.5"
                     />
                   </NuxtLink>
                 </div>
@@ -186,12 +190,13 @@
               <component 
                 :is="item.icon" 
                 :class="[
-                  'relative z-10 transition-colors',
+                  'relative z-10 transition-colors stroke-1',
                   sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5 mr-3',
                   isActive(item.href)
                     ? 'text-primary-600 dark:text-primary-400' 
                     : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200'
                 ]"
+                stroke-width="1.5"
               />
               <span 
                 v-if="!sidebarCollapsed" 
@@ -322,11 +327,12 @@
                       >
                         <BuildingOfficeIcon 
                           :class="[
-                            'w-3.5 h-3.5 flex-shrink-0 transition-colors',
+                            'w-3.5 h-3.5 flex-shrink-0 transition-colors stroke-1',
                             route.params.id === department.id && route.path.startsWith('/dashboard/departments')
                               ? 'text-primary-600 dark:text-primary-400'
                               : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
                           ]"
+                          stroke-width="1.5"
                         />
                         <span class="truncate">{{ department.name }}</span>
                       </NuxtLink>
@@ -342,9 +348,10 @@
                       >
                         <ChevronDownIcon 
                           :class="[
-                            'w-3 h-3 transition-transform duration-200',
+                            'w-3 h-3 transition-transform duration-200 stroke-1',
                             expandedDepartments[department.id] ? 'rotate-180' : ''
                           ]"
+                          stroke-width="1.5"
                         />
                       </button>
                     </div>
@@ -362,7 +369,8 @@
                           @click.prevent="department.isActive === false ? null : null"
                         >
                           <UsersIcon 
-                            class="w-3 h-3 flex-shrink-0 mr-1.5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                            class="w-3 h-3 flex-shrink-0 mr-1.5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1"
+                            stroke-width="1.5"
                           />
                           <span class="truncate">{{ staff.firstName }} {{ staff.lastName }}</span>
                         </NuxtLink>
@@ -445,10 +453,11 @@
             
             <ArrowRightOnRectangleIcon 
               :class="[
-                'relative z-10 transition-all duration-300',
+                'relative z-10 transition-all duration-300 stroke-1',
                 sidebarCollapsed ? 'w-4 h-4' : 'w-4 h-4 mr-1.5',
                 'group-hover:scale-110 group-hover:rotate-[-5deg]'
               ]"
+              stroke-width="1.5"
             />
             <span v-if="!sidebarCollapsed" class="relative z-10 text-xs font-medium">Sign out</span>
             
@@ -486,11 +495,11 @@
             @click="sidebarOpen = true"
               class="lg:hidden p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
           >
-            <Bars3Icon class="w-4 h-4 sm:w-4 sm:h-4" />
+            <Bars3Icon class="w-4 h-4 sm:w-4 sm:h-4 stroke-1" stroke-width="1.5" />
           </button>
             <!-- Page Name -->
             <div class="hidden md:flex items-center space-x-1 sm:space-x-1.5">
-              <component :is="currentPageIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-400" />
+              <component :is="currentPageIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600 dark:text-gray-400 stroke-1" stroke-width="1.5" />
               <h1 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">
                 {{ currentPageName }}
               </h1>
@@ -504,7 +513,7 @@
               class="hidden md:flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 w-48 sm:w-52 border border-gray-300 dark:border-gray-700 rounded-md hover:border-primary-300 dark:hover:border-primary-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all text-xs bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400"
               title="Search (Cmd/Ctrl+K)"
             >
-              <MagnifyingGlassIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <MagnifyingGlassIcon class="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 stroke-1" stroke-width="1.5" />
               <span class="flex-1 text-left">Search anything...</span>
               <kbd class="hidden lg:inline-flex px-1 py-0.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">⌘K</kbd>
             </button>
@@ -515,7 +524,7 @@
               class="md:hidden p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Search"
             >
-              <MagnifyingGlassIcon class="w-4 h-4 sm:w-4 sm:h-4" />
+              <MagnifyingGlassIcon class="w-4 h-4 sm:w-4 sm:h-4 stroke-1" stroke-width="1.5" />
             </button>
 
             <!-- Store Selector (for super admins) -->
@@ -530,7 +539,7 @@
               class="relative p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Notifications"
             >
-              <BellIcon class="w-4 h-4 sm:w-4 sm:h-4" />
+              <BellIcon class="w-4 h-4 sm:w-4 sm:h-4 stroke-1" stroke-width="1.5" />
               <span
                 v-if="unreadNotificationCount > 0"
                 class="absolute top-0 right-0 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-0.5"
@@ -552,7 +561,7 @@
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
                   <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
                 </div>
-                <ChevronDownIcon class="hidden md:block w-3 h-3 sm:w-3 sm:h-3 text-gray-400 dark:text-gray-500" />
+                <ChevronDownIcon class="hidden md:block w-3 h-3 sm:w-3 sm:h-3 text-gray-400 dark:text-gray-500 stroke-1" stroke-width="1.5" />
               </button>
 
               <!-- Profile Dropdown Menu -->
@@ -574,7 +583,7 @@
                     class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
-                    <UserCircleIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <UserCircleIcon class="w-3.5 h-3.5 flex-shrink-0 stroke-1" stroke-width="1.5" />
                     Profile
                   </NuxtLink>
                   <NuxtLink
@@ -582,7 +591,7 @@
                     class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                     @click="profileMenuOpen = false"
                   >
-                    <Cog6ToothIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <Cog6ToothIcon class="w-3.5 h-3.5 flex-shrink-0 stroke-1" stroke-width="1.5" />
                     Settings
                   </NuxtLink>
                   <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
@@ -590,7 +599,7 @@
                     @click="handleSignOut"
                     class="flex items-center gap-2 w-full text-left px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active:bg-gray-200 dark:active:bg-gray-600"
                   >
-                    <ArrowRightOnRectangleIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <ArrowRightOnRectangleIcon class="w-3.5 h-3.5 flex-shrink-0 stroke-1" stroke-width="1.5" />
                     Sign out
                   </button>
                 </div>
