@@ -6,7 +6,7 @@
         <div class="flex justify-between items-center h-12 lg:h-14">
             <NuxtLink to="/" class="flex items-center space-x-2 group hover:opacity-80 transition-opacity">
               <img
-                :src="logoSource"
+                src="/storvv logo 2.png"
                 alt="Storvv Logo 2"
                 class="h-5 sm:h-8 w-auto object-contain"
               />
@@ -1389,9 +1389,9 @@ import {
 
 const { actualTheme } = useTheme()
 
-const logoSource = computed(() => {
-  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-})
+// const logoSource = computed(() => {
+//   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+// })
 
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
