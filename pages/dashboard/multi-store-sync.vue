@@ -342,10 +342,28 @@
                     {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
                   </p>
                 </div>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1.5">
                   {{ transfer.itemsCount }} items • {{ formatDate(transfer.createdAt) }}
                 </p>
-                <p v-if="transfer.notes" class="text-[10px] text-gray-600 dark:text-gray-400 mt-1">{{ transfer.notes }}</p>
+                <!-- Item Details -->
+                <div v-if="transfer.items && transfer.items.length > 0" class="space-y-1 mt-1.5">
+                  <div
+                    v-for="(item, idx) in transfer.items.slice(0, 3)"
+                    :key="idx"
+                    class="text-[10px] text-gray-600 dark:text-gray-400 flex items-center gap-1.5"
+                  >
+                    <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500"></span>
+                    <span>
+                      {{ item.itemName || 'Item' }}
+                      <span v-if="item.serialNumber" class="text-gray-500 dark:text-gray-500">({{ item.serialNumber }})</span>
+                      <span v-if="item.quantity && item.quantity > 1" class="text-gray-500 dark:text-gray-500">× {{ item.quantity }}</span>
+                    </span>
+                  </div>
+                  <div v-if="transfer.items.length > 3" class="text-[10px] text-gray-500 dark:text-gray-500 italic pl-2.5">
+                    and {{ transfer.items.length - 3 }} more item{{ transfer.items.length - 3 > 1 ? 's' : '' }}
+                  </div>
+                </div>
+                <p v-if="transfer.notes" class="text-[10px] text-gray-600 dark:text-gray-400 mt-1.5 italic">{{ transfer.notes }}</p>
               </div>
               <span
                 :class="[
@@ -721,7 +739,15 @@ const handleTransfer = async () => {
             throw new Error(`Failed to move item: ${moveError.message}`)
           }
 
-          transferredItems.push({ itemId, quantity: 1 })
+          // Store item details for transfer history
+          const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
+          const itemSerial = sourceItem.serialNo || sourceItem.serialNumber || null
+          transferredItems.push({ 
+            itemId, 
+            quantity: 1,
+            itemName,
+            serialNumber: itemSerial
+          })
         } else {
           // For bulk items, check available quantity
           const availableQty = sourceItem.quantity || sourceItem.Quantity || 0
@@ -801,7 +827,13 @@ const handleTransfer = async () => {
             }
           }
 
-          transferredItems.push({ itemId, quantity })
+          // Store item details for transfer history
+          const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
+          transferredItems.push({ 
+            itemId, 
+            quantity,
+            itemName
+          })
         }
       } catch (error: any) {
         errors.push(`Error transferring item ${itemId}: ${error.message}`)
@@ -910,7 +942,7 @@ const loadTransferHistory = async () => {
     }
 
     // Import Firebase functions
-    const { collection, query, orderBy, getDocs } = await import('firebase/firestore')
+    const { collection, query, orderBy, getDocs, getDoc, where: firestoreWhere } = await import('firebase/firestore')
     const pathUserId = userId
 
     console.log('[TransferHistory] Loading transfer history for userId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid)
@@ -944,11 +976,113 @@ const loadTransferHistory = async () => {
       })
 
       // Sort by createdAt descending if available
-      transferHistory.value = transfers.sort((a: any, b: any) => {
+      const sortedTransfers: any[] = transfers.sort((a: any, b: any) => {
         const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt ? new Date(a.createdAt) : new Date(0))
         const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt ? new Date(b.createdAt) : new Date(0))
         return bDate.getTime() - aDate.getTime()
       })
+
+      // Fetch item details for transfers that don't have item names stored (backward compatibility)
+      const { getInventoryItemDocument, getInventoryItemsCollection } = await import('~/composables/useFirestorePaths')
+      
+      for (const transfer of sortedTransfers) {
+        if (transfer.items && Array.isArray(transfer.items)) {
+          for (const item of transfer.items as any[]) {
+            // If item already has itemName, use it (for new transfers)
+            if (item.itemName && item.itemName !== 'Item' && item.itemName !== 'Item (deleted or moved)') {
+              continue
+            }
+            
+            // Try to fetch item name if not stored
+            if (!item.itemName || item.itemName === 'Item' || item.itemName === 'Item (deleted or moved)') {
+              try {
+                const sourceStoreId = (transfer as any).sourceStoreId
+                const destinationStoreId = (transfer as any).destinationStoreId
+                const destinationFolderId = (transfer as any).destinationFolderId
+                
+                // First, try to find in destination store (where item was moved to)
+                // Search for items that were transferred from the source store
+                if (destinationStoreId && destinationFolderId) {
+                  try {
+                    const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
+                    const transferredItemsQuery = query(
+                      destItemsRef,
+                      firestoreWhere('folderId', '==', destinationFolderId),
+                      firestoreWhere('transferredFrom', '==', sourceStoreId),
+                      firestoreWhere('isTransferred', '==', true)
+                    )
+                    const transferredItemsSnap = await getDocs(transferredItemsQuery)
+                    
+                    if (!transferredItemsSnap.empty) {
+                      // Find the item that matches the original itemId or was transferred around the same time
+                      const transferredItems = transferredItemsSnap.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                      })) as any[]
+                      
+                      // Try to match by original itemId if stored, or just use the first one if only one item
+                      let matchedItem: any = null
+                      if (transferredItems.length === 1) {
+                        matchedItem = transferredItems[0]
+                      } else {
+                        // Try to find by matching transferredFromFolder and itemId
+                        matchedItem = transferredItems.find((ti: any) => {
+                          const transferredFromFolder = ti.transferredFromFolder || ti.folderId
+                          return transferredFromFolder === (transfer as any).folderId
+                        })
+                        if (!matchedItem && transferredItems.length > 0) {
+                          matchedItem = transferredItems[0] // Fallback to first item
+                        }
+                      }
+                      
+                      if (matchedItem) {
+                        item.itemName = matchedItem.name || matchedItem.itemName || 'Unnamed Item'
+                        if (matchedItem.serialNo || matchedItem.serialNumber) {
+                          item.serialNumber = matchedItem.serialNo || matchedItem.serialNumber
+                        }
+                        continue // Successfully found, skip other attempts
+                      }
+                    }
+                  } catch (queryError) {
+                    console.warn('[TransferHistory] Error querying transferred items:', queryError)
+                  }
+                }
+                
+                // Fallback: Try source store (item might still be there if transfer failed or was partial)
+                if (sourceStoreId && item.itemId) {
+                  try {
+                    const itemRef = getInventoryItemDocument(db, pathUserId, sourceStoreId, item.itemId)
+                    const itemSnap = await getDoc(itemRef)
+                    if (itemSnap.exists()) {
+                      const itemData = itemSnap.data() as any
+                      item.itemName = itemData.name || itemData.itemName || 'Unnamed Item'
+                      if (itemData.serialNo || itemData.serialNumber) {
+                        item.serialNumber = itemData.serialNo || itemData.serialNumber
+                      }
+                      continue // Successfully found
+                    }
+                  } catch (sourceError) {
+                    console.warn('[TransferHistory] Error fetching from source store:', sourceError)
+                  }
+                }
+                
+                // If still no name found, use itemId as fallback
+                if (!item.itemName || item.itemName === 'Item' || item.itemName === 'Item (deleted or moved)') {
+                  item.itemName = `Item ${item.itemId?.substring(0, 8) || 'Unknown'}`
+                }
+              } catch (fetchError) {
+                console.warn('[TransferHistory] Error fetching item details:', fetchError)
+                // Final fallback
+                if (!item.itemName || item.itemName === 'Item' || item.itemName === 'Item (deleted or moved)') {
+                  item.itemName = `Item ${item.itemId?.substring(0, 8) || 'Unknown'}`
+                }
+              }
+            }
+          }
+        }
+      }
+
+      transferHistory.value = sortedTransfers
     } catch (queryError: any) {
       console.error('[TransferHistory] Query error:', queryError)
       // If it's a permission error, provide more helpful message

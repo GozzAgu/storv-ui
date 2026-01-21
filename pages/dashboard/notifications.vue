@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-3">
-    <!-- Page Header - Compact -->
+    <!-- Page Header -->
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Notifications</h1>
@@ -8,95 +8,94 @@
           Track all activities and updates in your store
         </p>
       </div>
-      <div class="flex items-center gap-2">
-        <button
-          v-if="unreadNotifications.length > 0"
-          @click="handleMarkAllAsRead"
-          :disabled="notificationsStore.loading"
-          class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Mark all as read
-        </button>
-      </div>
-    </div>
-
-    <!-- Loading State - Skeleton (Compact) -->
-    <div v-if="notificationsStore.loading && notifications.length === 0" class="space-y-2">
-      <Card v-for="i in 5" :key="i" padding="sm" extra-class="p-2.5">
-        <div class="flex items-start gap-2.5">
-          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
-          <div class="flex-1 space-y-1.5">
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
-          </div>
-        </div>
-      </Card>
-    </div>
-
-    <!-- Empty State - Compact -->
-    <Card v-else-if="notifications.length === 0" padding="sm" extra-class="p-4">
-      <div class="text-center py-6">
-        <BellIcon class="w-10 h-10 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-          No notifications yet
-        </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400">
-          Your activity notifications will appear here
-        </p>
-      </div>
-    </Card>
-
-    <!-- Notifications List - Compact -->
-    <div v-else class="space-y-2">
-      <Card
-        v-for="notification in notifications"
-        :key="notification.id"
-        padding="sm"
-        extra-class="p-2.5 transition-all duration-200 cursor-pointer hover:shadow-md"
-        :class="!notification.read ? 'bg-primary-50/50 dark:bg-primary-900/10 border-primary-200 dark:border-primary-800' : ''"
-        @click="handleNotificationClick(notification)"
+      <button
+        v-if="unreadNotifications.length > 0"
+        @click="handleMarkAllAsRead"
+        :disabled="notificationsStore.loading"
+        class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <div class="flex items-start gap-2.5">
-          <!-- Icon -->
-          <div :class="[
-            'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-            getIconClasses(notification.type)
-          ]">
-            <component :is="getIcon(notification.type)" class="w-4 h-4" />
-          </div>
+        Mark all as read
+      </button>
+    </div>
 
-          <!-- Content -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
+    <!-- Loading State -->
+    <div v-if="notificationsStore.loading && notifications.length === 0" class="space-y-2">
+      <div v-for="i in 5" :key="i" class="flex items-start gap-3 p-3 border-b border-gray-100 dark:border-gray-800">
+        <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse flex-shrink-0"></div>
+        <div class="flex-1 space-y-1.5">
+          <div class="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4 animate-pulse"></div>
+          <div class="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-full animate-pulse"></div>
+          <div class="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-1/4 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="notifications.length === 0" class="text-center py-8">
+      <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+        <BellIcon class="w-6 h-6 text-gray-400 dark:text-gray-500 stroke-1" stroke-width="1.5" />
+      </div>
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+        No notifications yet
+      </h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        Your activity notifications will appear here
+      </p>
+    </div>
+
+    <!-- Notifications List -->
+    <div v-else class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div
+        v-for="(notification, index) in notifications"
+        :key="notification.id"
+        @click="handleNotificationClick(notification)"
+        :class="[
+          'flex items-start gap-3 p-3 transition-colors cursor-pointer',
+          index !== notifications.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : '',
+          !notification.read 
+            ? 'bg-primary-50/30 dark:bg-primary-900/10 hover:bg-primary-50/50 dark:hover:bg-primary-900/20' 
+            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+        ]"
+      >
+        <!-- Icon -->
+        <div :class="[
+          'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center',
+          getIconClasses(notification.type)
+        ]">
+          <component :is="getIcon(notification.type)" class="w-4 h-4 stroke-1" stroke-width="1.5" />
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 mb-0.5">
                 <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                   {{ notification.title }}
                 </h3>
-                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">
-                  {{ notification.message }}
-                </p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
-                  {{ formatTime(notification.createdAt) }}
-                </p>
+                <!-- Unread indicator -->
+                <div
+                  v-if="!notification.read"
+                  class="flex-shrink-0 w-1.5 h-1.5 bg-primary-500 rounded-full"
+                ></div>
               </div>
-              
-              <!-- Unread indicator -->
-              <div
-                v-if="!notification.read"
-                class="flex-shrink-0 w-1.5 h-1.5 bg-primary-500 rounded-full mt-1"
-              ></div>
+              <p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                {{ notification.message }}
+              </p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
+                {{ formatTime(notification.createdAt) }}
+              </p>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <!-- Load More Button - Compact -->
-      <div v-if="notificationsStore.hasMore" class="text-center pt-3">
+      <!-- Load More Button -->
+      <div v-if="notificationsStore.hasMore" class="p-3 border-t border-gray-100 dark:border-gray-700 text-center">
         <button
           @click="loadMoreNotifications"
           :disabled="notificationsStore.loading"
-          class="px-4 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {{ notificationsStore.loading ? 'Loading...' : 'Load more' }}
         </button>
@@ -122,7 +121,6 @@ import {
   TrashIcon,
   PencilSquareIcon,
 } from '@heroicons/vue/24/outline'
-import Card from '~/components/ui/Card.vue'
 import { useNotificationsStore, type Notification, type NotificationType } from '~/stores/notifications'
 import { useRouter } from 'vue-router'
 import { useToast } from '~/composables/useToast'
@@ -167,28 +165,28 @@ const getIcon = (type: NotificationType) => {
 
 const getIconClasses = (type: NotificationType) => {
   const classMap: Record<string, string> = {
-    receipt_created: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-    receipt_refunded: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-    receipt_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    item_created: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    item_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-    item_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    item_discount_applied: 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400',
-    item_discount_removed: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
-    folder_created: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
-    folder_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-    folder_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    staff_created: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-    staff_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-    staff_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    department_created: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
-    department_updated: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-    department_deleted: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    import_completed: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-    export_completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    swap_in_completed: 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400',
+    receipt_created: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+    receipt_refunded: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+    receipt_deleted: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+    item_created: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+    item_updated: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    item_deleted: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+    item_discount_applied: 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400',
+    item_discount_removed: 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400',
+    folder_created: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400',
+    folder_updated: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    folder_deleted: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+    staff_created: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+    staff_updated: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    staff_deleted: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+    department_created: 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400',
+    department_updated: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400',
+    department_deleted: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+    import_completed: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+    export_completed: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+    swap_in_completed: 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400',
   }
-  return classMap[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+  return classMap[type] || 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
 }
 
 const formatTime = (date: Date | any) => {

@@ -84,7 +84,7 @@
               'bg-primary-50 dark:bg-primary-900/20': currentStore?.id === store.id
             }"
           >
-            <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center justify-between gap-3">
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-gray-900 dark:text-gray-100 break-words pr-2 flex items-center gap-2">
                   {{ store.name || 'Unnamed Store' }}
@@ -95,13 +95,10 @@
                     title="Active store"
                   ></span>
                 </p>
-                <p class="text-xs text-gray-600 dark:text-gray-400 break-words mt-0.5" v-if="store.description">
-                  {{ store.description }}
-                </p>
               </div>
               <svg
                 v-if="currentStore?.id === store.id"
-                class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5"
+                class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -178,7 +175,6 @@ const switchStore = async (storeId: string) => {
   
   try {
     switchingStore.value = true
-    toast.info('Switching store and loading data...')
     dropdownOpen.value = false
     
     // Set loading state on all stores to hide previous data
@@ -213,7 +209,7 @@ const switchStore = async (storeId: string) => {
     // This will clear old data and load new data
     await storesStore.setCurrentStore(storeId)
     
-    toast.success('Store switched successfully. All data loaded.')
+    toast.success(`Switched to ${storesStore.getStoreById(storeId)?.name || 'store'}`)
   } catch (err: any) {
     console.error('Error switching store:', err)
     toast.error(err.message || 'Failed to switch store')

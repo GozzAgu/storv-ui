@@ -1047,15 +1047,24 @@ watch(() => route.path, (path) => {
 
 const inventoryFolders = computed(() => {
   if (!inventoryStore.folders) return []
-  return inventoryStore.folders
+  // Filter to ensure only valid inventory folders are shown
+  return inventoryStore.folders.filter(folder => 
+    folder && 
+    folder.id && 
+    folder.name && 
+    typeof folder.name === 'string'
+  )
 })
 
 const recentFolders = computed(() => {
-  return [...inventoryFolders.value].sort((a, b) => {
-    const dateA = a.updatedAt instanceof Date ? a.updatedAt : (a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt))
-    const dateB = b.updatedAt instanceof Date ? b.updatedAt : (b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt))
-    return dateB.getTime() - dateA.getTime()
-  })
+  // Only show inventory folders, sorted by most recently updated
+  return [...inventoryFolders.value]
+    .filter(folder => folder && folder.id) // Additional safety check
+    .sort((a, b) => {
+      const dateA = a.updatedAt instanceof Date ? a.updatedAt : (a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt))
+      const dateB = b.updatedAt instanceof Date ? b.updatedAt : (b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt))
+      return dateB.getTime() - dateA.getTime()
+    })
 })
 
 // Current store
