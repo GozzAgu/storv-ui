@@ -5,7 +5,7 @@
     <!-- Welcome Header - Compact -->
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex-1">
-        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Welcome back, {{ userName }}! 👋</h1>
+        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight" data-tutorial="dashboard">Welcome back, {{ userName }}! 👋</h1>
         <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
       </div>
       <div class="flex items-center">
@@ -158,7 +158,7 @@
       <StatCard
         label="Orders Today"
         :value="todayReceiptsCount.toString()"
-        :subtext="`$${formatCurrency(todaySales)} in sales`"
+        :subtext="`${formatCurrency(todaySales)} in sales`"
         :subtext-class="'text-primary-600 dark:text-primary-400 text-xs font-medium'"
         :icon="ShoppingCartIcon"
         icon-bg-class="bg-primary-100 dark:bg-primary-900/30"
@@ -457,6 +457,7 @@ import {
   BuildingOfficeIcon,
   Cog6ToothIcon,
   ExclamationTriangleIcon,
+  ChartBarIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -467,6 +468,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
+import { usePreferences } from '~/composables/usePreferences'
 import type { Receipt } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 
@@ -477,29 +479,34 @@ definePageMeta({
 
 const tutorialSteps = [
   {
-    title: 'Welcome to Your Dashboard',
-    description: 'This is your main dashboard where you can see all key metrics, revenue, and activity at a glance.',
-    icon: HomeIcon
+    title: 'Welcome to Your Dashboard! 👋',
+    description: 'This is your command center. Here you can see your total revenue, active customers, inventory status, and recent transactions all in one place. The charts show your sales trends over time, helping you understand your business performance at a glance.',
+    icon: HomeIcon,
+    targetSelector: '[data-tutorial="dashboard"]'
   },
   {
     title: 'Manage Your Inventory',
-    description: 'Organize your products into folders and track stock levels. Click on Inventory in the sidebar to get started.',
-    icon: CubeIcon
+    description: 'Click "Inventory" in the sidebar to organize your products. Create folders (like "Electronics" or "Clothing") to categorize items. Add products to each folder with details like name, price, and quantity. You can track which items are in stock, low stock, or sold out.',
+    icon: CubeIcon,
+    targetSelector: '[data-tutorial="inventory"]'
   },
   {
-    title: 'Track Receipts & Returns',
-    description: 'Record sales receipts and handle returns efficiently. Access these features from the sidebar navigation.',
-    icon: ReceiptPercentIcon
+    title: 'Create and Track Receipts',
+    description: 'Click "Receipts" to record sales. When a customer makes a purchase, create a new receipt, add the items sold, and the system automatically tracks revenue and updates inventory. You can also view all past receipts, handle returns, and send receipts via email.',
+    icon: ReceiptPercentIcon,
+    targetSelector: '[data-tutorial="receipts"]'
   },
   {
-    title: 'Manage Customers & Departments',
-    description: 'Keep track of your customers and organize your team by departments.',
-    icon: UsersIcon
+    title: 'View Analytics & Reports',
+    description: 'Click "Analytics" to see detailed insights about your business. View sales trends, top-selling products, customer behavior, and inventory turnover. Export reports to PDF or Excel for your records or accounting needs.',
+    icon: ChartBarIcon,
+    targetSelector: '[data-tutorial="analytics"]'
   },
   {
-    title: 'Configure Settings',
-    description: 'Customize your store settings, preferences, and manage your account from the Settings page.',
-    icon: Cog6ToothIcon
+    title: 'Configure Your Settings',
+    description: 'Click "Settings" to customize your store preferences, manage departments, add staff members, and configure how your store operates. You can also update your profile and account information here.',
+    icon: Cog6ToothIcon,
+    targetSelector: '[data-tutorial="settings"]'
   }
 ]
 
@@ -537,7 +544,7 @@ const todaySales = computed(() => receiptsStore.todaySales)
 const monthSales = computed(() => receiptsStore.monthSales)
 const revenueChangeText = computed(() => {
   if (totalRevenue.value === 0) return 'No sales yet'
-  return `$${formatCurrency(monthSales.value)} this month`
+  return `${formatCurrency(monthSales.value)} this month`
 })
 const revenueChangeClass = computed(() => {
   return totalRevenue.value > 0 ? 'text-green-600 dark:text-green-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'
@@ -1091,10 +1098,11 @@ const chartOptions = computed(() => {
           fontSize: '12px'
         },
         formatter: (value: number) => {
+          const symbol = currencySymbol.value || '$'
           if (value >= 1000) {
-            return `$${(value / 1000).toFixed(1)}k`
+            return `${symbol}${(value / 1000).toFixed(1)}k`
           }
-          return `$${Math.round(value)}`
+          return `${symbol}${Math.round(value)}`
         }
       },
       title: {
@@ -1129,7 +1137,7 @@ const chartOptions = computed(() => {
     tooltip: {
       theme: isDark ? 'dark' : 'light',
       y: {
-        formatter: (value: number) => `$${formatCurrency(value)}`
+        formatter: (value: number) => formatCurrency(value)
       },
       x: {
         formatter: (value: string) => {
@@ -1231,7 +1239,7 @@ const pieChartOptions = computed(() => {
     tooltip: {
       theme: isDark ? 'dark' : 'light',
       y: {
-        formatter: (val: number) => `$${formatCurrency(val)}`
+        formatter: (val: number) => formatCurrency(val)
       }
     },
     theme: {
@@ -1249,21 +1257,19 @@ const pieChartOptions = computed(() => {
   }
 })
 
-// Utility functions
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value).replace('$', '')
-}
+// Get currency formatting from preferences
+const { formatCurrency: formatCurrencyFromPrefs, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
+
+// Use the formatCurrency from preferences (which already includes the symbol)
+const formatCurrency = formatCurrencyFromPrefs
 
 const formatCurrencyShort = (value: number) => {
+  const symbol = currencySymbol.value
   if (value >= 1000) {
-    return `$${(value / 1000).toFixed(1)}k`
+    return `${symbol}${(value / 1000).toFixed(1)}k`
   }
-  return `$${Math.round(value)}`
+  return `${symbol}${Math.round(value)}`
 }
 
 const getTimeAgo = (date: Date) => {

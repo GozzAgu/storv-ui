@@ -295,6 +295,7 @@ import {
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
+import { useUserStore } from '~/stores/user'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 import Card from '~/components/ui/Card.vue'
@@ -313,6 +314,7 @@ const toast = useToast()
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
+const userStore = useUserStore()
 
 // State
 const isLoading = ref(true)
@@ -479,6 +481,9 @@ const repeatPurchaseRate = computed(() => {
 })
 
 const lowStockItems = computed(() => {
+  // Get low stock threshold from user settings
+  const lowStockThreshold = userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
+  
   // First, filter out sold items (items with dateOut) and get available items
   const availableItems = inventoryItems.value.filter(item => {
     // Check if item is sold (has dateOut)
@@ -514,7 +519,6 @@ const lowStockItems = computed(() => {
       quantity = item.quantity || item.Quantity || 0
     }
     
-    const threshold = item.lowStockThreshold || 10
     const folderName = folder?.name || 'Unknown'
     
     if (groupedMap.has(key)) {
@@ -526,7 +530,7 @@ const lowStockItems = computed(() => {
         brand: brand || 'Unknown Brand',
         model: model || 'Unknown Model',
         totalQuantity: quantity,
-        threshold: threshold,
+        threshold: lowStockThreshold,
         folderName: folderName,
         itemIds: [item.id],
         folder: folder

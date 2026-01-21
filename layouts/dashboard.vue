@@ -165,6 +165,7 @@
             <NuxtLink
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
               :to="item.href"
+              :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[
                 'group relative flex items-center font-medium rounded-md transition-all duration-200',
                 sidebarCollapsed ? 'justify-center w-full py-2' : 'justify-start px-3 py-2',

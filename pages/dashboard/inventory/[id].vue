@@ -312,7 +312,8 @@
                   </div>
                 </div>
                 <div v-else>
-                  <div v-if="'type' in column && column.type === 'currency'" class="text-[11px]">
+                  <!-- Check if column is a price field (by key or type) -->
+                  <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[11px]">
                     <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                       <span class="font-semibold text-green-600 dark:text-green-400">
                         {{ formatCurrency(item.discountedPrice) }}
@@ -896,14 +897,15 @@ const columns = computed(() => {
       key: field.name,
       label: field.label || field.name,
       sortable: true,
-      type: field.type,
+      // Ensure price fields always have currency type
+      type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
     })))
   } else {
     // Fallback to default columns if no template
     templateColumns.push(
       { key: 'name', label: 'Item', sortable: true },
       { key: 'sku', label: 'SKU', sortable: true },
-      { key: 'price', label: 'Price', sortable: true }
+      { key: 'price', label: 'Price', sortable: true, type: 'currency' }
     )
   }
   

@@ -170,14 +170,6 @@
               </div>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
             </div>
-            
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1">
-                <CurrencyDollarIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-[10px] text-gray-600 dark:text-gray-400">Value</span>
-              </div>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(folder.totalValue) }}</span>
-            </div>
           </div>
 
           <!-- Low Stock Warning - Compact -->

@@ -4,7 +4,7 @@
       <!-- Progress Indicator -->
       <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
-          <h2 class="text-sm font-medium text-gray-600 dark:text-gray-400">Store Setup</h2>
+          <h2 class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
           <span class="text-sm font-medium text-primary-600 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -17,20 +17,78 @@
 
       <!-- Form Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 sm:p-10 border border-gray-200 dark:border-gray-700">
-        <!-- Step 1: Store Name -->
-        <div v-if="currentStep === 1" class="space-y-4 sm:space-y-5">
+        <!-- Step 1: Currency & Country Selection -->
+        <div v-if="currentStep === 1" class="space-y-6 sm:space-y-8">
           <div class="text-center mb-6 sm:mb-8">
             <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
-              <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+              <GlobeAltIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Welcome to Storvv!
             </h1>
             <p class="text-gray-600 dark:text-gray-400">
-              Let's set up your store. First, tell us your store name.
+              Let's set up your account. Choose your currency and country to get started.
             </p>
           </div>
 
+          <!-- Currency Selection -->
+          <div>
+            <label for="currency" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Select Currency <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="currency"
+              v-model="selectedCurrency"
+              required
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Choose a currency...</option>
+              <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
+                {{ currency.symbol }} {{ currency.name }} ({{ currency.code }})
+              </option>
+            </select>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              This currency will be used throughout your account for all transactions and reports.
+            </p>
+          </div>
+
+          <!-- Country Selection -->
+          <div>
+            <label for="country" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Select Country <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="country"
+              v-model="selectedCountry"
+              required
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Choose your country...</option>
+              <option v-for="region in regions" :key="region.code" :value="region.code">
+                {{ region.flag }} {{ region.name }}
+              </option>
+            </select>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              This helps us format dates, times, and numbers according to your location.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2: Store Information -->
+        <div v-if="currentStep === 2" class="space-y-4 sm:space-y-5">
+          <div class="text-center mb-6 sm:mb-8">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
+              <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+            </div>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Store Information
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+              Tell us about your store. This information will be used on receipts and reports.
+            </p>
+          </div>
+
+          <!-- Store Name -->
           <div>
             <label for="storeName" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Store Name <span class="text-red-500">*</span>
@@ -44,22 +102,8 @@
               placeholder="e.g., My Awesome Store"
             />
           </div>
-        </div>
 
-        <!-- Step 2: Store Details -->
-        <div v-if="currentStep === 2" class="space-y-4 sm:space-y-5">
-          <div class="text-center mb-6 sm:mb-8">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
-              <InformationCircleIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
-            </div>
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Store Details
-            </h1>
-            <p class="text-gray-600 dark:text-gray-400">
-              Add more information about your store (optional)
-            </p>
-          </div>
-
+          <!-- Store Address -->
           <div>
             <label for="storeAddress" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Store Address
@@ -73,6 +117,7 @@
             ></textarea>
           </div>
 
+          <!-- Store Phone -->
           <div>
             <label for="storePhone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Store Phone
@@ -86,6 +131,7 @@
             />
           </div>
 
+          <!-- Store Email -->
           <div>
             <label for="storeEmail" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
               Store Email
@@ -99,30 +145,16 @@
             />
           </div>
 
+          <!-- Store Description -->
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <label for="storeDescription" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Store Description
-              </label>
-              <button
-                type="button"
-                @click="generateAIDescription"
-                :disabled="isGeneratingDescription || !storeDetails.storeName"
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
-                <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ isGeneratingDescription ? 'Generating...' : 'AI Complete' }}
-              </button>
-            </div>
+            <label for="storeDescription" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Store Description
+            </label>
             <textarea
               id="storeDescription"
               v-model="storeDetails.storeDescription"
-              rows="2"
-              class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+              rows="3"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
@@ -147,7 +179,7 @@
 
           <button
             @click="nextStep"
-            :disabled="isLoading || (currentStep === 1 && !storeDetails.storeName)"
+            :disabled="isLoading || (currentStep === 1 && (!selectedCurrency || !selectedCountry)) || (currentStep === 2 && !storeDetails.storeName?.trim())"
             type="button"
             class="px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
           >
@@ -170,10 +202,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
-import { BuildingStorefrontIcon, InformationCircleIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/vue/24/outline'
+import { ref, onMounted, nextTick, computed } from 'vue'
+import { GlobeAltIcon, ArrowRightIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
+import { usePreferences, currencies, regions } from '~/composables/usePreferences'
 
 definePageMeta({
   layout: 'dashboard',
@@ -181,13 +214,15 @@ definePageMeta({
 })
 
 const { currentUser, loading: authLoading } = useFirebaseAuth()
-const { updateStoreDetails, getUserDocument } = useUser()
+const { getUserDocument, updateUserDocument, updateStoreDetails } = useUser()
+const { updatePreferences } = usePreferences()
 
 const currentStep = ref(1)
 const totalSteps = 2
 const isLoading = ref(false)
 const errorMessage = ref('')
-const isGeneratingDescription = ref(false)
+const selectedCurrency = ref('')
+const selectedCountry = ref('')
 
 const storeDetails = ref<StoreDetails>({
   storeName: '',
@@ -197,38 +232,11 @@ const storeDetails = ref<StoreDetails>({
   storeDescription: ''
 })
 
-const generateAIDescription = async () => {
-  if (!storeDetails.value.storeName?.trim()) {
-    errorMessage.value = 'Please enter a store name first'
-    return
-  }
-
-  isGeneratingDescription.value = true
-  errorMessage.value = ''
-
-  try {
-    const response = await $fetch<{ success: boolean; description?: string; error?: string }>('/api/ai/generate-store-description', {
-      method: 'POST',
-      body: {
-        storeName: storeDetails.value.storeName.trim(),
-        storeAddress: storeDetails.value.storeAddress?.trim() || '',
-        storeType: 'general'
-      }
-    })
-
-    if (response.success && response.description) {
-      storeDetails.value.storeDescription = response.description
-      errorMessage.value = ''
-    } else {
-      errorMessage.value = response.error || 'Failed to generate description. Please try again.'
-    }
-  } catch (err: any) {
-    console.error('AI generation error:', err)
-    errorMessage.value = err.message || 'Failed to generate description. Please try again.'
-  } finally {
-    isGeneratingDescription.value = false
-  }
-}
+// Get currency symbol from selected currency
+const selectedCurrencySymbol = computed(() => {
+  const currency = currencies.find(c => c.code === selectedCurrency.value)
+  return currency?.symbol || '$'
+})
 
 onMounted(async () => {
   // Redirect if not authenticated
@@ -256,14 +264,14 @@ const previousStep = () => {
 
 const nextStep = async () => {
   if (currentStep.value === 1) {
-    // Validate store name
-    if (!storeDetails.value.storeName?.trim()) {
-      errorMessage.value = 'Store name is required'
+    // Validate currency and country
+    if (!selectedCurrency.value || !selectedCountry.value) {
+      errorMessage.value = 'Please select both currency and country to continue'
       return
     }
     currentStep.value++
   } else if (currentStep.value === totalSteps) {
-    // Save store details and complete onboarding
+    // Complete onboarding
     await completeOnboarding()
   }
 }
@@ -274,17 +282,44 @@ const completeOnboarding = async () => {
     return
   }
 
+  // Validate store name
+  if (!storeDetails.value.storeName?.trim()) {
+    errorMessage.value = 'Store name is required'
+    return
+  }
+
   isLoading.value = true
   errorMessage.value = ''
 
   try {
+    // Get the selected currency details
+    const currency = currencies.find(c => c.code === selectedCurrency.value)
+    const region = regions.find(r => r.code === selectedCountry.value)
+
+    if (!currency || !region) {
+      throw new Error('Invalid currency or country selection')
+    }
+
+    // Save preferences to user account
+    await updatePreferences({
+      currency: selectedCurrency.value,
+      currencySymbol: currency.symbol,
+      region: selectedCountry.value,
+      baseCurrency: selectedCurrency.value, // Set as base currency on first setup
+      language: 'en', // Default language
+      timezone: 'UTC', // Will be updated based on region if needed
+      dateFormat: selectedCountry.value === 'US' ? 'MM/DD/YYYY' : 'DD/MM/YYYY',
+      timeFormat: '12h'
+    })
+
+    // Save store details
     await updateStoreDetails(currentUser.value.uid, storeDetails.value)
     
     // Redirect to dashboard (tutorial will start there)
     await navigateTo('/dashboard')
   } catch (error: any) {
     console.error('Onboarding error:', error)
-    errorMessage.value = error.message || 'Failed to save store details. Please try again.'
+    errorMessage.value = error.message || 'Failed to save information. Please try again.'
   } finally {
     isLoading.value = false
   }

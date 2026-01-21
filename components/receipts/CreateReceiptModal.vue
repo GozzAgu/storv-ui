@@ -368,7 +368,7 @@
                     <option value="Bank Transfer">Bank Transfer</option>
                   </select>
                   <div class="relative w-28">
-                    <span class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
+                    <span class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                     <input
                       v-model.number="payment.amount"
                       type="number"
@@ -400,7 +400,7 @@
                   <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Total:</span>
                   <div class="text-right">
                     <span class="text-xs font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                      ${{ formatCurrency(splitPaymentsTotal) }} / ${{ formatCurrency(receiptTotal) }}
+                      {{ formatCurrency(splitPaymentsTotal) }} / {{ formatCurrency(receiptTotal) }}
                     </span>
                     <p v-if="splitPaymentsTotal !== receiptTotal" class="text-[10px] text-red-600 dark:text-red-400 mt-0.5">
                       Amount must equal total
@@ -684,7 +684,8 @@ const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)

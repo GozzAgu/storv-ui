@@ -101,14 +101,14 @@
             <div class="flex items-center gap-1.5 sm:gap-2">
               <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Sales:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(totalSales) }}</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalSales) }}</span>
             </div>
             <div class="hidden sm:flex items-center gap-2">
               <CalendarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400 stroke-1" stroke-width="1.5" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
-                <span v-else>${{ formatCurrency(todaySales) }}</span>
+                <span v-else>{{ formatCurrency(todaySales) }}</span>
               </span>
             </div>
             <div class="hidden lg:flex items-center gap-2">
@@ -116,7 +116,7 @@
               <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
-                <span v-else>${{ formatCurrency(monthSales) }}</span>
+                <span v-else>{{ formatCurrency(monthSales) }}</span>
               </span>
             </div>
           </div>
@@ -434,7 +434,7 @@
               </td>
               <td class="px-2 py-1.5 whitespace-nowrap">
                 <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
-                  ${{ formatCurrency(receipt.total) }}
+                  {{ formatCurrency(receipt.total) }}
                 </span>
               </td>
               <td class="px-2 py-1.5 whitespace-nowrap">
@@ -606,13 +606,13 @@
               <div class="flex items-center gap-1.5">
                 <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
                 <span class="text-[10px] text-gray-600 dark:text-gray-400">Revenue:</span>
-                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customersTotalRevenue) }}</span>
+                <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customersTotalRevenue) }}</span>
               </div>
               <div class="hidden sm:flex items-center gap-1.5">
                 <ChartBarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 <span class="text-[10px] text-gray-600 dark:text-gray-400">Avg. Order:</span>
                 <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                  ${{ formatCurrency(customersAverageOrderValue) }}
+                  {{ formatCurrency(customersAverageOrderValue) }}
                 </span>
               </div>
             </div>
@@ -704,7 +704,7 @@
                     <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">{{ customer.receipts.length }}</span>
                   </td>
                   <td class="px-2 py-1.5">
-                    <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">${{ formatCurrency(customer.totalSpent) }}</span>
+                    <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
                   <td class="px-2 py-1.5">
                     <span class="text-[11px] text-gray-600 dark:text-gray-400">{{ formatDate(customer.lastOrderDate) }}</span>
@@ -740,7 +740,7 @@
                             </div>
                             <div class="text-right">
                               <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
-                                ${{ formatCurrency(receipt.total) }}
+                                {{ formatCurrency(receipt.total) }}
                               </p>
                               <span
                                 :class="[
@@ -765,7 +765,7 @@
                               <div class="flex-1">
                                 <p class="text-[11px] text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
                                 <p class="text-[9px] text-gray-500 dark:text-gray-400">
-                                  Qty: {{ item.quantity }} • ${{ formatCurrency(item.price) }}
+                                  Qty: {{ item.quantity }} • {{ formatCurrency(item.price) }}
                                   <span v-if="item.hasDiscount" class="text-green-600 dark:text-green-400">
                                     ({{ item.discountPercentage }}% off)
                                   </span>
@@ -773,7 +773,7 @@
                               </div>
                               <div class="text-right">
                                 <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">
-                                  ${{ formatCurrency(item.price * item.quantity) }}
+                                  {{ formatCurrency(item.price * item.quantity) }}
                                 </p>
                               </div>
                             </div>
@@ -880,6 +880,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useStaffStore } from '~/stores/staff'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { useCopy } from '~/composables/useCopy'
+import { usePreferences } from '~/composables/usePreferences'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1394,12 +1395,8 @@ const isColumnSortable = (key: string) => {
   return sortableColumns.some(col => col.key === key)
 }
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
+// Use formatCurrency from preferences (which includes the correct currency symbol)
+const { formatCurrency } = usePreferences()
 
 const formatDate = (date: string | Date) => {
   const dateObj = date instanceof Date ? date : new Date(date)

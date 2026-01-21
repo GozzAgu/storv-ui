@@ -592,6 +592,7 @@ import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
+import { useInventoryStore } from '~/stores/inventory'
 import { useToast } from '~/composables/useToast'
 import Button from '~/components/ui/Button.vue'
 import Card from '~/components/ui/Card.vue'
@@ -626,6 +627,7 @@ const { getUserDocument, updateStoreDetails } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
+const inventoryStore = useInventoryStore()
 const toast = useToast()
 
 // Check if user is super admin (only super admins can edit settings)
@@ -1018,6 +1020,23 @@ const saveInventorySettings = async () => {
       defaultCategory: inventorySettings.defaultCategory,
     },
   })
+  
+  // Refresh user data to get updated settings
+  if (currentUser.value) {
+    await userStore.fetchUserData(currentUser.value.uid)
+  }
+  
+  // Update low stock counts for all folders with the new threshold
+  try {
+    const folders = inventoryStore.folders
+    for (const folder of folders) {
+      await inventoryStore.updateLowStockCount(folder.id)
+    }
+    toast.success('Low stock counts updated with new threshold!')
+  } catch (error: any) {
+    console.error('Error updating low stock counts:', error)
+    // Don't show error to user, just log it - the threshold is saved anyway
+  }
 }
 
 // Save receipt settings
