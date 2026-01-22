@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-3 pb-24 sm:pb-20">
+  <div class="space-y-3 pb-24 sm:pb-20 overflow-x-hidden">
     <!-- Enhanced Header - Compact -->
     <div class="flex items-start justify-between gap-2">
       <div class="flex items-start gap-2 flex-1 min-w-0">
@@ -438,29 +438,66 @@
                 />
               </td>
               <td v-if="canManageInventoryItems" class="px-4 py-3">
-                <div class="flex items-center justify-end gap-3" @click.stop>
+                <!-- Desktop: Show all action buttons -->
+                <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
                     @click="handleEditItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors',
+                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                   >
-                    <PencilSquareIcon class="w-4 h-4" />
+                    <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors',
+                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
                   >
-                    <TrashIcon class="w-4 h-4" />
+                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
+                </div>
+                <!-- Mobile: Show 3-dot menu -->
+                <div class="sm:hidden relative" @click.stop>
+                  <button
+                    @click="toggleItemMenu(item.id)"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
+                      isItemSold(item) && 'cursor-not-allowed opacity-40'
+                    ]"
+                    title="Actions"
+                  >
+                    <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                  </button>
+                  <!-- Dropdown Menu -->
+                  <div
+                    v-if="openItemMenuId === item.id"
+                    class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                  >
+                    <button
+                      @click="handleEditItem(item); openItemMenuId = null"
+                      :disabled="isItemSold(item)"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
+                    >
+                      <PencilSquareIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      @click="handleDeleteItem(item); openItemMenuId = null"
+                      :disabled="isItemSold(item)"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
+                    >
+                      <TrashIcon class="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -821,6 +858,7 @@ import {
   TagIcon,
   XMarkIcon,
   ArrowsPointingOutIcon,
+  EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -830,6 +868,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
+import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
 import { usePreferences } from '~/composables/usePreferences'
@@ -852,6 +891,7 @@ import type { InventoryItem } from '~/stores/inventory'
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
+const storesStore = useStoresStore()
 const { canManage, canManageInventoryItems } = usePermissions()
 const toast = useToast()
 const { formatCurrency } = usePreferences()
@@ -930,6 +970,11 @@ const isExporting = ref(false)
 
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
 const isFullscreen = ref(false)
+const openItemMenuId = ref<string | null>(null)
+
+const toggleItemMenu = (itemId: string) => {
+  openItemMenuId.value = openItemMenuId.value === itemId ? null : itemId
+}
 
 // Sync sortBy dropdown with currentSort
 watch(() => currentSort.value.key, (newKey) => {
@@ -938,10 +983,13 @@ watch(() => currentSort.value.key, (newKey) => {
   }
 }, { immediate: true })
 
-// Handle ESC key to exit fullscreen
+// Handle ESC key to exit fullscreen and close menus
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && isFullscreen.value) {
-    isFullscreen.value = false
+  if (e.key === 'Escape') {
+    if (isFullscreen.value) {
+      isFullscreen.value = false
+    }
+    openItemMenuId.value = null
   }
 }
 
@@ -2263,6 +2311,12 @@ onMounted(async () => {
   // Add keyboard listener for ESC key
   if (import.meta.client) {
     window.addEventListener('keydown', handleKeyDown)
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.relative')) {
+        openItemMenuId.value = null
+      }
+    })
   }
 
   // Wait for auth to be ready
@@ -2322,6 +2376,16 @@ watch(() => route.params.id, async (newId, oldId) => {
     if (authStore.currentUser) {
       await loadFolderData()
     }
+  }
+}, { immediate: false })
+
+// Watch for store changes and redirect to folders list
+watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
+  if (newStoreId && newStoreId !== oldStoreId && folderId.value && authStore.currentUser) {
+    // Store changed - folders are store-specific, so redirect to folders list
+    // This prevents showing "folder not found" errors when switching stores
+    console.log('[InventoryItems] Store changed, redirecting to folders list...', { oldStoreId, newStoreId })
+    navigateTo('/dashboard/inventory')
   }
 }, { immediate: false })
 

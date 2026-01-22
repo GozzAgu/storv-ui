@@ -1,6 +1,6 @@
 <template>
   <ClientOnly>
-    <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full">
+    <div class="space-y-4 sm:space-y-6 pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
       <!-- Loading State -->
       <template v-if="isInitialLoading">
 
@@ -152,8 +152,8 @@
         <!-- Header with Stats and Filters (hidden in fullscreen) -->
         <div v-if="!receiptsStore.loading && !isReceiptsFullscreen" class="border-b border-gray-200 dark:border-gray-700">
         <!-- Stats and Filters - Side by Side -->
-        <div class="px-4 sm:px-6 py-3 bg-gray-50 dark:bg-gray-800/50">
-          <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
+        <div class="px-4 sm:px-6 py-3 bg-gray-50 dark:bg-gray-800/50 overflow-x-hidden">
+          <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6 min-w-0">
             <!-- Stats -->
             <div class="flex items-center gap-1.5 sm:gap-2">
               <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 stroke-1" stroke-width="1.5" />
@@ -189,7 +189,7 @@
             <div class="flex-1"></div>
             
             <!-- Search and Filters -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-shrink-0">
               <!-- Search Input -->
               <div class="relative">
                 <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
@@ -532,30 +532,70 @@
                 </div>
               </td>
               <td class="px-4 py-3">
-                <div class="flex items-center justify-end gap-3" @click.stop>
+                <!-- Desktop: Show all action buttons -->
+                <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
                     @click="handlePrintReceipt(receipt)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
                     title="View/Print"
                   >
-                    <PrinterIcon class="w-4 h-4" />
+                    <PrinterIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     v-if="receipt.status === 'completed' && canEditReceipts"
                     @click="handleRefundReceipt(receipt)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors flex-shrink-0"
                     title="Refund"
                   >
-                    <ArrowPathIcon class="w-4 h-4" />
+                    <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     v-if="canDeleteReceipts"
                     @click="handleDeleteReceipt(receipt)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0"
                     title="Delete"
                   >
-                    <TrashIcon class="w-4 h-4" />
+                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
+                </div>
+                <!-- Mobile: Show 3-dot menu -->
+                <div class="sm:hidden relative" @click.stop>
+                  <button
+                    @click="toggleReceiptMenu(receipt.id)"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
+                    title="Actions"
+                  >
+                    <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                  </button>
+                  <!-- Dropdown Menu -->
+                  <div
+                    v-if="openReceiptMenuId === receipt.id"
+                    class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                  >
+                    <button
+                      @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="View/Print"
+                    >
+                      <PrinterIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      v-if="receipt.status === 'completed' && canEditReceipts"
+                      @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                      title="Refund"
+                    >
+                      <ArrowPathIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      v-if="canDeleteReceipts"
+                      @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      title="Delete"
+                    >
+                      <TrashIcon class="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -779,14 +819,38 @@
                     <span class="text-[11px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
                   <td class="px-4 py-3">
-                    <div class="flex items-center justify-end gap-3" @click.stop>
+                    <!-- Desktop: Show action button -->
+                    <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                       <button
                         @click="viewCustomerReceipts(customer)"
-                        class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                        class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
                         title="View Receipts"
                       >
-                        <PrinterIcon class="w-4 h-4" />
+                        <PrinterIcon class="w-4 h-4 flex-shrink-0" />
                       </button>
+                    </div>
+                    <!-- Mobile: Show 3-dot menu -->
+                    <div class="sm:hidden relative" @click.stop>
+                      <button
+                        @click="toggleCustomerMenu(customer.id)"
+                        class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
+                        title="Actions"
+                      >
+                        <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                      </button>
+                      <!-- Dropdown Menu -->
+                      <div
+                        v-if="openCustomerMenuId === customer.id"
+                        class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                      >
+                        <button
+                          @click="viewCustomerReceipts(customer); openCustomerMenuId = null"
+                          class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          title="View Receipts"
+                        >
+                          <PrinterIcon class="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -931,6 +995,7 @@ import {
   BarsArrowUpIcon,
   ClipboardDocumentIcon,
   ArrowsPointingOutIcon,
+  EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -992,8 +1057,18 @@ const router = useRouter()
 const activeTab = ref<'receipts' | 'customers'>((route.query.tab as any) || 'receipts')
 const isReceiptsFullscreen = ref(false)
 const isCustomersFullscreen = ref(false)
+const openReceiptMenuId = ref<string | null>(null)
+const openCustomerMenuId = ref<string | null>(null)
 
-// Handle ESC key to exit fullscreen
+const toggleReceiptMenu = (receiptId: string) => {
+  openReceiptMenuId.value = openReceiptMenuId.value === receiptId ? null : receiptId
+}
+
+const toggleCustomerMenu = (customerId: string) => {
+  openCustomerMenuId.value = openCustomerMenuId.value === customerId ? null : customerId
+}
+
+// Handle ESC key to exit fullscreen and close menus
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     if (isReceiptsFullscreen.value) {
@@ -1002,8 +1077,21 @@ const handleKeyDown = (e: KeyboardEvent) => {
     if (isCustomersFullscreen.value) {
       isCustomersFullscreen.value = false
     }
+    openReceiptMenuId.value = null
   }
 }
+
+// Close menus when clicking outside
+onMounted(() => {
+  if (import.meta.client) {
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.relative')) {
+        openReceiptMenuId.value = null
+        openCustomerMenuId.value = null
+      }
+    })
+  }
+})
 
 // Watch fullscreen state to lock/unlock body scroll
 watch([isReceiptsFullscreen, isCustomersFullscreen], ([receiptsFullscreen, customersFullscreen]) => {

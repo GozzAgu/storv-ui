@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-3 pb-24 sm:pb-20 min-h-screen w-full">
+  <div class="space-y-3 pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
     <!-- Header with Back Button - Compact -->
     <div class="flex items-center gap-2">
       <button
@@ -274,28 +274,66 @@
                 </span>
               </td>
               <td v-if="canManageDepartments" class="px-4 py-3">
-                <div class="flex items-center justify-end gap-3" @click.stop>
+                <!-- Desktop: Show all action buttons -->
+                <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
                     @click="handleToggleStaffRole(member)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0"
                     :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
                   >
-                    <ArrowPathIcon class="w-4 h-4" />
+                    <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleEditStaff(member)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
                     title="Edit"
                   >
-                    <PencilSquareIcon class="w-4 h-4" />
+                    <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteStaff(member)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0"
                     title="Delete"
                   >
-                    <TrashIcon class="w-4 h-4" />
+                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
                   </button>
+                </div>
+                <!-- Mobile: Show 3-dot menu -->
+                <div class="sm:hidden relative" @click.stop>
+                  <button
+                    @click="toggleStaffMenu(member.id)"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
+                    title="Actions"
+                  >
+                    <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                  </button>
+                  <!-- Dropdown Menu -->
+                  <div
+                    v-if="openStaffMenuId === member.id"
+                    class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                  >
+                    <button
+                      @click="handleToggleStaffRole(member); openStaffMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
+                    >
+                      <ArrowPathIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      @click="handleEditStaff(member); openStaffMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="Edit"
+                    >
+                      <PencilSquareIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      @click="handleDeleteStaff(member); openStaffMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      title="Delete"
+                    >
+                      <TrashIcon class="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -366,6 +404,7 @@ import {
   ArrowPathIcon,
   ArrowsPointingOutIcon,
   XMarkIcon,
+  EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -421,11 +460,19 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const sidebarCollapsed = ref(false)
 const isStaffFullscreen = ref(false)
+const openStaffMenuId = ref<string | null>(null)
 
-// Handle ESC key to exit fullscreen
+const toggleStaffMenu = (staffId: string) => {
+  openStaffMenuId.value = openStaffMenuId.value === staffId ? null : staffId
+}
+
+// Handle ESC key to exit fullscreen and close menus
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && isStaffFullscreen.value) {
-    isStaffFullscreen.value = false
+  if (e.key === 'Escape') {
+    if (isStaffFullscreen.value) {
+      isStaffFullscreen.value = false
+    }
+    openStaffMenuId.value = null
   }
 }
 
@@ -766,6 +813,12 @@ onMounted(async () => {
   // Add keyboard listener for ESC key
   if (import.meta.client) {
     window.addEventListener('keydown', handleKeyDown)
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.relative')) {
+        openStaffMenuId.value = null
+      }
+    })
   }
 
   if (import.meta.server) return
