@@ -16,6 +16,10 @@
               <span>Features</span>
               <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
+            <a href="#gallery" @click.prevent="scrollToSection('gallery')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 hover:scale-105 relative group">
+              <span>Gallery</span>
+              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
+            </a>
             <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 hover:scale-105 relative group">
               <span>About</span>
               <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
@@ -56,6 +60,13 @@
               >
               Features
             </a>
+              <a 
+                href="#gallery" 
+                @click.prevent="scrollToSection('gallery'); mobileMenuOpen = false" 
+                class="block px-3 py-3 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-200"
+              >
+                Gallery
+              </a>
               <a 
                 href="#about" 
                 @click.prevent="scrollToSection('about'); mobileMenuOpen = false" 
@@ -1133,6 +1144,380 @@
       </div>
     </section>
 
+    <!-- Gallery Section -->
+    <section id="gallery" data-section-id="gallery" class="scroll-animate scroll-animate-up py-24 sm:py-32 lg:py-40 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-16">
+          <h2 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
+            See Storvv in Action
+          </h2>
+          <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Explore how Storvv simplifies inventory management, sales processing, and multi-store operations
+          </p>
+        </div>
+
+        <!-- Carousel Container -->
+        <div class="relative">
+          <!-- Navigation Buttons -->
+          <button
+            @click="previousSlide"
+            class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
+            aria-label="Previous slide"
+          >
+            <ChevronLeftIcon class="w-6 h-6 text-gray-700" />
+          </button>
+          
+          <button
+            @click="nextSlide"
+            class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center hover:bg-gray-50 transition-all duration-200 hover:scale-110"
+            aria-label="Next slide"
+          >
+            <ChevronRightIcon class="w-6 h-6 text-gray-700" />
+          </button>
+
+          <!-- Carousel -->
+          <div class="overflow-hidden px-16">
+            <div
+              class="flex transition-transform duration-500 ease-in-out"
+              :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+            >
+              <!-- Welcome Screen -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/welcome.png" 
+                    alt="Welcome Screen" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/welcome.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Getting Started</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Welcome to Storvv</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Start your journey with a warm welcome. Storvv greets new users with an intuitive welcome screen that guides you through the initial setup process.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Intuitive welcome interface</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Quick start guide and tutorials</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Step-by-step onboarding process</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Onboarding Step 1 -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/onboarding1.png" 
+                    alt="Onboarding Step 1" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/onboarding1.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Initial Setup</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Configure Your Preferences</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Set up your account with ease. Choose your preferred currency, select your country, and configure regional settings for a personalized experience.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Currency selection for accurate pricing</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Regional settings and timezone configuration</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Personalized experience from day one</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Onboarding Step 2 -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/onboarding2.png" 
+                    alt="Onboarding Step 2" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/onboarding2.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Store Setup</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Create Your First Branch</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Complete your setup by creating your first branch. Enter your branch name, address, contact information, and business details for a personalized experience.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Branch information and contact details</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Business type and category selection</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Ready to start managing inventory</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inventory Folder Creation -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/createInventoryFolder.png" 
+                    alt="Create Inventory Folder" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/createInventoryFolder.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Inventory Management</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Organize with Custom Folders</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Create inventory folders tailored to your product categories. Design custom templates with flexible field types to organize your inventory exactly how your business needs it.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Custom field templates for any product type</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Bulk import from Excel or add items individually</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Department-level access control</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inventory Item Creation -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/createInventoryItem.png" 
+                    alt="Create Inventory Item" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/createInventoryItem.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Item Management</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Add Items with Ease</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Quickly add inventory items with a clean, intuitive form. Support for serial numbers, batch tracking, and custom fields all in one place.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Serial number tracking for individual items</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Real-time stock level monitoring</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Low stock alerts and notifications</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Receipt Creation - Step 1 -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/createReceipt1.png" 
+                    alt="Create Receipt - Step 1" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.src='/createReceipt1.png'; this.onerror=null;"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Sales Processing</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Start Your Sale</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Begin creating a receipt by selecting items from your inventory. Search and add products quickly with an intuitive interface and real-time price updates.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Quick item search and selection</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Real-time price calculations</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Automatic inventory deduction</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Receipt Creation - Step 2 -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/createReceipt2.png" 
+                    alt="Create Receipt - Step 2" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.src='/createReceipt2.png'; this.onerror=null;"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Payment & Discounts</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Apply Discounts & Process Payment</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Apply discounts to individual items or the entire receipt. Choose from multiple payment methods and let the system automatically calculate totals and change.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Item-level and receipt-level discounts</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Multiple payment methods support</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Automatic change calculation</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Receipt Creation - Step 3 -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/createReceipt3.png" 
+                    alt="Create Receipt - Step 3" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.src='/createReceipt3.png'; this.onerror=null;"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Receipt Management</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Complete & Print Receipt</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Finalize your sale and generate a professional receipt. View the complete transaction summary, customer information, and print or email instantly.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Professional receipt formatting</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Print or email receipts instantly</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Automatic customer database creation</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Multi-Store Sync -->
+              <div class="min-w-full flex-shrink-0 px-4">
+                <div class="relative mb-12">
+                  <img 
+                    src="/multistoresync.png" 
+                    alt="Multi-Store Sync" 
+                    class="w-full h-auto object-contain"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.src='/multistoresync.png';"
+                  />
+                </div>
+                <div class="max-w-3xl mx-auto text-center space-y-6">
+                  <div class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Multi-Store Operations</div>
+                  <h3 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">Seamless Store Transfers</h3>
+                  <p class="text-lg text-gray-600 leading-relaxed max-w-2xl mx-auto">
+                    Transfer inventory between stores effortlessly. Select items, choose destination, and track transfers with complete audit trails across your network.
+                  </p>
+                  <div class="space-y-3 pt-2 flex flex-col items-center">
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Transfer items between branches instantly</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Complete transfer history and audit trails</span>
+                    </div>
+                    <div class="flex items-start gap-3">
+                      <CheckIcon class="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                      <span class="text-gray-700">Real-time inventory synchronization</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide Indicators -->
+          <div class="flex justify-center items-center gap-2 mt-12">
+            <button
+              v-for="(slide, index) in 9"
+              :key="index"
+              @click="goToSlide(index)"
+              :class="[
+                'w-2 h-2 rounded-full transition-all duration-300',
+                currentSlide === index ? 'bg-primary-600 w-8' : 'bg-gray-300 hover:bg-gray-400'
+              ]"
+              :aria-label="`Go to slide ${index + 1}`"
+            />
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="mt-24 text-center">
+          <NuxtLink
+            to="/signin"
+            class="inline-flex items-center gap-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-2xl text-lg"
+          >
+            Get Started Today
+            <ArrowRightIcon class="w-6 h-6" />
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
     <!-- Contact Section -->
     <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1385,6 +1770,7 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
 
 const { actualTheme } = useTheme()
@@ -1411,6 +1797,29 @@ const toggleFaq = (index: number) => {
 
 // Feature carousel state
 const currentFeatureIndex = ref(0)
+const currentSlide = ref(0)
+const totalSlides = 9
+
+const nextSlide = () => {
+  if (currentSlide.value < totalSlides - 1) {
+    currentSlide.value++
+  } else {
+    currentSlide.value = 0 // Loop back to start
+  }
+}
+
+const previousSlide = () => {
+  if (currentSlide.value > 0) {
+    currentSlide.value--
+  } else {
+    currentSlide.value = totalSlides - 1 // Loop to end
+  }
+}
+
+const goToSlide = (index: number) => {
+  currentSlide.value = index
+}
+
 const visibleFeatures = computed(() => {
   if (typeof window === 'undefined') return 3
   return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
