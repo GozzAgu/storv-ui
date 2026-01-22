@@ -202,60 +202,47 @@
       </div>
 
       <div v-else class="overflow-x-auto mb-4 sm:mb-6">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
+        <table class="min-w-full">
+          <thead class="border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Name
               </th>
-              <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden sm:table-cell">
+              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden sm:table-cell">
                 Position
               </th>
-              <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Role
               </th>
-              <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden md:table-cell">
+              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden md:table-cell">
                 Email
               </th>
-              <th class="px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 Status
               </th>
-              <th v-if="canManageDepartments" class="px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[80px]">
-                Actions
+              <th v-if="canManageDepartments" class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Action
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
             <tr
               v-for="member in paginatedStaff"
               :key="member.id"
               class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
             >
-              <td class="px-2 py-1.5 whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
-                    {{ member.firstName.charAt(0).toUpperCase() }}{{ member.lastName.charAt(0).toUpperCase() }}
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {{ member.firstName }} {{ member.lastName }}
-                    </div>
-                    <div class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                      {{ member.phone || 'No phone' }}
-                    </div>
-                    <div class="text-[10px] text-gray-500 dark:text-gray-400 truncate sm:hidden mt-0.5">
-                      {{ member.position }}
-                    </div>
-                  </div>
-                </div>
+              <td class="px-4 py-3">
+                <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
+                  {{ member.firstName }} {{ member.lastName }}
+                </span>
               </td>
-              <td class="px-2 py-1.5 whitespace-nowrap hidden sm:table-cell">
-                <span class="text-xs text-gray-900 dark:text-gray-100">
+              <td class="px-4 py-3 hidden sm:table-cell">
+                <span class="text-[11px] text-gray-600 dark:text-gray-300">
                   {{ member.position }}
                 </span>
               </td>
-              <td class="px-2 py-1.5 whitespace-nowrap">
-                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize"
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium capitalize"
                   :class="[
                     member.role === 'manager'
                       ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300'
@@ -267,15 +254,15 @@
                   {{ member.role }}
                 </span>
               </td>
-              <td class="px-2 py-1.5 whitespace-nowrap hidden md:table-cell">
-                <div class="text-xs text-gray-900 dark:text-gray-100 truncate max-w-[150px]">
+              <td class="px-4 py-3 hidden md:table-cell">
+                <div class="text-[11px] text-gray-600 dark:text-gray-300 truncate max-w-[150px]">
                   {{ member.email }}
                 </div>
               </td>
-              <td class="px-2 py-1.5 whitespace-nowrap">
+              <td class="px-4 py-3">
                 <span
                   :class="[
-                    'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium capitalize',
+                    'inline-flex items-center px-2 py-0.5 text-[10px] font-medium capitalize',
                     member.status === 'active'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : member.status === 'on_leave'
@@ -286,31 +273,28 @@
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>
               </td>
-              <td class="px-2 py-1.5 whitespace-nowrap text-right min-w-[80px]">
-                <div class="flex items-center justify-end gap-1 flex-shrink-0">
+              <td v-if="canManageDepartments" class="px-4 py-3">
+                <div class="flex items-center justify-end gap-3" @click.stop>
                   <button
-                    v-if="canManageDepartments"
                     @click="handleToggleStaffRole(member)"
-                    class="flex-shrink-0 p-1 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
                   >
-                    <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
+                    <ArrowPathIcon class="w-4 h-4" />
                   </button>
                   <button
-                    v-if="canManageDepartments"
                     @click="handleEditStaff(member)"
-                    class="flex-shrink-0 p-1 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                     title="Edit"
                   >
-                    <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
+                    <PencilSquareIcon class="w-4 h-4" />
                   </button>
                   <button
-                    v-if="canManageDepartments"
                     @click="handleDeleteStaff(member)"
-                    class="flex-shrink-0 p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                     title="Delete"
                   >
-                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
+                    <TrashIcon class="w-4 h-4" />
                   </button>
                 </div>
               </td>

@@ -11,12 +11,12 @@
       <div class="flex flex-col gap-3">
         <div class="flex items-center gap-3">
           <div class="flex-1 relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search folders..."
-              class="w-full pl-10 pr-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              class="w-full pl-8 pr-4 py-2.5 sm:py-2 text-[10px] border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
         </div>
@@ -32,50 +32,12 @@
           </select>
           <select
             v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-[10px] border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="name">Sort by Name</option>
-            <option value="items">Sort by Items</option>
-            <option value="date">Sort by Date</option>
+            <option value="name">Name</option>
+            <option value="items">Items</option>
+            <option value="date">Date</option>
           </select>
-        </div>
-        <!-- View Mode Toggle - Mobile -->
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-gray-600 dark:text-gray-400">View:</span>
-          <div class="flex items-center gap-1 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
-            <button
-              @click="viewMode = 'grid'"
-              :class="[
-                'px-3 py-2 text-xs transition-colors',
-                viewMode === 'grid'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              ]"
-            >
-              <Squares2X2Icon class="w-4 h-4" />
-            </button>
-            <button
-              @click="viewMode = 'table'"
-              :class="[
-                'px-3 py-2 text-xs transition-colors',
-                viewMode === 'table'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              ]"
-            >
-              <TableCellsIcon class="w-4 h-4" />
-            </button>
-          </div>
-          <!-- Fullscreen Toggle - Mobile (only show in table view) -->
-          <button
-            v-if="viewMode === 'table'"
-            @click="isFullscreen = !isFullscreen"
-            class="px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-          >
-            <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-4 h-4" />
-            <XMarkIcon v-else class="w-4 h-4" />
-          </button>
         </div>
       </div>
     </Card>
@@ -84,21 +46,21 @@
     <Card v-if="!inventoryStore.loading" padding="sm" class="hidden lg:block mb-3 p-2.5">
       <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <span class="text-xs font-medium text-gray-600 dark:text-gray-400">Folders: <span class="font-semibold text-gray-900 dark:text-gray-100">{{ filteredFolders.length }}</span></span>
+          <span class="text-xs text-gray-600 dark:text-gray-400">Folders: <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ filteredFolders.length }}</span></span>
         </div>
         <div class="flex items-center gap-2">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search folders..."
-              class="pl-9 pr-3 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-56"
+              class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
             />
           </div>
           <select
             v-model="selectedDepartmentId"
-            class="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[140px]"
+            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
           >
             <option value="">All Departments</option>
             <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -107,49 +69,12 @@
           </select>
           <select
             v-model="sortBy"
-            class="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
           >
-            <option value="name">Sort by Name</option>
-            <option value="items">Sort by Items</option>
-            <option value="date">Sort by Date</option>
+            <option value="name">Name</option>
+            <option value="items">Items</option>
+            <option value="date">Date</option>
           </select>
-          <!-- View Mode Toggle -->
-          <div class="flex items-center gap-1 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-            <button
-              @click="viewMode = 'grid'"
-              :class="[
-                'px-2 py-1.5 text-xs transition-colors',
-                viewMode === 'grid'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              ]"
-              title="Grid view"
-            >
-              <Squares2X2Icon class="w-4 h-4" />
-            </button>
-            <button
-              @click="viewMode = 'table'"
-              :class="[
-                'px-2 py-1.5 text-xs transition-colors',
-                viewMode === 'table'
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-              ]"
-              title="Table view"
-            >
-              <TableCellsIcon class="w-4 h-4" />
-            </button>
-          </div>
-          <!-- Fullscreen Toggle (only show in table view) -->
-          <button
-            v-if="viewMode === 'table'"
-            @click="isFullscreen = !isFullscreen"
-            class="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-          >
-            <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-4 h-4" />
-            <XMarkIcon v-else class="w-4 h-4" />
-          </button>
         </div>
       </div>
     </Card>
@@ -189,138 +114,8 @@
       </div>
     </div>
 
-    <!-- Table View Container -->
-    <div
-      v-if="viewMode === 'table' && paginatedFolders.length > 0"
-      :class="[
-        'mb-4 transition-all duration-300',
-        isFullscreen
-          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 p-6 overflow-auto'
-          : 'relative'
-      ]"
-    >
-      <!-- Fullscreen Header -->
-      <div v-if="isFullscreen" class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Inventory Folders - Fullscreen View</h2>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ filteredFolders.length }} folders</p>
-        </div>
-        <button
-          @click="isFullscreen = false"
-          class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-          title="Exit fullscreen"
-        >
-          <XMarkIcon class="w-5 h-5" />
-        </button>
-      </div>
-
-      <!-- Table View -->
-      <div class="overflow-x-auto">
-        <table class="w-full border-collapse">
-          <thead class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-            <tr>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Folder</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Description</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Type</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Items</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Low Stock</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Departments</th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Created</th>
-              <th v-if="canManage" class="px-4 py-3 text-right text-[10px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="folder in paginatedFolders"
-              :key="folder.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
-              @click="navigateToFolder(folder.id)"
-            >
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <div
-                    class="w-8 h-8 rounded-md bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 flex items-center justify-center flex-shrink-0"
-                  >
-                    <FolderIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                  </div>
-                  <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">{{ folder.name }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <span 
-                  class="text-[11px] text-gray-600 dark:text-gray-400 block truncate max-w-xs"
-                  :title="folder.description || '-'"
-                >
-                  {{ folder.description || '-' }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="text-[11px] px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md capitalize">{{ folder.type || '-' }}</span>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-1.5">
-                  <CubeIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
-                  <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <span
-                  v-if="folder.lowStockCount > 0"
-                  class="text-[11px] px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-md font-medium"
-                >
-                  ⚠ {{ folder.lowStockCount }}
-                </span>
-                <span v-else class="text-[11px] text-gray-400 dark:text-gray-500">-</span>
-              </td>
-              <td class="px-4 py-3">
-                <div v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0" class="flex flex-wrap gap-1">
-                  <span
-                    v-for="deptId in folder.allowedDepartments.slice(0, 2)"
-                    :key="deptId"
-                    class="text-[11px] px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
-                  >
-                    {{ getDepartmentName(deptId) }}
-                  </span>
-                  <span
-                    v-if="folder.allowedDepartments.length > 2"
-                    class="text-[11px] px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
-                  >
-                    +{{ folder.allowedDepartments.length - 2 }}
-                  </span>
-                </div>
-                <span v-else class="text-[11px] text-gray-400 dark:text-gray-500">All</span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="text-[11px] text-gray-600 dark:text-gray-400">
-                  {{ formatFolderDate(folder.createdAt) }}
-                </span>
-              </td>
-              <td v-if="canManage" class="px-4 py-3">
-                <div class="flex items-center justify-end gap-2" @click.stop>
-                  <button
-                    @click.stop="handleEditFolder(folder)"
-                    class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-                    title="Edit folder"
-                  >
-                    <PencilSquareIcon class="w-4 h-4" />
-                  </button>
-                  <button
-                    @click.stop="handleDeleteFolder(folder)"
-                    class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-                    title="Delete folder"
-                  >
-                    <TrashIcon class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
     <!-- Folders Grid - Compact -->
-    <div v-else-if="viewMode === 'grid' && paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
@@ -774,7 +569,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, reactive, watch, onMounted, nextTick } from 'vue'
 import {
   FolderIcon,
   PlusIcon,
@@ -786,9 +581,6 @@ import {
   ExclamationTriangleIcon,
   SparklesIcon,
   Squares2X2Icon,
-  TableCellsIcon,
-  ArrowsPointingOutIcon,
-  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
@@ -848,8 +640,6 @@ const getInitialPage = (): number => {
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(20)
 const sidebarCollapsed = ref(false)
-const viewMode = ref<'grid' | 'table'>('grid')
-const isFullscreen = ref(false)
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
@@ -1478,30 +1268,8 @@ const toggleDepartmentAccess = (departmentId: string, checked: boolean) => {
   }
 }
 
-// Handle ESC key to exit fullscreen
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && isFullscreen.value) {
-    isFullscreen.value = false
-  }
-}
-
-// Watch fullscreen state to lock/unlock body scroll
-watch(isFullscreen, (fullscreen) => {
-  if (import.meta.client) {
-    if (fullscreen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-  }
-})
-
 // Load folders on mount
 onMounted(async () => {
-  // Add keyboard listener for ESC key
-  if (import.meta.client) {
-    window.addEventListener('keydown', handleKeyDown)
-  }
   // Only run on client
   if (import.meta.server) return
   
@@ -1571,13 +1339,6 @@ onMounted(async () => {
   await loadData()
 })
 
-// Cleanup keyboard listener and restore body overflow
-onBeforeUnmount(() => {
-  if (import.meta.client) {
-    window.removeEventListener('keydown', handleKeyDown)
-    document.body.style.overflow = ''
-  }
-})
 
 // Watch for user data changes and fetch folders when it becomes available
 watch(() => userStore.userData, async (userData) => {

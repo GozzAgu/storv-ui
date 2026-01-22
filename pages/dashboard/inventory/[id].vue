@@ -153,14 +153,14 @@
             v-model="searchQuery"
             type="text"
                 placeholder="Search by name, SKU..."
-                class="w-full pl-8 pr-3 py-2 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                class="w-full pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div class="flex items-center gap-2">
           <select
             v-model="sortBy"
             @change="handleSortByChange"
-            class="flex-1 px-2.5 py-2 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+            class="flex-1 px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Name</option>
             <option value="price">Price</option>
@@ -218,20 +218,20 @@
           </button>
         </div>
         <!-- Filters in Fullscreen -->
-        <div class="flex items-center gap-3 mt-4">
+        <div class="flex items-center gap-2 mt-4">
           <div class="relative">
             <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search..."
-              class="pl-8 pr-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+              class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
             />
           </div>
           <select
             v-model="sortBy"
             @change="handleSortByChange"
-            class="px-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
           >
             <option value="name">Name</option>
             <option value="price">Price</option>
@@ -241,7 +241,7 @@
           </select>
           <button
             @click="resetFilters"
-            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
             title="Reset filters"
           >
             <ArrowPathIcon class="w-4 h-4" />
@@ -258,29 +258,29 @@
               <div class="flex items-center gap-2">
                 <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
+                <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
-                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
+                <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
               </div>
             </div>
             <!-- Compact Filters -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
               <div class="relative">
                 <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="searchQuery"
                   type="text"
                   placeholder="Search..."
-                  class="pl-8 pr-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+                  class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
                 />
               </div>
               <select
                 v-model="sortBy"
                 @change="handleSortByChange"
-                class="px-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
               >
                 <option value="name">Name</option>
                 <option value="price">Price</option>
@@ -290,7 +290,7 @@
               </select>
               <button
                 @click="resetFilters"
-                class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 title="Reset filters"
               >
                 <ArrowPathIcon class="w-4 h-4" />
@@ -298,7 +298,7 @@
               <!-- Fullscreen Toggle -->
               <button
                 @click="isFullscreen = !isFullscreen"
-                class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
               >
                 <ArrowsPointingOutIcon class="w-4 h-4" />
