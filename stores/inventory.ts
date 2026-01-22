@@ -866,6 +866,90 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
+    // Check if a serial number already exists for the same brand and model
+    async checkDuplicateSerialNumber(
+      storeId: string,
+      folderId: string,
+      serialNo: string,
+      brand: string,
+      model: string,
+      createdByUid: string,
+      userRole?: string
+    ): Promise<boolean> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      // Only check if serial number, brand, and model are provided
+      if (!serialNo || !brand || !model) {
+        return false // No duplicate if required fields are missing
+      }
+
+      try {
+        const itemsRef = getInventoryItemsCollection(db, createdByUid, storeId)
+        const trimmedSerialNo = serialNo.trim()
+        const trimmedBrand = brand.trim()
+        const trimmedModel = model.trim()
+        
+        // Query for items with same serial number in the same folder
+        // We'll filter by brand and model in memory to avoid composite index requirements
+        // For staff: check all items in folder (no createdBy filter)
+        // For superadmin: check only their items
+        let q
+        try {
+          if (userRole === 'staff') {
+            q = query(
+              itemsRef,
+              where('folderId', '==', folderId),
+              where('serialNo', '==', trimmedSerialNo)
+            )
+          } else {
+            q = query(
+              itemsRef,
+              where('folderId', '==', folderId),
+              where('serialNo', '==', trimmedSerialNo),
+              where('createdBy', '==', createdByUid)
+            )
+          }
+        } catch (queryError: any) {
+          // If query fails due to missing index, try simpler query
+          if (queryError.code === 'failed-precondition' || queryError.message?.includes('index')) {
+            // Fallback: query by folderId only and filter in memory
+            if (userRole === 'staff') {
+              q = query(itemsRef, where('folderId', '==', folderId))
+            } else {
+              q = query(
+                itemsRef,
+                where('folderId', '==', folderId),
+                where('createdBy', '==', createdByUid)
+              )
+            }
+          } else {
+            throw queryError
+          }
+        }
+
+        const querySnapshot = await getDocs(q)
+        
+        // Filter results in memory to check for matching brand and model
+        const duplicateExists = querySnapshot.docs.some(doc => {
+          const data = doc.data()
+          return (
+            data.serialNo?.trim() === trimmedSerialNo &&
+            data.brand?.trim() === trimmedBrand &&
+            data.model?.trim() === trimmedModel
+          )
+        })
+
+        return duplicateExists
+      } catch (error: any) {
+        // If query fails, log warning but don't block creation
+        console.warn('Error checking duplicate serial number:', error)
+        return false // Allow creation if check fails
+      }
+    },
+
     // Create a new item
     async createItem(folderId: string, itemData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>) {
       const db = useFirestore().getFirestoreInstance()
@@ -903,6 +987,23 @@ export const useInventoryStore = defineStore('inventory', {
         storeId = await getCurrentStoreId() || ''
         if (!storeId) {
           throw new Error('No store selected. Please select a store first.')
+        }
+      }
+
+      // Check for duplicate serial number if item has serial number, brand, and model
+      if (itemData.serialNo && itemData.brand && itemData.model) {
+        const isDuplicate = await this.checkDuplicateSerialNumber(
+          storeId,
+          folderId,
+          itemData.serialNo,
+          itemData.brand,
+          itemData.model,
+          createdByUid,
+          userStore.userData?.role
+        )
+        
+        if (isDuplicate) {
+          throw new Error(`An item with serial number "${itemData.serialNo}" already exists for ${itemData.brand} ${itemData.model}. Please use a different serial number.`)
         }
       }
 
@@ -996,6 +1097,37 @@ export const useInventoryStore = defineStore('inventory', {
         storeId = await getCurrentStoreId() || ''
         if (!storeId) {
           throw new Error('No store selected. Please select a store first.')
+        }
+      }
+
+      // Check for duplicate serial numbers in the batch
+      const itemsWithSerialNumbers = itemsData.filter(item => item.serialNo && item.brand && item.model)
+      if (itemsWithSerialNumbers.length > 0) {
+        // Check each item for duplicates
+        for (const item of itemsWithSerialNumbers) {
+          const isDuplicate = await this.checkDuplicateSerialNumber(
+            storeId,
+            folderId,
+            item.serialNo,
+            item.brand,
+            item.model,
+            createdByUid,
+            userStore.userData?.role
+          )
+          
+          if (isDuplicate) {
+            throw new Error(`An item with serial number "${item.serialNo}" already exists for ${item.brand} ${item.model}. Please use a different serial number.`)
+          }
+        }
+
+        // Check for duplicates within the batch itself
+        const serialNumberMap = new Map<string, { brand: string; model: string }>()
+        for (const item of itemsWithSerialNumbers) {
+          const key = `${item.serialNo.trim()}-${item.brand.trim()}-${item.model.trim()}`
+          if (serialNumberMap.has(key)) {
+            throw new Error(`Duplicate serial number "${item.serialNo}" for ${item.brand} ${item.model} found in the items you're trying to add. Each serial number must be unique.`)
+          }
+          serialNumberMap.set(key, { brand: item.brand, model: item.model })
         }
       }
 

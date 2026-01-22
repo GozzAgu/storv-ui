@@ -1593,7 +1593,6 @@ const handleSaveItem = async () => {
 
           // Close modal immediately for better UX
           handleCancelItem()
-          toast.success(`Creating ${validSerialNumbers.length} item${validSerialNumbers.length !== 1 ? 's' : ''}...`)
 
           // Create items in batch for much better performance
           const itemsToCreate = validSerialNumbers.map(serialNo => ({
@@ -1621,7 +1620,6 @@ const handleSaveItem = async () => {
           // Create single item (normal mode)
           // Close modal immediately for better UX
           handleCancelItem()
-          toast.success('Creating item...')
 
           // CRITICAL: Wait for item creation to complete (ensures data is saved to Firestore)
           await inventoryStore.createItem(folderId.value, itemForm)
