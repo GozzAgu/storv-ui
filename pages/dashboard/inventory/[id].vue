@@ -562,14 +562,29 @@
       </div>
     </div>
 
-    <!-- Pagination for Fullscreen Mode -->
-    <div v-if="isFullscreen && sortedFilteredItems.length > 0 && usePagination" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+    <!-- Load More Button or Pagination for Fullscreen Mode -->
+    <div v-if="isFullscreen && sortedFilteredItems.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+      <!-- Load More Button -->
+      <div v-if="showLoadMore" class="flex justify-center">
+        <button
+          @click="loadMoreItems"
+          class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-medium transition-colors text-xs"
+        >
+          Load More ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
+        </button>
+      </div>
+      <!-- Pagination -->
       <Pagination
+        v-else-if="usePagination"
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="sortedFilteredItems.length"
         @page-change="handlePageChange"
       />
+      <!-- Show count when in Load More mode but all items are displayed -->
+      <div v-else class="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+        Showing all {{ sortedFilteredItems.length }} items
+      </div>
     </div>
 
     <!-- Hidden file input for import -->
