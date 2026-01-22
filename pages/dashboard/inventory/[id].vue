@@ -148,22 +148,25 @@
     <Card v-else padding="sm" class="lg:hidden p-2.5">
       <div class="flex flex-col gap-2">
         <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
           <input
             v-model="searchQuery"
             type="text"
                 placeholder="Search by name, SKU..."
-                class="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                class="w-full pl-8 pr-3 py-2 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div class="flex items-center gap-2">
           <select
             v-model="sortBy"
-            class="flex-1 px-2.5 py-2 text-xs border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+            @change="handleSortByChange"
+            class="flex-1 px-2.5 py-2 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="name">Sort by Name</option>
-            <option value="price">Sort by Price</option>
-            <option value="sku">Sort by SKU</option>
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+            <option value="sku">SKU</option>
+            <option value="dateIn">Date In</option>
+            <option value="availability">Status</option>
           </select>
           <Button
             variant="outline"
@@ -217,21 +220,24 @@
         <!-- Filters in Fullscreen -->
         <div class="flex items-center gap-3 mt-4">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search..."
-              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+              class="pl-8 pr-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
             />
           </div>
           <select
             v-model="sortBy"
-            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            @change="handleSortByChange"
+            class="px-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="name">Sort by Name</option>
-            <option value="price">Sort by Price</option>
-            <option value="sku">Sort by SKU</option>
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+            <option value="sku">SKU</option>
+            <option value="dateIn">Date In</option>
+            <option value="availability">Status</option>
           </select>
           <button
             @click="resetFilters"
@@ -263,21 +269,24 @@
             <!-- Compact Filters -->
             <div class="flex items-center gap-3">
               <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                 <input
                   v-model="searchQuery"
                   type="text"
                   placeholder="Search..."
-                  class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+                  class="pl-8 pr-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
                 />
               </div>
               <select
                 v-model="sortBy"
-                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                @change="handleSortByChange"
+                class="px-3 py-1.5 text-[10px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value="name">Sort by Name</option>
-                <option value="price">Sort by Price</option>
-                <option value="sku">Sort by SKU</option>
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+                <option value="sku">SKU</option>
+                <option value="dateIn">Date In</option>
+                <option value="availability">Status</option>
               </select>
               <button
                 @click="resetFilters"
@@ -298,15 +307,15 @@
           </div>
         </div>
       <div :class="['overflow-x-auto', isFullscreen ? 'p-6' : 'mb-6']">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
-            <tr>
+        <table class="min-w-full">
+          <thead class="border-b border-gray-200 dark:border-gray-700">
+              <tr>
               <th
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-2 py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
-                  column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                  'px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
@@ -325,7 +334,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-2 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -336,52 +345,26 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-2 py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 min-w-[120px]">
-                    Actions
-                  </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="(item, index) in paginatedItems"
-              :key="item.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-            >
+              <th v-if="canManageInventoryItems" class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+                Action
+              </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr
+                v-for="(item, index) in paginatedItems"
+                :key="item.id"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-2 py-1.5 whitespace-nowrap"
+                class="px-4 py-3"
               >
                 <div v-if="colIndex === 0" class="flex items-center gap-2">
-                  <!-- First column shows avatar and value -->
-                  <div class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
-                    {{ getItemDisplayValue(item[column.key])?.toString().charAt(0).toUpperCase() || '?' }}
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1.5">
-                      <div class="text-[11px] font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {{ getItemDisplayValue(item[column.key]) }}
-                      </div>
-                      <button
-                        v-if="column.key === 'id' || column.key === 'itemId'"
-                        @click.stop="copyItemId(item.id)"
-                        class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
-                        title="Copy item ID"
-                      >
-                        <ClipboardDocumentIcon class="w-3.5 h-3.5" />
-                      </button>
-                      <span
-                        v-if="item.swapIn"
-                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0"
-                        title="Swapped-in item"
-                      >
-                        Swap-In
-                      </span>
-                    </div>
-                    <div v-if="columns.length > 1 && columns[1]" class="text-[9px] text-gray-500 dark:text-gray-400 truncate">
-                      {{ getItemDisplayValue(item[columns[1].key]) }}
-                    </div>
-                  </div>
+                  <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
+                    {{ getItemDisplayValue(item[column.key]) }}
+                  </span>
                 </div>
                 <div v-else>
                   <!-- Check if column is a price field (by key or type) -->
@@ -413,33 +396,38 @@
                     </span>
                   </div>
                   <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
-                    <div v-if="item[column.key]" class="flex flex-col">
-                      <span>{{ formatItemDate(item[column.key]) }}</span>
-                      <!-- Show transfer date below original date if item was transferred -->
-                      <span v-if="item.isTransferred && item.transferredAt && column.key === 'dateIn'" class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
-                        Transferred: {{ formatItemDate(item.transferredAt) }}
-                      </span>
-                    </div>
-                    <span v-else class="text-gray-400 dark:text-gray-500 italic">
+                    <span v-if="item[column.key]">
+                      {{ formatItemDate(item[column.key]) }}
+                    </span>
+                    <span v-else class="text-gray-400 dark:text-gray-500">
                       -
                     </span>
                   </div>
                   <div v-else-if="column.key === 'availability'" class="text-[11px]">
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium"
+                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium"
                       :class="getItemAvailability(item).class">
                       {{ getItemAvailability(item).label }}
                     </span>
                   </div>
-                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] font-medium"
+                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 py-0.5 text-[9px] font-medium"
                     :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                     {{ item[column.key] ? 'Yes' : 'No' }}
                   </div>
                   <div v-else class="text-[11px] text-gray-600 dark:text-gray-300">
-                    {{ getItemDisplayValue(item[column.key]) }}
+                    <span 
+                      v-if="getItemDisplayValue(item[column.key]) && typeof getItemDisplayValue(item[column.key]) === 'string' && getItemDisplayValue(item[column.key]).length > 30"
+                      class="block truncate max-w-xs"
+                      :title="getItemDisplayValue(item[column.key])"
+                    >
+                      {{ getItemDisplayValue(item[column.key]) }}
+                    </span>
+                    <span v-else>
+                      {{ getItemDisplayValue(item[column.key]) }}
+                    </span>
                   </div>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-2 py-1.5 whitespace-nowrap text-center">
+              <td v-if="canManageInventoryItems" class="px-4 py-3 text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -449,69 +437,38 @@
                   :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
                 />
               </td>
-                  <td v-if="canManageInventoryItems" class="px-2 py-1.5 whitespace-nowrap text-right min-w-[120px]">
-                <div class="flex items-center justify-end gap-1 flex-shrink-0">
-                  <button
-                    @click="handleApplyDiscount(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'flex-shrink-0 p-1 rounded-md transition-colors',
-                      isItemSold(item)
-                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        : 'text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot apply discount to sold item' : (item.discountedPrice ? 'Edit discount' : 'Apply discount')"
-                  >
-                    <TagIcon class="w-4 h-4 flex-shrink-0" />
-                  </button>
-                  <button
-                    v-if="item.discountedPrice"
-                    @click="handleRemoveDiscount(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
-                      isItemSold(item)
-                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot remove discount from sold item' : 'Remove discount'"
-                  >
-                    <XMarkIcon class="w-5 h-5 flex-shrink-0" />
-                  </button>
+              <td v-if="canManageInventoryItems" class="px-4 py-3">
+                <div class="flex items-center justify-end gap-3" @click.stop>
                   <button
                     @click="handleEditItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
-                      isItemSold(item)
-                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        : 'text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20'
+                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors',
+                      isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                   >
-                    <PencilSquareIcon class="w-5 h-5 flex-shrink-0" />
+                    <PencilSquareIcon class="w-4 h-4" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'flex-shrink-0 p-1.5 sm:p-2 rounded-lg transition-colors',
-                      isItemSold(item)
-                        ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                        : 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors',
+                      isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
                   >
-                    <TrashIcon class="w-5 h-5 flex-shrink-0" />
+                    <TrashIcon class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
             <!-- Empty State -->
             <tr v-if="sortedFilteredItems.length === 0">
-              <td :colspan="columns.length + 1" class="px-6 py-12">
+              <td :colspan="columns.length + (canManageInventoryItems ? 2 : 0)" class="px-6 py-12">
                 <div class="text-center">
-                  <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
+                  <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
                     <CubeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
                   </div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -974,6 +931,13 @@ const isExporting = ref(false)
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
 const isFullscreen = ref(false)
 
+// Sync sortBy dropdown with currentSort
+watch(() => currentSort.value.key, (newKey) => {
+  if (sortBy.value !== newKey) {
+    sortBy.value = newKey
+  }
+}, { immediate: true })
+
 // Handle ESC key to exit fullscreen
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape' && isFullscreen.value) {
@@ -1101,12 +1065,12 @@ const getItemAvailability = (item: InventoryItem) => {
   )
   
   if (refundedReceipts.length > 0) {
-    return { status: 'returned', label: 'Returned', class: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' }
+    return { status: 'returned', label: 'Returned', class: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300' }
   }
   
   // Check if item has dateOut (was sold via receipt)
   if (isItemSold(item)) {
-      return { status: 'sold', label: 'Sold', class: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }
+      return { status: 'sold', label: 'Sold', class: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' }
   }
   
   // Item is available (not sold, not returned)
@@ -1224,6 +1188,20 @@ const toggleSort = (key: string) => {
     currentSort.value.key = key
     currentSort.value.order = 'asc'
   }
+  // Sync sortBy dropdown with currentSort
+  sortBy.value = key
+}
+
+const handleSortByChange = () => {
+  // Update currentSort when dropdown changes
+  if (currentSort.value.key === sortBy.value) {
+    // Toggle order if same key
+    currentSort.value.order = currentSort.value.order === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Set new key with ascending order
+    currentSort.value.key = sortBy.value
+    currentSort.value.order = 'asc'
+  }
 }
 
 // formatCurrency is now imported from usePreferences for currency conversion
@@ -1265,7 +1243,10 @@ const formatItemDate = (date: string | Date | any) => {
           const timestamp = seconds * 1000 + (nanoseconds / 1000000)
           const dateObj = new Date(timestamp)
           if (!isNaN(dateObj.getTime())) {
-            return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            const day = dateObj.getDate()
+            const month = dateObj.toLocaleDateString('en-US', { month: 'short' })
+            const year = dateObj.getFullYear()
+            return `${day} ${month} ${year}`
           }
         }
       } catch (e) {
@@ -1276,7 +1257,10 @@ const formatItemDate = (date: string | Date | any) => {
     // Handle Date objects
     if (date instanceof Date) {
       if (isNaN(date.getTime())) return '-'
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      const day = date.getDate()
+      const month = date.toLocaleDateString('en-US', { month: 'short' })
+      const year = date.getFullYear()
+      return `${day} ${month} ${year}`
     }
     
     // Handle string dates or ISO date strings
@@ -1287,7 +1271,10 @@ const formatItemDate = (date: string | Date | any) => {
       }
       const dateObj = new Date(date)
       if (!isNaN(dateObj.getTime())) {
-        return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        const day = dateObj.getDate()
+        const month = dateObj.toLocaleDateString('en-US', { month: 'short' })
+        const year = dateObj.getFullYear()
+        return `${day} ${month} ${year}`
       }
     }
     
