@@ -84,9 +84,73 @@
 
 
     <!-- Receipts Table -->
-    <Card padding="none">
-      <!-- Header with Stats and Filters -->
-      <div v-if="!receiptsStore.loading" class="border-b border-gray-200 dark:border-gray-700">
+    <div
+      :class="[
+        'transition-all duration-300',
+        isReceiptsFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
+          : 'relative'
+      ]"
+    >
+      <!-- Fullscreen Header -->
+      <div v-if="isReceiptsFullscreen" class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Receipts - Fullscreen View</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {{ filteredReceipts.length }} receipts • Total Sales: {{ formatCurrency(totalSales) }}
+            </p>
+          </div>
+          <button
+            @click="isReceiptsFullscreen = false"
+            class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            title="Exit fullscreen"
+          >
+            <XMarkIcon class="w-5 h-5" />
+          </button>
+        </div>
+        <!-- Filters in Fullscreen -->
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search receipts..."
+              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+            />
+          </div>
+          <select
+            v-model="statusFilter"
+            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
+          >
+            <option value="all">All Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          <select
+            v-model="dateFilter"
+            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
+          >
+            <option value="all">All Dates</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+          <button
+            @click="resetFilters"
+            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            title="Reset filters"
+          >
+            <ArrowPathIcon class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <Card padding="none" :class="isReceiptsFullscreen ? 'shadow-none border-0' : ''">
+        <!-- Header with Stats and Filters (hidden in fullscreen) -->
+        <div v-if="!receiptsStore.loading && !isReceiptsFullscreen" class="border-b border-gray-200 dark:border-gray-700">
         <!-- Stats - Mobile Optimized -->
         <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 dark:bg-gray-800/50">
           <div class="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-6">
@@ -161,6 +225,15 @@
               >
                 <ArrowPathIcon class="w-4 h-4 flex-shrink-0" />
                 <span class="sm:hidden">Reset</span>
+              </button>
+              <!-- Fullscreen Toggle -->
+              <button
+                @click="isReceiptsFullscreen = !isReceiptsFullscreen"
+                class="px-3 sm:px-2 py-2.5 sm:py-1.5 text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500 rounded-md transition-colors flex items-center justify-center gap-1.5 sm:gap-0 flex-shrink-0 touch-manipulation sm:p-1.5"
+                :title="isReceiptsFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+              >
+                <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="w-4 h-4 flex-shrink-0" />
+                <XMarkIcon v-else class="w-4 h-4 flex-shrink-0" />
               </button>
             </div>
           </div>
@@ -517,11 +590,12 @@
           </tbody>
         </table>
       </div>
-    </Card>
+      </Card>
+    </div>
 
     <!-- Load More Button or Pagination -->
     <div
-      v-if="sortedFilteredReceipts.length > 0"
+      v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
@@ -548,6 +622,16 @@
           Showing all {{ sortedFilteredReceipts.length }} items
         </div>
       </div>
+    </div>
+
+    <!-- Pagination for Fullscreen Mode -->
+    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0 && usePagination" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="sortedFilteredReceipts.length"
+        @page-change="handlePageChange"
+      />
     </div>
 
     <!-- Floating Action Button - Mobile Optimized -->
@@ -836,7 +920,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   ReceiptPercentIcon,
@@ -858,6 +942,7 @@ import {
   ChevronRightIcon,
   BarsArrowUpIcon,
   ClipboardDocumentIcon,
+  ArrowsPointingOutIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -917,6 +1002,31 @@ const loadingCreators = ref(false)
 const route = useRoute()
 const router = useRouter()
 const activeTab = ref<'receipts' | 'customers'>((route.query.tab as any) || 'receipts')
+const isReceiptsFullscreen = ref(false)
+const isCustomersFullscreen = ref(false)
+
+// Handle ESC key to exit fullscreen
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    if (isReceiptsFullscreen.value) {
+      isReceiptsFullscreen.value = false
+    }
+    if (isCustomersFullscreen.value) {
+      isCustomersFullscreen.value = false
+    }
+  }
+}
+
+// Watch fullscreen state to lock/unlock body scroll
+watch([isReceiptsFullscreen, isCustomersFullscreen], ([receiptsFullscreen, customersFullscreen]) => {
+  if (import.meta.client) {
+    if (receiptsFullscreen || customersFullscreen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }
+})
 
 // Watch for tab changes and update URL
 watch(activeTab, (newTab) => {
@@ -1681,6 +1791,11 @@ const loadCreatorNames = async () => {
 
 // Load receipts on mount
 onMounted(async () => {
+  // Add keyboard listener for ESC key
+  if (import.meta.client) {
+    window.addEventListener('keydown', handleKeyDown)
+  }
+
   // Only run on client
   if (import.meta.server) return
   
@@ -1724,6 +1839,14 @@ onMounted(async () => {
   // Hide initial loading state after a minimum time to prevent flash
   await new Promise(resolve => setTimeout(resolve, 300))
   isInitialLoading.value = false
+})
+
+// Cleanup keyboard listener and restore body overflow
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = ''
+  }
 })
 
 // Watch for auth state changes

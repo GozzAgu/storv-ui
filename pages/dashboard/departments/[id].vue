@@ -109,12 +109,39 @@
     </div>
 
     <!-- Staff Management Section -->
-    <Card padding="none">
-      <!-- Compact Header (Visible only on large screens) -->
-      <div v-if="!isLoadingStaff && staff.length > 0" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-          <!-- Compact Stats -->
-          <div class="flex items-center gap-6">
+    <div
+      :class="[
+        'transition-all duration-300',
+        isStaffFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
+          : 'relative'
+      ]"
+    >
+      <!-- Fullscreen Header -->
+      <div v-if="isStaffFullscreen" class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ department?.name || 'Department' }} - Staff Fullscreen View</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {{ staff.length }} staff members • {{ totalManagers }} managers • {{ activeStaff }} active
+            </p>
+          </div>
+          <button
+            @click="isStaffFullscreen = false"
+            class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            title="Exit fullscreen"
+          >
+            <XMarkIcon class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <Card padding="none" :class="isStaffFullscreen ? 'shadow-none border-0' : ''">
+        <!-- Compact Header (Visible only on large screens, hidden in fullscreen) -->
+        <div v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+            <!-- Compact Stats -->
+            <div class="flex items-center gap-6">
             <div class="flex items-center gap-2">
               <UsersIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
@@ -136,6 +163,15 @@
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ onLeaveStaff }}</span>
             </div>
           </div>
+          <!-- Fullscreen Toggle -->
+          <button
+            @click="isStaffFullscreen = !isStaffFullscreen"
+            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            :title="isStaffFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+          >
+            <ArrowsPointingOutIcon v-if="!isStaffFullscreen" class="w-4 h-4" />
+            <XMarkIcon v-else class="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -282,14 +318,25 @@
           </tbody>
         </table>
       </div>
-    </Card>
+      </Card>
+    </div>
 
     <!-- Fixed Staff Pagination - Mobile Optimized -->
     <div
-      v-if="staff.length > 0"
+      v-if="staff.length > 0 && !isStaffFullscreen"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
+      <Pagination
+        :current-page="staffCurrentPage"
+        :items-per-page="staffItemsPerPage"
+        :total="staff.length"
+        @page-change="handleStaffPageChange"
+      />
+    </div>
+
+    <!-- Pagination for Fullscreen Mode -->
+    <div v-if="isStaffFullscreen && staff.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
       <Pagination
         :current-page="staffCurrentPage"
         :items-per-page="staffItemsPerPage"
@@ -322,7 +369,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   ArrowLeftIcon,
   PlusIcon,
@@ -333,6 +380,8 @@ import {
   PencilSquareIcon,
   TrashIcon,
   ArrowPathIcon,
+  ArrowsPointingOutIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -387,6 +436,25 @@ const staffStore = useStaffStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const sidebarCollapsed = ref(false)
+const isStaffFullscreen = ref(false)
+
+// Handle ESC key to exit fullscreen
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isStaffFullscreen.value) {
+    isStaffFullscreen.value = false
+  }
+}
+
+// Watch fullscreen state to lock/unlock body scroll
+watch(isStaffFullscreen, (fullscreen) => {
+  if (import.meta.client) {
+    if (fullscreen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }
+})
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
@@ -711,6 +779,11 @@ watch(() => route.params.id, async (newId, oldId) => {
 }, { immediate: false })
 
 onMounted(async () => {
+  // Add keyboard listener for ESC key
+  if (import.meta.client) {
+    window.addEventListener('keydown', handleKeyDown)
+  }
+
   if (import.meta.server) return
 
   // Wait for auth and user data to load
@@ -729,6 +802,14 @@ onMounted(async () => {
 
   // Load data immediately
   await loadDepartmentData()
+})
+
+// Cleanup keyboard listener and restore body overflow
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = ''
+  }
 })
 </script>
 

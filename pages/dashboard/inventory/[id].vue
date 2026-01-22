@@ -174,58 +174,130 @@
             <span class="hidden sm:inline">Reset</span>
             <span class="sm:hidden">↻</span>
           </Button>
+          <!-- Fullscreen Toggle - Mobile -->
+          <button
+            @click="isFullscreen = !isFullscreen"
+            class="px-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+          >
+            <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-4 h-4" />
+            <XMarkIcon v-else class="w-4 h-4" />
+          </button>
         </div>
       </div>
     </Card>
 
     <!-- Enhanced Items Table -->
-    <Card padding="none" v-if="!isLoadingFolder">
-      <!-- Compact Header (Visible only on large screens) -->
-      <div class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-          <!-- Compact Stats -->
-          <div class="flex items-center gap-3 sm:gap-4">
-            <div class="flex items-center gap-2">
-              <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
-            </div>
+    <div
+      v-if="!isLoadingFolder"
+      :class="[
+        'transition-all duration-300',
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
+          : 'relative'
+      ]"
+    >
+      <!-- Fullscreen Header -->
+      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }} - Fullscreen View</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {{ filteredItems.length }} items • Total Value: {{ formatCurrency(totalInventoryValue) }}
+            </p>
           </div>
-          <!-- Compact Filters -->
-          <div class="flex items-center gap-3">
-            <div class="relative">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search..."
-                class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
-              />
-            </div>
-            <select
-              v-model="sortBy"
-              class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            >
-              <option value="name">Sort by Name</option>
-              <option value="price">Sort by Price</option>
-              <option value="sku">Sort by SKU</option>
-            </select>
-            <button
-              @click="resetFilters"
-              class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title="Reset filters"
-            >
-              <ArrowPathIcon class="w-4 h-4" />
-            </button>
+          <button
+            @click="isFullscreen = false"
+            class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            title="Exit fullscreen"
+          >
+            <XMarkIcon class="w-5 h-5" />
+          </button>
+        </div>
+        <!-- Filters in Fullscreen -->
+        <div class="flex items-center gap-3 mt-4">
+          <div class="relative">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search..."
+              class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+            />
           </div>
+          <select
+            v-model="sortBy"
+            class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="name">Sort by Name</option>
+            <option value="price">Sort by Price</option>
+            <option value="sku">Sort by SKU</option>
+          </select>
+          <button
+            @click="resetFilters"
+            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            title="Reset filters"
+          >
+            <ArrowPathIcon class="w-4 h-4" />
+          </button>
         </div>
       </div>
-      <div class="overflow-x-auto mb-6">
+
+      <Card padding="none" :class="isFullscreen ? 'shadow-none border-0' : ''">
+        <!-- Compact Header (Visible only on large screens, hidden in fullscreen) -->
+        <div v-if="!isFullscreen" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
+            <!-- Compact Stats -->
+            <div class="flex items-center gap-3 sm:gap-4">
+              <div class="flex items-center gap-2">
+                <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+                <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
+                <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
+              </div>
+            </div>
+            <!-- Compact Filters -->
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search..."
+                  class="pl-9 pr-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-48"
+                />
+              </div>
+              <select
+                v-model="sortBy"
+                class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price">Sort by Price</option>
+                <option value="sku">Sort by SKU</option>
+              </select>
+              <button
+                @click="resetFilters"
+                class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Reset filters"
+              >
+                <ArrowPathIcon class="w-4 h-4" />
+              </button>
+              <!-- Fullscreen Toggle -->
+              <button
+                @click="isFullscreen = !isFullscreen"
+                class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+              >
+                <ArrowsPointingOutIcon class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      <div :class="['overflow-x-auto', isFullscreen ? 'p-6' : 'mb-6']">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-800/50">
             <tr>
@@ -462,11 +534,12 @@
           </tbody>
         </table>
       </div>
-    </Card>
+      </Card>
+    </div>
 
     <!-- Load More Button or Pagination -->
     <div
-      v-if="sortedFilteredItems.length > 0"
+      v-if="sortedFilteredItems.length > 0 && !isFullscreen"
       class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
     >
@@ -493,6 +566,16 @@
           Showing all {{ sortedFilteredItems.length }} items
         </div>
       </div>
+    </div>
+
+    <!-- Pagination for Fullscreen Mode -->
+    <div v-if="isFullscreen && sortedFilteredItems.length > 0 && usePagination" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="sortedFilteredItems.length"
+        @page-change="handlePageChange"
+      />
     </div>
 
     <!-- Hidden file input for import -->
@@ -760,7 +843,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import {
   ArrowLeftIcon,
   PlusIcon,
@@ -780,6 +863,7 @@ import {
   ArrowUpTrayIcon,
   TagIcon,
   XMarkIcon,
+  ArrowsPointingOutIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
@@ -888,6 +972,25 @@ const isImporting = ref(false)
 const isExporting = ref(false)
 
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', order: 'asc' })
+const isFullscreen = ref(false)
+
+// Handle ESC key to exit fullscreen
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && isFullscreen.value) {
+    isFullscreen.value = false
+  }
+}
+
+// Watch fullscreen state to lock/unlock body scroll
+watch(isFullscreen, (fullscreen) => {
+  if (import.meta.client) {
+    if (fullscreen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+  }
+})
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
@@ -2170,6 +2273,11 @@ const handleFileImport = async (event: Event) => {
 
 // Load folder from Firestore
 onMounted(async () => {
+  // Add keyboard listener for ESC key
+  if (import.meta.client) {
+    window.addEventListener('keydown', handleKeyDown)
+  }
+
   // Wait for auth to be ready
   if (authStore.loading) {
     const checkAuth = setInterval(() => {
@@ -2200,6 +2308,14 @@ onMounted(async () => {
   }
 
   // Items will be loaded by loadFolderData
+})
+
+// Cleanup keyboard listener and restore body overflow
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = ''
+  }
 })
 
 // Watch for auth state changes
