@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -97,14 +98,26 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Sign up with email and password
-    async signUp(email: string, password: string) {
+    async signUp(email: string, password: string, sendVerificationEmail: boolean = true) {
       const auth = this.getAuthInstance()
       if (!auth) throw new Error('Firebase Auth not initialized')
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        this.currentUser = userCredential.user
-        return userCredential.user
+        const user = userCredential.user
+        this.currentUser = user
+        
+        // Send email verification if requested
+        if (sendVerificationEmail && user && !user.emailVerified) {
+          try {
+            await sendEmailVerification(user)
+          } catch (verificationError: any) {
+            // Log but don't fail signup if verification email fails
+            console.warn('Failed to send verification email:', verificationError)
+          }
+        }
+        
+        return user
       } catch (error: any) {
         throw new Error(error.message || 'Sign up failed')
       }
@@ -132,6 +145,30 @@ export const useAuthStore = defineStore('auth', {
         await sendPasswordResetEmail(auth, email)
       } catch (error: any) {
         throw new Error(error.message || 'Password reset failed')
+      }
+    },
+
+    // Send email verification
+    async sendVerificationEmail(user?: User) {
+      const auth = this.getAuthInstance()
+      if (!auth) throw new Error('Firebase Auth not initialized')
+
+      const targetUser = user || this.currentUser
+      if (!targetUser) {
+        throw new Error('No user found to send verification email')
+      }
+
+      if (targetUser.emailVerified) {
+        throw new Error('Email is already verified')
+      }
+
+      try {
+        await sendEmailVerification(targetUser)
+      } catch (error: any) {
+        if (error.code === 'auth/too-many-requests') {
+          throw new Error('Too many verification emails sent. Please try again later.')
+        }
+        throw new Error(error.message || 'Failed to send verification email')
       }
     },
 

@@ -258,7 +258,7 @@ const errorMessage = ref('')
 const rulesCopied = ref(false)
 const showPhoneSignIn = ref(false)
 
-const { signUp } = useFirebaseAuth()
+const { signUp, sendVerificationEmail } = useFirebaseAuth()
 const { createUserDocument, getUserDocument } = useUser()
 
 // Function to copy Firestore rules to clipboard
@@ -335,8 +335,8 @@ const handleSignUp = async () => {
   errorMessage.value = ''
 
   try {
-    // Create Firebase Auth user
-    const user = await signUp(form.value.email, form.value.password)
+    // Create Firebase Auth user (verification email is sent automatically)
+    const user = await signUp(form.value.email, form.value.password, true)
     
     if (user) {
       // Create user document in Firestore
@@ -347,6 +347,11 @@ const handleSignUp = async () => {
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false
       })
+      
+      // Show success message about email verification
+      const { useToast } = await import('~/composables/useToast')
+      const toast = useToast()
+      toast.success('Account created! Please check your email to verify your account.')
       
       // Redirect to onboarding (first-time setup)
       await navigateTo('/dashboard/onboarding')

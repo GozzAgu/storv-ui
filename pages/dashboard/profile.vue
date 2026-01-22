@@ -404,7 +404,7 @@
           <div v-else-if="storeInfo.storeName" class="space-y-2.5">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Store Name</p>
+                <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">Branch Name</p>
                 <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
               </div>
               <div v-if="storeInfo.storeEmail">

@@ -88,10 +88,10 @@
             </p>
           </div>
 
-          <!-- Store Name -->
+          <!-- Branch Name -->
           <div>
             <label for="storeName" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Store Name <span class="text-red-500">*</span>
+              Branch Name <span class="text-red-500">*</span>
             </label>
             <input
               id="storeName"
@@ -99,7 +99,7 @@
               type="text"
               required
               class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="e.g., My Awesome Store"
+              placeholder="e.g., My Awesome Branch"
             />
           </div>
 
@@ -284,7 +284,7 @@ const completeOnboarding = async () => {
 
   // Validate store name
   if (!storeDetails.value.storeName?.trim()) {
-    errorMessage.value = 'Store name is required'
+    errorMessage.value = 'Branch name is required'
     return
   }
 
