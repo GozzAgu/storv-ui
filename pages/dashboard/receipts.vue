@@ -535,6 +535,13 @@
                 <!-- Desktop: Show all action buttons -->
                 <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
+                    @click="handleViewReceiptTimeline(receipt)"
+                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
+                    title="View receipt history"
+                  >
+                    <ClockIcon class="w-4 h-4 flex-shrink-0" />
+                  </button>
+                  <button
                     @click="handlePrintReceipt(receipt)"
                     class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
                     title="View/Print"
@@ -572,6 +579,13 @@
                     v-if="openReceiptMenuId === receipt.id"
                     class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
                   >
+                    <button
+                      @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      title="View receipt history"
+                    >
+                      <ClockIcon class="w-5 h-5" />
+                    </button>
                     <button
                       @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -705,6 +719,12 @@
         v-model="showDeleteReceiptModal"
         :receipt="selectedReceipt"
         @deleted="handleReceiptDeleted"
+      />
+
+      <!-- Receipt Timeline Modal -->
+      <ReceiptTimelineModal
+        v-model="showTimelineModal"
+        :receipt="selectedReceipt"
       />
     </template>
 
@@ -1008,6 +1028,8 @@ import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
+// @ts-ignore
+import ReceiptTimelineModal from '~/components/receipts/ReceiptTimelineModal.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
 import { useRecentItems } from '~/composables/useRecentItems'
 import { useAuthStore } from '~/stores/auth'
@@ -1673,10 +1695,16 @@ const handleReceiptCreated = async (receipt: Receipt) => {
 const selectedReceipt = ref<Receipt | null>(null)
 const showViewReceiptModal = ref(false)
 const showReturnReceiptModal = ref(false)
+const showTimelineModal = ref(false)
 const showDeleteReceiptModal = ref(false)
 
 
 const { addRecentItem } = useRecentItems()
+
+const handleViewReceiptTimeline = (receipt: Receipt) => {
+  selectedReceipt.value = receipt
+  showTimelineModal.value = true
+}
 
 const handlePrintReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
