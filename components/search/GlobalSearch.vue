@@ -155,17 +155,21 @@
 
           <!-- No Results -->
           <div v-else-if="!searchStore.hasResults && searchStore.query.trim()" class="p-6 sm:p-8 text-center">
-            <MagnifyingGlassIcon class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-3" />
-            <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
+            <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <MagnifyingGlassIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
+            </div>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Try adjusting your search query or filters</p>
           </div>
 
           <!-- Empty State -->
           <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-4 sm:p-8">
             <div class="text-center mb-4 sm:mb-6">
-              <MagnifyingGlassIcon class="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 dark:text-gray-500 mx-auto mb-2 sm:mb-3" />
-              <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Search across all your data</p>
+              <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <MagnifyingGlassIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+              </div>
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Search across receipts, inventory, customers & more</p>
             </div>
 
             <!-- Saved Searches -->

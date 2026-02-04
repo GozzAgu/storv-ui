@@ -25,7 +25,9 @@
 
       <!-- Empty State -->
       <div v-else-if="searchStore.savedSearches.length === 0" class="text-center py-8">
-        <MagnifyingGlassIcon class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+          <MagnifyingGlassIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+        </div>
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No saved searches</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Save your frequently used searches for quick access</p>
         <Button variant="primary" size="sm" @click="showCreateModal = true">

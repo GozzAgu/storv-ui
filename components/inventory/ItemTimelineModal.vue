@@ -22,8 +22,11 @@
 
     <div class="max-h-[calc(100vh-14rem)] overflow-y-auto">
       <div v-if="timeline.length === 0" class="py-8 text-center">
-        <ClockIcon class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-        <p class="text-sm text-gray-500 dark:text-gray-400">No timeline events yet</p>
+        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center">
+          <ClockIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
+        </div>
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No timeline events yet</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Activity for this item will appear here</p>
       </div>
 
       <div v-else class="relative">

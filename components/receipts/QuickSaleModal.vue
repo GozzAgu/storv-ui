@@ -88,9 +88,12 @@
         <!-- Selected Items -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
           <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Selected Items</h3>
-          <div v-if="cartItems.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-            <ShoppingBagIcon class="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No items in cart. Scan or search to add items.</p>
+          <div v-if="cartItems.length === 0" class="text-center py-8 px-4 border border-dashed border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+              <ShoppingBagIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
+            </div>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your cart is empty</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Scan or search to add items</p>
           </div>
           <div v-else class="space-y-2 max-h-64 overflow-y-auto">
             <div

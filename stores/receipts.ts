@@ -462,6 +462,19 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
+    // Optimistically remove receipt from local state (for undo flow)
+    removeReceiptOptimistically(receiptId: string): Receipt | null {
+      const index = this.receipts.findIndex(r => r.id === receiptId)
+      if (index === -1) return null
+      const [removed] = this.receipts.splice(index, 1)
+      return removed ?? null
+    },
+
+    // Restore receipt to local state (undo)
+    restoreReceipt(receipt: Receipt) {
+      this.receipts.push(receipt)
+    },
+
     // Delete a receipt
     async deleteReceipt(receiptId: string) {
       const db = useFirestore().getFirestoreInstance()

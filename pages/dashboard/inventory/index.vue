@@ -212,20 +212,12 @@
 
     <!-- Empty State - Compact -->
     <Card v-else-if="!inventoryStore.loading" padding="sm" extra-class="p-4">
-      <div class="text-center py-6">
-        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
-          <FolderIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
-        </div>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-          <span v-if="selectedDepartmentId">No folders found for {{ getDepartmentName(selectedDepartmentId) }}</span>
-          <span v-else-if="searchQuery">No folders found</span>
-          <span v-else>No folders yet</span>
-        </h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 px-4">
-          <span v-if="selectedDepartmentId">Try selecting a different department or clear the filter</span>
-          <span v-else-if="searchQuery">Try adjusting your search criteria</span>
-          <span v-else>Create your first folder to organize your inventory</span>
-        </p>
+      <EmptyState
+        :icon="FolderIcon"
+        :title="selectedDepartmentId ? `No folders found for ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet')"
+        :description="selectedDepartmentId ? 'Try selecting a different department or clear the filter' : (searchQuery ? 'Try adjusting your search criteria' : 'Create your first folder to organize your inventory')"
+        icon-bg-class="bg-primary-50 dark:bg-primary-900/20"
+      >
         <div v-if="selectedDepartmentId" class="mb-4">
           <Button
             variant="outline"
@@ -244,7 +236,7 @@
         >
           Create Your First Folder
         </Button>
-      </div>
+      </EmptyState>
     </Card>
 
     <!-- Fixed Pagination - Mobile Optimized -->
@@ -312,7 +304,7 @@
               v-model="folderForm.name"
               type="text"
               required
-              class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
+              class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
               placeholder="Enter folder name"
             />
           </div>
@@ -323,7 +315,7 @@
             <select
               v-model="folderForm.type"
               required
-              class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
+              class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
             >
               <option value="">Select type</option>
               <option value="general">General</option>
@@ -362,7 +354,7 @@
             v-model="folderForm.description"
             @input="aiError = null"
             rows="3"
-            class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
+            class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
             placeholder="Describe the folder's purpose"
           ></textarea>
           <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
@@ -476,41 +468,41 @@
             <div
               v-for="(field, index) in editableFields"
               :key="field.id"
-              class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+              class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
             >
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 items-end">
                 <div class="sm:col-span-3">
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Field Name *
                   </label>
                   <input
                     v-model="field.name"
                     type="text"
                     required
-                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
                     placeholder="fieldName"
                   />
                 </div>
                 <div class="sm:col-span-3">
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Label *
                   </label>
                   <input
                     v-model="field.label"
                     type="text"
                     required
-                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
                     placeholder="Display Name"
                   />
                 </div>
                 <div class="sm:col-span-3">
-                  <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Field Type *
                   </label>
                   <select
                     v-model="field.type"
                     required
-                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
                   >
                     <option value="text">Text</option>
                     <option value="number">Number</option>
@@ -550,8 +542,12 @@
               </div>
             </div>
             
-            <div v-if="editableFields.length === 0" class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
-              No fields added. Click "Add Field" to get started.
+            <div v-if="editableFields.length === 0" class="text-center py-8 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/30">
+              <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <Squares2X2Icon class="w-6 h-6 text-primary-500 dark:text-primary-400" />
+              </div>
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No fields added</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Click "Add Field" to define your table columns</p>
             </div>
           </div>
         </div>
@@ -585,6 +581,7 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import EmptyState from '~/components/ui/EmptyState.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'

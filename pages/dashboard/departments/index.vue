@@ -333,9 +333,9 @@
       padding="sm"
       extra-class="p-4"
     >
-      <div class="text-center py-6">
-        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
-          <BuildingOfficeIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+      <div class="text-center py-8">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+          <BuildingOfficeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary-600 dark:text-primary-400" />
         </div>
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}

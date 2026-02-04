@@ -1,15 +1,10 @@
 <template>
   <div class="space-y-3 pb-24 sm:pb-20 min-h-screen w-full">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
+
     <!-- Page Header - Compact -->
     <div>
-      <div class="flex items-center gap-2 mb-1">
-        <NuxtLink
-          to="/dashboard/settings"
-          class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-xs font-medium"
-        >
-          ← Back to Settings
-        </NuxtLink>
-      </div>
       <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
         {{ store?.name || 'Store' }} - Departments
       </h1>
@@ -285,9 +280,9 @@
 
     <!-- Empty State - Compact -->
     <Card v-if="!departmentsStore.loading && !departmentsStore.error && !storesLoading && paginatedDepartments.length === 0 && filteredDepartments.length === 0" padding="sm" extra-class="p-4">
-      <div class="text-center py-6">
-        <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
-          <BuildingOfficeIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+      <div class="text-center py-8">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+          <BuildingOfficeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary-600 dark:text-primary-400" />
         </div>
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
@@ -347,6 +342,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   BuildingOfficeIcon,
+  Cog6ToothIcon,
   UsersIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
@@ -356,6 +352,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import type { Department } from '~/composables/useDepartments'
@@ -450,6 +447,11 @@ const canManageDepartments = computed(() => !isStaff.value) // Only non-staff ca
 const storesLoading = computed(() => storesStore.loading)
 const store = computed(() => storesStore.getStoreById(storeId.value))
 const currentStore = computed(() => storesStore.currentStore)
+
+const storeDepartmentsBreadcrumbs = computed(() => [
+  { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
+  { label: store.value?.name || 'Store', icon: BuildingOfficeIcon },
+])
 
 // Filter departments by storeId
 const storeDepartments = computed(() => {

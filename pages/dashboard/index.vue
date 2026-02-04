@@ -213,7 +213,13 @@
           </div>
         </div>
         <div class="h-48 sm:h-64 lg:h-72 relative pb-4">
-          <p v-if="chartData.length === 0" class="text-sm text-gray-500 dark:text-gray-400 text-center py-12">No revenue data available yet</p>
+          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-14 h-14 mb-3 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+              <ChartBarIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
+            </div>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start making sales to see your revenue chart</p>
+          </div>
           <ClientOnly>
             <apexchart
               v-if="chartData.length > 0"
@@ -238,7 +244,13 @@
           <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">By product category</p>
         </div>
         <div class="h-48 sm:h-64 lg:h-72 relative overflow-hidden">
-          <p v-if="pieChartData.length === 0" class="text-xs text-gray-500 dark:text-gray-400 text-center py-12">No data available</p>
+          <div v-if="pieChartData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-14 h-14 mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+              <Squares2X2Icon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+            </div>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No breakdown data</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sales will appear here by category</p>
+          </div>
           <ClientOnly>
             <apexchart
               v-if="pieChartData.length > 0"
@@ -312,8 +324,11 @@
           <NuxtLink to="/dashboard/receipts" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
         <div class="space-y-1.5">
-          <div v-if="recentTransactions.length === 0" class="text-center py-4">
-            <p class="text-[10px] text-gray-500 dark:text-gray-400">No recent transactions</p>
+          <div v-if="recentTransactions.length === 0" class="text-center py-6">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <ReceiptPercentIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">No recent transactions</p>
           </div>
           <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
             <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -339,8 +354,11 @@
           <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
     </div>
         <div class="space-y-2">
-          <div v-if="topSellingItems.length === 0" class="text-center py-4">
-            <p class="text-[10px] text-gray-500 dark:text-gray-400">No products sold yet</p>
+          <div v-if="topSellingItems.length === 0" class="text-center py-6">
+            <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+              <CubeIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">No products sold yet</p>
           </div>
           <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
             <div class="flex-shrink-0 w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-[10px]">
@@ -458,6 +476,7 @@ import {
   Cog6ToothIcon,
   ExclamationTriangleIcon,
   ChartBarIcon,
+  Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'

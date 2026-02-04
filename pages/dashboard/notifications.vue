@@ -31,14 +31,14 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="notifications.length === 0" class="text-center py-8">
-      <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-        <BellIcon class="w-6 h-6 text-gray-400 dark:text-gray-500 stroke-1" stroke-width="1.5" />
+    <div v-else-if="notifications.length === 0" class="text-center py-10">
+      <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+        <BellIcon class="w-8 h-8 sm:w-10 sm:h-10 text-amber-600 dark:text-amber-400 stroke-1" stroke-width="1.5" />
       </div>
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
         No notifications yet
       </h3>
-      <p class="text-xs text-gray-500 dark:text-gray-400">
+      <p class="text-xs text-gray-500 dark:text-gray-400 px-4">
         Your activity notifications will appear here
       </p>
     </div>

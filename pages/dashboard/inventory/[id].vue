@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-3 pb-24 sm:pb-20 overflow-x-hidden">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs :items="inventoryBreadcrumbs" />
+
     <!-- Enhanced Header - Compact -->
     <div class="flex items-start justify-between gap-2">
       <div class="flex items-start gap-2 flex-1 min-w-0">
@@ -359,72 +362,99 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-4 py-3"
+                class="px-4 py-3 align-top"
               >
-                <div v-if="colIndex === 0" class="flex items-center gap-2">
-                  <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
-                    {{ getItemDisplayValue(item[column.key]) }}
-                  </span>
+                <!-- Inline edit mode (large screens only) -->
+                <div
+                  v-if="isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && isEditingCell(item, column.key)"
+                  class="min-w-[80px]"
+                >
+                  <input
+                    ref="inlineEditInputRef"
+                    v-model="inlineEditValue"
+                    type="text"
+                    :inputmode="(column.type === 'currency' || column.type === 'number' || column.key.toLowerCase().includes('price')) ? 'decimal' : 'text'"
+                    class="w-full min-w-0 px-2 py-1.5 text-[11px] border border-primary-500 dark:border-primary-400 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    @blur="saveInlineEdit"
+                    @keydown.enter="saveInlineEdit"
+                    @keydown.esc="cancelInlineEdit"
+                    @click.stop
+                  />
                 </div>
-                <div v-else>
-                  <!-- Check if column is a price field (by key or type) -->
-                  <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[11px]">
-                    <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
-                      <span class="font-semibold text-green-600 dark:text-green-400">
-                        {{ formatCurrency(item.discountedPrice) }}
-                      </span>
-                      <span class="text-[9px] text-gray-400 dark:text-gray-500 line-through">
-                        {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
-                      </span>
-                      <span class="text-[9px] text-red-600 dark:text-red-400 font-medium">
-                        {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
+                <!-- Display mode -->
+                <div
+                  v-else
+                  :class="[
+                    'flex items-center gap-2 min-h-[28px]',
+                    isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors'
+                  ]"
+                  @click="startInlineEdit(item, column)"
+                >
+                  <template v-if="colIndex === 0">
+                    <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
+                      {{ getItemDisplayValue(item[column.key]) }}
+                    </span>
+                  </template>
+                  <template v-else>
+                    <!-- Check if column is a price field (by key or type) -->
+                    <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[11px]">
+                      <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
+                        <span class="font-semibold text-green-600 dark:text-green-400">
+                          {{ formatCurrency(item.discountedPrice) }}
+                        </span>
+                        <span class="text-[9px] text-gray-400 dark:text-gray-500 line-through">
+                          {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
+                        </span>
+                        <span class="text-[9px] text-red-600 dark:text-red-400 font-medium">
+                          {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
+                        </span>
+                      </div>
+                      <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
+                        {{ formatCurrency(item[column.key] || 0) }}
                       </span>
                     </div>
-                    <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
-                      {{ formatCurrency(item[column.key] || 0) }}
-                    </span>
-                  </div>
-                  <div v-else-if="'type' in column && column.type === 'number'" class="text-[11px] text-gray-600 dark:text-gray-300">
-                    {{ formatNumber(item[column.key]) }}
-                  </div>
-                  <div v-else-if="'type' in column && column.type === 'date'" class="text-[11px] text-gray-600 dark:text-gray-300">
-                    <span v-if="item[column.key]">
-                      {{ formatItemDate(item[column.key]) }}
-                    </span>
-                    <span v-else class="text-gray-400 dark:text-gray-500 italic">
-                      -
-                    </span>
-                  </div>
-                  <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
-                    <span v-if="item[column.key]">
-                      {{ formatItemDate(item[column.key]) }}
-                    </span>
-                    <span v-else class="text-gray-400 dark:text-gray-500">
-                      -
-                    </span>
-                  </div>
-                  <div v-else-if="column.key === 'availability'" class="text-[11px]">
-                    <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium"
-                      :class="getItemAvailability(item).class">
-                      {{ getItemAvailability(item).label }}
-                    </span>
-                  </div>
-                  <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 py-0.5 text-[9px] font-medium"
-                    :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
-                    {{ item[column.key] ? 'Yes' : 'No' }}
-                  </div>
-                  <div v-else class="text-[11px] text-gray-600 dark:text-gray-300">
-                    <span 
-                      v-if="getItemDisplayValue(item[column.key]) && typeof getItemDisplayValue(item[column.key]) === 'string' && getItemDisplayValue(item[column.key]).length > 30"
-                      class="block truncate max-w-xs"
-                      :title="getItemDisplayValue(item[column.key])"
-                    >
-                      {{ getItemDisplayValue(item[column.key]) }}
-                    </span>
-                    <span v-else>
-                      {{ getItemDisplayValue(item[column.key]) }}
-                    </span>
-                  </div>
+                    <div v-else-if="'type' in column && column.type === 'number'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                      {{ formatNumber(item[column.key]) }}
+                    </div>
+                    <div v-else-if="'type' in column && column.type === 'date'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                      <span v-if="item[column.key]">
+                        {{ formatItemDate(item[column.key]) }}
+                      </span>
+                      <span v-else class="text-gray-400 dark:text-gray-500 italic">
+                        -
+                      </span>
+                    </div>
+                    <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                      <span v-if="item[column.key]">
+                        {{ formatItemDate(item[column.key]) }}
+                      </span>
+                      <span v-else class="text-gray-400 dark:text-gray-500">
+                        -
+                      </span>
+                    </div>
+                    <div v-else-if="column.key === 'availability'" class="text-[11px]">
+                      <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium"
+                        :class="getItemAvailability(item).class">
+                        {{ getItemAvailability(item).label }}
+                      </span>
+                    </div>
+                    <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 py-0.5 text-[9px] font-medium"
+                      :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
+                      {{ item[column.key] ? 'Yes' : 'No' }}
+                    </div>
+                    <div v-else class="text-[11px] text-gray-600 dark:text-gray-300">
+                      <span 
+                        v-if="getItemDisplayValue(item[column.key]) && typeof getItemDisplayValue(item[column.key]) === 'string' && getItemDisplayValue(item[column.key]).length > 30"
+                        class="block truncate max-w-xs"
+                        :title="getItemDisplayValue(item[column.key])"
+                      >
+                        {{ getItemDisplayValue(item[column.key]) }}
+                      </span>
+                      <span v-else>
+                        {{ getItemDisplayValue(item[column.key]) }}
+                      </span>
+                    </div>
+                  </template>
                 </div>
               </td>
               <td v-if="canManageInventoryItems" class="px-4 py-3 text-center">
@@ -518,11 +548,11 @@
             <!-- Empty State -->
             <tr v-if="sortedFilteredItems.length === 0">
               <td :colspan="columns.length + (canManageInventoryItems ? 2 : 0)" class="px-6 py-12">
-                <div class="text-center">
-                  <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
-                    <CubeIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                <div class="text-center py-4">
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                    <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary-500 dark:text-primary-400" />
                   </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     {{ searchQuery ? 'No items found' : 'No items in this folder' }}
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
@@ -872,11 +902,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   ArrowLeftIcon,
   PlusIcon,
   CubeIcon,
+  FolderIcon,
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
@@ -898,6 +929,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
+import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -921,6 +953,11 @@ definePageMeta({
 
 const route = useRoute()
 const folderId = computed(() => route.params.id as string)
+
+const inventoryBreadcrumbs = computed(() => [
+  { label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
+  { label: folder.value?.name || 'Folder', icon: FolderIcon },
+])
 
 // Import InventoryItem from store
 import type { InventoryItem } from '~/stores/inventory'
@@ -1053,6 +1090,121 @@ const showDeleteItemModal = ref(false)
 const selectedItemForDelete = ref<InventoryItem | null>(null)
 const showTimelineModal = ref(false)
 const selectedItemForTimeline = ref<InventoryItem | null>(null)
+
+// Inline edit state (large screens only)
+const editingCell = ref<{ itemId: string; columnKey: string } | null>(null)
+const inlineEditValue = ref('')
+const isSavingInline = ref(false)
+const isLargeScreen = ref(false)
+
+onMounted(() => {
+  if (import.meta.client) {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    isLargeScreen.value = mq.matches
+    mq.addEventListener('change', (e) => { isLargeScreen.value = e.matches })
+  }
+})
+
+// Close inline edit when clicking outside the cell
+const handleClickOutsideInlineEdit = (e: MouseEvent) => {
+  if (!editingCell.value) return
+  const target = e.target as Node
+  const input = inlineEditInputRef.value
+  if (input && !input.contains(target)) {
+    saveInlineEdit()
+  }
+}
+
+watch(editingCell, (val) => {
+  if (import.meta.client) {
+    if (val) {
+      document.addEventListener('mousedown', handleClickOutsideInlineEdit)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutsideInlineEdit)
+    }
+  }
+}, { immediate: true })
+
+const isColumnEditable = (column: { key: string; type?: string }) => {
+  return !['availability', 'dateIn', 'dateOut'].includes(column.key)
+}
+
+const isEditingCell = (item: InventoryItem, columnKey: string) => {
+  return editingCell.value?.itemId === item.id && editingCell.value?.columnKey === columnKey
+}
+
+const inlineEditInputRef = ref<HTMLInputElement | null>(null)
+
+const startInlineEdit = async (item: InventoryItem, column: { key: string; type?: string }) => {
+  if (!canManageInventoryItems.value || isItemSold(item) || !isColumnEditable(column)) return
+  if (!isLargeScreen.value) return
+  let val = item[column.key]
+  // For price columns with discount, show the effective (discounted) price
+  if ((column.type === 'currency' || column.key.toLowerCase().includes('price')) && item.discountedPrice !== undefined) {
+    val = item.discountedPrice
+  }
+  inlineEditValue.value = val !== undefined && val !== null ? String(val) : ''
+  editingCell.value = { itemId: item.id, columnKey: column.key }
+  await nextTick()
+  inlineEditInputRef.value?.focus()
+}
+
+const cancelInlineEdit = () => {
+  editingCell.value = null
+  inlineEditValue.value = ''
+}
+
+const saveInlineEdit = async () => {
+  if (!editingCell.value || isSavingInline.value) return
+  const { itemId, columnKey } = editingCell.value
+  const item = items.value.find((i) => i.id === itemId)
+  if (!item || isItemSold(item)) {
+    cancelInlineEdit()
+    return
+  }
+  const column = columns.value.find((c) => c.key === columnKey)
+  if (!column || !isColumnEditable(column)) {
+    cancelInlineEdit()
+    return
+  }
+  const rawValue = inlineEditValue.value.trim()
+  let parsedValue: string | number | boolean = rawValue
+  const colType = column.type || (column as any).type
+  if (colType === 'number' || columnKey.toLowerCase().includes('quantity') || columnKey.toLowerCase() === 'sku') {
+    const num = parseFloat(rawValue)
+    parsedValue = isNaN(num) ? rawValue : num
+  } else if (colType === 'currency' || columnKey.toLowerCase().includes('price')) {
+    const num = parseFloat(rawValue.replace(/[^0-9.-]/g, ''))
+    parsedValue = isNaN(num) ? 0 : num
+  } else if (colType === 'boolean') {
+    parsedValue = ['true', '1', 'yes'].includes(rawValue.toLowerCase())
+  }
+  const previousValue = item[columnKey]
+  const previousDiscounted = item.discountedPrice
+  const isPriceField = colType === 'currency' || columnKey.toLowerCase().includes('price')
+  const hasChanged = isPriceField && item.discountedPrice !== undefined
+    ? parsedValue !== previousDiscounted && String(parsedValue) !== String(previousDiscounted)
+    : parsedValue !== previousValue && String(parsedValue) !== String(previousValue)
+  if (!hasChanged) {
+    cancelInlineEdit()
+    return
+  }
+  isSavingInline.value = true
+  try {
+    const updates: Record<string, any> = { [columnKey]: parsedValue }
+    // When editing price and item had discount, sync discountedPrice to new value
+    if (isPriceField && item.discountedPrice !== undefined) {
+      updates.discountedPrice = parsedValue
+    }
+    await inventoryStore.updateItem(folderId.value, itemId, updates)
+    toast.success('Updated')
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to update')
+  } finally {
+    isSavingInline.value = false
+    cancelInlineEdit()
+  }
+}
 
 // Folder will be loaded from Firestore via inventoryStore
 
@@ -1506,6 +1658,7 @@ const openAddItemModal = () => {
 }
 
 const handleEditItem = (item: InventoryItem) => {
+  cancelInlineEdit()
   editingItem.value = item
   serialNumbers.value = []
   // Copy all item data to form, excluding system fields
@@ -1548,23 +1701,32 @@ const handleViewTimeline = async (item: InventoryItem) => {
   }
 }
 
-const handleConfirmDeleteItem = async (item: InventoryItem) => {
-  try {
-    await inventoryStore.deleteItem(folderId.value, item.id)
-    // Reload folder to update stats
-    if (folder.value) {
-      await inventoryStore.fetchFolder(folderId.value)
-      folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
-    }
-    // Refresh folder list to update item counts on the folders page
-    await inventoryStore.fetchFolders()
-    toast.success('Item deleted successfully')
-  } catch (error: any) {
-    toast.error(error.message || 'Failed to delete item')
-  } finally {
-    showDeleteItemModal.value = false
-    selectedItemForDelete.value = null
-  }
+const handleConfirmDeleteItem = (item: InventoryItem) => {
+  showDeleteItemModal.value = false
+  selectedItemForDelete.value = null
+
+  const removed = inventoryStore.removeItemOptimistically(folderId.value, item.id)
+  if (!removed) return
+
+  toast.deletedWithUndo(
+    'Item deleted',
+    () => {
+      inventoryStore.restoreItem(folderId.value, item)
+    },
+    async () => {
+      try {
+        await inventoryStore.deleteItem(folderId.value, item.id)
+        if (folder.value) {
+          await inventoryStore.fetchFolder(folderId.value)
+          folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+        }
+        await inventoryStore.fetchFolders()
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete item')
+      }
+    },
+    5000
+  )
 }
 
 const addSerialNumber = () => {
@@ -2401,6 +2563,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
+    document.removeEventListener('mousedown', handleClickOutsideInlineEdit)
     document.body.style.overflow = ''
   }
 })

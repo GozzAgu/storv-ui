@@ -39,15 +39,13 @@
           <p class="text-red-800 dark:text-red-200 text-xs">{{ storesError }}</p>
         </div>
 
-        <div v-else-if="stores.length === 0" class="text-center py-6">
-          <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-50">No stores yet</h3>
-          <p class="mt-1.5 text-xs text-gray-600 dark:text-gray-400">Get started by creating your first store.</p>
-          <div class="mt-3">
-            <Button size="sm" @click="showCreateModal = true">Create Branch</Button>
+        <div v-else-if="stores.length === 0" class="text-center py-8">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+            <BuildingStorefrontIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary-600 dark:text-primary-400" />
           </div>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No stores yet</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Get started by creating your first store.</p>
+          <Button size="sm" @click="showCreateModal = true">Create Branch</Button>
         </div>
 
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
@@ -586,6 +584,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
   SparklesIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'

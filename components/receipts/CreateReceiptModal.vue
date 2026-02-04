@@ -75,11 +75,16 @@
             </div>
             <div
               v-else-if="filteredFolders.length === 0"
-              class="text-center py-5 border border-gray-200 dark:border-gray-700 rounded-md"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
             >
-              <FolderIcon class="w-9 h-9 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                {{ folderSearchQuery ? 'No folders found matching your search' : 'No inventory folders found' }}
+              <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <FolderIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+              </div>
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {{ folderSearchQuery ? 'No folders found' : 'No inventory folders' }}
+              </p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                {{ folderSearchQuery ? 'Try a different search' : 'Create a folder in Inventory first' }}
               </p>
             </div>
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto">
@@ -152,10 +157,13 @@
             </div>
             <div
               v-else-if="availableItems.length === 0"
-              class="text-center py-5 border border-gray-200 dark:border-gray-700 rounded-md"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
             >
-              <CubeIcon class="w-9 h-9 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-              <p class="text-xs text-gray-500 dark:text-gray-400">No items available in this folder</p>
+              <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <CubeIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+              </div>
+              <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No items available</p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400">This folder has no items to add</p>
             </div>
             <div v-else class="max-h-[360px] overflow-y-auto space-y-2">
               <div
@@ -453,8 +461,11 @@
                 </div>
                 <div
                   v-else-if="folders.length === 0"
-                  class="text-center py-3 border border-gray-200 dark:border-gray-700 rounded-md"
+                  class="text-center py-4 px-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
                 >
+                  <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                    <FolderIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                  </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400">No inventory folders found</p>
                 </div>
                 <select

@@ -615,10 +615,10 @@
             </tr>
             <!-- Empty State - Mobile Optimized -->
             <tr v-if="sortedFilteredReceipts.length === 0" class="bg-white dark:bg-gray-800">
-              <td colspan="9" class="px-3 py-6">
-                <div class="text-center">
-                  <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
-                    <ReceiptPercentIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <td colspan="9" class="px-3 py-8">
+                <div class="text-center py-4">
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                    <ReceiptPercentIcon class="w-8 h-8 sm:w-10 sm:h-10 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
                     {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
@@ -718,7 +718,7 @@
       <DeleteReceiptModal
         v-model="showDeleteReceiptModal"
         :receipt="selectedReceipt"
-        @deleted="handleReceiptDeleted"
+        @confirmDelete="handleReceiptConfirmDelete"
       />
 
       <!-- Receipt Timeline Modal -->
@@ -942,10 +942,10 @@
               </template>
               <!-- Empty State - Compact -->
               <tr v-if="filteredCustomers.length === 0" class="bg-white dark:bg-gray-800">
-                <td colspan="7" class="px-3 py-6">
-                  <div class="text-center">
-                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-2">
-                      <UsersIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <td colspan="7" class="px-3 py-8">
+                  <div class="text-center py-4">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                      <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
                       {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
@@ -1041,6 +1041,7 @@ import { useStaffStore } from '~/stores/staff'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1053,6 +1054,7 @@ useHead({
 
 const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
+const toast = useToast()
 const authStore = useAuthStore()
 const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
 const { getUserDocument } = useUser()
@@ -1747,13 +1749,28 @@ const handleDeleteReceipt = (receipt: Receipt) => {
   showDeleteReceiptModal.value = true
 }
 
-const handleReceiptDeleted = async (receipt: Receipt) => {
+const handleReceiptConfirmDelete = (receipt: Receipt) => {
   showDeleteReceiptModal.value = false
   selectedReceipt.value = null
-  // Refresh receipts list
-  await receiptsStore.fetchReceipts()
-  // Reload creator names
-  await loadCreatorNames()
+
+  const removed = receiptsStore.removeReceiptOptimistically(receipt.id)
+  if (!removed) return
+
+  toast.deletedWithUndo(
+    'Receipt deleted',
+    () => {
+      receiptsStore.restoreReceipt(receipt)
+    },
+    async () => {
+      try {
+        await receiptsStore.deleteReceipt(receipt.id)
+        await loadCreatorNames()
+      } catch (error: any) {
+        toast.error(error.message || 'Failed to delete receipt')
+      }
+    },
+    5000
+  )
 }
 
 // Function to fetch creator name for a given UID

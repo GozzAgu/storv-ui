@@ -28,6 +28,15 @@
             {{ toast.message }}
           </p>
         </div>
+
+        <!-- Action Button (e.g. Undo) -->
+        <button
+          v-if="toast.action"
+          @click="toast.action.onClick()"
+          class="flex-shrink-0 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:underline transition-colors px-2 py-1 rounded"
+        >
+          {{ toast.action.label }}
+        </button>
         
         <!-- Close Button -->
         <button

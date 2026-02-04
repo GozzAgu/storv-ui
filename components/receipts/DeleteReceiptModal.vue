@@ -157,7 +157,7 @@ import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import { useReceiptsStore, type Receipt } from '~/stores/receipts'
+import type { Receipt } from '~/stores/receipts'
 
 interface Props {
   modelValue: boolean
@@ -167,10 +167,8 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  'deleted': [receipt: Receipt]
+  'confirmDelete': [receipt: Receipt]
 }>()
-
-const receiptsStore = useReceiptsStore()
 
 const confirmed = ref(false)
 const isProcessing = ref(false)
@@ -203,22 +201,11 @@ const handleCancel = () => {
   emit('update:modelValue', false)
 }
 
-const handleConfirmDelete = async () => {
+const handleConfirmDelete = () => {
   if (!props.receipt || !confirmed.value || isProcessing.value) return
-
-  isProcessing.value = true
-
-  try {
-    const receipt = props.receipt
-    await receiptsStore.deleteReceipt(receipt.id)
-
-    emit('deleted', receipt)
-    handleCancel()
-  } catch (error: any) {
-    alert(error.message || 'Failed to delete receipt. Please try again.')
-  } finally {
-    isProcessing.value = false
-  }
+  const receipt = props.receipt
+  emit('confirmDelete', receipt)
+  handleCancel()
 }
 
 // Reset form when modal opens/closes

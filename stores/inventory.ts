@@ -1253,6 +1253,22 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
+    // Optimistically remove item from local state (for undo flow)
+    removeItemOptimistically(folderId: string, itemId: string): InventoryItem | null {
+      if (!this.items[folderId]) return null
+      const index = this.items[folderId].findIndex(item => item.id === itemId)
+      if (index === -1) return null
+      const [removed] = this.items[folderId].splice(index, 1)
+      return removed ?? null
+    },
+
+    // Restore item to local state (undo)
+    restoreItem(folderId: string, item: InventoryItem) {
+      if (!this.items[folderId]) this.items[folderId] = []
+      this.items[folderId].push(item)
+      this.updateItemCount(folderId)
+    },
+
     // Delete an item
     async deleteItem(folderId: string, itemId: string) {
       const db = useFirestore().getFirestoreInstance()

@@ -331,8 +331,12 @@
       <Card v-if="activeTab === 'history'" padding="sm" extra-class="p-4">
         <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Transfer History</h2>
         
-        <div v-if="transferHistory.length === 0" class="text-center py-8">
-          <p class="text-xs text-gray-500 dark:text-gray-400">No transfer history found</p>
+        <div v-if="transferHistory.length === 0" class="text-center py-10">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+            <ArrowsRightLeftIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+          </div>
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No transfer history</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Transfers between stores will appear here</p>
         </div>
 
         <div v-else class="space-y-2">

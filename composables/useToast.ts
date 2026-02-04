@@ -2,11 +2,17 @@ import { ref } from 'vue'
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info'
 
+export interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 export interface Toast {
   id: string
   message: string
   type: ToastType
   duration?: number
+  action?: ToastAction
 }
 
 // Shared state - singleton pattern to ensure all instances use the same toasts array
@@ -16,6 +22,9 @@ let toastIdCounter = 0
 
 // Store timeout IDs to allow cleanup
 const toastTimeouts = new Map<string, NodeJS.Timeout>()
+
+// Store pending commit callbacks for undo toasts
+const pendingCommits = new Map<string, NodeJS.Timeout>()
 
 export const useToast = () => {
   const addToast = (message: string, type: ToastType = 'info', duration: number = 5000) => {
@@ -76,24 +85,78 @@ export const useToast = () => {
   const info = (message: string, duration?: number) => {
     return addToast(message, 'info', duration || 5000)
   }
+
+  /**
+   * Show a "deleted" toast with an Undo button.
+   * onUndo is called if user clicks Undo; onCommit runs after duration if not undone.
+   */
+  const deletedWithUndo = (
+    message: string,
+    onUndo: () => void,
+    onCommit: () => void | Promise<void>,
+    duration: number = 5000
+  ) => {
+    if (import.meta.server) {
+      return
+    }
+
+    const id = `toast-${++toastIdCounter}-${Date.now()}`
+    let cancelled = false
+
+    const commitTimer = setTimeout(async () => {
+      pendingCommits.delete(id)
+      if (cancelled) return
+      removeToast(id)
+      try {
+        await onCommit()
+      } catch (err) {
+        console.error('[Toast] Commit failed:', err)
+      }
+    }, duration)
+    pendingCommits.set(id, commitTimer)
+
+    const handleUndo = () => {
+      cancelled = true
+      const timer = pendingCommits.get(id)
+      if (timer) {
+        clearTimeout(timer)
+        pendingCommits.delete(id)
+      }
+      removeToast(id)
+      onUndo()
+    }
+
+    const toast: Toast = {
+      id,
+      message,
+      type: 'success',
+      duration: 0,
+      action: { label: 'Undo', onClick: handleUndo },
+    }
+    toasts.value.push(toast)
+    return id
+  }
   
   const clearAll = () => {
     // Clear all timeouts
     toastTimeouts.forEach(timeoutId => clearTimeout(timeoutId))
     toastTimeouts.clear()
-    
+    pendingCommits.forEach(timeoutId => clearTimeout(timeoutId))
+    pendingCommits.clear()
+
     toasts.value = []
   }
-  
+
   return {
-    toasts, // Return ref directly - Vue's reactivity will handle it
+    toasts,
     success,
     error,
     warning,
     info,
     addToast,
     removeToast,
-    clearAll
+    deletedWithUndo,
+    clearAll,
   }
 }
 
