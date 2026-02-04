@@ -28,9 +28,12 @@
               <span>Contact</span>
               <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-200 group-hover:w-full"></span>
             </a>
-            <NuxtLink to="/signin" class="bg-primary-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg">
+            <button
+              @click="showContactFormModal = true"
+              class="bg-primary-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary-700 transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            >
               Start Free Trial
-            </NuxtLink>
+            </button>
           </div>
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen"
@@ -83,13 +86,12 @@
               </a>
             </div>
             <div class="mt-4 pt-4 border-t border-gray-100">
-              <NuxtLink 
-                to="/signin"
-                @click="mobileMenuOpen = false" 
+              <button
+                @click="showContactFormModal = true; mobileMenuOpen = false"
                 class="w-full bg-primary-600 text-white px-4 py-3 rounded-lg font-semibold text-sm hover:bg-primary-700 transition-all duration-200 shadow-sm hover:shadow-md block text-center"
               >
                 Start Free Trial
-            </NuxtLink>
+              </button>
             </div>
           </div>
         </Transition>
@@ -126,12 +128,12 @@
             </p>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <NuxtLink
-                to="/signin"
+              <button
+                @click="showContactFormModal = true"
                 class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors w-auto"
               >
                 Get Started
-              </NuxtLink>
+              </button>
               <button
                 @click="scrollToSection('features')"
                 class="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors w-auto"
@@ -262,12 +264,12 @@
         </div>
 
               <div class="pt-2">
-                <NuxtLink
-                  to="/signin"
-                  class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors"
+                <button
+                  @click="showContactFormModal = true"
+                  class="inline-flex items-center justify-center rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm sm:text-base font-semibold px-4 sm:px-6 py-2 sm:py-3 transition-colors w-full"
                 >
                   Get Started
-                </NuxtLink>
+                </button>
                 </div>
                 </div>
               </div>
@@ -639,9 +641,12 @@
             <div class="mb-6">
               <p class="text-lg font-bold text-gray-900">FREE / {{ isYearly ? 'annually' : 'monthly' }}:</p>
             </div>
-            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
+            <button
+              @click="showContactFormModal = true"
+              class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center"
+            >
               Get Started
-            </NuxtLink>
+            </button>
             </div>
 
           <!-- Storvv Medium -->
@@ -688,9 +693,12 @@
               </div>
               <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $27/year</p>
             </div>
-            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
+            <button
+              @click="showContactFormModal = true"
+              class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center"
+            >
               Get Started
-            </NuxtLink>
+            </button>
             </div>
 
           <!-- Storvv Enterprise -->
@@ -740,9 +748,12 @@
             </div>
               <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $45/year</p>
                 </div>
-            <NuxtLink to="/signin" class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center">
+            <button
+              @click="showContactFormModal = true"
+              class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-2 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:from-orange-600 hover:to-red-600 transition-colors inline-flex items-center justify-center"
+            >
               Get Started
-            </NuxtLink>
+            </button>
               </div>
               </div>
             </div>
@@ -1133,13 +1144,13 @@
           <p class="text-lg sm:text-xl font-semibold text-white/90 mb-6">
             Experience the difference a truly flexible system makes.
           </p>
-    <NuxtLink
-            to="/signin"
+    <button
+            @click="showContactFormModal = true"
             class="group inline-flex items-center gap-2 bg-white text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Get Started Now
             <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-        </NuxtLink>
+        </button>
         </div>
       </div>
     </section>
@@ -1507,121 +1518,49 @@
 
         <!-- CTA -->
         <div class="mt-24 text-center">
-          <NuxtLink
-            to="/signin"
+          <button
+            @click="showContactFormModal = true"
             class="inline-flex items-center gap-3 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-2xl text-lg"
           >
             Get Started Today
             <ArrowRightIcon class="w-6 h-6" />
-          </NuxtLink>
+          </button>
         </div>
       </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-16">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-            Need some information? Reach out to us
-        </h2>
-          </div>
+    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 sm:py-24 lg:py-28 bg-gradient-to-b from-gray-50 to-white">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative overflow-hidden rounded-2xl bg-white border border-gray-200/80 shadow-xl shadow-gray-200/50 p-10 sm:p-12 lg:p-16 text-center">
+          <!-- Subtle background accent -->
+          <div class="absolute top-0 right-0 w-64 h-64 bg-primary-50/50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary-100/30 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl pointer-events-none" />
           
-        <!-- Two Column Layout -->
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <!-- Left: Image -->
-          <div class="order-2 lg:order-1 hidden lg:block">
-            <div class="rounded-lg overflow-hidden">
-              <img
-                src="/contact.jpg"
-                alt="Contact us"
-                class="w-full h-[500px] object-cover"
-              />
+          <div class="relative">
+            <!-- Icon -->
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-primary-50 rounded-xl mb-6">
+              <EnvelopeIcon class="w-7 h-7 text-primary-600 flex-shrink-0" />
             </div>
+            
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+              Need some information?
+            </h2>
+            <p class="text-base sm:text-lg text-gray-600 max-w-xl mx-auto mb-8">
+              Reach out to us we'd love to hear from you. Questions, feedback, or partnership inquiries welcome.
+            </p>
+            
+            <!-- Divider -->
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent max-w-xs mx-auto mb-8" />
+            
+            <button
+              @click="showContactFormModal = true"
+              class="group inline-flex items-center gap-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-4 rounded-xl text-base font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <span>Contact Us</span>
+              <ArrowRightIcon class="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
+            </button>
           </div>
-          
-          <!-- Right: Contact Form -->
-          <div class="order-1 lg:order-2">
-            <form @submit.prevent="handleContactSubmit" class="space-y-6">
-              <!-- Full Name -->
-          <div>
-                <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  id="fullName"
-                  v-model="contactForm.fullName"
-                  type="text"
-                  required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
-                  placeholder="Enter your full name"
-                />
-          </div>
-          
-              <!-- Email Address -->
-          <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  v-model="contactForm.email"
-                  type="email"
-                  required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors"
-                  placeholder="Enter your email address"
-                />
-          </div>
-          
-              <!-- Select One -->
-          <div>
-                <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-                  Select One
-                </label>
-                <div class="relative">
-                  <select
-                    id="subject"
-                    v-model="contactForm.subject"
-                    required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none appearance-none bg-white transition-colors"
-                  >
-                    <option value="">Select a subject</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="support">Support</option>
-                    <option value="sales">Sales</option>
-                    <option value="partnership">Partnership</option>
-                  </select>
-                  <ChevronDownIcon class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-        
-              <!-- Message -->
-          <div>
-                <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
-                  Example Text
-                </label>
-                <textarea
-                  id="message"
-                  v-model="contactForm.message"
-                  required
-                  rows="5"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors resize-none"
-                  placeholder="Enter your message"
-                ></textarea>
-          </div>
-
-              <!-- Submit Button -->
-              <button
-                type="submit"
-                :disabled="isSubmittingContact"
-                class="w-full bg-gray-900 text-white px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>SEND MESSAGE</span>
-                <span class="text-lg sm:text-xl font-bold">>></span>
-              </button>
-            </form>
-        </div>
         </div>
       </div>
     </section>
@@ -1693,6 +1632,26 @@
         <ArrowUpIcon class="w-6 h-6 flex-shrink-0" />
     </button>
     </Transition>
+
+    <!-- Contact Form Modal -->
+    <Modal
+      :model-value="showContactFormModal"
+      @update:model-value="showContactFormModal = $event"
+      size="xl"
+      :show-close="true"
+    >
+      <template #header>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Contact Us</h3>
+      </template>
+      <div class="min-h-[500px]">
+        <iframe
+          v-if="showContactFormModal"
+          src="https://forms.fillout.com/t/89G44ZqC6Zus"
+          title="Contact form"
+          class="w-full h-[600px] min-h-[500px] border-0 rounded-md"
+        />
+      </div>
+    </Modal>
 
     <!-- Launching Soon Modal - Disabled -->
     <!-- <Modal
@@ -1783,6 +1742,7 @@ const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
 const isYearly = ref(false)
 const showLaunchModal = ref(false)
+const showContactFormModal = ref(false)
 const visibleSections = ref<Set<string>>(new Set())
 const heroBackground = ref<HTMLElement | null>(null)
 const openFaqItems = ref<Set<number>>(new Set())
@@ -1879,34 +1839,6 @@ const previousFeature = () => {
 
 const goToFeature = (index: number) => {
   currentFeatureIndex.value = index
-}
-
-// Contact form state
-const contactForm = ref({
-  fullName: '',
-  email: '',
-  subject: '',
-  message: ''
-})
-
-const isSubmittingContact = ref(false)
-
-const handleContactSubmit = async () => {
-  isSubmittingContact.value = true
-  // Here you would typically send the form data to your backend
-  // For now, we'll just show a success message
-  setTimeout(() => {
-    isSubmittingContact.value = false
-    // Reset form
-    contactForm.value = {
-      fullName: '',
-      email: '',
-      subject: '',
-      message: ''
-    }
-    // You could show a toast notification here
-    alert('Thank you for your message! We\'ll get back to you soon.')
-  }, 1000)
 }
 
 const scrollToSection = (sectionId: string) => {
