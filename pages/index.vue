@@ -282,39 +282,6 @@
         </div>
     </section>
 
-    <!-- Investor Section -->
-    <section class="py-20 sm:py-24 lg:py-28 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <!-- Left: Text Content -->
-          <div class="order-2 lg:order-1">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 tracking-tight leading-tight">
-              For investor opportunities in Storvv
-            </h2>
-            <a
-              href="#contact"
-              @click.prevent="scrollToSection('contact')"
-              class="inline-flex items-center gap-2 text-gray-900 hover:text-primary-600 font-semibold text-base sm:text-lg transition-colors group"
-            >
-              <span>GET STARTED</span>
-              <span class="text-xl font-bold group-hover:translate-x-1 transition-transform">>></span>
-            </a>
-                </div>
-
-          <!-- Right: Image -->
-          <div class="order-1 lg:order-2">
-            <div class="relative rounded-lg overflow-hidden shadow-lg">
-              <img
-                src="/invest.jpg"
-                alt="Investor opportunities"
-                class="w-full h-[400px] sm:h-[500px] object-cover"
-              />
-                </div>
-              </div>
-            </div>
-            </div>
-    </section>
-
     <!-- How It Works Section -->
     <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up relative overflow-hidden">
       <div class="grid lg:grid-cols-2 min-h-[600px]">
