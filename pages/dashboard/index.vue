@@ -269,12 +269,12 @@
       </Card>
     </div>
 
-    <!-- Bottom Row -->
+    <!-- Bottom Row - fixed height cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
       <!-- Quick Stats -->
-      <Card padding="sm" extra-class="p-4 h-full">
-        <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 mb-2">Quick Stats</h2>
-        <div class="space-y-2">
+      <Card padding="sm" extra-class="p-4 h-[240px] flex flex-col">
+        <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 mb-2 flex-shrink-0">Quick Stats</h2>
+        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
           <div class="flex items-center gap-2">
             <div class="w-6 h-6 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
               <CheckCircleIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
@@ -318,12 +318,12 @@
       </Card>
 
       <!-- Recent Transactions -->
-      <Card class="h-full">
-        <div class="flex items-center justify-between mb-2">
+      <Card extra-class="h-[240px] flex flex-col p-4">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
           <NuxtLink to="/dashboard/receipts" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
-        <div class="space-y-1.5">
+        <div class="space-y-1.5 flex-1 min-h-0 overflow-y-auto">
           <div v-if="recentTransactions.length === 0" class="text-center py-6">
             <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
               <ReceiptPercentIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
@@ -348,12 +348,12 @@
       </Card>
 
       <!-- Top Selling Products -->
-      <Card class="h-full">
-        <div class="flex items-center justify-between mb-2">
+      <Card extra-class="h-[240px] flex flex-col p-4">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
           <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
-    </div>
-        <div class="space-y-2">
+        </div>
+        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
           <div v-if="topSellingItems.length === 0" class="text-center py-6">
             <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
               <CubeIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
@@ -376,12 +376,12 @@
       </Card>
 
       <!-- Low Stock Items -->
-      <Card v-if="lowStockItems.length > 0" class="h-full">
-        <div class="flex items-center justify-between mb-2">
+      <Card v-if="lowStockItems.length > 0" extra-class="h-[240px] flex flex-col p-4">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Low Stock Items</h2>
           <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
         </div>
-        <div class="space-y-2">
+        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
           <div v-for="item in lowStockItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
             <div class="flex-shrink-0 w-7 h-7 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
               <ExclamationTriangleIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
@@ -410,11 +410,11 @@
       </Card>
 
       <!-- Inventory Status -->
-      <Card class="h-full">
-        <div class="flex items-center justify-between mb-2">
+      <Card extra-class="h-[240px] flex flex-col p-4">
+        <div class="flex items-center justify-between mb-2 flex-shrink-0">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
         </div>
-        <div class="space-y-2.5">
+        <div class="space-y-2.5 flex-1 min-h-0 overflow-y-auto">
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-[10px] text-gray-600 dark:text-gray-400">In Stock</span>
