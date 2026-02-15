@@ -150,6 +150,7 @@ function generateReceiptEmailHTML(receiptData: any): string {
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
+          ${receiptData.storeLogoUrl ? `<img src="${receiptData.storeLogoUrl}" alt="Store logo" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #d1d5db; margin-bottom: 12px;" />` : ''}
           <h1 style="margin: 0; font-size: 24px; font-weight: bold;">${receiptData.storeBranchName || 'Store'}</h1>
         </div>
 

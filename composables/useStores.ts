@@ -5,6 +5,7 @@ export interface Store {
   address?: string
   phone?: string
   email?: string
+  logoUrl?: string // Store logo - shown on receipts, visible to staff
   ownerId: string // Super admin UID who owns this store
   isActive: boolean
   createdAt: any

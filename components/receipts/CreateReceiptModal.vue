@@ -1254,6 +1254,7 @@ const handleCreateReceipt = async () => {
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name
+      storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || undefined, // Account logo - applies to all stores
       createdByUserName, // User who created the receipt
     }
     

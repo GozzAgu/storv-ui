@@ -11,23 +11,12 @@
       <Card class="lg:col-span-1 p-3">
         <div class="flex flex-col items-center text-center">
           <!-- Avatar -->
-          <div class="relative mb-3">
-            <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-              {{ profileData.firstName[0] }}{{ profileData.lastName[0] }}
-            </div>
-            <button 
-              @click="triggerFileUpload"
-              class="absolute bottom-0 right-0 w-8 h-8 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          <div class="mb-3">
+            <div
+              class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600"
             >
-              <CameraIcon class="w-4 h-4 text-gray-600 dark:text-gray-400" />
-            </button>
-            <input
-              ref="fileInput"
-              type="file"
-              accept="image/*"
-              @change="handleImageUpload"
-              class="hidden"
-            />
+              {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
+            </div>
           </div>
           
           <!-- User Info -->
@@ -909,7 +898,6 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted, computed } from 'vue'
 import {
-  CameraIcon,
   LanguageIcon,
   BellIcon,
   MoonIcon,
@@ -931,6 +919,7 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { usePermissions } from '~/composables/usePermissions'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -968,7 +957,6 @@ const backupData = reactive({ ...profileData })
 
 // Edit state
 const isEditingPersonalInfo = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
 const isLoadingProfile = ref(true)
 const isLoadingStats = ref(true)
 
@@ -976,6 +964,7 @@ const isLoadingStats = ref(true)
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument } = useUser()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
@@ -1396,21 +1385,6 @@ const savePersonalInfo = async () => {
   } catch (error: any) {
     console.error('Error saving profile:', error)
     toast.error(error.message || 'Failed to update profile. Please try again.')
-  }
-}
-
-const triggerFileUpload = () => {
-  fileInput.value?.click()
-}
-
-const handleImageUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
-    // Here you would typically upload to a server
-    console.log('Uploading image:', file.name)
-    // Show success message
-    toast.success('Image uploaded successfully!')
   }
 }
 

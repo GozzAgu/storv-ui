@@ -15,6 +15,57 @@
     </div>
 
     <div class="space-y-3">
+      <!-- Account Logo (super admin - applies to all stores) -->
+      <Card v-if="userStore.isSuperAdmin" padding="sm" extra-class="p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account Logo</h2>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">One logo for all your stores. Shown on receipts.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <div
+              class="w-20 h-20 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-800"
+            >
+              <img
+                v-if="accountLogoUrl"
+                :src="accountLogoUrl"
+                alt="Account logo"
+                class="w-full h-full object-cover"
+              />
+              <BuildingStorefrontIcon v-else class="w-10 h-10 text-gray-400 dark:text-gray-500" />
+            </div>
+            <button
+              type="button"
+              @click="accountLogoInput?.click()"
+              :disabled="isUploadingAccountLogo"
+              class="absolute bottom-0 right-0 w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center disabled:opacity-50"
+            >
+              <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-4 h-4 animate-spin" />
+              <CameraIcon v-else class="w-4 h-4" />
+            </button>
+            <input
+              ref="accountLogoInput"
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              class="hidden"
+              @change="handleAccountLogoUpload"
+            />
+          </div>
+          <div>
+            <button
+              v-if="accountLogoUrl"
+              type="button"
+              @click="removeAccountLogo"
+              class="text-xs text-red-600 hover:text-red-700 font-medium"
+            >
+              Remove logo
+            </button>
+          </div>
+        </div>
+      </Card>
+
       <!-- Stores Management (for super admins) -->
       <Card v-if="userStore.isSuperAdmin" padding="sm" extra-class="p-3">
         <div class="flex items-center justify-between mb-3">
@@ -60,7 +111,13 @@
               <div class="flex-1 mb-2">
                 <div class="flex items-start justify-between mb-1">
                   <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-1 mb-0.5 flex-wrap">
+                    <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                      <div
+                        v-if="store.logoUrl || accountLogoUrl"
+                        class="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-600"
+                      >
+                        <img :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="w-full h-full object-cover" />
+                      </div>
                       <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-50 truncate">{{ store.name }}</h3>
                       <span
                         v-if="currentStore?.id === store.id"
@@ -583,12 +640,15 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import {
-  SparklesIcon,
+  ArrowPathIcon,
   BuildingStorefrontIcon,
+  CameraIcon,
+  SparklesIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
+import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
@@ -622,10 +682,11 @@ const isLoadingStoreInfo = ref(true)
 
 // Get user data and load store info
 const { currentUser } = useFirebaseAuth()
-const { getUserDocument, updateStoreDetails } = useUser()
+const { getUserDocument, updateStoreDetails, updateUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
+const authStore = useAuthStore()
 const inventoryStore = useInventoryStore()
 const toast = useToast()
 
@@ -665,6 +726,53 @@ const storeForm = ref({
   email: '',
   isActive: true,
 })
+const accountLogoInput = ref<HTMLInputElement | null>(null)
+const isUploadingAccountLogo = ref(false)
+
+const accountLogoUrl = computed(() => userStore.userData?.storeLogoUrl || '')
+
+const handleAccountLogoUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !authStore.currentUser || !userStore.isSuperAdmin) return
+
+  isUploadingAccountLogo.value = true
+  input.value = ''
+
+  try {
+    const { uploadImage } = useFirebaseStorage()
+    const userId = authStore.currentUser.uid
+    const { url } = await uploadImage(file, userId, {
+      folder: 'account-logo',
+    })
+
+    await updateUserDocument(userId, { storeLogoUrl: url })
+    userStore.$patch((state) => {
+      if (state.userData) state.userData = { ...state.userData, storeLogoUrl: url }
+    })
+    await storesStore.updateAllStoresLogo(url)
+    toast.success('Logo updated for all stores')
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to upload logo')
+  } finally {
+    isUploadingAccountLogo.value = false
+  }
+}
+
+const removeAccountLogo = async () => {
+  if (!authStore.currentUser || !userStore.isSuperAdmin) return
+
+  try {
+    await updateUserDocument(authStore.currentUser.uid, { storeLogoUrl: '' })
+    userStore.$patch((state) => {
+      if (state.userData) state.userData = { ...state.userData, storeLogoUrl: '' }
+    })
+    await storesStore.updateAllStoresLogo('')
+    toast.success('Logo removed from all stores')
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to remove logo')
+  }
+}
 
 const generateAIDescription = async () => {
   if (!storeForm.value.name?.trim()) {
@@ -760,7 +868,8 @@ const handleStoreSubmit = async () => {
       closeStoreModal()
     } else {
       const wasFirstStore = stores.value.length === 0
-      const newStoreId = await storesStore.createStore(storeForm.value)
+      const logoUrl = userStore.userData?.storeLogoUrl || ''
+      const newStoreId = await storesStore.createStore({ ...storeForm.value, logoUrl })
       toast.success('Store created successfully')
       closeStoreModal()
       await storesStore.fetchStores()

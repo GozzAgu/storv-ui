@@ -53,6 +53,13 @@
       <div ref="receiptContent" class="receipt-content bg-white text-gray-900 p-6 max-w-lg mx-auto">
         <!-- Store Header -->
         <div class="text-center mb-4 pb-3 border-b border-gray-400">
+          <div v-if="storeLogoUrl" class="flex justify-center mb-2">
+            <img
+              :src="storeLogoUrl"
+              alt="Store logo"
+              class="w-14 h-14 rounded-full object-cover border-2 border-gray-300"
+            />
+          </div>
           <h1 class="text-xl font-bold mb-1">{{ storeName || 'Store Name' }}</h1>
           <p v-if="storeAddress" class="text-xs mb-0.5">{{ storeAddress }}</p>
           <p v-if="storePhone" class="text-xs mb-0.5">Phone: {{ storePhone }}</p>
@@ -246,6 +253,7 @@ import type { Receipt } from '~/stores/receipts'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useInventoryStore } from '~/stores/inventory'
+import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
 
@@ -272,13 +280,24 @@ const copyReceiptNumber = (receiptNumber: string) => {
 }
 const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
+const storesStore = useStoresStore()
 const { formatCurrency } = usePreferences()
 
-// Store information
-const storeName = computed(() => userStore.userData?.storeDetails?.storeName || '')
+// Store information (receipt.storeBranchName takes precedence for receipts created in a specific branch)
+const storeName = computed(() => props.receipt?.storeBranchName || userStore.userData?.storeDetails?.storeName || '')
 const storeAddress = computed(() => userStore.userData?.storeDetails?.storeAddress || '')
 const storePhone = computed(() => userStore.userData?.storeDetails?.storePhone || '')
 const storeEmail = computed(() => userStore.userData?.storeDetails?.storeEmail || '')
+// Store logo - from receipt (when created), store by storeId, or account logo
+const storeLogoUrl = computed(() => {
+  const receipt = props.receipt
+  if (receipt?.storeLogoUrl) return receipt.storeLogoUrl
+  if (receipt?.storeId) {
+    const store = storesStore.getStoreById?.(receipt.storeId) || (storesStore.currentStore?.id === receipt.storeId ? storesStore.currentStore : null)
+    if (store?.logoUrl) return store.logoUrl
+  }
+  return userStore.userData?.storeLogoUrl || ''
+})
 
 // Swap-in folder name
 const swapInFolderName = computed(() => {

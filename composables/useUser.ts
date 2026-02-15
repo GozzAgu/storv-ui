@@ -35,6 +35,8 @@ export interface UserData {
   email: string
   name: string
   role: 'superAdmin' | 'admin' | 'user' | 'staff'
+  photoURL?: string
+  storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
   storeDetails?: StoreDetails
   preferences?: UserPreferences
   hasCompletedOnboarding: boolean

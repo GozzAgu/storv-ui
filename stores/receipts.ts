@@ -39,6 +39,7 @@ export interface Receipt {
   itemIds: string[] // Array of inventory item IDs that were sold
   storeId: string // Store this receipt belongs to
   storeBranchName?: string // Store branch name where receipt was generated
+  storeLogoUrl?: string // Super admin profile photo - shown on receipts
   createdByUserName?: string // Name of the user who created the receipt
   // Swap-in fields
   isSwapIn?: boolean // Indicates if this receipt includes a swap-in
@@ -202,6 +203,7 @@ export const useReceiptsStore = defineStore('receipts', {
             itemIds: data.itemIds || [],
             storeId: data.storeId || '',
             storeBranchName: data.storeBranchName || '',
+            storeLogoUrl: data.storeLogoUrl || undefined,
             createdByUserName: data.createdByUserName || '',
             createdBy: data.createdBy || userId,
             actualCreator: data.actualCreator || data.createdBy,

@@ -569,6 +569,23 @@ export const useStoresStore = defineStore('stores', {
       }
     },
 
+    // Update logo for all stores (super admin account logo - applies to all stores)
+    async updateAllStoresLogo(logoUrl: string) {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return
+
+      const userId = await getQueryUserId()
+      if (!userId) return
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) return
+
+      const ownerStores = this.stores.filter(s => s.ownerId === authStore.currentUser!.uid)
+      for (const store of ownerStores) {
+        await this.updateStore(store.id, { logoUrl })
+      }
+    },
+
     // Delete a store
     async deleteStore(storeId: string) {
       const db = useFirestore().getFirestoreInstance()
