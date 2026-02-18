@@ -339,15 +339,18 @@ export const useReceiptsStore = defineStore('receipts', {
 
         const now = new Date()
         
-        // Build receipt object - only include actualCreator if it's different from createdBy
-        const newReceipt: Omit<Receipt, 'id'> = {
+        // Build receipt object - strip undefined values (Firestore rejects undefined)
+        const receiptPayload = {
           ...receiptData,
           date: receiptData.date || now,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
           createdBy: createdByUid,
-          ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }), // Only include if different
+          ...(actualCreatorUid !== createdByUid && { actualCreator: actualCreatorUid }),
         }
+        const newReceipt = Object.fromEntries(
+          Object.entries(receiptPayload).filter(([, v]) => v !== undefined)
+        ) as Omit<Receipt, 'id'>
 
         await setDoc(newReceiptRef, newReceipt)
 

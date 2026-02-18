@@ -1077,7 +1077,13 @@ const removeSplitPayment = (index: number) => {
 }
 
 const getItemDisplayName = (item: InventoryItem) => {
-  // Try to find a name field in the item
+  // Prefer brand + model for serial-number items (e.g. Laptop → Dell XPS 15)
+  const brand = getItemField(item, 'brand')
+  const model = getItemField(item, 'model')
+  if (brand || model) {
+    return [brand, model].filter(Boolean).join(' ').trim()
+  }
+  // Fall back to name/item/title field
   const nameField = Object.keys(item).find(key => 
     key.toLowerCase().includes('name') || 
     key.toLowerCase().includes('item') ||
@@ -1254,7 +1260,7 @@ const handleCreateReceipt = async () => {
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
       storeBranchName, // Store branch name
-      storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || undefined, // Account logo - applies to all stores
+      storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
     }
     

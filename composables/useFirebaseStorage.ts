@@ -128,7 +128,7 @@ export const useFirebaseStorage = () => {
   }
 
   /**
-   * Delete an image from Firebase Storage
+   * Delete an image from Firebase Storage by path
    */
   const deleteImage = async (path: string): Promise<void> => {
     const storage = getStorageInstance()
@@ -138,6 +138,22 @@ export const useFirebaseStorage = () => {
 
     const storageRef = ref(storage, path)
     await deleteObject(storageRef)
+  }
+
+  /**
+   * Delete an image from Firebase Storage by download URL.
+   * Extracts the storage path from Firebase Storage URLs.
+   */
+  const deleteImageByUrl = async (url: string): Promise<void> => {
+    if (!url) return
+
+    // Firebase Storage URL format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{encodedPath}?alt=media&token=...
+    const match = url.match(/\/o\/(.+?)\?/)
+    const encodedPath = match?.[1]
+    if (!encodedPath) return
+
+    const path = decodeURIComponent(encodedPath)
+    await deleteImage(path)
   }
 
   /**
@@ -155,6 +171,7 @@ export const useFirebaseStorage = () => {
     uploadImage,
     getImageUrl,
     deleteImage,
+    deleteImageByUrl,
     buildPath,
     getStorageInstance,
     allowedImageTypes: ALLOWED_IMAGE_TYPES,

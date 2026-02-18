@@ -482,7 +482,7 @@ const completeSale = async () => {
         itemIds,
         storeId: currentStoreId, // Store ID where receipt was created
         storeBranchName, // Store branch name
-        storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || undefined, // Account logo - applies to all stores
+        storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
         createdByUserName, // User who created the receipt
       }
       

@@ -762,8 +762,13 @@ const handleAccountLogoUpload = async (event: Event) => {
 const removeAccountLogo = async () => {
   if (!authStore.currentUser || !userStore.isSuperAdmin) return
 
+  const currentLogoUrl = accountLogoUrl.value
   try {
-    await updateUserDocument(authStore.currentUser.uid, { storeLogoUrl: '' })
+    if (currentLogoUrl) {
+      const { deleteImageByUrl } = useFirebaseStorage()
+      await deleteImageByUrl(currentLogoUrl)
+    }
+    await updateUserDocument(authStore.currentUser!.uid, { storeLogoUrl: '' })
     userStore.$patch((state) => {
       if (state.userData) state.userData = { ...state.userData, storeLogoUrl: '' }
     })
