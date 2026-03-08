@@ -660,10 +660,10 @@
               </div>
             <div class="mb-6">
               <div class="flex items-baseline gap-2">
-                <p class="text-lg font-bold text-gray-900">{{ isYearly ? '$153.00' : '$15.00' }} / {{ isYearly ? 'annually' : 'monthly' }}:</p>
-                <span v-if="isYearly" class="text-sm text-gray-400 line-through">$180</span>
+                <p class="text-lg font-bold text-gray-900">{{ isYearly ? 'N100,000' : 'N10,000' }} / {{ isYearly ? 'annually' : 'monthly' }}:</p>
+                <span v-if="isYearly" class="text-sm text-gray-400 line-through">N120,000</span>
               </div>
-              <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $27/year</p>
+              <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save N20,000/year</p>
             </div>
             <button
               @click="showContactFormModal = true"
@@ -715,10 +715,10 @@
               </div>
             <div class="mb-6">
               <div class="flex items-baseline gap-2">
-                <p class="text-lg font-bold text-gray-900">{{ isYearly ? '$255.00' : '$25.00' }} / {{ isYearly ? 'annually' : 'monthly' }}:</p>
-                <span v-if="isYearly" class="text-sm text-gray-400 line-through">$300</span>
+                <p class="text-lg font-bold text-gray-900">{{ isYearly ? 'N200,000' : 'N25,000' }} / {{ isYearly ? 'annually' : 'monthly' }}:</p>
+                <span v-if="isYearly" class="text-sm text-gray-400 line-through">N300,000</span>
             </div>
-              <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save $45/year</p>
+              <p v-if="isYearly" class="text-sm text-green-600 font-semibold mt-1">Save N100,000/year</p>
                 </div>
             <button
               @click="showContactFormModal = true"
