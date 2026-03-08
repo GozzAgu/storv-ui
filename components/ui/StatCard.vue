@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-md p-2.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700/50 active:scale-[0.98] transition-all duration-200 group">
+  <div class="bg-gray-50 dark:bg-gray-800/80 rounded-md p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700/60 active:scale-[0.98] transition-all duration-200 group">
     <div class="flex items-center justify-between">
       <div class="flex-1 min-w-0">
         <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">{{ label }}</p>
