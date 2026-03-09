@@ -3,7 +3,7 @@
 export type { Theme } from '~/stores/theme'
 
 export const useTheme = () => {
-  const theme = useState<Theme>('theme', () => 'system')
+  const theme = useState<Theme>('theme', () => 'light')
   
   const actualTheme = computed<'light' | 'dark'>(() => {
     if (theme.value === 'system') {
@@ -48,14 +48,14 @@ export const useTheme = () => {
 
   const initTheme = () => {
     if (import.meta.client) {
-      // Get saved theme from localStorage or default to 'system'
+      // Get saved theme from localStorage or default to light (first-time users)
       const savedTheme = localStorage.getItem('theme') as Theme | null
       if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
         theme.value = savedTheme
       } else {
-        // If no saved theme, default to 'system' and save it
-        theme.value = 'system'
-        localStorage.setItem('theme', 'system')
+        // If no saved theme, default to light until the user changes it
+        theme.value = 'light'
+        localStorage.setItem('theme', 'light')
       }
       
       // Apply theme immediately to ensure consistency with inline script

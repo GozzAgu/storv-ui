@@ -4,7 +4,7 @@ export type Theme = 'light' | 'dark' | 'system'
 
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    theme: 'system' as Theme,
+    theme: 'light' as Theme,
     initialized: false,
   }),
 
@@ -29,9 +29,9 @@ export const useThemeStore = defineStore('theme', {
         if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
           this.theme = savedTheme
         } else {
-          // If no saved theme, default to 'system' but keep it in sync
-          this.theme = 'system'
-          localStorage.setItem('theme', 'system')
+          // If no saved theme, default to light until the user changes it
+          this.theme = 'light'
+          localStorage.setItem('theme', 'light')
         }
         
         // Apply theme immediately to ensure consistency

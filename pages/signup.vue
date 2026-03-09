@@ -28,7 +28,7 @@
           <img
             :src="logoSource"
             alt="Storvv Logo"
-            class="h-10 w-auto max-w-[200px] mx-auto object-contain"
+            class="h-6 w-auto max-w-[110px] mx-auto object-contain shrink-0"
           />
         </NuxtLink>
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
@@ -226,7 +226,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
-import { useTheme } from '~/composables/useTheme'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
@@ -236,12 +235,9 @@ definePageMeta({
   middleware: 'guest'
 })
 
-const { actualTheme } = useTheme()
+useForceLightPage()
 
-const logoSource = computed(() => {
-  // Use light logo on dark background, dark logo on light background for better contrast
-  return actualTheme.value === 'dark' ? '/storvv logo 2.png' : '/storvv logo.png'
-})
+const logoSource = computed(() => '/storvv logo.png')
 
 const form = ref({
   name: '',

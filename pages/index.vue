@@ -1715,7 +1715,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useTheme } from '~/composables/useTheme'
 import Modal from '~/components/ui/Modal.vue'
 import {
   Bars3Icon,
@@ -1752,11 +1751,7 @@ import {
   ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
 
-const { actualTheme } = useTheme()
-
-// const logoSource = computed(() => {
-//   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-// })
+useForceLightPage()
 
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)

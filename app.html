@@ -18,8 +18,8 @@
             isDark = true;
           } else if (theme === 'light') {
             isDark = false;
-          } else {
-            // theme is 'system', null, or undefined - check system preference
+          } else if (theme === 'system') {
+            // User explicitly chose system - follow device preference
             try {
               if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 isDark = true;
@@ -27,16 +27,13 @@
             } catch(e) {
               isDark = false;
             }
-          }
-        } catch(e) {
-          // localStorage access failed - check system preference
-          try {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-              isDark = true;
-            }
-          } catch(e2) {
+          } else {
+            // No saved theme (first-time user) - default to light until they change it
             isDark = false;
           }
+        } catch(e) {
+          // localStorage access failed - default to light
+          isDark = false;
         }
         
         // Apply theme class SYNCHRONOUSLY before any rendering
