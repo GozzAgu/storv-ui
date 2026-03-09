@@ -251,32 +251,30 @@
         </div>
       </template>
 
-      <div class="max-h-[65vh] overflow-y-auto pr-1 -mr-1">
-        <form @submit.prevent="handleSaveFolder" class="space-y-5">
+      <div class="max-h-[65vh] overflow-y-auto -mx-1 px-1">
+        <form @submit.prevent="handleSaveFolder" class="bg-transparent">
           <!-- Basic info -->
-          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-            <div class="p-4 sm:p-5 border-b border-gray-200/60 dark:border-gray-700/60">
-              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Basic info</h4>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Name, type, and description</p>
-            </div>
-            <div class="p-4 sm:p-5 space-y-4">
+          <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Basic info</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-4">Name, type, and description</p>
+            <div class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name *</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Folder name *</label>
                   <input
                     v-model="folderForm.name"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                    class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                     placeholder="Enter folder name"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Type *</label>
                   <select
                     v-model="folderForm.type"
                     required
-                    class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                    class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
                   >
                     <option value="">Select type</option>
                     <option value="general">General</option>
@@ -290,7 +288,7 @@
                 </div>
               </div>
               <div>
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-1.5">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <button
                     type="button"
@@ -307,154 +305,146 @@
                   v-model="folderForm.description"
                   @input="aiError = null"
                   rows="3"
-                  class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                  class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
                   placeholder="Describe the folder's purpose"
                 />
                 <p v-if="aiError" class="text-sm text-red-600 dark:text-red-400 mt-1.5">{{ aiError }}</p>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Color</label>
                 <div class="flex items-center gap-3">
                   <input
                     v-model="folderForm.color"
                     type="color"
-                    class="w-12 h-10 rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 cursor-pointer overflow-hidden"
+                    class="w-11 h-9 rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 cursor-pointer overflow-hidden"
                   />
-                  <span class="text-sm text-gray-600 dark:text-gray-400 font-mono">{{ folderForm.color }}</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">{{ folderForm.color }}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Serial numbers -->
-          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-            <div class="p-4 sm:p-5">
-              <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start">
-                <div class="flex-1">
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Use serial numbers for items</span>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    When enabled, each item has a unique serial number and quantity is 1. When disabled, quantity is editable for bulk items.
-                  </p>
-                </div>
-              </Checkbox>
-            </div>
+          <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+            <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start">
+              <div class="flex-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Use serial numbers for items</span>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
+                  One serial per item (quantity fixed at 1). Turn off to allow editable quantity for bulk items.
+                </p>
+              </div>
+            </Checkbox>
           </div>
 
           <!-- Department access -->
-          <div v-if="canCreateInventoryFolders" class="rounded-xl bg-blue-50/50 dark:bg-blue-900/20 ring-1 ring-blue-200/50 dark:ring-blue-800/50 overflow-hidden">
-            <div class="p-4 sm:p-5 border-b border-blue-200/50 dark:border-blue-800/50">
-              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Department access</h4>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Choose which departments can access this folder. Leave empty for all.</p>
-            </div>
-            <div class="p-4 sm:p-5">
-              <div v-if="departmentsStore.loading" class="text-sm text-gray-500 dark:text-gray-400">Loading departments...</div>
-              <div v-else-if="departmentsStore.departments.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No departments available. Create departments first.</div>
-              <div v-else class="space-y-2 max-h-44 overflow-y-auto">
-                <div
-                  v-for="dept in departmentsStore.departments"
-                  :key="dept.id"
-                  class="flex items-center gap-3 p-3 rounded-xl bg-white/80 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800/80 transition-colors"
-                >
-                  <Checkbox
-                    :model-value="folderForm.allowedDepartments.includes(dept.id)"
-                    @update:model-value="(checked) => toggleDepartmentAccess(dept.id, checked)"
-                    size="sm"
-                  >
-                    <div class="flex items-center justify-between flex-1 min-w-0">
-                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
-                      <span v-if="dept.description" class="text-sm text-gray-500 dark:text-gray-400 truncate ml-2">{{ dept.description }}</span>
-                    </div>
-                  </Checkbox>
+          <div v-if="canCreateInventoryFolders" class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Department access</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-3">Which departments can use this folder. Empty = all.</p>
+            <div v-if="departmentsStore.loading" class="text-sm text-gray-500 dark:text-gray-400 py-2">Loading departments…</div>
+            <div v-else-if="departmentsStore.departments.length === 0" class="text-sm text-gray-500 dark:text-gray-400 py-2">No departments yet. Create one in Settings.</div>
+            <div v-else class="space-y-0 max-h-44 overflow-y-auto">
+              <label
+                v-for="dept in departmentsStore.departments"
+                :key="dept.id"
+                class="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700/80 last:border-b-0 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  :checked="folderForm.allowedDepartments.includes(dept.id)"
+                  @change="toggleDepartmentAccess(dept.id, ($event.target as HTMLInputElement).checked)"
+                  class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                />
+                <div class="flex-1 min-w-0">
+                  <span class="text-sm font-medium text-gray-900 dark:text-gray-100 block truncate">{{ dept.name }}</span>
+                  <span v-if="dept.description" class="text-xs text-gray-500 dark:text-gray-400 block truncate mt-0.5">{{ dept.description }}</span>
                 </div>
-              </div>
+              </label>
             </div>
           </div>
 
           <!-- Table template -->
-          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-            <div class="p-4 sm:p-5 border-b border-gray-200/60 dark:border-gray-700/60 flex items-center gap-3">
-              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
-              <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Custom</span>
+          <div class="px-4 py-4">
+            <div class="flex flex-wrap items-center gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
+                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Custom</span>
+              </div>
+              <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-full sm:ml-auto">
+                + Add field
+              </Button>
             </div>
-            <div class="p-4 sm:p-5">
-              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Define columns for this folder’s table. Add fields below.</p>
-              <div v-if="selectedTemplate" class="space-y-4">
-                <div class="flex justify-end">
-                  <Button variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-full">
-                    + Add field
-                  </Button>
-                </div>
-                <div class="space-y-3 max-h-56 overflow-y-auto pr-1">
-                  <div
-                    v-for="(field, index) in editableFields"
-                    :key="field.id"
-                    class="p-4 rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/60 dark:ring-gray-600/60"
-                  >
-                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Field name *</label>
-                        <input
-                          v-model="field.name"
-                          type="text"
-                          required
-                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                          placeholder="fieldName"
-                        />
-                      </div>
-                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Label *</label>
-                        <input
-                          v-model="field.label"
-                          type="text"
-                          required
-                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                          placeholder="Display name"
-                        />
-                      </div>
-                      <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Type *</label>
-                        <select
-                          v-model="field.type"
-                          required
-                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
-                        >
-                          <option value="text">Text</option>
-                          <option value="number">Number</option>
-                          <option value="date">Date</option>
-                          <option value="select">Select</option>
-                          <option value="boolean">Boolean</option>
-                          <option value="currency">Currency</option>
-                        </select>
-                      </div>
-                      <div class="sm:col-span-3 flex items-center gap-2 justify-end">
-                        <label class="flex items-center gap-2 cursor-pointer flex-shrink-0">
-                          <input v-model="field.required" type="checkbox" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer" />
-                          <span class="text-sm text-gray-600 dark:text-gray-400">Required</span>
-                        </label>
-                        <button
-                          v-if="!['name', 'price'].includes(field.name)"
-                          type="button"
-                          @click="handleRemoveField(index)"
-                          class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                          title="Remove field"
-                        >
-                          <TrashIcon class="w-4 h-4" />
-                        </button>
-                        <span v-else class="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300" title="Default field">D</span>
-                      </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Define columns for this folder’s table.</p>
+            <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto">
+              <div
+                v-for="(field, index) in editableFields"
+                :key="field.id"
+                class="py-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0"
+              >
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
+                    <div class="sm:col-span-3">
+                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Field name *</label>
+                      <input
+                        v-model="field.name"
+                        type="text"
+                        required
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                        placeholder="e.g. sku"
+                      />
                     </div>
-                  </div>
-                  <div v-if="editableFields.length === 0" class="text-center py-10 px-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/30">
-                    <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
-                      <Squares2X2Icon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+                    <div class="sm:col-span-3">
+                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Label *</label>
+                      <input
+                        v-model="field.label"
+                        type="text"
+                        required
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                        placeholder="Display name"
+                      />
                     </div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No fields yet</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Click “Add field” to define table columns</p>
+                    <div class="sm:col-span-3">
+                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Type *</label>
+                      <select
+                        v-model="field.type"
+                        required
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                      >
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date</option>
+                        <option value="select">Select</option>
+                        <option value="boolean">Boolean</option>
+                        <option value="currency">Currency</option>
+                      </select>
+                    </div>
+                    <div class="sm:col-span-3 flex items-center gap-3 justify-end flex-wrap">
+                      <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          v-model="field.required"
+                          type="checkbox"
+                          class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                        />
+                        <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
+                      </label>
+                      <button
+                        v-if="!['name', 'price'].includes(field.name)"
+                        type="button"
+                        @click="handleRemoveField(index)"
+                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Remove field"
+                      >
+                        <TrashIcon class="w-4 h-4" />
+                      </button>
+                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Default field">Default</span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div v-if="editableFields.length === 0" class="text-center py-10 px-5 border border-dashed border-gray-200 dark:border-gray-600">
+                <Squares2X2Icon class="w-9 h-9 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Click “Add field” to define columns</p>
+              </div>
             </div>
-          </div>
         </form>
       </div>
 
