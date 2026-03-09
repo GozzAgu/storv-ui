@@ -39,8 +39,8 @@
 
     <!-- Loading State -->
     <template v-if="isLoading">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-2.5">
-        <Card v-for="i in 4" :key="i" padding="sm" class="p-3">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-2.5">
+        <Card v-for="i in 5" :key="i" padding="sm" class="p-3">
           <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
         </Card>
       </div>
@@ -49,7 +49,7 @@
     <!-- Analytics Content -->
     <template v-else>
       <!-- Key Metrics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
         <Card padding="sm" class="p-3">
           <div class="flex items-center justify-between">
             <div class="flex-1">
@@ -106,6 +106,21 @@
             </div>
             <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
               <ExclamationTriangleIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            </div>
+          </div>
+        </Card>
+
+        <Card padding="sm" class="p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Refunds</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
+              <p class="text-[10px] mt-1 text-red-600 dark:text-red-400">
+                {{ formatCurrency(refundAmount) }} · {{ refundRateText }}
+              </p>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <ArrowPathIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
             </div>
           </div>
         </Card>
@@ -175,8 +190,62 @@
         </Card>
       </div>
 
-      <!-- Detailed Tables -->
+      <!-- Peak hours, Sales by day, Busiest time -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <!-- Busiest day & hour -->
+        <Card padding="sm" extra-class="p-4 flex flex-col justify-center">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Busiest time</h2>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 mb-3">Peak day & hour in period</p>
+          <p class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ busiestTimeSummary }}</p>
+        </Card>
+
+        <!-- Sales by hour (peak hours) -->
+        <Card padding="sm" extra-class="p-4 lg:col-span-2">
+          <div class="mb-4">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sales by hour</h2>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak hours (revenue)</p>
+          </div>
+          <apexchart
+            type="bar"
+            height="250"
+            :options="peakHoursChartOptions"
+            :series="peakHoursChartSeries"
+          />
+        </Card>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <!-- Sales by day of week -->
+        <Card padding="sm" extra-class="p-4">
+          <div class="mb-4">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sales by day of week</h2>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Best and worst days</p>
+          </div>
+          <apexchart
+            type="bar"
+            height="250"
+            :options="salesByDayChartOptions"
+            :series="salesByDayChartSeries"
+          />
+        </Card>
+
+        <!-- Traffic heatmap: day × hour -->
+        <Card padding="sm" extra-class="p-4">
+          <div class="mb-4">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Traffic heatmap</h2>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Revenue by day × hour</p>
+          </div>
+          <apexchart
+            type="heatmap"
+            height="280"
+            :options="heatmapChartOptions"
+            :series="heatmapSeries"
+          />
+        </Card>
+      </div>
+
+      <!-- Detailed Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <!-- Top Products Table -->
         <Card padding="sm" extra-class="p-4">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Selling Products</h2>
@@ -247,6 +316,38 @@
             </table>
           </div>
         </Card>
+
+        <!-- Recent Returns Table -->
+        <Card padding="sm" extra-class="p-4">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Returns</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="border-b border-gray-200 dark:border-gray-700">
+                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Receipt #</th>
+                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Date</th>
+                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
+                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="ret in recentReturns"
+                  :key="ret.id"
+                  class="border-b border-gray-100 dark:border-gray-800"
+                >
+                  <td class="py-2 px-2 font-medium text-gray-900 dark:text-gray-100">{{ ret.receiptNumber }}</td>
+                  <td class="py-2 px-2 text-gray-700 dark:text-gray-300">{{ formatReturnDate(ret.date) }}</td>
+                  <td class="py-2 px-2 text-right font-semibold text-red-600 dark:text-red-400">-{{ formatCurrency(ret.amount) }}</td>
+                  <td class="py-2 px-2 text-gray-600 dark:text-gray-400 max-w-[120px] truncate" :title="ret.reason">{{ ret.reason }}</td>
+                </tr>
+                <tr v-if="recentReturns.length === 0" class="border-b border-gray-100 dark:border-gray-800">
+                  <td colspan="4" class="py-4 px-2 text-center text-gray-500 dark:text-gray-400">No returns in this period</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
 
       <!-- Low Stock Alerts -->
@@ -287,6 +388,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   ArrowDownTrayIcon,
+  ArrowPathIcon,
   CurrencyDollarIcon,
   ShoppingBagIcon,
   ChartBarIcon,
@@ -311,6 +413,16 @@ useHead({
 
 const { formatCurrency } = usePreferences()
 const toast = useToast()
+
+function formatReturnDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
@@ -557,6 +669,296 @@ const lowStockItems = computed(() => {
 })
 
 const lowStockCount = computed(() => lowStockItems.value.length)
+
+// Refund metrics (period-filtered)
+const refundedReceiptsInPeriod = computed(() =>
+  filteredReceipts.value.filter(r => r.status === 'refunded')
+)
+const refundedCount = computed(() => refundedReceiptsInPeriod.value.length)
+const refundAmount = computed(() =>
+  refundedReceiptsInPeriod.value.reduce((sum, r) => sum + (r.total || 0), 0)
+)
+const completedCountInPeriod = computed(() =>
+  filteredReceipts.value.filter(r => r.status === 'completed').length
+)
+const refundRate = computed(() => {
+  const total = completedCountInPeriod.value + refundedCount.value
+  return total > 0 ? (refundedCount.value / total) * 100 : 0
+})
+const refundRateText = computed(() => `${refundRate.value.toFixed(1)}% refund rate`)
+
+// Recent returns for table (receipt number, date, amount, reason)
+function getRefundReason(receipt: { refundReason?: string; notes?: string }): string {
+  if (receipt.refundReason && receipt.refundReason.trim()) return receipt.refundReason.trim()
+  const notes = receipt.notes
+  if (!notes || !notes.trim()) return '—'
+  const prefix = 'Returned: '
+  return notes.startsWith(prefix) ? notes.slice(prefix.length).trim() : notes
+}
+const recentReturns = computed(() =>
+  refundedReceiptsInPeriod.value
+    .map(r => {
+      const d = r.updatedAt ? (r.updatedAt?.toDate ? r.updatedAt.toDate() : new Date(r.updatedAt)) : (r.date?.toDate ? r.date.toDate() : new Date(r.date))
+      return {
+        id: r.id,
+        receiptNumber: r.receiptNumber,
+        date: d,
+        amount: r.total || 0,
+        reason: getRefundReason(r)
+      }
+    })
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .slice(0, 10)
+)
+
+// Completed receipts only (for sales-by-time analytics)
+const completedReceiptsInPeriod = computed(() =>
+  filteredReceipts.value.filter(r => r.status === 'completed')
+)
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {
+  if (i === 0) return '12am'
+  if (i === 12) return '12pm'
+  return i < 12 ? `${i}am` : `${i - 12}pm`
+})
+
+// Sales by hour (0–23): revenue and order count per hour
+const salesByHour = computed(() => {
+  const byHour = Array.from({ length: 24 }, (_, hour) => ({ hour, revenue: 0, count: 0 }))
+  completedReceiptsInPeriod.value.forEach(r => {
+    const d = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+    const h = d.getHours()
+    const slot = byHour[h]
+    if (slot) {
+      slot.revenue += r.total || 0
+      slot.count += 1
+    }
+  })
+  return byHour
+})
+
+// Sales by day of week (0=Sun … 6=Sat)
+const salesByDayOfWeek = computed(() => {
+  const byDay = DAY_NAMES.map((name, i) => ({ dayIndex: i, dayName: name, revenue: 0, count: 0 }))
+  completedReceiptsInPeriod.value.forEach(r => {
+    const d = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+    const dayIndex = d.getDay()
+    const slot = byDay[dayIndex]
+    if (slot) {
+      slot.revenue += r.total || 0
+      slot.count += 1
+    }
+  })
+  return byDay
+})
+
+// Busiest hour and day in the period (by revenue)
+const busiestHourIndex = computed(() => {
+  let max = -1
+  let best = 0
+  salesByHour.value.forEach((s, i) => {
+    if (s.revenue > max) {
+      max = s.revenue
+      best = i
+    }
+  })
+  return max > 0 ? best : null
+})
+const busiestDayIndex = computed(() => {
+  let max = -1
+  let best = 0
+  salesByDayOfWeek.value.forEach((s, i) => {
+    if (s.revenue > max) {
+      max = s.revenue
+      best = i
+    }
+  })
+  return max > 0 ? best : null
+})
+const busiestHourLabel = computed(() =>
+  busiestHourIndex.value != null ? HOUR_LABELS[busiestHourIndex.value] : null
+)
+const busiestDayName = computed(() =>
+  busiestDayIndex.value != null ? DAY_NAMES[busiestDayIndex.value] : null
+)
+const busiestTimeSummary = computed(() => {
+  if (busiestDayName.value == null || busiestHourLabel.value == null) return 'No sales in period'
+  return `${busiestDayName.value}, ${busiestHourLabel.value}`
+})
+
+// Heatmap: day × hour, value = revenue. Rows = days (Sun–Sat), cols = hours.
+const heatmapSeries = computed(() => {
+  const dayHourRevenue: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0))
+  completedReceiptsInPeriod.value.forEach(r => {
+    const d = r.date?.toDate ? r.date.toDate() : new Date(r.date)
+    const dayIndex = d.getDay()
+    const hour = d.getHours()
+    const row = dayHourRevenue[dayIndex]
+    if (row && row[hour] !== undefined) row[hour] += r.total || 0
+  })
+  return DAY_NAMES.map((name, dayIndex) => {
+    const row = dayHourRevenue[dayIndex]
+    return {
+      name,
+      data: row ? row.map((revenue, hour) => ({ x: HOUR_LABELS[hour], y: Math.round(revenue * 100) / 100 })) : []
+    }
+  })
+})
+const heatmapMaxRevenue = computed(() => {
+  let max = 0
+  heatmapSeries.value.forEach(s => {
+    s.data?.forEach((d: { y: number }) => { if (d.y > max) max = d.y })
+  })
+  return max
+})
+
+const peakHoursChartSeries = computed(() => [{
+  name: 'Revenue',
+  data: salesByHour.value.map(s => s.revenue)
+}])
+const peakHoursChartOptions = computed(() => {
+  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  const textColor = isDark ? '#E5E7EB' : '#1F2937'
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
+  const borderColor = isDark ? '#4B5563' : '#E5E7EB'
+  return {
+    chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
+    colors: [isDark ? '#60a5fa' : '#2563eb'],
+    xaxis: {
+      categories: HOUR_LABELS,
+      labels: {
+        style: { colors: mutedColor, fontSize: '10px' },
+        rotate: -45,
+        rotateAlways: false
+      },
+      axisBorder: { show: true, color: borderColor },
+      axisTicks: { show: true, color: borderColor },
+      title: { style: { color: textColor, fontSize: '12px' } }
+    },
+    yaxis: {
+      labels: {
+        style: { colors: mutedColor, fontSize: '12px' },
+        formatter: (val: number) => formatCurrency(val)
+      },
+      axisBorder: { show: true, color: borderColor },
+      axisTicks: { show: true, color: borderColor },
+      title: { style: { color: textColor, fontSize: '12px' } }
+    },
+    grid: {
+      borderColor,
+      strokeDashArray: 4,
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: true } }
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      style: { fontSize: '12px' },
+      y: { formatter: (val: number) => formatCurrency(val), title: { formatter: () => 'Revenue' } }
+    },
+    theme: { mode: isDark ? 'dark' : 'light' }
+  }
+})
+
+const salesByDayChartSeries = computed(() => [{
+  name: 'Revenue',
+  data: salesByDayOfWeek.value.map(s => s.revenue)
+}])
+const salesByDayChartOptions = computed(() => {
+  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  return {
+    chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
+    colors: ['#059669'],
+    xaxis: {
+      categories: DAY_NAMES,
+      labels: { style: { colors: isDark ? '#9CA3AF' : '#1F2937', fontSize: '12px' } },
+      axisBorder: { show: true, color: isDark ? '#374151' : '#E5E7EB' },
+      axisTicks: { show: true, color: isDark ? '#374151' : '#E5E7EB' }
+    },
+    yaxis: {
+      labels: { style: { colors: isDark ? '#9CA3AF' : '#1F2937', fontSize: '12px' } },
+      formatter: (val: number) => formatCurrency(val)
+    },
+    grid: { borderColor: isDark ? '#374151' : '#E5E7EB', strokeDashArray: 4 },
+    tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val: number) => formatCurrency(val) } },
+    theme: { mode: isDark ? 'dark' : 'light' }
+  }
+})
+
+const heatmapChartOptions = computed(() => {
+  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  const textColor = isDark ? '#E5E7EB' : '#1F2937'
+  const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
+  const borderColor = isDark ? '#4B5563' : '#D1D5DB'
+  const max = heatmapMaxRevenue.value
+  const scaleMax = max > 0 ? max : 1
+  const q1 = max * 0.25
+  const q2 = max * 0.5
+  const q3 = max * 0.75
+  const ranges = [
+    { from: 0, to: 0, color: isDark ? '#374151' : '#E5E7EB' },
+    { from: 0.01, to: max > 0 ? q1 : scaleMax, color: isDark ? '#1e3a5f' : '#93c5fd' },
+    ...(max > 0 ? [
+      { from: q1, to: q2, color: isDark ? '#1d4ed8' : '#60a5fa' },
+      { from: q2, to: q3, color: isDark ? '#2563eb' : '#3b82f6' },
+      { from: q3, to: max + 1, color: isDark ? '#3b82f6' : '#1d4ed8' }
+    ] : [])
+  ]
+  return {
+    chart: { type: 'heatmap', toolbar: { show: false }, background: 'transparent' },
+    plotOptions: {
+      heatmap: {
+        shadeIntensity: 0.5,
+        radius: 0,
+        useFillColorAsStroke: true,
+        stroke: { width: 1, colors: [borderColor] },
+        colorScale: {
+          min: 0,
+          max: scaleMax,
+          inverseColors: false,
+          ranges
+        }
+      }
+    },
+    xaxis: {
+      categories: HOUR_LABELS,
+      labels: {
+        style: { colors: mutedColor, fontSize: '9px' },
+        rotate: -45,
+        rotateAlways: false
+      },
+      axisBorder: { show: true, color: borderColor },
+      axisTicks: { show: true, color: borderColor }
+    },
+    yaxis: {
+      labels: {
+        style: { colors: mutedColor, fontSize: '11px' }
+      },
+      axisBorder: { show: true, color: borderColor },
+      axisTicks: { show: true, color: borderColor }
+    },
+    dataLabels: { enabled: false },
+    grid: {
+      borderColor,
+      strokeDashArray: 1,
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: true } }
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      style: { fontSize: '12px' },
+      x: { formatter: (val: string) => val },
+      y: {
+        formatter: (val: number) => formatCurrency(val),
+        title: { formatter: () => 'Revenue' }
+      }
+    },
+    legend: {
+      labels: { colors: textColor }
+    },
+    theme: { mode: isDark ? 'dark' : 'light' }
+  }
+})
 
 // Chart Data
 const revenueChartSeries = computed(() => {
@@ -990,6 +1392,9 @@ const exportToPDF = async () => {
       ['Total Orders', totalOrders.value.toString()],
       ['Average Order Value', formatCurrency(averageOrderValue.value)],
       ['Low Stock Items', lowStockCount.value.toString()],
+      ['Refunded Count', refundedCount.value.toString()],
+      ['Refund Amount', formatCurrency(refundAmount.value)],
+      ['Refund Rate', `${refundRate.value.toFixed(1)}%`],
       ['Repeat Purchase Rate', `${repeatPurchaseRate.value.toFixed(1)}%`]
     ]
     
@@ -1050,6 +1455,35 @@ const exportToPDF = async () => {
         doc.text(c.name.substring(0, 30), 20, yPos)
         doc.text(c.orders.toString(), 100, yPos)
         doc.text(formatCurrency(c.totalSpent), 150, yPos)
+        yPos += 6
+      })
+      
+      yPos += 4
+    }
+    
+    // Recent Returns
+    if (recentReturns.value.length > 0) {
+      doc.setFontSize(14)
+      doc.text('Recent Returns', 14, yPos)
+      yPos += 8
+      
+      doc.setFontSize(12)
+      doc.text('Receipt #', 20, yPos)
+      doc.text('Date', 60, yPos)
+      doc.text('Amount', 110, yPos)
+      doc.text('Reason', 150, yPos)
+      yPos += 6
+      doc.setFontSize(10)
+      
+      recentReturns.value.forEach((ret) => {
+        if (yPos > 280) {
+          doc.addPage()
+          yPos = 20
+        }
+        doc.text(ret.receiptNumber, 20, yPos)
+        doc.text(formatReturnDate(ret.date), 60, yPos)
+        doc.text('-' + formatCurrency(ret.amount), 110, yPos)
+        doc.text((ret.reason || '—').substring(0, 25), 150, yPos)
         yPos += 6
       })
     }

@@ -1,137 +1,107 @@
 <template>
-  <div class="space-y-3 pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
-    <!-- Breadcrumbs -->
+  <div class="pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
     <Breadcrumbs :items="departmentBreadcrumbs" />
 
-    <!-- Header with Back Button - Compact -->
-    <div class="flex items-center gap-2">
+    <div class="mb-6 sm:mb-8 flex items-start gap-3">
       <button
         @click="navigateTo('/dashboard/departments')"
-        class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors flex-shrink-0"
+        class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
         title="Back to departments"
       >
-        <ArrowLeftIcon class="w-4 h-4" />
+        <ArrowLeftIcon class="w-5 h-5" />
       </button>
       <div class="flex-1 min-w-0">
-        <h1 v-if="isLoadingDepartment" class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-          <span class="inline-block h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></span>
+        <h1 v-if="isLoadingDepartment" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+          <span class="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></span>
         </h1>
-        <h1 v-else class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
+        <h1 v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
           {{ department?.name || 'Department' }}
         </h1>
-        <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
-          Department Management
-        </p>
+        <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Department management</p>
       </div>
     </div>
 
-    <!-- Department Info Card - Compact -->
-    <Card padding="sm" extra-class="p-2.5">
-      <div v-if="isLoadingDepartment" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4 sm:p-6 mb-6">
+      <div v-if="isLoadingDepartment" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div v-for="i in 3" :key="i">
-          <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20 mb-1.5 animate-pulse"></div>
-          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-28 animate-pulse"></div>
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-24 mb-2 animate-pulse"></div>
+          <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-lg w-32 animate-pulse"></div>
         </div>
       </div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <div>
-          <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Department Type</p>
-          <p class="mt-1 text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
-            {{ department?.departmentType || '-' }}
-          </p>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Department type</p>
+          <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ department?.departmentType || '—' }}</p>
         </div>
         <div>
-          <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Manager</p>
-          <p class="mt-1 text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
-            {{ currentManager }}
-          </p>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Manager</p>
+          <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ currentManager }}</p>
         </div>
         <div>
-          <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400">Total Staff</p>
-          <p class="mt-1 text-xs font-semibold text-gray-900 dark:text-gray-100">
-            {{ department?.staffCount || 0 }} members
-          </p>
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total staff</p>
+          <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ department?.staffCount ?? 0 }} members</p>
         </div>
       </div>
-    </Card>
-
-    <!-- Stats Cards Skeleton - Compact -->
-    <div v-if="isLoadingDepartment" class="grid grid-cols-3 gap-2.5 lg:hidden">
-      <Card v-for="i in 3" :key="i" padding="sm" extra-class="p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-1.5 animate-pulse"></div>
-            <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
-        </div>
-      </Card>
     </div>
 
-    <!-- Stats Cards - Compact -->
-    <div class="grid grid-cols-3 gap-2.5 lg:hidden">
-      <Card padding="sm" extra-class="border-l-4 border-l-primary-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Total Staff</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              {{ staff.length }}
-            </p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <UsersIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-          </div>
-        </div>
-      </Card>
-      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Managers</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              {{ totalManagers }}
-            </p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <UserCircleIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
-      </Card>
-      <Card padding="sm" extra-class="border-l-4 border-l-green-500 p-2.5">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-medium text-gray-600 dark:text-gray-400 truncate">Active</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              {{ activeStaff }}
-            </p>
-          </div>
-          <div class="w-8 h-8 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CheckCircleIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
-      </Card>
+    <div v-if="isLoadingDepartment" class="grid grid-cols-3 gap-3 lg:hidden mb-6">
+      <div v-for="i in 3" :key="i" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-2 animate-pulse"></div>
+        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 animate-pulse"></div>
+      </div>
     </div>
 
-    <!-- Staff Management Section -->
+    <div class="grid grid-cols-3 gap-3 lg:hidden mb-6">
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total staff</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ staff.length }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <UsersIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          </div>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Managers</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalManagers }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <UserCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+        </div>
+      </div>
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Active</p>
+            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ activeStaff }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div
       :class="[
-        'transition-all duration-300',
-        isStaffFullscreen
-          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
-          : 'relative'
+        'transition-all duration-300 mt-6 sm:mt-8',
+        isStaffFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto' : 'relative'
       ]"
     >
-      <!-- Fullscreen Header -->
-      <div v-if="isStaffFullscreen" class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div class="flex items-center justify-between mb-4">
+      <div v-if="isStaffFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-4">
+        <div class="flex items-center justify-between gap-4">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ department?.name || 'Department' }} - Staff Fullscreen View</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {{ staff.length }} staff members • {{ totalManagers }} managers • {{ activeStaff }} active
-            </p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ department?.name || 'Department' }} — Staff</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ staff.length }} staff · {{ totalManagers }} managers · {{ activeStaff }} active</p>
           </div>
           <button
             @click="isStaffFullscreen = false"
-            class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            class="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Exit fullscreen"
           >
             <XMarkIcon class="w-5 h-5" />
@@ -139,116 +109,90 @@
         </div>
       </div>
 
-      <Card padding="none" :class="isStaffFullscreen ? 'shadow-none border-0' : ''">
-        <!-- Compact Header (Visible only on large screens, hidden in fullscreen) -->
-        <div v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-            <!-- Compact Stats -->
-            <div class="flex items-center gap-6">
+      <div
+        :class="[
+          isStaffFullscreen ? 'shadow-none' : 'rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50'
+        ]"
+      >
+        <div v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen" class="hidden lg:flex flex-wrap items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60">
+          <div class="flex items-center flex-wrap gap-6">
             <div class="flex items-center gap-2">
-              <UsersIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
+              <UsersIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Staff:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ staff.length }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <UserCircleIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
+              <UserCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Managers:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <CheckCircleIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Active:</span>
+              <CheckCircleIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Active:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ activeStaff }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <ClockIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">On Leave:</span>
+              <ClockIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">On leave:</span>
               <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ onLeaveStaff }}</span>
             </div>
           </div>
-          <!-- Fullscreen Toggle -->
           <button
             @click="isStaffFullscreen = !isStaffFullscreen"
-            class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-            :title="isStaffFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+            :title="isStaffFullscreen ? 'Exit fullscreen' : 'Fullscreen'"
           >
-            <ArrowsPointingOutIcon v-if="!isStaffFullscreen" class="w-4 h-4" />
-            <XMarkIcon v-else class="w-4 h-4" />
+            <ArrowsPointingOutIcon v-if="!isStaffFullscreen" class="w-5 h-5" />
+            <XMarkIcon v-else class="w-5 h-5" />
           </button>
         </div>
-      </div>
 
-      <!-- Staff Table - Mobile Optimized -->
-      <!-- Staff Loading Skeleton -->
-      <div v-if="isLoadingStaff" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-gray-800/50">
-            <tr>
-              <th v-for="i in 5" :key="i" class="px-2 sm:px-3 py-2">
-                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="i in 5" :key="i">
-              <td v-for="j in 5" :key="j" class="px-2 sm:px-3 py-3">
-                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div v-else-if="staff.length === 0" class="text-center py-8 sm:py-10">
-        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-          <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-400" />
+        <div v-if="isLoadingStaff" class="overflow-x-auto">
+          <div class="p-4 sm:p-6 space-y-3">
+            <div v-for="i in 6" :key="i" class="flex gap-4 items-center">
+              <div class="h-10 w-10 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse w-1/3"></div>
+                <div class="h-3 rounded bg-gray-200 dark:bg-gray-700 animate-pulse w-1/4"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">No staff members yet</h3>
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 px-4">Add staff members to this department to get started</p>
-      </div>
 
-      <div v-else class="overflow-x-auto mb-4 sm:mb-6">
-        <table class="min-w-full">
-          <thead class="border-b border-gray-200 dark:border-gray-700">
-            <tr>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Name
-              </th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden sm:table-cell">
-                Position
-              </th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Role
-              </th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 hidden md:table-cell">
-                Email
-              </th>
-              <th class="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Status
-              </th>
-              <th v-if="canManageDepartments" class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="member in paginatedStaff"
-              :key="member.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-            >
-              <td class="px-4 py-3">
-                <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
-                  {{ member.firstName }} {{ member.lastName }}
-                </span>
+        <div v-else-if="staff.length === 0" class="text-center py-12 sm:py-16">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No staff members yet</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Add staff to this department to get started</p>
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-white/60 dark:bg-gray-800/60">
+              <tr>
+                <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
+                <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden sm:table-cell">Position</th>
+                <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Role</th>
+                <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden md:table-cell">Email</th>
+                <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                <th v-if="canManageDepartments" class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
+              <tr
+                v-for="member in paginatedStaff"
+                :key="member.id"
+                class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
+              >
+              <td class="px-4 sm:px-5 py-3.5">
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ member.firstName }} {{ member.lastName }}</span>
               </td>
-              <td class="px-4 py-3 hidden sm:table-cell">
-                <span class="text-[11px] text-gray-600 dark:text-gray-300">
-                  {{ member.position }}
-                </span>
+              <td class="px-4 sm:px-5 py-3.5 hidden sm:table-cell">
+                <span class="text-sm text-gray-600 dark:text-gray-300">{{ member.position }}</span>
               </td>
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium capitalize"
+              <td class="px-4 sm:px-5 py-3.5">
+                <span class="inline-flex items-center px-2 py-1 text-xs font-medium capitalize rounded-full"
                   :class="[
                     member.role === 'manager'
                       ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-300'
@@ -260,15 +204,13 @@
                   {{ member.role }}
                 </span>
               </td>
-              <td class="px-4 py-3 hidden md:table-cell">
-                <div class="text-[11px] text-gray-600 dark:text-gray-300 truncate max-w-[150px]">
-                  {{ member.email }}
-                </div>
+              <td class="px-4 sm:px-5 py-3.5 hidden md:table-cell">
+                <span class="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[150px]">{{ member.email }}</span>
               </td>
-              <td class="px-4 py-3">
+              <td class="px-4 sm:px-5 py-3.5">
                 <span
                   :class="[
-                    'inline-flex items-center px-2 py-0.5 text-[10px] font-medium capitalize',
+                    'inline-flex items-center px-2 py-1 text-xs font-medium capitalize rounded-full',
                     member.status === 'active'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : member.status === 'on_leave'
@@ -279,7 +221,7 @@
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>
               </td>
-              <td v-if="canManageDepartments" class="px-4 py-3">
+              <td v-if="canManageDepartments" class="px-4 sm:px-5 py-3.5">
                 <!-- Desktop: Show all action buttons -->
                 <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
@@ -345,15 +287,14 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
-      </Card>
     </div>
 
-    <!-- Fixed Staff Pagination - Mobile Optimized -->
     <div
       v-if="staff.length > 0 && !isStaffFullscreen"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
+      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 rounded-t-2xl safe-area-inset-bottom"
+      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
       <Pagination
         :current-page="staffCurrentPage"
@@ -363,8 +304,7 @@
       />
     </div>
 
-    <!-- Pagination for Fullscreen Mode -->
-    <div v-if="isStaffFullscreen && staff.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+    <div v-if="isStaffFullscreen && staff.length > 0" class="sticky bottom-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
       <Pagination
         :current-page="staffCurrentPage"
         :items-per-page="staffItemsPerPage"
@@ -373,15 +313,18 @@
       />
     </div>
 
-    <!-- Floating Action Button - Mobile Optimized -->
-    <button
-      v-if="canCreateNewStaff && !isLoadingStaff"
-      @click="openCreateStaffModal"
-      class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
-      title="Add new staff"
-    >
-      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
-    </button>
+    <div v-if="canCreateNewStaff && !isLoadingStaff" class="fixed bottom-24 right-6 z-40 group">
+      <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+        Add staff
+      </span>
+      <button
+        @click="openCreateStaffModal"
+        class="w-12 h-12 rounded-full bg-primary-500 hover:bg-primary-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
+        title="Add new staff"
+      >
+        <PlusIcon class="w-5 h-5" />
+      </button>
+    </div>
 
     <!-- Staff Modal -->
     <StaffModal
@@ -413,7 +356,6 @@ import {
   XMarkIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
-import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'

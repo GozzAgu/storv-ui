@@ -35,6 +35,7 @@ export interface Receipt {
   paymentMethod: string
   status: 'completed' | 'pending' | 'refunded'
   notes?: string
+  refundReason?: string // Reason for return/refund (when status is refunded)
   folderId: string
   itemIds: string[] // Array of inventory item IDs that were sold
   storeId: string // Store this receipt belongs to

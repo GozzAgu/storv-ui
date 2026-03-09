@@ -1,197 +1,147 @@
 <template>
-  <div class="space-y-3 pb-24 sm:pb-20 overflow-x-hidden">
+  <div class="pb-24 sm:pb-20 overflow-x-hidden">
     <!-- Breadcrumbs -->
-    <Breadcrumbs :items="inventoryBreadcrumbs" />
+    <Breadcrumbs :items="inventoryBreadcrumbs" class="mb-4" />
 
-    <!-- Enhanced Header - Compact -->
-    <div class="flex items-start justify-between gap-2">
-      <div class="flex items-start gap-2 flex-1 min-w-0">
-        <button
-          @click="navigateTo('/dashboard/inventory')"
-          class="mt-0.5 p-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors flex-shrink-0"
-          title="Back to folders"
-        >
-          <ArrowLeftIcon class="w-4 h-4" />
-        </button>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-1">
-            <div class="flex-1 min-w-0">
-              <h1 v-if="isLoadingFolder" class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
-                Loading...
-              </h1>
-              <h1 v-else class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">
-                {{ folder?.name || 'Folder' }}
-              </h1>
-              <p v-if="!isLoadingFolder" class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
-                {{ folder?.description || 'No description' }}
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 mt-1.5 text-[10px] text-gray-600 dark:text-gray-400 flex-wrap">
-            <div class="flex items-center gap-1">
-              <CalendarIcon class="w-3 h-3 flex-shrink-0" />
-              <span class="truncate">Created {{ formatDate(folder?.createdAt) }}</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <CubeIcon class="w-3 h-3 flex-shrink-0" />
-              <span>{{ folder?.itemCount || 0 }} items</span>
+    <!-- Hero header: back + title + description + meta -->
+    <div class="mb-6 sm:mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <button
+            @click="navigateTo('/dashboard/inventory')"
+            class="mt-0.5 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors flex-shrink-0"
+            title="Back to folders"
+          >
+            <ArrowLeftIcon class="w-5 h-5" stroke-width="1.75" />
+          </button>
+          <div class="min-w-0 flex-1">
+            <h1 v-if="isLoadingFolder" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+              Loading...
+            </h1>
+            <h1 v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
+              {{ folder?.name || 'Folder' }}
+            </h1>
+            <p v-if="!isLoadingFolder" class="mt-1.5 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+              {{ folder?.description || 'No description' }}
+            </p>
+            <div class="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+              <span class="flex items-center gap-1.5">
+                <CalendarIcon class="w-4 h-4" />
+                Created {{ formatDate(folder?.createdAt) }}
+              </span>
+              <span class="flex items-center gap-1.5">
+                <CubeIcon class="w-4 h-4" />
+                {{ folder?.itemCount || 0 }} items
+              </span>
             </div>
           </div>
         </div>
-        
-        <!-- Bulk Discount Button - Compact -->
-        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-1.5 flex-shrink-0 ml-2">
-          <button
+        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center shrink-0">
+          <Button
+            variant="primary"
             @click="openBulkDiscountModal"
-            class="px-2.5 py-1.5 bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium"
-            title="Apply bulk discount"
+            :icon="TagIcon"
+            class="rounded-full"
           >
-            <TagIcon class="w-4 h-4 flex-shrink-0" />
-            <span class="hidden sm:inline">({{ selectedItemsForBulk.length }})</span>
-            <span class="sm:hidden">({{ selectedItemsForBulk.length }})</span>
-          </button>
+            Bulk discount ({{ selectedItemsForBulk.length }})
+          </Button>
         </div>
       </div>
     </div>
 
-    <!-- Enhanced Stats Cards - Mobile Optimized -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden">
-      <Card padding="sm" extra-class="border-l-4 border-l-blue-500 sm:p-4">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Items</p>
-            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              {{ folder?.itemCount || 0 }}
-            </p>
-            <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Items in this folder</p>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-          </div>
+    <!-- Stats cards - modern, no borders -->
+    <div v-if="!isLoadingFolder" class="grid grid-cols-2 gap-4 mb-6 lg:hidden">
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Items</p>
+          <p class="mt-1 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+            {{ folder?.itemCount || 0 }}
+          </p>
         </div>
-      </Card>
-
-      <Card padding="sm" extra-class="border-l-4 border-l-green-500 sm:p-4">
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0">
-            <p class="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total Value</p>
-            <p class="mt-1 sm:mt-2 text-base sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              {{ formatCurrency(totalInventoryValue) }}
-            </p>
-            <p class="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-gray-500 dark:text-gray-500 truncate">Inventory value</p>
-          </div>
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0 ml-2">
-            <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
-          </div>
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100/80 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+          <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
         </div>
-      </Card>
-
+      </div>
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Value</p>
+          <p class="mt-1 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
+            {{ formatCurrency(totalInventoryValue) }}
+          </p>
+        </div>
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100/80 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+          <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" stroke-width="1.75" />
+        </div>
+      </div>
     </div>
 
     <!-- Loading State - Skeleton -->
     <template v-if="isLoadingFolder">
-      <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden">
-        <Card v-for="i in 2" :key="i" padding="sm" extra-class="sm:p-4">
-          <div class="flex items-center justify-between">
-            <div class="flex-1 min-w-0">
-              <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-2 animate-pulse"></div>
-              <div class="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
-            </div>
-            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+      <div class="grid grid-cols-2 gap-4 mb-6 lg:hidden">
+        <div v-for="i in 2" :key="i" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-2 animate-pulse"></div>
+            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 animate-pulse"></div>
           </div>
-        </Card>
+          <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"></div>
+        </div>
       </div>
-
-      <!-- Header Skeleton -->
-      <Card padding="sm" class="sm:p-4">
-        <div class="space-y-4">
-          <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 animate-pulse"></div>
-          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 animate-pulse"></div>
-        </div>
-      </Card>
-
-      <!-- Filters Skeleton -->
-      <Card padding="sm" class="sm:p-4">
-        <div class="space-y-3">
-          <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-6 mb-6">
+        <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl w-3/4 mb-4 animate-pulse"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-full animate-pulse"></div>
+        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mt-3 animate-pulse"></div>
+      </div>
+      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden min-h-[320px]">
+        <div class="p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <div class="flex gap-3">
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md flex-1 animate-pulse"></div>
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-md flex-1 animate-pulse"></div>
+            <div class="h-10 flex-1 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-10 w-24 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           </div>
         </div>
-      </Card>
-
-      <!-- Items Table Skeleton -->
-      <Card padding="none">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800/50">
-              <tr>
-                <th v-for="i in 6" :key="i" class="px-3 py-2">
-                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              <tr v-for="i in 5" :key="i">
-                <td v-for="j in 6" :key="j" class="px-3 py-3">
-                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full animate-pulse"></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="p-4 space-y-3">
+          <div v-for="i in 6" :key="i" class="flex gap-4">
+            <div class="h-4 flex-1 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-4 w-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-4 w-16 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          </div>
         </div>
-      </Card>
+      </div>
     </template>
 
-    <!-- Enhanced Filters Section - Compact -->
-    <Card v-else padding="sm" class="lg:hidden p-2.5">
-      <div class="flex flex-col gap-2">
-        <div class="flex-1 relative">
-          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-          <input
-            v-model="searchQuery"
-            type="text"
-                placeholder="Search by name, SKU..."
-                class="w-full pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <select
-            v-model="sortBy"
-            @change="handleSortByChange"
-            class="flex-1 px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="name">Name</option>
-            <option value="price">Price</option>
-            <option value="sku">SKU</option>
-            <option value="dateIn">Date In</option>
-            <option value="availability">Status</option>
-          </select>
-          <Button
-            variant="outline"
-            @click="resetFilters"
-            :icon="ArrowPathIcon"
-            class="flex-shrink-0 px-2.5 py-2 text-xs"
-          >
-            <span class="hidden sm:inline">Reset</span>
-            <span class="sm:hidden">↻</span>
-          </Button>
-          <!-- Fullscreen Toggle - Mobile -->
-          <button
-            @click="isFullscreen = !isFullscreen"
-            class="px-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-          >
-            <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-4 h-4" />
-            <XMarkIcon v-else class="w-4 h-4" />
-          </button>
-        </div>
+    <!-- Toolbar: search + filters (mobile) -->
+    <div v-else class="lg:hidden flex flex-col sm:flex-row gap-3 mb-6">
+      <div class="relative flex-1 min-w-0">
+        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name, SKU..."
+          class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+        />
       </div>
-    </Card>
+      <div class="flex items-center gap-2">
+        <select
+          v-model="sortBy"
+          @change="handleSortByChange"
+          class="flex-1 sm:flex-none px-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+        >
+          <option value="name">Name</option>
+          <option value="price">Price</option>
+          <option value="sku">SKU</option>
+          <option value="dateIn">Date In</option>
+          <option value="availability">Status</option>
+        </select>
+        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" class="shrink-0 rounded-full" />
+        <button
+          @click="isFullscreen = !isFullscreen"
+          class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+          :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+        >
+          <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-5 h-5" />
+          <XMarkIcon v-else class="w-5 h-5" />
+        </button>
+      </div>
+    </div>
 
     <!-- Enhanced Items Table -->
     <div
@@ -204,37 +154,36 @@
       ]"
     >
       <!-- Fullscreen Header -->
-      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div class="flex items-center justify-between">
+      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-4">
+        <div class="flex items-center justify-between gap-4">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }} - Fullscreen View</h2>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {{ filteredItems.length }} items • Total Value: {{ formatCurrency(totalInventoryValue) }}
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              {{ filteredItems.length }} items · {{ formatCurrency(totalInventoryValue) }} total value
             </p>
           </div>
           <button
             @click="isFullscreen = false"
-            class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+            class="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Exit fullscreen"
           >
             <XMarkIcon class="w-5 h-5" />
           </button>
         </div>
-        <!-- Filters in Fullscreen -->
         <div class="flex items-center gap-2 mt-4">
-          <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+          <div class="relative flex-1 max-w-xs">
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search..."
-              class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
+              class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             />
           </div>
           <select
             v-model="sortBy"
             @change="handleSortByChange"
-            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
+            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[110px]"
           >
             <option value="name">Name</option>
             <option value="price">Price</option>
@@ -244,80 +193,80 @@
           </select>
           <button
             @click="resetFilters"
-            class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Reset filters"
           >
-            <ArrowPathIcon class="w-4 h-4" />
+            <ArrowPathIcon class="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <Card padding="none" :class="isFullscreen ? 'shadow-none border-0' : ''">
-        <!-- Compact Header (Visible only on large screens, hidden in fullscreen) -->
-        <div v-if="!isFullscreen" class="hidden lg:block border-b border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-800/50">
-            <!-- Compact Stats -->
-            <div class="flex items-center gap-3 sm:gap-4">
-              <div class="flex items-center gap-2">
-                <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
-                <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
-                <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
-              </div>
-            </div>
-            <!-- Compact Filters -->
+      <div
+        :class="[
+          isFullscreen ? 'shadow-none' : 'rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden',
+          !isFullscreen && 'border border-gray-200/50 dark:border-gray-700/50'
+        ]"
+      >
+        <!-- Desktop toolbar (stats + filters) -->
+        <div v-if="!isFullscreen" class="hidden lg:flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/60">
+          <div class="flex items-center gap-6">
             <div class="flex items-center gap-2">
-              <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search..."
-                  class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
-                />
-              </div>
-              <select
-                v-model="sortBy"
-                @change="handleSortByChange"
-                class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
-              >
-                <option value="name">Name</option>
-                <option value="price">Price</option>
-                <option value="sku">SKU</option>
-                <option value="dateIn">Date In</option>
-                <option value="availability">Status</option>
-              </select>
-              <button
-                @click="resetFilters"
-                class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-                title="Reset filters"
-              >
-                <ArrowPathIcon class="w-4 h-4" />
-              </button>
-              <!-- Fullscreen Toggle -->
-              <button
-                @click="isFullscreen = !isFullscreen"
-                class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-                :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-              >
-                <ArrowsPointingOutIcon class="w-4 h-4" />
-              </button>
+              <CubeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Items:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CurrencyDollarIcon class="w-5 h-5 text-green-600 dark:text-green-400" stroke-width="1.75" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Value:</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
             </div>
           </div>
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search..."
+                class="pl-9 pr-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-44"
+              />
+            </div>
+            <select
+              v-model="sortBy"
+              @change="handleSortByChange"
+              class="px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[110px]"
+            >
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+              <option value="sku">SKU</option>
+              <option value="dateIn">Date In</option>
+              <option value="availability">Status</option>
+            </select>
+            <button
+              @click="resetFilters"
+              class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+              title="Reset filters"
+            >
+              <ArrowPathIcon class="w-5 h-5" />
+            </button>
+            <button
+              @click="isFullscreen = !isFullscreen"
+              class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+              :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+            >
+              <ArrowsPointingOutIcon class="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      <div :class="['overflow-x-auto', isFullscreen ? 'p-6' : 'mb-6']">
+      <div :class="['overflow-x-auto', isFullscreen ? 'p-6' : '']">
         <table class="min-w-full">
-          <thead class="border-b border-gray-200 dark:border-gray-700">
+          <thead :class="[isFullscreen ? 'border-b border-gray-200 dark:border-gray-700' : 'bg-white/60 dark:bg-gray-800/60']">
               <tr>
               <th
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300',
+                  'px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400',
                   column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
@@ -337,7 +286,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -348,21 +297,21 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">
+              <th v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                 Action
               </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
               <tr
                 v-for="(item, index) in paginatedItems"
                 :key="item.id"
-                class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
               >
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-4 py-3 align-top"
+                class="px-4 sm:px-5 py-3.5 align-top"
               >
                 <!-- Inline edit mode (large screens only) -->
                 <div
@@ -433,7 +382,7 @@
                       </span>
                     </div>
                     <div v-else-if="column.key === 'availability'" class="text-[11px]">
-                      <span class="inline-flex items-center px-2 py-0.5 text-[10px] font-medium"
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium"
                         :class="getItemAvailability(item).class">
                         {{ getItemAvailability(item).label }}
                       </span>
@@ -457,7 +406,7 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-4 py-3 text-center">
+              <td v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -467,7 +416,7 @@
                   :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
                 />
               </td>
-              <td v-if="canManageInventoryItems" class="px-4 py-3">
+              <td v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5">
                 <!-- Desktop: Show all action buttons -->
                 <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
                   <button
@@ -547,24 +496,25 @@
             </tr>
             <!-- Empty State -->
             <tr v-if="sortedFilteredItems.length === 0">
-              <td :colspan="columns.length + (canManageInventoryItems ? 2 : 0)" class="px-6 py-12">
-                <div class="text-center py-4">
-                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-2xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                    <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-primary-500 dark:text-primary-400" />
+              <td :colspan="columns.length + (canManageInventoryItems ? 2 : 0)" class="px-6 py-16">
+                <div class="text-center">
+                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
                   </div>
-                  <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
                     {{ searchQuery ? 'No items found' : 'No items in this folder' }}
                   </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    {{ searchQuery ? 'Try adjusting your filters' : 'Add items to get started' }}
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                    {{ searchQuery ? 'Try adjusting your search or filters' : 'Add items to start tracking inventory' }}
                   </p>
                   <Button
                     v-if="!searchQuery && canManageInventoryItems"
                     variant="primary"
                     :icon="PlusIcon"
                     @click="openAddItemModal"
+                    class="rounded-full"
                   >
-                    Add Your First Item
+                    Add your first item
                   </Button>
                 </div>
               </td>
@@ -572,26 +522,21 @@
           </tbody>
         </table>
       </div>
-      </Card>
+      </div>
     </div>
 
-    <!-- Load More Button or Pagination -->
+    <!-- Bottom bar: Load More / Pagination -->
     <div
       v-if="sortedFilteredItems.length > 0 && !isFullscreen"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
+      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom rounded-t-2xl"
+      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
       <div class="px-4 sm:px-6 py-4">
-        <!-- Load More Button -->
         <div v-if="showLoadMore" class="flex justify-center">
-          <button
-            @click="loadMoreItems"
-            class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-medium transition-colors text-xs"
-          >
-            Load More ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
-          </button>
+          <Button variant="primary" @click="loadMoreItems" class="rounded-full text-sm">
+            Load more ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
+          </Button>
         </div>
-        <!-- Pagination -->
         <Pagination
           v-else-if="usePagination"
           :current-page="currentPage"
@@ -599,25 +544,19 @@
           :total="sortedFilteredItems.length"
           @page-change="handlePageChange"
         />
-        <!-- Show count when in Load More mode but all items are displayed -->
-        <div v-else class="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+        <div v-else class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
           Showing all {{ sortedFilteredItems.length }} items
         </div>
       </div>
     </div>
 
-    <!-- Load More Button or Pagination for Fullscreen Mode -->
-    <div v-if="isFullscreen && sortedFilteredItems.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
-      <!-- Load More Button -->
+    <!-- Fullscreen mode: bottom bar -->
+    <div v-if="isFullscreen && sortedFilteredItems.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
       <div v-if="showLoadMore" class="flex justify-center">
-        <button
-          @click="loadMoreItems"
-          class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md font-medium transition-colors text-xs"
-        >
-          Load More ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
-        </button>
+        <Button variant="primary" @click="loadMoreItems" class="rounded-full text-sm">
+          Load more ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
+        </Button>
       </div>
-      <!-- Pagination -->
       <Pagination
         v-else-if="usePagination"
         :current-page="currentPage"
@@ -625,8 +564,7 @@
         :total="sortedFilteredItems.length"
         @page-change="handlePageChange"
       />
-      <!-- Show count when in Load More mode but all items are displayed -->
-      <div v-else class="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+      <div v-else class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
         Showing all {{ sortedFilteredItems.length }} items
       </div>
     </div>
@@ -669,10 +607,10 @@
       </button>
       <button
         @click="openAddItemModal"
-        class="w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
+        class="w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
         title="Add new item"
       >
-        <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
+        <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5 text-white" />
       </button>
     </div>
 
@@ -927,7 +865,6 @@ import {
   EllipsisVerticalIcon,
   ClockIcon,
 } from '@heroicons/vue/24/outline'
-import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'

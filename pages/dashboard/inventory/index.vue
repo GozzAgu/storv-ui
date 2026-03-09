@@ -1,251 +1,204 @@
 <template>
-  <div class="space-y-3 pb-24 sm:pb-20">
-    <!-- Page Header - Compact -->
-    <div>
-      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">Inventory Folders</h1>
-      <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Organize your inventory into folders for better management</p>
+  <div class="pb-24 sm:pb-20">
+    <!-- Hero header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Inventory Folders</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
+      </div>
+      <Button
+        v-if="canCreateInventoryFolders"
+        variant="primary"
+        :icon="PlusIcon"
+        @click="openCreateFolderModal"
+        class="w-full sm:w-auto shrink-0"
+      >
+        New folder
+      </Button>
     </div>
 
-    <!-- Search and Filter - Mobile Optimized -->
-    <Card padding="sm" class="lg:hidden">
-      <div class="flex flex-col gap-3">
-        <div class="flex items-center gap-3">
-          <div class="flex-1 relative">
-            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search folders..."
-              class="w-full pl-8 pr-4 py-2.5 sm:py-2 text-[10px] border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            />
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <select
-            v-model="selectedDepartmentId"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="">All Departments</option>
-            <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
-              {{ dept.name }}
-            </option>
-          </select>
-          <select
-            v-model="sortBy"
-            class="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-[10px] border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          >
-            <option value="name">Name</option>
-            <option value="items">Items</option>
-            <option value="date">Date</option>
-          </select>
-        </div>
+    <!-- Toolbar: search + filters (single bar, modern) -->
+    <div
+      v-if="!inventoryStore.loading"
+      class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6"
+    >
+      <div class="relative flex-1 min-w-0">
+        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search folders..."
+          class="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+        />
       </div>
-    </Card>
-
-    <!-- Compact Header (Visible only on large screens) -->
-    <Card v-if="!inventoryStore.loading" padding="sm" class="hidden lg:block mb-3 p-2.5">
-      <div class="flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <span class="text-xs text-gray-600 dark:text-gray-400">Folders: <span class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ filteredFolders.length }}</span></span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search folders..."
-              class="pl-8 pr-3 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-40"
-            />
-          </div>
-          <select
-            v-model="selectedDepartmentId"
-            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[120px]"
-          >
-            <option value="">All Departments</option>
-            <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
-              {{ dept.name }}
-            </option>
-          </select>
-          <select
-            v-model="sortBy"
-            class="px-2.5 py-1 text-[10px] border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 min-w-[100px]"
-          >
-            <option value="name">Name</option>
-            <option value="items">Items</option>
-            <option value="date">Date</option>
-          </select>
-        </div>
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+        <select
+          v-model="selectedDepartmentId"
+          class="px-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[140px]"
+        >
+          <option value="">All departments</option>
+          <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+            {{ dept.name }}
+          </option>
+        </select>
+        <select
+          v-model="sortBy"
+          class="px-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+        >
+          <option value="name">Name</option>
+          <option value="items">Items</option>
+          <option value="date">Date</option>
+        </select>
+        <span class="hidden sm:inline text-sm text-gray-500 dark:text-gray-400 ml-1">
+          {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
+        </span>
       </div>
-    </Card>
+    </div>
 
-    <!-- Loading State - Folders Skeleton (Compact) -->
-    <div v-if="inventoryStore.loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
+    <!-- Content area: show only one of skeleton, folders, or empty -->
+    <!-- Loading skeleton (replaces content so real folders don't show below) -->
+    <div v-if="inventoryStore.loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 min-h-[280px]">
       <div
         v-for="i in 8"
         :key="i"
-        class="bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+        class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden animate-pulse"
       >
-        <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
-          <div class="flex items-center gap-2 flex-1">
-            <div class="w-7 h-7 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            <div class="flex-1">
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-0.5 animate-pulse"></div>
-            </div>
-          </div>
-          <div class="flex gap-0.5">
-            <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-            <div class="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+        <div class="flex items-center gap-3 p-5">
+          <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700 shrink-0"></div>
+          <div class="flex-1 min-w-0">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mb-2"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
           </div>
         </div>
-        <div class="p-2.5">
-          <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-full mb-1.5 animate-pulse"></div>
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-8 animate-pulse"></div>
-            </div>
-            <div class="flex items-center justify-between">
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
-            </div>
+        <div class="px-5 pb-5 space-y-3">
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+          <div class="flex justify-between">
+            <div class="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div class="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Folders Grid - Compact -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 mb-4">
+    <!-- Folders grid (only when not loading, so it never appears under the skeleton) -->
+    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative bg-white dark:bg-gray-800 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-primary-300 dark:hover:border-primary-600 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer transition-all duration-200 overflow-hidden"
+        class="group relative rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden hover:bg-gray-100/80 dark:hover:bg-gray-800 transition-all duration-200 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Card Header - Compact -->
-        <div class="flex items-center justify-between p-2.5 border-b border-gray-100 dark:border-gray-700/50">
-          <div class="flex items-center gap-2 flex-1 min-w-0">
-            <div
-              class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/30 dark:to-primary-800/30 flex items-center justify-center flex-shrink-0"
-            >
-              <FolderIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
-                {{ folder.name }}
-              </h3>
-            </div>
-          </div>
-          <div v-if="canManage" class="flex items-center gap-0.5 flex-shrink-0 ml-1">
-            <button
-              @click.stop="handleEditFolder(folder)"
-              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors"
-              title="Edit folder"
-            >
-              <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
-            </button>
-            <button
-              @click.stop="handleDeleteFolder(folder)"
-              class="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-md transition-colors"
-              title="Delete folder"
-            >
-              <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Body - Compact -->
-        <div class="p-2.5">
-          <!-- Description -->
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1 mb-2 min-h-[0.75rem]">
-            {{ folder.description || 'No description' }}
-          </p>
-          
-          <!-- Folder Stats - Compact -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1">
-                <CubeIcon class="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                <span class="text-[10px] text-gray-600 dark:text-gray-400">Items</span>
+        <!-- Card content -->
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/15 to-primary-600/20 dark:from-primary-500/20 dark:to-primary-600/25 flex items-center justify-center shrink-0 ring-1 ring-primary-500/10"
+              >
+                <FolderIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
               </div>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  {{ folder.name }}
+                </h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                  {{ folder.description || 'No description' }}
+                </p>
+              </div>
+            </div>
+            <div v-if="canManage" class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                @click.stop="handleEditFolder(folder)"
+                class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Edit folder"
+              >
+                <PencilSquareIcon class="w-4 h-4" />
+              </button>
+              <button
+                @click.stop="handleDeleteFolder(folder)"
+                class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                title="Delete folder"
+              >
+                <TrashIcon class="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <!-- Low Stock Warning - Compact -->
-          <div
-            v-if="folder.lowStockCount > 0"
-            class="mt-2 p-1.5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md"
-          >
-            <p class="text-[10px] font-medium text-orange-700 dark:text-orange-300">
-              ⚠ {{ folder.lowStockCount }} low stock
-            </p>
+          <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+              <CubeIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
+              <span class="text-xs">items</span>
+            </div>
+            <div v-if="folder.lowStockCount > 0" class="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
+              <ExclamationTriangleIcon class="w-3.5 h-3.5" />
+              <span class="text-xs font-medium">{{ folder.lowStockCount }} low stock</span>
+            </div>
           </div>
 
-          <!-- Department Access Info - Compact -->
+          <!-- Department pills -->
           <div
             v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
-            class="mt-2 p-1.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md"
+            class="flex flex-wrap gap-1.5 mt-3"
           >
-            <p class="text-[10px] font-medium text-blue-700 dark:text-blue-300 mb-1">
-              Accessible to:
-            </p>
-            <div class="flex flex-wrap gap-1">
-              <span
-                v-for="deptId in folder.allowedDepartments.slice(0, 2)"
-                :key="deptId"
-                class="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
-              >
-                {{ getDepartmentName(deptId) }}
-              </span>
-              <span
-                v-if="folder.allowedDepartments.length > 2"
-                class="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded"
-              >
-                +{{ folder.allowedDepartments.length - 2 }}
-              </span>
-            </div>
+            <span
+              v-for="deptId in folder.allowedDepartments.slice(0, 2)"
+              :key="deptId"
+              class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary-500/10 text-primary-700 dark:text-primary-300"
+            >
+              {{ getDepartmentName(deptId) }}
+            </span>
+            <span
+              v-if="folder.allowedDepartments.length > 2"
+              class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-200/80 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+            >
+              +{{ folder.allowedDepartments.length - 2 }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty State - Compact -->
-    <Card v-else-if="!inventoryStore.loading" padding="sm" extra-class="p-4">
-      <EmptyState
-        :icon="FolderIcon"
-        :title="selectedDepartmentId ? `No folders found for ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet')"
-        :description="selectedDepartmentId ? 'Try selecting a different department or clear the filter' : (searchQuery ? 'Try adjusting your search criteria' : 'Create your first folder to organize your inventory')"
-        icon-bg-class="bg-primary-50 dark:bg-primary-900/20"
-      >
-        <div v-if="selectedDepartmentId" class="mb-4">
-          <Button
-            variant="outline"
-            @click="selectedDepartmentId = ''"
-            class="w-full sm:w-auto"
-          >
-            Clear Department Filter
-          </Button>
-        </div>
+    <!-- Empty state (when not loading and no folders) -->
+    <div
+      v-else
+      class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-16 px-6 text-center"
+    >
+      <div class="w-16 h-16 rounded-2xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-4">
+        <FolderIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+      </div>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
+      </h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+        {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
+      </p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <Button
+          v-if="selectedDepartmentId"
+          variant="outline"
+          @click="selectedDepartmentId = ''"
+        >
+          Clear filter
+        </Button>
         <Button
           v-if="!searchQuery && !selectedDepartmentId && canCreateInventoryFolders"
           variant="primary"
           :icon="PlusIcon"
           @click="openCreateFolderModal"
-          class="w-full sm:w-auto"
         >
-          Create Your First Folder
+          Create folder
         </Button>
-      </EmptyState>
-    </Card>
+      </div>
+    </div>
 
-    <!-- Fixed Pagination - Mobile Optimized -->
+    <!-- Pagination bar -->
     <div
       v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-lg z-30 transition-all duration-300 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'"
+      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 z-30 safe-area-inset-bottom transition-[left] duration-300"
+      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6">
+      <div class="px-4 sm:px-6 py-3">
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
@@ -255,15 +208,24 @@
       </div>
     </div>
 
-    <!-- Floating Action Button - Mobile Optimized -->
-    <button
-      v-if="filteredFolders.length > 0 && canCreateInventoryFolders"
-      @click="openCreateFolderModal"
-      class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-40 touch-manipulation"
-      title="Create new folder"
+    <!-- FAB: New folder (when list is not empty) -->
+    <div
+      v-if="paginatedFolders.length > 0 && canCreateInventoryFolders"
+      class="group fixed bottom-24 sm:bottom-28 right-4 sm:right-6 z-40 flex items-center justify-end"
     >
-      <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5" />
-    </button>
+      <span
+        class="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
+      >
+        New folder
+      </span>
+      <button
+        @click="openCreateFolderModal"
+        class="group w-14 h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+        aria-label="New folder"
+      >
+        <PlusIcon class="w-6 h-6 text-white stroke-white" stroke-width="2.5" />
+      </button>
+    </div>
 
     <!-- Delete Folder Modal -->
     <DeleteFolderModal
@@ -279,285 +241,227 @@
       size="lg"
     >
       <template #header>
-        <div class="flex items-center justify-between w-full">
-          <div>
-            <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">
-              {{ editingFolder ? 'Edit Folder' : 'Create New Folder' }}
-            </h3>
-            <div class="flex items-center gap-3 mt-1.5 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
-              <span>Created By: {{ userStore.userData?.name || authStore.currentUser?.displayName || authStore.currentUser?.email?.split('@')[0] || 'User' }}</span>
-              <span>Date: {{ new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}</span>
-            </div>
-          </div>
+        <div class="w-full">
+          <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+            {{ editingFolder ? 'Edit Folder' : 'Create New Folder' }}
+          </h3>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ editingFolder ? 'Update folder details and template.' : 'Add a new inventory folder and define its table columns.' }}
+          </p>
         </div>
       </template>
-      
-      <div class="max-h-[60vh] overflow-y-auto pr-1.5 -mr-1.5">
-        <form @submit.prevent="handleSaveFolder" class="space-y-3 sm:space-y-4">
-        <!-- Folder Basic Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-              Folder Name *
-            </label>
-            <input
-              v-model="folderForm.name"
-              type="text"
-              required
-              class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
-              placeholder="Enter folder name"
-            />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-              Type *
-            </label>
-            <select
-              v-model="folderForm.type"
-              required
-              class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
-            >
-              <option value="">Select type</option>
-              <option value="general">General</option>
-              <option value="electronics">Electronics</option>
-              <option value="clothing">Clothing & Apparel</option>
-              <option value="automotive">Automotive</option>
-              <option value="food">Food & Beverage</option>
-              <option value="office">Office Supplies</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="space-y-1">
-          <div class="flex items-center justify-between">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-              Description
-            </label>
-            <button
-              type="button"
-              @click="handleGenerateDescription"
-              :disabled="!folderForm.name || isGeneratingDescription"
-              class="flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Generate description with AI"
-            >
-              <SparklesIcon 
-                :class="[
-                  'w-3.5 h-3.5 transition-transform',
-                  isGeneratingDescription ? 'animate-spin' : ''
-                ]"
-              />
-              <span class="hidden sm:inline">{{ isGeneratingDescription ? 'Generating...' : 'AI Generate' }}</span>
-            </button>
-          </div>
-          <textarea
-            v-model="folderForm.description"
-            @input="aiError = null"
-            rows="3"
-            class="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 resize-none transition-all hover:border-gray-300 dark:hover:border-gray-500"
-            placeholder="Describe the folder's purpose"
-          ></textarea>
-          <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
-        </div>
-
-        <!-- Color Selector -->
-        <div class="space-y-1">
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-            Color
-          </label>
-          <div class="flex items-center gap-3">
-            <input
-              v-model="folderForm.color"
-              type="color"
-              class="w-14 h-10 rounded-md border border-gray-200 dark:border-gray-600 cursor-pointer transition-all hover:border-gray-300 dark:hover:border-gray-500"
-            />
-            <span class="text-xs text-gray-600 dark:text-gray-400">{{ folderForm.color }}</span>
-          </div>
-        </div>
-
-        <!-- Serial Number Management -->
-        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
-          <Checkbox
-            v-model="folderForm.hasSerialNumbers"
-            size="sm"
-            wrapper-class="items-start"
-          >
-            <div class="flex-1">
-              <span class="text-xs font-medium text-gray-700 dark:text-gray-300">
-                Is serial number going to be available for items in this folder?
-              </span>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                When enabled, quantity field will be hidden and automatically set to 1 for each item (each item has a unique serial number). When disabled, quantity field will be visible and editable for bulk items.
-              </p>
+      <div class="max-h-[65vh] overflow-y-auto pr-1 -mr-1">
+        <form @submit.prevent="handleSaveFolder" class="space-y-5">
+          <!-- Basic info -->
+          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-gray-200/60 dark:border-gray-700/60">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Basic info</h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Name, type, and description</p>
             </div>
-          </Checkbox>
-        </div>
+            <div class="p-4 sm:p-5 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name *</label>
+                  <input
+                    v-model="folderForm.name"
+                    type="text"
+                    required
+                    class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                    placeholder="Enter folder name"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Type *</label>
+                  <select
+                    v-model="folderForm.type"
+                    required
+                    class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                  >
+                    <option value="">Select type</option>
+                    <option value="general">General</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing & Apparel</option>
+                    <option value="automotive">Automotive</option>
+                    <option value="food">Food & Beverage</option>
+                    <option value="office">Office Supplies</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <button
+                    type="button"
+                    @click="handleGenerateDescription"
+                    :disabled="!folderForm.name || isGeneratingDescription"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Generate description with AI"
+                  >
+                    <SparklesIcon :class="['w-4 h-4', isGeneratingDescription ? 'animate-spin' : '']" />
+                    {{ isGeneratingDescription ? 'Generating...' : 'AI Generate' }}
+                  </button>
+                </div>
+                <textarea
+                  v-model="folderForm.description"
+                  @input="aiError = null"
+                  rows="3"
+                  class="w-full px-4 py-2.5 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                  placeholder="Describe the folder's purpose"
+                />
+                <p v-if="aiError" class="text-sm text-red-600 dark:text-red-400 mt-1.5">{{ aiError }}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Color</label>
+                <div class="flex items-center gap-3">
+                  <input
+                    v-model="folderForm.color"
+                    type="color"
+                    class="w-12 h-10 rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 cursor-pointer overflow-hidden"
+                  />
+                  <span class="text-sm text-gray-600 dark:text-gray-400 font-mono">{{ folderForm.color }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <!-- Department Access Control -->
-        <div v-if="canCreateInventoryFolders" class="p-3 bg-blue-50/50 dark:bg-blue-900/20 rounded-md border border-blue-200/60 dark:border-blue-800">
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Department Access
-          </label>
-          <p class="text-[10px] text-gray-600 dark:text-gray-400 mb-2">
-            Select which departments can access this folder. Leave empty to allow all departments.
-          </p>
-          <div v-if="departmentsStore.loading" class="text-xs text-gray-500 dark:text-gray-400">
-            Loading departments...
-          </div>
-          <div v-else-if="departmentsStore.departments.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
-            No departments available. Create departments first.
-          </div>
-          <div v-else class="space-y-2 max-h-48 overflow-y-auto">
-            <div
-              v-for="dept in departmentsStore.departments"
-              :key="dept.id"
-              class="p-1.5 hover:bg-white dark:hover:bg-gray-800 rounded-md transition-colors"
-            >
-              <Checkbox
-                :model-value="folderForm.allowedDepartments.includes(dept.id)"
-                @update:model-value="(checked) => toggleDepartmentAccess(dept.id, checked)"
-                size="sm"
-              >
-                <div class="flex items-center justify-between flex-1">
-                  <span class="text-xs text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
-                  <span v-if="dept.description" class="text-[10px] text-gray-500 dark:text-gray-400 ml-auto">
-                    {{ dept.description }}
-                  </span>
+          <!-- Serial numbers -->
+          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+            <div class="p-4 sm:p-5">
+              <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start">
+                <div class="flex-1">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Use serial numbers for items</span>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    When enabled, each item has a unique serial number and quantity is 1. When disabled, quantity is editable for bulk items.
+                  </p>
                 </div>
               </Checkbox>
             </div>
           </div>
-        </div>
 
-        <!-- Template Editor -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Table Template *
-          </label>
-          <div class="p-4 bg-primary-50/50 dark:bg-primary-900/20 border-2 border-primary-500 rounded-md mb-4">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Custom Template
-              </span>
-              <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded-full">
-                Custom
-              </span>
+          <!-- Department access -->
+          <div v-if="canCreateInventoryFolders" class="rounded-xl bg-blue-50/50 dark:bg-blue-900/20 ring-1 ring-blue-200/50 dark:ring-blue-800/50 overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-blue-200/50 dark:border-blue-800/50">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Department access</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Choose which departments can access this folder. Leave empty for all.</p>
             </div>
-            <p class="text-xs text-gray-600 dark:text-gray-400">
-              Create your own custom table structure by adding fields below
-            </p>
-          </div>
-        </div>
-
-        <!-- Template Editor -->
-        <div v-if="selectedTemplate" class="p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600">
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Customize Template Fields
-            </h4>
-            <Button
-              variant="outline"
-              size="sm"
-              @click="handleAddField"
-            >
-              + Add Field
-            </Button>
-          </div>
-          
-          <div class="space-y-3 max-h-64 overflow-y-auto pr-2">
-            <div
-              v-for="(field, index) in editableFields"
-              :key="field.id"
-              class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
-            >
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 items-end">
-                <div class="sm:col-span-3">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Field Name *
-                  </label>
-                  <input
-                    v-model="field.name"
-                    type="text"
-                    required
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
-                    placeholder="fieldName"
-                  />
-                </div>
-                <div class="sm:col-span-3">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Label *
-                  </label>
-                  <input
-                    v-model="field.label"
-                    type="text"
-                    required
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500"
-                    placeholder="Display Name"
-                  />
-                </div>
-                <div class="sm:col-span-3">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Field Type *
-                  </label>
-                  <select
-                    v-model="field.type"
-                    required
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/40 focus:border-primary-500 transition-all hover:border-gray-300 dark:hover:border-gray-500 cursor-pointer"
+            <div class="p-4 sm:p-5">
+              <div v-if="departmentsStore.loading" class="text-sm text-gray-500 dark:text-gray-400">Loading departments...</div>
+              <div v-else-if="departmentsStore.departments.length === 0" class="text-sm text-gray-500 dark:text-gray-400">No departments available. Create departments first.</div>
+              <div v-else class="space-y-2 max-h-44 overflow-y-auto">
+                <div
+                  v-for="dept in departmentsStore.departments"
+                  :key="dept.id"
+                  class="flex items-center gap-3 p-3 rounded-xl bg-white/80 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800/80 transition-colors"
+                >
+                  <Checkbox
+                    :model-value="folderForm.allowedDepartments.includes(dept.id)"
+                    @update:model-value="(checked) => toggleDepartmentAccess(dept.id, checked)"
+                    size="sm"
                   >
-                    <option value="text">Text</option>
-                    <option value="number">Number</option>
-                    <option value="date">Date</option>
-                    <option value="select">Select</option>
-                    <option value="boolean">Boolean</option>
-                    <option value="currency">Currency</option>
-                  </select>
-                </div>
-                <div class="sm:col-span-3 flex items-center gap-2 sm:gap-3 justify-start sm:justify-end pl-0 sm:pl-6 sm:ml-2">
-                  <label class="flex items-center gap-1.5 cursor-pointer flex-shrink-0">
-                    <input
-                      v-model="field.required"
-                      type="checkbox"
-                      class="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500/20 focus:ring-offset-0 cursor-pointer transition-all hover:border-primary-400 dark:hover:border-primary-500 flex-shrink-0"
-                    />
-                    <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">Required</span>
-                  </label>
-                  <!-- Default fields cannot be removed -->
-                  <button
-                    v-if="!['name', 'price'].includes(field.name)"
-                    type="button"
-                    @click="handleRemoveField(index)"
-                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
-                    title="Remove field"
-                  >
-                    <TrashIcon class="w-4 h-4" />
-                  </button>
-                  <span
-                    v-else
-                    class="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded whitespace-nowrap"
-                    title="Default field - cannot be removed"
-                  >
-                    D
-                  </span>
+                    <div class="flex items-center justify-between flex-1 min-w-0">
+                      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ dept.name }}</span>
+                      <span v-if="dept.description" class="text-sm text-gray-500 dark:text-gray-400 truncate ml-2">{{ dept.description }}</span>
+                    </div>
+                  </Checkbox>
                 </div>
               </div>
             </div>
-            
-            <div v-if="editableFields.length === 0" class="text-center py-8 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/30">
-              <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <Squares2X2Icon class="w-6 h-6 text-primary-500 dark:text-primary-400" />
+          </div>
+
+          <!-- Table template -->
+          <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-gray-200/60 dark:border-gray-700/60 flex items-center gap-3">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
+              <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Custom</span>
+            </div>
+            <div class="p-4 sm:p-5">
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Define columns for this folder’s table. Add fields below.</p>
+              <div v-if="selectedTemplate" class="space-y-4">
+                <div class="flex justify-end">
+                  <Button variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-full">
+                    + Add field
+                  </Button>
+                </div>
+                <div class="space-y-3 max-h-56 overflow-y-auto pr-1">
+                  <div
+                    v-for="(field, index) in editableFields"
+                    :key="field.id"
+                    class="p-4 rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/60 dark:ring-gray-600/60"
+                  >
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                      <div class="sm:col-span-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Field name *</label>
+                        <input
+                          v-model="field.name"
+                          type="text"
+                          required
+                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                          placeholder="fieldName"
+                        />
+                      </div>
+                      <div class="sm:col-span-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Label *</label>
+                        <input
+                          v-model="field.label"
+                          type="text"
+                          required
+                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                          placeholder="Display name"
+                        />
+                      </div>
+                      <div class="sm:col-span-3">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Type *</label>
+                        <select
+                          v-model="field.type"
+                          required
+                          class="w-full px-3 py-2 text-sm rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                        >
+                          <option value="text">Text</option>
+                          <option value="number">Number</option>
+                          <option value="date">Date</option>
+                          <option value="select">Select</option>
+                          <option value="boolean">Boolean</option>
+                          <option value="currency">Currency</option>
+                        </select>
+                      </div>
+                      <div class="sm:col-span-3 flex items-center gap-2 justify-end">
+                        <label class="flex items-center gap-2 cursor-pointer flex-shrink-0">
+                          <input v-model="field.required" type="checkbox" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer" />
+                          <span class="text-sm text-gray-600 dark:text-gray-400">Required</span>
+                        </label>
+                        <button
+                          v-if="!['name', 'price'].includes(field.name)"
+                          type="button"
+                          @click="handleRemoveField(index)"
+                          class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                          title="Remove field"
+                        >
+                          <TrashIcon class="w-4 h-4" />
+                        </button>
+                        <span v-else class="px-2 py-1 text-xs font-medium rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300" title="Default field">D</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="editableFields.length === 0" class="text-center py-10 px-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/30">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
+                      <Squares2X2Icon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+                    </div>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No fields yet</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Click “Add field” to define table columns</p>
+                  </div>
+                </div>
               </div>
-              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No fields added</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Click "Add Field" to define your table columns</p>
             </div>
           </div>
-        </div>
         </form>
       </div>
 
       <template #footer>
-        <Button variant="outline" @click="handleCancelFolder">Cancel</Button>
-        <Button variant="primary" type="submit" @click="handleSaveFolder">
-          {{ editingFolder ? 'Update' : 'Create' }} Folder
+        <Button variant="outline" @click="handleCancelFolder" extra-class="!rounded-full">Cancel</Button>
+        <Button variant="primary" type="submit" @click="handleSaveFolder" extra-class="!rounded-full">
+          {{ editingFolder ? 'Update' : 'Create' }} folder
         </Button>
       </template>
     </Modal>
@@ -579,9 +483,7 @@ import {
   Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
-import Card from '~/components/ui/Card.vue'
 import Button from '~/components/ui/Button.vue'
-import EmptyState from '~/components/ui/EmptyState.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'

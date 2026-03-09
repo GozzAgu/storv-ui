@@ -1,170 +1,144 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/40 dark:from-gray-900 dark:via-gray-800 dark:to-primary-900/40 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-    <!-- Enhanced Background Pattern -->
+  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <!-- Geometric Grid Pattern -->
-      <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
-        <div class="absolute inset-0" style="background-image: linear-gradient(to right, #667eea 1px, transparent 1px), linear-gradient(to bottom, #667eea 1px, transparent 1px); background-size: 50px 50px;"></div>
-      </div>
-      
-      <!-- Animated Gradient Orbs -->
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-primary-400/40 to-primary-400/40 dark:from-primary-500/30 dark:to-primary-500/30 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-primary-400/30 to-pink-400/30 dark:from-primary-500/20 dark:to-pink-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-primary-300/20 to-primary-300/20 dark:from-primary-400/15 dark:to-primary-400/15 rounded-full blur-3xl"></div>
-      
-      <!-- Floating Shapes -->
-      <div class="absolute top-20 left-10 w-32 h-32 bg-primary-200/20 dark:bg-primary-400/10 rounded-3xl rotate-45 blur-xl"></div>
-      <div class="absolute bottom-20 right-20 w-24 h-24 bg-primary-200/20 dark:bg-primary-400/10 rounded-full blur-xl"></div>
-      <div class="absolute top-1/3 right-1/4 w-20 h-20 bg-pink-200/20 dark:bg-pink-400/10 rounded-2xl rotate-12 blur-lg"></div>
-      
-      <!-- Dot Pattern Overlay -->
-      <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style="background-image: radial-gradient(circle, #667eea 1px, transparent 1px); background-size: 30px 30px;"></div>
+      <div class="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px); background-size: 48px 48px;"></div>
+      <div class="absolute -top-32 -right-32 w-80 h-80 bg-primary-400/25 dark:bg-primary-500/20 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-primary-300/20 dark:bg-primary-500/15 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="max-w-md w-full relative z-10">
-      <!-- Logo and Header -->
-      <div class="text-center mb-6">
-        <NuxtLink to="/" class="inline-block transform hover:scale-105 transition-transform duration-200 mb-3">
+    <div class="max-w-[400px] w-full relative z-10">
+      <div class="text-center mb-8">
+        <NuxtLink to="/" class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 rounded-lg">
           <img
             :src="logoSource"
-            alt="Storvv Logo"
-            class="h-10 w-auto max-w-[200px] mx-auto object-contain"
+            alt="Storvv"
+            class="h-9 w-auto max-w-[180px] mx-auto object-contain"
           />
         </NuxtLink>
-        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+        <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
           Welcome back
-        </h2>
-        <p class="text-gray-600 dark:text-gray-400 text-sm">
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Sign in to continue to your dashboard
         </p>
       </div>
 
-      <!-- Sign In Form Card -->
-      <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-lg shadow-2xl p-6 sm:p-7 border border-white/50 dark:border-gray-700/50">
-        <form @submit.prevent="handleSignIn" class="space-y-4">
-          <div class="space-y-1.5">
-            <label for="email" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Email address
-            </label>
-            <div class="relative">
+      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
+        <div class="p-6 sm:p-8">
+          <form @submit.prevent="handleSignIn" class="space-y-5">
+            <div class="space-y-2">
+              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Email address
+              </label>
               <input
                 id="email"
                 v-model="form.email"
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 hover:border-gray-300 dark:hover:border-gray-500"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="Enter your email"
               />
             </div>
-          </div>
 
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label for="password" class="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Password
-              </label>
-              <NuxtLink
-                to="/forgot-password"
-                class="text-xs sm:text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
-              >
-                Forgot?
-              </NuxtLink>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <NuxtLink
+                  to="/forgot-password"
+                  class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+                >
+                  Forgot?
+                </NuxtLink>
+              </div>
+              <div class="relative">
+                <input
+                  id="password"
+                  v-model="form.password"
+                  :type="showPassword ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  required
+                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                  placeholder="Enter your password"
+                />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  aria-label="Toggle password visibility"
+                >
+                  <EyeIcon v-if="!showPassword" class="w-4 h-4" />
+                  <EyeSlashIcon v-else class="w-4 h-4" />
+                </button>
+              </div>
             </div>
-            <div class="relative">
-              <input
-                id="password"
-                v-model="form.password"
-                :type="showPassword ? 'text' : 'password'"
-                autocomplete="current-password"
-                required
-                class="w-full px-3 py-2.5 bg-white/80 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-10 hover:border-gray-300 dark:hover:border-gray-500"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
-              >
-                <EyeIcon v-if="!showPassword" class="w-4 h-4" />
-                <EyeSlashIcon v-else class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
 
-          <div class="flex items-center justify-between">
             <div class="flex items-center">
               <input
                 id="remember-me"
                 v-model="form.rememberMe"
                 type="checkbox"
-                class="h-3.5 w-3.5 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
               />
-              <label for="remember-me" class="ml-2 block text-xs sm:text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              <label for="remember-me" class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                 Remember me
               </label>
             </div>
-          </div>
 
-          <!-- Error Message -->
-          <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <div class="text-xs sm:text-sm text-red-600 dark:text-red-400">
-              <p class="font-semibold mb-1.5">⚠️ Error</p>
-              <div class="whitespace-pre-line text-left">{{ errorMessage }}</div>
-              <NuxtLink 
-                v-if="errorMessage.includes('Firestore')" 
-                to="/QUICK_FIX.md" 
+            <div
+              v-if="errorMessage"
+              class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-4"
+            >
+              <p class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Error</p>
+              <div class="text-sm text-red-700 dark:text-red-300 whitespace-pre-line text-left">{{ errorMessage }}</div>
+              <NuxtLink
+                v-if="errorMessage.includes('Firestore')"
+                to="/QUICK_FIX.md"
                 target="_blank"
-                class="mt-2 inline-block text-[11px] text-red-700 dark:text-red-300 underline hover:text-red-900 dark:hover:text-red-100"
+                class="mt-2 inline-block text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline"
               >
                 View Quick Fix Guide →
               </NuxtLink>
             </div>
+
+            <Button
+              type="submit"
+              :disabled="isLoading"
+              :loading="isLoading"
+              variant="primary"
+              size="lg"
+              :icon="ArrowRightIcon"
+              icon-right
+              extra-class="!w-full !rounded-full"
+            >
+              Sign in
+            </Button>
+          </form>
+
+          <div class="mt-6">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              :icon="PhoneIcon"
+              extra-class="!w-full !rounded-full"
+              @click="showPhoneSignIn = !showPhoneSignIn"
+            >
+              Sign in with Phone
+            </Button>
           </div>
 
-          <button
-            type="submit"
-            :disabled="isLoading"
-            class="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center justify-center gap-2 group"
-          >
-            <span v-if="!isLoading" class="flex items-center gap-2">
-              Sign in
-              <ArrowRightIcon class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </span>
-            <span v-else class="flex items-center gap-2">
-              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Signing in...
-            </span>
-          </button>
-        </form>
+          <div v-if="showPhoneSignIn" class="mt-6 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
+            <PhoneSignIn @success="handlePhoneSignInSuccess" @error="handlePhoneSignInError" />
+          </div>
 
-        <!-- Phone Sign In Option -->
-        <div class="mt-5">
-          <button
-            type="button"
-            @click="showPhoneSignIn = !showPhoneSignIn"
-            class="w-full inline-flex justify-center items-center py-2.5 px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-200 hover:scale-[1.02]"
-          >
-            <PhoneIcon class="w-4 h-4 mr-2" />
-            <span>Sign in with Phone</span>
-          </button>
-        </div>
-
-        <!-- Phone Sign In Component -->
-        <div v-if="showPhoneSignIn" class="pt-3 border-t border-gray-200 dark:border-gray-700">
-          <PhoneSignIn @success="handlePhoneSignInSuccess" @error="handlePhoneSignInError" />
-        </div>
-
-        <!-- Sign Up Link -->
-        <div class="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
-          <p class="text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+          <p class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-sm text-gray-500 dark:text-gray-400">
             Don't have an account?
             <NuxtLink
               to="/signup"
-              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors ml-1"
+              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
             >
               Sign up for free
             </NuxtLink>
@@ -178,6 +152,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
+import Button from '~/components/ui/Button.vue'
 import { useTheme } from '~/composables/useTheme'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'

@@ -18,32 +18,31 @@
 
     <button
       @click="dropdownOpen = !dropdownOpen"
-      class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors"
+      class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-xl transition-colors"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
-      <svg v-if="!switchingStore" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      <svg v-if="!switchingStore" class="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       </svg>
-      <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+      <svg v-else class="w-5 h-5 shrink-0 animate-spin text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="max-w-[100px] sm:max-w-[120px] truncate text-xs sm:text-sm flex items-center gap-1.5">
+      <span class="max-w-[90px] sm:max-w-[120px] truncate text-xs sm:text-sm flex items-center gap-1.5">
         <span class="hidden sm:inline">
           {{ switchingStore ? 'Switching...' : (currentStore?.name || 'No Store') }}
         </span>
         <span class="sm:hidden">
           {{ switchingStore ? '...' : (currentStore?.name?.substring(0, 8) || 'Store') }}
         </span>
-        <!-- Green online indicator for active store -->
         <span 
           v-if="!switchingStore && currentStore"
-          class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"
+          class="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full animate-pulse ring-2 ring-white dark:ring-gray-800"
           title="Active store"
         ></span>
       </span>
-      <svg v-if="!switchingStore" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
     </button>
 

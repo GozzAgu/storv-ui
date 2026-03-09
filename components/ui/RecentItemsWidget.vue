@@ -70,17 +70,15 @@ const formatTime = (timestamp: number) => {
 
 <template>
   <div v-if="recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').length > 0" class="space-y-2">
-    <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-      <h3 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-        Recent Items
-      </h3>
-    </div>
+    <p class="px-3 py-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+      Recent
+    </p>
     <div class="space-y-1 max-h-64 overflow-y-auto">
       <button
         v-for="item in recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').slice(0, 5)"
         :key="`${item.type}-${item.id}`"
         @click="handleItemClick(item)"
-        class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group flex items-center gap-2"
+        class="w-full px-3 py-2 text-left rounded-full hover:bg-gray-200/60 dark:hover:bg-gray-800/60 transition-colors group flex items-center gap-2"
       >
         <component
           :is="getIcon(item.type)"

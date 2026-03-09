@@ -117,9 +117,9 @@ const getColorClasses = (color?: string) => {
         leave-from-class="opacity-100 rotate-0"
         leave-to-class="opacity-0 -rotate-90"
       >
-        <XMarkIcon v-if="isOpen && !mainAction && actions && actions.length > 0" key="close" class="w-6 h-6" />
-        <component v-else-if="mainAction" :is="mainAction.icon" key="main" class="w-6 h-6" />
-        <PlusIcon v-else key="plus" class="w-6 h-6" />
+        <XMarkIcon v-if="isOpen && !mainAction && actions && actions.length > 0" key="close" class="w-6 h-6 text-white" />
+        <component v-else-if="mainAction" :is="mainAction.icon" key="main" class="w-6 h-6 text-white" />
+        <PlusIcon v-else key="plus" class="w-6 h-6 text-white" />
       </Transition>
     </button>
 

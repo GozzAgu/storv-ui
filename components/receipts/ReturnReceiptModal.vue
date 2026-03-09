@@ -224,10 +224,11 @@ const handleConfirmReturn = async () => {
       }
     }
 
-    // 2. Update receipt status to refunded
+    // 2. Update receipt status to refunded and store reason
     await receiptsStore.updateReceipt(receipt.id, {
       status: 'refunded',
       notes: returnReason.value ? `Returned: ${returnReason.value}` : 'Returned',
+      refundReason: returnReason.value || undefined,
     })
 
     // 3. Update customer (if needed - this might be handled elsewhere)
