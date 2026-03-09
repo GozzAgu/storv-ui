@@ -3,7 +3,7 @@
     <!-- Hero header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Inventory Folders</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
       </div>
       <Button
@@ -56,105 +56,58 @@
     </div>
 
     <!-- Content area: show only one of skeleton, folders, or empty -->
-    <!-- Loading skeleton (replaces content so real folders don't show below) -->
-    <div v-if="inventoryStore.loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 min-h-[280px]">
+    <!-- Loading skeleton -->
+    <div v-if="inventoryStore.loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 min-h-[200px]">
       <div
         v-for="i in 8"
         :key="i"
-        class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden animate-pulse"
+        class="flex items-center rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[70px] overflow-hidden animate-pulse"
       >
-        <div class="flex items-center gap-3 p-5">
-          <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-gray-700 shrink-0"></div>
-          <div class="flex-1 min-w-0">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mb-2"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+        <div class="w-[50px] h-[50px] ml-2.5 rounded-[10px] bg-gray-200 dark:bg-gray-700 shrink-0" />
+        <div class="flex-1 min-w-0 ml-2.5 pr-3 space-y-1">
+          <div class="flex justify-between items-center">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-10" />
           </div>
-        </div>
-        <div class="px-5 pb-5 space-y-3">
-          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          <div class="flex justify-between">
-            <div class="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div class="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full" />
         </div>
       </div>
     </div>
 
-    <!-- Folders grid (only when not loading, so it never appears under the skeleton) -->
+    <!-- Folders grid -->
     <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden hover:bg-gray-100/80 dark:hover:bg-gray-800 transition-all duration-200 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+        class="group relative flex items-start w-full min-h-[70px] rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 backdrop-blur-[10px] transition-all duration-300 ease-in-out hover:scale-105 hover:ring-primary-500/30 dark:hover:ring-primary-400/30 hover:cursor-pointer overflow-hidden py-2.5"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Card content -->
-        <div class="p-5">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div
-                class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500/15 to-primary-600/20 dark:from-primary-500/20 dark:to-primary-600/25 flex items-center justify-center shrink-0 ring-1 ring-primary-500/10"
-              >
-                <FolderIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  {{ folder.name }}
-                </h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
-                  {{ folder.description || 'No description' }}
-                </p>
-              </div>
-            </div>
-            <div v-if="canManage" class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                @click.stop="handleEditFolder(folder)"
-                class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                title="Edit folder"
-              >
-                <PencilSquareIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click.stop="handleDeleteFolder(folder)"
-                class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                title="Delete folder"
-              >
-                <TrashIcon class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+        <!-- Icon with primary gradient (changes on hover) -->
+        <div class="flex items-center justify-center w-[50px] h-[50px] ml-2.5 mt-0.5 rounded-[10px] shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-300 ease-in-out">
+          <FolderIcon class="w-6 h-6 text-white" stroke-width="1.75" />
+        </div>
 
-          <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-            <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
-              <CubeIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-              <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount }}</span>
-              <span class="text-xs">items</span>
-            </div>
-            <div v-if="folder.lowStockCount > 0" class="flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300">
-              <ExclamationTriangleIcon class="w-3.5 h-3.5" />
-              <span class="text-xs font-medium">{{ folder.lowStockCount }} low stock</span>
-            </div>
-          </div>
+        <div class="textBox flex-1 min-w-0 ml-2.5 pr-2">
+          <p class="h1 text-base font-bold text-gray-900 dark:text-gray-100 break-words group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ folder.name }}</p>
+          <span class="span text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 block">{{ folder.itemCount }} items</span>
+        </div>
 
-          <!-- Department pills -->
-          <div
-            v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0"
-            class="flex flex-wrap gap-1.5 mt-3"
+        <!-- Actions on hover -->
+        <div v-if="canManage" class="flex items-center gap-0.5 pr-2 shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            @click.stop="handleEditFolder(folder)"
+            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+            title="Edit folder"
           >
-            <span
-              v-for="deptId in folder.allowedDepartments.slice(0, 2)"
-              :key="deptId"
-              class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-primary-500/10 text-primary-700 dark:text-primary-300"
-            >
-              {{ getDepartmentName(deptId) }}
-            </span>
-            <span
-              v-if="folder.allowedDepartments.length > 2"
-              class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-gray-200/80 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-            >
-              +{{ folder.allowedDepartments.length - 2 }}
-            </span>
-          </div>
+            <PencilSquareIcon class="w-4 h-4" />
+          </button>
+          <button
+            @click.stop="handleDeleteFolder(folder)"
+            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            title="Delete folder"
+          >
+            <TrashIcon class="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -1280,4 +1233,3 @@ watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
   }
 }, { immediate: false })
 </script>
-
