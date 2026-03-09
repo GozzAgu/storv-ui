@@ -333,7 +333,7 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
+          <div class="flex items-center gap-0.5 sm:gap-2 ml-auto shrink-0 min-w-0">
             <!-- Global search -->
             <button
               @click="searchStore.openSearch()"
@@ -348,7 +348,7 @@
             <!-- Mobile search -->
             <button
               @click="searchStore.openSearch()"
-              class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="md:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
               title="Search"
               aria-label="Search"
             >
@@ -362,24 +362,24 @@
             <!-- Notifications -->
             <NuxtLink
               to="/dashboard/notifications"
-              class="relative flex items-center justify-center w-10 h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
               title="Notifications"
               aria-label="Notifications"
             >
               <BellIcon class="w-5 h-5" stroke-width="1.75" />
               <span
                 v-if="unreadNotificationCount > 0"
-                class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-1 ring-2 ring-white dark:ring-gray-900"
+                class="absolute top-1 right-1 min-w-[16px] h-[16px] bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-0.5 ring-2 ring-white dark:ring-gray-900"
               >
                 {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
               </span>
             </NuxtLink>
 
             <!-- Profile -->
-            <div class="relative" ref="profileMenuRef">
+            <div class="relative shrink-0" ref="profileMenuRef">
               <button
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex items-center gap-2.5 sm:gap-3 pl-1.5 pr-2 sm:pr-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                class="flex items-center gap-2 md:gap-3 p-1 sm:pl-1.5 sm:pr-2 md:pr-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-0"
                 :class="profileMenuOpen ? 'bg-gray-100 dark:bg-gray-800' : ''"
                 aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
@@ -404,11 +404,11 @@
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="absolute right-0 mt-2 w-48 sm:w-52 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg py-2 z-50"
+                  class="fixed top-14 inset-x-3 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mt-2 w-auto md:w-52 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-[100]"
                 >
                   <NuxtLink
                     to="/dashboard/profile"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     @click="profileMenuOpen = false"
                   >
                     <UserCircleIcon class="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
@@ -416,16 +416,16 @@
                   </NuxtLink>
                   <NuxtLink
                     to="/dashboard/settings"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     @click="profileMenuOpen = false"
                   >
                     <Cog6ToothIcon class="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
                     Settings
                   </NuxtLink>
-                  <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+                  <div class="border-t border-gray-100 dark:border-gray-700 my-2" />
                   <button
                     @click="handleSignOut"
-                    class="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors text-left"
+                    class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors text-left"
                   >
                     <ArrowRightOnRectangleIcon class="w-5 h-5 shrink-0" stroke-width="1.75" />
                     Sign out

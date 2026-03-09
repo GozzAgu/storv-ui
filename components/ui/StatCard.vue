@@ -6,8 +6,13 @@
         <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">{{ value }}</p>
         <p v-if="subtext" :class="['mt-0.5 text-[10px] truncate', subtextClass || 'text-gray-600 dark:text-gray-400']">{{ subtext }}</p>
       </div>
-      <div :class="['w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 ml-2 transition-transform duration-200 group-hover:scale-110', iconBgClass]">
-        <component :is="icon" :class="['w-4 h-4', iconClass]" />
+      <div
+        :class="[
+          'flex items-center justify-center flex-shrink-0 ml-2 transition-transform duration-200 group-hover:scale-105',
+          iconBgClass ? `w-8 h-8 rounded-md ${iconBgClass}` : 'w-9 h-9'
+        ]"
+      >
+        <component :is="icon" :class="[iconBgClass ? 'w-4 h-4' : 'w-6 h-6', iconClass]" stroke-width="1.75" />
       </div>
     </div>
   </div>
@@ -20,7 +25,7 @@ defineProps<{
   subtext?: string
   subtextClass?: string
   icon: any
-  iconBgClass: string
+  iconBgClass?: string
   iconClass: string
 }>()
 </script>

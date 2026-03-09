@@ -835,6 +835,7 @@
     <ItemTimelineModal
       v-model="showTimelineModal"
       :item="selectedItemForTimeline"
+      :folder-name="folder?.name"
     />
   </div>
 </template>

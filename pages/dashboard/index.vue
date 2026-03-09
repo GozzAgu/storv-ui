@@ -125,7 +125,6 @@
         :subtext="revenueChangeText"
         :subtext-class="revenueChangeClass"
         :icon="CurrencyDollarIcon"
-        icon-bg-class="bg-green-100 dark:bg-green-900/30"
         icon-class="text-green-600 dark:text-green-400"
       />
       <StatCard
@@ -134,7 +133,6 @@
         :subtext="`${newCustomersToday} new today`"
         :subtext-class="newCustomersToday > 0 ? 'text-blue-600 dark:text-blue-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
         :icon="UsersIcon"
-        icon-bg-class="bg-blue-100 dark:bg-blue-900/30"
         icon-class="text-blue-600 dark:text-blue-400"
       />
       <StatCard
@@ -143,7 +141,6 @@
         :subtext="lowStockCount > 0 ? `⚠ ${lowStockCount} Low Stock` : 'All items in stock'"
         :subtext-class="lowStockCount > 0 ? 'text-orange-600 dark:text-orange-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
         :icon="CubeIcon"
-        icon-bg-class="bg-orange-100 dark:bg-orange-900/30"
         icon-class="text-orange-600 dark:text-orange-400"
       />
       <StatCard
@@ -152,7 +149,6 @@
         :subtext="`${formatCurrency(todaySales)} in sales`"
         :subtext-class="'text-primary-600 dark:text-primary-400 text-xs font-medium'"
         :icon="ShoppingCartIcon"
-        icon-bg-class="bg-primary-100 dark:bg-primary-900/30"
         icon-class="text-primary-600 dark:text-primary-400"
       />
     </div>
