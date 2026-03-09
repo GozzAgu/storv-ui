@@ -27,7 +27,7 @@
           <img
             :src="logoSource"
             alt="Storvv"
-            :class="['shrink-0 object-contain transition-all duration-300', sidebarCollapsed ? 'h-9 w-9' : 'h-8 max-w-[140px]']"
+            :class="['shrink-0 object-contain transition-all duration-300', sidebarCollapsed ? 'h-7 w-7' : 'h-6 max-w-[110px]']"
           />
         </NuxtLink>
         <button
@@ -37,19 +37,6 @@
           aria-label="Close menu"
         >
           <XMarkIcon class="w-5 h-5" stroke-width="2" />
-        </button>
-      </div>
-
-      <!-- Search (pill, Fathom-style) -->
-      <div v-if="!sidebarCollapsed" class="px-3 pb-3">
-        <button
-          type="button"
-          @click="searchStore.openSearch()"
-          class="w-full flex items-center gap-2.5 pl-3.5 pr-3 py-2.5 rounded-full bg-gray-200/60 dark:bg-gray-800/60 border-0 text-left text-sm text-gray-500 dark:text-gray-400 placeholder-gray-400 dark:placeholder-gray-500 hover:bg-gray-200/80 dark:hover:bg-gray-800/80 transition-colors"
-        >
-          <MagnifyingGlassIcon class="w-4 h-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-          <span class="flex-1 truncate">Search...</span>
-          <kbd class="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:text-gray-500 bg-white/60 dark:bg-gray-700/60 rounded border border-gray-200/80 dark:border-gray-600/80">⌘K</kbd>
         </button>
       </div>
 
