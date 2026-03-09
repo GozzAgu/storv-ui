@@ -351,32 +351,62 @@
       </div>
 
       <!-- Low Stock Alerts -->
-      <Card padding="sm" extra-class="p-4" v-if="lowStockItems.length > 0">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Low Stock Alerts</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Items that need restocking</p>
+      <Card padding="none" extra-class="rounded-xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
+        <div class="px-4 sm:px-5 py-4 border-b border-gray-200/80 dark:border-gray-700/80">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30">
+                <ExclamationTriangleIcon class="w-5 h-5 text-amber-600 dark:text-amber-400" stroke-width="1.75" />
+              </div>
+              <div>
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Low stock alerts</h2>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Items at or below restock threshold</p>
+              </div>
+            </div>
+            <NuxtLink
+              v-if="lowStockItems.length > 0"
+              to="/dashboard/inventory"
+              class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 whitespace-nowrap"
+            >
+              View inventory →
+            </NuxtLink>
           </div>
         </div>
-        <div class="space-y-2">
-          <div
-            v-for="item in lowStockItems"
-            :key="item.id"
-            class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg"
-          >
-            <div class="flex-1">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-              <p class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5">
-                {{ item.folderName }}
-                <span v-if="item.itemCount > 1" class="ml-1 text-orange-600 dark:text-orange-400">
-                  ({{ item.itemCount }} items)
-                </span>
-              </p>
+        <div class="divide-y divide-gray-200/80 dark:divide-gray-700/80">
+          <template v-if="lowStockItems.length > 0">
+            <NuxtLink
+              v-for="item in lowStockItems"
+              :key="item.id"
+              :to="item.folderId ? `/dashboard/inventory/${item.folderId}` : '/dashboard/inventory'"
+              class="flex items-center gap-4 px-4 sm:px-5 py-3.5 hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  {{ item.name }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {{ item.folderName }}
+                  <span v-if="item.itemCount > 1" class="text-amber-600 dark:text-amber-400"> · {{ item.itemCount }} items</span>
+                </p>
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">{{ item.quantity }} left</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">/ {{ item.threshold }}</span>
+              </div>
+            </NuxtLink>
+          </template>
+          <div v-else class="px-4 sm:px-5 py-8 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700/50 mb-3">
+              <ExclamationTriangleIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
-            <div class="text-right">
-              <p class="text-xs font-semibold text-orange-600 dark:text-orange-400">{{ item.quantity }} left</p>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400">Threshold: {{ item.threshold }}</p>
-            </div>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No low stock items</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">All items are above the restock threshold</p>
+            <NuxtLink
+              to="/dashboard/inventory"
+              class="inline-block mt-3 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+            >
+              View inventory →
+            </NuxtLink>
           </div>
         </div>
       </Card>
@@ -664,6 +694,7 @@ const lowStockItems = computed(() => {
     quantity: group.totalQuantity,
     threshold: group.threshold,
     folderName: group.folderName,
+    folderId: group.folder?.id,
     itemCount: group.itemIds.length
   }))
 })

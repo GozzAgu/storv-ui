@@ -287,6 +287,9 @@
             <div class="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
           </div>
         </button>
+        <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500" :class="sidebarCollapsed ? 'text-center' : 'text-left'">
+          v{{ appVersion }}
+        </p>
       </div>
     </aside>
 
@@ -497,6 +500,7 @@ const { actualTheme } = useTheme()
 const logoSource = computed(() => {
   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 })
+const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '1.0'
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const notificationsStore = useNotificationsStore()
