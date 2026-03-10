@@ -85,7 +85,8 @@
 
       <div v-if="activeTab === 'transfer'" class="mt-6 sm:mt-8 rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Transfer items between stores</h2>
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Move stock between warehouses</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
         </div>
         <div class="p-4 sm:p-6 space-y-5">
           <div>
@@ -192,16 +193,17 @@
 
           <div class="flex justify-end pt-2">
             <Button
-              @click="handleTransfer"
+              @click="requestTransfer"
               :disabled="!canTransfer || isTransferring"
               :loading="isTransferring"
               variant="primary"
               :icon="ArrowsRightLeftIcon"
               extra-class="!rounded-full"
             >
-              {{ isTransferring ? 'Transferring...' : 'Transfer items' }}
+              {{ isTransferring ? 'Creating...' : 'Request transfer' }}
             </Button>
           </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Transfer will be created as pending. Approve → mark in transit → add tracking (optional) → complete to update stock.</p>
         </div>
       </div>
 
@@ -296,6 +298,7 @@
       <div v-if="activeTab === 'history'" class="mt-6 sm:mt-8 rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Warehouse-to-warehouse transfers with approval and tracking</p>
         </div>
         <div class="p-4 sm:p-6">
           <div v-if="transferHistory.length === 0" class="text-center py-12">
@@ -303,25 +306,25 @@
               <ArrowsRightLeftIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
             <p class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No transfer history</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Transfers between stores will appear here</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
           </div>
 
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-4">
             <div
               v-for="transfer in transferHistory"
               :key="transfer.id"
-              class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-4 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
+              class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-4 sm:p-5 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
             >
-              <div class="flex items-start justify-between gap-4">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2 mb-1.5">
+                  <div class="flex flex-wrap items-center gap-2 mb-1.5">
                     <ArrowsRightLeftIcon class="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
-                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
                     </p>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    {{ transfer.itemsCount }} items · {{ formatDate(transfer.createdAt) }}
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatTransferProductSummary(transfer) }} · {{ formatDate(transfer.createdAt) }}
                   </p>
                   <div v-if="transfer.items && transfer.items.length > 0" class="space-y-1 mt-2">
                     <div
@@ -330,27 +333,77 @@
                       class="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                     >
                       <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0"></span>
-                      <span>{{ item.itemName || 'Item' }}<span v-if="item.serialNumber" class="text-gray-500"> ({{ item.serialNumber }})</span></span>
+                      <span>{{ item.itemName || 'Item' }}<span v-if="item.quantity > 1" class="text-gray-500"> · {{ item.quantity }} units</span><span v-if="item.serialNumber" class="text-gray-500"> ({{ item.serialNumber }})</span></span>
                     </div>
                     <p v-if="transfer.items.length > 3" class="text-xs text-gray-500 dark:text-gray-500 italic pl-3.5">
                       +{{ transfer.items.length - 3 }} more
                     </p>
                   </div>
+                  <div v-if="transfer.trackingNumber || transfer.carrier" class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <TruckIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <span v-if="transfer.carrier">{{ transfer.carrier }}</span>
+                    <span v-if="transfer.trackingNumber" class="font-mono">{{ transfer.trackingNumber }}</span>
+                  </div>
                   <p v-if="transfer.notes" class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">{{ transfer.notes }}</p>
                 </div>
-                <span
-                  :class="[
-                    'px-2.5 py-1 text-xs font-medium rounded-full shrink-0',
-                    transfer.status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                  ]"
-                >
-                  {{ transfer.status }}
-                </span>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                  <span
+                    :class="[
+                      'px-2.5 py-1 text-xs font-medium rounded-full capitalize',
+                      getTransferStatusClass(transfer.status)
+                    ]"
+                  >
+                    {{ getTransferStatusLabel(transfer.status) }}
+                  </span>
+                  <div v-if="isTransferActionable(transfer)" class="flex flex-wrap gap-1.5 justify-end">
+                    <template v-if="transfer.status === 'pending_approval'">
+                      <Button variant="primary" extra-class="!rounded-full !py-1.5 !text-xs" @click="approveTransfer(transfer)">Approve</Button>
+                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" @click="cancelTransfer(transfer)">Cancel</Button>
+                    </template>
+                    <template v-else-if="transfer.status === 'in_transit'">
+                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" :icon="TruckIcon" @click="openTrackingModal(transfer)">Tracking</Button>
+                      <Button variant="primary" extra-class="!rounded-full !py-1.5 !text-xs" @click="completeTransfer(transfer)">Complete</Button>
+                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" @click="cancelTransfer(transfer)">Cancel</Button>
+                    </template>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Tracking modal -->
+      <Modal
+        v-model="showTrackingModal"
+        size="sm"
+      >
+        <template #header>Shipment tracking</template>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Carrier</label>
+            <input
+              v-model="trackingForm.carrier"
+              type="text"
+              class="w-full px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              placeholder="e.g. DHL, FedEx"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tracking number</label>
+            <input
+              v-model="trackingForm.trackingNumber"
+              type="text"
+              class="w-full px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 font-mono"
+              placeholder="e.g. 1234567890"
+            />
+          </div>
+        </div>
+        <template #footer>
+          <Button variant="outline" @click="showTrackingModal = false">Cancel</Button>
+          <Button variant="primary" @click="saveTracking">Save</Button>
+        </template>
+      </Modal>
     </template>
   </div>
 </template>
@@ -364,8 +417,10 @@ import {
   ArrowsRightLeftIcon,
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
+  TruckIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
+import Modal from '~/components/ui/Modal.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -401,6 +456,9 @@ const destinationFolders = ref<any[]>([])
 const availableItems = ref<any[]>([])
 const transferHistory = ref<any[]>([])
 const isTransferring = ref(false)
+const showTrackingModal = ref(false)
+const selectedTransferForTracking = ref<any>(null)
+const trackingForm = ref({ carrier: '', trackingNumber: '' })
 
 // Transfer Form
 const transferForm = ref({
@@ -596,78 +654,109 @@ const getAvailableQuantity = (item: any) => {
   return item.quantity || item.Quantity || 0
 }
 
-const handleTransfer = async () => {
+// Create a transfer request (pending approval). No stock is moved until transfer is completed.
+const requestTransfer = async () => {
   if (!canTransfer.value) return
-  
+
   isTransferring.value = true
   try {
-    const itemsToTransfer = Object.entries(transferForm.value.items)
-      .filter(([_, qty]) => qty > 0)
-      .map(([itemId, qty]) => ({ itemId, quantity: qty }))
-    
-    // Get current user ID
     const authStore = useAuthStore()
     const userId = authStore.currentUser?.uid
-    
-    if (!userId) {
-      throw new Error('User not authenticated')
-    }
+    if (!userId) throw new Error('User not authenticated')
+    if (userStore.userData?.role !== 'superAdmin') throw new Error('Only super admins can transfer items')
 
-    // Verify user is super admin
-    if (userStore.userData?.role !== 'superAdmin') {
-      throw new Error('Only super admins can transfer items')
-    }
-
-    // Get Firestore instance
     const db = useFirestore().getFirestoreInstance()
-    if (!db) {
-      throw new Error('Firestore not initialized')
-    }
+    if (!db) throw new Error('Firestore not initialized')
 
-    // Get folder info to check if it has serial numbers
     const sourceFolder = sourceFolders.value.find(f => f.id === transferForm.value.folderId)
     const hasSerialNumbers = sourceFolder?.hasSerialNumbers || false
 
-    // Import Firebase functions
-    const { doc, getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs } = await import('firebase/firestore')
-    const { getInventoryItemDocument, getInventoryItemsCollection, getStoreDocument } = await import('~/composables/useFirestorePaths')
+    const { getDoc, setDoc, serverTimestamp, collection, doc: createDoc } = await import('firebase/firestore')
+    const { getStoreDocument } = await import('~/composables/useFirestorePaths')
+    const pathUserId = userId
 
-    // For super admins, use their own UID directly in Firestore paths
-    // This ensures userId in path matches request.auth.uid, which Firestore rules check
-    // The rules allow operations when userId == request.auth.uid
-    const pathUserId = userId // Always use current user's UID for super admins
-    
-    // Verify both stores belong to the user
     const sourceStoreRef = getStoreDocument(db, pathUserId, transferForm.value.sourceStoreId)
     const destStoreRef = getStoreDocument(db, pathUserId, transferForm.value.destinationStoreId)
-    
-    const [sourceStoreSnap, destStoreSnap] = await Promise.all([
-      getDoc(sourceStoreRef),
-      getDoc(destStoreRef)
-    ])
-    
-    if (!sourceStoreSnap.exists() || !destStoreSnap.exists()) {
-      throw new Error('One or both stores not found')
-    }
-    
+    const [sourceStoreSnap, destStoreSnap] = await Promise.all([getDoc(sourceStoreRef), getDoc(destStoreRef)])
+    if (!sourceStoreSnap.exists() || !destStoreSnap.exists()) throw new Error('One or both stores not found')
     const sourceStore = sourceStoreSnap.data()
     const destStore = destStoreSnap.data()
-    
-    if (sourceStore.ownerId !== userId || destStore.ownerId !== userId) {
-      throw new Error('You do not have permission to transfer items between these stores')
-    }
+    if (sourceStore.ownerId !== userId || destStore.ownerId !== userId) throw new Error('You do not have permission to transfer items between these stores')
 
     const transferredItems: any[] = []
-    const errors: string[] = []
+    for (const [itemId, qty] of Object.entries(transferForm.value.items)) {
+      const quantity = Number(qty)
+      if (quantity <= 0) continue
+      const item = availableItems.value.find(i => i.id === itemId)
+      transferredItems.push({
+        itemId,
+        quantity,
+        itemName: item?.name || item?.itemName || 'Unnamed Item',
+        serialNumber: item?.serialNo || item?.serialNumber || null,
+      })
+    }
+    if (transferredItems.length === 0) {
+      toast.error('No items to transfer')
+      return
+    }
 
-    // Process each item to transfer
-    for (const { itemId, quantity } of itemsToTransfer) {
+    const transfersRef = collection(db, 'users', pathUserId, 'storeTransfers')
+    const transferRef = createDoc(transfersRef)
+    await setDoc(transferRef, {
+      sourceStoreId: transferForm.value.sourceStoreId,
+      destinationStoreId: transferForm.value.destinationStoreId,
+      folderId: transferForm.value.folderId,
+      destinationFolderId: transferForm.value.destinationFolderId,
+      items: transferredItems,
+      itemsCount: transferredItems.length,
+      hasSerialNumbers: hasSerialNumbers,
+      notes: transferForm.value.notes || '',
+      status: 'pending_approval',
+      createdBy: userId,
+      createdAt: serverTimestamp(),
+    })
+
+    toast.success('Transfer requested. Approve it from Transfer History, then complete when stock arrives.')
+    transferForm.value = { sourceStoreId: '', destinationStoreId: '', folderId: '', destinationFolderId: '', items: {}, notes: '' }
+    availableItems.value = []
+    sourceFolders.value = []
+    destinationFolders.value = []
+    await loadTransferHistory()
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to create transfer request')
+  } finally {
+    isTransferring.value = false
+  }
+}
+
+// Execute the actual stock move (used when completing an in_transit transfer).
+const executeTransfer = async (transfer: any) => {
+  const authStore = useAuthStore()
+  const userId = authStore.currentUser?.uid
+  if (!userId) throw new Error('User not authenticated')
+
+  const db = useFirestore().getFirestoreInstance()
+  if (!db) throw new Error('Firestore not initialized')
+
+  const { getDoc, setDoc, updateDoc, serverTimestamp, query, where, getDocs, collection, doc } = await import('firebase/firestore')
+  const { deleteDoc } = await import('firebase/firestore')
+  const { getInventoryItemDocument, getInventoryItemsCollection, getStoreDocument } = await import('~/composables/useFirestorePaths')
+  const pathUserId = userId
+
+  const sourceStoreId = transfer.sourceStoreId
+  const destinationStoreId = transfer.destinationStoreId
+  const folderId = transfer.folderId
+  const destinationFolderId = transfer.destinationFolderId
+  const hasSerialNumbers = transfer.hasSerialNumbers || false
+  const itemsToTransfer = (transfer.items || []).map((i: any) => ({ itemId: i.itemId, quantity: i.quantity || 1 }))
+
+  const transferredItems: any[] = []
+  const errors: string[] = []
+
+  try {
+  for (const { itemId, quantity } of itemsToTransfer) {
       try {
-        // Get source item
-        // Use pathUserId to ensure Firestore rules allow access (userId in path must match request.auth.uid)
-        // CRITICAL: pathUserId must equal request.auth.uid for Firestore rules to allow access
-        console.log('[Transfer] Using pathUserId:', pathUserId, 'userId:', userId, 'auth.uid:', authStore.currentUser?.uid)
-        const sourceItemRef = getInventoryItemDocument(db, pathUserId, transferForm.value.sourceStoreId, itemId)
+        const sourceItemRef = getInventoryItemDocument(db, pathUserId, sourceStoreId, itemId)
         const sourceItemSnap = await getDoc(sourceItemRef)
         
         if (!sourceItemSnap.exists()) {
@@ -676,7 +765,6 @@ const handleTransfer = async () => {
         }
 
         const sourceItem = sourceItemSnap.data()
-        console.log('[Transfer] Source item createdBy:', sourceItem.createdBy, 'pathUserId:', pathUserId)
         
         // Check if item is sold
         if (sourceItem.dateOut) {
@@ -693,221 +781,168 @@ const handleTransfer = async () => {
 
           // Create new item in destination store
           // Use pathUserId to ensure Firestore rules allow access
-          const destItemsRef = getInventoryItemsCollection(db, pathUserId, transferForm.value.destinationStoreId)
-          const { doc: createDoc, deleteDoc } = await import('firebase/firestore')
-          const newItemRef = createDoc(destItemsRef)
-          
-          // Create new item in destination store
-          // Set createdBy to current user to ensure Firestore rules allow it
-          // Preserve original dateIn from source item
+          const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
+          const newItemRef = doc(destItemsRef)
           const { createdBy: _createdBy, dateOut: _dateOut, id: _id, ...itemDataWithoutSystemFields } = sourceItem
-          // Remove undefined values before setting document (Firestore doesn't allow undefined)
           const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
-          console.log('[Transfer] Moving serial item to destination store:', transferForm.value.destinationStoreId, 'pathUserId:', pathUserId, 'createdBy:', userId, 'auth.uid:', authStore.currentUser?.uid)
-          try {
-            // First create in destination store
-            // Preserve original dateIn from source item
-            const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
-            await setDoc(newItemRef, {
-              ...cleanedItemData,
-              id: newItemRef.id,
-              folderId: transferForm.value.destinationFolderId,
-              storeId: transferForm.value.destinationStoreId,
-              dateIn: originalDateIn, // Preserve original dateIn
-              createdBy: userId, // Set to current user for Firestore rules
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp(),
-              transferredFrom: transferForm.value.sourceStoreId,
-              transferredFromFolder: transferForm.value.folderId,
-              transferredAt: serverTimestamp(), // Transfer date
-              isTransferred: true, // Mark as transferred item
-            })
-            console.log('[Transfer] Serial item created in destination store successfully')
-            
-            // Then delete from source store (move, not duplicate)
-            console.log('[Transfer] Deleting serial item from source store:', transferForm.value.sourceStoreId)
-            await deleteDoc(sourceItemRef)
-            console.log('[Transfer] Serial item deleted from source store successfully')
-          } catch (moveError: any) {
-            console.error('[Transfer] Error moving item:', moveError)
-            throw new Error(`Failed to move item: ${moveError.message}`)
-          }
-
-          // Store item details for transfer history (without quantity)
-          const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
-          const itemSerial = sourceItem.serialNo || sourceItem.serialNumber || null
-          transferredItems.push({ 
-            itemId, 
-            itemName,
-            serialNumber: itemSerial
+          const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
+          await setDoc(newItemRef, {
+            ...cleanedItemData,
+            id: newItemRef.id,
+            folderId: destinationFolderId,
+            storeId: destinationStoreId,
+            dateIn: originalDateIn,
+            createdBy: userId,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            transferredFrom: sourceStoreId,
+            transferredFromFolder: folderId,
+            transferredAt: serverTimestamp(),
+            isTransferred: true,
           })
+          await deleteDoc(sourceItemRef)
+          transferredItems.push({ itemId, itemName: sourceItem.name || sourceItem.itemName || 'Unnamed Item', quantity: 1, serialNumber: sourceItem.serialNo || sourceItem.serialNumber || null })
         } else {
-          // For bulk items, check available quantity
           const availableQty = sourceItem.quantity || sourceItem.Quantity || 0
           if (availableQty < quantity) {
             errors.push(`Insufficient quantity for item ${itemId}. Available: ${availableQty}, Requested: ${quantity}`)
             continue
           }
-
-          // Remove transferred quantity from source store
           const newQty = availableQty - quantity
-          console.log('[Transfer] Removing bulk item quantity from source store:', itemId, 'in store:', transferForm.value.sourceStoreId, 'pathUserId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid, 'qty transferred:', quantity, 'remaining:', newQty)
-          try {
-            const { deleteDoc } = await import('firebase/firestore')
-            
-            if (newQty <= 0) {
-              // All quantity transferred - delete the source item completely
-              console.log('[Transfer] All quantity transferred, deleting source item completely')
-              await deleteDoc(sourceItemRef)
-              console.log('[Transfer] Source item deleted successfully')
-            } else {
-              // Partial transfer - reduce quantity in source (item stays but with reduced qty)
-              console.log('[Transfer] Partial transfer, reducing source quantity to:', newQty)
-              await updateDoc(sourceItemRef, {
-                quantity: newQty,
-                Quantity: newQty,
-                updatedAt: serverTimestamp(),
-              })
-              console.log('[Transfer] Source item quantity reduced successfully')
-            }
-          } catch (updateError: any) {
-            console.error('[Transfer] Error updating source item:', updateError)
-            throw new Error(`Failed to remove quantity from source store: ${updateError.message}`)
+          if (newQty <= 0) {
+            await deleteDoc(sourceItemRef)
+          } else {
+            await updateDoc(sourceItemRef, { quantity: newQty, Quantity: newQty, updatedAt: serverTimestamp() })
           }
-
-          // Check if item exists in destination store with same name
-          // Use pathUserId to ensure Firestore rules allow access
-          const destItemsRef = getInventoryItemsCollection(db, pathUserId, transferForm.value.destinationStoreId)
+          const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
           const existingItemsQuery = query(
             destItemsRef,
-            where('folderId', '==', transferForm.value.destinationFolderId),
+            where('folderId', '==', destinationFolderId),
             where('name', '==', sourceItem.name || sourceItem.itemName || '')
           )
           const existingItemsSnap = await getDocs(existingItemsQuery)
-          
           if (existingItemsSnap.empty) {
-            // Create new item in destination store
-            // Set createdBy to current user to ensure Firestore rules allow it
-            const { doc: createDoc } = await import('firebase/firestore')
-            const newItemRef = createDoc(destItemsRef)
+            const newItemRef = doc(destItemsRef)
             const { createdBy: _, ...itemDataWithoutCreatedBy } = sourceItem
-            // Remove undefined values before setting document (Firestore doesn't allow undefined)
             const cleanedItemData = removeUndefined(itemDataWithoutCreatedBy)
-            // Preserve original dateIn from source item
             const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
             await setDoc(newItemRef, {
               ...cleanedItemData,
               id: newItemRef.id,
-              folderId: transferForm.value.destinationFolderId,
-              storeId: transferForm.value.destinationStoreId,
-              dateIn: originalDateIn, // Preserve original dateIn
-              quantity: quantity,
+              folderId: destinationFolderId,
+              storeId: destinationStoreId,
+              dateIn: originalDateIn,
+              quantity,
               Quantity: quantity,
-              createdBy: userId, // Set to current user for Firestore rules
+              createdBy: userId,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp(),
-              transferredFrom: transferForm.value.sourceStoreId,
-              transferredFromFolder: transferForm.value.folderId,
-              transferredAt: serverTimestamp(), // Transfer date
+              transferredFrom: sourceStoreId,
+              transferredFromFolder: folderId,
+              transferredAt: serverTimestamp(),
             })
           } else {
-            // Update existing item quantity
             const existingItem = existingItemsSnap.docs[0]
             if (existingItem) {
               const existingQty = existingItem.data().quantity || existingItem.data().Quantity || 0
               const existingData = existingItem.data()
-              // Preserve original dateIn if it doesn't exist, or use the older one
               const originalDateIn = existingData.dateIn || existingData.DateIn || (sourceItem.dateIn || sourceItem.DateIn || null)
               await updateDoc(existingItem.ref, {
                 quantity: existingQty + quantity,
                 Quantity: existingQty + quantity,
-                dateIn: originalDateIn, // Preserve original dateIn
-                transferredAt: serverTimestamp(), // Update transfer date
+                dateIn: originalDateIn,
+                transferredAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
               })
             }
           }
-
-          // Store item details for transfer history (without quantity)
-          const itemName = sourceItem.name || sourceItem.itemName || 'Unnamed Item'
-          transferredItems.push({ 
-            itemId, 
-            itemName
-          })
+          transferredItems.push({ itemId, itemName: sourceItem.name || sourceItem.itemName || 'Unnamed Item', quantity })
         }
       } catch (error: any) {
         errors.push(`Error transferring item ${itemId}: ${error.message}`)
       }
     }
 
-    // Create transfer record
-    // Use pathUserId to ensure Firestore rules allow access
-    const { collection } = await import('firebase/firestore')
-    const transfersRef = collection(db, 'users', pathUserId, 'storeTransfers')
-    const { doc: createDoc } = await import('firebase/firestore')
-    const transferRef = createDoc(transfersRef)
-    console.log('[Transfer] Creating transfer record, pathUserId:', pathUserId, 'createdBy:', userId, 'auth.uid:', authStore.currentUser?.uid)
-    try {
-      await setDoc(transferRef, {
-        sourceStoreId: transferForm.value.sourceStoreId,
-        destinationStoreId: transferForm.value.destinationStoreId,
-        folderId: transferForm.value.folderId,
-        destinationFolderId: transferForm.value.destinationFolderId,
-        items: transferredItems,
-        itemsCount: transferredItems.length,
-        notes: transferForm.value.notes || '',
-        status: errors.length > 0 ? 'partial' : 'completed',
-        errors: errors.length > 0 ? errors : null,
-        createdBy: userId,
-        createdAt: serverTimestamp(),
-      })
-      console.log('[Transfer] Transfer record created successfully')
-    } catch (recordError: any) {
-      console.error('[Transfer] Error creating transfer record:', recordError)
-      // Don't throw - transfer might have succeeded even if record creation failed
-      console.warn('Transfer items succeeded but failed to create transfer record')
-    }
+    const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
+    await updateDoc(transferRef, {
+      status: errors.length > 0 ? 'partial' : 'completed',
+      completedAt: serverTimestamp(),
+      completedBy: userId,
+      items: transferredItems.length ? transferredItems : transfer.items,
+      itemsCount: transferredItems.length || (transfer.items || []).length,
+    })
 
     if (errors.length > 0) {
-      toast.warning(`Transfer completed with ${errors.length} errors. ${transferredItems.length} items transferred.`)
+      toast.warning(`Transfer completed with ${errors.length} errors. ${transferredItems.length} items moved.`)
     } else {
-      toast.success(`Successfully transferred ${transferredItems.length} items!`)
+      toast.success(`Stock updated: ${transferredItems.length} items moved to ${getStoreName(destinationStoreId)}.`)
     }
-
-    // Reset form
-    transferForm.value = {
-      sourceStoreId: '',
-      destinationStoreId: '',
-      folderId: '',
-      destinationFolderId: '',
-      items: {},
-      notes: '',
-    }
-    availableItems.value = []
-    sourceFolders.value = []
-    destinationFolders.value = []
-    
-    // Reload history
     await loadTransferHistory()
-  } catch (error: any) {
-    console.error('Transfer error:', error)
-    const authStore = useAuthStore()
-    console.error('Error details:', {
-      code: error.code,
-      message: error.message,
-      stack: error.stack,
-      userId: authStore.currentUser?.uid,
-      sourceStoreId: transferForm.value.sourceStoreId,
-      destinationStoreId: transferForm.value.destinationStoreId,
-    })
-    
-    // Provide more specific error message
-    let errorMessage = 'Transfer failed: ' + error.message
-    if (error.code === 'permission-denied' || error.message?.includes('permission')) {
-      errorMessage = 'Permission denied. Please ensure:\n1. You are logged in as a super admin\n2. Both stores belong to you\n3. Firestore rules have been deployed to Firebase'
-    }
-    
-    toast.error(errorMessage)
+  } catch (err: any) {
+    toast.error(err?.message || 'Failed to complete transfer')
+    throw err
+  }
+}
+
+const approveTransfer = async (transfer: any) => {
+  const authStore = useAuthStore()
+  const userId = authStore.currentUser?.uid
+  if (!userId) return
+  const db = useFirestore().getFirestoreInstance()
+  if (!db) return
+  const { updateDoc, serverTimestamp, doc } = await import('firebase/firestore')
+  const pathUserId = userId
+  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
+  await updateDoc(transferRef, { status: 'in_transit', approvedAt: serverTimestamp(), approvedBy: userId })
+  toast.success('Transfer approved. Stock is in transit.')
+  await loadTransferHistory()
+}
+
+const cancelTransfer = async (transfer: any) => {
+  const authStore = useAuthStore()
+  const userId = authStore.currentUser?.uid
+  if (!userId) return
+  const db = useFirestore().getFirestoreInstance()
+  if (!db) return
+  const { updateDoc, doc } = await import('firebase/firestore')
+  const pathUserId = userId
+  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
+  await updateDoc(transferRef, { status: 'cancelled' })
+  toast.success('Transfer cancelled.')
+  await loadTransferHistory()
+}
+
+const openTrackingModal = (t: any) => {
+  selectedTransferForTracking.value = t
+  trackingForm.value = { carrier: t.carrier || '', trackingNumber: t.trackingNumber || '' }
+  showTrackingModal.value = true
+}
+
+const saveTracking = async () => {
+  const t = selectedTransferForTracking.value
+  if (!t) return
+  const authStore = useAuthStore()
+  const userId = authStore.currentUser?.uid
+  if (!userId) return
+  const db = useFirestore().getFirestoreInstance()
+  if (!db) return
+  const { updateDoc, doc } = await import('firebase/firestore')
+  const pathUserId = userId
+  const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', t.id)
+  await updateDoc(transferRef, { carrier: trackingForm.value.carrier || null, trackingNumber: trackingForm.value.trackingNumber || null })
+  showTrackingModal.value = false
+  selectedTransferForTracking.value = null
+  trackingForm.value = { carrier: '', trackingNumber: '' }
+  toast.success('Tracking info saved.')
+  await loadTransferHistory()
+}
+
+const completeTransfer = async (transfer: any) => {
+  isTransferring.value = true
+  try {
+    await executeTransfer(transfer)
+  } catch (e) {
+    // error already toasts in executeTransfer
   } finally {
     isTransferring.value = false
   }
@@ -1289,6 +1324,49 @@ const exportConsolidatedReport = async () => {
 const getStoreName = (storeId: string) => {
   const store = stores.value.find(s => s.id === storeId)
   return store?.name || store?.branchName || storeId
+}
+
+const formatTransferProductSummary = (transfer: any) => {
+  const items = transfer.items || []
+  const totalUnits = items.reduce((sum: number, i: any) => sum + (i.quantity || 1), 0)
+  if (items.length === 0) return `${transfer.itemsCount ?? 0} items`
+  if (items.length === 1 && totalUnits === 1) return '1 item'
+  return `${totalUnits} units · ${items.length} product${items.length === 1 ? '' : 's'}`
+}
+
+const TRANSFER_STATUS_LABELS: Record<string, string> = {
+  pending_approval: 'Pending approval',
+  in_transit: 'In transit',
+  completed: 'Completed',
+  completed_partial: 'Completed (partial)',
+  partial: 'Completed (partial)',
+  cancelled: 'Cancelled',
+}
+
+const getTransferStatusLabel = (status: string) => {
+  return TRANSFER_STATUS_LABELS[status] || (status || 'Pending')
+}
+
+const getTransferStatusClass = (status: string) => {
+  switch (status) {
+    case 'pending_approval':
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+    case 'in_transit':
+      return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'completed':
+    case 'partial':
+    case 'completed_partial':
+      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'cancelled':
+      return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+  }
+}
+
+const isTransferActionable = (transfer: any) => {
+  const s = (transfer.status || '').toLowerCase()
+  return s === 'pending_approval' || s === 'in_transit'
 }
 
 const formatDate = (date: any) => {

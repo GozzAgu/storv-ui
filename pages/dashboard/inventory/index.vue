@@ -85,7 +85,12 @@
         </div>
 
         <div class="textBox flex-1 min-w-0 ml-3 sm:ml-2.5 pr-2">
-          <p class="h1 text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2 sm:line-clamp-none group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ folder.name }}</p>
+          <p
+            class="h1 text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
+            :title="folder.name"
+          >
+            {{ folder.name }}
+          </p>
           <span class="span text-xs sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 sm:mt-0.5 block">{{ folder.itemCount }} items</span>
         </div>
 

@@ -224,27 +224,27 @@
       </div>
       </Card>
 
-      <!-- Revenue Breakdown Pie Chart -->
+      <!-- Revenue Breakdown - Horizontal Bar Chart -->
       <Card padding="sm" extra-class="p-4 overflow-hidden">
         <div class="mb-2">
           <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Revenue Breakdown</h2>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">By product category</p>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Top products by revenue</p>
         </div>
         <div class="h-48 sm:h-64 lg:h-72 relative overflow-hidden">
-          <div v-if="pieChartData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+          <div v-if="revenueBarData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
             <div class="w-14 h-14 mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-              <Squares2X2Icon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+              <ChartBarIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No breakdown data</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sales will appear here by category</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sales will appear here by product</p>
           </div>
           <ClientOnly>
             <apexchart
-              v-if="pieChartData.length > 0"
-              type="donut"
+              v-if="revenueBarData.length > 0"
+              type="bar"
               :height="isMobile ? 220 : 280"
-              :options="pieChartOptions"
-              :series="pieChartSeries"
+              :options="revenueBarOptions"
+              :series="revenueBarSeries"
             />
             <template #fallback>
               <div class="flex items-center justify-center h-full">
@@ -462,7 +462,6 @@ import {
   Cog6ToothIcon,
   ExclamationTriangleIcon,
   ChartBarIcon,
-  Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -1189,10 +1188,9 @@ const chartOptions = computed(() => {
   }
 })
 
-// Pie Chart Data - Revenue by Top Products
-const pieChartData = computed(() => {
+// Revenue Bar Chart - Top Products by Revenue
+const revenueBarData = computed(() => {
   const productRevenue = new Map<string, number>()
-  
   receiptsStore.receipts.forEach(receipt => {
     if (receipt.status === 'completed' && receipt.items) {
       receipt.items.forEach((item: any) => {
@@ -1201,63 +1199,60 @@ const pieChartData = computed(() => {
       })
     }
   })
-  
   return Array.from(productRevenue.entries())
     .map(([name, revenue]) => ({ name, revenue }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5)
 })
 
-const pieChartSeries = computed(() => {
-  return pieChartData.value.map(item => item.revenue)
-})
+const revenueBarSeries = computed(() => [{
+  name: 'Revenue',
+  data: revenueBarData.value.map(item => item.revenue)
+}])
 
-const pieChartOptions = computed(() => {
-  const isDark = import.meta.client 
+const revenueBarOptions = computed(() => {
+  const isDark = import.meta.client
     ? (document.documentElement.classList.contains('dark') || themeStore.actualTheme === 'dark')
     : false
-  
   return {
     chart: {
-      type: 'donut',
-      background: 'transparent'
+      type: 'bar',
+      toolbar: { show: false },
+      background: 'transparent',
+      fontFamily: 'inherit'
     },
-    labels: pieChartData.value.map(item => item.name),
-    colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
-    legend: {
-      position: 'bottom',
-      offsetY: 0,
-      height: 40,
-      labels: {
-        colors: isDark ? '#9CA3AF' : '#1F2937',
-        fontSize: '10px',
-        useSeriesColors: false
-      },
-      itemMargin: {
-        horizontal: 8,
-        vertical: 4
-      },
-      formatter: function(seriesName: string, opts: any) {
-        return seriesName.length > 10 ? seriesName.substring(0, 10) + '...' : seriesName
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        barHeight: '60%',
+        borderRadius: 4,
+        dataLabels: { position: 'top' as const }
       }
+    },
+    colors: [isDark ? '#60a5fa' : '#3b82f6'],
+    dataLabels: {
+      enabled: true,
+      formatter: (val: number) => formatCurrency(val),
+      style: { fontSize: '10px', colors: [isDark ? '#9CA3AF' : '#111827'] },
+      offsetX: 24
+    },
+    xaxis: {
+      categories: revenueBarData.value.map(item => item.name.length > 12 ? item.name.substring(0, 12) + '…' : item.name),
+      labels: { style: { colors: isDark ? '#9CA3AF' : '#111827', fontSize: '11px' } },
+      axisBorder: { show: false },
+      axisTicks: { show: false }
+    },
+    yaxis: {
+      labels: { style: { colors: isDark ? '#9CA3AF' : '#111827', fontSize: '11px' } }
+    },
+    grid: {
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: false } },
+      padding: { top: 0, right: 16, bottom: 0, left: 0 }
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
-      y: {
-        formatter: (val: number) => formatCurrency(val)
-      }
-    },
-    theme: {
-      mode: isDark ? 'dark' : 'light'
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: (val: number) => `${val.toFixed(1)}%`,
-      style: {
-        fontSize: '11px',
-        fontWeight: 500,
-        colors: isDark ? ['#fff'] : ['#1F2937']
-      }
+      y: { formatter: (val: number) => formatCurrency(val) }
     }
   }
 })
