@@ -57,60 +57,58 @@
 
     <!-- Content area: show only one of skeleton, folders, or empty -->
     <!-- Loading skeleton -->
-    <div v-if="inventoryStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 min-h-[200px]">
+    <div v-if="inventoryStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 min-h-[160px]">
       <div
         v-for="i in 8"
         :key="i"
-        class="flex items-center rounded-2xl sm:rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[72px] sm:h-[70px] overflow-hidden animate-pulse px-3 sm:px-0"
+        class="flex items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[52px] sm:h-[50px] overflow-hidden animate-pulse px-2.5 sm:px-0"
       >
-        <div class="w-12 h-12 sm:w-[50px] sm:h-[50px] ml-0 sm:ml-2.5 rounded-xl sm:rounded-[10px] bg-gray-200 dark:bg-gray-700 shrink-0" />
-        <div class="flex-1 min-w-0 ml-3 sm:ml-2.5 pr-2 space-y-1.5">
-          <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-          <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+        <div class="w-9 h-9 sm:w-8 sm:h-8 ml-0 sm:ml-2 rounded-lg bg-gray-200 dark:bg-gray-700 shrink-0" />
+        <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-2 space-y-1">
+          <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+          <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-12" />
         </div>
       </div>
     </div>
 
     <!-- Folders grid -->
-    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex items-start w-full min-h-[72px] sm:min-h-[70px] rounded-2xl sm:rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 backdrop-blur-[10px] transition-all duration-300 ease-in-out active:scale-[0.99] sm:hover:scale-105 hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-3 px-3 sm:py-2.5 sm:px-0"
+        class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Icon with primary gradient (changes on hover) -->
-        <div class="flex items-center justify-center w-12 h-12 sm:w-[50px] sm:h-[50px] sm:ml-2.5 mt-0.5 rounded-xl sm:rounded-[10px] shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-300 ease-in-out">
-          <FolderIcon class="w-6 h-6 text-white" stroke-width="1.75" />
+        <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
+          <FolderIcon class="w-5 h-5 text-white" stroke-width="1.75" />
         </div>
 
-        <div class="textBox flex-1 min-w-0 ml-3 sm:ml-2.5 pr-2">
+        <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
           <p
-            class="h1 text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
+            class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
             :title="folder.name"
           >
             {{ folder.name }}
           </p>
-          <span class="span text-xs sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 sm:mt-0.5 block">{{ folder.itemCount }} items</span>
+          <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ folder.itemCount }} items</span>
         </div>
 
-        <!-- Actions: always visible on mobile for touch, hover on desktop -->
         <div v-if="canManage" class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             @click.stop="handleEditFolder(folder)"
-            class="p-2 sm:p-1.5 rounded-xl sm:rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+            class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
             title="Edit folder"
             aria-label="Edit folder"
           >
-            <PencilSquareIcon class="w-4 h-4" />
+            <PencilSquareIcon class="w-3.5 h-3.5" />
           </button>
           <button
             @click.stop="handleDeleteFolder(folder)"
-            class="p-2 sm:p-1.5 rounded-xl sm:rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-50 dark:active:bg-red-900/20 transition-colors touch-manipulation"
+            class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation"
             title="Delete folder"
             aria-label="Delete folder"
           >
-            <TrashIcon class="w-4 h-4" />
+            <TrashIcon class="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

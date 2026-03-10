@@ -1,5 +1,4 @@
 <template>
-  <div class="pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
     <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
     <div class="mb-6 sm:mb-8">
@@ -92,16 +91,16 @@
           </div>
         </div>
         <div class="p-4 sm:p-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 min-h-[200px]">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 min-h-[160px]">
             <div
               v-for="i in 8"
               :key="i"
-              class="flex items-center rounded-2xl sm:rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[72px] sm:h-[70px] overflow-hidden animate-pulse px-3 sm:px-0"
+              class="flex items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[52px] sm:h-[50px] overflow-hidden animate-pulse px-2.5 sm:px-0"
             >
-              <div class="w-12 h-12 sm:w-[50px] sm:h-[50px] ml-0 sm:ml-2.5 rounded-xl sm:rounded-[10px] bg-gray-200 dark:bg-gray-700 shrink-0" />
-              <div class="flex-1 min-w-0 ml-3 sm:ml-2.5 pr-2 space-y-1.5">
-                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16" />
+              <div class="w-9 h-9 sm:w-8 sm:h-8 ml-0 sm:ml-2 rounded-lg bg-gray-200 dark:bg-gray-700 shrink-0" />
+              <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-2 space-y-1">
+                <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-12" />
               </div>
             </div>
           </div>
@@ -143,41 +142,46 @@
         </div>
       </div>
 
-      <div v-if="paginatedDepartments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+      <div v-if="paginatedDepartments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex items-start w-full min-h-[72px] sm:min-h-[70px] rounded-2xl sm:rounded-[20px] bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 backdrop-blur-[10px] transition-all duration-300 ease-in-out active:scale-[0.99] sm:hover:scale-105 hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-3 px-3 sm:py-2.5 sm:px-0"
+          class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
           :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false }"
           @click="department.isActive === false ? null : navigateToDepartment(department.id)"
         >
-          <div class="flex items-center justify-center w-12 h-12 sm:w-[50px] sm:h-[50px] sm:ml-2.5 mt-0.5 rounded-xl sm:rounded-[10px] shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-300 ease-in-out">
-            <BuildingOfficeIcon class="w-6 h-6 text-white" stroke-width="1.75" />
+          <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
+            <BuildingOfficeIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
-          <div class="textBox flex-1 min-w-0 ml-3 sm:ml-2.5 pr-2">
-            <p class="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 break-words line-clamp-2 sm:line-clamp-none group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ department.name }}</p>
-            <span class="text-xs sm:text-[10px] text-gray-500 dark:text-gray-400 mt-1 sm:mt-0.5 block">{{ department.staffCount || 0 }} staff</span>
+          <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
+            <p
+              class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
+              :title="department.name"
+            >
+              {{ department.name }}
+            </p>
+            <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ department.staffCount || 0 }} staff</span>
           </div>
           <div v-if="canManageDepartments" class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button
               @click.stop="department.isActive === false ? null : handleEditDepartment(department)"
-              class="p-2 sm:p-1.5 rounded-xl sm:rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 active:bg-gray-200 dark:active:bg-gray-700 transition-colors touch-manipulation"
+              class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
               title="Edit department"
               aria-label="Edit department"
             >
-              <PencilSquareIcon class="w-4 h-4" />
+              <PencilSquareIcon class="w-3.5 h-3.5" />
             </button>
             <button
               @click.stop="department.isActive === false ? null : handleDeleteDepartment(department)"
-              class="p-2 sm:p-1.5 rounded-xl sm:rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-50 dark:active:bg-red-900/20 transition-colors touch-manipulation"
+              class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation"
               title="Delete department"
               aria-label="Delete department"
             >
-              <TrashIcon class="w-4 h-4" />
+              <TrashIcon class="w-3.5 h-3.5" />
             </button>
           </div>
-          <div v-if="department.isActive === false" class="absolute top-2 right-2 sm:top-2.5 sm:right-2 z-10">
-            <span class="px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full">Inactive</span>
+          <div v-if="department.isActive === false" class="absolute top-1.5 right-1.5 z-10">
+            <span class="px-1 py-0.5 text-[9px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full">Inactive</span>
           </div>
         </div>
       </div>
@@ -227,7 +231,6 @@
       @success="handleDepartmentSuccess"
       @error="handleDepartmentError"
     />
-  </div>
 
   <div v-if="canManageDepartments" class="fixed bottom-24 right-6 z-50 group">
     <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">New department</span>
