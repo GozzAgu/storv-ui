@@ -28,9 +28,9 @@
 
     <template v-else>
     <!-- Hero header -->
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Sales</h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Manage receipts, customers, and returns</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Sales</h1>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
     <!-- Tab Navigation - Modern segment style (ring indicator, no bg fill) -->
@@ -75,20 +75,20 @@
       ]"
     >
       <!-- Fullscreen header -->
-      <div v-if="isReceiptsFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-4">
-        <div class="flex items-center justify-between gap-4 mb-4">
+      <div v-if="isReceiptsFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-4 py-3">
+        <div class="flex items-center justify-between gap-3 mb-3">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Receipts</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Receipts</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {{ filteredReceipts.length }} receipts · {{ formatCurrency(totalSales) }} total sales
             </p>
           </div>
           <button
             @click="isReceiptsFullscreen = false"
-            class="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Exit fullscreen"
           >
-            <XMarkIcon class="w-5 h-5" />
+            <XMarkIcon class="w-4 h-4" />
           </button>
         </div>
         <div class="flex items-center gap-2 flex-wrap">

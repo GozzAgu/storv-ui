@@ -2,7 +2,7 @@
   <div class="pb-8 min-h-screen w-full overflow-x-hidden">
     <div class="mb-6 sm:mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Settings</h1>
+        <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Settings</h1>
         <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Manage your store and application preferences</p>
       </div>
       <div v-if="!canEditSettings" class="rounded-xl bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/60 dark:ring-amber-800/50 px-4 py-2.5">
@@ -14,7 +14,7 @@
     <div class="space-y-6">
       <div v-if="userStore.isSuperAdmin" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Account logo</h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account logo</h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">One logo for all your stores. Shown on receipts.</p>
         </div>
         <div class="p-4 sm:p-6 flex items-center gap-5">
@@ -43,7 +43,7 @@
       <div v-if="userStore.isSuperAdmin" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Stores</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Stores</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Create, edit, and delete your stores</p>
           </div>
           <Button v-if="!isStaff" @click="showCreateModal = true" extra-class="!rounded-full" size="sm">
@@ -66,7 +66,7 @@
             <div class="w-16 h-16 mx-auto mb-5 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <BuildingStorefrontIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No stores yet</h3>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No stores yet</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Create your first store to get started.</p>
             <Button size="sm" @click="showCreateModal = true" extra-class="!rounded-full">Create branch</Button>
           </div>
@@ -130,7 +130,7 @@
       <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Update your business details</p>
           </div>
           <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
@@ -169,7 +169,7 @@
       <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Inventory settings</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Inventory settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Configure inventory management preferences</p>
           </div>
           <Button v-if="canEditSettings" @click="saveInventorySettings" variant="primary" extra-class="!rounded-full" size="sm">Save changes</Button>
@@ -222,7 +222,7 @@
       <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Receipt & invoice settings</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Receipt & invoice settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Customize receipt and invoice preferences</p>
           </div>
           <Button v-if="canEditSettings" @click="saveReceiptSettings" variant="primary" extra-class="!rounded-full" size="sm">Save changes</Button>

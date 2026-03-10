@@ -1,40 +1,29 @@
 <template>
   <div class="pb-24 sm:pb-20">
     <!-- Hero header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
-      </div>
-      <Button
-        v-if="canCreateInventoryFolders"
-        variant="primary"
-        :icon="PlusIcon"
-        @click="openCreateFolderModal"
-        class="w-full sm:w-auto shrink-0"
-      >
-        New folder
-      </Button>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
     </div>
 
     <!-- Toolbar: search + filters (single bar, modern) -->
     <div
       v-if="!inventoryStore.loading"
-      class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6"
+      class="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4"
     >
       <div class="relative flex-1 min-w-0">
-        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+        <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search folders..."
-          class="w-full pl-10 pr-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+          class="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
         />
       </div>
-      <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5">
         <select
           v-model="selectedDepartmentId"
-          class="px-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[140px]"
+          class="px-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
         >
           <option value="">All departments</option>
           <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -43,13 +32,13 @@
         </select>
         <select
           v-model="sortBy"
-          class="px-4 py-2.5 sm:py-3 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+          class="px-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
         >
           <option value="name">Name</option>
           <option value="items">Items</option>
           <option value="date">Date</option>
         </select>
-        <span class="hidden sm:inline text-sm text-gray-500 dark:text-gray-400 ml-1">
+        <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400 ml-1">
           {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
         </span>
       </div>
@@ -117,21 +106,23 @@
     <!-- Empty state (when not loading and no folders) -->
     <div
       v-else
-      class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-16 px-6 text-center"
+      class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 text-center"
     >
-      <div class="w-16 h-16 rounded-2xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-4">
-        <FolderIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+      <div class="w-12 h-12 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
+        <FolderIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
       </div>
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
       </h2>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm">
         {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
       </p>
-      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Button
           v-if="selectedDepartmentId"
           variant="outline"
+          size="sm"
+          extra-class="!text-xs !py-1.5 !px-3"
           @click="selectedDepartmentId = ''"
         >
           Clear filter
@@ -139,7 +130,9 @@
         <Button
           v-if="!searchQuery && !selectedDepartmentId && canCreateInventoryFolders"
           variant="primary"
+          size="sm"
           :icon="PlusIcon"
+          extra-class="!text-xs !py-1.5 !px-3"
           @click="openCreateFolderModal"
         >
           Create folder
@@ -153,7 +146,7 @@
       class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 z-30 safe-area-inset-bottom transition-[left] duration-300"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6 py-3">
+      <div class="px-4 sm:px-6 py-2">
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
@@ -166,19 +159,19 @@
     <!-- FAB: New folder (when list is not empty) -->
     <div
       v-if="paginatedFolders.length > 0 && canCreateInventoryFolders"
-      class="group fixed bottom-24 sm:bottom-28 right-4 sm:right-6 z-40 flex items-center justify-end"
+      class="group fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-40 flex items-center justify-end"
     >
       <span
-        class="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
+        class="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
       >
         New folder
       </span>
       <button
         @click="openCreateFolderModal"
-        class="group w-14 h-14 rounded-2xl bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+        class="group w-11 h-11 rounded-full bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
         aria-label="New folder"
       >
-        <PlusIcon class="w-6 h-6 text-white stroke-white" stroke-width="2.5" />
+        <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
       </button>
     </div>
 

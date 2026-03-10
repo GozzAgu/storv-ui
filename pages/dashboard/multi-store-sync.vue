@@ -1,7 +1,7 @@
 <template>
   <div class="pb-8 min-h-screen w-full overflow-x-hidden">
     <div class="mb-6 sm:mb-8">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Multi-Store Sync</h1>
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Multi-Store Sync</h1>
       <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Transfer items between stores and view consolidated reports</p>
     </div>
 
@@ -35,7 +35,7 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total transfers</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ transferHistory.length }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ transferHistory.length }}</p>
             </div>
             <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
               <ArrowPathIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
@@ -253,19 +253,19 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total revenue</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.totalRevenue) }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.totalRevenue) }}</p>
             </div>
             <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total sales</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalSales }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalSales }}</p>
             </div>
             <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total items</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalItems }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalItems }}</p>
             </div>
             <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Avg order value</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</p>
             </div>
           </div>
 
@@ -305,7 +305,7 @@
             <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <ArrowsRightLeftIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
-            <p class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No transfer history</p>
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No transfer history</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
           </div>
 

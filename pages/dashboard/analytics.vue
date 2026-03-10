@@ -54,7 +54,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Total Revenue</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalRevenue) }}</p>
+              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalRevenue) }}</p>
               <p class="text-[10px] mt-1" :class="revenueChange >= 0 ? 'text-green-600' : 'text-red-600'">
                 {{ revenueChange >= 0 ? '↑' : '↓' }} {{ Math.abs(revenueChange) }}% vs previous period
               </p>
@@ -69,7 +69,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Total Sales</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalSales }}</p>
+              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalSales }}</p>
               <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
                 {{ totalOrders }} orders
               </p>
@@ -84,7 +84,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Avg. Order Value</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(averageOrderValue) }}</p>
+              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(averageOrderValue) }}</p>
               <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
                 Per transaction
               </p>
@@ -99,7 +99,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Low Stock Items</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ lowStockCount }}</p>
+              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ lowStockCount }}</p>
               <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
                 Need restocking
               </p>
@@ -114,7 +114,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Refunds</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
+              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
               <p class="text-[10px] mt-1 text-red-600 dark:text-red-400">
                 {{ formatCurrency(refundAmount) }} · {{ refundRateText }}
               </p>
@@ -196,7 +196,7 @@
         <Card padding="sm" extra-class="p-4 flex flex-col justify-center">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Busiest time</h2>
           <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 mb-3">Peak day & hour in period</p>
-          <p class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ busiestTimeSummary }}</p>
+          <p class="text-base font-bold text-primary-600 dark:text-primary-400">{{ busiestTimeSummary }}</p>
         </Card>
 
         <!-- Sales by hour (peak hours) -->

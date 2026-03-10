@@ -4,27 +4,27 @@
     <Breadcrumbs :items="inventoryBreadcrumbs" class="mb-4" />
 
     <!-- Hero header: back + title + description + meta -->
-    <div class="mb-6 sm:mb-8">
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div class="flex items-start gap-3 min-w-0 flex-1">
+    <div class="mb-4 sm:mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div class="flex items-start gap-2.5 min-w-0 flex-1">
           <button
             @click="navigateTo('/dashboard/inventory')"
-            class="mt-0.5 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors flex-shrink-0"
+            class="mt-0.5 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
             title="Back to folders"
           >
-            <ArrowLeftIcon class="w-5 h-5" stroke-width="1.75" />
+            <ArrowLeftIcon class="w-4 h-4" stroke-width="1.75" />
           </button>
           <div class="min-w-0 flex-1">
-            <h1 v-if="isLoadingFolder" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+            <h1 v-if="isLoadingFolder" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
               Loading...
             </h1>
-            <h1 v-else class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
+            <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
               {{ folder?.name || 'Folder' }}
             </h1>
-            <p v-if="!isLoadingFolder" class="mt-1.5 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
+            <p v-if="!isLoadingFolder" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
               {{ folder?.description || 'No description' }}
             </p>
-            <div class="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
               <span class="flex items-center gap-1.5">
                 <CalendarIcon class="w-4 h-4" />
                 Created {{ formatDate(folder?.createdAt) }}
@@ -50,27 +50,27 @@
     </div>
 
     <!-- Stats cards - modern, no borders -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-2 gap-4 mb-6 lg:hidden">
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between gap-3">
+    <div v-if="!isLoadingFolder" class="grid grid-cols-2 gap-2 mb-4 lg:hidden">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 p-3 flex items-center justify-between gap-2">
         <div class="min-w-0">
-          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Items</p>
-          <p class="mt-1 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">
+          <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Items</p>
+          <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">
             {{ folder?.itemCount || 0 }}
           </p>
         </div>
-        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-100/80 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-          <CubeIcon class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
+        <div class="w-8 h-8 rounded-lg bg-blue-100/80 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+          <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
         </div>
       </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between gap-3">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 p-3 flex items-center justify-between gap-2">
         <div class="min-w-0">
-          <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Value</p>
-          <p class="mt-1 text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
+          <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Value</p>
+          <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100 truncate">
             {{ formatCurrency(totalInventoryValue) }}
           </p>
         </div>
-        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-100/80 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-          <CurrencyDollarIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" stroke-width="1.75" />
+        <div class="w-8 h-8 rounded-lg bg-green-100/80 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+          <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
         </div>
       </div>
     </div>

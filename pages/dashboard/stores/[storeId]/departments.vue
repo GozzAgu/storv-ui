@@ -1,16 +1,16 @@
 <template>
     <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
         {{ store?.name || 'Store' }} — Departments
       </h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Manage departments and staff for this store</p>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage departments and staff for this store</p>
     </div>
 
     <div
       v-if="store"
-      class="rounded-2xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/50 p-4 sm:p-5 mb-6"
+      class="rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/50 p-3 sm:p-4 mb-4"
     >
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div class="flex-1 min-w-0">
@@ -109,7 +109,7 @@
     </template>
 
     <div v-else-if="!departmentsStore.error" class="space-y-6">
-      <div class="hidden lg:flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 dark:bg-gray-800/80 px-4 sm:px-6 py-4 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
+      <div class="hidden lg:flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 px-3 sm:px-5 py-3 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
         <div class="flex items-center flex-wrap gap-6">
           <div class="flex items-center gap-2">
             <BuildingOfficeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -188,12 +188,12 @@
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-16 px-6 text-center"
+        class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 text-center"
       >
         <div class="w-16 h-16 rounded-2xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-4">
           <BuildingOfficeIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
         </div>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
         </h2>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">

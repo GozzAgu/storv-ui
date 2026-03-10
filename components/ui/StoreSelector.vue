@@ -18,17 +18,17 @@
 
     <button
       @click="dropdownOpen = !dropdownOpen"
-      class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-xl transition-colors"
+      class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-colors"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
-      <svg v-if="!switchingStore" class="w-5 h-5 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+      <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
       </svg>
-      <svg v-else class="w-5 h-5 shrink-0 animate-spin text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24">
+      <svg v-else class="w-4 h-4 shrink-0 animate-spin text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="max-w-[90px] sm:max-w-[120px] truncate text-xs sm:text-sm flex items-center gap-1.5">
+      <span class="max-w-[80px] sm:max-w-[100px] truncate text-xs flex items-center gap-1">
         <span class="hidden sm:inline">
           {{ switchingStore ? 'Switching...' : (currentStore?.name || 'No Store') }}
         </span>
@@ -41,79 +41,111 @@
           title="Active store"
         ></span>
       </span>
-      <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <svg v-if="!switchingStore" class="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
     </button>
 
     <Transition
       enter-active-class="transition ease-out duration-200"
-      enter-from-class="transform opacity-0 scale-95 sm:scale-95 translate-y-1"
-      enter-to-class="transform opacity-100 scale-100 sm:scale-100 translate-y-0"
+      enter-from-class="transform opacity-0 scale-[0.98] translate-y-1"
+      enter-to-class="transform opacity-100 scale-100 translate-y-0"
       leave-active-class="transition ease-in duration-150"
-      leave-from-class="transform opacity-100 scale-100 sm:scale-100 translate-y-0"
-      leave-to-class="transform opacity-0 scale-95 sm:scale-95 translate-y-1"
+      leave-from-class="transform opacity-100 scale-100 translate-y-0"
+      leave-to-class="transform opacity-0 scale-[0.98] translate-y-1"
     >
       <div
         v-if="dropdownOpen"
-        class="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-64 max-w-none sm:max-w-[320px] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-[50] max-h-[calc(100vh-7rem)] sm:max-h-[400px] overflow-y-auto"
+        class="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-0.5 w-auto sm:w-60 max-w-none sm:max-w-[280px] bg-white dark:bg-gray-800 rounded-xl shadow-lg shadow-gray-200/40 dark:shadow-black/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60 py-2 z-[50] max-h-[calc(100vh-7rem)] sm:max-h-[380px] overflow-hidden flex flex-col"
         @click.stop
       >
-        <div class="px-4 py-2.5 border-b border-gray-200 dark:border-gray-700">
-          <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            {{ isStaff ? 'Store' : 'Switch Store' }}
+        <div class="px-3 pb-2 flex items-center gap-1.5">
+          <div class="flex items-center justify-center w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <p class="text-xs font-medium text-gray-700 dark:text-gray-300">
+            {{ isStaff ? 'Store' : 'Switch store' }}
           </p>
         </div>
-        
-        <div v-if="loading" class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-          Loading stores...
-        </div>
 
-        <div v-else-if="stores.length === 0" class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-          No stores available
-        </div>
+        <div
+          class="flex-1 overflow-y-auto px-2 min-h-0 overscroll-contain"
+          :class="{ 'max-h-[10rem]': !loading && stores.length > 3 }"
+        >
+          <div v-if="loading" class="px-2 py-3 text-center">
+            <div class="inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+              <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              Loading…
+            </div>
+          </div>
 
-        <template v-else>
-          <button
-            v-for="store in stores"
-            :key="store.id"
-            @click="switchStore(store.id)"
-            class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
-            :class="{
-              'bg-primary-50 dark:bg-primary-900/20': currentStore?.id === store.id
-            }"
-          >
-            <div class="flex items-center justify-between gap-3">
+          <div v-else-if="stores.length === 0" class="px-2 py-3 text-center text-xs text-gray-500 dark:text-gray-400">
+            No stores available
+          </div>
+
+          <div v-else class="space-y-0.5 pb-1.5">
+            <button
+              v-for="store in stores"
+              :key="store.id"
+              @click="switchStore(store.id)"
+              class="w-full text-left flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors duration-150"
+              :class="currentStore?.id === store.id
+                ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:bg-gray-200 dark:active:bg-gray-700'"
+            >
+              <div class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 ring-1 ring-gray-200/50 dark:ring-gray-600/50">
+                <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-900 dark:text-gray-100 break-words pr-2 flex items-center gap-2">
+                <p class="font-medium truncate pr-1 text-xs">
                   {{ store.name || 'Unnamed Store' }}
-                  <!-- Green online indicator for active store -->
-                  <span 
-                    v-if="currentStore?.id === store.id"
-                    class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"
-                    title="Active store"
-                  ></span>
                 </p>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span
+                    v-if="currentStore?.id === store.id"
+                    class="inline-flex items-center gap-1 text-[11px] text-primary-600 dark:text-primary-400"
+                  >
+                    <span class="w-1 h-1 rounded-full bg-emerald-500 ring-2 ring-primary-100 dark:ring-primary-500/30" />
+                    Current
+                  </span>
+                  <span
+                    v-else-if="store.isActive === false"
+                    class="text-[11px] text-gray-400 dark:text-gray-500"
+                  >
+                    Inactive
+                  </span>
+                </div>
               </div>
               <svg
                 v-if="currentStore?.id === store.id"
-                class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0"
+                class="w-4 h-4 flex-shrink-0 text-primary-500 dark:text-primary-400"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
-            </div>
-          </button>
-        </template>
+            </button>
+          </div>
+        </div>
 
-        <div class="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2" v-if="!isStaff">
+        <div v-if="!isStaff" class="border-t border-gray-100 dark:border-gray-700/80 pt-1.5 mt-0.5 px-2">
           <NuxtLink
             to="/dashboard/settings"
-            class="block px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+            class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             @click="dropdownOpen = false"
           >
-            Manage Stores
+            <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Manage stores
           </NuxtLink>
         </div>
       </div>

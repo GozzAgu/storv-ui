@@ -1,45 +1,45 @@
 <template>
   <div class="pb-8 min-h-screen w-full overflow-x-hidden">
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Manage your account settings and preferences</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your account settings and preferences</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
       <div class="lg:col-span-1 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden shrink-0 w-full">
-        <div class="p-6 flex flex-col items-center text-center">
-          <div class="w-20 h-20 rounded-xl flex items-center justify-center text-white text-xl font-bold overflow-hidden bg-primary-500 shadow-lg">
+        <div class="p-4 flex flex-col items-center text-center">
+          <div class="w-14 h-14 rounded-xl flex items-center justify-center text-white text-base font-bold overflow-hidden bg-primary-500 shadow-lg">
             {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
           </div>
-          <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4">
-            <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div v-if="isLoadingProfile" class="space-y-1.5 w-full mt-3">
+            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
-          <div v-else class="mt-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div v-else class="mt-3">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
             </h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ profileData.email || 'No email' }}</p>
-            <span class="inline-block mt-2 px-3 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ profileData.email || 'No email' }}</p>
+            <span class="inline-block mt-1.5 px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
               {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
-          <div class="grid grid-cols-3 gap-4 w-full mt-6 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
+          <div class="grid grid-cols-3 gap-3 w-full mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
             <div>
-              <p v-if="isLoadingStats" class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-10 mx-auto"></p>
-              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
+              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
+              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-10 mx-auto"></p>
-              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
+              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
+              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-10 mx-auto"></p>
-              <p v-else class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
+              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
+              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
             </div>
           </div>
         </div>
@@ -47,10 +47,10 @@
 
       <div class="lg:col-span-2 space-y-6">
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
+        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Personal information</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Personal information</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
           </div>
           <div v-if="!isEditingPersonalInfo">
             <button @click="enableEditing('personal')" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
@@ -88,7 +88,7 @@
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
           <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
           </div>
           <div class="p-4 sm:p-6 space-y-1">
@@ -169,7 +169,7 @@
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
           <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Security</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Security</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
           </div>
           <div class="p-4 sm:p-6 space-y-1">
@@ -214,7 +214,7 @@
 
         <div v-if="storeInfo.storeName || isLoadingProfile" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
           <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
           </div>
           <div class="p-4 sm:p-6">
@@ -260,7 +260,7 @@
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
           <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
             </div>
             <span class="px-3 py-1.5 text-sm font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">

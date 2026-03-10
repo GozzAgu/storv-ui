@@ -1,54 +1,54 @@
 <template>
   <div class="pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
     <!-- Hero header -->
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Departments</h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Manage your store departments and staff</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Departments</h1>
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your store departments and staff</p>
     </div>
 
     <!-- Stats (mobile) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:hidden mb-6">
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:hidden mb-4">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Departments</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</p>
+            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Departments</p>
+            <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <BuildingOfficeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
         </div>
       </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total Staff</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalStaff }}</p>
+            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Staff</p>
+            <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ totalStaff }}</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <UsersIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <UsersIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
           </div>
         </div>
       </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Managers</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ totalManagers }}</p>
+            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Managers</p>
+            <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ totalManagers }}</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <UserCircleIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+            <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
           </div>
         </div>
       </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Avg. Staff/Dept</p>
-            <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</p>
+            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Avg. Staff/Dept</p>
+            <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</p>
           </div>
-          <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <ChartBarIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
+          <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
           </div>
         </div>
       </div>
@@ -57,25 +57,25 @@
     <!-- Staff banner (staff users) -->
     <div
       v-if="isStaff && currentStaffMember"
-      class="rounded-2xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/50 p-4 sm:p-5 mb-6"
+      class="rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/50 p-3 sm:p-4 mb-4"
     >
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center text-white flex-shrink-0">
-            <UsersIcon class="w-5 h-5" />
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white flex-shrink-0">
+            <UsersIcon class="w-4 h-4" />
           </div>
           <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+            <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
               You are a member of {{ currentStaffMember.departmentName || 'a department' }}
             </h3>
-            <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 truncate">
+            <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5 truncate">
               {{ currentStaffMember.position }} · {{ currentStaffMember.role }}
             </p>
           </div>
         </div>
         <NuxtLink
           :to="currentDepartment && currentDepartment.isActive === false ? '#' : `/dashboard/departments/${currentStaffMember.departmentId}`"
-          class="inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-colors flex-shrink-0"
+          class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-colors flex-shrink-0"
           :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': currentDepartment && currentDepartment.isActive === false }"
           :title="currentDepartment && currentDepartment.isActive === false ? 'This department is inactive' : ''"
         >
@@ -146,47 +146,47 @@
     </template>
 
     <!-- Toolbar + content (desktop when not loading) -->
-    <div v-else-if="!departmentsStore.error" class="space-y-6">
+    <div v-else-if="!departmentsStore.error" class="space-y-4">
       <!-- Toolbar (desktop): stats + search -->
-      <div class="hidden lg:flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 dark:bg-gray-800/80 px-4 sm:px-6 py-4 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
-        <div class="flex items-center flex-wrap gap-6">
-          <div class="flex items-center gap-2">
-            <BuildingOfficeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Departments:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</span>
+      <div class="hidden lg:flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 px-3 sm:px-5 py-3 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
+        <div class="flex items-center flex-wrap gap-4">
+          <div class="flex items-center gap-1.5">
+            <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Departments:</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ departmentsStore.totalDepartments }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <UsersIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Staff:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
+          <div class="flex items-center gap-1.5">
+            <UsersIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ totalStaff }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <UserCircleIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Managers:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
+          <div class="flex items-center gap-1.5">
+            <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Managers:</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ totalManagers }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <ChartBarIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Avg/Dept:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</span>
+          <div class="flex items-center gap-1.5">
+            <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <span class="text-xs text-gray-600 dark:text-gray-400">Avg/Dept:</span>
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ averageStaffPerDept }}</span>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search departments..."
-              class="pl-9 pr-4 py-2 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-56"
+              class="pl-8 pr-3 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-48"
             />
           </div>
           <button
             @click="resetFilters"
-            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
             title="Reset filters"
           >
-            <ArrowPathIcon class="w-5 h-5" />
+            <ArrowPathIcon class="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -247,10 +247,10 @@
         <div class="w-16 h-16 rounded-2xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-4">
           <BuildingOfficeIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
         </div>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
         </h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm">
           {{ searchQuery ? 'Try a different search.' : 'Create a department to organize your store.' }}
         </p>
         <Button

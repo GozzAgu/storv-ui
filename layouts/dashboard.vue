@@ -19,48 +19,48 @@
       ]"
     >
       <!-- Logo / Brand -->
-      <div class="flex items-center justify-between h-14 shrink-0 px-3 min-h-[3.5rem]">
+      <div class="flex items-center justify-between h-11 shrink-0 px-2.5 min-h-[2.75rem]">
         <NuxtLink
           to="/dashboard"
-          :class="['flex items-center transition-all duration-300', sidebarCollapsed ? 'justify-center w-full' : 'gap-2 min-w-0']"
+          :class="['flex items-center transition-all duration-300', sidebarCollapsed ? 'justify-center w-full' : 'gap-1.5 min-w-0']"
         >
           <img
             :src="logoSource"
             alt="Storvv"
-            :class="['shrink-0 object-contain transition-all duration-300', sidebarCollapsed ? 'h-7 w-7' : 'h-6 max-w-[110px]']"
+            :class="['shrink-0 object-contain transition-all duration-300', sidebarCollapsed ? 'h-6 w-6' : 'h-5 max-w-[100px]']"
           />
         </NuxtLink>
         <button
           v-if="!sidebarCollapsed"
           @click="sidebarOpen = false"
-          class="lg:hidden p-2 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="lg:hidden p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700 rounded-lg transition-colors"
           aria-label="Close menu"
         >
-          <XMarkIcon class="w-5 h-5" stroke-width="2" />
+          <XMarkIcon class="w-4 h-4" stroke-width="2" />
         </button>
       </div>
 
       <!-- Collapse toggle (desktop) - minimal -->
       <button
         @click="toggleSidebar"
-        class="absolute top-12 -right-3 hidden lg:flex items-center justify-center w-5 h-5 rounded-full bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors z-10"
+        class="absolute top-9 -right-2.5 hidden lg:flex items-center justify-center w-4 h-4 rounded-full bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors z-10"
         :title="sidebarCollapsed ? 'Expand' : 'Collapse'"
         aria-label="Toggle sidebar"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-3 h-3" stroke-width="2.5" />
-        <ChevronLeftIcon v-else class="w-3 h-3" stroke-width="2.5" />
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-2.5 h-2.5" stroke-width="2.5" />
+        <ChevronLeftIcon v-else class="w-2.5 h-2.5" stroke-width="2.5" />
       </button>
 
       <!-- Navigation -->
-      <nav class="relative flex-1 py-2 overflow-y-auto overflow-x-hidden min-h-0" :class="sidebarCollapsed ? 'px-2' : 'px-3'">
-        <div class="space-y-1 min-h-0">
+      <nav class="relative flex-1 py-1.5 overflow-y-auto overflow-x-hidden min-h-0" :class="sidebarCollapsed ? 'px-1.5' : 'px-2.5'">
+        <div class="space-y-0.5 min-h-0">
           <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Inventory (expandable) -->
-            <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-1">
+            <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-0.5">
               <div
                 :class="[
-                  'group relative flex items-center justify-between w-full rounded-full transition-all duration-200',
-                  sidebarCollapsed ? 'px-2 py-2' : 'px-3 py-2.5',
+                  'group relative flex items-center justify-between w-full rounded-lg transition-all duration-200',
+                  sidebarCollapsed ? 'px-1.5 py-1.5' : 'px-2.5 py-2',
                   isActive(item.href)
                     ? 'bg-gray-200/90 dark:bg-gray-700/70'
                     : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60'
@@ -74,40 +74,40 @@
                   <component
                     :is="item.icon"
                     :class="[
-                      'w-5 h-5 shrink-0 transition-colors',
-                      sidebarCollapsed ? '' : 'mr-3',
+                      'w-4 h-4 shrink-0 transition-colors',
+                      sidebarCollapsed ? '' : 'mr-2.5',
                       isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                     ]"
                     stroke-width="1.75"
                   />
-                  <span class="text-sm font-medium truncate" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+                  <span class="text-xs font-medium truncate" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
                     {{ item.name }}
                   </span>
                 </NuxtLink>
                 <button
                   @click.stop="inventoryExpanded = !inventoryExpanded"
-                  class="p-1.5 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 transition-colors shrink-0"
+                  class="p-1 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 transition-colors shrink-0"
                   :class="isActive(item.href) ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'"
                 >
-                  <ChevronDownIcon class="w-4 h-4 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />
+                  <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />
                 </button>
               </div>
-              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="pl-5 pr-2 py-1 space-y-0.5">
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="pl-4 pr-1.5 py-0.5 space-y-0.5">
                 <NuxtLink
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
                   :class="[
-                    'flex items-center gap-2.5 px-3 py-2 rounded-full text-sm transition-colors',
+                    'flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors',
                     route.params.id === folder.id
                       ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
                     { 'pointer-events-none opacity-50': switchingStore }
                   ]"
                 >
-                  <FolderIcon class="w-4 h-4 shrink-0" :class="route.params.id === folder.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
+                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
                   <span class="truncate flex-1">{{ folder.name }}</span>
-                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-4 h-4 shrink-0 text-gray-700 dark:text-gray-300" stroke-width="2" />
+                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-gray-700 dark:text-gray-300" stroke-width="2" />
                 </NuxtLink>
               </div>
             </div>
@@ -118,8 +118,8 @@
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[
-                'group relative flex items-center rounded-full transition-all duration-200',
-                sidebarCollapsed ? 'justify-center w-full py-2.5' : 'px-3 py-2.5 gap-3',
+                'group relative flex items-center rounded-lg transition-all duration-200',
+                sidebarCollapsed ? 'justify-center w-full py-2' : 'px-2.5 py-2 gap-2.5',
                 isActive(item.href)
                   ? 'bg-gray-200/90 dark:bg-gray-700/70'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60',
@@ -130,41 +130,41 @@
               <component
                 :is="item.icon"
                 :class="[
-                  'w-5 h-5 shrink-0 transition-colors',
+                  'w-4 h-4 shrink-0 transition-colors',
                   sidebarCollapsed ? '' : 'mr-0',
                   isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                 ]"
                 stroke-width="1.75"
               />
-              <span v-if="!sidebarCollapsed" class="text-sm font-medium truncate" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+              <span v-if="!sidebarCollapsed" class="text-xs font-medium truncate" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
                 {{ item.name }}
               </span>
               <!-- Tooltip when collapsed -->
               <div
                 v-if="sidebarCollapsed"
-                class="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
               >
                 {{ item.name }}
-                <div class="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+                <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
               </div>
             </NuxtLink>
           </template>
           
           <!-- Stores (super admins) - Fathom-style section -->
-          <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-5 pt-4">
+          <div v-if="userStore.isSuperAdmin && !sidebarCollapsed" class="mt-4 pt-3">
             <button
               type="button"
               @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="flex items-center justify-between w-full px-3 py-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
+              class="flex items-center justify-between w-full px-2.5 py-1 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
             >
               <span>Stores</span>
-              <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
+              <ChevronDownIcon class="w-3 h-3 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
             </button>
-            <div v-if="!storesSectionCollapsed" class="mt-1 space-y-1 pl-0">
+            <div v-if="!storesSectionCollapsed" class="mt-0.5 space-y-0.5 pl-0">
               <template v-for="store in storesList" :key="store.id">
                 <div
                   :class="[
-                    'flex items-center justify-between rounded-full px-3 py-2.5 transition-all duration-200',
+                    'flex items-center justify-between rounded-lg px-2.5 py-2 transition-all duration-200',
                     route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                       ? 'bg-gray-200/90 dark:bg-gray-700/70'
                       : currentStore?.id === store.id
@@ -176,118 +176,118 @@
                 >
                   <NuxtLink
                     :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
-                    class="flex items-center flex-1 min-w-0 gap-2.5"
+                    class="flex items-center flex-1 min-w-0 gap-2"
                     :class="{ 'pointer-events-none cursor-not-allowed': switchingStore || (store.id !== storesStore.currentStoreId) }"
                     :title="store.id !== storesStore.currentStoreId ? 'Switch to this store to access it' : ''"
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
-                    <svg class="w-5 h-5 shrink-0" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                    <svg class="w-4 h-4 shrink-0" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span class="text-sm font-medium truncate" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+                    <span class="text-xs font-medium truncate" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
                       {{ store.name }}
                     </span>
-                    <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active store"></span>
-                    <span v-if="store.id !== storesStore.currentStoreId" class="text-[10px] text-gray-400 dark:text-gray-500 italic shrink-0">Inactive</span>
+                    <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active store"></span>
+                    <span v-if="store.id !== storesStore.currentStoreId" class="text-[9px] text-gray-400 dark:text-gray-500 italic shrink-0">Inactive</span>
                   </NuxtLink>
                   <button
                     v-if="store.id === storesStore.currentStoreId"
                     @click.stop="toggleStoreExpanded(store.id)"
-                    class="p-1.5 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
+                    class="p-1 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
                   >
-                    <ChevronDownIcon class="w-4 h-4 transition-transform duration-200" :class="expandedStores[store.id] ? 'rotate-180' : ''" stroke-width="2" />
+                    <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedStores[store.id] ? 'rotate-180' : ''" stroke-width="2" />
                   </button>
                 </div>
-                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="pl-5 pr-2 py-1 space-y-0.5">
+                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="pl-4 pr-1.5 py-0.5 space-y-0.5">
                   <template v-for="department in getDepartmentsForStore(store.id)" :key="department.id">
-                    <div class="flex items-center justify-between gap-1 rounded-full group">
+                    <div class="flex items-center justify-between gap-1 rounded-lg group">
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
-                        class="flex items-center gap-2.5 flex-1 min-w-0 px-3 py-2 rounded-full text-sm transition-colors"
+                        class="flex items-center gap-2 flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
                         :class="[
                           route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
                           { 'pointer-events-none opacity-50': switchingStore }
                         ]"
                       >
-                        <BuildingOfficeIcon class="w-4 h-4 shrink-0" :class="route.params.id === department.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
+                        <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
                         <span class="truncate flex-1">{{ department.name }}</span>
                       </NuxtLink>
                       <button
                         @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="p-1.5 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
+                        class="p-1 rounded-full hover:bg-gray-300/60 dark:hover:bg-gray-600/60 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
                         :aria-expanded="expandedDepartments[department.id]"
                       >
-                        <ChevronDownIcon class="w-4 h-4 transition-transform duration-200" :class="expandedDepartments[department.id] ? 'rotate-180' : ''" stroke-width="2" />
+                        <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedDepartments[department.id] ? 'rotate-180' : ''" stroke-width="2" />
                       </button>
                     </div>
-                    <div v-if="expandedDepartments[department.id]" class="pl-6 pr-2 pb-1 space-y-0.5">
+                    <div v-if="expandedDepartments[department.id]" class="pl-5 pr-1.5 pb-0.5 space-y-0.5">
                       <template v-if="getStaffForDepartment(department.id).length > 0">
                         <NuxtLink
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100"
+                          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100"
                         >
-                          <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
+                          <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
                         </NuxtLink>
                       </template>
-                      <p v-else class="px-3 py-1.5 text-xs text-gray-400 dark:text-gray-500">No staff</p>
+                      <p v-else class="px-2.5 py-1 text-[11px] text-gray-400 dark:text-gray-500">No staff</p>
                     </div>
                   </template>
                   <NuxtLink
                     v-if="getDepartmentsForStore(store.id).length === 0"
                     :to="`/dashboard/stores/${store.id}/departments`"
-                    class="block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    class="block px-2.5 py-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   >
                     View departments →
                   </NuxtLink>
                 </div>
               </template>
-              <div v-if="storesList.length === 0" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No stores</div>
+              <div v-if="storesList.length === 0" class="px-2.5 py-1.5 text-xs text-gray-500 dark:text-gray-400">No stores</div>
             </div>
           </div>
         </div>
 
         <!-- Recent Items -->
-        <div v-if="!sidebarCollapsed" class="mt-auto pt-4">
+        <div v-if="!sidebarCollapsed" class="mt-auto pt-3">
           <RecentItemsWidget />
         </div>
       </nav>
 
       <!-- Bottom: user + sign out (minimal Fathom-style) -->
-      <div class="shrink-0 border-t border-gray-200/40 dark:border-gray-800 px-3 py-3 bg-[#f8f8f8] dark:bg-gray-900" :class="sidebarCollapsed ? 'px-2' : ''">
-        <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
-          <div class="w-9 h-9 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 font-semibold text-sm shrink-0">
+      <div class="shrink-0 border-t border-gray-200/40 dark:border-gray-800 px-2.5 py-2 bg-[#f8f8f8] dark:bg-gray-900" :class="sidebarCollapsed ? 'px-1.5' : ''">
+        <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'justify-center' : ''">
+          <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 font-semibold text-xs shrink-0">
             {{ userInitials }}
           </div>
           <div v-if="!sidebarCollapsed" class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
+            <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
+            <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
           </div>
-          <div v-if="sidebarCollapsed" class="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
+          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
             {{ userName }}
-            <span class="block text-xs text-gray-400">{{ userEmail }}</span>
-            <div class="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+            <span class="block text-[11px] text-gray-400">{{ userEmail }}</span>
+            <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
           </div>
         </div>
         <button
           @click="handleSignOut"
           :class="[
-            'mt-3 w-full flex items-center justify-center gap-2 rounded-full py-2.5 text-sm font-medium transition-colors',
-            sidebarCollapsed ? 'w-full py-2.5' : 'px-3',
+            'mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors',
+            sidebarCollapsed ? 'w-full py-2' : 'px-2.5',
             'text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-gray-100'
           ]"
           title="Sign out"
         >
-          <ArrowRightOnRectangleIcon class="w-5 h-5 shrink-0" stroke-width="1.75" />
+          <ArrowRightOnRectangleIcon class="w-4 h-4 shrink-0" stroke-width="1.75" />
           <span v-if="!sidebarCollapsed">Sign out</span>
-          <div v-if="sidebarCollapsed" class="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
+          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
             Sign out
-            <div class="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
+            <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
           </div>
         </button>
-        <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500" :class="sidebarCollapsed ? 'text-center' : 'text-left'">
+        <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="sidebarCollapsed ? 'text-center' : 'text-left'">
           v{{ appVersion }}
         </p>
       </div>
@@ -313,46 +313,46 @@
           sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'
         ]"
       >
-        <div class="flex items-center justify-between h-14 sm:h-16 px-3 sm:px-4 lg:px-6">
-          <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <div class="flex items-center justify-between h-11 sm:h-12 px-3 sm:px-4 lg:px-6">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               @click="sidebarOpen = true"
-              class="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Open menu"
             >
-              <Bars3Icon class="w-5 h-5" stroke-width="2" />
+              <Bars3Icon class="w-4 h-4" stroke-width="2" />
             </button>
             <!-- Page name -->
-            <div class="hidden md:flex items-center gap-2.5 min-w-0">
-              <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
-                <component :is="currentPageIcon" class="w-5 h-5" stroke-width="1.75" />
+            <div class="hidden md:flex items-center gap-2 min-w-0">
+              <div class="flex items-center justify-center w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                <component :is="currentPageIcon" class="w-4 h-4" stroke-width="1.75" />
               </div>
-              <h1 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
+              <h1 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                 {{ currentPageName }}
               </h1>
             </div>
           </div>
 
-          <div class="flex items-center gap-0.5 sm:gap-2 ml-auto shrink-0 min-w-0">
+          <div class="flex items-center gap-0.5 sm:gap-1.5 ml-auto shrink-0 min-w-0">
             <!-- Global search -->
             <button
               @click="searchStore.openSearch()"
-              class="hidden md:flex items-center gap-2.5 pl-4 pr-3 py-2.5 w-52 sm:w-56 lg:w-64 rounded-xl bg-gray-100/80 dark:bg-gray-800/80 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-all text-sm text-gray-500 dark:text-gray-400"
+              class="hidden md:flex items-center gap-2 pl-3 pr-2.5 py-1.5 w-48 sm:w-52 lg:w-60 rounded-lg bg-gray-100/80 dark:bg-gray-800/80 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-700 transition-all text-xs text-gray-500 dark:text-gray-400"
               title="Search (⌘K)"
             >
-              <MagnifyingGlassIcon class="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0" stroke-width="1.75" />
+              <MagnifyingGlassIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" stroke-width="1.75" />
               <span class="flex-1 text-left truncate">Search...</span>
-              <kbd class="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">⌘K</kbd>
+              <kbd class="hidden lg:inline-flex items-center gap-0.5 px-1 py-0.5 text-[9px] font-medium text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-700/50 rounded border border-gray-200 dark:border-gray-600">⌘K</kbd>
             </button>
 
             <!-- Mobile search -->
             <button
               @click="searchStore.openSearch()"
-              class="md:hidden flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+              class="md:hidden flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
               title="Search"
               aria-label="Search"
             >
-              <MagnifyingGlassIcon class="w-5 h-5" stroke-width="1.75" />
+              <MagnifyingGlassIcon class="w-4 h-4" stroke-width="1.75" />
             </button>
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
@@ -362,14 +362,14 @@
             <!-- Notifications -->
             <NuxtLink
               to="/dashboard/notifications"
-              class="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
+              class="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
               title="Notifications"
               aria-label="Notifications"
             >
-              <BellIcon class="w-5 h-5" stroke-width="1.75" />
+              <BellIcon class="w-4 h-4" stroke-width="1.75" />
               <span
                 v-if="unreadNotificationCount > 0"
-                class="absolute top-1 right-1 min-w-[16px] h-[16px] bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center px-0.5 ring-2 ring-white dark:ring-gray-900"
+                class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-0.5 ring-2 ring-white dark:ring-gray-900"
               >
                 {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
               </span>
@@ -379,19 +379,19 @@
             <div class="relative shrink-0" ref="profileMenuRef">
               <button
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex items-center gap-2 md:gap-3 p-1 sm:pl-1.5 sm:pr-2 md:pr-3 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-0"
+                class="flex items-center gap-1.5 md:gap-2 p-0.5 sm:pl-1 sm:pr-1.5 md:pr-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-0"
                 :class="profileMenuOpen ? 'bg-gray-100 dark:bg-gray-800' : ''"
                 aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
                   {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left min-w-0">
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
+                  <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
                 </div>
-                <ChevronDownIcon class="hidden md:block w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0 transition-transform" :class="profileMenuOpen ? 'rotate-180' : ''" stroke-width="2" />
+                <ChevronDownIcon class="hidden md:block w-3.5 h-3.5 text-gray-400 dark:text-gray-500 shrink-0 transition-transform" :class="profileMenuOpen ? 'rotate-180' : ''" stroke-width="2" />
               </button>
 
               <Transition
@@ -404,30 +404,30 @@
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="fixed top-14 inset-x-3 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mt-2 w-auto md:w-52 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl py-2 z-[100]"
+                  class="fixed top-12 inset-x-3 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mt-1.5 w-auto md:w-48 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl py-1.5 z-[100]"
                 >
                   <NuxtLink
                     to="/dashboard/profile"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     @click="profileMenuOpen = false"
                   >
-                    <UserCircleIcon class="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
+                    <UserCircleIcon class="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
                     Profile
                   </NuxtLink>
                   <NuxtLink
                     to="/dashboard/settings"
-                    class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     @click="profileMenuOpen = false"
                   >
-                    <Cog6ToothIcon class="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
+                    <Cog6ToothIcon class="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
                     Settings
                   </NuxtLink>
-                  <div class="border-t border-gray-100 dark:border-gray-700 my-2" />
+                  <div class="border-t border-gray-100 dark:border-gray-700 my-1.5" />
                   <button
                     @click="handleSignOut"
-                    class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors text-left"
+                    class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors text-left"
                   >
-                    <ArrowRightOnRectangleIcon class="w-5 h-5 shrink-0" stroke-width="1.75" />
+                    <ArrowRightOnRectangleIcon class="w-4 h-4 shrink-0" stroke-width="1.75" />
                     Sign out
                   </button>
                 </div>
@@ -438,7 +438,7 @@
       </header>
 
       <!-- Spacer so fixed nav never overlaps page content -->
-      <div class="h-14 sm:h-16 shrink-0" aria-hidden="true" />
+      <div class="h-11 sm:h-12 shrink-0" aria-hidden="true" />
 
       <!-- Page Content -->
       <main class="px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
