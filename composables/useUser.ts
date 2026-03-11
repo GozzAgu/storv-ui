@@ -1,5 +1,6 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
+import type { SubscriptionPlan } from '~/types/subscription'
 
 export interface StoreSettings {
   inventory?: {
@@ -35,6 +36,7 @@ export interface UserData {
   email: string
   name: string
   role: 'superAdmin' | 'admin' | 'user' | 'staff'
+  subscription: SubscriptionPlan
   photoURL?: string
   storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
   storeDetails?: StoreDetails
@@ -77,7 +79,9 @@ export const useUser = () => {
           hasCompletedTutorial: false,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          ...userData
+          ...userData,
+          // Ensure default subscription isn't overwritten by undefined
+          subscription: (userData.subscription as SubscriptionPlan) || 'storvv_micro',
         }
         
         await setDoc(userRef, newUserData)

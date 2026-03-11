@@ -1,6 +1,5 @@
 <template>
-  <div class="pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
-    <!-- Hero header -->
+  <!-- Hero header -->
     <div class="mb-4 sm:mb-6">
       <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Departments</h1>
       <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your store departments and staff</p>
@@ -285,7 +284,6 @@
       @success="handleDepartmentSuccess"
       @error="handleDepartmentError"
     />
-  </div>
 
   <!-- FAB -->
   <div v-if="canManageDepartments" class="fixed bottom-24 right-6 z-50 group">

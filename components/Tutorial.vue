@@ -8,45 +8,45 @@
 
     <!-- Tutorial Content -->
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-      <div 
+      <div
         ref="tutorialCard"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full p-6 sm:p-8 pointer-events-auto transform transition-all duration-300"
+        class="bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-2xl max-w-md w-full pointer-events-auto transform transition-all duration-300 overflow-hidden"
         :style="cardPosition"
       >
-        <!-- Step Indicator -->
-        <div class="flex items-center justify-between mb-6">
-          <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
+          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
             Step {{ currentStep }} of {{ totalSteps }}
           </span>
           <button
             @click="skipTutorial"
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
           >
-            <XMarkIcon class="w-5 h-5" />
+            <XMarkIcon class="w-4 h-4" />
           </button>
         </div>
 
-        <!-- Tutorial Content -->
-        <div class="space-y-4">
-          <div class="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-4 mx-auto">
-            <component :is="tutorialSteps[currentStep - 1]?.icon" class="h-8 w-8 text-white" />
+        <!-- Content -->
+        <div class="p-3 sm:p-4 space-y-3">
+          <div class="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 mx-auto">
+            <component :is="tutorialSteps[currentStep - 1]?.icon" class="h-6 w-6 text-white" />
           </div>
           
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center tracking-tight">
             {{ tutorialSteps[currentStep - 1]?.title }}
           </h3>
           
-          <p class="text-gray-600 dark:text-gray-400 text-center">
+          <p class="text-xs text-gray-600 dark:text-gray-400 text-center leading-relaxed">
             {{ tutorialSteps[currentStep - 1]?.description }}
           </p>
         </div>
 
         <!-- Navigation -->
-        <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between gap-2 p-3 sm:p-4 border-t border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
           <button
             v-if="currentStep > 1"
             @click="previousStep"
-            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors"
+            class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
           >
             Previous
           </button>
@@ -55,13 +55,13 @@
           <div class="flex items-center gap-2">
             <button
               @click="skipTutorial"
-              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-medium transition-colors"
+              class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
             >
               Skip
             </button>
             <button
               @click="nextStep"
-              class="px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-primary-500/50 transition-all duration-300"
+              class="px-3.5 py-1.5 text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
             >
               {{ currentStep === totalSteps ? 'Get Started' : 'Next' }}
             </button>

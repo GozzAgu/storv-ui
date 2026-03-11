@@ -340,6 +340,7 @@ const handleSignUp = async () => {
         email: form.value.email,
         name: form.value.name,
         role: 'superAdmin',
+        subscription: 'storvv_micro',
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false
       })
@@ -381,6 +382,7 @@ const handlePhoneSignUpSuccess = async (user: any) => {
         email: user.email || '',
         name: displayName,
         role: 'superAdmin',
+        subscription: 'storvv_micro',
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false
       })

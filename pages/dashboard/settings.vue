@@ -41,6 +41,58 @@
         </div>
       </div>
 
+      <!-- Subscription -->
+      <div class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Subscription</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Upgrade your plan to unlock more features.</p>
+          </div>
+          <span class="px-2.5 py-1 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+            Current: {{ currentSubscriptionLabel }}
+          </span>
+        </div>
+
+        <div class="px-5 sm:px-6 py-5">
+          <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div class="flex-1">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Upgrade to</label>
+              <select
+                v-model="selectedUpgradePlan"
+                :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
+                :class="[
+                  'w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                  canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
+                    ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100'
+                    : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed'
+                ]"
+              >
+                <option value="" disabled>
+                  {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
+                </option>
+                <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
+                  {{ p.name }}
+                </option>
+              </select>
+            </div>
+
+            <Button
+              variant="primary"
+              size="sm"
+              extra-class="!rounded-lg"
+              :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
+              @click="handleUpgradeSubscription"
+            >
+              {{ isUpgradingSubscription ? 'Upgrading...' : 'Upgrade' }}
+            </Button>
+          </div>
+
+          <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+            This only updates your account plan in-app (billing integration can be added later).
+          </p>
+        </div>
+      </div>
+
       <!-- Stores -->
       <div v-if="userStore.isSuperAdmin" class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
         <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
@@ -454,6 +506,7 @@ import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
+import { SUBSCRIPTION_PLANS, type SubscriptionPlan } from '~/types/subscription'
 
 definePageMeta({
   layout: 'dashboard'
@@ -490,6 +543,45 @@ const toast = useToast()
 const canEditSettings = computed(() => {
   return userStore.isSuperAdmin
 })
+
+// Subscription
+const subscriptionOrder: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
+const currentSubscription = computed<SubscriptionPlan>(() => {
+  return (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+})
+const currentSubscriptionLabel = computed(() => {
+  return SUBSCRIPTION_PLANS.find(p => p.id === currentSubscription.value)?.name || 'Storvv Micro'
+})
+const upgradeOptions = computed(() => {
+  const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)
+  return SUBSCRIPTION_PLANS.filter(p => subscriptionOrder.indexOf(p.id) > currentIdx)
+})
+const selectedUpgradePlan = ref<SubscriptionPlan | ''>('')
+const isUpgradingSubscription = ref(false)
+
+const handleUpgradeSubscription = async () => {
+  if (!canEditSettings.value) {
+    toast.error('Only super admins can upgrade subscription')
+    return
+  }
+  if (!currentUser.value) {
+    toast.error('You must be signed in to upgrade')
+    return
+  }
+  if (!selectedUpgradePlan.value) return
+
+  isUpgradingSubscription.value = true
+  try {
+    await updateUserDocument(currentUser.value.uid, { subscription: selectedUpgradePlan.value })
+    await userStore.fetchUserData(currentUser.value.uid)
+    toast.success(`Upgraded to ${SUBSCRIPTION_PLANS.find(p => p.id === selectedUpgradePlan.value)?.name || 'new plan'}`)
+    selectedUpgradePlan.value = ''
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to upgrade subscription')
+  } finally {
+    isUpgradingSubscription.value = false
+  }
+}
 
 // Stores management
 const storesLoading = computed(() => storesStore.loading)

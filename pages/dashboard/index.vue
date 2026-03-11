@@ -224,34 +224,28 @@
       </div>
       </Card>
 
-      <!-- Revenue Breakdown - Horizontal Bar Chart -->
+      <!-- Busiest time -->
       <Card padding="sm" extra-class="p-4 overflow-hidden">
-        <div class="mb-2">
-          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Revenue Breakdown</h2>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Top products by revenue</p>
-        </div>
-        <div class="h-48 sm:h-64 lg:h-72 relative overflow-hidden">
-          <div v-if="revenueBarData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
-            <div class="w-14 h-14 mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-              <ChartBarIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-100 dark:ring-primary-900/30">
+              <ClockIcon class="w-4.5 h-4.5 text-primary-600 dark:text-primary-400" />
             </div>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No breakdown data</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sales will appear here by product</p>
+            <div class="min-w-0">
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">Busiest time</h2>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak day & hour in period</p>
+            </div>
           </div>
-          <ClientOnly>
-            <apexchart
-              v-if="revenueBarData.length > 0"
-              type="bar"
-              :height="isMobile ? 220 : 280"
-              :options="revenueBarOptions"
-              :series="revenueBarSeries"
-            />
-            <template #fallback>
-              <div class="flex items-center justify-center h-full">
-                <div class="animate-pulse text-gray-400">Loading chart...</div>
-              </div>
-            </template>
-          </ClientOnly>
+          <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
+            Last 30 days
+          </span>
+        </div>
+
+        <div class="mt-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-900/30 dark:to-gray-800/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60">
+          <p class="text-[10px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
+          <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            {{ busiestTimeSummary }}
+          </p>
         </div>
       </Card>
     </div>
@@ -1188,73 +1182,92 @@ const chartOptions = computed(() => {
   }
 })
 
-// Revenue Bar Chart - Top Products by Revenue
-const revenueBarData = computed(() => {
-  const productRevenue = new Map<string, number>()
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.status === 'completed' && receipt.items) {
-      receipt.items.forEach((item: any) => {
-        const existing = productRevenue.get(item.itemName) || 0
-        productRevenue.set(item.itemName, existing + (item.price * item.quantity))
-      })
-    }
-  })
-  return Array.from(productRevenue.entries())
-    .map(([name, revenue]) => ({ name, revenue }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5)
+// Busiest time (like Analytics): peak day × hour by revenue. Last 30 days.
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {
+  if (i === 0) return '12am'
+  if (i === 12) return '12pm'
+  return i < 12 ? `${i}am` : `${i - 12}pm`
 })
 
-const revenueBarSeries = computed(() => [{
-  name: 'Revenue',
-  data: revenueBarData.value.map(item => item.revenue)
-}])
+const receiptToDate = (r: any) => (r?.date?.toDate ? r.date.toDate() : new Date(r?.date))
 
-const revenueBarOptions = computed(() => {
-  const isDark = import.meta.client
-    ? (document.documentElement.classList.contains('dark') || themeStore.actualTheme === 'dark')
-    : false
-  return {
-    chart: {
-      type: 'bar',
-      toolbar: { show: false },
-      background: 'transparent',
-      fontFamily: 'inherit'
-    },
-    plotOptions: {
-      bar: {
-        horizontal: true,
-        barHeight: '60%',
-        borderRadius: 4,
-        dataLabels: { position: 'top' as const }
-      }
-    },
-    colors: [isDark ? '#60a5fa' : '#3b82f6'],
-    dataLabels: {
-      enabled: true,
-      formatter: (val: number) => formatCurrency(val),
-      style: { fontSize: '10px', colors: [isDark ? '#9CA3AF' : '#111827'] },
-      offsetX: 24
-    },
-    xaxis: {
-      categories: revenueBarData.value.map(item => item.name.length > 12 ? item.name.substring(0, 12) + '…' : item.name),
-      labels: { style: { colors: isDark ? '#9CA3AF' : '#111827', fontSize: '11px' } },
-      axisBorder: { show: false },
-      axisTicks: { show: false }
-    },
-    yaxis: {
-      labels: { style: { colors: isDark ? '#9CA3AF' : '#111827', fontSize: '11px' } }
-    },
-    grid: {
-      xaxis: { lines: { show: false } },
-      yaxis: { lines: { show: false } },
-      padding: { top: 0, right: 16, bottom: 0, left: 0 }
-    },
-    tooltip: {
-      theme: isDark ? 'dark' : 'light',
-      y: { formatter: (val: number) => formatCurrency(val) }
+const completedReceiptsForBusiestTime = computed(() => {
+  const now = new Date()
+  const cutoff = new Date(now)
+  cutoff.setDate(cutoff.getDate() - 30)
+  return receiptsStore.receipts.filter((r: any) => {
+    if (r.status !== 'completed') return false
+    const d = receiptToDate(r)
+    return d instanceof Date && !Number.isNaN(d.getTime()) && d >= cutoff && d <= now
+  })
+})
+
+const busiestHasData = computed(() => completedReceiptsForBusiestTime.value.length > 0)
+
+const salesByHourForBusiest = computed(() => {
+  const byHour = Array.from({ length: 24 }, (_, hour) => ({ hour, revenue: 0, count: 0 }))
+  completedReceiptsForBusiestTime.value.forEach((r: any) => {
+    const d = receiptToDate(r)
+    const h = d.getHours()
+    const slot = byHour[h]
+    if (slot) {
+      slot.revenue += r.total || 0
+      slot.count += 1
     }
-  }
+  })
+  return byHour
+})
+
+const salesByDayOfWeekForBusiest = computed(() => {
+  const byDay = DAY_NAMES.map((name, i) => ({ dayIndex: i, dayName: name, revenue: 0, count: 0 }))
+  completedReceiptsForBusiestTime.value.forEach((r: any) => {
+    const d = receiptToDate(r)
+    const dayIndex = d.getDay()
+    const slot = byDay[dayIndex]
+    if (slot) {
+      slot.revenue += r.total || 0
+      slot.count += 1
+    }
+  })
+  return byDay
+})
+
+const busiestHourIndex = computed(() => {
+  let max = -1
+  let best = 0
+  salesByHourForBusiest.value.forEach((s, i) => {
+    if (s.revenue > max) {
+      max = s.revenue
+      best = i
+    }
+  })
+  return max > 0 ? best : null
+})
+
+const busiestDayIndex = computed(() => {
+  let max = -1
+  let best = 0
+  salesByDayOfWeekForBusiest.value.forEach((s, i) => {
+    if (s.revenue > max) {
+      max = s.revenue
+      best = i
+    }
+  })
+  return max > 0 ? best : null
+})
+
+const busiestHourLabel = computed(() =>
+  busiestHourIndex.value != null ? HOUR_LABELS[busiestHourIndex.value] : null
+)
+
+const busiestDayName = computed(() =>
+  busiestDayIndex.value != null ? DAY_NAMES[busiestDayIndex.value] : null
+)
+
+const busiestTimeSummary = computed(() => {
+  if (!busiestHasData.value || busiestDayName.value == null || busiestHourLabel.value == null) return 'No sales in period'
+  return `${busiestDayName.value}, ${busiestHourLabel.value}`
 })
 
 // Get currency formatting from preferences

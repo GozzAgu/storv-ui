@@ -193,10 +193,28 @@
       <!-- Peak hours, Sales by day, Busiest time -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
         <!-- Busiest day & hour -->
-        <Card padding="sm" extra-class="p-4 flex flex-col justify-center">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Busiest time</h2>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 mb-3">Peak day & hour in period</p>
-          <p class="text-base font-bold text-primary-600 dark:text-primary-400">{{ busiestTimeSummary }}</p>
+        <Card padding="sm" extra-class="p-4 overflow-hidden">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-2.5 min-w-0">
+              <div class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-100 dark:ring-primary-900/30">
+                <ClockIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              </div>
+              <div class="min-w-0">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">Busiest time</h2>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak day & hour in period</p>
+              </div>
+            </div>
+            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
+              {{ selectedPeriod === 'daily' ? 'Today' : selectedPeriod === 'weekly' ? 'This week' : 'This month' }}
+            </span>
+          </div>
+
+          <div class="mt-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-900/30 dark:to-gray-800/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60">
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
+            <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              {{ busiestTimeSummary }}
+            </p>
+          </div>
         </Card>
 
         <!-- Sales by hour (peak hours) -->
@@ -422,6 +440,7 @@ import {
   CurrencyDollarIcon,
   ShoppingBagIcon,
   ChartBarIcon,
+  ClockIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 import { useReceiptsStore } from '~/stores/receipts'

@@ -10,23 +10,61 @@
 
     <div
       v-if="store"
-      class="rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-800/50 p-3 sm:p-4 mb-4"
+      class="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-gray-50/70 dark:bg-gray-800/40 ring-1 ring-gray-200/60 dark:ring-gray-700/60 px-3 py-2"
     >
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ store.name }}</h2>
-          <p v-if="store.description" class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1">{{ store.description }}</p>
-          <p v-if="store.address" class="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">
-            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 ring-1 ring-gray-200/70 dark:ring-gray-700/70 flex items-center justify-center flex-shrink-0">
+          <BuildingOfficeIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ store.name }}</span>
+            <span
+              v-if="currentStore?.id === store.id"
+              class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex-shrink-0"
+            >
+              Current
+            </span>
+          </div>
+          <p v-if="store.address" class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
             {{ store.address }}
           </p>
         </div>
-        <span
-          v-if="currentStore?.id === store.id"
-          class="px-2.5 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full flex-shrink-0"
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap justify-end">
+        <div class="hidden sm:flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+          <span v-if="storeDepartments.length">{{ storeDepartments.length }} depts</span>
+          <span v-if="storeDepartments.length && totalStaffForStore">·</span>
+          <span v-if="totalStaffForStore">{{ totalStaffForStore }} staff</span>
+        </div>
+        <div class="relative w-full sm:w-64">
+          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search departments..."
+            class="w-full pl-8 pr-9 py-2 text-xs rounded-xl bg-white dark:bg-gray-800/70 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+          />
+          <button
+            v-if="searchQuery"
+            type="button"
+            @click="searchQuery = ''"
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
+            title="Clear search"
+            aria-label="Clear search"
+          >
+            <span class="text-xs leading-none">×</span>
+          </button>
+        </div>
+        <button
+          @click="resetFilters"
+          class="hidden sm:inline-flex p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+          title="Reset filters"
+          aria-label="Reset filters"
         >
-          Current store
-        </span>
+          <ArrowPathIcon class="w-4 h-4" />
+        </button>
       </div>
     </div>
 
@@ -52,21 +90,6 @@
             <UsersIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="lg:hidden mb-6">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="relative flex-1">
-          <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search departments..."
-            class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-          />
-        </div>
-        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" extra-class="!rounded-full sm:w-auto w-full" size="sm">Reset</Button>
       </div>
     </div>
 
@@ -109,39 +132,6 @@
     </template>
 
     <div v-else-if="!departmentsStore.error" class="space-y-6">
-      <div class="hidden lg:flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 px-3 sm:px-5 py-3 ring-1 ring-gray-200/50 dark:ring-gray-700/50">
-        <div class="flex items-center flex-wrap gap-6">
-          <div class="flex items-center gap-2">
-            <BuildingOfficeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Departments:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ storeDepartments.length }}</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <UsersIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
-            <span class="text-sm text-gray-600 dark:text-gray-400">Staff:</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalStaffForStore }}</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search departments..."
-              class="pl-9 pr-4 py-2 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-56"
-            />
-          </div>
-          <button
-            @click="resetFilters"
-            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
-            title="Reset filters"
-          >
-            <ArrowPathIcon class="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
       <div v-if="paginatedDepartments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
         <div
           v-for="department in paginatedDepartments"
