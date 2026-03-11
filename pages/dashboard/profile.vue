@@ -1,45 +1,54 @@
 <template>
-  <div class="pb-8 min-h-screen w-full overflow-x-hidden">
-    <div class="mb-4 sm:mb-6">
-      <h1 class="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your account settings and preferences</p>
+    <!-- Minimal page header -->
+    <div class="mb-6 sm:mb-8">
+      <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Account</p>
+      <h1 class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
-      <div class="lg:col-span-1 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden shrink-0 w-full">
-        <div class="p-3 flex flex-col items-center text-center">
-          <div class="w-11 h-11 rounded-lg flex items-center justify-center text-white text-xs font-bold overflow-hidden bg-primary-500 shadow-lg">
-            {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
-          </div>
-          <div v-if="isLoadingProfile" class="space-y-1.5 w-full mt-2.5">
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-          </div>
-          <div v-else class="mt-2.5">
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-              {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
-            </h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ profileData.email || 'No email' }}</p>
-            <span class="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
-              {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
-            </span>
-          </div>
-          <div class="grid grid-cols-3 gap-2 w-full mt-3 pt-3 border-t border-gray-200/80 dark:border-gray-700/80">
-            <div>
-              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
-              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
+      <!-- Profile card: clean, modern -->
+      <div class="lg:col-span-1 w-full shrink-0">
+        <div class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+          <div class="relative p-6 sm:p-7 flex flex-col items-center text-center">
+            <!-- Avatar -->
+            <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden bg-primary-500 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+              {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
             </div>
-            <div>
-              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
-              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
+            <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
+              <div class="h-4 bg-gray-200/80 dark:bg-gray-700/80 rounded-md animate-pulse" />
+              <div class="h-3 bg-gray-200/80 dark:bg-gray-700/80 rounded animate-pulse" />
+              <div class="h-3 bg-gray-200/80 dark:bg-gray-700/80 rounded animate-pulse w-3/4 mx-auto" />
             </div>
-            <div>
-              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
-              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
+            <template v-else>
+              <h2 class="mt-4 text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+                {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
+              </h2>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="profileData.email || 'No email'">
+                {{ profileData.email || 'No email' }}
+              </p>
+              <span class="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-primary-600 dark:text-primary-400 bg-primary-500/10 dark:bg-primary-500/15 ring-1 ring-primary-500/20 dark:ring-primary-400/20">
+                {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
+              </span>
+            </template>
+            <!-- Stats: clean row with dividers -->
+            <div class="mt-6 w-full flex items-center justify-center gap-0 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 py-3 px-2">
+              <div class="flex-1 min-w-0">
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
+              </div>
+              <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
+              <div class="flex-1 min-w-0">
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
+              </div>
+              <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
+              <div class="flex-1 min-w-0">
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
+              </div>
             </div>
           </div>
         </div>
@@ -702,7 +711,6 @@
         </Button>
       </template>
     </Modal>
-  </div>
 </template>
 
 <script setup lang="ts">

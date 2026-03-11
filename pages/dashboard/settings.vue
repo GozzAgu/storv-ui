@@ -1,50 +1,52 @@
-<template>
-  <div class="pb-8 min-h-screen w-full overflow-x-hidden">
-    <div class="mb-4 sm:mb-6 flex flex-wrap items-start justify-between gap-3">
+<template>    
+<!-- Minimal page header -->
+    <div class="mb-6 sm:mb-8 flex flex-wrap items-start justify-between gap-4">
       <div>
-        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Settings</h1>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Manage your store and application preferences</p>
+        <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Store & app</p>
+        <h1 class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Settings</h1>
       </div>
-      <div v-if="!canEditSettings" class="rounded-lg bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/60 dark:ring-amber-800/50 px-3 py-2">
-        <p class="text-xs font-medium text-amber-800 dark:text-amber-200">View only</p>
-        <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Only super admins can edit settings</p>
+      <div v-if="!canEditSettings" class="inline-flex items-center gap-2 rounded-full bg-amber-500/10 dark:bg-amber-500/15 ring-1 ring-amber-500/20 dark:ring-amber-400/20 px-3 py-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
+        <span class="text-xs font-medium text-amber-700 dark:text-amber-300">View only</span>
       </div>
     </div>
 
-    <div class="space-y-4">
-      <div v-if="userStore.isSuperAdmin" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account logo</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">One logo for all your stores. Shown on receipts.</p>
+    <div class="space-y-5 sm:space-y-6">
+      <!-- Account logo -->
+      <div v-if="userStore.isSuperAdmin" class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Account logo</h2>
+          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">One logo for all your stores. Shown on receipts.</p>
         </div>
-        <div class="p-3 sm:p-4 flex items-center gap-4">
-          <div class="relative">
-            <div class="w-14 h-14 rounded-lg flex items-center justify-center overflow-hidden ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-100 dark:bg-gray-800">
+        <div class="relative px-5 sm:px-6 py-5 flex items-center gap-5">
+          <div class="relative shrink-0">
+            <div class="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
               <img v-if="accountLogoUrl" :src="accountLogoUrl" alt="Account logo" class="w-full h-full object-cover" />
-              <BuildingStorefrontIcon v-else class="w-7 h-7 text-gray-400 dark:text-gray-500" />
+              <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <button
               type="button"
               @click="accountLogoInput?.click()"
               :disabled="isUploadingAccountLogo"
-              class="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shadow disabled:opacity-50 transition-colors"
+              class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-500/25 disabled:opacity-50 transition-all"
             >
-              <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3 h-3 animate-spin" />
-              <CameraIcon v-else class="w-3 h-3" />
+              <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3.5 h-3.5 animate-spin" />
+              <CameraIcon v-else class="w-3.5 h-3.5" />
             </button>
             <input ref="accountLogoInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleAccountLogoUpload" />
           </div>
-          <button v-if="accountLogoUrl" type="button" @click="removeAccountLogo" class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
+          <button v-if="accountLogoUrl" type="button" @click="removeAccountLogo" class="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">
             Remove logo
           </button>
         </div>
       </div>
 
-      <div v-if="userStore.isSuperAdmin" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+      <!-- Stores -->
+      <div v-if="userStore.isSuperAdmin" class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Stores</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create, edit, and delete your stores</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Stores</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Create, edit, and delete your stores</p>
           </div>
           <Button v-if="!isStaff" @click="showCreateModal = true" extra-class="!rounded-lg" size="sm">
             <PlusIcon class="w-3.5 h-3.5" />
@@ -52,33 +54,33 @@
           </Button>
         </div>
 
-        <div class="p-3 sm:p-4">
-          <div v-if="storesLoading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary-500/30 border-t-primary-600"></div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Loading stores...</p>
+        <div class="relative px-5 sm:px-6 py-5">
+          <div v-if="storesLoading" class="text-center py-10">
+            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary-500/20 border-t-primary-500 animate-spin" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Loading stores...</p>
           </div>
 
-          <div v-else-if="storesError" class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/60 dark:ring-red-800/50 p-3">
-            <p class="text-xs text-red-800 dark:text-red-200">{{ storesError }}</p>
+          <div v-else-if="storesError" class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 px-4 py-3">
+            <p class="text-xs font-medium text-red-800 dark:text-red-200">{{ storesError }}</p>
           </div>
 
-          <div v-else-if="stores.length === 0" class="text-center py-8">
-            <div class="w-12 h-12 mx-auto mb-3 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <BuildingStorefrontIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          <div v-else-if="stores.length === 0" class="text-center py-10">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-gray-100 dark:bg-gray-800/80 flex items-center justify-center ring-1 ring-gray-200/60 dark:ring-gray-700/50">
+              <BuildingStorefrontIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
-            <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-0.5">No stores yet</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Create your first store to get started.</p>
-            <Button size="sm" @click="showCreateModal = true" extra-class="!rounded-lg">Create branch</Button>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Create your first store to get started.</p>
+            <Button size="sm" @click="showCreateModal = true" extra-class="!rounded-lg mt-5">Create branch</Button>
           </div>
 
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             <div
               v-for="store in stores"
               :key="store.id"
               class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
               :class="currentStore?.id === store.id ? 'ring-2 ring-primary-500/80 dark:ring-primary-400/80' : ''"
             >
-              <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 overflow-hidden bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
+              <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 overflow-hidden bg-primary-500 group-hover:bg-primary-600 transition-colors">
                 <img v-if="store.logoUrl || accountLogoUrl" :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="w-full h-full object-cover" />
                 <BuildingStorefrontIcon v-else class="w-5 h-5 text-white" stroke-width="1.75" />
               </div>
@@ -118,11 +120,12 @@
         </div>
       </div>
 
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+      <!-- Store information -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your business details</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Store information</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Update your business details</p>
           </div>
           <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           <div v-else-if="canEditSettings && isEditingStore" class="flex gap-1.5">
@@ -131,8 +134,8 @@
           </div>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
-        <div class="p-3 sm:p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="px-5 sm:px-6 py-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Branch name</label>
             <input v-model="storeInfo.name" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter branch name" />
@@ -157,17 +160,18 @@
         </div>
       </div>
 
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+      <!-- Inventory settings -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Inventory settings</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Configure inventory management preferences</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Inventory settings</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Configure inventory management preferences</p>
           </div>
           <Button v-if="canEditSettings" @click="saveInventorySettings" variant="primary" extra-class="!rounded-lg" size="sm">Save changes</Button>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
-        <div class="p-3 sm:p-4 space-y-0">
-          <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+        <div class="px-5 sm:px-6 py-4 space-y-0">
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Low stock alert threshold</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alert when stock falls below this quantity</p>
@@ -178,7 +182,7 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Auto-reorder enabled</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create purchase orders when stock is low</p>
@@ -194,7 +198,7 @@
             </label>
           </div>
 
-          <div class="flex items-center justify-between py-2.5">
+          <div class="flex items-center justify-between py-3">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Default category</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Default category for new products</p>
@@ -210,17 +214,18 @@
         </div>
       </div>
 
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+      <!-- Receipt & invoice settings -->
+      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Receipt & invoice settings</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Customize receipt and invoice preferences</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Receipt & invoice settings</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Customize receipt and invoice preferences</p>
           </div>
           <Button v-if="canEditSettings" @click="saveReceiptSettings" variant="primary" extra-class="!rounded-lg" size="sm">Save changes</Button>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
-        <div class="p-3 sm:p-4 space-y-0">
-          <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+        <div class="px-5 sm:px-6 py-4 space-y-0">
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Receipt prefix</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prefix for receipt numbers (e.g. REC-)</p>
@@ -228,7 +233,7 @@
             <input v-model="receiptSettings.prefix" type="text" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="REC-" />
           </div>
 
-          <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+          <div class="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700/60">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Next receipt number</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Starting number for next receipt</p>
@@ -236,7 +241,7 @@
             <input v-model.number="receiptSettings.nextNumber" type="number" min="1" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
           </div>
 
-          <div class="flex items-center justify-between py-2.5">
+          <div class="flex items-center justify-between py-3">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Print receipt automatically</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Print receipt after sale</p>
@@ -429,7 +434,6 @@
         </div>
       </div>
     </Modal>
-  </div>
 </template>
 
 <script setup lang="ts">
