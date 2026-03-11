@@ -3,6 +3,7 @@
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
+    :subtitle="isEdit ? 'Update staff details.' : 'Add a new staff member with login and role.'"
     size="lg"
   >
     <div class="space-y-4">
@@ -65,10 +66,9 @@
         </div>
 
         <div v-if="!isEdit && needsSuperAdminPassword" class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-3 mt-1.5">
-          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-3">
-            <p class="text-xs text-yellow-800 dark:text-yellow-200">
-              <strong>Security Verification Required</strong><br>
-              Please enter your super admin password to create staff accounts. Your credentials are not currently stored.
+          <div class="bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-xl p-2.5 mb-2.5">
+            <p class="text-xs text-amber-800 dark:text-amber-200">
+              <strong>Security verification required.</strong> Enter your super admin password to create staff accounts. Credentials are not stored.
             </p>
           </div>
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -175,8 +175,8 @@
     </div>
 
     <template #footer>
-      <Button variant="secondary" @click="handleClose" class="w-full sm:w-auto text-xs px-3 py-1.5">Cancel</Button>
-      <Button @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto text-xs px-3 py-1.5">
+      <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+      <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-lg">
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

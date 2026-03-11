@@ -2,14 +2,18 @@
   <Modal
     v-model="isOpen"
     title="Saved Searches"
+    subtitle="Load or save search filters."
     size="md"
   >
     <template #header>
       <div class="flex items-center justify-between w-full">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Saved Searches</h3>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Saved Searches</h3>
+          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Load or save search filters</p>
+        </div>
         <button
           @click="showCreateModal = true"
-          class="px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
         >
           + Save Current
         </button>
@@ -84,37 +88,30 @@
     <Modal
       v-model="showCreateModal"
       title="Save Search"
+      subtitle="Name this search to load it later."
       size="sm"
     >
-      <div class="space-y-4">
+      <div class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Search Name *
-          </label>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Search Name *</label>
           <input
             v-model="searchName"
             type="text"
             placeholder="e.g., High-value customers"
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             @keydown.enter="handleSave"
           />
         </div>
-        <div class="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-          <p class="text-xs text-gray-600 dark:text-gray-400 mb-1">Query:</p>
-          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {{ searchStore.query || '(empty)' }}
-          </p>
-          <p v-if="searchStore.hasActiveFilters" class="text-xs text-gray-600 dark:text-gray-400 mt-2">
-            Filters: {{ getFiltersSummary() }}
-          </p>
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Query</p>
+          <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ searchStore.query || '(empty)' }}</p>
+          <p v-if="searchStore.hasActiveFilters" class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Filters: {{ getFiltersSummary() }}</p>
         </div>
       </div>
 
       <template #footer>
-        <Button variant="outline" @click="showCreateModal = false">Cancel</Button>
-        <Button variant="primary" @click="handleSave" :disabled="!searchName.trim()">
-          Save
-        </Button>
+        <Button variant="outline" size="sm" @click="showCreateModal = false" extra-class="!rounded-lg">Cancel</Button>
+        <Button variant="primary" size="sm" @click="handleSave" :disabled="!searchName.trim()" extra-class="!rounded-lg">Save</Button>
       </template>
     </Modal>
   </Modal>

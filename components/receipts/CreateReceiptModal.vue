@@ -2,6 +2,7 @@
   <Modal
     :model-value="props.modelValue"
     title="Create New Receipt"
+    subtitle="Select folder, items, then enter receipt details."
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -573,12 +574,13 @@
     </template>
 
     <template #footer>
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3 w-full">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
         <Button
           v-if="currentStep > 0"
           variant="outline"
+          size="sm"
           @click="previousStep"
-          class="w-full sm:w-auto order-2 sm:order-1"
+          class="w-full sm:w-auto order-2 sm:order-1 !rounded-lg"
         >
           Previous
         </Button>
@@ -586,15 +588,17 @@
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
+            size="sm"
             @click="handleCancel"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto !rounded-lg"
           >
             Cancel
           </Button>
           <Button
             v-if="currentStep < 2"
             variant="primary"
-            class="w-full sm:w-auto"
+            size="sm"
+            class="w-full sm:w-auto !rounded-lg"
             @click="nextStep"
             :disabled="!canProceed"
           >
@@ -603,9 +607,10 @@
           <Button
             v-else
             variant="primary"
+            size="sm"
             @click="handleCreateReceipt"
             :disabled="!isFormValid || isCreating"
-            class="w-full sm:w-auto"
+            class="w-full sm:w-auto !rounded-lg"
           >
             <span v-if="isCreating">Creating...</span>
             <span v-else>Create Receipt</span>

@@ -5,97 +5,87 @@
     size="lg"
   >
     <template #header>
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-md bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-          <TrashIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
         </div>
-        <div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Delete Folder
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ folder?.name || 'This folder' }}
-          </p>
+        <div class="min-w-0">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">Delete Folder</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ folder?.name || 'This folder' }}</p>
         </div>
       </div>
     </template>
 
-    <div class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
-      <!-- Warning Message -->
-      <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-        <div class="flex items-start gap-3">
-          <ExclamationTriangleIcon class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+    <div class="max-h-[calc(100vh-14rem)] overflow-y-auto space-y-3">
+      <!-- Warning -->
+      <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+        <div class="flex items-start gap-2.5">
+          <ExclamationTriangleIcon class="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p class="text-sm font-medium text-red-800 dark:text-red-200">
-              Confirm Deletion
-            </p>
-            <p class="mt-1 text-xs text-red-700 dark:text-red-300">
-              This action cannot be undone. Deleting this folder will permanently remove it from your inventory. The items in this folder will not be deleted, but they will no longer be organized under this folder.
-            </p>
+            <p class="text-xs font-medium text-red-800 dark:text-red-200">Confirm deletion</p>
+            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The folder will be removed; items will not be deleted but will no longer be under this folder.</p>
           </div>
         </div>
       </div>
 
       <!-- Folder Details -->
-      <div v-if="folder" class="space-y-3">
-        <div>
-          <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Folder Information</h4>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-1.5">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Folder Name:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.name }}</span>
-            </div>
-            <div v-if="folder.description" class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Description:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.description }}</span>
-            </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Items Count:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount || 0 }} item{{ (folder.itemCount || 0) !== 1 ? 's' : '' }}</span>
-            </div>
-            <div v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0" class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Departments:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.allowedDepartments.length }} department{{ folder.allowedDepartments.length !== 1 ? 's' : '' }}</span>
-            </div>
-            <div v-if="folder.hasSerialNumbers" class="flex justify-between text-sm">
-              <span class="text-gray-600 dark:text-gray-400">Serial Numbers:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">Enabled</span>
-            </div>
+      <div v-if="folder" class="space-y-2">
+        <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Folder information</h4>
+        <div class="bg-gray-50/80 dark:bg-gray-700/40 rounded-lg p-2.5 space-y-1.5">
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Folder name</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.name }}</span>
+          </div>
+          <div v-if="folder.description" class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Description</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.description }}</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Items</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount || 0 }} item{{ (folder.itemCount || 0) !== 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0" class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Departments</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.allowedDepartments.length }} department{{ folder.allowedDepartments.length !== 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="folder.hasSerialNumbers" class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Serial numbers</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">Enabled</span>
           </div>
         </div>
       </div>
 
-      <!-- What Will Happen -->
-      <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-        <h4 class="text-xs font-semibold text-yellow-900 dark:text-yellow-100 mb-1.5">What will happen:</h4>
-        <ul class="space-y-0.5 text-xs text-yellow-800 dark:text-yellow-200 list-disc list-inside">
-          <li>This folder will be permanently deleted from inventory</li>
-          <li>Items in this folder will not be deleted, but will no longer be organized under this folder</li>
-          <li>All associated folder data will be removed</li>
-          <li>This action cannot be undone</li>
+      <!-- What will happen -->
+      <div class="p-2.5 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-xl">
+        <h4 class="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">What will happen</h4>
+        <ul class="space-y-0.5 text-xs text-amber-800 dark:text-amber-200 list-disc list-inside">
+          <li>Folder permanently deleted from inventory</li>
+          <li>Items remain but are no longer under this folder</li>
+          <li>Associated folder data removed; action cannot be undone</li>
         </ul>
       </div>
 
-      <!-- Confirmation Checkbox -->
-      <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+      <!-- Confirmation -->
+      <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
         <Checkbox
           v-model="confirmed"
           label="I understand that this action cannot be undone and will permanently delete this folder."
           size="sm"
           wrapper-class="items-start"
-          label-class="text-sm text-gray-700 dark:text-gray-300"
+          label-class="text-xs text-gray-700 dark:text-gray-300"
         />
       </div>
     </div>
 
     <template #footer>
-      <Button variant="outline" @click="handleCancel" class="w-full sm:w-auto">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
       <Button
         variant="danger"
+        size="sm"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmDelete"
         :icon="TrashIcon"
-        class="w-full sm:w-auto"
+        class="w-full sm:w-auto !rounded-lg"
       >
         {{ isProcessing ? 'Deleting...' : 'Delete Folder' }}
       </Button>

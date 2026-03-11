@@ -264,32 +264,31 @@
     <Modal
       v-model="showCreateModal"
       :title="editingStore ? 'Edit Branch' : 'Create Branch'"
+      :subtitle="editingStore ? 'Update branch details.' : 'Add a new branch with name, description, and contact info.'"
       size="lg"
     >
-      <div class="space-y-4">
+      <div class="space-y-3">
         <div>
-          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
             Branch Name <span class="text-red-500">*</span>
           </label>
           <input
             v-model="storeForm.name"
             type="text"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
             placeholder="My Branch"
           />
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1.5">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-              Description
-            </label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
             <button
               type="button"
               @click="generateAIDescription"
               :disabled="isGeneratingDescription || !storeForm.name"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-lg"
             >
               <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
               <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -302,43 +301,37 @@
           <textarea
             v-model="storeForm.description"
             rows="2"
-            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
+            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-none"
             placeholder="Store description..."
           />
         </div>
 
         <div>
-          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Address
-          </label>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
           <input
             v-model="storeForm.address"
             type="text"
-            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
             placeholder="123 Main St, City, State ZIP"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Phone
-            </label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
             <input
               v-model="storeForm.phone"
               type="tel"
-              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
               placeholder="+1234567890"
             />
           </div>
           <div>
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Email
-            </label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input
               v-model="storeForm.email"
               type="email"
-              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
               placeholder="store@example.com"
             />
           </div>
@@ -351,14 +344,14 @@
               type="checkbox"
               class="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
-            <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Active</span>
+            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Active</span>
           </label>
         </div>
       </div>
 
       <template #footer>
-        <Button variant="secondary" @click="closeStoreModal">Cancel</Button>
-        <Button @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore">
+        <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-lg">Cancel</Button>
+        <Button size="sm" @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore" extra-class="!rounded-lg">
           {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
         </Button>
       </template>
@@ -368,20 +361,21 @@
     <Modal
       v-model="showDeleteModal"
       title="Delete Store"
+      subtitle="This action cannot be undone."
       size="md"
     >
-      <div class="space-y-4">
-        <p class="text-gray-700 dark:text-gray-300">
-          Are you sure you want to delete <strong>{{ storeToDelete?.name }}</strong>? This action cannot be undone.
+      <div class="space-y-3">
+        <p class="text-xs text-gray-700 dark:text-gray-300">
+          Are you sure you want to delete <strong>{{ storeToDelete?.name }}</strong>?
         </p>
-        <p class="text-sm text-red-600 dark:text-red-400">
-          Warning: All data associated with this store (departments, staff, inventory, receipts) will need to be handled separately.
+        <p class="text-xs text-red-600 dark:text-red-400">
+          All data associated with this store (departments, staff, inventory, receipts) will need to be handled separately.
         </p>
       </div>
 
       <template #footer>
-        <Button variant="secondary" @click="showDeleteModal = false">Cancel</Button>
-        <Button variant="danger" @click="handleStoreDelete" :disabled="isDeletingStore">
+        <Button variant="outline" size="sm" @click="showDeleteModal = false" extra-class="!rounded-lg">Cancel</Button>
+        <Button variant="danger" size="sm" @click="handleStoreDelete" :disabled="isDeletingStore" extra-class="!rounded-lg">
           {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
         </Button>
       </template>
@@ -391,19 +385,20 @@
     <Modal
       v-model="showStoreSelectionModal"
       title="Select Your Store"
+      subtitle="Your store was created. Select it to continue."
       size="md"
       :close-on-backdrop="false"
     >
-      <div class="space-y-4">
-        <p class="text-gray-700 dark:text-gray-300">
-          Your store has been created successfully! Please select this store to continue.
+      <div class="space-y-3">
+        <p class="text-xs text-gray-700 dark:text-gray-300">
+          Please select this store to continue.
         </p>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <button
             v-for="store in stores"
             :key="store.id"
             @click="handleStoreSelection(store.id)"
-            class="w-full text-left p-4 border-2 rounded-md transition-all"
+            class="w-full text-left p-3 border-2 rounded-xl transition-all"
             :class="
               newlyCreatedStoreId === store.id
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
@@ -412,18 +407,18 @@
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">
-                <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ store.name }}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" v-if="store.description">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ store.name }}</h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5" v-if="store.description">
                   {{ store.description }}
                 </p>
-                <div class="mt-2 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <div class="mt-1.5 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <span v-if="store.address">{{ store.address }}</span>
                   <span v-if="store.phone">{{ store.phone }}</span>
                 </div>
               </div>
               <svg
                 v-if="newlyCreatedStoreId === store.id"
-                class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-3"
+                class="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-3"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >

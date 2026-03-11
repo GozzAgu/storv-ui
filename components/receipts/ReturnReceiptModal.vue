@@ -135,9 +135,11 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" @click="handleCancel" class="w-full sm:w-auto">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
       <Button
         variant="primary"
+        size="sm"
+        extra-class="!rounded-lg"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmReturn"
         :icon="ArrowPathIcon"

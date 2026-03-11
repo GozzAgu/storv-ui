@@ -201,9 +201,11 @@
       <div class="flex items-center justify-between w-full">
         <Button
           v-if="step > 1 && step < 4"
-          variant="secondary"
+          variant="outline"
+          size="sm"
           @click="previousStep"
           :disabled="isVerifying"
+          extra-class="!rounded-lg"
         >
           Back
         </Button>
@@ -212,23 +214,29 @@
         <div class="flex gap-2">
           <Button
             v-if="step < 4"
-            variant="secondary"
+            variant="outline"
+            size="sm"
             @click="$emit('update:modelValue', false)"
             :disabled="isVerifying"
+            extra-class="!rounded-lg"
           >
             Cancel
           </Button>
           <Button
             v-if="step === 1"
+            size="sm"
             @click="nextStep"
             :disabled="!selectedMethod"
+            extra-class="!rounded-lg"
           >
             Continue
           </Button>
           <Button
             v-if="step === 2"
+            size="sm"
             @click="initiateSetup"
             :disabled="isLoading || (selectedMethod === 'phone' && !phoneNumber)"
+            extra-class="!rounded-lg"
           >
             <span v-if="isLoading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -241,8 +249,10 @@
           </Button>
           <Button
             v-if="step === 3"
+            size="sm"
             @click="verifyCode"
             :disabled="isVerifying || !verificationCode || verificationCode.length !== 6"
+            extra-class="!rounded-lg"
           >
             <span v-if="isVerifying" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -255,7 +265,9 @@
           </Button>
           <Button
             v-if="step === 4"
+            size="sm"
             @click="completeSetup"
+            extra-class="!rounded-lg"
           >
             Done
           </Button>

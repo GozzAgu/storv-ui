@@ -32,27 +32,32 @@
             <div
               v-if="modelValue"
               :class="[
-                'relative w-full bg-white dark:bg-gray-800 rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-700/80 shadow-xl transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
+                'relative w-full bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-xl transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
                 sizeClasses
               ]"
               @click.stop
             >
-              <!-- Header -->
+              <!-- Header: compact, modern -->
               <div
-                v-if="title || $slots.header || showClose"
-                class="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200/60 dark:border-gray-700/60 flex-shrink-0"
+                v-if="title || subtitle || $slots.header || showClose"
+                class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60 flex-shrink-0"
               >
                 <div class="flex items-center gap-2 flex-1 min-w-0 pr-2">
                   <slot name="header">
-                    <h3 v-if="title" class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
-                      {{ title }}
-                    </h3>
+                    <div v-if="title || subtitle" class="min-w-0">
+                      <h3 v-if="title" class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate tracking-tight">
+                        {{ title }}
+                      </h3>
+                      <p v-if="subtitle" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {{ subtitle }}
+                      </p>
+                    </div>
                   </slot>
                 </div>
                 <button
                   v-if="showClose"
                   @click="handleClose"
-                  class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-lg transition-colors flex-shrink-0"
+                  class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-lg transition-colors flex-shrink-0"
                   aria-label="Close modal"
                 >
                   <XMarkIcon class="w-4 h-4" />
@@ -64,10 +69,10 @@
                 <slot />
               </div>
 
-              <!-- Footer -->
+              <!-- Footer: compact -->
               <div
                 v-if="$slots.footer"
-                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 p-4 sm:p-5 border-t border-gray-200/60 dark:border-gray-700/60 bg-gray-50/80 dark:bg-gray-800/30 rounded-b-xl flex-shrink-0"
+                class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 p-3 sm:p-4 border-t border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30 rounded-b-2xl flex-shrink-0"
               >
                 <slot name="footer" />
               </div>
@@ -86,6 +91,7 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 interface Props {
   modelValue: boolean
   title?: string
+  subtitle?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   showClose?: boolean
   closeOnBackdrop?: boolean
@@ -97,7 +103,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showClose: true,
   closeOnBackdrop: true,
-  contentPadding: 'p-4 sm:p-5',
+  contentPadding: 'p-3 sm:p-4',
 })
 
 const emit = defineEmits<{

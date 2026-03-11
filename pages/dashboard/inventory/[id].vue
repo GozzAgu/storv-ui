@@ -618,12 +618,13 @@
     <Modal
       v-model="showAddItemModal"
       :title="editingItem ? 'Edit Item' : (folder?.hasSerialNumbers && !editingItem ? 'Add Items with Serial Numbers' : 'Add New Item')"
+      :subtitle="folder?.hasSerialNumbers && !editingItem ? 'Enter shared details, then add serial numbers' : (editingItem ? 'Update item details' : 'Add a new item to this folder')"
       size="lg"
     >
-      <form @submit.prevent="handleSaveItem" class="space-y-3 sm:space-y-4">
+      <form @submit.prevent="handleSaveItem" class="space-y-3">
         <!-- Bulk Add Mode for Serial Numbers -->
         <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-3">
-          <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+          <div class="p-2.5 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-xl">
             <p class="text-xs text-blue-800 dark:text-blue-200">
               <strong>Bulk Add Mode:</strong> Enter the item details once, then add multiple serial numbers below. Each serial number will create a separate item with the same details.
             </p>
@@ -800,9 +801,9 @@
       </form>
 
       <template #footer>
-        <Button variant="outline" @click="handleCancelItem" class="w-full sm:w-auto">Cancel</Button>
-        <Button variant="primary" type="submit" @click="handleSaveItem" class="w-full sm:w-auto">
-          {{ editingItem ? 'Update' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Item${serialNumbers.length !== 1 ? 's' : ''}` : 'Add') }} Item{{ folder?.hasSerialNumbers && !editingItem && serialNumbers.length !== 1 ? 's' : '' }}
+        <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+        <Button variant="primary" size="sm" type="submit" @click="handleSaveItem" class="w-full sm:w-auto !rounded-lg">
+          {{ editingItem ? 'Update Item' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Item${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Item') }}
         </Button>
       </template>
     </Modal>

@@ -196,9 +196,9 @@
     </template>
 
     <template #footer>
-      <div class="flex gap-3 justify-end">
-        <Button variant="outline" @click="$emit('update:modelValue', false)">Cancel</Button>
-        <Button @click="completeSale" :loading="isProcessing" :disabled="cartItems.length === 0 || !paymentMethod || !selectedFolderId">
+      <div class="flex gap-2 justify-end">
+        <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-lg">Cancel</Button>
+        <Button size="sm" @click="completeSale" :loading="isProcessing" :disabled="cartItems.length === 0 || !paymentMethod || !selectedFolderId" extra-class="!rounded-lg">
           Complete Sale (${{ formatCurrency(cartTotal) }})
         </Button>
       </div>
