@@ -447,6 +447,7 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
 import { useUserStore } from '~/stores/user'
+import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 import Card from '~/components/ui/Card.vue'
@@ -476,6 +477,7 @@ const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 
 // State
 const isLoading = ref(true)
@@ -868,7 +870,7 @@ const peakHoursChartSeries = computed(() => [{
   data: salesByHour.value.map(s => s.revenue)
 }])
 const peakHoursChartOptions = computed(() => {
-  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  const isDark = themeStore.actualTheme === 'dark'
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
   const borderColor = isDark ? '#4B5563' : '#E5E7EB'
@@ -915,7 +917,7 @@ const salesByDayChartSeries = computed(() => [{
   data: salesByDayOfWeek.value.map(s => s.revenue)
 }])
 const salesByDayChartOptions = computed(() => {
-  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  const isDark = themeStore.actualTheme === 'dark'
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
     colors: ['#059669'],
@@ -936,7 +938,7 @@ const salesByDayChartOptions = computed(() => {
 })
 
 const heatmapChartOptions = computed(() => {
-  const isDark = import.meta.client ? document.documentElement.classList.contains('dark') : false
+  const isDark = themeStore.actualTheme === 'dark'
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
   const borderColor = isDark ? '#4B5563' : '#D1D5DB'
@@ -1074,9 +1076,7 @@ const revenueChartSeries = computed(() => {
 })
 
 const revenueChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
+  const isDark = themeStore.actualTheme === 'dark'
   
   return {
     chart: {
@@ -1149,9 +1149,7 @@ const topProductsChartSeries = computed(() => {
 })
 
 const topProductsChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
+  const isDark = themeStore.actualTheme === 'dark'
   
   return {
     chart: {
@@ -1206,9 +1204,7 @@ const inventoryTurnoverChartSeries = computed(() => {
 })
 
 const inventoryTurnoverChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
+  const isDark = themeStore.actualTheme === 'dark'
   
   return {
     chart: {
@@ -1271,9 +1267,7 @@ const customerChartSeries = computed(() => {
 })
 
 const customerChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
+  const isDark = themeStore.actualTheme === 'dark'
   
   return {
     chart: {

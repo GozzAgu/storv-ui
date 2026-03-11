@@ -1008,9 +1008,7 @@ if (import.meta.client) {
 const chartHeight = computed(() => isMobile.value ? 256 : 320)
 
 const chartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? (document.documentElement.classList.contains('dark') || themeStore.actualTheme === 'dark')
-    : false
+  const isDark = themeStore.actualTheme === 'dark'
   
   return {
     chart: {
