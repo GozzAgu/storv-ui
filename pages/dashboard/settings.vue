@@ -12,84 +12,95 @@
     </div>
 
     <div class="space-y-5 sm:space-y-6">
-      <!-- Account logo -->
+      <!-- Account: logo + subscription -->
       <div v-if="userStore.isSuperAdmin" class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
-        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Account logo</h2>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">One logo for all your stores. Shown on receipts.</p>
-        </div>
-        <div class="relative px-5 sm:px-6 py-5 flex items-center gap-5">
-          <div class="relative shrink-0">
-            <div class="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
-              <img v-if="accountLogoUrl" :src="accountLogoUrl" alt="Account logo" class="w-full h-full object-cover" />
-              <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
-            </div>
-            <button
-              type="button"
-              @click="accountLogoInput?.click()"
-              :disabled="isUploadingAccountLogo"
-              class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-500/25 disabled:opacity-50 transition-all"
-            >
-              <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3.5 h-3.5 animate-spin" />
-              <CameraIcon v-else class="w-3.5 h-3.5" />
-            </button>
-            <input ref="accountLogoInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleAccountLogoUpload" />
-          </div>
-          <button v-if="accountLogoUrl" type="button" @click="removeAccountLogo" class="text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">
-            Remove logo
-          </button>
-        </div>
-      </div>
-
-      <!-- Subscription -->
-      <div class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
         <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Subscription</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Upgrade your plan to unlock more features.</p>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Account</h2>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Logo and subscription for your whole account.</p>
           </div>
           <span class="px-2.5 py-1 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
-            Current: {{ currentSubscriptionLabel }}
+            Plan: {{ currentSubscriptionLabel }}
           </span>
         </div>
 
-        <div class="px-5 sm:px-6 py-5">
-          <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-            <div class="flex-1">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Upgrade to</label>
-              <select
-                v-model="selectedUpgradePlan"
-                :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
-                :class="[
-                  'w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30',
-                  canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
-                    ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100'
-                    : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed'
-                ]"
+        <div class="px-5 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Logo -->
+          <div class="flex items-center gap-5">
+            <div class="relative shrink-0">
+              <div class="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
+                <img v-if="accountLogoUrl" :src="accountLogoUrl" alt="Account logo" class="w-full h-full object-cover" />
+                <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+              </div>
+              <button
+                type="button"
+                @click="accountLogoInput?.click()"
+                :disabled="isUploadingAccountLogo"
+                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-500/25 disabled:opacity-50 transition-all"
+                title="Upload logo"
+                aria-label="Upload logo"
               >
-                <option value="" disabled>
-                  {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
-                </option>
-                <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
-                  {{ p.name }}
-                </option>
-              </select>
+                <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3.5 h-3.5 animate-spin" />
+                <CameraIcon v-else class="w-3.5 h-3.5" />
+              </button>
+              <input ref="accountLogoInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleAccountLogoUpload" />
             </div>
-
-            <Button
-              variant="primary"
-              size="sm"
-              extra-class="!rounded-lg"
-              :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
-              @click="handleUpgradeSubscription"
-            >
-              {{ isUpgradingSubscription ? 'Upgrading...' : 'Upgrade' }}
-            </Button>
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account logo</p>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">One logo for all stores. Shown on receipts.</p>
+              <button
+                v-if="accountLogoUrl"
+                type="button"
+                @click="removeAccountLogo"
+                class="mt-2 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+              >
+                Remove logo
+              </button>
+            </div>
           </div>
 
-          <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
-            This only updates your account plan in-app (billing integration can be added later).
-          </p>
+          <!-- Subscription -->
+          <div class="flex flex-col justify-between gap-2">
+            <div>
+              <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Subscription</p>
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Upgrade your plan to unlock more features.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+              <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Upgrade to</label>
+                <select
+                  v-model="selectedUpgradePlan"
+                  :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
+                  :class="[
+                    'w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                    canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
+                      ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100'
+                      : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed'
+                  ]"
+                >
+                  <option value="" disabled>
+                    {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
+                  </option>
+                  <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
+                    {{ p.name }}
+                  </option>
+                </select>
+              </div>
+
+              <Button
+                variant="primary"
+                size="sm"
+                extra-class="!rounded-lg"
+                :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
+                @click="handleUpgradeSubscription"
+              >
+                {{ isUpgradingSubscription ? 'Upgrading...' : 'Upgrade' }}
+              </Button>
+            </div>
+            <p class="text-[10px] text-gray-500 dark:text-gray-400">
+              This only updates your account plan in-app (billing integration can be added later).
+            </p>
+          </div>
         </div>
       </div>
 
@@ -100,9 +111,15 @@
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Stores</h2>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Create, edit, and delete your stores</p>
           </div>
-          <Button v-if="!isStaff" @click="showCreateModal = true" extra-class="!rounded-lg" size="sm">
-            <PlusIcon class="w-3.5 h-3.5" />
-            Create branch
+          <Button
+            v-if="!isStaff"
+            @click="showCreateModal = true"
+            size="sm"
+            extra-class="!rounded-lg !px-2"
+            title="Create branch"
+            aria-label="Create branch"
+          >
+            <PlusIcon class="w-4 h-4" />
           </Button>
         </div>
 
@@ -182,7 +199,14 @@
           <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           <div v-else-if="canEditSettings && isEditingStore" class="flex gap-1.5">
             <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="saveStoreInfo" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Save changes</button>
+            <button
+              @click="saveStoreInfo"
+              class="inline-flex items-center justify-center w-9 h-8 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
+              title="Done"
+              aria-label="Done"
+            >
+              <CheckIcon class="w-4 h-4" />
+            </button>
           </div>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
@@ -219,7 +243,17 @@
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Inventory settings</h2>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Configure inventory management preferences</p>
           </div>
-          <Button v-if="canEditSettings" @click="saveInventorySettings" variant="primary" extra-class="!rounded-lg" size="sm">Save changes</Button>
+          <Button
+            v-if="canEditSettings"
+            @click="saveInventorySettings"
+            variant="primary"
+            size="sm"
+            extra-class="!rounded-lg !px-2"
+            title="Done"
+            aria-label="Done"
+          >
+            <CheckIcon class="w-4 h-4" />
+          </Button>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
         <div class="px-5 sm:px-6 py-4 space-y-0">
@@ -273,7 +307,17 @@
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Receipt & invoice settings</h2>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Customize receipt and invoice preferences</p>
           </div>
-          <Button v-if="canEditSettings" @click="saveReceiptSettings" variant="primary" extra-class="!rounded-lg" size="sm">Save changes</Button>
+          <Button
+            v-if="canEditSettings"
+            @click="saveReceiptSettings"
+            variant="primary"
+            size="sm"
+            extra-class="!rounded-lg !px-2"
+            title="Done"
+            aria-label="Done"
+          >
+            <CheckIcon class="w-4 h-4" />
+          </Button>
           <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
         <div class="px-5 sm:px-6 py-4 space-y-0">
@@ -489,6 +533,7 @@ import {
   ArrowPathIcon,
   BuildingStorefrontIcon,
   CameraIcon,
+  CheckIcon,
   PencilSquareIcon,
   PlusIcon,
   SparklesIcon,
