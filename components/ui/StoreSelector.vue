@@ -1,21 +1,5 @@
 <template>
   <div class="relative" ref="dropdownRef">
-    <!-- Mobile Backdrop -->
-    <Transition
-      enter-active-class="transition-opacity ease-out duration-200"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity ease-in duration-150"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="dropdownOpen"
-        @click="dropdownOpen = false"
-        class="fixed inset-0 bg-black/50 z-[45] sm:hidden"
-      ></div>
-    </Transition>
-
     <button
       @click="dropdownOpen = !dropdownOpen"
       class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-colors"
