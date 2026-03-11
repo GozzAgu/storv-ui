@@ -1,56 +1,56 @@
 <template>
   <div class="pb-8 min-h-screen w-full overflow-x-hidden">
-    <div class="mb-6 sm:mb-8">
-      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Multi-Store Sync</h1>
-      <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">Transfer items between stores and view consolidated reports</p>
+    <div class="mb-4 sm:mb-6">
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Multi-Store Sync</h1>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Transfer items between stores and view consolidated reports</p>
     </div>
 
     <div
       v-if="!canAccess"
-      class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/60 dark:ring-amber-800/50 p-5 flex items-center gap-4"
+      class="rounded-xl bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/60 dark:ring-amber-800/50 p-3 sm:p-4 flex items-center gap-3"
     >
-      <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-        <ExclamationTriangleIcon class="w-6 h-6 text-amber-600 dark:text-amber-400" />
+      <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+        <ExclamationTriangleIcon class="w-4 h-4 text-amber-600 dark:text-amber-400" />
       </div>
       <div>
-        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">Only super admins can access multi-store sync features.</p>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Only super admins can access multi-store sync features.</p>
       </div>
     </div>
 
     <template v-else>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total stores</p>
-              <p class="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">{{ stores.length }}</p>
+              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ stores.length }}</p>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <BuildingStorefrontIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <BuildingStorefrontIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
-        <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total transfers</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ transferHistory.length }}</p>
+              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ transferHistory.length }}</p>
             </div>
-            <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <ArrowPathIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
+            <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <ArrowPathIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Tabs -->
-      <div class="inline-flex p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/50 ring-1 ring-gray-200/60 dark:ring-gray-700/50">
+      <div class="inline-flex p-0.5 rounded-lg bg-gray-100/80 dark:bg-gray-800/50 ring-1 ring-gray-200/60 dark:ring-gray-700/50">
         <nav class="flex gap-0.5">
           <button
             @click="activeTab = 'transfer'"
             :class="[
-              'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'transfer'
                 ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -61,7 +61,7 @@
           <button
             @click="activeTab = 'reports'"
             :class="[
-              'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'reports'
                 ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -72,7 +72,7 @@
           <button
             @click="activeTab = 'history'"
             :class="[
-              'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'history'
                 ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -83,96 +83,96 @@
         </nav>
       </div>
 
-      <div v-if="activeTab === 'transfer'" class="mt-6 sm:mt-8 rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Move stock between warehouses</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
+      <div v-if="activeTab === 'transfer'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move stock between warehouses</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
         </div>
-        <div class="p-4 sm:p-6 space-y-5">
+        <div class="p-3 sm:p-4 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Source store</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Source store</label>
             <select
               v-model="transferForm.sourceStoreId"
               @change="loadSourceStoreInventory"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             >
               <option value="">Select source store</option>
               <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Destination store</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Destination store</label>
             <select
               v-model="transferForm.destinationStoreId"
               @change="loadDestinationStoreFolders"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             >
               <option value="">Select destination store</option>
               <option v-for="store in stores.filter(s => s.id !== transferForm.sourceStoreId)" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
             </select>
           </div>
           <div v-if="transferForm.destinationStoreId">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Destination folder</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Destination folder</label>
             <select
               v-model="transferForm.destinationFolderId"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             >
               <option value="">Select destination folder</option>
               <option v-for="folder in destinationFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
             </select>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Folder in the destination store where items will be transferred</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Folder in the destination store where items will be transferred</p>
           </div>
           <div v-if="transferForm.sourceStoreId">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Inventory folder</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Inventory folder</label>
             <select
               v-model="transferForm.folderId"
               @change="loadFolderItems"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             >
               <option value="">Select folder</option>
               <option v-for="folder in sourceFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
             </select>
           </div>
 
-          <div v-if="transferForm.folderId && availableItems.length > 0" class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select items to transfer</label>
-            <div class="rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-700/80 overflow-hidden max-h-64 overflow-y-auto">
-              <table class="w-full text-sm">
+          <div v-if="transferForm.folderId && availableItems.length > 0" class="space-y-1.5">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Select items to transfer</label>
+            <div class="rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-700/80 overflow-hidden max-h-52 overflow-y-auto">
+              <table class="w-full text-xs">
                 <thead class="bg-white/60 dark:bg-gray-800/60 sticky top-0">
                   <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
-                    <th v-if="!currentFolderHasSerialNumbers" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Available</th>
-                    <th v-if="!currentFolderHasSerialNumbers" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Qty</th>
-                    <th v-else class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Select</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Available</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Qty</th>
+                    <th v-else class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Select</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
                   <tr v-for="item in availableItems" :key="item.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40">
-                    <td class="px-4 py-3">
+                    <td class="px-3 py-2">
                       <div>
                         <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name || item.itemName || 'Unnamed Item' }}</p>
                         <p v-if="item.brand && item.model" class="text-xs text-gray-500 dark:text-gray-400">{{ item.brand }} {{ item.model }}</p>
                         <p v-if="item.serialNo || item.serialNumber" class="text-xs text-gray-500 dark:text-gray-400">Serial: {{ item.serialNo || item.serialNumber }}</p>
                       </div>
                     </td>
-                    <td v-if="!currentFolderHasSerialNumbers" class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ getAvailableQuantity(item) }}</td>
-                    <td v-if="!currentFolderHasSerialNumbers" class="px-4 py-3">
+                    <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-gray-600 dark:text-gray-300">{{ getAvailableQuantity(item) }}</td>
+                    <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2">
                       <input
                         v-model.number="transferForm.items[item.id]"
                         type="number"
                         :max="getAvailableQuantity(item)"
                         min="0"
-                        class="w-20 px-2.5 py-1.5 text-sm rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30"
+                        class="w-16 px-2 py-1 text-xs rounded-md ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30"
                         placeholder="0"
                       />
                     </td>
-                    <td v-else class="px-4 py-3">
+                    <td v-else class="px-3 py-2">
                       <input
                         v-model="transferForm.items[item.id]"
                         type="checkbox"
                         :true-value="1"
                         :false-value="0"
-                        class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30"
+                        class="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30"
                       />
                     </td>
                   </tr>
@@ -182,43 +182,44 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes (optional)</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notes (optional)</label>
             <textarea
               v-model="transferForm.notes"
-              rows="3"
-              class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none"
+              rows="2"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none"
               placeholder="Add any notes about this transfer..."
             />
           </div>
 
-          <div class="flex justify-end pt-2">
+          <div class="flex justify-end pt-1.5">
             <Button
               @click="requestTransfer"
               :disabled="!canTransfer || isTransferring"
               :loading="isTransferring"
               variant="primary"
+              size="sm"
               :icon="ArrowsRightLeftIcon"
-              extra-class="!rounded-full"
+              extra-class="!rounded-lg font-medium"
             >
               {{ isTransferring ? 'Creating...' : 'Request transfer' }}
             </Button>
           </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Transfer will be created as pending. Approve → mark in transit → add tracking (optional) → complete to update stock.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Transfer will be created as pending. Approve → mark in transit → add tracking (optional) → complete to update stock.</p>
         </div>
       </div>
 
-      <div v-if="activeTab === 'reports'" class="mt-6 sm:mt-8 rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Consolidated reports</h2>
+      <div v-if="activeTab === 'reports'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Consolidated reports</h2>
         </div>
-        <div class="p-4 sm:p-6 space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-3 sm:p-4 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date range</label>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Date range</label>
               <select
                 v-model="reportFilters.dateRange"
                 @change="loadConsolidatedReports"
-                class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 <option value="7">Last 7 days</option>
                 <option value="30">Last 30 days</option>
@@ -228,11 +229,11 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stores</label>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Stores</label>
               <select
                 v-model="reportFilters.storeIds"
                 @change="loadConsolidatedReports"
-                class="w-full px-4 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               >
                 <option value="all">All stores</option>
                 <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
@@ -242,51 +243,52 @@
               <Button
                 @click="exportConsolidatedReport"
                 variant="success"
+                size="sm"
                 :icon="ArrowDownTrayIcon"
-                extra-class="!rounded-full w-full sm:w-auto"
+                extra-class="!rounded-lg font-medium w-full sm:w-auto"
               >
                 Export report
               </Button>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total revenue</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.totalRevenue) }}</p>
+              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.totalRevenue) }}</p>
             </div>
-            <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total sales</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalSales }}</p>
+              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalSales }}</p>
             </div>
-            <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total items</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalItems }}</p>
+              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalItems }}</p>
             </div>
-            <div class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
+            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
               <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Avg order value</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</p>
+              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</p>
             </div>
           </div>
 
           <div>
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Store breakdown</h3>
-            <div class="rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-700/80 overflow-hidden">
-              <table class="w-full text-sm">
+            <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-2">Store breakdown</h3>
+            <div class="rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-700/80 overflow-hidden">
+              <table class="w-full text-xs">
                 <thead class="bg-white/60 dark:bg-gray-800/60">
                   <tr>
-                    <th class="px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Store</th>
-                    <th class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Revenue</th>
-                    <th class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Sales</th>
-                    <th class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Items</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Store</th>
+                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Revenue</th>
+                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Sales</th>
+                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Items</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
                   <tr v-for="store in consolidatedReport.storeBreakdown" :key="store.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40">
-                    <td class="px-4 sm:px-5 py-3.5 font-medium text-gray-900 dark:text-gray-100">{{ store.name }}</td>
-                    <td class="px-4 sm:px-5 py-3.5 text-right text-gray-600 dark:text-gray-300">{{ formatCurrency(store.revenue) }}</td>
-                    <td class="px-4 sm:px-5 py-3.5 text-right text-gray-600 dark:text-gray-300">{{ store.sales }}</td>
-                    <td class="px-4 sm:px-5 py-3.5 text-right text-gray-600 dark:text-gray-300">{{ store.items }}</td>
+                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ store.name }}</td>
+                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ formatCurrency(store.revenue) }}</td>
+                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ store.sales }}</td>
+                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ store.items }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -295,31 +297,31 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'history'" class="mt-6 sm:mt-8 rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Warehouse-to-warehouse transfers with approval and tracking</p>
+      <div v-if="activeTab === 'history'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Warehouse-to-warehouse transfers with approval and tracking</p>
         </div>
-        <div class="p-4 sm:p-6">
-          <div v-if="transferHistory.length === 0" class="text-center py-12">
-            <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <ArrowsRightLeftIcon class="w-8 h-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div class="p-3 sm:p-4">
+          <div v-if="transferHistory.length === 0" class="text-center py-8">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <ArrowsRightLeftIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
             </div>
-            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">No transfer history</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
+            <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-0.5">No transfer history</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
           </div>
 
-          <div v-else class="space-y-4">
+          <div v-else class="space-y-3">
             <div
               v-for="transfer in transferHistory"
               :key="transfer.id"
-              class="rounded-xl bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-4 sm:p-5 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
+              class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-3 sm:p-4 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
             >
-              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                    <ArrowsRightLeftIcon class="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
-                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                    <ArrowsRightLeftIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                    <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                       {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
                     </p>
                   </div>
@@ -349,7 +351,7 @@
                 <div class="flex flex-col items-end gap-2 shrink-0">
                   <span
                     :class="[
-                      'px-2.5 py-1 text-xs font-medium rounded-full capitalize',
+                      'px-2 py-0.5 text-xs font-medium rounded-md capitalize',
                       getTransferStatusClass(transfer.status)
                     ]"
                   >
@@ -357,13 +359,13 @@
                   </span>
                   <div v-if="isTransferActionable(transfer)" class="flex flex-wrap gap-1.5 justify-end">
                     <template v-if="transfer.status === 'pending_approval'">
-                      <Button variant="primary" extra-class="!rounded-full !py-1.5 !text-xs" @click="approveTransfer(transfer)">Approve</Button>
-                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" @click="cancelTransfer(transfer)">Cancel</Button>
+                      <Button variant="primary" size="sm" extra-class="!rounded-lg font-medium" @click="approveTransfer(transfer)">Approve</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
                     </template>
                     <template v-else-if="transfer.status === 'in_transit'">
-                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" :icon="TruckIcon" @click="openTrackingModal(transfer)">Tracking</Button>
-                      <Button variant="primary" extra-class="!rounded-full !py-1.5 !text-xs" @click="completeTransfer(transfer)">Complete</Button>
-                      <Button variant="outline" extra-class="!rounded-full !py-1.5 !text-xs" @click="cancelTransfer(transfer)">Cancel</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" :icon="TruckIcon" @click="openTrackingModal(transfer)">Tracking</Button>
+                      <Button variant="primary" size="sm" extra-class="!rounded-lg font-medium" @click="completeTransfer(transfer)">Complete</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
                     </template>
                   </div>
                 </div>
@@ -379,29 +381,29 @@
         size="sm"
       >
         <template #header>Shipment tracking</template>
-        <div class="space-y-4">
+        <div class="space-y-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Carrier</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Carrier</label>
             <input
               v-model="trackingForm.carrier"
               type="text"
-              class="w-full px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400"
               placeholder="e.g. DHL, FedEx"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Tracking number</label>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Tracking number</label>
             <input
               v-model="trackingForm.trackingNumber"
               type="text"
-              class="w-full px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 font-mono"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-600 text-gray-900 dark:text-gray-100 placeholder-gray-400 font-mono"
               placeholder="e.g. 1234567890"
             />
           </div>
         </div>
         <template #footer>
-          <Button variant="outline" @click="showTrackingModal = false">Cancel</Button>
-          <Button variant="primary" @click="saveTracking">Save</Button>
+          <Button variant="outline" size="sm" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="showTrackingModal = false">Cancel</Button>
+          <Button variant="primary" size="sm" extra-class="!rounded-lg font-medium" @click="saveTracking">Save</Button>
         </template>
       </Modal>
     </template>

@@ -118,7 +118,7 @@
           type="button"
           @click="loadMoreNotifications"
           :disabled="notificationsStore.loading"
-          class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {{ notificationsStore.loading ? 'Loading…' : 'Load more' }}
         </button>

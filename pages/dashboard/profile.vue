@@ -1,223 +1,223 @@
 <template>
   <div class="pb-8 min-h-screen w-full overflow-x-hidden">
     <div class="mb-4 sm:mb-6">
-      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
+      <h1 class="text-sm sm:text-base font-bold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
       <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your account settings and preferences</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
       <div class="lg:col-span-1 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden shrink-0 w-full">
-        <div class="p-4 flex flex-col items-center text-center">
-          <div class="w-14 h-14 rounded-xl flex items-center justify-center text-white text-base font-bold overflow-hidden bg-primary-500 shadow-lg">
+        <div class="p-3 flex flex-col items-center text-center">
+          <div class="w-11 h-11 rounded-lg flex items-center justify-center text-white text-xs font-bold overflow-hidden bg-primary-500 shadow-lg">
             {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
           </div>
-          <div v-if="isLoadingProfile" class="space-y-1.5 w-full mt-3">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          <div v-if="isLoadingProfile" class="space-y-1.5 w-full mt-2.5">
+            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
-          <div v-else class="mt-3">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          <div v-else class="mt-2.5">
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">
               {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
             </h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ profileData.email || 'No email' }}</p>
-            <span class="inline-block mt-1.5 px-2.5 py-0.5 text-[11px] font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+            <span class="inline-block mt-1 px-2 py-0.5 text-[10px] font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
               {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
-          <div class="grid grid-cols-3 gap-3 w-full mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
+          <div class="grid grid-cols-3 gap-2 w-full mt-3 pt-3 border-t border-gray-200/80 dark:border-gray-700/80">
             <div>
-              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
-              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
+              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
+              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
-              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
+              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
+              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
             </div>
             <div>
-              <p v-if="isLoadingStats" class="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-8 mx-auto"></p>
-              <p v-else class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
+              <p v-if="isLoadingStats" class="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-6 mx-auto"></p>
+              <p v-else class="text-xs font-bold text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
+              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-4">
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Personal information</h2>
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Personal information</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
           </div>
           <div v-if="!isEditingPersonalInfo">
-            <button @click="enableEditing('personal')" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
+            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           </div>
-          <div v-else class="flex gap-2">
-            <button @click="cancelEditing('personal')" class="px-4 py-2 text-sm font-medium rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="savePersonalInfo" class="px-4 py-2 text-sm font-medium rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-colors">Save changes</button>
+          <div v-else class="flex gap-1.5">
+            <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Save changes</button>
           </div>
         </div>
-        <div class="p-4 sm:p-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-3 sm:p-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First name</label>
-              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter first name" />
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
+              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter first name" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last name</label>
-              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter last name" />
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last name</label>
+              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter last name" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
-              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter email" />
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter email" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-4 py-2.5 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone" />
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-4 py-2.5 text-sm rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell us about yourself" />
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
+              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell us about yourself" />
             </div>
           </div>
         </div>
         </div>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
+          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
           </div>
-          <div class="p-4 sm:p-6 space-y-1">
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <LanguageIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <div class="p-3 sm:p-4 space-y-0">
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <LanguageIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Language</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Language</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
                 </div>
               </div>
-              <button @click="showLanguageModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <GlobeAltIcon class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <GlobeAltIcon class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Region</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Region</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
                 </div>
               </div>
-              <button @click="showRegionModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <CurrencyDollarIcon class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <CurrencyDollarIcon class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Currency</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Currency</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
                 </div>
               </div>
-              <button @click="showCurrencyModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <BellIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <BellIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Notifications</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
                 </div>
               </div>
-              <button @click="showNotificationsModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
+              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <MoonIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <MoonIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Theme</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Theme</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
                 </div>
               </div>
-              <button @click="showThemeModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-3">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <CalendarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <div class="flex items-center justify-between py-2.5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <CalendarIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Timezone</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Timezone</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
                 </div>
               </div>
-              <button @click="showTimezoneModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
           </div>
         </div>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Security</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
+          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Security</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
           </div>
-          <div class="p-4 sm:p-6 space-y-1">
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <KeyIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
+          <div class="p-3 sm:p-4 space-y-0">
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <KeyIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Password</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
                 </div>
               </div>
-              <button @click="showPasswordModal = true" class="px-4 py-2 text-sm font-medium rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-colors">Change</button>
+              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <ShieldCheckIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <ShieldCheckIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
                 </div>
               </div>
-              <button @click="handle2FAToggle" :class="['px-4 py-2 text-sm font-medium rounded-full transition-colors', securitySettings.twoFactor ? 'bg-red-600 hover:bg-red-700 text-white' : 'ring-1 ring-gray-200/80 dark:ring-gray-600/80 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300']">{{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}</button>
+              <button @click="handle2FAToggle" :class="['px-3 py-1.5 text-xs font-medium rounded-lg transition-colors', securitySettings.twoFactor ? 'bg-red-600 hover:bg-red-700 text-white' : 'ring-1 ring-gray-200/80 dark:ring-gray-600/80 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300']">{{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}</button>
             </div>
-            <div class="flex items-center justify-between py-3">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <DevicePhoneMobileIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+            <div class="flex items-center justify-between py-2.5">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                  <DevicePhoneMobileIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
                 </div>
               </div>
-              <button @click="showSessionsModal = true" class="px-4 py-2 text-sm font-medium rounded-full text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
+              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
             </div>
           </div>
         </div>
 
         <div v-if="storeInfo.storeName || isLoadingProfile" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
+          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
           </div>
-          <div class="p-4 sm:p-6">
+          <div class="p-3 sm:p-4">
             <div v-if="isLoadingProfile" class="space-y-4">
               <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-xl w-3/4 animate-pulse"></div>
               <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-xl w-1/2 animate-pulse"></div>
@@ -226,53 +226,53 @@
             <div v-else-if="storeInfo.storeName" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Branch name</p>
-                  <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Branch name</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
                 </div>
                 <div v-if="storeInfo.storeEmail">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Store email</p>
-                  <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeEmail }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store email</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeEmail }}</p>
                 </div>
                 <div v-if="storeInfo.storePhone">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Store phone</p>
-                  <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storePhone }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store phone</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storePhone }}</p>
                 </div>
                 <div v-if="storeInfo.storeDescription">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Description</p>
-                  <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeDescription }}</p>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeDescription }}</p>
                 </div>
               </div>
               <div v-if="storeInfo.storeAddress">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Address</p>
-                <p class="text-sm text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
               </div>
               <div class="pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-                <NuxtLink to="/dashboard/settings" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings →</NuxtLink>
+                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings →</NuxtLink>
               </div>
             </div>
             <div v-else class="text-center py-8">
-              <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="inline-block px-4 py-2.5 text-sm font-medium rounded-full bg-primary-600 hover:bg-primary-700 text-white transition-colors">Set up store information</NuxtLink>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
+              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Set up store information</NuxtLink>
             </div>
           </div>
         </div>
 
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-4">
+          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
+              <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
             </div>
-            <span class="px-3 py-1.5 text-sm font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+            <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
               {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
-          <div class="p-4 sm:p-6 space-y-4">
-            <div class="p-4 rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-700/40">
-              <p class="text-sm font-medium text-primary-900 dark:text-primary-100 mb-2">
+          <div class="p-3 sm:p-4 space-y-3">
+            <div class="p-3 rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-700/40">
+              <p class="text-xs font-medium text-primary-900 dark:text-primary-100 mb-1.5">
                 {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
-              <p class="text-sm text-primary-700 dark:text-primary-200 leading-relaxed">
+              <p class="text-xs text-primary-700 dark:text-primary-200 leading-relaxed">
                 <template v-if="profileData.role === 'staff'">
                   As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
                 </template>
@@ -285,21 +285,21 @@
               </p>
             </div>
             <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Your permissions</p>
-              <div v-if="userPermissions.length === 0" class="text-sm text-gray-500 dark:text-gray-400 py-2">Loading permissions...</div>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Your permissions</p>
+              <div v-if="userPermissions.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-2">Loading permissions...</div>
               <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60">
-                  <CheckCircleIcon class="w-4 h-4 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  <span class="text-sm text-gray-700 dark:text-gray-100">{{ permission }}</span>
+                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 p-2.5 rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60">
+                  <CheckCircleIcon class="w-3.5 h-3.5 text-green-500 dark:text-green-400 flex-shrink-0" />
+                  <span class="text-xs text-gray-700 dark:text-gray-100">{{ permission }}</span>
                 </div>
               </div>
             </div>
-            <div class="pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200/60 dark:ring-blue-700/40">
-                <InformationCircleIcon class="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div class="pt-3 border-t border-gray-200/80 dark:border-gray-700/80">
+              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200/60 dark:ring-blue-700/40">
+                <InformationCircleIcon class="w-4 h-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">About your role</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-200 leading-relaxed">
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">About your role</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-200 leading-relaxed">
                     <template v-if="profileData.role === 'staff'">
                       You are a staff member with access to your assigned store and department. Contact your Super Admin if you need additional permissions or have questions about your access.
                     </template>
@@ -318,7 +318,7 @@
     <!-- Theme Change Modal -->
     <Modal v-model="showThemeModal" title="Change Theme" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Select your preferred theme</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred theme</p>
         <div class="space-y-2">
           <button
             v-for="themeOption in themeOptions"
@@ -333,8 +333,8 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ themeOption.label }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ themeOption.description }}</p>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ themeOption.label }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ themeOption.description }}</p>
               </div>
               <div v-if="currentThemeValue === themeOption.value" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
@@ -351,7 +351,7 @@
     <!-- Language Selection Modal -->
     <Modal v-model="showLanguageModal" title="Change Language" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Select your preferred language</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Select your preferred language</p>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <button
             v-for="lang in languages"
@@ -366,8 +366,8 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ lang.name }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ lang.nativeName }}</p>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ lang.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ lang.nativeName }}</p>
               </div>
               <div v-if="accountSettings.language === lang.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
@@ -387,8 +387,8 @@
         <div class="space-y-4">
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive notifications via email</p>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Email Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Receive notifications via email</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -402,8 +402,8 @@
           
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Push Notifications</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive push notifications in browser</p>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Push Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Receive push notifications in browser</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -418,8 +418,8 @@
           
           <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">SMS Notifications</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Receive notifications via SMS</p>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">SMS Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Receive notifications via SMS</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -433,8 +433,8 @@
           
           <div class="flex items-center justify-between py-4">
             <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">In-App Notifications</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Show notifications within the app</p>
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100">In-App Notifications</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Show notifications within the app</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -456,39 +456,39 @@
     <!-- Password Change Modal -->
     <Modal v-model="showPasswordModal" title="Change Password" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Enter your current password and choose a new one</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Enter your current password and choose a new one</p>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Current Password
             </label>
             <input
               v-model="passwordForm.currentPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Enter current password"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               New Password
             </label>
             <input
               v-model="passwordForm.newPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Enter new password"
             />
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Confirm New Password
             </label>
             <input
               v-model="passwordForm.confirmPassword"
               type="password"
-              class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Confirm new password"
             />
             <p v-if="passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="text-xs text-red-500 mt-1">
@@ -496,7 +496,7 @@
             </p>
           </div>
           <div v-if="passwordError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p class="text-sm text-red-600 dark:text-red-400">{{ passwordError }}</p>
+            <p class="text-xs text-red-600 dark:text-red-400">{{ passwordError }}</p>
           </div>
         </div>
       </div>
@@ -518,7 +518,7 @@
     <!-- Active Sessions Modal -->
     <Modal v-model="showSessionsModal" title="Active Sessions" size="lg">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Manage devices where you're currently signed in</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Manage devices where you're currently signed in</p>
         <div v-if="isLoadingSessions" class="space-y-3">
           <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md">
             <div class="flex-1 space-y-2">
@@ -529,7 +529,7 @@
           </div>
         </div>
         <div v-else-if="activeSessions.length === 0" class="text-center py-8">
-          <p class="text-sm text-gray-500 dark:text-gray-400">No active sessions found</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">No active sessions found</p>
         </div>
         <div v-else class="space-y-3">
           <div
@@ -541,18 +541,18 @@
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                   <DevicePhoneMobileIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ session.device }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ session.device }}</p>
                   <span v-if="session.current" class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full">
                     Current
                   </span>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ session.location }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ session.location }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Last active: {{ formatDate(session.lastActive) }}</p>
               </div>
               <button
                 v-if="!session.current"
                 @click="revokeSession(index)"
-                class="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 Revoke
               </button>
@@ -569,7 +569,7 @@
     <!-- Region Selection Modal -->
     <Modal v-model="showRegionModal" title="Change Region" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Select your region</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Select your region</p>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <button
             v-for="region in regions"
@@ -584,10 +584,10 @@
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <span class="text-2xl">{{ region.flag }}</span>
+                <span class="text-xl">{{ region.flag }}</span>
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ region.name }}</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ region.code }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ region.name }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ region.code }}</p>
                 </div>
               </div>
               <div v-if="accountSettings.region === region.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
@@ -605,7 +605,7 @@
     <!-- Currency Selection Modal -->
     <Modal v-model="showCurrencyModal" title="Change Currency" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Select your currency</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Select your currency</p>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <button
             v-for="currency in currencies"
@@ -620,8 +620,8 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ currency.name }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ currency.symbol }} {{ currency.code }}</p>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ currency.name }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ currency.symbol }} {{ currency.code }}</p>
               </div>
               <div v-if="accountSettings.currency === currency.code" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
@@ -638,14 +638,14 @@
     <!-- Timezone Selection Modal -->
     <Modal v-model="showTimezoneModal" title="Change Timezone" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">Select your timezone</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">Select your timezone</p>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Timezone
           </label>
           <select
             v-model="selectedTimezone"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
             <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
               {{ tz.label }}
@@ -669,23 +669,23 @@
     <!-- 2FA Disable Modal -->
     <Modal v-model="show2FADisableModal" title="Disable Two-Factor Authentication" size="md">
       <div class="space-y-4">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p class="text-xs text-gray-600 dark:text-gray-400">
           Please enter your password to disable two-factor authentication.
         </p>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Password
           </label>
           <input
             v-model="disable2FAPassword"
             type="password"
-            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="Enter your password"
             @keyup.enter="handleDisable2FA"
           />
         </div>
         <div v-if="disable2FAError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p class="text-sm text-red-600 dark:text-red-400">{{ disable2FAError }}</p>
+          <p class="text-xs text-red-600 dark:text-red-400">{{ disable2FAError }}</p>
         </div>
       </div>
       <template #footer>

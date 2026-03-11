@@ -154,36 +154,36 @@
       ]"
     >
       <!-- Fullscreen Header -->
-      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-6 py-4">
-        <div class="flex items-center justify-between gap-4">
+      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-4 py-3">
+        <div class="flex items-center justify-between gap-3">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }}</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }}</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {{ filteredItems.length }} items · {{ formatCurrency(totalInventoryValue) }} total value
             </p>
           </div>
           <button
             @click="isFullscreen = false"
-            class="p-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Exit fullscreen"
           >
-            <XMarkIcon class="w-5 h-5" />
+            <XMarkIcon class="w-4 h-4" />
           </button>
         </div>
-        <div class="flex items-center gap-2 mt-4">
+        <div class="flex items-center gap-1.5 mt-3">
           <div class="relative flex-1 max-w-xs">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search..."
-              class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             />
           </div>
           <select
             v-model="sortBy"
             @change="handleSortByChange"
-            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[110px]"
+            class="px-2.5 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
           >
             <option value="name">Name</option>
             <option value="price">Price</option>
@@ -193,48 +193,48 @@
           </select>
           <button
             @click="resetFilters"
-            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Reset filters"
           >
-            <ArrowPathIcon class="w-5 h-5" />
+            <ArrowPathIcon class="w-4 h-4" />
           </button>
         </div>
       </div>
 
       <div
         :class="[
-          isFullscreen ? 'shadow-none' : 'rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden',
+          isFullscreen ? 'shadow-none' : 'rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden',
           !isFullscreen && 'border border-gray-200/50 dark:border-gray-700/50'
         ]"
       >
         <!-- Desktop toolbar (stats + filters) -->
-        <div v-if="!isFullscreen" class="hidden lg:flex items-center justify-between gap-4 px-4 sm:px-6 py-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex items-center gap-6">
-            <div class="flex items-center gap-2">
-              <CubeIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">Items:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
+        <div v-if="!isFullscreen" class="hidden lg:flex items-center justify-between gap-3 px-3 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5">
+              <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
             </div>
-            <div class="flex items-center gap-2">
-              <CurrencyDollarIcon class="w-5 h-5 text-green-600 dark:text-green-400" stroke-width="1.75" />
-              <span class="text-sm text-gray-600 dark:text-gray-400">Value:</span>
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
+            <div class="flex items-center gap-1.5">
+              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
+              <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
+              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5">
             <div class="relative">
-              <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+              <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
               <input
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search..."
-                class="pl-9 pr-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-44"
+                class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-40"
               />
             </div>
             <select
               v-model="sortBy"
               @change="handleSortByChange"
-              class="px-3 py-2 text-sm rounded-xl bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[110px]"
+              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
             >
               <option value="name">Name</option>
               <option value="price">Price</option>
@@ -244,17 +244,17 @@
             </select>
             <button
               @click="resetFilters"
-              class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
               title="Reset filters"
             >
-              <ArrowPathIcon class="w-5 h-5" />
+              <ArrowPathIcon class="w-4 h-4" />
             </button>
             <button
               @click="isFullscreen = !isFullscreen"
-              class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
               :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
             >
-              <ArrowsPointingOutIcon class="w-5 h-5" />
+              <ArrowsPointingOutIcon class="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -266,7 +266,7 @@
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-4 sm:px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
@@ -286,7 +286,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -297,7 +297,7 @@
                   wrapper-class="justify-center"
                 />
               </th>
-              <th v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">
                 Action
               </th>
               </tr>
@@ -311,7 +311,7 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-4 sm:px-5 py-3.5 align-top"
+                class="px-3 sm:px-4 py-2 align-top"
               >
                 <!-- Inline edit mode (large screens only) -->
                 <div
@@ -323,7 +323,7 @@
                     v-model="inlineEditValue"
                     type="text"
                     :inputmode="(column.type === 'currency' || column.type === 'number' || column.key.toLowerCase().includes('price')) ? 'decimal' : 'text'"
-                    class="w-full min-w-0 px-2 py-1.5 text-[11px] border border-primary-500 dark:border-primary-400 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    class="w-full min-w-0 px-2 py-1 text-[10px] border border-primary-500 dark:border-primary-400 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                     @blur="saveInlineEdit"
                     @keydown.enter="saveInlineEdit"
                     @keydown.esc="cancelInlineEdit"
@@ -334,19 +334,19 @@
                 <div
                   v-else
                   :class="[
-                    'flex items-center gap-2 min-h-[28px]',
+                    'flex items-center gap-1.5 min-h-[22px]',
                     isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors'
                   ]"
                   @click="startInlineEdit(item, column)"
                 >
                   <template v-if="colIndex === 0">
-                    <span class="text-[11px] font-medium text-gray-900 dark:text-gray-100">
+                    <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">
                       {{ getItemDisplayValue(item[column.key]) }}
                     </span>
                   </template>
                   <template v-else>
                     <!-- Check if column is a price field (by key or type) -->
-                    <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[11px]">
+                    <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[10px]">
                       <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
                         <span class="font-semibold text-green-600 dark:text-green-400">
                           {{ formatCurrency(item.discountedPrice) }}
@@ -362,10 +362,10 @@
                         {{ formatCurrency(item[column.key] || 0) }}
                       </span>
                     </div>
-                    <div v-else-if="'type' in column && column.type === 'number'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="'type' in column && column.type === 'number'" class="text-[10px] text-gray-600 dark:text-gray-300">
                       {{ formatNumber(item[column.key]) }}
                     </div>
-                    <div v-else-if="'type' in column && column.type === 'date'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="'type' in column && column.type === 'date'" class="text-[10px] text-gray-600 dark:text-gray-300">
                       <span v-if="item[column.key]">
                         {{ formatItemDate(item[column.key]) }}
                       </span>
@@ -373,7 +373,7 @@
                         -
                       </span>
                     </div>
-                    <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[11px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[10px] text-gray-600 dark:text-gray-300">
                       <span v-if="item[column.key]">
                         {{ formatItemDate(item[column.key]) }}
                       </span>
@@ -381,8 +381,8 @@
                         -
                       </span>
                     </div>
-                    <div v-else-if="column.key === 'availability'" class="text-[11px]">
-                      <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium"
+                    <div v-else-if="column.key === 'availability'" class="text-[10px]">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium"
                         :class="getItemAvailability(item).class">
                         {{ getItemAvailability(item).label }}
                       </span>
@@ -391,7 +391,7 @@
                       :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                       {{ item[column.key] ? 'Yes' : 'No' }}
                     </div>
-                    <div v-else class="text-[11px] text-gray-600 dark:text-gray-300">
+                    <div v-else class="text-[10px] text-gray-600 dark:text-gray-300">
                       <span 
                         v-if="getItemDisplayValue(item[column.key]) && typeof getItemDisplayValue(item[column.key]) === 'string' && getItemDisplayValue(item[column.key]).length > 30"
                         class="block truncate max-w-xs"
@@ -406,7 +406,7 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5 text-center">
+              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -416,37 +416,37 @@
                   :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
                 />
               </td>
-              <td v-if="canManageInventoryItems" class="px-4 sm:px-5 py-3.5">
+              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2">
                 <!-- Desktop: Show all action buttons -->
-                <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
+                <div class="hidden sm:flex items-center justify-end gap-1.5 flex-shrink-0" @click.stop>
                   <button
                     @click="handleViewTimeline(item)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
+                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
                     title="View item history"
                   >
-                    <ClockIcon class="w-4 h-4 flex-shrink-0" />
+                    <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleEditItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
+                      'p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                   >
-                    <PencilSquareIcon class="w-4 h-4 flex-shrink-0" />
+                    <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0',
+                      'p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
                   >
-                    <TrashIcon class="w-4 h-4 flex-shrink-0" />
+                    <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                 </div>
                 <!-- Mobile: Show 3-dot menu -->
@@ -455,7 +455,7 @@
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
+                      'p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     title="Actions"
@@ -533,7 +533,7 @@
     >
       <div class="px-4 sm:px-6 py-4">
         <div v-if="showLoadMore" class="flex justify-center">
-          <Button variant="primary" @click="loadMoreItems" class="rounded-full text-sm">
+          <Button variant="outline" size="sm" @click="loadMoreItems" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
             Load more ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
           </Button>
         </div>
@@ -553,7 +553,7 @@
     <!-- Fullscreen mode: bottom bar -->
     <div v-if="isFullscreen && sortedFilteredItems.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
       <div v-if="showLoadMore" class="flex justify-center">
-        <Button variant="primary" @click="loadMoreItems" class="rounded-full text-sm">
+        <Button variant="outline" size="sm" @click="loadMoreItems" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
           Load more ({{ displayedItemsCount }} of {{ sortedFilteredItems.length }})
         </Button>
       </div>
