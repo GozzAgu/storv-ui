@@ -105,6 +105,11 @@
         <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(20,63,141,0.35),transparent_55%)]"></div>
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(16,185,129,0.22),transparent_55%)]"></div>
+        <!-- Fluid motion accent -->
+        <div class="absolute inset-0">
+          <FluidOrbit class="absolute right-[-10%] top-[-6%] h-[520px] w-[520px] opacity-50 mix-blend-screen" />
+          <div class="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-transparent to-slate-950/50"></div>
+        </div>
         <!-- Clean dot grid pattern -->
         <div
           class="absolute inset-0"
