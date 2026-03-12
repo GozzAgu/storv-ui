@@ -467,7 +467,7 @@ const getEntityTypeBadgeColor = (type: SearchEntityType) => {
 const getEntityTypeLabel = (type: SearchEntityType) => {
   const labels: Record<string, string> = {
     receipts: 'Receipt',
-    inventory: 'Item',
+    inventory: 'Product',
     customers: 'Customer',
     departments: 'Department',
     staff: 'Staff',

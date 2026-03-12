@@ -93,7 +93,7 @@
               <ShoppingBagIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your cart is empty</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Scan or search to add items</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Scan or search to add products</p>
           </div>
           <div v-else class="space-y-2 max-h-64 overflow-y-auto">
             <div
@@ -363,7 +363,7 @@ const searchByBarcode = async () => {
     })
     
     if (!foundItem) {
-      showWarningToast('Item not found')
+      showWarningToast('Product not found')
       manualBarcode.value = ''
       return
     }
@@ -375,7 +375,7 @@ const searchByBarcode = async () => {
     } else {
       // Check if item is sold
       if (foundItem.dateOut) {
-        showErrorToast('This item has already been sold')
+        showErrorToast('This product has already been sold')
         manualBarcode.value = ''
         return
       }
@@ -385,9 +385,10 @@ const searchByBarcode = async () => {
       const price = parseFloat((foundItem as any)[priceField] || '0')
       const itemName = Object.keys(foundItem).find(key => 
         key.toLowerCase().includes('name') || 
-        key.toLowerCase().includes('item')
+        key.toLowerCase().includes('item') ||
+        key.toLowerCase().includes('product')
       )
-      const name = itemName ? (foundItem as any)[itemName] : `Item ${foundItem.id.slice(0, 8)}`
+      const name = itemName ? (foundItem as any)[itemName] : `Product ${foundItem.id.slice(0, 8)}`
       
       cartItems.value.push({
         id: foundItem.id,
@@ -399,9 +400,9 @@ const searchByBarcode = async () => {
     }
     
     manualBarcode.value = ''
-    showSuccessToast('Item added to cart')
+    showSuccessToast('Product added to cart')
   } catch (error: any) {
-    showErrorToast('Error searching for item')
+    showErrorToast('Error searching for product')
   } finally {
     isSearching.value = false
   }

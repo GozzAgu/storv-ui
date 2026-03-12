@@ -1130,14 +1130,14 @@ const userPermissions = computed(() => {
     permissions.push('Create and process sales')
   } else {
     // Staff permissions (all staff can view and create)
-    permissions.push('View inventory items')
+    permissions.push('View inventory products')
     permissions.push('View receipts')
     permissions.push('View customer information')
     permissions.push('Create and process sales')
     
     // Manager-specific permissions
     if (isManager.value) {
-      permissions.push('Manage inventory items')
+      permissions.push('Manage inventory products')
       permissions.push('Edit receipts')
       permissions.push('Delete receipts')
       permissions.push('Create inventory folders')

@@ -10,8 +10,8 @@
           <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
         </div>
         <div class="min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">Delete Item</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ itemName || 'This item' }}</p>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">Delete Product</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ itemName || 'This product' }}</p>
         </div>
       </div>
     </template>
@@ -23,7 +23,7 @@
           <ExclamationTriangleIcon class="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
             <p class="text-xs font-medium text-red-800 dark:text-red-200">Confirm deletion</p>
-            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The item will be permanently removed from inventory.</p>
+            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The product will be permanently removed from inventory.</p>
           </div>
         </div>
       </div>
@@ -32,9 +32,9 @@
       <div v-if="item" class="space-y-2">
         <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Item information</h4>
         <div class="bg-gray-50/80 dark:bg-gray-700/40 rounded-lg p-2.5 space-y-1.5">
-          <div v-if="item.brand && item.model" class="flex justify-between text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Brand & Model</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">{{ item.brand }} {{ item.model }}</span>
+          <div v-if="item.brand || item.model" class="flex justify-between text-xs">
+            <span class="text-gray-500 dark:text-gray-400">Product model</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ item.brand || '' }}{{ item.brand && item.model ? ' ' : '' }}{{ item.model || '' }}</span>
           </div>
           <div v-if="item.serialNo || item.serialNumber" class="flex justify-between text-xs">
             <span class="text-gray-500 dark:text-gray-400">Serial Number</span>
@@ -55,7 +55,7 @@
       <div class="p-2.5 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-xl">
         <h4 class="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">What will happen</h4>
         <ul class="space-y-0.5 text-xs text-amber-800 dark:text-amber-200 list-disc list-inside">
-          <li>Item permanently deleted from inventory</li>
+          <li>Product permanently deleted from inventory</li>
           <li>All associated data removed</li>
           <li>This action cannot be undone</li>
         </ul>
@@ -65,7 +65,7 @@
       <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
         <Checkbox
           v-model="confirmed"
-          label="I understand that this action cannot be undone and will permanently delete this item."
+          label="I understand that this action cannot be undone and will permanently delete this product."
           size="sm"
           wrapper-class="items-start"
           label-class="text-xs text-gray-700 dark:text-gray-300"
@@ -83,7 +83,7 @@
         :icon="TrashIcon"
         class="w-full sm:w-auto !rounded-lg"
       >
-        {{ isProcessing ? 'Deleting...' : 'Delete Item' }}
+        {{ isProcessing ? 'Deleting...' : 'Delete Product' }}
       </Button>
     </template>
   </Modal>

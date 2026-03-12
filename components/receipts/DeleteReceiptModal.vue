@@ -68,7 +68,7 @@
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600 dark:text-gray-400">Items Count:</span>
-              <span class="font-medium text-gray-900 dark:text-gray-100">{{ receipt.itemsCount }} item{{ receipt.itemsCount !== 1 ? 's' : '' }}</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100">{{ receipt.itemsCount }} product{{ receipt.itemsCount !== 1 ? 's' : '' }}</span>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="sticky top-0">
                   <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Item</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Product</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Quantity</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Price</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>

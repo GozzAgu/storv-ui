@@ -9,7 +9,7 @@
       <div class="space-y-4">
         <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p class="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Bulk Discount:</strong> This discount will be applied to <strong>{{ selectedItems.length }}</strong> selected item{{ selectedItems.length !== 1 ? 's' : '' }}.
+            <strong>Bulk Discount:</strong> This discount will be applied to <strong>{{ selectedItems.length }}</strong> selected product{{ selectedItems.length !== 1 ? 's' : '' }}.
           </p>
         </div>
 
@@ -75,16 +75,16 @@
             />
           </div>
           <p v-if="discountType === 'percentage'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Enter a value between 0 and 100. This percentage will be applied to each item's price.
+            Enter a value between 0 and 100. This percentage will be applied to each product's price.
           </p>
           <p v-else class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Enter a fixed amount. This amount will be deducted from each item's price.
+            Enter a fixed amount. This amount will be deducted from each product's price.
           </p>
         </div>
 
         <!-- Preview Sample -->
         <div v-if="discountValue && discountValue > 0 && previewItems.length > 0" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview (showing first {{ Math.min(3, previewItems.length) }} items):</p>
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview (showing first {{ Math.min(3, previewItems.length) }} products):</p>
           <div class="space-y-2 max-h-64 overflow-y-auto">
             <div
               v-for="(item, index) in previewItems.slice(0, 3)"
@@ -114,7 +114,7 @@
               </div>
             </div>
             <p v-if="selectedItems.length > 3" class="text-xs text-gray-500 dark:text-gray-400 text-center pt-2">
-              ... and {{ selectedItems.length - 3 }} more item{{ selectedItems.length - 3 !== 1 ? 's' : '' }}
+              ... and {{ selectedItems.length - 3 }} more product{{ selectedItems.length - 3 !== 1 ? 's' : '' }}
             </p>
           </div>
         </div>
@@ -138,7 +138,7 @@
         class="w-full sm:w-auto"
       >
         <span v-if="isApplying">Applying...</span>
-        <span v-else>Apply to {{ selectedItems.length }} Item{{ selectedItems.length !== 1 ? 's' : '' }}</span>
+        <span v-else>Apply to {{ selectedItems.length }} Product{{ selectedItems.length !== 1 ? 's' : '' }}</span>
       </Button>
     </template>
   </Modal>
@@ -171,11 +171,11 @@ const discountValue = ref<number>(0)
 const isApplying = ref(false)
 
 const getItemName = (item: InventoryItem): string => {
-  const nameFields = ['name', 'Name', 'item', 'Item', 'title', 'Title']
+  const nameFields = ['name', 'Name', 'product', 'Product', 'title', 'Title']
   for (const field of nameFields) {
     if (item[field]) return String(item[field])
   }
-  return `Item ${item.id.slice(0, 8)}`
+  return `Product ${item.id.slice(0, 8)}`
 }
 
 const getItemPrice = (item: InventoryItem): number => {
@@ -225,7 +225,7 @@ const handleApplyBulkDiscount = async () => {
       discountType.value,
       discountValue.value
     )
-    toast.success(`Discount applied successfully to ${count} item${count !== 1 ? 's' : ''}!`)
+    toast.success(`Discount applied successfully to ${count} product${count !== 1 ? 's' : ''}!`)
     emit('discount-applied')
     handleCancel()
   } catch (error: any) {

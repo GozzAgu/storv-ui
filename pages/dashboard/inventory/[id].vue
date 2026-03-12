@@ -157,9 +157,9 @@
       <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-4 py-3">
         <div class="flex items-center justify-between gap-3">
           <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Items' }}</h2>
+            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Products' }}</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {{ filteredItems.length }} items · {{ formatCurrency(totalInventoryValue) }} total value
+              {{ filteredItems.length }} products · {{ formatCurrency(totalInventoryValue) }} total value
             </p>
           </div>
           <button
@@ -413,7 +413,7 @@
                   :disabled="isItemSold(item)"
                   size="sm"
                   wrapper-class="justify-center"
-                  :title="isItemSold(item) ? 'Cannot select sold items for bulk operations' : ''"
+                  :title="isItemSold(item) ? 'Cannot select sold products for bulk operations' : ''"
                 />
               </td>
               <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2">
@@ -422,7 +422,7 @@
                   <button
                     @click="handleViewTimeline(item)"
                     class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
-                    title="View item history"
+                    title="View product history"
                   >
                     <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
@@ -470,7 +470,7 @@
                     <button
                       @click="handleViewTimeline(item); openItemMenuId = null"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="View item history"
+                      title="View product history"
                     >
                       <ClockIcon class="w-5 h-5" />
                     </button>
@@ -502,10 +502,10 @@
                     <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
                   </div>
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-                    {{ searchQuery ? 'No items found' : 'No items in this folder' }}
+                    {{ searchQuery ? 'No products found' : 'No products in this folder' }}
                   </h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
-                    {{ searchQuery ? 'Try adjusting your search or filters' : 'Add items to start tracking inventory' }}
+                    {{ searchQuery ? 'Try adjusting your search or filters' : 'Add products to start tracking inventory' }}
                   </p>
                   <Button
                     v-if="!searchQuery && canManageInventoryItems"
@@ -545,7 +545,7 @@
           @page-change="handlePageChange"
         />
         <div v-else class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          Showing all {{ sortedFilteredItems.length }} items
+          Showing all {{ sortedFilteredItems.length }} products
         </div>
       </div>
     </div>
@@ -565,7 +565,7 @@
         @page-change="handlePageChange"
       />
       <div v-else class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-        Showing all {{ sortedFilteredItems.length }} items
+        Showing all {{ sortedFilteredItems.length }} products
       </div>
     </div>
 
@@ -617,8 +617,8 @@
     <!-- Enhanced Add/Edit Item Modal -->
     <Modal
       v-model="showAddItemModal"
-      :title="editingItem ? 'Edit Item' : (folder?.hasSerialNumbers && !editingItem ? 'Add Items with Serial Numbers' : 'Add New Item')"
-      :subtitle="folder?.hasSerialNumbers && !editingItem ? 'Enter shared details, then add serial numbers' : (editingItem ? 'Update item details' : 'Add a new item to this folder')"
+      :title="editingItem ? 'Edit Product' : (folder?.hasSerialNumbers && !editingItem ? 'Add Products with Serial Numbers' : 'Add New Product')"
+      :subtitle="folder?.hasSerialNumbers && !editingItem ? 'Enter shared details, then add serial numbers' : (editingItem ? 'Update product details' : 'Add a new product to this folder')"
       size="lg"
     >
       <form @submit.prevent="handleSaveItem" class="space-y-3">
@@ -626,38 +626,26 @@
         <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-3">
           <div class="p-2.5 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-xl">
             <p class="text-xs text-blue-800 dark:text-blue-200">
-              <strong>Bulk Add Mode:</strong> Enter the item details once, then add multiple serial numbers below. Each serial number will create a separate item with the same details.
+              <strong>Bulk Add Mode:</strong> Enter the product details once, then add multiple serial numbers below. Each serial number will create a separate product with the same details.
             </p>
           </div>
 
           <!-- Common Fields (all items share these) -->
           <div class="space-y-3">
-            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Item Details (Shared)</h4>
+            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Product Details (Shared)</h4>
             
-            <!-- Brand and Model Fields (default when serial numbers enabled) -->
+            <!-- Product model (formerly Brand) when serial numbers enabled -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Brand *
+                  Product model *
                 </label>
                 <input
                   v-model="itemForm.brand"
                   type="text"
                   required
                   class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  placeholder="Enter brand name"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Model *
-                </label>
-                <input
-                  v-model="itemForm.model"
-                  type="text"
-                  required
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  placeholder="Enter model name"
+                  placeholder="Enter product model"
                 />
               </div>
             </div>
@@ -803,7 +791,7 @@
       <template #footer>
         <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
         <Button variant="primary" size="sm" type="submit" @click="handleSaveItem" class="w-full sm:w-auto !rounded-lg">
-          {{ editingItem ? 'Update Item' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Item${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Item') }}
+          {{ editingItem ? 'Update Product' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Product') }}
         </Button>
       </template>
     </Modal>
@@ -1147,23 +1135,25 @@ const saveInlineEdit = async () => {
 
 // Folder will be loaded from Firestore via inventoryStore
 
-// Generate columns based on folder template
+// Generate columns based on folder template (exclude Model column; show Brand as Product model)
 const columns = computed(() => {
   const templateColumns: Array<{ key: string; label: string; sortable: boolean; type?: string }> = []
   
   if (folder.value?.template?.fields && folder.value.template.fields.length > 0) {
-    // Generate columns from template fields
-    templateColumns.push(...folder.value.template.fields.map(field => ({
-      key: field.name,
-      label: field.label || field.name,
-      sortable: true,
-      // Ensure price fields always have currency type
-      type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
-    })))
+    // Generate columns from template fields; exclude 'model'; show 'brand' as 'Product model'
+    const mapped = folder.value.template.fields
+      .filter(field => field.name !== 'model')
+      .map(field => ({
+        key: field.name,
+        label: field.name === 'brand' ? 'Product model' : (field.label || field.name),
+        sortable: true,
+        type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
+      }))
+    templateColumns.push(...mapped)
   } else {
     // Fallback to default columns if no template
     templateColumns.push(
-      { key: 'name', label: 'Item', sortable: true },
+      { key: 'name', label: 'Product', sortable: true },
       { key: 'sku', label: 'SKU', sortable: true },
       { key: 'price', label: 'Price', sortable: true, type: 'currency' }
     )
@@ -1623,7 +1613,7 @@ const getItemDisplayName = (item: InventoryItem) => {
   if (item.brand && item.model) {
     return `${item.brand} ${item.model}`
   }
-  return 'this item'
+  return 'this product'
 }
 
 const handleDeleteItem = (item: InventoryItem) => {
@@ -1680,14 +1670,10 @@ const handleSaveItem = async () => {
   // Validate brand and model when serial numbers are enabled
   if (folder.value?.hasSerialNumbers && !editingItem.value) {
     if (!itemForm.brand || itemForm.brand.toString().trim() === '') {
-      toast.warning('Please enter a brand name')
+      toast.warning('Please enter a product model')
       return
     }
-    if (!itemForm.model || itemForm.model.toString().trim() === '') {
-      toast.warning('Please enter a model name')
-      return
     }
-  }
   
   // Validate required fields based on template
   if (folder.value?.template?.fields) {
@@ -1705,7 +1691,7 @@ const handleSaveItem = async () => {
       // Update existing item
       // Close modal immediately for better UX
       handleCancelItem()
-      toast.success('Updating item...')
+      toast.success('Updating product...')
       
       // CRITICAL: Wait for item update to complete (ensures data is saved to Firestore)
       await inventoryStore.updateItem(folderId.value, editingItem.value.id, itemForm)
@@ -1717,7 +1703,7 @@ const handleSaveItem = async () => {
         // Item is already updated in local state, so this is just a sync issue
       })
       
-      toast.success('Item updated successfully!')
+      toast.success('Product updated successfully!')
     } else {
         // Check if we're in bulk add mode (hasSerialNumbers and serialNumbers array has items)
         if (folder.value?.hasSerialNumbers && serialNumbers.value.length > 0) {
@@ -1764,7 +1750,7 @@ const handleSaveItem = async () => {
             // Item is already created and in local state, so this is just a sync issue
           })
 
-          toast.success(`Successfully created ${validSerialNumbers.length} item${validSerialNumbers.length !== 1 ? 's' : ''}`)
+          toast.success(`Successfully created ${validSerialNumbers.length} product${validSerialNumbers.length !== 1 ? 's' : ''}`)
         } else {
           // Create single item (normal mode)
           // Close modal immediately for better UX
@@ -1785,11 +1771,11 @@ const handleSaveItem = async () => {
             // Item is already created and in local state, so this is just a sync issue
           })
 
-          toast.success('Item created successfully!')
+          toast.success('Product created successfully!')
         }
       }
   } catch (error: any) {
-    toast.error(error.message || 'Failed to save item')
+    toast.error(error.message || 'Failed to save product')
   }
 }
 
@@ -1804,7 +1790,7 @@ const handleCancelItem = () => {
 const handleApplyDiscount = (item: InventoryItem) => {
   // Prevent applying discount to sold items
   if (isItemSold(item)) {
-    toast.error('Cannot apply discount to sold items')
+    toast.error('Cannot apply discount to sold products')
     return
   }
   selectedItemForDiscount.value = item
@@ -1814,10 +1800,10 @@ const handleApplyDiscount = (item: InventoryItem) => {
 const handleRemoveDiscount = async (item: InventoryItem) => {
   // Prevent removing discount from sold items
   if (isItemSold(item)) {
-    toast.error('Cannot modify discount on sold items')
+    toast.error('Cannot modify discount on sold products')
     return
   }
-  if (confirm(`Remove discount from this item?`)) {
+  if (confirm(`Remove discount from this product?`)) {
     try {
       await inventoryStore.removeDiscount(folderId.value, item.id)
       // Reload items to refresh the display
@@ -1961,7 +1947,7 @@ const handleExportToExcel = async () => {
     ws['!cols'] = colWidths
 
     // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventory Items')
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventory Products')
 
     // Generate filename
     const folderName = folder.value.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()
@@ -1970,10 +1956,10 @@ const handleExportToExcel = async () => {
     // Write and download file
     XLSX.writeFile(wb, filename)
     
-    toast.success(`Successfully exported ${folderItems.length} item(s) to ${filename}`)
+    toast.success(`Successfully exported ${folderItems.length} product(s) to ${filename}`)
   } catch (error: any) {
     console.error('Export error:', error)
-    toast.error(`Failed to export items: ${error.message || 'Unknown error'}`)
+    toast.error(`Failed to export products: ${error.message || 'Unknown error'}`)
   } finally {
     isExporting.value = false
   }
@@ -1989,7 +1975,7 @@ const handleFileImport = async (event: Event) => {
   }
 
   if (!folder.value || !folder.value.template) {
-    toast.error('Folder template not found. Cannot import items.')
+    toast.error('Folder template not found. Cannot import products.')
     if (fileInputRef.value) {
       fileInputRef.value.value = ''
     }
@@ -2403,7 +2389,7 @@ const handleFileImport = async (event: Event) => {
         successCount++
       } catch (error: any) {
         console.error('Error importing item:', error)
-        errors.push(`Row ${itemEntry.rowNumber}: Failed to create item - ${error.message || 'Unknown error'}`)
+        errors.push(`Row ${itemEntry.rowNumber}: Failed to create product - ${error.message || 'Unknown error'}`)
         failCount++
       }
     }

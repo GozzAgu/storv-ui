@@ -262,7 +262,7 @@
               </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Custom folders and templates; bulk import from Excel or add items individually.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Custom folders and templates; bulk import from Excel or add products individually.</p>
               </div>
             </div>
             <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">

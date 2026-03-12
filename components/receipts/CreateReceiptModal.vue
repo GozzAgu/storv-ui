@@ -147,7 +147,7 @@
                 <input
                   v-model="itemSearchQuery"
                   type="text"
-                  :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by item name or serial number...' : 'Search by item name...'"
+                  :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by product name or serial number...' : 'Search by product name...'"
                   class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
                 />
               </div>
@@ -452,7 +452,7 @@
               size="sm"
             />
 
-            <div v-if="isSwapIn" class="space-y-3 mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+            <div v-if="isSwapIn" class="space-y-4 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
               <div>
                 <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Select Folder for Swapped-In Device *
@@ -464,8 +464,8 @@
                   v-else-if="folders.length === 0"
                   class="text-center py-4 px-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
                 >
-                  <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                    <FolderIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                  <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <FolderIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400">No inventory folders found</p>
                 </div>
@@ -473,7 +473,7 @@
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                 >
                   <option value="">Select folder for swapped-in device</option>
                   <option
@@ -486,19 +486,17 @@
                 </select>
               </div>
 
-              <!-- Swap-In Device Form Fields -->
-              <div v-if="swapInFolderId && swapInFolder">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Swapped-In Device Details
-                </label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <!-- Swapped-In Device Details (aligned with inventory product form) -->
+              <div v-if="swapInFolderId && swapInFolder" class="space-y-3">
+                <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Swapped-In Device Details</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div
-                    v-for="field in swapInFolder.template?.fields || []"
+                    v-for="field in swapInDisplayFields"
                     :key="field.id || field.name"
-                    :class="field.type === 'boolean' ? 'md:col-span-2' : ''"
+                    :class="field.type === 'boolean' || field.type === 'date' ? 'sm:col-span-2' : ''"
                   >
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      {{ field.label || field.name }}
+                      {{ swapInFieldLabel(field) }}
                       <span v-if="field.required" class="text-red-500">*</span>
                     </label>
                     <!-- Text Input -->
@@ -507,35 +505,47 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="text"
-                      :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                      :placeholder="swapInFieldPlaceholder(field)"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                     />
-                    <!-- Number/Currency Input -->
+                    <!-- Number Input -->
                     <input
-                      v-else-if="field.type === 'number' || field.type === 'currency'"
+                      v-else-if="field.type === 'number'"
                       v-model.number="swapInItemForm[field.name]"
                       :required="field.required"
                       type="number"
-                      step="any"
-                      :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                      :placeholder="swapInFieldPlaceholder(field)"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                     />
+                    <!-- Currency Input -->
+                    <div v-else-if="field.type === 'currency'" class="relative">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
+                      <input
+                        v-model.number="swapInItemForm[field.name]"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        :required="field.required"
+                        class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                        placeholder="0.00"
+                      />
+                    </div>
                     <!-- Date Input -->
                     <input
                       v-else-if="field.type === 'date'"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                     >
-                      <option value="">Select {{ field.label || field.name }}</option>
+                      <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
                         {{ option }}
                       </option>
@@ -544,20 +554,20 @@
                     <Checkbox
                       v-else-if="field.type === 'boolean'"
                       v-model="swapInItemForm[field.name]"
-                      :label="field.label || field.name"
+                      :label="swapInFieldLabel(field)"
                       size="sm"
                     />
                   </div>
                 </div>
-                <p v-if="!swapInFolder.template?.fields || swapInFolder.template.fields.length === 0" class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                <p v-if="swapInDisplayFields.length === 0" class="text-xs text-gray-500 dark:text-gray-400">
                   No template fields defined for this folder.
                 </p>
               </div>
             </div>
           </div>
-          <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+          <div class="p-3 rounded-lg border border-gray-200 dark:border-gray-700">
             <div class="flex justify-between items-center mb-1.5">
-              <span class="text-xs text-gray-600 dark:text-gray-400">Items</span>
+              <span class="text-xs text-gray-600 dark:text-gray-400">Products</span>
               <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ totalSelectedQuantity }}</span>
             </div>
             <div class="flex justify-between items-center mb-1.5">
@@ -816,6 +826,36 @@ const swapInFolder = computed(() => {
   return inventoryStore.folders.find(f => f.id === swapInFolderId.value) || null
 })
 
+// Swap-in form: show only fields that appear as table columns in this folder's inventory table
+// (same logic as inventory [id].vue: template fields excluding model, or default columns name/sku/price)
+const defaultTableColumnFields: Array<{ id?: string; name: string; label: string; type: string; required: boolean; options?: string[] }> = [
+  { name: 'name', label: 'Product', type: 'text', required: true },
+  { name: 'sku', label: 'SKU', type: 'text', required: false },
+  { name: 'price', label: 'Price', type: 'currency', required: true },
+]
+
+const swapInDisplayFields = computed(() => {
+  const folder = swapInFolder.value
+  const templateFields = folder?.template?.fields
+  if (templateFields && templateFields.length > 0) {
+    return templateFields.filter((f: { name: string }) => f.name !== 'model')
+  }
+  return defaultTableColumnFields
+})
+
+function swapInFieldLabel(field: { name: string; label?: string }) {
+  if (field.name === 'brand') return 'Product model'
+  if (field.name === 'name') return 'Product'
+  return field.label || field.name
+}
+
+function swapInFieldPlaceholder(field: { name: string; label?: string; placeholder?: string; type?: string }) {
+  if (field.name === 'brand') return 'Enter product model'
+  if (field.name === 'name') return 'Enter product'
+  if (field.type === 'currency') return '0.00'
+  return field.placeholder || `Enter ${swapInFieldLabel(field)}`
+}
+
 const canProceed = computed(() => {
   if (currentStep.value === 0) {
     return selectedFolder.value !== null
@@ -839,16 +879,15 @@ const isFormValid = computed(() => {
     if (!receiptForm.value.paymentMethod) return false
   }
   
-  // If swap-in is enabled, validate swap-in fields
+  // If swap-in is enabled, validate swap-in fields (only those we display, aligned with inventory)
   if (isSwapIn.value) {
     if (!swapInFolderId.value) return false
     if (!swapInFolder.value) return false
-    
-    // Check required fields
-    const requiredFields = swapInFolder.value.template?.fields?.filter(f => f.required) || []
+    const displayFields = swapInDisplayFields.value
+    const requiredFields = displayFields.filter((f: { required?: boolean }) => f.required)
     for (const field of requiredFields) {
       const value = swapInItemForm.value[field.name]
-      if (!value || (typeof value === 'string' && value.trim() === '')) {
+      if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
         return false
       }
     }
@@ -870,25 +909,26 @@ watch(() => props.modelValue, async (isOpen) => {
   }
 })
 
-// Watch for swap-in folder selection to initialize form
+// Watch for swap-in folder selection to initialize form (same fields as table columns)
 watch(() => swapInFolderId.value, (folderId) => {
-  if (folderId && swapInFolder.value?.template?.fields) {
-    // Initialize form with empty values for all template fields
+  if (!folderId) {
     swapInItemForm.value = {}
-    swapInFolder.value.template.fields.forEach(field => {
-      if (field.type === 'number' || field.type === 'currency') {
-        swapInItemForm.value[field.name] = 0
-      } else if (field.type === 'boolean') {
-        swapInItemForm.value[field.name] = false
-      } else if (field.type === 'date') {
-        swapInItemForm.value[field.name] = new Date().toISOString().split('T')[0]
-      } else {
-        swapInItemForm.value[field.name] = ''
-      }
-    })
-  } else {
-    swapInItemForm.value = {}
+    return
   }
+  const folder = swapInFolder.value
+  const fields = swapInDisplayFields.value
+  swapInItemForm.value = {}
+  fields.forEach((field: { name: string; type?: string }) => {
+    if (field.type === 'number' || field.type === 'currency') {
+      swapInItemForm.value[field.name] = 0
+    } else if (field.type === 'boolean') {
+      swapInItemForm.value[field.name] = false
+    } else if (field.type === 'date') {
+      swapInItemForm.value[field.name] = new Date().toISOString().split('T')[0]
+    } else {
+      swapInItemForm.value[field.name] = ''
+    }
+  })
 })
 
 // Watch for swap-in toggle to reset form when disabled

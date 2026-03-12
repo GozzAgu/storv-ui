@@ -9,7 +9,7 @@
       <div class="space-y-4">
         <div v-if="item">
           <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item:</p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product:</p>
             <p class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ getItemName(item) }}</p>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Current Price: <span class="font-medium">${{ formatCurrency(getOriginalPrice(item)) }}</span>
@@ -153,11 +153,11 @@ const discountValue = ref<number>(0)
 const isApplying = ref(false)
 
 const getItemName = (item: InventoryItem): string => {
-  const nameFields = ['name', 'Name', 'item', 'Item', 'title', 'Title']
+  const nameFields = ['name', 'Name', 'product', 'Product', 'title', 'Title']
   for (const field of nameFields) {
     if (item[field]) return String(item[field])
   }
-  return `Item ${item.id.slice(0, 8)}`
+  return `Product ${item.id.slice(0, 8)}`
 }
 
 const getOriginalPrice = (item: InventoryItem): number => {

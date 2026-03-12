@@ -467,7 +467,7 @@
                       {{ item.itemName }}<span v-if="item.quantity > 1" class="text-gray-500 dark:text-gray-400"> × {{ item.quantity }}</span>
                     </div>
                     <div v-if="receipt.items.length > 3" class="text-[9px] text-gray-500 dark:text-gray-400 italic">
-                      and {{ receipt.items.length - 3 }} more item{{ receipt.items.length - 3 > 1 ? 's' : '' }}
+                      and {{ receipt.items.length - 3 }} more product{{ receipt.items.length - 3 > 1 ? 's' : '' }}
                     </div>
                   </div>
                   <span v-else class="text-[9px] text-gray-500 dark:text-gray-400">

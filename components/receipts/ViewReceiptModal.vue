@@ -96,7 +96,7 @@
           <table class="w-full border-collapse">
             <thead>
               <tr class="border-b border-gray-400">
-                <th class="text-left py-1 text-xs font-bold">Item</th>
+                <th class="text-left py-1 text-xs font-bold">Product</th>
                 <th class="text-center py-1 text-xs font-bold">Qty</th>
                 <th class="text-right py-1 text-xs font-bold">Price</th>
                 <th class="text-right py-1 text-xs font-bold">Total</th>

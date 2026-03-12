@@ -23,7 +23,7 @@
           <ExclamationTriangleIcon class="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
             <p class="text-xs font-medium text-red-800 dark:text-red-200">Confirm deletion</p>
-            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The folder will be removed; items will not be deleted but will no longer be under this folder.</p>
+            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The folder will be removed; products will not be deleted but will no longer be under this folder.</p>
           </div>
         </div>
       </div>
@@ -41,8 +41,8 @@
             <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.description }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Items</span>
-            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount || 0 }} item{{ (folder.itemCount || 0) !== 1 ? 's' : '' }}</span>
+            <span class="text-gray-500 dark:text-gray-400">Products</span>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ folder.itemCount || 0 }} product{{ (folder.itemCount || 0) !== 1 ? 's' : '' }}</span>
           </div>
           <div v-if="folder.allowedDepartments && folder.allowedDepartments.length > 0" class="flex justify-between text-xs">
             <span class="text-gray-500 dark:text-gray-400">Departments</span>
@@ -60,7 +60,7 @@
         <h4 class="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">What will happen</h4>
         <ul class="space-y-0.5 text-xs text-amber-800 dark:text-amber-200 list-disc list-inside">
           <li>Folder permanently deleted from inventory</li>
-          <li>Items remain but are no longer under this folder</li>
+          <li>Products remain but are no longer under this folder</li>
           <li>Associated folder data removed; action cannot be undone</li>
         </ul>
       </div>

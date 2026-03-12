@@ -35,7 +35,7 @@
           class="px-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
         >
           <option value="name">Name</option>
-          <option value="items">Items</option>
+          <option value="items">Products</option>
           <option value="date">Date</option>
         </select>
         <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400 ml-1">
@@ -79,7 +79,7 @@
           >
             {{ folder.name }}
           </p>
-          <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ folder.itemCount }} items</span>
+          <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ folder.itemCount }} products</span>
         </div>
 
         <div v-if="canManage" class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
@@ -266,9 +266,9 @@
           <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
             <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start">
               <div class="flex-1">
-                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Use serial numbers for items</span>
+                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Use serial numbers for products</span>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
-                  One serial per item (quantity fixed at 1). Turn off to allow editable quantity for bulk items.
+                  One serial per product (quantity fixed at 1). Turn off to allow editable quantity for bulk products.
                 </p>
               </div>
             </Checkbox>
@@ -543,7 +543,7 @@ const getDefaultFields = (): TemplateField[] => {
     {
       id: `field-name-${Date.now()}`,
       name: 'name',
-      label: 'Item',
+      label: 'Product',
       type: 'text',
       required: true,
     },
@@ -578,10 +578,9 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
     editableFields.value = getDefaultFields()
     selectedTemplateId.value = 'custom'
     
-    // If serial numbers is already checked, add brand and model fields
+    // If serial numbers is already checked, add serialNo and product model (brand) fields
     if (folderForm.hasSerialNumbers) {
       const brandFieldExists = editableFields.value.some(f => f.name === 'brand')
-      const modelFieldExists = editableFields.value.some(f => f.name === 'model')
       const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
       
       if (!serialNoFieldExists) {
@@ -598,17 +597,7 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
         editableFields.value.push({
           id: `field-brand-${Date.now()}`,
           name: 'brand',
-          label: 'Brand',
-          type: 'text',
-          required: true,
-        })
-      }
-      
-      if (!modelFieldExists) {
-        editableFields.value.push({
-          id: `field-model-${Date.now()}`,
-          name: 'model',
-          label: 'Model',
+          label: 'Product model',
           type: 'text',
           required: true,
         })
@@ -617,13 +606,11 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
   }
 })
 
-// Watch hasSerialNumbers to auto-add/remove serialNo, brand, and model fields
+// Watch hasSerialNumbers to auto-add/remove serialNo and product model (brand) fields
 watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
   if (hasSerial) {
-    // Check if serialNo field already exists
     const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
     if (!serialNoFieldExists) {
-      // Add serialNo field to the template
       const serialNoField: TemplateField = {
         id: `field-serialNo-${Date.now()}`,
         name: 'serialNo',
@@ -634,32 +621,16 @@ watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
       editableFields.value.push(serialNoField)
     }
     
-    // Check if brand field already exists
     const brandFieldExists = editableFields.value.some(f => f.name === 'brand')
     if (!brandFieldExists) {
-      // Add brand field to the template
       const brandField: TemplateField = {
         id: `field-brand-${Date.now()}`,
         name: 'brand',
-        label: 'Brand',
+        label: 'Product model',
         type: 'text',
         required: true,
       }
       editableFields.value.push(brandField)
-    }
-    
-    // Check if model field already exists
-    const modelFieldExists = editableFields.value.some(f => f.name === 'model')
-    if (!modelFieldExists) {
-      // Add model field to the template
-      const modelField: TemplateField = {
-        id: `field-model-${Date.now()}`,
-        name: 'model',
-        label: 'Model',
-        type: 'text',
-        required: true,
-      }
-      editableFields.value.push(modelField)
     }
   } else {
     // Remove serialNo, brand, and model fields when unchecked
@@ -904,7 +875,7 @@ const handleEditFolder = (folder: InventoryFolder) => {
     return indexA - indexB
   }), ...customFields]
   
-  // If hasSerialNumbers is true, ensure serialNo, brand, and model fields exist
+  // If hasSerialNumbers is true, ensure serialNo and product model (brand) fields exist
   if (folderForm.hasSerialNumbers) {
     const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
     if (!serialNoFieldExists) {
@@ -923,23 +894,11 @@ const handleEditFolder = (folder: InventoryFolder) => {
       const brandField: TemplateField = {
         id: `field-brand-${Date.now()}`,
         name: 'brand',
-        label: 'Brand',
+        label: 'Product model',
         type: 'text',
         required: true,
       }
       editableFields.value.push(brandField)
-    }
-    
-    const modelFieldExists = editableFields.value.some(f => f.name === 'model')
-    if (!modelFieldExists) {
-      const modelField: TemplateField = {
-        id: `field-model-${Date.now()}`,
-        name: 'model',
-        label: 'Model',
-        type: 'text',
-        required: true,
-      }
-      editableFields.value.push(modelField)
     }
   }
   showCreateFolderModal.value = true
