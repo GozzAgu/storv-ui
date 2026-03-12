@@ -47,46 +47,12 @@
           />
         </div>
 
-        <div v-if="!isEdit">
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Password <span class="text-red-500">*</span>
-            <span class="text-[10px] text-gray-500 dark:text-gray-400 ml-1">(For staff login)</span>
-          </label>
-          <input
-            v-model="formData.password"
-            type="password"
-            required
-            minlength="6"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            placeholder="Minimum 6 characters"
-          />
-          <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
-            Staff will use this email and password to log in
+        <div v-if="!isEdit" class="md:col-span-2">
+          <p class="text-xs text-gray-600 dark:text-gray-400">
+            A signup link will be sent to the email above so the staff member can set their own password.
           </p>
         </div>
 
-        <div v-if="!isEdit && needsSuperAdminPassword" class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-3 mt-1.5">
-          <div class="bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-xl p-2.5 mb-2.5">
-            <p class="text-xs text-amber-800 dark:text-amber-200">
-              <strong>Security verification required.</strong> Enter your super admin password to create staff accounts. Credentials are not stored.
-            </p>
-          </div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Your Super Admin Password <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.superAdminPassword"
-            type="password"
-            :required="needsSuperAdminPassword"
-            minlength="6"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            placeholder="Enter your password"
-          />
-          <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
-            This is required to temporarily sign you out while creating the staff account
-          </p>
-        </div>
-        
         <div>
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
             Phone Number
@@ -196,7 +162,6 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
-import { useAdminCredentials } from '~/composables/useAdminCredentials'
 
 interface Props {
   modelValue: boolean
@@ -213,14 +178,11 @@ const emit = defineEmits<{
 }>()
 
 const staffStore = useStaffStore()
-const { hasCredentials } = useAdminCredentials()
 
 const formData = ref({
   firstName: '',
   lastName: '',
   email: '',
-  password: '',
-  superAdminPassword: '',
   phone: '',
   position: '',
   role: 'staff' as 'manager' | 'staff' | 'intern',
@@ -232,51 +194,21 @@ const formData = ref({
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-// Computed to check if super admin password is needed
-const needsSuperAdminPassword = computed(() => {
-  if (isEdit.value) return false
-  
-  // Always check if credentials are available
-  try {
-    return !hasCredentials()
-  } catch (e) {
-    // If check fails, assume credentials are not available
-    return true
-  }
-})
-
 const isEdit = computed(() => !!props.staff)
 
-const isFormValid = computed(() => {
-  const baseValid = !!(
-    formData.value.firstName &&
-    formData.value.lastName &&
-    formData.value.email &&
-    formData.value.position &&
-    formData.value.hireDate
-  )
-  
-  // For new staff, password is required
-  if (!isEdit.value) {
-    if (!formData.value.password || formData.value.password.length < 6) {
-      return false
-    }
-
-    if (needsSuperAdminPassword.value && (!formData.value.superAdminPassword || formData.value.superAdminPassword.length < 6)) {
-      return false
-    }
-  }
-
-  return baseValid
-})
+const isFormValid = computed(() => !!(
+  formData.value.firstName &&
+  formData.value.lastName &&
+  formData.value.email &&
+  formData.value.position &&
+  formData.value.hireDate
+))
 
 const resetForm = () => {
   formData.value = {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
-    superAdminPassword: '',
     phone: '',
     position: '',
     role: 'staff',
@@ -297,8 +229,6 @@ watch(
           firstName: props.staff.firstName || '',
           lastName: props.staff.lastName || '',
           email: props.staff.email || '',
-          password: '',
-          superAdminPassword: '',
           phone: props.staff.phone || '',
           position: props.staff.position || '',
           role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
@@ -346,8 +276,6 @@ const handleSubmit = async () => {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
-        password: formData.value.password,
-        superAdminPassword: needsSuperAdminPassword.value ? formData.value.superAdminPassword : undefined,
         phone: formData.value.phone || undefined,
         position: formData.value.position,
         role: formData.value.role,
@@ -360,7 +288,7 @@ const handleSubmit = async () => {
     emit('success')
     emit('update:modelValue', false)
   } catch (error: any) {
-    errorMessage.value = error.message || 'Failed to save staff member. Please try again.'
+    errorMessage.value = error?.data?.message || error?.message || 'Failed to save staff member. Please try again.'
     emit('error', errorMessage.value)
   } finally {
     isSubmitting.value = false

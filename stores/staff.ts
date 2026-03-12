@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { sendPasswordResetEmail } from 'firebase/auth'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
-import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getStaffCollection, getStaffDocument, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Staff } from '~/composables/useStaff'
@@ -313,411 +312,85 @@ export const useStaffStore = defineStore('staff', {
       }
     },
 
-    // Create a new staff member
-    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName'> & { password?: string; superAdminPassword?: string }) {
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error('Firestore not initialized')
-      }
-
+    // Create a new staff member (invite flow: server creates user + Firestore doc, we send set-password email)
+    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'>) {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated to create staff')
       }
-
-      // Get super admin credentials for signing back in
-      const { getCredentials, storeCredentials } = useAdminCredentials()
-      const adminCredentials = getCredentials()
-      
-      // Use provided password or stored credentials (prefer stored credentials)
-      const superAdminEmail = authStore.currentUser.email
-      let superAdminPassword: string | undefined
-      
-      // First try stored credentials (they're automatically available if user signed in recently)
-      if (adminCredentials) {
-        superAdminPassword = adminCredentials.password
-      } else if (staffData.superAdminPassword) {
-        // Use password provided directly (e.g., from modal when credentials not stored)
-        superAdminPassword = staffData.superAdminPassword
-        // Store credentials for future use if email is available
-        if (superAdminEmail) {
-          storeCredentials(superAdminEmail, superAdminPassword)
-        }
-      }
-      
-      if (!superAdminPassword) {
-        throw new Error('Super admin password is required. If your credentials expired, please enter your password in the "Your Super Admin Password" field above.')
-      }
-      
-      if (!superAdminEmail) {
-        throw new Error('Super admin email not found')
+      if (!staffData.email?.trim()) {
+        throw new Error('Staff email is required')
       }
 
-      if (!staffData.password || !staffData.email) {
-        throw new Error('Staff email and password are required')
+      const departmentsStore = useDepartmentsStore()
+      const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
+      if (!department || department.createdBy !== authStore.currentUser.uid) {
+        throw new Error('Department not found or access denied')
+      }
+      const storeId = department.storeId
+      if (!storeId) {
+        throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
       }
 
-      let staffAuthUid: string | null = null
-      let signedBackIn = false
-      let firebaseAuthAccountCreated = false // Flag to track if Firebase Auth account was successfully created
-
-      // Helper function to sign super admin back in
-      const signSuperAdminBackIn = async () => {
-        if (signedBackIn) return
-        
-        try {
-          if (!superAdminPassword) {
-            throw new Error('Password is required to sign back in')
-          }
-          await authStore.signIn(superAdminEmail, superAdminPassword)
-          signedBackIn = true
-          console.log('[Staff Creation] Super admin signed back in successfully')
-          
-          // Verify we're signed back in
-          if (!authStore.currentUser) {
-            throw new Error('Super admin sign-in verification failed - currentUser is null')
-          }
-        } catch (signInError: any) {
-          console.error('[Staff Creation] Failed to sign super admin back in:', signInError)
-          throw new Error(`Failed to sign super admin back in: ${signInError.message}`)
-        }
-      }
-
-      try {
-        // Verify department exists and belongs to this user
-        const departmentsStore = useDepartmentsStore()
-        const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
-        if (!department || department.createdBy !== authStore.currentUser.uid) {
-          throw new Error('Department not found or access denied')
-        }
-
-        // CRITICAL: Always use the department's storeId to ensure staff is created under the correct store -> department hierarchy
-        // The staff must be created in the same store as the department where they are being added
-        const storeId = department.storeId
-        if (!storeId) {
-          throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
-        }
-        
-        console.log('[Staff Creation] Creating staff under store -> department:', {
-          storeId: storeId,
+      const token = await authStore.currentUser.getIdToken()
+      const res = await $fetch<{ success: boolean; uid: string; staffId: string }>('/api/staff/invite', {
+        method: 'POST',
+        body: {
+          email: staffData.email.trim().toLowerCase(),
           departmentId: staffData.departmentId,
-          departmentName: department.name
-        })
+          storeId,
+          firstName: staffData.firstName.trim(),
+          lastName: staffData.lastName.trim(),
+          phone: staffData.phone ?? '',
+          position: staffData.position.trim(),
+          role: staffData.role,
+          hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
+          salary: staffData.salary,
+          status: staffData.status ?? 'active',
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
-        // Set flag to prevent redirect during staff creation
-        if (import.meta.client) {
-          sessionStorage.setItem('staff_creation_in_progress', 'true')
+      const auth = authStore.getAuthInstance()
+      if (auth) {
+        try {
+          await sendPasswordResetEmail(auth, staffData.email.trim().toLowerCase())
+        } catch (e) {
+          console.warn('[Staff Creation] Send set-password email failed (staff was still created):', e)
         }
-
-        // Step 1: Sign out super admin temporarily
-        console.log('[Staff Creation] Signing out super admin...')
-        await authStore.signOut()
-        console.log('[Staff Creation] Super admin signed out successfully')
-
-          // Step 2: Create Firebase Auth account for staff
-          const auth = authStore.getAuthInstance()
-          if (!auth) {
-            // Sign super admin back in before throwing error
-            try {
-              await signSuperAdminBackIn()
-            } catch (signInError) {
-              console.error('Failed to sign super admin back in:', signInError)
-            }
-            throw new Error('Firebase Auth not initialized')
-          }
-
-          console.log('[Staff Creation] Creating Firebase Auth account for staff:', staffData.email)
-          try {
-            if (!staffData.email || !staffData.password) {
-              throw new Error('Staff email and password are required for Firebase Auth account creation')
-            }
-
-            if (staffData.password.length < 6) {
-              throw new Error('Staff password must be at least 6 characters long')
-            }
-
-            console.log('[Staff Creation] Calling createUserWithEmailAndPassword...')
-            const userCredential = await createUserWithEmailAndPassword(
-              auth,
-              staffData.email.trim().toLowerCase(),
-              staffData.password
-            )
-            
-            if (!userCredential || !userCredential.user) {
-              throw new Error('Firebase Auth account creation returned null user credential')
-            }
-
-            staffAuthUid = userCredential.user.uid
-            console.log('[Staff Creation] Firebase Auth account created successfully. UID:', staffAuthUid)
-
-            if (!staffAuthUid || staffAuthUid.trim() === '') {
-              throw new Error('Staff Firebase Auth UID is null or empty after account creation')
-            }
-
-            // Mark that Firebase Auth account was successfully created
-            firebaseAuthAccountCreated = true
-            console.log('[Staff Creation] ✅ Firebase Auth account creation confirmed. Flag set to true.')
-
-            // Verify the account was actually created
-            console.log('[Staff Creation] Verifying Firebase Auth account exists...')
-            const createdUser = auth.currentUser
-            if (createdUser && createdUser.uid === staffAuthUid && createdUser.email === staffData.email) {
-              console.log('[Staff Creation] ✅ Verified: Firebase Auth account exists and matches created user')
-            } else {
-              // This is expected - after signing out, currentUser will be null, but the account still exists
-              console.log('[Staff Creation] Note: Auth state cleared (expected after sign out), but Firebase Auth account was created with UID:', staffAuthUid)
-            }
-            
-            // Additional verification: Ensure we have a valid UID
-            if (!staffAuthUid || staffAuthUid.length < 20) {
-              throw new Error('Invalid Firebase Auth UID received: ' + staffAuthUid)
-            }
-            
-            console.log('[Staff Creation] ✅ Firebase Auth account UID validated:', staffAuthUid.substring(0, 8) + '...')
-
-            // Step 3: Skip creating top-level user document for staff
-            // Staff members should only exist in the hierarchical structure:
-            // users/{superadminUID}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
-            // This prevents duplicate user documents and keeps staff data organized under their superadmin
-            console.log('[Staff Creation] Skipping top-level user document creation - staff will only exist in hierarchical structure')
-          } catch (authError: any) {
-            console.error('[Staff Creation] Error creating staff Firebase Auth account:', authError)
-            // If staff account creation fails, sign super admin back in first
-            try {
-              await signSuperAdminBackIn()
-            } catch (signInError) {
-              console.error('Failed to sign super admin back in after staff creation error:', signInError)
-            }
-            // Re-throw with more context
-            const errorMessage = authError.code 
-              ? `Failed to create staff Firebase Auth account (${authError.code}): ${authError.message}`
-              : `Failed to create staff Firebase Auth account: ${authError.message}`
-            throw new Error(errorMessage)
-          }
-
-        // Step 4: Sign super admin back in quickly
-        console.log('[Staff Creation] Signing super admin back in...')
-        await signSuperAdminBackIn()
-        
-        // Step 4.5: Restore store context after sign-in
-        // The storeId might be lost during sign-out/sign-in, so restore it
-        if (import.meta.client && storeId) {
-          try {
-            // Save storeId to localStorage before it might be lost
-            localStorage.setItem('currentStoreId', storeId)
-            console.log('[Staff Creation] Saved storeId to localStorage:', storeId)
-            
-            // Restore store context in stores store
-            const { useStoresStore } = await import('./stores')
-            const storesStore = useStoresStore()
-            storesStore.currentStoreId = storeId
-            console.log('[Staff Creation] Restored storeId in storesStore:', storeId)
-          } catch (restoreError) {
-            console.warn('[Staff Creation] Could not restore store context:', restoreError)
-          }
-        }
-
-        // Step 5: Create staff document in Firestore
-        // CRITICAL VALIDATION: Ensure Firebase Auth account was created
-        if (!firebaseAuthAccountCreated) {
-          console.error('[Staff Creation] FATAL ERROR: Firebase Auth account was not created!')
-          throw new Error('Cannot create staff document: Firebase Auth account creation failed or was not completed.')
-        }
-
-        if (!staffAuthUid || staffAuthUid.trim() === '') {
-          console.error('[Staff Creation] FATAL ERROR: staffAuthUid is null or empty!')
-          console.error('[Staff Creation] Cannot create Firestore document without Firebase Auth account.')
-          throw new Error('Cannot create staff document: Firebase Auth account was not created. staffAuthUid is null or empty.')
-        }
-
-        console.log('[Staff Creation] ✅ Firebase Auth account confirmed. Creation flag:', firebaseAuthAccountCreated, 'UID:', staffAuthUid)
-        console.log('[Staff Creation] Creating staff document in Firestore...')
-        // Remove password and superAdminPassword from staffData - these are not stored in Firestore
-        // Rename superAdminPassword during destructuring to avoid naming conflict
-        const { password, superAdminPassword: _, ...staffDataWithoutPassword } = staffData
-        
-        // Clean undefined values - Firestore doesn't accept undefined
-        const cleanedStaffData = Object.fromEntries(
-          Object.entries(staffDataWithoutPassword).filter(([_, value]) => value !== undefined)
-        ) as Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId' | 'authUid'>
-        
-        // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff
-        const userId = authStore.currentUser.uid
-        const staffRef = getStaffCollection(db, userId, storeId, staffData.departmentId)
-        const newStaffRef = doc(staffRef)
-
-        // StoreId is already obtained from the department above (auto-assigned)
-
-        const newStaff: Omit<Staff, 'id' | 'departmentName'> = {
-          ...cleanedStaffData,
-          storeId, // Assign staff to department's store (auto-detected)
-          authUid: staffAuthUid, // CRITICAL: This must be set for staff to log in
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          createdBy: authStore.currentUser.uid, // Should be set now after sign in
-        }
-
-        // Double-check before saving
-        if (!newStaff.authUid || newStaff.authUid.trim() === '') {
-          console.error('[Staff Creation] FATAL ERROR: authUid is missing in newStaff object!')
-          throw new Error('Staff object is missing authUid field. Cannot save to Firestore.')
-        }
-
-        console.log('[Staff Creation] Staff document data:', {
-          ...newStaff,
-          authUid: staffAuthUid,
-          createdBy: authStore.currentUser.uid
-        })
-
-        await setDoc(newStaffRef, newStaff)
-        console.log('[Staff Creation] ✅ SUCCESS: Staff created in Firestore with authUid:', staffAuthUid)
-
-        // Verify the staff document was created with authUid
-        const verifyDoc = await getDoc(newStaffRef)
-        if (!verifyDoc.exists()) {
-          throw new Error('Staff document was not created in Firestore')
-        }
-        const verifyData = verifyDoc.data()
-        if (!verifyData.authUid || verifyData.authUid !== staffAuthUid) {
-          console.error('[Staff Creation] ERROR: Staff document created but authUid is missing or incorrect!')
-          console.error('[Staff Creation] Expected authUid:', staffAuthUid)
-          console.error('[Staff Creation] Actual authUid in document:', verifyData.authUid)
-          // Delete the document since it's incomplete
-          await deleteDoc(newStaffRef)
-          throw new Error('Staff document was created without authUid. Document deleted. Please try again.')
-        }
-        console.log('[Staff Creation] ✅ Verified: Staff document has correct authUid:', verifyData.authUid)
-
-        // Update department staff count - pass storeId directly to avoid "No store selected" error
-        await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
-
-        // If staff is a manager, update department manager
-        if (staffData.role === 'manager') {
-          await departmentsStore.updateDepartment(staffData.departmentId, {
-            manager: `${staffData.firstName} ${staffData.lastName}`,
-            managerId: newStaffRef.id,
-          } as Partial<import('~/composables/useDepartments').Department>)
-        }
-
-        // Add to local state with all required fields
-        // CRITICAL: Ensure createdBy is set so fetchCurrentStaffMember can find the superadmin UID
-        const staffWithDept: Staff = {
-          id: newStaffRef.id,
-          ...newStaff,
-          departmentId: staffData.departmentId, // Ensure departmentId is set
-          storeId: storeId, // Ensure storeId is set
-          createdBy: authStore.currentUser.uid, // CRITICAL: Set createdBy so fetchCurrentStaffMember can find superadmin
-          departmentName: department.name,
-        }
-        this.staff.unshift(staffWithDept)
-        console.log('[Staff Creation] Staff added to local state with createdBy:', authStore.currentUser.uid)
-
-        // Clear staff creation flag on success
-        if (import.meta.client) {
-          sessionStorage.removeItem('staff_creation_in_progress')
-        }
-
-        // CRITICAL: Ensure store context is properly restored BEFORE returning
-        // This prevents "No store selected" errors and allows modal to close immediately
-        if (import.meta.client && storeId) {
-          try {
-            const { useStoresStore } = await import('./stores')
-            const storesStore = useStoresStore()
-            
-            // Restore store context immediately and synchronously
-            storesStore.currentStoreId = storeId
-            localStorage.setItem('currentStoreId', storeId)
-            console.log('[Staff Creation] Store context restored:', storeId)
-            
-            // Initialize stores if needed (but don't wait if it fails)
-            if (storesStore.stores.length === 0) {
-              // Do this in background, don't await
-              storesStore.initializeCurrentStore().catch(initError => {
-                console.warn('[Staff Creation] Could not initialize stores, but continuing:', initError)
-              })
-            }
-          } catch (storeError) {
-            console.warn('[Staff Creation] Could not restore store context:', storeError)
-            // Don't throw - we still want to return success and close modal
-          }
-        }
-
-        // Return success immediately - modal can close now
-        // Staff was successfully created, background refresh will happen asynchronously
-        const staffId = newStaffRef.id
-
-        // Refresh data in the background (non-blocking) AFTER returning
-        // This ensures modal closes immediately and errors don't prevent closing
-        if (import.meta.client) {
-          // Use setTimeout to ensure store context is fully restored before refresh
-          // Wrap in try-catch to prevent unhandled promise rejections
-          setTimeout(async () => {
-            try {
-              // Ensure store context is set before refresh
-              if (storeId && import.meta.client) {
-                const { useStoresStore } = await import('./stores')
-                const storesStore = useStoresStore()
-                if (!storesStore.currentStoreId) {
-                  storesStore.currentStoreId = storeId
-                  localStorage.setItem('currentStoreId', storeId)
-                  console.log('[Staff Creation] Re-ensuring store context before refresh:', storeId)
-                }
-              }
-              
-          Promise.all([
-                // Refresh staff list for the department (most important for table display)
-                this.fetchStaffByDepartment(staffData.departmentId).catch(err => {
-              console.warn('[Staff Creation] Background refresh: Failed to refresh department staff:', err)
-                  return null // Return null instead of throwing
-                }),
-            // Refresh overall staff list for consistency across pages
-                this.fetchStaff().catch(err => {
-              console.warn('[Staff Creation] Background refresh: Failed to refresh staff list:', err)
-                  return null // Return null instead of throwing
-                }),
-                // Refresh department to update staff count - pass storeId directly to avoid "No store selected" error
-                departmentsStore.fetchDepartment(staffData.departmentId, storeId).catch(err => {
-              console.warn('[Staff Creation] Background refresh: Failed to refresh department:', err)
-                  return null // Return null instead of throwing
-                }),
-                // Refresh departments list to ensure it loads properly
-                departmentsStore.fetchDepartments().catch(err => {
-                  console.warn('[Staff Creation] Background refresh: Failed to refresh departments:', err)
-                  return null // Return null instead of throwing
-                }),
-          ]).then(() => {
-                console.log('[Staff Creation] ✅ Background refresh completed - staff should now be visible in table')
-          }).catch(err => {
-                // All errors are already caught above, this should not happen
-                console.warn('[Staff Creation] Unexpected error in background refresh:', err)
-          })
-            } catch (syncError) {
-              // Catch any synchronous errors in the setTimeout callback
-              console.warn('[Staff Creation] Error in background refresh setup:', syncError)
-            }
-          }, 500) // Increased delay to ensure store context is fully set and staff is in Firestore
-        }
-
-        return staffId
-      } catch (error: any) {
-        console.error('Error creating staff:', error)
-        
-        // Ensure super admin is signed back in even if something fails
-        if (!signedBackIn) {
-          try {
-            await signSuperAdminBackIn()
-          } catch (signInError) {
-            console.error('Failed to sign super admin back in after error:', signInError)
-          }
-        }
-        
-        // Clear staff creation flag on error
-        if (import.meta.client) {
-          sessionStorage.removeItem('staff_creation_in_progress')
-        }
-        
-        throw new Error(error.message || 'Failed to create staff')
       }
+
+      await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
+      if (staffData.role === 'manager') {
+        await departmentsStore.updateDepartment(staffData.departmentId, {
+          manager: `${staffData.firstName} ${staffData.lastName}`,
+          managerId: res.staffId,
+        } as Partial<import('~/composables/useDepartments').Department>)
+      }
+
+      const now = new Date()
+      const staffWithDept: Staff = {
+        id: res.staffId,
+        ...staffData,
+        storeId,
+        authUid: res.uid,
+        createdAt: now,
+        updatedAt: now,
+        createdBy: authStore.currentUser.uid,
+        departmentName: department.name,
+      }
+      this.staff.unshift(staffWithDept)
+
+      if (import.meta.client) {
+        setTimeout(() => {
+          this.fetchStaffByDepartment(staffData.departmentId).catch(() => {})
+          this.fetchStaff().catch(() => {})
+          departmentsStore.fetchDepartment(staffData.departmentId, storeId).catch(() => {})
+          departmentsStore.fetchDepartments().catch(() => {})
+        }, 500)
+      }
+
+      return res.staffId
     },
 
     // Update a staff member

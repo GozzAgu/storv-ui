@@ -478,6 +478,7 @@ const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 // State
 const isLoading = ref(true)
@@ -1204,7 +1205,9 @@ const inventoryTurnoverChartSeries = computed(() => {
 })
 
 const inventoryTurnoverChartOptions = computed(() => {
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
   
   return {
     chart: {
@@ -1267,7 +1270,9 @@ const customerChartSeries = computed(() => {
 })
 
 const customerChartOptions = computed(() => {
-  const isDark = themeStore.actualTheme === 'dark'
+  const isDark = import.meta.client 
+    ? document.documentElement.classList.contains('dark')
+    : false
   
   return {
     chart: {
@@ -1544,6 +1549,10 @@ const exportToPDF = async () => {
 }
 
 onMounted(() => {
+  if (!canUseSubscriptionFeature('analytics')) {
+    navigateTo('/dashboard/settings?upgrade=1')
+    return
+  }
   loadAnalytics()
 })
 </script>

@@ -14,7 +14,9 @@
       </div>
       <div>
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Only super admins can access multi-store sync features.</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+          {{ isStaff ? 'Only super admins can access multi-store sync.' : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.' }}
+        </p>
       </div>
     </div>
 
@@ -446,9 +448,10 @@ const storesStore = useStoresStore()
 const inventoryStore = useInventoryStore()
 const userStore = useUserStore()
 const { isStaff } = usePermissions()
+const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
-// Security check - only super admins can access
-const canAccess = computed(() => !isStaff.value)
+// Security check - only super admins with Enterprise plan can access
+const canAccess = computed(() => !isStaff.value && canUseSubscriptionFeature('multi_store_sync'))
 
 // State
 const activeTab = ref<'transfer' | 'reports' | 'history'>('transfer')

@@ -98,8 +98,21 @@
               </Button>
             </div>
             <p class="text-[10px] text-gray-500 dark:text-gray-400">
-              This only updates your account plan in-app (billing integration can be added later).
+              You’ll be redirected to Paystack to complete payment; your plan updates after payment.
             </p>
+            <details class="mt-3 group">
+              <summary class="text-[10px] font-medium text-gray-500 dark:text-gray-400 cursor-pointer list-none inline-flex items-center gap-1">
+                <span class="group-open:rotate-90 transition-transform">›</span> What’s in each plan?
+              </summary>
+              <ul class="mt-2 space-y-2 pl-3 border-l border-gray-200 dark:border-gray-600">
+                <li v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id" class="text-[10px]">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">{{ SUBSCRIPTION_PLANS.find(p => p.id === id)?.name }}</span>
+                  <ul class="mt-0.5 text-gray-500 dark:text-gray-400 list-disc list-inside">
+                    <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
+                  </ul>
+                </li>
+              </ul>
+            </details>
           </div>
         </div>
       </div>
@@ -113,11 +126,12 @@
           </div>
           <Button
             v-if="!isStaff"
-            @click="showCreateModal = true"
+            @click="openCreateStoreModal"
             size="sm"
             extra-class="!rounded-lg !px-2"
-            title="Create branch"
+            :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             aria-label="Create branch"
+            :disabled="!canAddStore"
           >
             <PlusIcon class="w-4 h-4" />
           </Button>
@@ -139,7 +153,7 @@
             </div>
             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Create your first store to get started.</p>
-            <Button size="sm" @click="showCreateModal = true" extra-class="!rounded-lg mt-5">Create branch</Button>
+            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-lg mt-5">Create branch</Button>
           </div>
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
@@ -529,6 +543,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import {
   ArrowPathIcon,
   BuildingStorefrontIcon,
@@ -551,7 +566,7 @@ import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
-import { SUBSCRIPTION_PLANS, type SubscriptionPlan } from '~/types/subscription'
+import { SUBSCRIPTION_PLANS, SUBSCRIPTION_FEATURE_SUMMARY, type SubscriptionPlan } from '~/types/subscription'
 
 definePageMeta({
   layout: 'dashboard'
@@ -583,6 +598,8 @@ const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const inventoryStore = useInventoryStore()
 const toast = useToast()
+const { limits } = useSubscriptionFeatures()
+const route = useRoute()
 
 // Check if user is super admin (only super admins can edit settings)
 const canEditSettings = computed(() => {
@@ -617,12 +634,22 @@ const handleUpgradeSubscription = async () => {
 
   isUpgradingSubscription.value = true
   try {
-    await updateUserDocument(currentUser.value.uid, { subscription: selectedUpgradePlan.value })
-    await userStore.fetchUserData(currentUser.value.uid)
-    toast.success(`Upgraded to ${SUBSCRIPTION_PLANS.find(p => p.id === selectedUpgradePlan.value)?.name || 'new plan'}`)
-    selectedUpgradePlan.value = ''
+    const res = await $fetch<{ success: boolean; authorization_url?: string; message?: string }>('/api/paystack/initialize', {
+      method: 'POST',
+      body: {
+        planId: selectedUpgradePlan.value,
+        email: currentUser.value.email || '',
+        userId: currentUser.value.uid,
+      },
+    })
+    if (res.success && res.authorization_url) {
+      window.location.href = res.authorization_url
+      return
+    }
+    toast.error(res.message || 'Could not start payment')
   } catch (err: any) {
-    toast.error(err.message || 'Failed to upgrade subscription')
+    const msg = err?.data?.message || err?.message || 'Failed to start payment'
+    toast.error(msg)
   } finally {
     isUpgradingSubscription.value = false
   }
@@ -638,6 +665,12 @@ const otherStores = computed(() => {
   const allStores = stores.value
   const current = currentStore.value
   return current ? allStores.filter(s => s.id !== current.id) : allStores
+})
+
+const canAddStore = computed(() => {
+  const max = limits.value.maxStores
+  if (max < 0) return true
+  return stores.value.length < max
 })
 
 // Store management state
@@ -795,8 +828,20 @@ const editStore = (store: Store) => {
   showCreateModal.value = true
 }
 
+const openCreateStoreModal = () => {
+  if (!canAddStore.value) {
+    toast.error('Storvv Micro allows 1 store. Upgrade your plan in the Account section to add more.')
+    return
+  }
+  showCreateModal.value = true
+}
+
 const handleStoreSubmit = async () => {
   if (!storeForm.value.name) return
+  if (!editingStore.value && !canAddStore.value) {
+    toast.error('Storvv Micro allows 1 store. Upgrade your plan to add more.')
+    return
+  }
 
   isSubmittingStore.value = true
   try {
@@ -904,6 +949,36 @@ const getTargetUserId = async (): Promise<string | null> => {
 
 // Load store information and settings from Firestore
 onMounted(async () => {
+  // Handle Paystack callback after payment redirect
+  const refParam = route.query.reference as string | undefined
+  const isPaystackCallback = route.query.paystack_callback === '1' || (refParam && String(refParam).startsWith('storvv_'))
+  if (currentUser.value && refParam && isPaystackCallback) {
+    try {
+      const verify = await $fetch<{ success?: boolean; paid?: boolean; userId?: string; planId?: string; message?: string }>(
+        `/api/paystack/verify?reference=${encodeURIComponent(refParam)}`
+      )
+      if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
+        await updateUserDocument(currentUser.value.uid, { subscription: verify.planId as SubscriptionPlan })
+        await userStore.fetchUserData(currentUser.value.uid)
+        toast.success(`Upgraded to ${SUBSCRIPTION_PLANS.find(p => p.id === verify.planId)?.name || 'new plan'}`)
+        selectedUpgradePlan.value = ''
+        if (import.meta.client && window.history.replaceState) {
+          window.history.replaceState({}, '', '/dashboard/settings')
+        }
+      } else if (!verify.paid && verify.message) {
+        toast.error(verify.message)
+        if (import.meta.client && window.history.replaceState) {
+          window.history.replaceState({}, '', '/dashboard/settings')
+        }
+      }
+    } catch (e) {
+      toast.error('Could not verify payment')
+      if (import.meta.client && window.history.replaceState) {
+        window.history.replaceState({}, '', '/dashboard/settings')
+      }
+    }
+  }
+
   if (currentUser.value) {
     try {
       // Fetch current user data first to check permissions

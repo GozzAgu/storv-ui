@@ -487,6 +487,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import type { SubscriptionFeature } from '~/types/subscription'
 import { useNotificationsStore } from '~/stores/notifications'
 import { useInventoryStore } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -503,6 +504,7 @@ const logoSource = computed(() => {
 const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '1.0'
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const notificationsStore = useNotificationsStore()
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
@@ -561,22 +563,27 @@ const toggleSidebar = () => {
 }
 
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
-  { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
-  { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true },
-  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
-  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
+const navigation: Array<{
+  name: string
+  href: string
+  icon: any
+  requiresSuperAdmin?: boolean
+  subscriptionFeature?: SubscriptionFeature
+}> = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, subscriptionFeature: 'dashboard' },
+  { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, subscriptionFeature: 'inventory' },
+  { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, subscriptionFeature: 'receipts' },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, subscriptionFeature: 'analytics' },
+  { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
+  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, subscriptionFeature: 'settings' },
+  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, subscriptionFeature: 'profile' },
 ]
 
-// Filter navigation based on user role
+// Filter navigation based on user role and subscription plan
 const filteredNavigation = computed(() => {
   return navigation.filter(item => {
-    if (item.requiresSuperAdmin) {
-      return userStore.isSuperAdmin
-    }
+    if (item.requiresSuperAdmin && !userStore.isSuperAdmin) return false
+    if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature)) return false
     return true
   })
 })
