@@ -2513,12 +2513,12 @@ watch(() => route.params.id, async (newId, oldId) => {
   }
 }, { immediate: false })
 
-// Watch for store changes and redirect to folders list
+// Watch for store changes and redirect to folders list (only when user actually switches store, not on initial load/refresh)
 watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
-  if (newStoreId && newStoreId !== oldStoreId && folderId.value && authStore.currentUser) {
-    // Store changed - folders are store-specific, so redirect to folders list
-    // This prevents showing "folder not found" errors when switching stores
-    console.log('[InventoryItems] Store changed, redirecting to folders list...', { oldStoreId, newStoreId })
+  const hadStore = oldStoreId != null && oldStoreId !== ''
+  const storeChanged = hadStore && newStoreId != null && newStoreId !== oldStoreId
+  if (storeChanged && folderId.value && authStore.currentUser) {
+    // User switched store - folders are store-specific, so redirect to folders list
     navigateTo('/dashboard/inventory')
   }
 }, { immediate: false })
