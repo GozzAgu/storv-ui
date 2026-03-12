@@ -381,7 +381,7 @@
                 @click="profileMenuOpen = !profileMenuOpen"
                 class="flex items-center gap-1.5 md:gap-2 p-0.5 sm:pl-1 sm:pr-1.5 md:pr-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors min-w-0"
                 :class="profileMenuOpen ? 'bg-gray-100 dark:bg-gray-800' : ''"
-                aria-expanded="profileMenuOpen"
+                :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
