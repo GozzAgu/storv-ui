@@ -1241,10 +1241,10 @@ export const useInventoryStore = defineStore('inventory', {
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
         const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         
-        // Filter out undefined values and system fields that shouldn't be updated directly
+        // Filter out undefined values and system fields (dates are not user-editable)
         const systemFields = ['dateOut', 'dateIn', 'swapIn', 'swapInReceiptId']
         const cleanedUpdates = Object.fromEntries(
-          Object.entries(updates).filter(([key, value]) => 
+          Object.entries(updates).filter(([key, value]) =>
             value !== undefined && !systemFields.includes(key)
           )
         )

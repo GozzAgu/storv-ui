@@ -213,16 +213,16 @@
           </div>
         </div>
         <!-- Bulk actions (receipts) -->
-        <div v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-3 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-primary-50/50 dark:bg-primary-900/10">
+        <div v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-3 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/10">
           <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedReceiptsForBulk.length }} selected</span>
           <Button
             variant="outline"
             size="sm"
             :icon="TrashIcon"
-            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
             @click="openBulkDeleteReceiptsModal"
           >
-            Delete ({{ selectedReceiptsForBulk.length }})
+            Delete
           </Button>
         </div>
       <!-- Table Loading Skeleton -->
@@ -577,7 +577,7 @@
                   <button
                     v-if="canDeleteReceipts"
                     @click="handleDeleteReceipt(receipt)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0"
+                    class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0"
                     title="Delete"
                   >
                     <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
@@ -622,7 +622,7 @@
                     <button
                       v-if="canDeleteReceipts"
                       @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 transition-colors"
                       title="Delete"
                     >
                       <TrashIcon class="w-5 h-5" />

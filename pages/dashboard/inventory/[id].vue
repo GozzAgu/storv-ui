@@ -38,20 +38,22 @@
         </div>
         <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 shrink-0">
           <Button
-            variant="primary"
+            variant="outline"
+            size="sm"
             @click="openBulkDiscountModal"
             :icon="TagIcon"
-            class="rounded-full"
+            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-primary-700 dark:hover:!text-primary-300 hover:!border-primary-200/80 dark:hover:!border-primary-700/50 hover:!bg-primary-50/60 dark:hover:!bg-primary-900/10"
           >
-            Bulk discount ({{ selectedItemsForBulk.length }})
+            Discount
           </Button>
           <Button
             variant="outline"
+            size="sm"
             @click="openBulkDeleteModal"
             :icon="TrashIcon"
-            class="rounded-full !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
           >
-            Delete ({{ selectedItemsForBulk.length }})
+            Delete
           </Button>
         </div>
       </div>
@@ -331,9 +333,10 @@
                 :key="column.key"
                 class="px-3 sm:px-4 py-2 align-top"
               >
-                <!-- Inline edit mode (large screens only) -->
+                <!-- Inline edit mode (large screens only); click outside saves -->
                 <div
                   v-if="isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && isEditingCell(item, column.key)"
+                  ref="inlineEditCellRef"
                   class="min-w-[80px]"
                 >
                   <input
@@ -341,7 +344,7 @@
                     v-model="inlineEditValue"
                     type="text"
                     :inputmode="(column.type === 'currency' || column.type === 'number' || column.key.toLowerCase().includes('price')) ? 'decimal' : 'text'"
-                    class="w-full min-w-0 px-2 py-1 text-[10px] border border-primary-500 dark:border-primary-400 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    class="w-full min-w-0 px-2 py-1 text-[10px] border border-primary-400/50 dark:border-primary-500/50 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400/20 focus:border-primary-400/60 outline-none"
                     @blur="saveInlineEdit"
                     @keydown.enter="saveInlineEdit"
                     @keydown.esc="cancelInlineEdit"
@@ -435,6 +438,20 @@
                     <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
+                    @click="handleApplyDiscount(item)"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'p-1 transition-colors flex-shrink-0',
+                      item.discountedPrice !== undefined
+                        ? 'text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400',
+                      isItemSold(item) && 'cursor-not-allowed opacity-40'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
+                  >
+                    <TagIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                  </button>
+                  <button
                     @click="handleEditItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
@@ -461,7 +478,7 @@
                     @click="handleDeleteItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors flex-shrink-0',
+                      'p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
@@ -495,6 +512,14 @@
                       <ClockIcon class="w-5 h-5" />
                     </button>
                     <button
+                      @click="handleApplyDiscount(item); openItemMenuId = null"
+                      :disabled="isItemSold(item)"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
+                    >
+                      <TagIcon class="w-5 h-5" />
+                    </button>
+                    <button
                       @click="handleEditItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -514,7 +539,7 @@
                     <button
                       @click="handleDeleteItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
                     >
                       <TrashIcon class="w-5 h-5" />
@@ -630,170 +655,221 @@
       v-model="showAddItemModal"
       :title="editingItem ? 'Edit Product' : (folder?.hasSerialNumbers && !editingItem ? 'Add Products with Serial Numbers' : 'Add New Product')"
       :subtitle="folder?.hasSerialNumbers && !editingItem ? 'Enter shared details, then add serial numbers' : (editingItem ? 'Update product details' : 'Add a new product to this folder')"
-      size="lg"
+      :size="editingItem || !folder?.hasSerialNumbers ? 'md' : 'lg'"
+      content-padding="p-3"
     >
-      <form @submit.prevent="handleSaveItem" class="space-y-3">
+      <form @submit.prevent="handleSaveItem" class="space-y-2">
         <!-- Bulk Add Mode for Serial Numbers -->
-        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-3">
-          <div class="p-2.5 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-xl">
-            <p class="text-xs text-blue-800 dark:text-blue-200">
-              <strong>Bulk Add Mode:</strong> Enter the product details once, then add multiple serial numbers below. Each serial number will create a separate product with the same details.
+        <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-2">
+          <div class="p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-lg">
+            <p class="text-[11px] text-blue-800 dark:text-blue-200">
+              <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below. Each serial creates a separate product.
             </p>
           </div>
 
-          <!-- Common Fields (all items share these) -->
-          <div class="space-y-3">
-            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Product Details (Shared)</h4>
-            
-            <!-- Product model (formerly Brand) when serial numbers enabled -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Common Fields (shared) – side by side -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Product details (shared)</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <!-- Product model (brand) -->
               <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Product model *
-                </label>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Product model *</label>
                 <input
                   v-model="itemForm.brand"
                   type="text"
                   required
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   placeholder="Enter product model"
                 />
               </div>
-            </div>
-            
-            <div
-              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
-              :key="field.id"
-              :class="['grid gap-3', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']"
-            >
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                </label>
-                <!-- Text Input -->
-                <input
-                  v-if="field.type === 'text'"
-                  v-model="itemForm[field.name]"
-                  type="text"
-                  :required="field.required"
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                />
-                <!-- Number Input -->
-                <input
-                  v-else-if="field.type === 'number'"
-                  v-model.number="itemForm[field.name]"
-                  type="number"
-                  :required="field.required"
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                />
-                <!-- Currency Input -->
-                <div v-else-if="field.type === 'currency'" class="relative">
-                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
+              <!-- Template fields (Product, Price, etc.) -->
+              <template
+                v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
+                :key="field.id"
+              >
+                <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                  </label>
                   <input
+                    v-if="field.type === 'text'"
+                    v-model="itemForm[field.name]"
+                    type="text"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                  />
+                  <input
+                    v-else-if="field.type === 'number'"
                     v-model.number="itemForm[field.name]"
                     type="number"
-                    step="0.01"
-                    min="0"
                     :required="field.required"
-                    class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                    :placeholder="field.placeholder || '0.00'"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                  />
+                  <div v-else-if="field.type === 'currency'" class="relative">
+                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
+                    <input
+                      v-model.number="itemForm[field.name]"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      :required="field.required"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                      :placeholder="field.placeholder || '0.00'"
+                    />
+                  </div>
+                  <select
+                    v-else-if="field.type === 'select' && field.options"
+                    v-model="itemForm[field.name]"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  >
+                    <option value="">Select {{ field.label || field.name }}</option>
+                    <option v-for="option in field.options" :key="option" :value="option">{{ option }}</option>
+                  </select>
+                  <input
+                    v-else
+                    v-model="itemForm[field.name]"
+                    type="text"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
-                <!-- Date Input -->
-                <input
-                  v-else-if="field.type === 'date'"
-                  v-model="itemForm[field.name]"
-                  type="date"
-                  :required="field.required"
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                />
-                <!-- Select Input -->
-                <select
-                  v-else-if="field.type === 'select' && field.options"
-                  v-model="itemForm[field.name]"
-                  :required="field.required"
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                >
-                  <option value="">Select {{ field.label || field.name }}</option>
-                  <option v-for="option in field.options" :key="option" :value="option">
-                    {{ option }}
-                  </option>
-                </select>
-                <!-- Boolean Input -->
-                <Checkbox
-                  v-else-if="field.type === 'boolean'"
-                  v-model="itemForm[field.name]"
-                  :label="field.label || field.name"
-                  size="sm"
-                />
-              </div>
+                <div v-else class="col-span-2 sm:col-span-1">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label || field.name }} {{ field.required ? '*' : '' }}</label>
+                  <input
+                    v-if="field.type === 'date'"
+                    v-model="itemForm[field.name]"
+                    type="date"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  />
+                  <Checkbox
+                    v-else-if="field.type === 'boolean'"
+                    v-model="itemForm[field.name]"
+                    :label="field.label || field.name"
+                    size="sm"
+                  />
+                </div>
+              </template>
             </div>
           </div>
 
-          <!-- Serial Numbers List -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial Numbers</h4>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="PlusIcon"
-                @click="addSerialNumber"
-              >
+          <!-- Serial Numbers -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300">Serial numbers</h4>
+              <Button variant="outline" size="sm" :icon="PlusIcon" @click="addSerialNumber" class="!py-1.5 !text-xs">
                 Add Serial Number
               </Button>
             </div>
-            <div v-if="serialNumbers.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            <div v-if="serialNumbers.length === 0" class="text-center py-2 text-[11px] text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
               No serial numbers added. Click "Add Serial Number" to start.
             </div>
-            <div v-else class="space-y-2 max-h-64 overflow-y-auto">
+            <div v-else class="space-y-1.5 max-h-52 overflow-y-auto">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
-                class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
+                class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
               >
                 <input
                   v-model="serialNumbers[index]"
                   type="text"
-                  :placeholder="`Serial Number ${index + 1}`"
-                  class="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                  :placeholder="`Serial ${index + 1}`"
+                  class="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                 />
                 <button
                   type="button"
                   @click="removeSerialNumber(index)"
-                  class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                  class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                   title="Remove serial number"
                 >
-                  <TrashIcon class="w-4 h-4" />
+                  <TrashIcon class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Single Item Mode (normal or edit) -->
+        <!-- Single Item Mode (normal or edit) – fields side by side -->
         <div v-else>
-          <div v-if="folder?.template?.fields && folder.template.fields.length > 0" class="space-y-3">
-            <div v-for="field in folder.template.fields" :key="field.id" :class="['grid gap-3', field.type === 'boolean' || field.type === 'date' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2']">
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                </label>
-                <input
-                  v-if="field.type === 'text'"
-                  v-model="itemForm[field.name]"
-                  type="text"
-                  :required="field.required"
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                />
-                <!-- Additional input types here -->
-              </div>
+          <div v-if="folder?.template?.fields && folder.template.fields.length > 0" class="space-y-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <template v-for="field in folder.template.fields" :key="field.id">
+                <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                  </label>
+                  <input
+                    v-if="field.type === 'text'"
+                    v-model="itemForm[field.name]"
+                    type="text"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                  />
+                  <input
+                    v-else-if="field.type === 'number'"
+                    v-model.number="itemForm[field.name]"
+                    type="number"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                  />
+                  <div v-else-if="field.type === 'currency'" class="relative">
+                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
+                    <input
+                      v-model.number="itemForm[field.name]"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      :required="field.required"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                      :placeholder="field.placeholder || '0.00'"
+                    />
+                  </div>
+                  <select
+                    v-else-if="field.type === 'select' && field.options"
+                    v-model="itemForm[field.name]"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  >
+                    <option value="">Select {{ field.label || field.name }}</option>
+                    <option v-for="option in field.options" :key="option" :value="option">{{ option }}</option>
+                  </select>
+                  <input
+                    v-else
+                    v-model="itemForm[field.name]"
+                    type="text"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                  />
+                </div>
+                <div v-else class="col-span-2 sm:col-span-1 min-w-0">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                  </label>
+                  <input
+                    v-if="field.type === 'date'"
+                    v-model="itemForm[field.name]"
+                    type="date"
+                    :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  />
+                  <Checkbox
+                    v-else-if="field.type === 'boolean'"
+                    v-model="itemForm[field.name]"
+                    :label="field.label || field.name"
+                    size="sm"
+                  />
+                </div>
+              </template>
             </div>
           </div>
-          <div v-else class="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
             No template fields defined for this folder. Please edit the folder to add fields.
           </div>
         </div>
@@ -1161,14 +1237,19 @@ onMounted(() => {
   }
 })
 
-// Close inline edit when clicking outside the cell
+// When user clicks outside the inline-edit cell, stop editing and save
+const inlineEditCellRef = ref<HTMLDivElement | HTMLDivElement[] | null>(null)
+function getEditCellEl(): HTMLElement | null {
+  const r = inlineEditCellRef.value
+  if (!r) return null
+  return Array.isArray(r) ? (r[0] ?? null) : r
+}
 const handleClickOutsideInlineEdit = (e: MouseEvent) => {
   if (!editingCell.value) return
   const target = e.target as Node
-  const input = inlineEditInputRef.value
-  if (input && !input.contains(target)) {
-    saveInlineEdit()
-  }
+  const cell = getEditCellEl()
+  if (cell?.contains(target)) return
+  saveInlineEdit()
 }
 
 watch(editingCell, (val) => {
@@ -1189,7 +1270,12 @@ const isEditingCell = (item: InventoryItem, columnKey: string) => {
   return editingCell.value?.itemId === item.id && editingCell.value?.columnKey === columnKey
 }
 
-const inlineEditInputRef = ref<HTMLInputElement | null>(null)
+const inlineEditInputRef = ref<HTMLInputElement | HTMLInputElement[] | null>(null)
+function getEditInputEl(): HTMLInputElement | null {
+  const r = inlineEditInputRef.value
+  if (!r) return null
+  return Array.isArray(r) ? (r[0] ?? null) : r
+}
 
 const startInlineEdit = async (item: InventoryItem, column: { key: string; type?: string }) => {
   if (!canManageInventoryItems.value || isItemSold(item) || !isColumnEditable(column)) return
@@ -1199,10 +1285,19 @@ const startInlineEdit = async (item: InventoryItem, column: { key: string; type?
   if ((column.type === 'currency' || column.key.toLowerCase().includes('price')) && item.discountedPrice !== undefined) {
     val = item.discountedPrice
   }
-  inlineEditValue.value = val !== undefined && val !== null ? String(val) : ''
+  if (val !== undefined && val !== null) {
+    if (column.key === 'dateIn' || column.key === 'dateOut' || column.type === 'date') {
+      const d = val && typeof val === 'object' && 'toISOString' in val ? ((val as Date).toISOString().split('T')[0] ?? '') : (typeof val === 'string' && val.includes('T') ? (val.split('T')[0] ?? '') : String(val))
+      inlineEditValue.value = d
+    } else {
+      inlineEditValue.value = String(val)
+    }
+  } else {
+    inlineEditValue.value = ''
+  }
   editingCell.value = { itemId: item.id, columnKey: column.key }
   await nextTick()
-  inlineEditInputRef.value?.focus()
+  getEditInputEl()?.focus()
 }
 
 const cancelInlineEdit = () => {
@@ -1234,18 +1329,31 @@ const saveInlineEdit = async () => {
     parsedValue = isNaN(num) ? 0 : num
   } else if (colType === 'boolean') {
     parsedValue = ['true', '1', 'yes'].includes(rawValue.toLowerCase())
+  } else if (columnKey === 'dateIn' || columnKey === 'dateOut' || colType === 'date') {
+    parsedValue = rawValue ? rawValue : ''
   }
   const previousValue = item[columnKey]
+  const prevDateStr = previousValue && (typeof previousValue === 'object' && 'toISOString' in previousValue)
+    ? (previousValue as Date).toISOString().split('T')[0]
+    : (typeof previousValue === 'string' && previousValue.includes('T') ? previousValue.split('T')[0] : previousValue)
   const previousDiscounted = item.discountedPrice
   const isPriceField = colType === 'currency' || columnKey.toLowerCase().includes('price')
+  const isDateField = columnKey === 'dateIn' || columnKey === 'dateOut' || colType === 'date'
   const hasChanged = isPriceField && item.discountedPrice !== undefined
     ? parsedValue !== previousDiscounted && String(parsedValue) !== String(previousDiscounted)
-    : parsedValue !== previousValue && String(parsedValue) !== String(previousValue)
+    : isDateField
+      ? String(parsedValue).trim() !== String(prevDateStr ?? '').trim()
+      : parsedValue !== previousValue && String(parsedValue) !== String(previousValue)
   if (!hasChanged) {
     cancelInlineEdit()
     return
   }
   isSavingInline.value = true
+  const indexBeforeSave = displayItems.value.findIndex((i) => i.id === itemId)
+  if (indexBeforeSave >= 0) {
+    lastInlineEditedId.value = itemId
+    lastInlineEditedIndex.value = indexBeforeSave
+  }
   try {
     const updates: Record<string, any> = { [columnKey]: parsedValue }
     // When editing price and item had discount, sync discountedPrice to new value
@@ -1410,47 +1518,54 @@ const filteredItems = computed(() => {
   return result
 })
 
-const sortedFilteredItems = computed(() => {
-  const result = [...filteredItems.value]
-  
-  result.sort((a, b) => {
-    // Handle availability column sorting
+// Display list: sorted list, with edited row kept at same position after inline save
+const displayItems = ref<InventoryItem[]>([])
+const lastInlineEditedId = ref<string | null>(null)
+const lastInlineEditedIndex = ref<number>(-1)
+
+const doSort = (list: InventoryItem[]) => {
+  list.sort((a, b) => {
     if (currentSort.value.key === 'availability') {
       const aAvail = getItemAvailability(a).status
       const bAvail = getItemAvailability(b).status
       const order = ['available', 'sold', 'returned']
       const aIndex = order.indexOf(aAvail)
       const bIndex = order.indexOf(bAvail)
-      
-      return currentSort.value.order === 'asc'
-        ? aIndex - bIndex
-        : bIndex - aIndex
+      return currentSort.value.order === 'asc' ? aIndex - bIndex : bIndex - aIndex
     }
-    
     let aValue = a[currentSort.value.key]
     let bValue = b[currentSort.value.key]
-    
-    // Handle undefined/null values
     if (aValue === undefined || aValue === null) return 1
     if (bValue === undefined || bValue === null) return -1
-    
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       return currentSort.value.order === 'asc'
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue)
     }
-    
-    // Try to convert to numbers for comparison
     const aNum = typeof aValue === 'number' ? aValue : parseFloat(aValue) || 0
     const bNum = typeof bValue === 'number' ? bValue : parseFloat(bValue) || 0
-    
-    return currentSort.value.order === 'asc'
-      ? aNum - bNum
-      : bNum - aNum
+    return currentSort.value.order === 'asc' ? aNum - bNum : bNum - aNum
   })
-  
-  return result
-})
+}
+
+watch([filteredItems, currentSort], () => {
+  const list = [...filteredItems.value]
+  doSort(list)
+  if (lastInlineEditedId.value != null && lastInlineEditedIndex.value >= 0) {
+    const id = lastInlineEditedId.value
+    const idx = lastInlineEditedIndex.value
+    const i = list.findIndex((item) => item.id === id)
+    if (i >= 0) {
+      const [item] = list.splice(i, 1)
+      if (item) list.splice(Math.min(idx, list.length), 0, item)
+    }
+    lastInlineEditedId.value = null
+    lastInlineEditedIndex.value = -1
+  }
+  displayItems.value = list
+}, { immediate: true })
+
+const sortedFilteredItems = computed(() => displayItems.value)
 
 const paginatedItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
@@ -1700,11 +1815,10 @@ const handleEditItem = (item: InventoryItem) => {
   cancelInlineEdit()
   editingItem.value = item
   serialNumbers.value = []
-  // Copy all item data to form, excluding system fields
+  // Copy all item data to form; dates (dateIn, dateOut) are not editable
+  const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateOut', 'dateIn', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice']
   Object.keys(itemForm).forEach(key => delete itemForm[key])
   Object.keys(item).forEach(key => {
-    // Exclude system/managed fields that shouldn't be edited
-    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateOut', 'dateIn', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice']
     if (!systemFields.includes(key)) {
       itemForm[key] = item[key]
     }

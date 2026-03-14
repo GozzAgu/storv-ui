@@ -12,13 +12,13 @@
       <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
         <ExclamationTriangleIcon class="w-4 h-4 text-amber-600 dark:text-amber-400" />
       </div>
-      <div>
+        <div>
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
         <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
           {{ isStaff ? 'Only super admins can access multi-store sync.' : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.' }}
         </p>
+        </div>
       </div>
-    </div>
 
     <template v-else>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
@@ -152,7 +152,7 @@
                   <tr v-for="item in availableItems" :key="item.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40">
                     <td class="px-3 py-2">
                       <div>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name || item.itemName || 'Unnamed Item' }}</p>
+                          <p class="font-medium text-gray-900 dark:text-gray-100">{{ item.name || item.itemName || 'Unnamed Item' }}</p>
                         <p v-if="item.brand && item.model" class="text-xs text-gray-500 dark:text-gray-400">{{ item.brand }} {{ item.model }}</p>
                         <p v-if="item.serialNo || item.serialNumber" class="text-xs text-gray-500 dark:text-gray-400">Serial: {{ item.serialNo || item.serialNumber }}</p>
                       </div>
@@ -303,7 +303,7 @@
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Warehouse-to-warehouse transfers with approval and tracking</p>
-        </div>
+          </div>
         <div class="p-3 sm:p-4">
           <div v-if="transferHistory.length === 0" class="text-center py-8">
             <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
@@ -311,12 +311,12 @@
             </div>
             <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-0.5">No transfer history</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
-          </div>
+        </div>
 
           <div v-else class="space-y-3">
-            <div
-              v-for="transfer in transferHistory"
-              :key="transfer.id"
+          <div
+            v-for="transfer in transferHistory"
+            :key="transfer.id"
               class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-3 sm:p-4 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
             >
               <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -324,21 +324,21 @@
                   <div class="flex flex-wrap items-center gap-1.5 mb-1">
                     <ArrowsRightLeftIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                     <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                      {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
-                    </p>
-                  </div>
+                    {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
+                  </p>
+                </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
                     {{ formatTransferProductSummary(transfer) }} · {{ formatDate(transfer.createdAt) }}
-                  </p>
+                </p>
                   <div v-if="transfer.items && transfer.items.length > 0" class="space-y-1 mt-2">
-                    <div
-                      v-for="(item, idx) in transfer.items.slice(0, 3)"
-                      :key="idx"
+                  <div
+                    v-for="(item, idx) in transfer.items.slice(0, 3)"
+                    :key="idx"
                       class="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
                     >
                       <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0"></span>
                       <span>{{ item.itemName || 'Item' }}<span v-if="item.quantity > 1" class="text-gray-500"> · {{ item.quantity }} units</span><span v-if="item.serialNumber" class="text-gray-500"> ({{ item.serialNumber }})</span></span>
-                    </div>
+                  </div>
                     <p v-if="transfer.items.length > 3" class="text-xs text-gray-500 dark:text-gray-500 italic pl-3.5">
                       +{{ transfer.items.length - 3 }} more
                     </p>
@@ -347,18 +347,18 @@
                     <TruckIcon class="w-3.5 h-3.5 flex-shrink-0" />
                     <span v-if="transfer.carrier">{{ transfer.carrier }}</span>
                     <span v-if="transfer.trackingNumber" class="font-mono">{{ transfer.trackingNumber }}</span>
-                  </div>
-                  <p v-if="transfer.notes" class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">{{ transfer.notes }}</p>
                 </div>
+                  <p v-if="transfer.notes" class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">{{ transfer.notes }}</p>
+              </div>
                 <div class="flex flex-col items-end gap-2 shrink-0">
-                  <span
-                    :class="[
+              <span
+                :class="[
                       'px-2 py-0.5 text-xs font-medium rounded-md capitalize',
                       getTransferStatusClass(transfer.status)
-                    ]"
-                  >
+                ]"
+              >
                     {{ getTransferStatusLabel(transfer.status) }}
-                  </span>
+              </span>
                   <div v-if="isTransferActionable(transfer)" class="flex flex-wrap gap-1.5 justify-end">
                     <template v-if="transfer.status === 'pending_approval'">
                       <Button variant="primary" size="sm" extra-class="!rounded-lg font-medium" @click="approveTransfer(transfer)">Approve</Button>
@@ -369,9 +369,9 @@
                       <Button variant="primary" size="sm" extra-class="!rounded-lg font-medium" @click="completeTransfer(transfer)">Complete</Button>
                       <Button variant="outline" size="sm" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
                     </template>
-                  </div>
-                </div>
-              </div>
+            </div>
+          </div>
+        </div>
             </div>
           </div>
         </div>
@@ -662,7 +662,7 @@ const getAvailableQuantity = (item: any) => {
 // Create a transfer request (pending approval). No stock is moved until transfer is completed.
 const requestTransfer = async () => {
   if (!canTransfer.value) return
-
+  
   isTransferring.value = true
   try {
     const authStore = useAuthStore()
@@ -755,11 +755,11 @@ const executeTransfer = async (transfer: any) => {
   const hasSerialNumbers = transfer.hasSerialNumbers || false
   const itemsToTransfer = (transfer.items || []).map((i: any) => ({ itemId: i.itemId, quantity: i.quantity || 1 }))
 
-  const transferredItems: any[] = []
-  const errors: string[] = []
+    const transferredItems: any[] = []
+    const errors: string[] = []
 
   try {
-  for (const { itemId, quantity } of itemsToTransfer) {
+    for (const { itemId, quantity } of itemsToTransfer) {
       try {
         const sourceItemRef = getInventoryItemDocument(db, pathUserId, sourceStoreId, itemId)
         const sourceItemSnap = await getDoc(sourceItemRef)
@@ -790,22 +790,22 @@ const executeTransfer = async (transfer: any) => {
           const newItemRef = doc(destItemsRef)
           const { createdBy: _createdBy, dateOut: _dateOut, id: _id, ...itemDataWithoutSystemFields } = sourceItem
           const cleanedItemData = removeUndefined(itemDataWithoutSystemFields)
-          const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
-          await setDoc(newItemRef, {
-            ...cleanedItemData,
-            id: newItemRef.id,
+            const originalDateIn = sourceItem.dateIn || sourceItem.DateIn || null
+            await setDoc(newItemRef, {
+              ...cleanedItemData,
+              id: newItemRef.id,
             folderId: destinationFolderId,
             storeId: destinationStoreId,
             dateIn: originalDateIn,
             createdBy: userId,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
             transferredFrom: sourceStoreId,
             transferredFromFolder: folderId,
             transferredAt: serverTimestamp(),
             isTransferred: true,
           })
-          await deleteDoc(sourceItemRef)
+            await deleteDoc(sourceItemRef)
           transferredItems.push({ itemId, itemName: sourceItem.name || sourceItem.itemName || 'Unnamed Item', quantity: 1, serialNumber: sourceItem.serialNo || sourceItem.serialNumber || null })
         } else {
           const availableQty = sourceItem.quantity || sourceItem.Quantity || 0
@@ -814,9 +814,9 @@ const executeTransfer = async (transfer: any) => {
             continue
           }
           const newQty = availableQty - quantity
-          if (newQty <= 0) {
-            await deleteDoc(sourceItemRef)
-          } else {
+            if (newQty <= 0) {
+              await deleteDoc(sourceItemRef)
+            } else {
             await updateDoc(sourceItemRef, { quantity: newQty, Quantity: newQty, updatedAt: serverTimestamp() })
           }
           const destItemsRef = getInventoryItemsCollection(db, pathUserId, destinationStoreId)
@@ -870,7 +870,7 @@ const executeTransfer = async (transfer: any) => {
 
     const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
     await updateDoc(transferRef, {
-      status: errors.length > 0 ? 'partial' : 'completed',
+        status: errors.length > 0 ? 'partial' : 'completed',
       completedAt: serverTimestamp(),
       completedBy: userId,
       items: transferredItems.length ? transferredItems : transfer.items,
@@ -900,11 +900,11 @@ const approveTransfer = async (transfer: any) => {
   const transferRef = doc(db, 'users', pathUserId, 'storeTransfers', transfer.id)
   await updateDoc(transferRef, { status: 'in_transit', approvedAt: serverTimestamp(), approvedBy: userId })
   toast.success('Transfer approved. Stock is in transit.')
-  await loadTransferHistory()
+    await loadTransferHistory()
 }
 
 const cancelTransfer = async (transfer: any) => {
-  const authStore = useAuthStore()
+    const authStore = useAuthStore()
   const userId = authStore.currentUser?.uid
   if (!userId) return
   const db = useFirestore().getFirestoreInstance()
