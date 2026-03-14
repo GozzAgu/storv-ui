@@ -167,7 +167,7 @@
             <span class="text-[11px] tabular-nums">{{ folder.itemCount }}</span>
           </div>
           <div class="flex items-center gap-1" title="Total value">
-            <CurrencyDollarIcon class="w-3.5 h-3.5 shrink-0" />
+            <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 shrink-0">{{ currencySymbol }}</span>
             <span class="text-[11px] tabular-nums">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
           </div>
           <div class="flex items-center gap-1" :title="folder.lowStockCount ? 'Low stock' : 'Stock'">
@@ -573,7 +573,6 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   CubeIcon,
-  CurrencyDollarIcon,
   PencilSquareIcon,
   TrashIcon,
   DocumentDuplicateIcon,
@@ -593,6 +592,7 @@ import { useInventoryStore, type InventoryFolder, type Template, type TemplateFi
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
+import { usePreferences } from '~/composables/usePreferences'
 import { useAI } from '~/composables/useAI'
 import { useToast } from '~/composables/useToast'
 
@@ -711,6 +711,8 @@ const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const toast = useToast()
 const { canManage, canCreateInventoryFolders } = usePermissions()
+const { formatCurrency, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
 // Duplicate folders/items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {
@@ -975,13 +977,6 @@ const getFolderGradient = (color: string) => {
     yellow: 'from-yellow-500 to-yellow-600',
   }
   return gradientMap[color] || 'from-gray-500 to-gray-600'
-}
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)
 }
 
 const getDepartmentName = (deptId: string) => {

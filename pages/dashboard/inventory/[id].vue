@@ -690,7 +690,7 @@
                 />
                 <!-- Currency Input -->
                 <div v-else-if="field.type === 'currency'" class="relative">
-                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                   <input
                     v-model.number="itemForm[field.name]"
                     type="number"
@@ -1019,7 +1019,8 @@ const canDuplicateByPlan = computed(() => {
   const sub = userStore.userData?.subscription
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const { copyToClipboard } = useCopy()
 
 const copyItemId = (itemId: string) => {
