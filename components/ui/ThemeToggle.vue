@@ -9,7 +9,9 @@
       :checked="currentTheme === 'dark'"
       @change="toggleTheme"
     />
-    <span class="theme-slider"></span>
+    <span class="theme-track">
+      <span class="theme-knob"></span>
+    </span>
   </label>
 </template>
 
@@ -41,19 +43,18 @@ watch(() => actualTheme.value, () => {
 </script>
 
 <style scoped>
-/* Top-nav theme switch based on Uiverse design */
 .theme-switch {
-  display: flex;
+  --track-w: 2.5rem;
+  --track-h: 1.25rem;
+  --knob: 1rem;
+  --gap: 0.125rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  --width-of-switch: 3.2em;
-  --height-of-switch: 1.8em;
-  --size-of-icon: 1.3em;
-  --slider-offset: 0.25em;
-  position: relative;
-  width: var(--width-of-switch);
-  height: var(--height-of-switch);
+  width: var(--track-w);
+  height: var(--track-h);
   cursor: pointer;
+  position: relative;
 }
 
 .theme-switch input {
@@ -62,37 +63,34 @@ watch(() => actualTheme.value, () => {
   height: 0;
 }
 
-.theme-slider {
+.theme-track {
   position: absolute;
   inset: 0;
-  background-color: #f4f4f5;
-  transition: 0.4s;
   border-radius: 999px;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.04);
+  background: #e5e7eb;
+  transition: background 0.25s ease;
 }
 
-.theme-slider::before {
+.theme-knob {
   position: absolute;
-  content: "";
-  height: var(--size-of-icon, 1.3em);
-  width: var(--size-of-icon, 1.3em);
-  border-radius: 999px;
-  left: var(--slider-offset, 0.25em);
+  width: var(--knob);
+  height: var(--knob);
+  border-radius: 50%;
+  left: var(--gap);
   top: 50%;
   transform: translateY(-50%);
-  background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
-  transition: 0.4s;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
 }
 
-input:checked + .theme-slider {
-  background-color: #111827;
+input:checked + .theme-track {
+  background: #4b5563;
 }
 
-input:checked + .theme-slider::before {
-  left: calc(100% - (var(--size-of-icon, 1.3em) + var(--slider-offset, 0.25em)));
-  background: #111827;
-  box-shadow:
-    inset -3px -2px 5px -2px #8983f7,
-    inset -10px -4px 0 0 #a3dafb;
+input:checked + .theme-track .theme-knob {
+  left: calc(100% - var(--knob) - var(--gap));
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 </style>

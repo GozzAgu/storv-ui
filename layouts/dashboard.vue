@@ -317,10 +317,10 @@
           <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               @click="sidebarOpen = true"
-              class="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              class="lg:hidden flex items-center justify-center w-11 h-11 rounded-xl text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.97] transition-all duration-200"
               aria-label="Open menu"
             >
-              <Bars3Icon class="w-4 h-4" stroke-width="2" />
+              <Squares2X2Icon class="w-6 h-6" stroke-width="2" />
             </button>
             <!-- Page name -->
             <div class="hidden md:flex items-center gap-2 min-w-0">
@@ -457,7 +457,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import {
-  Bars3Icon,
+  Squares2X2Icon,
   XMarkIcon,
   HomeIcon,
   CubeIcon,
