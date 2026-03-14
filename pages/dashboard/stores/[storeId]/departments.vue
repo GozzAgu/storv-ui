@@ -157,9 +157,20 @@
           v-for="department in paginatedDepartments"
           :key="department.id"
           class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:scale-[0.99] cursor-pointer pt-2.5 pb-2 px-2.5 overflow-visible"
-          :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false }"
-          @click="department.isActive === false ? null : navigateToDepartment(department.id)"
+          :class="{
+            'opacity-60 cursor-not-allowed': department.isActive === false,
+            'pointer-events-none': deletingDepartmentId === department.id
+          }"
+          @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
         >
+          <!-- Deleting overlay -->
+          <div
+            v-if="deletingDepartmentId === department.id"
+            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-lg bg-gray-900/60 dark:bg-gray-950/70 backdrop-blur-[2px]"
+          >
+            <ArrowPathIcon class="w-6 h-6 animate-spin text-white mb-1" aria-hidden="true" />
+            <span class="text-[11px] font-medium text-white">Deleting...</span>
+          </div>
           <!-- Checkbox top-left -->
           <div v-if="canManageDepartments" class="absolute left-1.5 top-1.5 z-10" @click.stop>
             <Checkbox
@@ -195,11 +206,13 @@
               </button>
               <button
                 type="button"
+                :disabled="deletingDepartmentId === department.id"
+                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 @click="handleDeleteDepartment(department); openDepartmentMenuId = null"
-                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
-                <TrashIcon class="w-3.5 h-3.5 shrink-0" />
-                Delete
+                <ArrowPathIcon v-if="deletingDepartmentId === department.id" class="w-3.5 h-3.5 shrink-0 animate-spin" />
+                <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
+                {{ deletingDepartmentId === department.id ? 'Deleting...' : 'Delete' }}
               </button>
             </div>
           </div>
@@ -302,6 +315,7 @@
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
+          :loading="isBulkDeletingDepartments"
           :icon="TrashIcon"
           class="!rounded-lg"
           @click="handleConfirmBulkDeleteDepartments"
@@ -373,6 +387,9 @@ const selectedDepartmentsForBulk = ref<Department[]>([])
 const showBulkDeleteDepartmentsModal = ref(false)
 const bulkDeleteDepartmentsConfirmed = ref(false)
 const isBulkDeletingDepartments = ref(false)
+
+// Single department delete – which card is currently deleting
+const deletingDepartmentId = ref<string | null>(null)
 
 const searchQuery = ref('')
 
@@ -709,7 +726,7 @@ const handleConfirmBulkDeleteDepartments = async () => {
   const count = ids.length
   try {
     for (const id of ids) {
-      await departmentsStore.deleteDepartment(id)
+      await departmentsStore.deleteDepartment(id, storeId.value)
     }
     selectedDepartmentsForBulk.value = []
     showBulkDeleteDepartmentsModal.value = false
@@ -729,13 +746,15 @@ const handleEditDepartment = (department: Department) => {
 }
 
 const handleDeleteDepartment = async (department: Department) => {
-  if (confirm(`Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`)) {
-    try {
-      await departmentsStore.deleteDepartment(department.id)
-      alert('Department deleted successfully')
-    } catch (error: any) {
-      alert(error.message || 'Failed to delete department')
-    }
+  if (!confirm(`Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`)) return
+  deletingDepartmentId.value = department.id
+  try {
+    await departmentsStore.deleteDepartment(department.id, storeId.value)
+    toast.success('Department deleted successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete department')
+  } finally {
+    deletingDepartmentId.value = null
   }
 }
 

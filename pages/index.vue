@@ -14,6 +14,7 @@
             </NuxtLink>
           <div class="hidden md:flex items-center gap-8">
             <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Features</a>
+            <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">About</a>
             <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             <button
@@ -42,6 +43,7 @@
         >
           <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200/80 space-y-1">
             <a href="#features" @click.prevent="scrollToSection('features'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">Features</a>
+            <a href="#pricing" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">About</a>
             <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">Contact</a>
             <button @click="showContactFormModal = true; mobileMenuOpen = false" class="w-full mt-4 rounded-full bg-gray-900 text-white text-sm font-medium py-3">Start free trial</button>
@@ -76,7 +78,7 @@
               </h1>
 
           <p class="mt-6 text-lg text-white/80 leading-relaxed max-w-2xl">
-            Storvv helps you organize inventory your way, generate professional receipts, track customers automatically, and collaborate with your team in an all in one system.
+            Storvv is an all-in-one retail system: custom inventory folders, serial number tracking, professional receipts and returns, automatic customer history, departments and staff roles, analytics and low-stock alerts, and—on higher plans—multiple stores and stock transfers between locations.
             </p>
 
           <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -372,7 +374,7 @@
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Multi-Store Support</h3>
             <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Manage multiple store locations from one account. Centralized control with store-specific inventory and sales tracking.
+              Manage multiple store locations from one account (Medium: up to 5; Enterprise: unlimited). Each store has its own inventory, receipts, and staff.
             </p>
           </div>
           <div class="text-center group relative">
@@ -399,7 +401,7 @@
               </div>
             <h3 class="text-lg font-semibold text-gray-900 mb-3">Real-Time Analytics</h3>
             <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Track revenue, sales trends, inventory values, and customer insights. Make data-driven decisions with comprehensive dashboards.
+              Available on Medium and Enterprise. Revenue charts, sales trends, busiest times, and exportable reports so you can make data-driven decisions.
             </p>
           </div>
         </div>
@@ -410,69 +412,83 @@
     <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
-          Find your plan
-          </h2>
+          Plans that fit your size
+        </h2>
+        <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
+          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
+        </p>
         <div class="flex items-center justify-center gap-3 mt-6">
           <span :class="['text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500']">Monthly</span>
-            <button
-              @click="isYearly = !isYearly"
+          <button
+            @click="isYearly = !isYearly"
             :class="['relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2', isYearly ? 'bg-primary-500' : 'bg-gray-300']"
-              role="switch"
-              :aria-checked="isYearly"
-            >
+            role="switch"
+            :aria-checked="isYearly"
+          >
             <span :class="['inline-block h-5 w-5 rounded-full bg-white shadow transition-transform', isYearly ? 'translate-x-6' : 'translate-x-1']" />
-            </button>
+          </button>
           <span :class="['text-sm font-medium flex items-center gap-2', isYearly ? 'text-gray-900' : 'text-gray-500']">
-              Yearly
+            Yearly
             <span v-if="isYearly" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Save 15%</span>
-            </span>
-          </div>
+          </span>
+        </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
+          <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
           <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Micro</h3>
+            <p class="mt-1 text-xs text-gray-500">Single store, solo or very small team</p>
             <p class="mt-4 text-2xl font-bold text-gray-900">FREE</p>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1">
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 10 users</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Optional support</li>
-                </ul>
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 department, up to 2 staff</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Full inventory & folders</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Receipts, returns & customers</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard & notifications</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
+              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No analytics; no multiple departments; no multi-store sync</li>
+            </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
-              </div>
+          </div>
+          <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 rounded-2xl border-2 border-primary-200 bg-white p-6 flex flex-col shadow-lg shadow-primary-500/5">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Medium</h3>
+            <p class="mt-1 text-xs text-gray-500">Growing business, multiple locations or teams</p>
             <div class="mt-4 flex items-baseline gap-2">
               <span class="text-2xl font-bold text-gray-900">{{ isYearly ? 'N100,000' : 'N10,000' }}</span>
               <span v-if="isYearly" class="text-sm text-gray-400 line-through">N120,000</span>
             </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1">
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 100 users</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 3 stores</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics</li>
-                </ul>
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 5 stores</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 10 departments, 25 staff per store</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics & reports</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
+              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No stock transfers between stores (Enterprise only)</li>
+            </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
-              </div>
+          </div>
+          <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Enterprise</h3>
+            <p class="mt-1 text-xs text-gray-500">Larger operations, central management</p>
             <div class="mt-4 flex items-baseline gap-2">
               <span class="text-2xl font-bold text-gray-900">{{ isYearly ? 'N200,000' : 'N25,000' }}</span>
               <span v-if="isYearly" class="text-sm text-gray-400 line-through">N300,000</span>
-              </div>
-            <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1">
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited users</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />24/7 support</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync</li>
-              <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics</li>
-                </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
-              </div>
-              </div>
             </div>
+            <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited departments & staff</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
+            </ul>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Security -->
@@ -728,6 +744,29 @@
               </div>
             </Transition>
           </div>
+
+          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+            <button @click="toggleFaq(11)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
+              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
+                <BanknotesIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What’s the difference between Micro, Medium, and Enterprise?</h3>
+              </div>
+              <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(11) ? 'rotate-180' : '']" />
+            </button>
+            <Transition enter-active-class="transition-all duration-200 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-200 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
+              <div v-show="openFaqItems.has(11)" class="px-4 sm:px-5 pb-4 sm:pb-5">
+                <div class="pl-11 sm:pl-12">
+                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard and notifications. No analytics, no multiple departments, no multi-store sync.<br><br>
+                    <strong>Medium:</strong> Everything in Micro plus up to 5 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
+                    <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); and priority support.
+                  </p>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
       </div>
     </section>
@@ -898,7 +937,7 @@
               <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Product</h4>
               <ul class="space-y-2.5">
                 <li><a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Features</a></li>
-                <li><a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Pricing</a></li>
+                <li><a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Plans</a></li>
                 <li><a href="#faq" @click.prevent="scrollToSection('faq')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">FAQs</a></li>
               </ul>
             </div>
@@ -1138,35 +1177,51 @@ const visibleFeatures = computed(() => {
 const features = [
   {
     title: 'Custom Inventory Folders',
-    description: 'Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products exactly.'
+    description: 'Create unlimited folders with your own fields (text, numbers, dates, currency, select, boolean). Each folder can have serial number tracking or bulk quantities—organize inventory your way.'
   },
   {
-    title: 'Serial Number Tracking',
-    description: 'Track individual items with serial numbers. Perfect for electronics, devices, or any product that requires unique identification.'
+    title: 'Serial Number & Bulk Tracking',
+    description: 'Track items by serial number for devices and electronics, or by quantity for bulk stock. Low-stock thresholds and alerts keep you ahead of restocking.'
   },
   {
-    title: 'Excel Import/Export',
-    description: 'Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.'
+    title: 'Excel Import & Export',
+    description: 'Bulk import products from Excel or export inventory for backup and analysis. Duplicate detection and column mapping make setup fast.'
   },
   {
-    title: 'Professional Receipt System',
-    description: 'Generate A4-optimized receipts with automatic customer tracking. Handle discounts, swap-ins, and multiple payment methods seamlessly.'
+    title: 'Professional Receipts & Sales',
+    description: 'Generate clean, A4-optimized receipts. Apply discounts, record swap-ins and returns, and support multiple payment methods. Every sale links to your customer list.'
   },
   {
-    title: 'Automatic Customer Management',
-    description: 'Customers are automatically created from receipts. Track purchase history, total spending, and order counts effortlessly.'
+    title: 'Automatic Customer History',
+    description: 'Customers are created from receipts (email, phone, or name). View purchase history, total spend, and order counts without manual data entry.'
   },
   {
-    title: 'Returns & Refunds',
-    description: 'Process returns and refunds with ease. Automatic inventory restoration and customer history updates built right in.'
+    title: 'Returns, Refunds & Swap-Ins',
+    description: 'Process returns and refunds with one click; inventory updates automatically. Swap-in transactions track exchanges and trade-ins back into stock.'
   },
   {
-    title: 'Team & Department Management',
-    description: 'Organize staff into departments with granular role-based permissions. Control folder access for managers and staff members.'
+    title: 'Departments & Staff Roles',
+    description: 'Create departments and assign staff with Super Admin, Manager, or Staff roles. Control which inventory folders each department can access.'
   },
   {
-    title: 'Real-Time Analytics Dashboard',
-    description: 'Comprehensive dashboard with revenue charts, sales trends, inventory status, and low stock alerts at a glance.'
+    title: 'Dashboard & Analytics',
+    description: 'Overview dashboard with quick stats. On Medium and Enterprise: full analytics—revenue trends, busiest times, product performance, and exportable reports.'
+  },
+  {
+    title: 'Multiple Stores',
+    description: 'Medium and Enterprise support multiple store locations. Each store has its own inventory, receipts, and staff; manage all from one account.'
+  },
+  {
+    title: 'Multi-Store Sync (Enterprise)',
+    description: 'Transfer stock between stores, view consolidated reports, and keep a full transfer history. Built for chains and central warehouses.'
+  },
+  {
+    title: 'In-App Notifications',
+    description: 'Stay updated with notifications for sales, low stock, and important account activity—all in one feed.'
+  },
+  {
+    title: 'Settings & Profile',
+    description: 'Configure currency, timezone, and language per profile. Store-level settings, theme and notifications preferences, and secure account management.'
   }
 ]
 

@@ -4,7 +4,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { getDepartmentsCollection, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getDepartmentsCollection, getDepartmentDocument, getStaffCollection, getQueryUserId } from '~/composables/useFirestorePaths'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
@@ -340,7 +340,8 @@ export const useDepartmentsStore = defineStore('departments', {
     },
 
     // Delete a department
-    async deleteDepartment(departmentId: string) {
+    // When on a store's departments page, pass storeId so the correct path is used
+    async deleteDepartment(departmentId: string, storeIdParam?: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -361,34 +362,36 @@ export const useDepartmentsStore = defineStore('departments', {
         throw new Error('Staff members do not have permission to delete departments')
       }
 
-      // Get current store ID
-      const storeId = await getCurrentStoreId()
+      // Use provided storeId (e.g. from route) or current store
+      let storeId = storeIdParam
+      if (!storeId) {
+        storeId = await getCurrentStoreId() ?? undefined
+      }
       if (!storeId) {
         throw new Error('No store selected')
       }
 
       try {
+        const userId = await getQueryUserId()
+        if (!userId) {
+          throw new Error('User ID not available')
+        }
+
         // First verify the department belongs to this user and store
         const department = await this.fetchDepartment(departmentId)
         if (!department || department.createdBy !== authStore.currentUser.uid) {
           throw new Error('Department not found or access denied')
         }
 
-        // Check if department has staff (only staff created by this user and in this store)
-        const staffRef = collection(db, 'staff')
-        const q = query(
-          staffRef,
-          where('departmentId', '==', departmentId),
-          where('storeId', '==', storeId),
-          where('createdBy', '==', authStore.currentUser.uid)
-        )
-        const querySnapshot = await getDocs(q)
-
-        if (!querySnapshot.empty) {
+        // Check if department has staff using hierarchical path (same path as in rules)
+        const staffRef = getStaffCollection(db, userId, storeId, departmentId)
+        const staffSnapshot = await getDocs(staffRef)
+        if (!staffSnapshot.empty) {
           throw new Error('Cannot delete department with existing staff. Please remove all staff first.')
         }
 
-        const departmentRef = doc(db, 'departments', departmentId)
+        // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}
+        const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
         await deleteDoc(departmentRef)
 
         // Remove from local state
