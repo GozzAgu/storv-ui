@@ -1150,9 +1150,9 @@ const userName = computed(() => {
     return cachedUserName.value
   }
   
-  // Try to get name from Firestore userData first
+  // Try to get name from Firestore userData first (only if it's for the current auth user)
   // During staff creation, ignore userData if it's for staff (preserve super admin cache)
-  if (userStore.userData?.name && currentUserId) {
+  if (userStore.userData?.name && currentUserId && userStore.userData.uid === currentUserId) {
     const name = userStore.userData.name ?? null
     const userRole = userStore.userData.role
     
@@ -1255,8 +1255,9 @@ const userEmail = computed(() => {
   
   // Cache it for this user (only if not staff creation and it's super admin)
   if (email && currentUserId && !isStaffCreationInProgress) {
-    // Only cache if userStore indicates this is a super admin (or we don't have userData yet)
-    if (userStore.userData?.role === 'superAdmin' || !userStore.userData) {
+    // Only cache if userStore indicates this is the current user (same uid) and is super admin (or we don't have userData yet)
+    const isCurrentUserData = userStore.userData && userStore.userData.uid === currentUserId
+    if ((isCurrentUserData && userStore.userData?.role === 'superAdmin') || !userStore.userData) {
       cachedUserEmail.value = email
       cachedUserId.value = currentUserId ?? null
       setCachedUserEmail(email, currentUserId ?? null)
@@ -1299,13 +1300,13 @@ const userInitials = computed(() => {
 const handleSignOut = async () => {
   const { signOut } = useFirebaseAuth()
   try {
-    // Clear cached user data from localStorage on sign out
+    userStore.clearUserData()
     clearCachedUser()
     await signOut()
     navigateTo('/signin')
   } catch (error) {
     console.error('Sign out error:', error)
-    // Still navigate even if sign out fails
+    userStore.clearUserData()
     clearCachedUser()
     navigateTo('/signin')
   }
@@ -1503,14 +1504,14 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     const hasUserData = userStore.userData && userStore.userData.uid === user.uid
     const userChanged = oldUser?.uid !== user.uid
     
-    // If user changed, clear old cache and load new user's cache
+    // If user changed, clear old user data and cache so nav never shows previous user
     if (userChanged && !isStaffCreationInProgress) {
-      // Clear old cache
+      userStore.clearUserData()
       cachedUserName.value = null
       cachedUserEmail.value = null
       cachedUserId.value = null
       
-      // Load new user's cache from localStorage
+      // Load new user's cache from localStorage (if they signed in before)
       const storedName = getCachedUserName()
       const storedEmail = getCachedUserEmail()
       const storedUserId = getCachedUserId()

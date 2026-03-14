@@ -529,8 +529,8 @@
           </Button>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
-          <div v-if="duplicateFolderNames.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
-            Click "Add name" to enter folder name(s)
+          <div v-if="duplicateFolderNames.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50/50 dark:bg-gray-800/30">
+            Click "+ Add name" to enter folder name(s)
           </div>
           <div
             v-for="(name, index) in duplicateFolderNames"
@@ -540,7 +540,7 @@
             <input
               v-model="duplicateFolderNames[index]"
               type="text"
-              class="flex-1 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
               placeholder="New folder name"
             />
             <button
