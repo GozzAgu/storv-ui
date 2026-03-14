@@ -41,17 +41,20 @@ export const useThemeStore = defineStore('theme', {
       }
     },
 
-    // Apply theme to document
+    // Apply theme to document (smooth transition for theme-related properties)
     applyTheme() {
       if (import.meta.client) {
         const html = document.documentElement
         const isDark = this.actualTheme === 'dark'
-        
+        html.classList.add('theme-transitioning')
         if (isDark) {
           html.classList.add('dark')
         } else {
           html.classList.remove('dark')
         }
+        setTimeout(() => {
+          html.classList.remove('theme-transitioning')
+        }, 320)
       }
     },
 
