@@ -1,32 +1,32 @@
 <template>
-  <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-4">
+  <div class="w-full flex flex-col sm:flex-row items-center justify-between gap-3 px-3 sm:px-4 py-2">
     <!-- Results summary -->
-    <p class="text-sm text-gray-500 dark:text-gray-400 order-2 sm:order-1">
-      <span class="font-medium text-gray-700 dark:text-gray-300">{{ startIndex + 1 }}</span>
-      <span class="mx-1">–</span>
-      <span class="font-medium text-gray-700 dark:text-gray-300">{{ endIndex }}</span>
-      <span class="mx-1">of</span>
-      <span class="font-medium text-gray-700 dark:text-gray-300">{{ total }}</span>
+    <p class="text-xs text-gray-500 dark:text-gray-500 order-2 sm:order-1 tabular-nums">
+      <span class="font-medium text-gray-600 dark:text-gray-400">{{ startIndex + 1 }}</span>
+      <span class="mx-0.5">–</span>
+      <span class="font-medium text-gray-600 dark:text-gray-400">{{ endIndex }}</span>
+      <span class="mx-0.5">of</span>
+      <span class="font-medium text-gray-600 dark:text-gray-400">{{ total }}</span>
     </p>
 
     <!-- Page controls -->
-    <div class="flex items-center gap-1.5 order-1 sm:order-2">
+    <div class="flex items-center gap-0.5 order-1 sm:order-2">
       <button
         type="button"
         @click="$emit('page-change', currentPage - 1)"
         :disabled="currentPage === 1"
-        :aria-label="'Previous page'"
+        aria-label="Previous page"
         :class="[
-          'flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all duration-200',
+          'flex items-center justify-center w-7 h-7 rounded-none text-xs font-medium transition-colors duration-150',
           currentPage === 1
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-gray-100'
+            : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
         ]"
       >
-        <ChevronLeftIcon class="w-5 h-5" stroke-width="2" />
+        <ChevronLeftIcon class="w-4 h-4" stroke-width="2" />
       </button>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-0.5">
         <template v-for="page in visiblePages" :key="page">
           <button
             v-if="page !== -1"
@@ -35,15 +35,15 @@
             :aria-label="`Page ${page}`"
             :aria-current="page === currentPage ? 'page' : undefined"
             :class="[
-              'min-w-[2.25rem] h-9 px-3 text-sm font-medium rounded-full transition-all duration-200',
+              'min-w-[1.75rem] h-7 px-2 text-xs font-medium transition-colors duration-150',
               page === currentPage
-                ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/25 dark:shadow-primary-400/20'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-gray-100'
+                ? 'rounded-md bg-primary-600 dark:bg-primary-500 text-white dark:text-white'
+                : 'rounded-none text-gray-600 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-primary-500/20 hover:text-primary-600 dark:hover:text-primary-400'
             ]"
           >
             {{ page }}
           </button>
-          <span v-else class="flex items-center justify-center w-9 h-9 text-gray-400 dark:text-gray-500 select-none" aria-hidden="true">…</span>
+          <span v-else class="flex items-center justify-center w-7 h-7 rounded-none text-xs text-gray-400 dark:text-gray-500 select-none" aria-hidden="true">…</span>
         </template>
       </div>
 
@@ -51,15 +51,15 @@
         type="button"
         @click="$emit('page-change', currentPage + 1)"
         :disabled="currentPage === totalPages"
-        :aria-label="'Next page'"
+        aria-label="Next page"
         :class="[
-          'flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all duration-200',
+          'flex items-center justify-center w-7 h-7 rounded-none text-xs font-medium transition-colors duration-150',
           currentPage === totalPages
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-gray-100'
+            : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
         ]"
       >
-        <ChevronRightIcon class="w-5 h-5" stroke-width="2" />
+        <ChevronRightIcon class="w-4 h-4" stroke-width="2" />
       </button>
     </div>
   </div>

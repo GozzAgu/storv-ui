@@ -547,7 +547,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(30)
+const itemsPerPage = ref(100)
 const sidebarCollapsed = ref(false)
 
 // Load sidebar state from localStorage

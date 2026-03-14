@@ -456,7 +456,7 @@ const getStaffInitialPage = (): number => {
   return 1
 }
 const staffCurrentPage = ref(getStaffInitialPage())
-const staffItemsPerPage = ref(30)
+const staffItemsPerPage = ref(100)
 
 // Staff modal
 const showStaffModal = ref(false)

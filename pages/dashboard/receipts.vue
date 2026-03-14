@@ -637,33 +637,24 @@
       </div>
     </div>
 
-    <!-- Bottom bar: Load more / Pagination -->
+    <!-- Bottom bar: Pagination -->
     <div
       v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
       class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom rounded-t-2xl"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
       <div class="px-4 sm:px-6 py-4">
-        <div v-if="showLoadMore" class="flex justify-center">
-          <Button variant="outline" size="sm" @click="loadMoreItems" extra-class="!rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
-            Load more ({{ displayedItemsCount }} of {{ sortedFilteredReceipts.length }})
-          </Button>
-        </div>
         <Pagination
-          v-else-if="usePagination"
           :current-page="currentPage"
-          :items-per-page="50"
+          :items-per-page="itemsPerPage"
           :total="sortedFilteredReceipts.length"
           @page-change="handlePageChange"
         />
-        <div v-else class="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          Showing all {{ sortedFilteredReceipts.length }} receipts
-        </div>
       </div>
     </div>
 
     <!-- Fullscreen pagination -->
-    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0 && usePagination" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
+    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
       <Pagination
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
@@ -1176,10 +1167,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(30)
-// Hybrid pagination: Load More (20 → 50) then switch to pagination
-const displayedItemsCount = ref(20)
-const usePagination = ref(false)
+const itemsPerPage = ref(100)
 const sidebarCollapsed = ref(false)
 
 // Sorting state
@@ -1213,7 +1201,7 @@ const getCustomersInitialPage = (): number => {
   return 1
 }
 const customersCurrentPage = ref(getCustomersInitialPage())
-const customersItemsPerPage = ref(30)
+const customersItemsPerPage = ref(100)
 
 // Customer interface for display
 interface CustomerDisplay {
@@ -1575,46 +1563,14 @@ const sortedFilteredReceipts = computed(() => {
 })
 
 const paginatedReceipts = computed(() => {
-  if (usePagination.value) {
-    // Traditional pagination mode (50 items per page)
-    const start = (currentPage.value - 1) * 50
-    const end = start + 50
-    return sortedFilteredReceipts.value.slice(start, end)
-  } else {
-    // Load More mode: show up to displayedItemsCount
-    return sortedFilteredReceipts.value.slice(0, displayedItemsCount.value)
-  }
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return sortedFilteredReceipts.value.slice(start, end)
 })
 
-// Check if we should show Load More button
-const showLoadMore = computed(() => {
-  return !usePagination.value && displayedItemsCount.value < sortedFilteredReceipts.value.length && displayedItemsCount.value < 50
-})
-
-// Check if we can load more (not at 50 yet)
-const canLoadMore = computed(() => {
-  return displayedItemsCount.value < 50 && displayedItemsCount.value < sortedFilteredReceipts.value.length
-})
-
-// Load more items
-const loadMoreItems = () => {
-  if (canLoadMore.value) {
-    displayedItemsCount.value = Math.min(displayedItemsCount.value + 10, 50)
-    // If we've reached 50, switch to pagination mode
-    if (displayedItemsCount.value >= 50) {
-      usePagination.value = true
-      currentPage.value = 1
-      itemsPerPage.value = 50
-    }
-  }
-}
-
-// Reset to Load More mode when filters change
+// Reset to first page when filters change
 watch([searchQuery, statusFilter, dateFilter, currentSort], () => {
-  displayedItemsCount.value = 20
-  usePagination.value = false
   currentPage.value = 1
-  itemsPerPage.value = 30
 })
 
 const toggleSort = (key: string) => {
@@ -1655,10 +1611,6 @@ const resetFilters = () => {
   statusFilter.value = 'all'
   dateFilter.value = 'all'
   currentPage.value = 1
-  displayedItemsCount.value = 20
-  usePagination.value = false
-  itemsPerPage.value = 30
-  // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {
     try {
       localStorage.setItem('receipts-page', '1')
