@@ -79,7 +79,7 @@
       <button
         @click="handleResendCode"
         :disabled="isResending"
-        class="w-full text-sm text-primary-600 dark:text-primary-400 hover:underline disabled:opacity-50"
+        class="w-full text-sm text-primary-500 dark:text-primary-400 hover:underline disabled:opacity-50"
       >
         {{ isResending ? 'Sending...' : "Didn't receive code? Resend" }}
       </button>

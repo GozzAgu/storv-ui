@@ -15,7 +15,7 @@
       <div class="text-center mb-8">
         <NuxtLink
           to="/"
-          class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 rounded-lg"
+          class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg"
         >
           <img
             :src="logoSource"
@@ -46,7 +46,7 @@
                 type="text"
                 autocomplete="name"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="John Doe"
               />
             </div>
@@ -61,7 +61,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="you@example.com"
               />
             </div>
@@ -77,7 +77,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Create a password (min 8 characters)"
                 />
                 <button
@@ -103,7 +103,7 @@
                   :type="showConfirmPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Re-enter your password"
                 />
                 <button
@@ -159,19 +159,19 @@
                 v-model="form.acceptTerms"
                 type="checkbox"
                 required
-                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800 mt-0.5"
+                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800 mt-0.5"
               />
               <label for="terms" class="ml-2.5 text-xs sm:text-sm text-gray-600 dark:text-gray-300 cursor-pointer select-none">
                 I agree to the
                 <NuxtLink
                   to="/terms"
-                  class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
+                  class="text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300"
                   >Terms of Service</NuxtLink
                 >
                 and
                 <NuxtLink
                   to="/privacy"
-                  class="text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
+                  class="text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300"
                   >Privacy Policy</NuxtLink
                 >
               </label>
@@ -216,7 +216,7 @@
             Already have an account?
             <NuxtLink
               to="/signin"
-              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+              class="font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors"
             >
               Sign in
             </NuxtLink>

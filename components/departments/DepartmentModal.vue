@@ -46,7 +46,7 @@
               type="button"
               @click="generateAIDescription"
               :disabled="isGeneratingDescription || !formData.name || !formData.departmentType"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <SparklesIcon v-if="!isGeneratingDescription" class="w-3 h-3" />
               <svg v-else class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -7,7 +7,7 @@
     <template #header>
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-primary-500/10 dark:bg-primary-400/10 flex items-center justify-center">
-          <TagIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
+          <TagIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
         </div>
         <div>
           <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Apply discount</h3>
@@ -37,7 +37,7 @@
               :class="[
                 'py-2.5 px-3 rounded-xl text-left transition-all duration-200 border',
                 discountType === 'percentage'
-                  ? 'border-primary-500/60 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500/30'
+                  ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
               ]"
             >
@@ -50,7 +50,7 @@
               :class="[
                 'py-2.5 px-3 rounded-xl text-left transition-all duration-200 border',
                 discountType === 'amount'
-                  ? 'border-primary-500/60 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 ring-1 ring-primary-500/30'
+                  ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
               ]"
             >

@@ -5,11 +5,11 @@
       <div class="mb-8">
         <div class="flex items-center justify-between mb-2">
           <h2 class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
-          <span class="text-sm font-medium text-primary-600 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
+          <span class="text-sm font-medium text-primary-500 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div 
-            class="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-primary-400 to-primary-500 h-2 rounded-full transition-all duration-300"
             :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
           ></div>
         </div>
@@ -40,7 +40,7 @@
               id="currency"
               v-model="selectedCurrency"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose a currency...</option>
               <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
@@ -61,7 +61,7 @@
               id="country"
               v-model="selectedCountry"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose your country...</option>
               <option v-for="region in regions" :key="region.code" :value="region.code">
@@ -98,7 +98,7 @@
               v-model="storeDetails.storeName"
               type="text"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Enter head store branch"
             />
           </div>
@@ -112,7 +112,7 @@
               id="storeAddress"
               v-model="storeDetails.storeAddress"
               rows="3"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="123 Main Street, City, State 12345"
             ></textarea>
           </div>
@@ -126,7 +126,7 @@
               id="storePhone"
               v-model="storeDetails.storePhone"
               type="tel"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -140,7 +140,7 @@
               id="storeEmail"
               v-model="storeDetails.storeEmail"
               type="email"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="store@example.com"
             />
           </div>
@@ -154,7 +154,7 @@
               id="storeDescription"
               v-model="storeDetails.storeDescription"
               rows="3"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
@@ -181,7 +181,7 @@
             @click="nextStep"
             :disabled="isLoading || (currentStep === 1 && (!selectedCurrency || !selectedCountry)) || (currentStep === 2 && !storeDetails.storeName?.trim())"
             type="button"
-            class="px-6 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
+            class="px-6 py-2.5 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
           >
             <span v-if="!isLoading">
               {{ currentStep === totalSteps ? 'Complete Setup' : 'Continue' }}

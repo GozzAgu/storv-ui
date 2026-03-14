@@ -41,7 +41,7 @@
           :class="[
             'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
             activeTab === 'receipts'
-              ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
+              ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           ]"
         >
@@ -52,7 +52,7 @@
           :class="[
             'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
             activeTab === 'customers'
-              ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
+              ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
           ]"
         >
@@ -98,12 +98,12 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search receipts..."
-              class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             />
           </div>
           <select
             v-model="statusFilter"
-            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[120px]"
           >
             <option value="all">All Status</option>
             <option value="completed">Completed</option>
@@ -112,7 +112,7 @@
           </select>
           <select
             v-model="dateFilter"
-            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[120px]"
           >
             <option value="all">All Dates</option>
             <option value="today">Today</option>
@@ -151,7 +151,7 @@
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalSales) }}</span>
             </div>
             <div class="hidden sm:flex items-center gap-1.5">
-              <CalendarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
+              <CalendarIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                 <span v-if="receiptsStore.loading">-</span>
@@ -174,12 +174,12 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search receipts..."
-                class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-40 sm:w-48"
+                class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30 w-40 sm:w-48"
               />
             </div>
             <select
               v-model="statusFilter"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
+              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
             >
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
@@ -188,7 +188,7 @@
             </select>
             <select
               v-model="dateFilter"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
+              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
             >
               <option value="all">All Dates</option>
               <option value="today">Today</option>
@@ -283,11 +283,11 @@
                   <template v-if="isColumnSortable('receiptNumber')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'receiptNumber' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'receiptNumber' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -305,11 +305,11 @@
                   <template v-if="isColumnSortable('customerName')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'customerName' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'customerName' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -327,11 +327,11 @@
                   <template v-if="isColumnSortable('date')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'date' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'date' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -349,11 +349,11 @@
                   <template v-if="isColumnSortable('itemsCount')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'itemsCount' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'itemsCount' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -371,11 +371,11 @@
                   <template v-if="isColumnSortable('total')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'total' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'total' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -393,11 +393,11 @@
                   <template v-if="isColumnSortable('paymentMethod')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'paymentMethod' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'paymentMethod' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -415,11 +415,11 @@
                   <template v-if="isColumnSortable('status')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'status' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'status' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -437,11 +437,11 @@
                   <template v-if="isColumnSortable('createdBy')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'createdBy' && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === 'createdBy' && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -675,7 +675,7 @@
       </span>
       <button
         @click="openCreateReceiptModal"
-        class="group w-11 h-11 rounded-full bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+        class="group w-11 h-11 rounded-full bg-primary-500 hover:bg-primary-600 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
         aria-label="Create new receipt"
       >
         <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
@@ -776,7 +776,7 @@
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customersTotalRevenue) }}</span>
             </div>
             <div class="hidden sm:flex items-center gap-1.5">
-              <ChartBarIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
+              <ChartBarIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Avg. order:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customersAverageOrderValue) }}</span>
             </div>
@@ -788,12 +788,12 @@
                 v-model="customersSearchQuery"
                 type="text"
                 placeholder="Search customers..."
-                class="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                class="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
               />
             </div>
             <select
               v-model="customersSortBy"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
+              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
             >
               <option value="name">Name</option>
               <option value="orders">Orders</option>
@@ -844,7 +844,7 @@
                       @click="toggleCustomerExpanded(customer.id)"
                       type="button"
                       :title="expandedCustomers[customer.id] ? 'Collapse receipts' : 'Expand to view receipts'"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800/50 border border-primary-200/80 dark:border-primary-700/60 transition-colors"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800/50 border border-primary-200/80 dark:border-primary-600/60 transition-colors"
                     >
                       <ChevronRightIcon
                         :class="['w-4 h-4 shrink-0 transition-transform duration-200', expandedCustomers[customer.id] ? 'rotate-90' : '']"

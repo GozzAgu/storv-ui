@@ -24,7 +24,7 @@
               :class="[
                 'p-3 border-2 rounded-lg transition-all text-center',
                 discountType === 'percentage'
-                  ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
               ]"
             >
@@ -37,7 +37,7 @@
               :class="[
                 'p-3 border-2 rounded-lg transition-all text-center',
                 discountType === 'amount'
-                  ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
               ]"
             >
@@ -71,7 +71,7 @@
               :max="discountType === 'percentage' ? 100 : undefined"
               step="any"
               :placeholder="discountType === 'percentage' ? '10' : '5.00'"
-              class="w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
           <p v-if="discountType === 'percentage'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">

@@ -54,7 +54,7 @@
             :class="[
               'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'transfer'
-                ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
+                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
           >
@@ -65,7 +65,7 @@
             :class="[
               'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'reports'
-                ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
+                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
           >
@@ -76,7 +76,7 @@
             :class="[
               'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
               activeTab === 'history'
-                ? 'text-primary-600 dark:text-primary-400 ring-1 ring-primary-500/50 dark:ring-primary-400/50'
+                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
           >
@@ -96,7 +96,7 @@
             <select
               v-model="transferForm.sourceStoreId"
               @change="loadSourceStoreInventory"
-              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             >
               <option value="">Select source store</option>
               <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
@@ -107,7 +107,7 @@
             <select
               v-model="transferForm.destinationStoreId"
               @change="loadDestinationStoreFolders"
-              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             >
               <option value="">Select destination store</option>
               <option v-for="store in stores.filter(s => s.id !== transferForm.sourceStoreId)" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
@@ -117,7 +117,7 @@
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Destination folder</label>
             <select
               v-model="transferForm.destinationFolderId"
-              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             >
               <option value="">Select destination folder</option>
               <option v-for="folder in destinationFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
@@ -129,7 +129,7 @@
             <select
               v-model="transferForm.folderId"
               @change="loadFolderItems"
-              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             >
               <option value="">Select folder</option>
               <option v-for="folder in sourceFolders" :key="folder.id" :value="folder.id">{{ folder.name }}</option>
@@ -164,7 +164,7 @@
                         type="number"
                         :max="getAvailableQuantity(item)"
                         min="0"
-                        class="w-16 px-2 py-1 text-xs rounded-md ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30"
+                        class="w-16 px-2 py-1 text-xs rounded-md ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400/30"
                         placeholder="0"
                       />
                     </td>
@@ -174,7 +174,7 @@
                         type="checkbox"
                         :true-value="1"
                         :false-value="0"
-                        class="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30"
+                        class="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30"
                       />
                     </td>
                   </tr>
@@ -188,7 +188,7 @@
             <textarea
               v-model="transferForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 resize-none"
+              class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30 resize-none"
               placeholder="Add any notes about this transfer..."
             />
           </div>
@@ -221,7 +221,7 @@
               <select
                 v-model="reportFilters.dateRange"
                 @change="loadConsolidatedReports"
-                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
               >
                 <option value="7">Last 7 days</option>
                 <option value="30">Last 30 days</option>
@@ -235,7 +235,7 @@
               <select
                 v-model="reportFilters.storeIds"
                 @change="loadConsolidatedReports"
-                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                class="w-full px-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
               >
                 <option value="all">All stores</option>
                 <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
@@ -322,7 +322,7 @@
               <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div class="flex-1 min-w-0">
                   <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                    <ArrowsRightLeftIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                    <ArrowsRightLeftIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400 flex-shrink-0" />
                     <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     {{ getStoreName(transfer.sourceStoreId) }} → {{ getStoreName(transfer.destinationStoreId) }}
                   </p>

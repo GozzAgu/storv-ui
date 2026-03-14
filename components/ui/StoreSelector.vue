@@ -79,7 +79,7 @@
               @click="switchStore(store.id)"
               class="w-full text-left flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors duration-150"
               :class="currentStore?.id === store.id
-                ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300'
+                ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-300'
                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:bg-gray-200 dark:active:bg-gray-700'"
             >
               <div class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 ring-1 ring-gray-200/50 dark:ring-gray-600/50">
@@ -94,7 +94,7 @@
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span
                     v-if="currentStore?.id === store.id"
-                    class="inline-flex items-center gap-1 text-[11px] text-primary-600 dark:text-primary-400"
+                    class="inline-flex items-center gap-1 text-[11px] text-primary-500 dark:text-primary-400"
                   >
                     <span class="w-1 h-1 rounded-full bg-emerald-500 ring-2 ring-primary-100 dark:ring-primary-500/30" />
                     Current

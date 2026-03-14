@@ -12,7 +12,7 @@
             :class="[
               'p-4 rounded-md border transition-all text-left',
               selectedMethod === 'totp'
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
@@ -35,7 +35,7 @@
             :class="[
               'p-4 rounded-md border transition-all text-left',
               selectedMethod === 'phone'
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
@@ -69,7 +69,7 @@
             </div>
             <div v-else class="w-56 h-56 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
               <div class="text-center">
-                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mb-2"></div>
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-500 mb-2"></div>
                 <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Generating QR code...</p>
               </div>
             </div>
@@ -86,7 +86,7 @@
               </code>
               <button
                 @click="copySecret"
-                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
               >
                 Copy
               </button>
@@ -110,7 +110,7 @@
           <input
             v-model="phoneNumber"
             type="tel"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-sm"
             placeholder="+1234567890"
           />
           <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
@@ -139,7 +139,7 @@
             v-model="verificationCode"
             type="text"
             maxlength="6"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-xl tracking-widest font-mono"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-center text-xl tracking-widest font-mono"
             placeholder="000000"
             @input="formatCode"
           />

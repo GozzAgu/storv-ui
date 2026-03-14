@@ -35,7 +35,7 @@
             <p class="mt-1 text-base font-bold text-gray-900 dark:text-gray-100">{{ staff.length }}</p>
           </div>
           <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <UsersIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <UsersIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
           </div>
         </div>
       </div>
@@ -110,12 +110,12 @@
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[160px]">{{ department?.departmentType || '—' }}</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <UserCircleIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <UserCircleIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Manager:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[180px]">{{ currentManager }}</span>
             </div>
             <div class="flex items-center gap-1.5">
-              <UsersIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+              <UsersIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
               <span class="text-xs text-gray-600 dark:text-gray-400">Staff:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ staff.length }}</span>
             </div>

@@ -56,7 +56,7 @@ const getColorClasses = (color?: string) => {
     case 'purple':
       return 'bg-purple-600 hover:bg-purple-700 text-white'
     default:
-      return 'bg-primary-600 hover:bg-primary-700 text-white'
+      return 'bg-primary-500 hover:bg-primary-600 text-white'
   }
 }
 </script>
@@ -105,7 +105,7 @@ const getColorClasses = (color?: string) => {
           ? getColorClasses(mainAction.color)
           : isOpen 
             ? 'bg-gray-600 hover:bg-gray-700 text-white' 
-            : 'bg-primary-600 hover:bg-primary-700 text-white'
+            : 'bg-primary-500 hover:bg-primary-600 text-white'
       ]"
     >
       <Transition

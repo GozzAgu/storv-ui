@@ -8,7 +8,7 @@
 
     <div class="max-w-[400px] w-full relative z-10">
       <div class="text-center mb-8">
-        <NuxtLink to="/" class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 rounded-lg">
+        <NuxtLink to="/" class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
           <img
             :src="logoSource"
             alt="Storvv"
@@ -36,7 +36,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="Enter your email"
               />
             </div>
@@ -48,7 +48,7 @@
                 </label>
                 <NuxtLink
                   to="/forgot-password"
-                  class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+                  class="text-sm font-medium text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors"
                 >
                   Forgot?
                 </NuxtLink>
@@ -60,7 +60,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Enter your password"
                 />
                 <button
@@ -80,7 +80,7 @@
                 id="remember-me"
                 v-model="form.rememberMe"
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
+                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
               />
               <label for="remember-me" class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                 Remember me
@@ -138,7 +138,7 @@
             Don't have an account?
             <NuxtLink
               to="/signup"
-              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
+              class="font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors"
             >
               Sign up for free
             </NuxtLink>

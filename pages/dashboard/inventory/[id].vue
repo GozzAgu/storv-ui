@@ -42,7 +42,7 @@
             size="sm"
             @click="openBulkDiscountModal"
             :icon="TagIcon"
-            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-primary-700 dark:hover:!text-primary-300 hover:!border-primary-200/80 dark:hover:!border-primary-700/50 hover:!bg-primary-50/60 dark:hover:!bg-primary-900/10"
+            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-300 hover:!border-primary-200/80 dark:hover:!border-primary-700/50 hover:!bg-primary-50/60 dark:hover:!bg-primary-900/10"
           >
             Discount
           </Button>
@@ -297,11 +297,11 @@
                   <template v-if="column.sortable">
                     <ChevronUpIcon
                       v-if="currentSort.key === column.key && currentSort.order === 'asc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <ChevronDownIcon
                       v-else-if="currentSort.key === column.key && currentSort.order === 'desc'"
-                      class="w-3 h-3 text-primary-600 dark:text-primary-400"
+                      class="w-3 h-3 text-primary-500 dark:text-primary-400"
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
@@ -432,7 +432,7 @@
                 <div class="hidden sm:flex items-center justify-end gap-1.5 flex-shrink-0" @click.stop>
                   <button
                     @click="handleViewTimeline(item)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
+                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors flex-shrink-0"
                     title="View product history"
                   >
                     <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
@@ -443,8 +443,8 @@
                     :class="[
                       'p-1 transition-colors flex-shrink-0',
                       item.discountedPrice !== undefined
-                        ? 'text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400',
+                        ? 'text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
@@ -467,7 +467,7 @@
                     @click="handleDuplicateItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0',
+                      'p-1 text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors flex-shrink-0',
                       isItemSold(item) && 'cursor-not-allowed opacity-40'
                     ]"
                     :title="isItemSold(item) ? 'Cannot duplicate sold item' : 'Duplicate item'"
@@ -514,7 +514,7 @@
                     <button
                       @click="handleApplyDiscount(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
                     >
                       <TagIcon class="w-5 h-5" />

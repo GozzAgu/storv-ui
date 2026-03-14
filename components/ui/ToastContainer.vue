@@ -27,7 +27,7 @@
         <template v-if="toast.action">
           <button
             @click="toast.action.onClick()"
-            class="flex-shrink-0 text-[12px] font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+            class="flex-shrink-0 text-[12px] font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 transition-colors"
           >
             {{ toast.action.label }}
           </button>

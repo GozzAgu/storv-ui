@@ -11,7 +11,7 @@
         <div class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
           <div class="relative p-6 sm:p-7 flex flex-col items-center text-center">
             <!-- Avatar -->
-            <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden bg-primary-500 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden bg-primary-400 ring-4 ring-white dark:ring-gray-800 shadow-lg">
               {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
             </div>
             <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
@@ -26,7 +26,7 @@
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="profileData.email || 'No email'">
                 {{ profileData.email || 'No email' }}
               </p>
-              <span class="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-primary-600 dark:text-primary-400 bg-primary-500/10 dark:bg-primary-500/15 ring-1 ring-primary-500/20 dark:ring-primary-400/20">
+              <span class="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-primary-500 dark:text-primary-400 bg-primary-400/10 dark:bg-primary-500/15 ring-1 ring-primary-400/20 dark:ring-primary-400/20">
                 {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </span>
             </template>
@@ -62,11 +62,11 @@
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
           </div>
           <div v-if="!isEditingPersonalInfo">
-            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
+            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           </div>
           <div v-else class="flex gap-1.5">
             <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Save changes</button>
+            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Save changes</button>
           </div>
         </div>
         <div class="p-3 sm:p-4">
@@ -111,7 +111,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
                 </div>
               </div>
-              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
               <div class="flex items-center gap-2.5">
@@ -123,7 +123,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
                 </div>
               </div>
-              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
               <div class="flex items-center gap-2.5">
@@ -135,19 +135,19 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
                 </div>
               </div>
-              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
               <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <BellIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                  <BellIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Notifications</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
                 </div>
               </div>
-              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
+              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
             </div>
             <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
               <div class="flex items-center gap-2.5">
@@ -159,7 +159,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
                 </div>
               </div>
-              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
@@ -171,7 +171,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
                 </div>
               </div>
-              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
                 </div>
               </div>
-              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Change</button>
+              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
               <div class="flex items-center gap-2.5">
@@ -209,14 +209,14 @@
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <DevicePhoneMobileIcon class="w-3.5 h-3.5 text-primary-600 dark:text-primary-400" />
+                  <DevicePhoneMobileIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
                 </div>
               </div>
-              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
+              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
             </div>
           </div>
         </div>
@@ -256,12 +256,12 @@
                 <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
               </div>
               <div class="pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings →</NuxtLink>
+                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings →</NuxtLink>
               </div>
             </div>
             <div v-else class="text-center py-8">
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors">Set up store information</NuxtLink>
+              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Set up store information</NuxtLink>
             </div>
           </div>
         </div>
@@ -272,7 +272,7 @@
               <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
             </div>
-            <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">
+            <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">
               {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
@@ -281,7 +281,7 @@
               <p class="text-xs font-medium text-primary-900 dark:text-primary-100 mb-1.5">
                 {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
-              <p class="text-xs text-primary-700 dark:text-primary-200 leading-relaxed">
+              <p class="text-xs text-primary-600 dark:text-primary-200 leading-relaxed">
                 <template v-if="profileData.role === 'staff'">
                   As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
                 </template>
@@ -345,7 +345,7 @@
                 <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ themeOption.label }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ themeOption.description }}</p>
               </div>
-              <div v-if="currentThemeValue === themeOption.value" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+              <div v-if="currentThemeValue === themeOption.value" class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
               </div>
             </div>
@@ -378,7 +378,7 @@
                 <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ lang.name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ lang.nativeName }}</p>
               </div>
-              <div v-if="accountSettings.language === lang.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+              <div v-if="accountSettings.language === lang.name" class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
               </div>
             </div>
@@ -405,7 +405,7 @@
                 type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
           
@@ -421,7 +421,7 @@
                 class="sr-only peer"
                 @change="handlePushNotificationToggle"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
           
@@ -436,7 +436,7 @@
                 type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
           
@@ -451,7 +451,7 @@
                 type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
         </div>
@@ -551,7 +551,7 @@
                 <div class="flex items-center gap-2 mb-1">
                   <DevicePhoneMobileIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ session.device }}</p>
-                  <span v-if="session.current" class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full">
+                  <span v-if="session.current" class="px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full">
                     Current
                   </span>
                 </div>
@@ -599,7 +599,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ region.code }}</p>
                 </div>
               </div>
-              <div v-if="accountSettings.region === region.name" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+              <div v-if="accountSettings.region === region.name" class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
               </div>
             </div>
@@ -632,7 +632,7 @@
                 <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ currency.name }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ currency.symbol }} {{ currency.code }}</p>
               </div>
-              <div v-if="accountSettings.currency === currency.code" class="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center">
+              <div v-if="accountSettings.currency === currency.code" class="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center">
                 <CheckCircleIcon class="w-4 h-4 text-white" />
               </div>
             </div>

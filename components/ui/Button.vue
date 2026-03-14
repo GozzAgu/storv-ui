@@ -89,7 +89,7 @@ const iconSize = computed(() => {
 // Solid background for filled variants (fixes “half blue” / transparent default)
 const variantBgClasses = computed(() => {
   const map = {
-    primary: 'bg-primary-500 dark:bg-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600',
+    primary: 'bg-primary-400 dark:bg-primary-500 text-white hover:bg-primary-500 dark:hover:bg-primary-600',
     secondary: 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-500',
     danger: 'bg-red-500 dark:bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600',
     success: 'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 dark:hover:bg-green-600',
@@ -103,7 +103,7 @@ const variantBgClasses = computed(() => {
 const variantRingClasses = computed(() => {
   const map = {
     primary:
-      'ring-2 ring-primary-500/25 hover:ring-4 hover:ring-primary-500/40 dark:ring-white/15 dark:hover:ring-primary-400/40',
+      'ring-2 ring-primary-400/25 hover:ring-4 hover:ring-primary-400/40 dark:ring-white/15 dark:hover:ring-primary-400/40',
     secondary:
       'ring-2 ring-gray-300/80 hover:ring-4 hover:ring-gray-400/60 dark:ring-white/10 dark:hover:ring-white/20',
     danger:
@@ -136,7 +136,7 @@ const variantTextClasses = computed(() => {
 // Ripple circle color
 const variantRippleClasses = computed(() => {
   const map = {
-    primary: 'bg-primary-500 dark:bg-primary-400',
+    primary: 'bg-primary-400 dark:bg-primary-400',
     secondary: 'bg-gray-400 dark:bg-gray-500',
     danger: 'bg-red-500 dark:bg-red-400',
     success: 'bg-green-500 dark:bg-green-400',

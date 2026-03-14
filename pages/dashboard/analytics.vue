@@ -20,7 +20,7 @@
           <button
             @click="exportReport('pdf')"
             :disabled="isExporting"
-            class="px-3 py-1.5 text-xs font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            class="px-3 py-1.5 text-xs font-medium bg-primary-500 hover:bg-primary-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
           >
             <ArrowDownTrayIcon class="w-4 h-4" />
             <span>{{ isExporting ? 'Exporting...' : 'Export PDF' }}</span>
@@ -150,7 +150,7 @@
           <div class="flex items-start justify-between gap-3">
             <div class="flex items-start gap-2.5 min-w-0">
               <div class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-100 dark:ring-primary-900/30">
-                <ClockIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                <ClockIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
               </div>
               <div class="min-w-0">
                 <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">Busiest time</h2>
@@ -305,7 +305,7 @@
       <Card padding="sm" extra-class="p-3.5">
         <div class="flex items-center justify-between mb-2">
           <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View inventory</NuxtLink>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View inventory</NuxtLink>
         </div>
         <div class="space-y-1.5">
           <template v-if="lowStockItems.length > 0">

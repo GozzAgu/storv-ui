@@ -9,7 +9,7 @@
       <NuxtLink
         v-if="crumb.href"
         :to="crumb.href"
-        class="inline-flex items-center gap-1.5 transition-colors truncate max-w-[180px] sm:max-w-[240px] hover:text-primary-600 dark:hover:text-primary-400"
+        class="inline-flex items-center gap-1.5 transition-colors truncate max-w-[180px] sm:max-w-[240px] hover:text-primary-500 dark:hover:text-primary-400"
       >
         <component
           v-if="crumb.icon"

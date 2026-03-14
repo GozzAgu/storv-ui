@@ -60,7 +60,7 @@
               :class="[
                 'px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors',
                 isEntityTypeSelected(entityType.value)
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               ]"
             >
@@ -134,7 +134,7 @@
                   :class="[
                     'px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors',
                     isStatusSelected(status.value)
-                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   ]"
                 >
@@ -166,7 +166,7 @@
           <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-4 sm:p-6">
             <div class="text-center mb-4">
               <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <MagnifyingGlassIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                <MagnifyingGlassIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">Search across receipts, inventory, customers & more</p>
@@ -178,7 +178,7 @@
                 <h3 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Saved Searches</h3>
                 <button
                   @click="showSavedSearchesModal = true"
-                  class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                  class="text-xs text-primary-500 dark:text-primary-400 hover:underline"
                 >
                   Manage
                 </button>
@@ -446,7 +446,7 @@ const getEntityTypeColor = (type: SearchEntityType) => {
   const colors: Record<string, string> = {
     receipts: 'bg-green-500',
     inventory: 'bg-blue-500',
-    customers: 'bg-primary-500',
+    customers: 'bg-primary-400',
     departments: 'bg-orange-500',
     staff: 'bg-pink-500',
   }

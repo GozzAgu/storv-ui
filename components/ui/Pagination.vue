@@ -20,7 +20,7 @@
           'flex items-center justify-center w-6 h-6 rounded-none text-xs font-medium transition-colors duration-150',
           currentPage === 1
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
+            : 'text-gray-600 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
         ]"
       >
         <ChevronLeftIcon class="w-4 h-4" stroke-width="2" />
@@ -37,8 +37,8 @@
             :class="[
               'min-w-[1.5rem] h-6 px-2 rounded-none text-xs font-medium transition-colors duration-150',
               page === currentPage
-                ? 'bg-primary-600 dark:bg-primary-500 text-white dark:text-white'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-primary-500/20 hover:text-primary-600 dark:hover:text-primary-400'
+                ? 'bg-primary-500 dark:bg-primary-500 text-white dark:text-white'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-primary-500/20 hover:text-primary-500 dark:hover:text-primary-400'
             ]"
           >
             {{ page }}
@@ -56,7 +56,7 @@
           'flex items-center justify-center w-6 h-6 rounded-none text-xs font-medium transition-colors duration-150',
           currentPage === totalPages
             ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
+            : 'text-gray-600 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-500/20'
         ]"
       >
         <ChevronRightIcon class="w-4 h-4" stroke-width="2" />

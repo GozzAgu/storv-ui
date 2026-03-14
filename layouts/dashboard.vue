@@ -2,7 +2,7 @@
   <!-- Loading state while checking authentication -->
   <div v-if="checkingAuth" class="min-h-screen bg-gray-50 dark:bg-gray-900 w-full flex items-center justify-center">
     <div class="text-center">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mb-4"></div>
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mb-4"></div>
       <p class="text-sm text-gray-600 dark:text-gray-400">Verifying authentication...</p>
     </div>
   </div>
@@ -384,7 +384,7 @@
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
                   {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left min-w-0">

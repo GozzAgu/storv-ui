@@ -148,7 +148,7 @@
               :class="[
                 'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'daily'
-                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               ]"
             >
@@ -159,7 +159,7 @@
               :class="[
                 'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'weekly'
-                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               ]"
             >
@@ -170,7 +170,7 @@
               :class="[
                 'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
                 chartView === 'monthly'
-                  ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               ]"
             >
@@ -233,7 +233,7 @@
       <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
         <div class="flex items-center justify-between mb-2">
           <p class="text-[11px] text-gray-500 dark:text-gray-400">Recent</p>
-          <NuxtLink to="/dashboard/receipts" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+          <NuxtLink to="/dashboard/receipts" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="recentTransactions.length === 0">
@@ -255,7 +255,7 @@
       <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
         <div class="flex items-center justify-between mb-2">
           <p class="text-[11px] text-gray-500 dark:text-gray-400">Top products</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="topSellingItems.length === 0">
@@ -280,7 +280,7 @@
       <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
         <div class="flex items-center justify-between mb-2">
           <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="lowStockItems.length === 0">

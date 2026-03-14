@@ -60,7 +60,7 @@
       />
       <!-- Readability overlay (dark) -->
       <div class="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/60 to-slate-950/80" />
-      <div class="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full bg-primary-500/10 blur-3xl" />
+      <div class="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full bg-primary-400/10 blur-3xl" />
       <div class="absolute -bottom-40 -left-32 w-[620px] h-[620px] rounded-full bg-primary-400/10 blur-3xl" />
 
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-24 lg:pb-28">
@@ -128,7 +128,7 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14">
           <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
-            Why <span class="text-primary-600">Storvv</span>?
+            Why <span class="text-primary-500">Storvv</span>?
           </h2>
           <p class="mt-4 text-gray-600 max-w-xl mx-auto">
             One operations layer for inventory, sales, customers, and teams—fast, clean, and flexible as you scale.
@@ -147,7 +147,7 @@
               <!-- rail -->
               <div class="absolute left-3 top-2 bottom-2 w-px bg-gray-200"></div>
               <div
-                class="absolute left-3 top-2 w-px bg-primary-600/70 transition-[height] duration-500 ease-out"
+                class="absolute left-3 top-2 w-px bg-primary-500/70 transition-[height] duration-500 ease-out"
                 :style="{ height: `${(whyActiveStep + 1) * 33.333}%` }"
               ></div>
 
@@ -156,7 +156,7 @@
                 <div class="group relative">
                   <div class="absolute left-0 top-1.5 -translate-x-[5px]">
                     <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-600' : 'bg-gray-300']"></div>
+                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-500' : 'bg-gray-300']"></div>
             </div>
                   </div>
                   <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 0 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
@@ -176,7 +176,7 @@
                 <div class="group relative">
                   <div class="absolute left-0 top-1.5 -translate-x-[5px]">
                     <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-600' : 'bg-gray-300']"></div>
+                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-500' : 'bg-gray-300']"></div>
             </div>
                   </div>
                   <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 1 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
@@ -196,7 +196,7 @@
                 <div class="group relative">
                   <div class="absolute left-0 top-1.5 -translate-x-[5px]">
                     <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-600' : 'bg-gray-300']"></div>
+                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-500' : 'bg-gray-300']"></div>
             </div>
                   </div>
                   <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 2 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
@@ -215,7 +215,7 @@
               <div class="pt-2">
                 <button
                   @click="showContactFormModal = true"
-                    class="rounded-full bg-primary-600 text-white font-medium px-6 py-3 hover:bg-primary-700 transition-colors"
+                    class="rounded-full bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
                 >
                     Get started
                 </button>
@@ -239,7 +239,7 @@
           </p>
           <div class="mt-10 space-y-6">
             <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
                 <BuildingOfficeIcon class="w-5 h-5 text-white" />
                 </div>
               <div>
@@ -248,7 +248,7 @@
               </div>
             </div>
             <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
                 <UserGroupIcon class="w-5 h-5 text-white" />
                 </div>
               <div>
@@ -257,7 +257,7 @@
               </div>
             </div>
             <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
                 <FolderIcon class="w-5 h-5 text-white" />
                 </div>
               <div>
@@ -266,7 +266,7 @@
               </div>
             </div>
             <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
                 <ShoppingCartIcon class="w-5 h-5 text-white" />
                 </div>
               <div>
@@ -275,7 +275,7 @@
               </div>
             </div>
             <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-500 flex items-center justify-center">
+              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
                 <ChartBarIcon class="w-5 h-5 text-white" />
                 </div>
               <div>
@@ -286,7 +286,7 @@
             </div>
                 </div>
                 </div>
-      <div class="bg-primary-500 flex items-center justify-center p-8 lg:p-12">
+      <div class="bg-primary-400 flex items-center justify-center p-8 lg:p-12">
         <div class="w-full max-w-2xl">
           <div class="rounded-xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur-sm">
             <img src="/dash.png" alt="Storvv Dashboard" class="w-full h-auto object-contain" />
@@ -307,7 +307,7 @@
               One solution: consolidate tools, simplify workflow, reduce costs.
           </p>
         </div>
-          <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm shrink-0">
+          <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium text-sm shrink-0">
             Explore features
             <ArrowRightIcon class="w-4 h-4" />
             </a>
@@ -335,7 +335,7 @@
                 <div class="h-full rounded-2xl border border-gray-200 bg-white p-6 hover:border-gray-300 transition-colors flex flex-col">
                   <h3 class="text-lg font-semibold text-gray-900">{{ feature.title }}</h3>
                   <p class="mt-2 text-sm text-gray-600 leading-relaxed flex-1">{{ feature.description }}</p>
-                  <span class="mt-4 inline-flex items-center gap-1.5 text-primary-600 text-sm font-medium">Explore <ArrowRightIcon class="w-4 h-4" /></span>
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-primary-500 text-sm font-medium">Explore <ArrowRightIcon class="w-4 h-4" /></span>
               </div>
               </div>
             </div>
@@ -345,7 +345,7 @@
               v-for="(dot, index) in totalDots"
               :key="index"
               @click="goToFeature(index * visibleFeatures)"
-              :class="['h-1.5 rounded-full transition-all', Math.floor(currentFeatureIndex / visibleFeatures) === index ? 'bg-primary-600 w-6' : 'bg-gray-300 w-1.5 hover:bg-gray-400']"
+              :class="['h-1.5 rounded-full transition-all', Math.floor(currentFeatureIndex / visibleFeatures) === index ? 'bg-primary-500 w-6' : 'bg-gray-300 w-1.5 hover:bg-gray-400']"
               :aria-label="`Slide ${index + 1}`"
             />
               </div>
@@ -416,7 +416,7 @@
           <span :class="['text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500']">Monthly</span>
             <button
               @click="isYearly = !isYearly"
-            :class="['relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2', isYearly ? 'bg-primary-600' : 'bg-gray-300']"
+            :class="['relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2', isYearly ? 'bg-primary-500' : 'bg-gray-300']"
               role="switch"
               :aria-checked="isYearly"
             >
@@ -453,7 +453,7 @@
               <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync</li>
               <li class="flex items-center gap-2 text-sm text-gray-600"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-primary-600 text-white py-2.5 text-sm font-medium hover:bg-primary-700 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Enterprise</h3>
@@ -514,10 +514,10 @@
               class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
             >
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ClockIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <ClockIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">How quickly can I get started?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How quickly can I get started?</h3>
               </div>
               <ChevronUpIcon 
                 :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(0) ? 'rotate-180' : '']" 
@@ -542,10 +542,10 @@
           <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(1)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <SparklesIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <SparklesIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Is Storvv difficult to learn?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Is Storvv difficult to learn?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(1) ? 'rotate-180' : '']" />
             </button>
@@ -561,10 +561,10 @@
           <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(2)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ChartBarIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <ChartBarIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Can I track in-store and online sales together?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I track in-store and online sales together?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(2) ? 'rotate-180' : '']" />
             </button>
@@ -580,10 +580,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <FolderIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <FolderIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
             </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">How do custom inventory folders work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How do custom inventory folders work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(3) ? 'rotate-180' : '']" />
             </button>
@@ -599,10 +599,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <DocumentTextIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <DocumentTextIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Can I import products from Excel?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I import products from Excel?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(4) ? 'rotate-180' : '']" />
             </button>
@@ -618,10 +618,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(5)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <UsersIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <UsersIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">How does customer tracking work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How does customer tracking work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(5) ? 'rotate-180' : '']" />
             </button>
@@ -637,10 +637,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(6)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ArrowPathIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <ArrowPathIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">What are swap-in transactions?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What are swap-in transactions?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(6) ? 'rotate-180' : '']" />
             </button>
@@ -656,10 +656,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <KeyIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <KeyIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">How do role-based permissions work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How do role-based permissions work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(7) ? 'rotate-180' : '']" />
             </button>
@@ -675,10 +675,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(8)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <BellAlertIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <BellAlertIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">What are low stock alerts?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What are low stock alerts?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(8) ? 'rotate-180' : '']" />
             </button>
@@ -694,10 +694,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(9)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <BuildingOfficeIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <BuildingOfficeIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Can I manage multiple stores?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I manage multiple stores?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(9) ? 'rotate-180' : '']" />
             </button>
@@ -713,10 +713,10 @@
           <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ShieldCheckIcon class="w-4 h-4 text-primary-600 flex-shrink-0" />
+                <ShieldCheckIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
           </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors pr-8">Is my data secure?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Is my data secure?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(10) ? 'rotate-180' : '']" />
             </button>
@@ -739,7 +739,7 @@
       
       <!-- Decorative gradient orbs -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-primary-500/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-primary-400/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
       </div>
 
@@ -765,7 +765,7 @@
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
             <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
                 </div>
                 <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
@@ -776,7 +776,7 @@
             
             <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
                 </div>
                 <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
@@ -787,7 +787,7 @@
             
             <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
                 </div>
                 <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
@@ -798,7 +798,7 @@
             
             <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
                 </div>
                 <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
@@ -809,7 +809,7 @@
             
             <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 sm:col-span-2 lg:col-span-1">
               <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-500/30 transition-colors">
+                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-lg flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
                 </div>
                 <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
@@ -840,7 +840,7 @@
     <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white">
       <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="w-14 h-14 rounded-2xl bg-primary-100 flex items-center justify-center mx-auto mb-6">
-          <EnvelopeIcon class="w-7 h-7 text-primary-600" />
+          <EnvelopeIcon class="w-7 h-7 text-primary-500" />
         </div>
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Get in touch</h2>
         <p class="mt-4 text-gray-600">Questions, feedback, or partnership we’d love to hear from you.</p>
@@ -947,7 +947,7 @@
           We use cookies on our website to help us provide the best browsing experience. By continuing to use our website you are deemed to have agreed to the use of cookies.
         </p>
         <div class="flex items-center gap-3 flex-shrink-0">
-          <NuxtLink to="/privacy" class="text-sm font-medium text-primary-600 hover:text-primary-700">
+          <NuxtLink to="/privacy" class="text-sm font-medium text-primary-500 hover:text-primary-600">
             Learn more
           </NuxtLink>
           <button

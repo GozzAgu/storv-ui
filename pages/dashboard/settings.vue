@@ -36,7 +36,7 @@
                 type="button"
                 @click="accountLogoInput?.click()"
                 :disabled="isUploadingAccountLogo"
-                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-500/25 disabled:opacity-50 transition-all"
+                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-400 hover:bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-400/25 disabled:opacity-50 transition-all"
                 title="Upload logo"
                 aria-label="Upload logo"
               >
@@ -163,12 +163,12 @@
               class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
               :class="currentStore?.id === store.id ? 'ring-2 ring-primary-500/80 dark:ring-primary-400/80' : ''"
             >
-              <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 overflow-hidden bg-primary-500 group-hover:bg-primary-600 transition-colors">
+              <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 overflow-hidden bg-primary-400 group-hover:bg-primary-500 transition-colors">
                 <img v-if="store.logoUrl || accountLogoUrl" :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="w-full h-full object-cover" />
                 <BuildingStorefrontIcon v-else class="w-5 h-5 text-white" stroke-width="1.75" />
               </div>
               <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
-                <p class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" :title="store.name">
+                <p class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors" :title="store.name">
                   {{ store.name }}
                 </p>
                 <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight truncate">{{ store.address || store.description || 'No address' }}</span>
@@ -210,12 +210,12 @@
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Store information</h2>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Update your business details</p>
           </div>
-          <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
+          <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           <div v-else-if="canEditSettings && isEditingStore" class="flex gap-1.5">
             <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
             <button
               @click="saveStoreInfo"
-              class="inline-flex items-center justify-center w-9 h-8 rounded-lg bg-primary-600 hover:bg-primary-700 text-white transition-colors"
+              class="inline-flex items-center justify-center w-9 h-8 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors"
               title="Done"
               aria-label="Done"
             >
@@ -294,7 +294,7 @@
                 :disabled="!canEditSettings"
                 class="sr-only peer"
               />
-              <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
 
@@ -363,7 +363,7 @@
                 :disabled="!canEditSettings"
                 class="sr-only peer"
               />
-              <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+              <div class="w-8 h-4 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all dark:border-gray-600 peer-checked:bg-primary-500"></div>
             </label>
           </div>
         </div>
@@ -398,7 +398,7 @@
               type="button"
               @click="generateAIDescription"
               :disabled="isGeneratingDescription || !storeForm.name"
-              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-lg"
+              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-lg"
             >
               <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
               <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -452,7 +452,7 @@
             <input
               v-model="storeForm.isActive"
               type="checkbox"
-              class="w-3.5 h-3.5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              class="w-3.5 h-3.5 text-primary-500 border-gray-300 rounded focus:ring-primary-400"
             />
             <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Active</span>
           </label>
@@ -528,7 +528,7 @@
               </div>
               <svg
                 v-if="newlyCreatedStoreId === store.id"
-                class="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-3"
+                class="w-4 h-4 text-primary-500 dark:text-primary-400 flex-shrink-0 ml-3"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >

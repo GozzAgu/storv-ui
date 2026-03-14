@@ -202,7 +202,7 @@
       class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 sm:px-6 text-center min-w-0 w-full"
     >
       <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
-        <FolderIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+        <FolderIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
       </div>
       <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
         {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
@@ -261,7 +261,7 @@
       </span>
     <button
       @click="openCreateFolderModal"
-        class="group w-11 h-11 rounded-full bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+        class="group w-11 h-11 rounded-full bg-primary-500 hover:bg-primary-600 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
         aria-label="New folder"
     >
         <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
@@ -443,7 +443,7 @@
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <div class="flex items-center gap-1.5">
                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
-                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300">Custom</span>
+                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">Custom</span>
               </div>
               <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-lg sm:ml-auto">
                 + Add field
@@ -973,7 +973,7 @@ const getFolderColor = (color: string) => {
   const colorMap: Record<string, string> = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',
-    purple: 'bg-primary-500',
+    purple: 'bg-primary-400',
     orange: 'bg-orange-500',
     red: 'bg-red-500',
     pink: 'bg-pink-500',

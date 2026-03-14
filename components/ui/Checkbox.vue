@@ -19,7 +19,7 @@
         'transform',
         size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5',
         modelValue
-          ? 'bg-gradient-to-br from-primary-500 to-primary-600 border-primary-500 scale-100'
+          ? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary-400 scale-100'
           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400 dark:group-hover:border-primary-500 scale-100',
         !disabled && 'group-hover:scale-105 active:scale-95',
         disabled && 'cursor-not-allowed'
@@ -65,7 +65,7 @@
     >
       <div
         v-if="modelValue"
-        class="absolute inset-0 rounded-lg bg-primary-500/20 pointer-events-none animate-ripple"
+        class="absolute inset-0 rounded-lg bg-primary-400/20 pointer-events-none animate-ripple"
         :class="[
           size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5'
         ]"

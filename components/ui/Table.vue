@@ -25,7 +25,7 @@
                   :class="[
                     'w-3 h-3',
                     sortBy === column.key && sortOrder === 'asc'
-                      ? 'text-primary-600 dark:text-primary-400'
+                      ? 'text-primary-500 dark:text-primary-400'
                       : 'text-gray-300 dark:text-gray-600'
                   ]"
                 />
@@ -33,7 +33,7 @@
                   :class="[
                     'w-3 h-3 -mt-1',
                     sortBy === column.key && sortOrder === 'desc'
-                      ? 'text-primary-600 dark:text-primary-400'
+                      ? 'text-primary-500 dark:text-primary-400'
                       : 'text-gray-300 dark:text-gray-600'
                   ]"
                 />
@@ -88,7 +88,7 @@
                 <button
                   v-if="onEdit"
                   @click="handleEdit(row, index)"
-                  class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
+                  class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
                   title="Edit"
                 >
                   <PencilSquareIcon class="w-4 h-4" />

@@ -62,7 +62,7 @@
               @keyup.enter="searchByBarcode"
               type="text"
               placeholder="Enter barcode..."
-              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
             <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
           </div>
@@ -76,7 +76,7 @@
           <select
             v-model="selectedFolderId"
             @change="loadFolderItems"
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
           >
             <option value="">Select a folder...</option>
             <option v-for="folder in folders" :key="folder.id" :value="folder.id">
@@ -150,13 +150,13 @@
               v-model="customerName"
               type="text"
               placeholder="Customer Name"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
             <input
               v-model="customerPhone"
               type="tel"
               placeholder="Phone (Optional)"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
         </div>
@@ -174,7 +174,7 @@
               :class="[
                 'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
                 paymentMethod === method
-                  ? 'bg-primary-600 text-white'
+                  ? 'bg-primary-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
               ]"
             >
@@ -187,7 +187,7 @@
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
           <div class="flex items-center justify-between">
             <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
-            <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">
+            <span class="text-2xl font-bold text-primary-500 dark:text-primary-400">
               ${{ formatCurrency(cartTotal) }}
             </span>
           </div>

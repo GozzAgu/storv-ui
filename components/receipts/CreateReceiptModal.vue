@@ -21,7 +21,7 @@
                   'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all',
                   'aspect-square',
                   currentStep >= index
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-primary-500 text-white'
                     : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                 ]"
               >
@@ -44,7 +44,7 @@
               v-if="index < steps.length - 1"
               :class="[
                 'hidden sm:block h-0.5 flex-1 mx-3 transition-all',
-                currentStep > index ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
+                currentStep > index ? 'bg-primary-500' : 'bg-gray-200 dark:bg-gray-700'
               ]"
             ></div>
           </div>
@@ -65,13 +65,13 @@
                   v-model="folderSearchQuery"
                   type="text"
                   placeholder="Search folders..."
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 />
               </div>
             </div>
             
             <div v-if="loadingFolders" class="text-center py-6">
-              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading folders...</p>
             </div>
             <div
@@ -79,7 +79,7 @@
               class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
             >
               <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <FolderIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+                <FolderIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {{ folderSearchQuery ? 'No folders found' : 'No inventory folders' }}
@@ -96,8 +96,8 @@
                 :class="[
                   'p-3 border-2 rounded-md transition-all text-left',
                   selectedFolder?.id === folder.id
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
                 ]"
               >
                 <div class="flex items-center gap-2.5">
@@ -117,7 +117,7 @@
                   </div>
                   <CheckCircleIcon
                     v-if="selectedFolder?.id === folder.id"
-                    class="w-4 h-4 text-primary-600"
+                    class="w-4 h-4 text-primary-500"
                   />
                 </div>
               </button>
@@ -134,7 +134,7 @@
               </label>
               <button
                 @click="loadItems"
-                class="text-xs text-primary-600 dark:text-primary-400 hover:underline"
+                class="text-xs text-primary-500 dark:text-primary-400 hover:underline"
               >
                 Refresh
               </button>
@@ -148,12 +148,12 @@
                   v-model="itemSearchQuery"
                   type="text"
                   :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by product name or serial number...' : 'Search by product name...'"
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 />
               </div>
             </div>
             <div v-if="loadingItems" class="text-center py-6">
-              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
             </div>
             <div
@@ -161,7 +161,7 @@
               class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
             >
               <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <CubeIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+                <CubeIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No items available</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">This folder has no items to add</p>
@@ -173,8 +173,8 @@
                 :class="[
                   'p-3 border rounded-md transition-all cursor-pointer',
                   selectedItems.find(si => si.id === item.id)
-                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
                 ]"
                 @click="toggleItemSelection(item)"
               >
@@ -229,7 +229,7 @@
                         @click.stop
                         min="1"
                         :max="getItemField(item, 'stock') || 1"
-                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                       />
                     </div>
                   </div>
@@ -262,7 +262,7 @@
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="John Doe"
               />
                 <MagnifyingGlassIcon 
@@ -305,7 +305,7 @@
               <input
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="john@example.com"
               />
             </div>
@@ -316,7 +316,7 @@
               <input
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="+1 234 567 8900"
               />
             </div>
@@ -327,7 +327,7 @@
               <input
                 v-model="receiptForm.customerAddress"
                 type="text"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="123 Main St, City, State"
               />
             </div>
@@ -348,7 +348,7 @@
               <select
                 v-model="receiptForm.paymentMethod"
                 required
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
               >
                 <option value="">Select payment method</option>
                 <option value="Cash">Cash</option>
@@ -368,7 +368,7 @@
                   <select
                     v-model="payment.method"
                     required
-                    class="flex-1 px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                    class="flex-1 px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                   >
                     <option value="">Select method</option>
                     <option value="Cash">Cash</option>
@@ -385,7 +385,7 @@
                       min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-6 pr-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                      class="w-full pl-6 pr-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                       placeholder="0.00"
                     />
                   </div>
@@ -401,7 +401,7 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="w-full px-3 py-1.5 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md border border-primary-300 dark:border-primary-700 transition-colors"
+                  class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md border border-primary-300 dark:border-primary-600 transition-colors"
                 >
                   + Add Payment Method
                 </button>
@@ -425,7 +425,7 @@
               <select
                 v-model="receiptForm.status"
                 required
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
               >
                 <option value="completed">Completed</option>
                 <option value="pending">Pending</option>
@@ -439,7 +439,7 @@
             <textarea
               v-model="receiptForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/60 resize-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60 resize-none"
               placeholder="Additional notes..."
             ></textarea>
           </div>
@@ -458,7 +458,7 @@
                   Select Folder for Swapped-In Device *
                 </label>
                 <div v-if="loadingFolders" class="text-center py-3">
-                  <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
+                  <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
                 </div>
                 <div
                   v-else-if="folders.length === 0"
@@ -473,7 +473,7 @@
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                 >
                   <option value="">Select folder for swapped-in device</option>
                   <option
@@ -506,7 +506,7 @@
                       :required="field.required"
                       type="text"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Number Input -->
                     <input
@@ -515,7 +515,7 @@
                       :required="field.required"
                       type="number"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
@@ -526,7 +526,7 @@
                         step="0.01"
                         min="0"
                         :required="field.required"
-                        class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                        class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                         placeholder="0.00"
                       />
                     </div>
@@ -536,14 +536,14 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     >
                       <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
@@ -647,7 +647,7 @@
             v-model="emailToSend"
             type="email"
             placeholder="Enter email address"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
             @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
           />
         </div>
@@ -1152,7 +1152,7 @@ const getFolderColorClass = (color: string) => {
   const colorMap: Record<string, string> = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',
-    purple: 'bg-primary-500',
+    purple: 'bg-primary-400',
     orange: 'bg-orange-500',
     red: 'bg-red-500',
     pink: 'bg-pink-500',

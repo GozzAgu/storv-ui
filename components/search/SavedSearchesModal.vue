@@ -13,7 +13,7 @@
         </div>
         <button
           @click="showCreateModal = true"
-          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
         >
           + Save Current
         </button>
@@ -30,7 +30,7 @@
       <!-- Empty State -->
       <div v-else-if="searchStore.savedSearches.length === 0" class="text-center py-8">
         <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-          <MagnifyingGlassIcon class="w-7 h-7 text-primary-600 dark:text-primary-400" />
+          <MagnifyingGlassIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
         </div>
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No saved searches</p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Save your frequently used searches for quick access</p>
@@ -66,7 +66,7 @@
             <div class="flex items-center gap-1 flex-shrink-0">
               <button
                 @click="$emit('load', saved.id)"
-                class="p-1.5 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="p-1.5 text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                 title="Load search"
               >
                 <ArrowRightIcon class="w-4 h-4" />

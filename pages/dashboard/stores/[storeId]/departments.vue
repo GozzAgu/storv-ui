@@ -14,7 +14,7 @@
     >
       <div class="flex items-center gap-2 min-w-0">
         <div class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 ring-1 ring-gray-200/70 dark:ring-gray-700/70 flex items-center justify-center flex-shrink-0">
-          <BuildingOfficeIcon class="w-4 h-4 text-primary-600 dark:text-primary-400" />
+          <BuildingOfficeIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2 min-w-0">
@@ -243,7 +243,7 @@
         class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 text-center"
       >
         <div class="w-16 h-16 rounded-2xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-4">
-          <BuildingOfficeIcon class="w-8 h-8 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+          <BuildingOfficeIcon class="w-8 h-8 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
         </div>
         <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
