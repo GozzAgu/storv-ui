@@ -84,14 +84,15 @@
       </template>
     </div>
     <!-- Folders grid -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
+        class="group relative flex flex-col items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 shadow shadow-gray-200/40 dark:shadow-none transition-all duration-200 hover:shadow-md hover:shadow-gray-200/50 active:scale-[0.99] cursor-pointer pt-3 pb-2.5 px-3 overflow-visible"
         @click="navigateToFolder(folder.id)"
       >
-        <div v-if="canManage" class="flex items-center justify-center w-8 h-8 sm:ml-2 shrink-0" @click.stop>
+        <!-- Checkbox top-left -->
+        <div v-if="canManage" class="absolute left-2 top-2 z-10" @click.stop>
           <Checkbox
             :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
             @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -99,37 +100,79 @@
             wrapper-class="justify-center"
           />
         </div>
-        <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
+
+        <!-- Ellipsis menu top-right -->
+        <div v-if="canManage" class="absolute right-1.5 top-1.5 z-20" @click.stop>
+          <button
+            type="button"
+            @click="toggleFolderMenu(folder.id)"
+            class="p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+            aria-label="Folder options"
+          >
+            <EllipsisVerticalIcon class="w-4 h-4" />
+          </button>
+          <div
+            v-if="openFolderMenuId === folder.id"
+            class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl ring-1 ring-gray-200/80 dark:ring-gray-600 py-0.5"
+            @click.stop
+          >
+            <button
+              type="button"
+              @click="handleDuplicateFolder(folder); openFolderMenuId = null"
+              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+            >
+              <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
+              Duplicate
+            </button>
+            <button
+              type="button"
+              @click="handleEditFolder(folder); openFolderMenuId = null"
+              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+            >
+              <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
+              Edit
+            </button>
+            <button
+              type="button"
+              @click="handleDeleteFolder(folder); openFolderMenuId = null"
+              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <TrashIcon class="w-3.5 h-3.5 shrink-0" />
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <!-- Folder icon (blue) -->
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-500 dark:bg-primary-600 mb-2">
           <FolderIcon class="w-5 h-5 text-white" stroke-width="1.75" />
         </div>
 
-        <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
-          <p
-            class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
-            :title="folder.name"
-          >
-            {{ folder.name }}
-          </p>
-          <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ folder.itemCount }} products</span>
-        </div>
+        <!-- Label (e.g. "X products") -->
+        <span class="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5">{{ folder.itemCount }} product{{ folder.itemCount !== 1 ? 's' : '' }}</span>
 
-        <div v-if="canManage" class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-          <button
-            @click.stop="handleEditFolder(folder)"
-            class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
-            title="Edit folder"
-            aria-label="Edit folder"
-          >
-            <PencilSquareIcon class="w-3.5 h-3.5" />
-          </button>
-          <button
-            @click.stop="handleDeleteFolder(folder)"
-            class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation"
-            title="Delete folder"
-            aria-label="Delete folder"
-          >
-            <TrashIcon class="w-3.5 h-3.5" />
-          </button>
+        <!-- Folder name (title) -->
+        <h3
+          class="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-2"
+          :title="folder.name"
+        >
+          {{ folder.name }}
+        </h3>
+
+        <!-- Stats row -->
+        <div class="flex items-center justify-center gap-3 w-full text-gray-500 dark:text-gray-400">
+          <div class="flex items-center gap-1" title="Products">
+            <CubeIcon class="w-3.5 h-3.5 shrink-0" />
+            <span class="text-[11px] tabular-nums">{{ folder.itemCount }}</span>
+          </div>
+          <div class="flex items-center gap-1" title="Total value">
+            <CurrencyDollarIcon class="w-3.5 h-3.5 shrink-0" />
+            <span class="text-[11px] tabular-nums">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
+          </div>
+          <div class="flex items-center gap-1" :title="folder.lowStockCount ? 'Low stock' : 'Stock'">
+            <ExclamationTriangleIcon class="w-3.5 h-3.5 shrink-0" :class="(folder.lowStockCount ?? 0) > 0 ? 'text-amber-500 dark:text-amber-400' : ''" />
+            <span class="text-[11px] tabular-nums">{{ folder.lowStockCount ?? 0 }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -174,10 +217,10 @@
     <!-- Pagination bar -->
     <div
       v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 z-30 safe-area-inset-bottom transition-[left] duration-300"
+      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 z-30 safe-area-inset-bottom transition-[left] duration-300"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6 py-2">
+      <div class="px-4 sm:px-6 py-1.5 rounded-none">
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
@@ -469,6 +512,56 @@
         </Button>
       </template>
     </Modal>
+
+    <!-- Duplicate Folder Modal (multiple folder names) -->
+    <Modal
+      v-model="showDuplicateFolderModal"
+      title="Duplicate folder"
+      subtitle="Create copies with the same template and settings. Enter one or more folder names."
+      size="md"
+      @update:model-value="(v: boolean) => { if (!v) clearDuplicateFolderModal() }"
+    >
+      <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Folder name(s)</label>
+          <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-lg">
+            + Add name
+          </Button>
+        </div>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          <div v-if="duplicateFolderNames.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            Click "Add name" to enter folder name(s)
+          </div>
+          <div
+            v-for="(name, index) in duplicateFolderNames"
+            :key="index"
+            class="flex items-center gap-2"
+          >
+            <input
+              v-model="duplicateFolderNames[index]"
+              type="text"
+              class="flex-1 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-600/80 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              placeholder="New folder name"
+            />
+            <button
+              type="button"
+              @click="removeDuplicateFolderName(index)"
+              class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
+              aria-label="Remove"
+            >
+              <TrashIcon class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <p v-if="duplicateFolderNamesError" class="text-xs text-red-600 dark:text-red-400">{{ duplicateFolderNamesError }}</p>
+      </form>
+      <template #footer>
+        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-lg">Cancel</Button>
+        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-lg">
+          {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} folder${validDuplicateFolderNamesCount !== 1 ? 's' : ''}` }}
+        </Button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -482,6 +575,8 @@ import {
   CurrencyDollarIcon,
   PencilSquareIcon,
   TrashIcon,
+  DocumentDuplicateIcon,
+  EllipsisVerticalIcon,
   ExclamationTriangleIcon,
   SparklesIcon,
   Squares2X2Icon,
@@ -520,6 +615,29 @@ const selectedFoldersForBulk = ref<InventoryFolder[]>([])
 const showBulkDeleteFoldersModal = ref(false)
 const bulkDeleteFoldersConfirmed = ref(false)
 const isBulkDeletingFolders = ref(false)
+
+const openFolderMenuId = ref<string | null>(null)
+const toggleFolderMenu = (folderId: string) => {
+  openFolderMenuId.value = openFolderMenuId.value === folderId ? null : folderId
+}
+
+// Close folder menu when clicking outside
+watch(openFolderMenuId, (id) => {
+  if (!id) return
+  const close = () => { openFolderMenuId.value = null }
+  const handler = () => {
+    close()
+    document.removeEventListener('click', handler)
+  }
+  setTimeout(() => document.addEventListener('click', handler), 0)
+})
+
+// Duplicate folder
+const showDuplicateFolderModal = ref(false)
+const duplicateSourceFolder = ref<InventoryFolder | null>(null)
+const duplicateFolderNames = ref<string[]>([''])
+const isDuplicatingFolder = ref(false)
+const duplicateFolderNamesError = ref<string | null>(null)
 
 // Department filter - load from localStorage
 const getInitialDepartment = (): string => {
@@ -917,6 +1035,76 @@ const openCreateFolderModal = () => {
   folderForm.hasSerialNumbers = false
   editableFields.value = getDefaultFields()
   showCreateFolderModal.value = true
+}
+
+const handleDuplicateFolder = (folder: InventoryFolder) => {
+  duplicateSourceFolder.value = folder
+  duplicateFolderNames.value = ['']
+  duplicateFolderNamesError.value = null
+  showDuplicateFolderModal.value = true
+}
+
+const clearDuplicateFolderModal = () => {
+  duplicateSourceFolder.value = null
+  duplicateFolderNames.value = []
+  duplicateFolderNamesError.value = null
+}
+
+const validDuplicateFolderNames = computed(() => {
+  const trimmed = duplicateFolderNames.value.map(n => n?.trim()).filter(Boolean)
+  return [...new Set(trimmed)]
+})
+
+const validDuplicateFolderNamesCount = computed(() => validDuplicateFolderNames.value.length)
+
+const hasValidDuplicateFolderNames = computed(() => validDuplicateFolderNamesCount.value > 0)
+
+const addDuplicateFolderName = () => {
+  duplicateFolderNames.value.push('')
+  duplicateFolderNamesError.value = null
+}
+
+const removeDuplicateFolderName = (index: number) => {
+  duplicateFolderNames.value.splice(index, 1)
+  duplicateFolderNamesError.value = null
+}
+
+const handleConfirmDuplicateFolder = async () => {
+  const source = duplicateSourceFolder.value
+  const names = validDuplicateFolderNames.value
+  if (!source || names.length === 0) return
+
+  const trimmedInputs = duplicateFolderNames.value.map(n => n?.trim()).filter(Boolean)
+  if (trimmedInputs.length !== validDuplicateFolderNames.value.length) {
+    duplicateFolderNamesError.value = 'Duplicate names are not allowed. Please ensure each folder name is unique.'
+    return
+  }
+  duplicateFolderNamesError.value = null
+
+  isDuplicatingFolder.value = true
+  try {
+    const allowedDepartments = source.allowedDepartments && source.allowedDepartments.length > 0 ? source.allowedDepartments : undefined
+    const template = source.template ? { ...source.template, fields: source.template.fields.map(f => ({ ...f })) } : undefined
+
+    for (const name of names) {
+      await inventoryStore.createFolder({
+        name,
+        description: source.description || '',
+        type: source.type || '',
+        color: source.color || '#3B82F6',
+        hasSerialNumbers: source.hasSerialNumbers ?? false,
+        template: template as Template | undefined,
+        allowedDepartments,
+      })
+    }
+    showDuplicateFolderModal.value = false
+    clearDuplicateFolderModal()
+    toast.success(`${names.length} folder${names.length !== 1 ? 's' : ''} created`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to duplicate folder')
+  } finally {
+    isDuplicatingFolder.value = false
+  }
 }
 
 const handleEditFolder = (folder: InventoryFolder) => {

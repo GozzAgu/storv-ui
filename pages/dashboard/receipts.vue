@@ -640,10 +640,10 @@
     <!-- Bottom bar: Pagination -->
     <div
       v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
-      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom rounded-t-2xl"
+      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6 py-4">
+      <div class="px-4 sm:px-6 py-1.5 rounded-none">
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
@@ -654,7 +654,7 @@
     </div>
 
     <!-- Fullscreen pagination -->
-    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0" class="sticky bottom-0 bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
+    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0" class="sticky bottom-0 rounded-none bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-1.5 z-10">
       <Pagination
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
@@ -981,15 +981,17 @@
 
       <div
         v-if="filteredCustomers.length > 0"
-        class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom rounded-t-2xl"
+        class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom"
         :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
       >
+        <div class="px-4 sm:px-6 py-1.5 rounded-none">
         <Pagination
           :current-page="customersCurrentPage"
           :items-per-page="customersItemsPerPage"
           :total="filteredCustomers.length"
           @page-change="handleCustomersPageChange"
         />
+        </div>
       </div>
     </template>
 

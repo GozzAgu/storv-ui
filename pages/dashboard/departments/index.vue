@@ -127,16 +127,17 @@
           </div>
         </div>
         <div class="p-4 sm:p-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 min-h-[160px]">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 min-h-[160px]">
             <div
               v-for="i in 8"
               :key="i"
-              class="flex items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 h-[52px] sm:h-[50px] overflow-hidden animate-pulse px-2.5 sm:px-0"
+              class="flex flex-col items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 shadow shadow-gray-200/40 pt-3 pb-2.5 px-3 animate-pulse"
             >
-              <div class="w-9 h-9 sm:w-8 sm:h-8 ml-0 sm:ml-2 rounded-lg bg-gray-200 dark:bg-gray-700 shrink-0" />
-              <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-2 space-y-1">
-                <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-12" />
+              <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 shrink-0 mb-2" />
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1" />
+              <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2" />
+              <div class="flex gap-3">
+                <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-6" />
               </div>
             </div>
           </div>
@@ -216,16 +217,17 @@
     </div>
     <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3"
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3"
       >
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
+          class="group relative flex flex-col items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 shadow shadow-gray-200/40 dark:shadow-none transition-all duration-200 hover:shadow-md hover:shadow-gray-200/50 active:scale-[0.99] cursor-pointer pt-3 pb-2.5 px-3 overflow-visible"
           :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false }"
           @click="department.isActive === false ? null : navigateToDepartment(department.id)"
         >
-          <div v-if="canManageDepartments" class="flex items-center justify-center w-8 h-8 sm:ml-2 shrink-0" @click.stop>
+          <!-- Checkbox top-left -->
+          <div v-if="canManageDepartments" class="absolute left-2 top-2 z-10" @click.stop>
             <Checkbox
               :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
               @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
@@ -233,36 +235,66 @@
               wrapper-class="justify-center"
             />
           </div>
-          <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
+
+          <!-- Ellipsis menu top-right -->
+          <div v-if="canManageDepartments" class="absolute right-1.5 top-1.5 z-20" @click.stop>
+            <button
+              type="button"
+              @click="toggleDepartmentMenu(department.id)"
+              class="p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+              aria-label="Department options"
+            >
+              <EllipsisVerticalIcon class="w-4 h-4" />
+            </button>
+            <div
+              v-if="openDepartmentMenuId === department.id"
+              class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl ring-1 ring-gray-200/80 dark:ring-gray-600 py-0.5"
+              @click.stop
+            >
+              <button
+                type="button"
+                @click="handleEditDepartment(department); openDepartmentMenuId = null"
+                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+              >
+                <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
+                Edit
+              </button>
+              <button
+                type="button"
+                @click="handleDeleteDepartment(department); openDepartmentMenuId = null"
+                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <TrashIcon class="w-3.5 h-3.5 shrink-0" />
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- Department icon (blue) -->
+          <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-500 dark:bg-primary-600 mb-2">
             <BuildingOfficeIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
-          <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
-            <p
-              class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
-              :title="department.name"
-            >
-              {{ department.name }}
-            </p>
-            <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight">{{ department.staffCount || 0 }} staff</span>
+
+          <!-- Label (e.g. "X staff") -->
+          <span class="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5">{{ department.staffCount || 0 }} staff</span>
+
+          <!-- Department name (title) -->
+          <h3
+            class="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-2"
+            :title="department.name"
+          >
+            {{ department.name }}
+          </h3>
+
+          <!-- Stats row -->
+          <div class="flex items-center justify-center gap-3 w-full text-gray-500 dark:text-gray-400">
+            <div class="flex items-center gap-1" title="Staff">
+              <UsersIcon class="w-3.5 h-3.5 shrink-0" />
+              <span class="text-[11px] tabular-nums">{{ department.staffCount || 0 }}</span>
+            </div>
           </div>
-          <div v-if="canManageDepartments" class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-            <button
-              @click.stop="department.isActive === false ? null : handleEditDepartment(department)"
-              class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
-              title="Edit department"
-              aria-label="Edit department"
-            >
-              <PencilSquareIcon class="w-3.5 h-3.5" />
-            </button>
-            <button
-              @click.stop="department.isActive === false ? null : handleDeleteDepartment(department)"
-              class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation"
-              title="Delete department"
-              aria-label="Delete department"
-            >
-              <TrashIcon class="w-3.5 h-3.5" />
-            </button>
-          </div>
+
+          <!-- Inactive badge -->
           <div v-if="department.isActive === false" class="absolute top-1.5 right-1.5 z-10">
             <span class="px-1 py-0.5 text-[9px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full">Inactive</span>
           </div>
@@ -298,7 +330,7 @@
     <!-- Fixed pagination bar -->
     <div
       v-if="filteredDepartments.length > 0"
-      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 rounded-t-2xl"
+      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
       <Pagination
@@ -388,6 +420,7 @@ import {
   ArrowPathIcon,
   PencilSquareIcon,
   TrashIcon,
+  EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
@@ -680,6 +713,22 @@ watch(() => authStore.loading, async (loading) => {
       console.error('[DepartmentsPage] Error fetching after auth loaded:', error.message || error)
     }
   }
+})
+
+const openDepartmentMenuId = ref<string | null>(null)
+const toggleDepartmentMenu = (departmentId: string) => {
+  openDepartmentMenuId.value = openDepartmentMenuId.value === departmentId ? null : departmentId
+}
+
+// Close department menu when clicking outside
+watch(openDepartmentMenuId, (id) => {
+  if (!id) return
+  const close = () => { openDepartmentMenuId.value = null }
+  const handler = () => {
+    close()
+    document.removeEventListener('click', handler)
+  }
+  setTimeout(() => document.addEventListener('click', handler), 0)
 })
 
 const openCreateDepartmentModal = () => {

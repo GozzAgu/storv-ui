@@ -333,7 +333,10 @@ export const useStaffStore = defineStore('staff', {
       }
 
       const token = await authStore.currentUser.getIdToken()
-      const res = await $fetch<{ success: boolean; uid: string; staffId: string }>('/api/staff/invite', {
+      const config = useRuntimeConfig()
+      const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
+      const inviteUrl = apiBase ? `${apiBase}/api/staff/invite` : '/api/staff/invite'
+      const res = await $fetch<{ success: boolean; uid: string; staffId: string }>(inviteUrl, {
         method: 'POST',
         body: {
           email: staffData.email.trim().toLowerCase(),

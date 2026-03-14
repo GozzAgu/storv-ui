@@ -298,7 +298,7 @@
 
     <div
       v-if="staff.length > 0 && !isStaffFullscreen"
-      class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 rounded-t-2xl safe-area-inset-bottom"
+      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
       <Pagination
@@ -309,7 +309,7 @@
       />
     </div>
 
-    <div v-if="isStaffFullscreen && staff.length > 0" class="sticky bottom-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-4 z-10 rounded-t-2xl">
+    <div v-if="isStaffFullscreen && staff.length > 0" class="sticky bottom-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-1.5 z-10">
       <Pagination
         :current-page="staffCurrentPage"
         :items-per-page="staffItemsPerPage"
