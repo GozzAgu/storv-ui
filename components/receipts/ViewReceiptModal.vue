@@ -8,125 +8,125 @@
     content-padding="p-0"
   >
     <template #header>
-      <div class="flex items-center justify-between w-full">
-        <div class="flex items-center gap-2">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Receipt {{ receipt?.receiptNumber }}
+      <div class="flex items-center justify-between w-full gap-4">
+        <div class="flex items-center gap-2 min-w-0">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+            {{ receipt?.receiptNumber }}
           </h3>
           <button
             v-if="receipt"
             @click="copyReceiptNumber(receipt.receiptNumber)"
-            class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
             title="Copy receipt number"
           >
-            <ClipboardDocumentIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
+            <ClipboardDocumentIcon class="w-4 h-4" stroke-width="1.5" />
           </button>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 flex-shrink-0">
           <button
             @click="showEmailModal = true"
             :disabled="isSendingEmail || !receipt"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
           >
-            <EnvelopeIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
-            <span>{{ isSendingEmail ? 'Sending...' : 'Send Email' }}</span>
+            <EnvelopeIcon class="w-4 h-4" stroke-width="1.5" />
+            <span>{{ isSendingEmail ? 'Sending...' : 'Email' }}</span>
           </button>
           <button
             @click="handlePrintPDF"
             :disabled="isPrinting || !receipt"
-            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
           >
-            <PrinterIcon class="w-4 h-4 stroke-1" stroke-width="1.5" />
-            <span>{{ isPrinting ? 'Generating...' : 'Print PDF' }}</span>
+            <PrinterIcon class="w-4 h-4" stroke-width="1.5" />
+            <span>{{ isPrinting ? 'Generating...' : 'Print' }}</span>
           </button>
         </div>
       </div>
     </template>
 
     <div v-if="!receipt" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading receipt...</p>
     </div>
 
-    <div v-else class="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-6">
-      <!-- Receipt Content (will be used for PDF) -->
-      <div ref="receiptContent" class="receipt-content bg-white text-gray-900 p-6 max-w-lg mx-auto">
-        <!-- Store Header -->
-        <div class="text-center mb-4 pb-3 border-b border-gray-400">
+    <div v-else class="max-h-[calc(100vh-12rem)] overflow-y-auto p-4 sm:p-6">
+      <!-- Receipt Content (used for PDF) -->
+      <div
+        ref="receiptContent"
+        class="receipt-content bg-white text-gray-900 rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-lg mx-auto"
+        :class="{ 'pdf-export': isCapturingPdf }"
+      >
+        <!-- Store header -->
+        <div class="text-center pt-6 pb-4 px-6">
           <div v-if="storeLogoUrl" class="flex justify-center mb-2">
-            <img
-              :src="storeLogoUrl"
-              alt="Store logo"
-              class="w-14 h-14 rounded-full object-cover border-2 border-gray-300"
-            />
+            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-lg object-contain ring-1 ring-gray-200" />
           </div>
-          <h1 class="text-xl font-bold mb-1">{{ storeName || 'Store Name' }}</h1>
-          <p v-if="storeAddress" class="text-xs mb-0.5">{{ storeAddress }}</p>
-          <p v-if="storePhone" class="text-xs mb-0.5">Phone: {{ storePhone }}</p>
-          <p v-if="storeEmail" class="text-xs">Email: {{ storeEmail }}</p>
+          <h1 class="text-sm font-semibold text-gray-900 tracking-tight">{{ storeName || 'Store' }}</h1>
+          <p v-if="storeAddress" class="mt-0.5 text-[10px] text-gray-500">{{ storeAddress }}</p>
+          <p v-if="storePhone || storeEmail" class="mt-0.5 text-[10px] text-gray-500">
+            <span v-if="storePhone">{{ storePhone }}</span><span v-if="storePhone && storeEmail"> · </span><span v-if="storeEmail">{{ storeEmail }}</span>
+          </p>
         </div>
 
-        <!-- Receipt Info -->
-        <div class="mb-4 pb-3 border-b border-gray-400">
-          <div class="flex justify-between mb-2">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs mb-0.5">Receipt: {{ receipt.receiptNumber }}</p>
-              <button
-                @click="copyReceiptNumber(receipt.receiptNumber)"
-                class="p-0.5 text-gray-600 hover:text-gray-900 transition-colors"
-                title="Copy receipt number"
-              >
-                <ClipboardDocumentIcon class="w-3 h-3" />
-              </button>
-              <span v-if="receipt.isSwapIn" class="text-xs">(Swap-in)</span>
+        <!-- Meta block -->
+        <div class="px-6 pb-4">
+          <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div>
+              <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Receipt</p>
+              <p class="text-xs font-medium text-gray-900 mt-0.5">
+                {{ receipt.receiptNumber }}
+                <span v-if="receipt.isSwapIn" class="text-gray-500 font-normal"> · Swap-in</span>
+              </p>
             </div>
             <div class="text-right">
-              <p class="text-xs">{{ formatReceiptDate(receipt.date) }}</p>
-              <p class="text-xs">{{ formatReceiptTime(receipt.date) }}</p>
+              <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Date & time</p>
+              <p class="text-xs text-gray-900 mt-0.5">{{ formatReceiptDate(receipt.date) }}</p>
+              <p class="text-[10px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
             </div>
           </div>
-          <div class="mt-2">
-            <p class="text-xs mb-0.5">Customer: {{ receipt.customerName }}</p>
-            <p v-if="receipt.customerEmail" class="text-xs">{{ receipt.customerEmail }}</p>
+          <div class="mt-3 pt-3 border-t border-gray-100">
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Customer</p>
+            <p class="text-xs font-medium text-gray-900 mt-0.5">{{ receipt.customerName }}</p>
+            <p v-if="receipt.customerEmail" class="text-[10px] text-gray-500 mt-0.5">{{ receipt.customerEmail }}</p>
           </div>
         </div>
 
-        <!-- Items Table -->
-        <div class="mb-4">
-          <table class="w-full border-collapse">
+        <!-- Items -->
+        <div class="px-6 pb-4">
+          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1.5">Items</p>
+          <table class="w-full">
             <thead>
-              <tr class="border-b border-gray-400">
-                <th class="text-left py-1 text-xs font-bold">Product</th>
-                <th class="text-center py-1 text-xs font-bold">Qty</th>
-                <th class="text-right py-1 text-xs font-bold">Price</th>
-                <th class="text-right py-1 text-xs font-bold">Total</th>
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                <th class="text-center py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider w-10">Qty</th>
+                <th class="text-right py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="text-right py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="(item, index) in receipt.items"
                 :key="index"
-                class="border-b border-gray-300"
+                class="border-b border-gray-100"
               >
-                <td class="py-1 text-xs">
-                  <div>{{ item.itemName }}</div>
-                  <div v-if="item.hasDiscount" class="text-xs">
-                    Discount: {{ item.discountPercentage ? `${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
-                  </div>
+                <td class="py-2">
+                  <p class="text-xs font-medium text-gray-900">{{ item.itemName }}</p>
+                  <p v-if="item.hasDiscount" class="text-[10px] text-gray-500 mt-0.5">
+                    {{ item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}` }}
+                  </p>
                 </td>
-                <td class="py-1 text-xs text-center">{{ item.quantity }}</td>
-                <td class="py-1 text-xs text-right">
-                  <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs line-through">{{ formatCurrency(item.originalPrice) }}</span>
+                <td class="py-2 text-center text-xs text-gray-700">{{ item.quantity }}</td>
+                <td class="py-2 text-right text-xs text-gray-700">
+                  <template v-if="item.hasDiscount && item.originalPrice">
+                    <span class="text-[10px] text-gray-400 line-through block">{{ formatCurrency(item.originalPrice) }}</span>
                     <span>{{ formatCurrency(item.price) }}</span>
-                  </div>
+                  </template>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
-                <td class="py-1 text-xs text-right">
-                  <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                    <span class="text-xs line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                <td class="py-2 text-right text-xs font-medium text-gray-900">
+                  <template v-if="item.hasDiscount && item.originalPrice">
+                    <span class="text-[10px] text-gray-400 font-normal line-through block">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
                     <span>{{ formatCurrency(item.price * item.quantity) }}</span>
-                  </div>
+                  </template>
                   <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
                 </td>
               </tr>
@@ -135,70 +135,66 @@
         </div>
 
         <!-- Totals -->
-        <div class="mb-4 pb-3 border-b border-gray-400">
+        <div class="px-6 pb-4">
           <div class="flex justify-end">
-            <div class="w-48 space-y-1">
+            <div class="w-44 space-y-1">
               <template v-if="hasAnyDiscount">
                 <div class="flex justify-between text-xs">
-                  <span>Subtotal:</span>
+                  <span class="text-gray-500">Subtotal</span>
                   <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
                 </div>
                 <div class="flex justify-between text-xs">
-                  <span>Total Discount:</span>
-                  <span>-{{ formatCurrency(calculateTotalDiscount) }}</span>
+                  <span class="text-gray-500">Discount</span>
+                  <span class="text-gray-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
                 </div>
               </template>
-              <div v-else class="flex justify-between text-xs">
-                <span>Subtotal:</span>
+              <template v-else>
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">Subtotal</span>
+                  <span>{{ formatCurrency(receipt.total) }}</span>
+                </div>
+              </template>
+              <div class="flex justify-between text-xs pt-1.5 border-t border-gray-200">
+                <span class="text-gray-500">Payment</span>
+                <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
+              </div>
+              <div class="flex justify-between text-xs font-semibold pt-1.5 border-t border-gray-200">
+                <span>Total</span>
                 <span>{{ formatCurrency(receipt.total) }}</span>
-              </div>
-              <div class="flex justify-between text-xs pt-1 border-t border-gray-400">
-                <span>Payment Method:</span>
-                <span class="capitalize">{{ receipt.paymentMethod }}</span>
-              </div>
-              <div class="flex justify-between text-xs pt-1 border-t-2 border-gray-600">
-                <span class="font-bold">Total:</span>
-                <span class="font-bold">{{ formatCurrency(receipt.total) }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Status -->
-        <div class="mb-4 text-center">
-          <span class="text-xs font-bold">Status: {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}</span>
+        <div class="px-6 pb-4">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700">
+            {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
+          </span>
         </div>
 
         <!-- Notes -->
-        <div v-if="receipt.notes" class="mb-4 pb-3 border-b border-gray-400">
-          <p class="text-xs font-bold mb-1">Notes:</p>
-          <p class="text-xs whitespace-pre-wrap">{{ receipt.notes }}</p>
+        <div v-if="receipt.notes" class="px-6 pb-4">
+          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-0.5">Notes</p>
+          <p class="text-xs text-gray-700 whitespace-pre-wrap">{{ receipt.notes }}</p>
         </div>
 
-        <!-- Swap-In Information -->
-        <div v-if="receipt.isSwapIn && swapInFolderName" class="mb-4 pb-3 border-b border-gray-400">
-          <p class="text-xs font-bold mb-1">Swap-In Information:</p>
-          <p class="text-xs">
-            A device was swapped in and added to inventory folder: {{ swapInFolderName }}
-          </p>
+        <!-- Swap-in -->
+        <div v-if="receipt.isSwapIn && swapInFolderName" class="px-6 pb-4">
+          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-0.5">Swap-in</p>
+          <p class="text-xs text-gray-700">Device added to {{ swapInFolderName }}</p>
         </div>
 
-        <!-- Store Branch and User Info -->
-        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="mb-4 pb-3 border-b border-gray-400">
-          <div class="flex justify-between text-xs">
-            <div v-if="receipt.storeBranchName">
-              <span>Branch: {{ receipt.storeBranchName }}</span>
-            </div>
-            <div v-if="receipt.createdByUserName">
-              <span>Generated by: {{ receipt.createdByUserName }}</span>
-            </div>
-          </div>
+        <!-- Branch & generated by -->
+        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="px-6 pb-4 flex flex-wrap justify-between gap-2 text-[10px] text-gray-500">
+          <span v-if="receipt.storeBranchName">Branch: {{ receipt.storeBranchName }}</span>
+          <span v-if="receipt.createdByUserName">Generated by {{ receipt.createdByUserName }}</span>
         </div>
 
         <!-- Footer -->
-        <div class="mt-4 pt-3 border-t border-gray-400 text-center">
-          <p class="text-xs mb-0.5">Thank you for your business!</p>
-          <p class="text-xs">This is a computer-generated receipt.</p>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
+          <p class="text-xs text-gray-600">Thank you for your business</p>
+          <p class="text-[10px] text-gray-500 mt-0.5">Computer-generated receipt</p>
         </div>
       </div>
     </div>
@@ -246,7 +242,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import type { Receipt } from '~/stores/receipts'
@@ -269,6 +265,7 @@ const emit = defineEmits<{
 }>()
 
 const receiptContent = ref<HTMLElement | null>(null)
+const isCapturingPdf = ref(false)
 const isPrinting = ref(false)
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
@@ -390,19 +387,51 @@ const formatReceiptTime = (date: string | Date) => {
   })
 }
 
+/** Convert external images in the receipt to data URLs so html2canvas can draw them (avoids CORS tainting). */
+async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
+  const images = el.querySelectorAll<HTMLImageElement>('img[src^="http"]')
+  await Promise.all(
+    Array.from(images).map(async (img) => {
+      const url = img.getAttribute('src')
+      if (!url || url.startsWith('data:')) return
+      try {
+        // Proxy via our API so we avoid CORS; server fetches the image and returns it
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
+        const res = await fetch(proxyUrl)
+        if (!res.ok) return
+        const blob = await res.blob()
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+        img.src = dataUrl
+        await img.decode()
+      } catch {
+        // Leave src as-is if proxy or decode fails
+      }
+    })
+  )
+}
+
 const handlePrintPDF = async () => {
   if (!receiptContent.value || !props.receipt || isPrinting.value) return
 
   isPrinting.value = true
 
   try {
+    isCapturingPdf.value = true
+    await nextTick()
+    await injectDataUrlsForImages(receiptContent.value!)
+
     // Dynamically import jsPDF and html2canvas
     const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
       import('jspdf'),
       import('html2canvas')
     ])
 
-    // Create canvas from receipt content
+    // Create canvas from receipt content (pdf-export class keeps text at ~12px on A4)
     const canvas = await html2canvas(receiptContent.value, {
       scale: 2,
       useCORS: true,
@@ -439,6 +468,7 @@ const handlePrintPDF = async () => {
     console.error('Error generating PDF:', error)
     alert('Failed to generate PDF. Please try again.')
   } finally {
+    isCapturingPdf.value = false
     isPrinting.value = false
   }
 }
@@ -453,50 +483,58 @@ const generateReceiptPDF = async (): Promise<string> => {
     throw new Error('Receipt content is required')
   }
 
-  // Dynamically import jsPDF and html2canvas
-  const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-    import('jspdf'),
-    import('html2canvas')
-  ])
+  isCapturingPdf.value = true
+  try {
+    await nextTick()
+    await injectDataUrlsForImages(receiptContent.value)
 
-  // Create canvas from receipt content
-  const canvas = await html2canvas(receiptContent.value, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: '#ffffff',
-  })
+    // Dynamically import jsPDF and html2canvas
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+      import('jspdf'),
+      import('html2canvas')
+    ])
 
-  // Calculate PDF dimensions (A4: 210 x 297 mm)
-  const imgWidth = 210
-  const pageHeight = 297
-  const imgHeight = (canvas.height * imgWidth) / canvas.width
-  let heightLeft = imgHeight
+    // Create canvas from receipt content (pdf-export class keeps text at ~12px on A4)
+    const canvas = await html2canvas(receiptContent.value, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+    })
 
-  // Create PDF
-  const pdf = new jsPDF('p', 'mm', 'a4')
-  let position = 0
+    // Calculate PDF dimensions (A4: 210 x 297 mm)
+    const imgWidth = 210
+    const pageHeight = 297
+    const imgHeight = (canvas.height * imgWidth) / canvas.width
+    let heightLeft = imgHeight
 
-  // Add image to PDF
-  const imgData = canvas.toDataURL('image/png')
-  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-  heightLeft -= pageHeight
+    // Create PDF
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    let position = 0
 
-  // Add additional pages if needed
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight
-    pdf.addPage()
+    // Add image to PDF
+    const imgData = canvas.toDataURL('image/png')
     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
     heightLeft -= pageHeight
-  }
 
-  // Convert PDF to base64 string
-  const dataUri = pdf.output('datauristring')
-  const base64 = dataUri.split(',')[1] // Remove data:application/pdf;base64, prefix
-  if (!base64) {
-    throw new Error('Failed to generate PDF base64')
+    // Add additional pages if needed
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight
+      pdf.addPage()
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+    }
+
+    // Convert PDF to base64 string
+    const dataUri = pdf.output('datauristring')
+    const base64 = dataUri.split(',')[1] // Remove data:application/pdf;base64, prefix
+    if (!base64) {
+      throw new Error('Failed to generate PDF base64')
+    }
+    return base64
+  } finally {
+    isCapturingPdf.value = false
   }
-  return base64
 }
 
 const handleSendEmail = async () => {
@@ -546,70 +584,46 @@ const handleSendEmail = async () => {
 
 <style scoped>
 .receipt-content {
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-  font-size: 13px;
+  font-family: inherit;
   line-height: 1.5;
-  color: #1f2937;
-  letter-spacing: 0.3px;
 }
 
-.receipt-content h1 {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  line-height: 1.2;
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+/* Logo: preserve aspect ratio (no stretch) in PDF and on screen */
+.receipt-logo {
+  object-fit: contain;
+  object-position: center;
 }
 
-.receipt-content .text-xs {
+/* PDF export: reduce font sizes so text appears ~12px on A4 (scale 2 capture → 210mm width) */
+.receipt-content.pdf-export {
   font-size: 10px;
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+}
+.receipt-content.pdf-export h1,
+.receipt-content.pdf-export .text-sm {
+  font-size: 10px !important;
+}
+.receipt-content.pdf-export .text-xs,
+.receipt-content.pdf-export p {
+  font-size: 10px !important;
+}
+.receipt-content.pdf-export .text-\[10px\] {
+  font-size: 8px !important;
+}
+.receipt-content.pdf-export th,
+.receipt-content.pdf-export td {
+  font-size: 10px !important;
+}
+.receipt-content.pdf-export .text-\[11px\] {
+  font-size: 8px !important;
 }
 
-.receipt-content .text-sm {
-  font-size: 12px;
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-}
-
-.receipt-content table {
-  font-size: 12px;
-  border-collapse: collapse;
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-}
-
-.receipt-content th,
-.receipt-content td {
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-  padding: 4px 8px;
-}
-
-.receipt-content th {
-  font-weight: 700;
-}
-
-.receipt-content * {
-  font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
-}
-
-/* Print styles */
+/* PDF capture: ensure clean print look */
 @media print {
   .receipt-content {
     page-break-inside: avoid;
-    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
     box-shadow: none;
     border-radius: 0;
-  }
-  
-  .receipt-content .shadow-xl {
-    box-shadow: none;
-  }
-  
-  .receipt-content .rounded-lg {
-    border-radius: 0;
-  }
-  
-  .receipt-content * {
-    font-family: 'Courier New', Courier, 'Lucida Console', Monaco, monospace;
+    background: #fff;
   }
 }
 </style>

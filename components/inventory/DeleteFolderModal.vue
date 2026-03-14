@@ -23,7 +23,7 @@
           <ExclamationTriangleIcon class="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
             <p class="text-xs font-medium text-red-800 dark:text-red-200">Confirm deletion</p>
-            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The folder will be removed; products will not be deleted but will no longer be under this folder.</p>
+            <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">This action cannot be undone. The folder and all {{ folder?.itemCount || 0 }} product{{ (folder?.itemCount || 0) !== 1 ? 's' : '' }} inside it will be permanently deleted.</p>
           </div>
         </div>
       </div>
@@ -60,8 +60,8 @@
         <h4 class="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">What will happen</h4>
         <ul class="space-y-0.5 text-xs text-amber-800 dark:text-amber-200 list-disc list-inside">
           <li>Folder permanently deleted from inventory</li>
-          <li>Products remain but are no longer under this folder</li>
-          <li>Associated folder data removed; action cannot be undone</li>
+          <li>All products in this folder permanently deleted</li>
+          <li>Action cannot be undone</li>
         </ul>
       </div>
 
@@ -69,7 +69,7 @@
       <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
         <Checkbox
           v-model="confirmed"
-          label="I understand that this action cannot be undone and will permanently delete this folder."
+          label="I understand that this action cannot be undone and will permanently delete this folder and all products in it."
           size="sm"
           wrapper-class="items-start"
           label-class="text-xs text-gray-700 dark:text-gray-300"

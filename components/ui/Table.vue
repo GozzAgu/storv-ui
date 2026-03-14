@@ -8,7 +8,7 @@
             v-for="column in columns"
             :key="column.key"
             :class="[
-              'px-2 py-1.5 text-left text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
+              'px-2 py-1.5 text-left text-[10px] !font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider',
               column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none' : '',
               column.class || '',
               headerClass
@@ -42,7 +42,7 @@
           </th>
           <th
             v-if="showActions"
-            class="px-2 py-1.5 text-right text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            class="px-2 py-1.5 text-right text-[10px] !font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
           >
             Actions
           </th>

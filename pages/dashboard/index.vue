@@ -12,24 +12,24 @@
 
     <!-- Loading State -->
     <template v-if="isLoading">
-      <!-- Stats Cards Skeleton - Compact -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-        <Card v-for="i in 4" :key="i" padding="sm" class="p-2.5">
-          <div class="flex items-center justify-between">
+      <!-- Stats Cards Skeleton -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div v-for="i in 4" :key="i" class="rounded-2xl bg-white dark:bg-gray-800/90 ring-1 ring-gray-200/80 dark:ring-gray-700/60 p-4 sm:p-5">
+          <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-2/3 mb-1.5 animate-pulse"></div>
-              <div class="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4 mb-1 animate-pulse"></div>
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/2 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2 animate-pulse"></div>
+              <div class="h-7 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
             </div>
-            <div class="w-8 h-8 rounded-md bg-gray-200 dark:bg-gray-700 animate-pulse ml-2"></div>
+            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"></div>
+          </div>
         </div>
-      </Card>
-    </div>
+      </div>
 
       <!-- Charts Row Skeleton -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4">
         <!-- Revenue Chart Skeleton -->
-        <Card class="lg:col-span-2">
+        <Card>
           <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
               <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 mb-2 animate-pulse"></div>
@@ -42,22 +42,6 @@
             </div>
           </div>
           <div class="h-48 sm:h-64 lg:h-72 bg-gray-100 dark:bg-gray-800 rounded-md animate-pulse"></div>
-        </Card>
-
-        <!-- Quick Stats Skeleton -->
-        <Card>
-          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-24 mb-4 animate-pulse"></div>
-          <div class="space-y-3">
-            <div v-for="i in 4" :key="i" class="flex items-center justify-between">
-              <div class="flex items-center gap-2 flex-1">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                <div class="flex-1">
-                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-20 mb-1 animate-pulse"></div>
-                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-12 animate-pulse"></div>
-                </div>
-              </div>
-            </div>
-          </div>
         </Card>
       </div>
 
@@ -117,46 +101,41 @@
 
     <!-- Actual Content (shown when not loading) -->
     <template v-else>
-    <!-- Key Metrics Cards - Compact -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+    <!-- Key Metrics Cards - Shopify style -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       <StatCard
-        label="Total Revenue"
+        label="Total revenue"
         :value="formatCurrency(totalRevenue)"
         :subtext="revenueChangeText"
         :subtext-class="revenueChangeClass"
-        :icon="CurrencyDollarIcon"
-        icon-class="text-green-600 dark:text-green-400"
+        :change="revenueChangePercent"
+        :change-positive="revenueChangePositive"
+        :sparkline-data="statCardRevenueSparkline"
       />
       <StatCard
-        label="Active Customers"
+        label="Active customers"
         :value="totalCustomers.toString()"
         :subtext="`${newCustomersToday} new today`"
-        :subtext-class="newCustomersToday > 0 ? 'text-blue-600 dark:text-blue-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
-        :icon="UsersIcon"
-        icon-class="text-blue-600 dark:text-blue-400"
+        :subtext-class="newCustomersToday > 0 ? 'text-green-600 dark:text-green-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
       />
       <StatCard
-        label="Total Items"
+        label="Total items"
         :value="totalInventoryItems.toString()"
-        :subtext="lowStockCount > 0 ? `⚠ ${lowStockCount} Low Stock` : 'All items in stock'"
-        :subtext-class="lowStockCount > 0 ? 'text-orange-600 dark:text-orange-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
-        :icon="CubeIcon"
-        icon-class="text-orange-600 dark:text-orange-400"
+        :subtext="lowStockCount > 0 ? `${lowStockCount} low stock` : 'All items in stock'"
+        :subtext-class="lowStockCount > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
       />
       <StatCard
-        label="Orders Today"
+        label="Orders today"
         :value="todayReceiptsCount.toString()"
         :subtext="`${formatCurrency(todaySales)} in sales`"
-        :subtext-class="'text-primary-600 dark:text-primary-400 text-xs font-medium'"
-        :icon="ShoppingCartIcon"
-        icon-class="text-primary-600 dark:text-primary-400"
+        :subtext-class="'text-gray-500 dark:text-gray-400 text-xs'"
       />
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <div class="grid grid-cols-1 gap-3">
       <!-- Revenue Chart -->
-      <Card class="lg:col-span-2" padding="sm" extra-class="p-4">
+      <Card padding="sm" extra-class="p-4">
         <div class="flex items-center justify-between mb-3 sm:mb-4">
           <div>
             <h2 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
@@ -199,10 +178,10 @@
             </button>
           </div>
         </div>
-        <div class="h-48 sm:h-64 lg:h-72 relative pb-4">
+        <div class="h-48 sm:h-64 lg:h-72 relative pb-8">
           <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
-            <div class="w-14 h-14 mb-3 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-              <ChartBarIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
+            <div class="w-14 h-14 mb-3 rounded-xl bg-green-500/10 dark:bg-green-500/15 ring-1 ring-green-500/20 flex items-center justify-center">
+              <ChartBarIcon class="w-7 h-7 text-green-600 dark:text-green-400" stroke-width="1.5" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start making sales to see your revenue chart</p>
@@ -223,215 +202,117 @@
           </ClientOnly>
       </div>
       </Card>
-
-      <!-- Busiest time -->
-      <Card padding="sm" extra-class="p-4 overflow-hidden">
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex items-start gap-2.5 min-w-0">
-            <div class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-100 dark:ring-primary-900/30">
-              <ClockIcon class="w-4.5 h-4.5 text-primary-600 dark:text-primary-400" />
-            </div>
-            <div class="min-w-0">
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">Busiest time</h2>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak day & hour in period</p>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
-            Last 30 days
-          </span>
-        </div>
-
-        <div class="mt-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-900/30 dark:to-gray-800/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60">
-          <p class="text-[10px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
-          <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-            {{ busiestTimeSummary }}
-          </p>
-        </div>
-      </Card>
     </div>
 
-    <!-- Bottom Row - fixed height cards -->
+    <!-- Bottom Row - clean compact cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-      <!-- Quick Stats -->
-      <Card padding="sm" extra-class="p-4 h-[240px] flex flex-col">
-        <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100 mb-2 flex-shrink-0">Quick Stats</h2>
-        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-md bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-              <CheckCircleIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-[10px] text-gray-600 dark:text-gray-400">Completed Orders</p>
-              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</p>
-            </div>
+      <!-- Orders & departments -->
+      <Card padding="sm" extra-class="p-3.5">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">Orders & departments</p>
+        <div class="space-y-2.5">
+          <div class="flex justify-between items-baseline">
+            <span class="text-[11px] text-gray-500 dark:text-gray-400">Completed</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</span>
           </div>
-          
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-              <ClockIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-[10px] text-gray-600 dark:text-gray-400">Pending Orders</p>
-              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</p>
-            </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-[11px] text-gray-500 dark:text-gray-400">Pending</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</span>
           </div>
-
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-md bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-              <XCircleIcon class="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-[10px] text-gray-600 dark:text-gray-400">Refunded</p>
-              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</p>
-            </div>
+          <div class="flex justify-between items-baseline">
+            <span class="text-[11px] text-gray-500 dark:text-gray-400">Refunded</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</span>
           </div>
-          
-          <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-              <BuildingOfficeIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-[10px] text-gray-600 dark:text-gray-400">Departments</p>
-              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</p>
-            </div>
+          <div class="flex justify-between items-baseline pt-1 border-t border-gray-200/80 dark:border-gray-700/80">
+            <span class="text-[11px] text-gray-500 dark:text-gray-400">Departments</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</span>
           </div>
         </div>
       </Card>
 
-      <!-- Recent Transactions -->
-      <Card extra-class="h-[240px] flex flex-col p-4">
-        <div class="flex items-center justify-between mb-2 flex-shrink-0">
-          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-          <NuxtLink to="/dashboard/receipts" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+      <!-- Recent transactions -->
+      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Recent</p>
+          <NuxtLink to="/dashboard/receipts" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
         </div>
-        <div class="space-y-1.5 flex-1 min-h-0 overflow-y-auto">
-          <div v-if="recentTransactions.length === 0" class="text-center py-6">
-            <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-              <ReceiptPercentIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" />
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">No recent transactions</p>
-          </div>
-          <div v-for="transaction in recentTransactions" :key="transaction.id" class="flex items-center justify-between py-1.5 border-b border-gray-200 dark:border-gray-700 last:border-0">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div :class="['w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0', transaction.iconBg]">
-                <component :is="transaction.icon" :class="['w-3.5 h-3.5', transaction.iconColor]" />
-              </div>
+        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+          <template v-if="recentTransactions.length === 0">
+            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">No transactions</p>
+          </template>
+          <template v-else>
+            <div v-for="tx in recentTransactions" :key="tx.id" class="flex justify-between items-start gap-2 py-0.5">
               <div class="min-w-0 flex-1">
-                <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">{{ transaction.description }}</p>
-                <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ transaction.time }}</p>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ tx.description }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ tx.time }}</p>
+              </div>
+              <p :class="['text-xs font-semibold flex-shrink-0', tx.amountClass]">{{ tx.amount }}</p>
+            </div>
+          </template>
+        </div>
+      </Card>
+
+      <!-- Top products -->
+      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Top products</p>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+        </div>
+        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+          <template v-if="topSellingItems.length === 0">
+            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">No sales yet</p>
+          </template>
+          <template v-else>
+            <div v-for="(item, i) in topSellingItems.slice(0, 5)" :key="item.id" class="flex justify-between items-baseline gap-2 py-0.5">
+              <div class="min-w-0 flex-1 flex items-center gap-1.5">
+                <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 w-4 flex-shrink-0">{{ i + 1 }}</span>
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+              </div>
+              <div class="flex-shrink-0 text-right">
+                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ item.sales }} sold</p>
               </div>
             </div>
-            <div class="text-right flex-shrink-0 ml-1.5">
-              <p :class="['text-[10px] font-semibold', transaction.amountClass]">{{ transaction.amount }}</p>
-            </div>
-          </div>
+          </template>
         </div>
       </Card>
 
-      <!-- Top Selling Products -->
-      <Card extra-class="h-[240px] flex flex-col p-4">
-        <div class="flex items-center justify-between mb-2 flex-shrink-0">
-          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Top Selling Products</h2>
-          <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+      <!-- Low stock -->
+      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
         </div>
-        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
-          <div v-if="topSellingItems.length === 0" class="text-center py-6">
-            <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-              <CubeIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+          <template v-if="lowStockItems.length === 0">
+            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">All stocked</p>
+          </template>
+          <template v-else>
+            <div v-for="item in lowStockItems.slice(0, 5)" :key="item.id" class="flex justify-between items-baseline gap-2 py-0.5">
+              <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate min-w-0">{{ item.name }}</p>
+              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">
+                {{ item.quantity }}<span v-if="!item.isSerialNumber">/{{ item.threshold }}</span>
+              </span>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">No products sold yet</p>
-          </div>
-          <div v-for="(item, index) in topSellingItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
-            <div class="flex-shrink-0 w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-[10px]">
-              {{ index + 1 }}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
-              <p class="text-[9px] text-gray-500 dark:text-gray-400">{{ item.sales }} sales</p>
-            </div>
-            <div class="text-right flex-shrink-0">
-              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
-            </div>
-          </div>
+          </template>
         </div>
       </Card>
 
-      <!-- Low Stock Items -->
-      <Card v-if="lowStockItems.length > 0" extra-class="h-[240px] flex flex-col p-4">
-        <div class="flex items-center justify-between mb-2 flex-shrink-0">
-          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Low Stock Items</h2>
-          <NuxtLink to="/dashboard/inventory" class="text-[9px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</NuxtLink>
+      <!-- Inventory status -->
+      <Card padding="sm" extra-class="p-3.5">
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">Inventory</p>
+        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+          <div class="bg-green-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
+          <div class="bg-amber-500 transition-all" :style="`width: ${lowStockPercentage}%`" title="Low stock" />
+          <div class="bg-red-500 transition-all" :style="`width: ${outOfStockPercentage}%`" title="Out of stock" />
         </div>
-        <div class="space-y-2 flex-1 min-h-0 overflow-y-auto">
-          <div v-for="item in lowStockItems.slice(0, 5)" :key="item.id" class="flex items-center gap-2">
-            <div class="flex-shrink-0 w-7 h-7 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <ExclamationTriangleIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-[10px] font-medium text-gray-900 dark:text-gray-100 truncate">
-                {{ item.isSerialNumber ? item.name : item.name }}
-              </p>
-              <p class="text-[9px] text-gray-500 dark:text-gray-400">
-                <span v-if="item.isSerialNumber">{{ item.quantity }} available</span>
-                <span v-else>{{ item.folderName }}</span>
-              </p>
-            </div>
-            <div class="text-right flex-shrink-0">
-              <p class="text-[10px] font-semibold text-orange-600 dark:text-orange-400">
-                <span v-if="item.isSerialNumber">{{ item.quantity }}</span>
-                <span v-else>{{ item.quantity }}</span>
-              </p>
-              <p class="text-[8px] text-gray-500 dark:text-gray-400">
-                <span v-if="item.isSerialNumber">items left</span>
-                <span v-else>of {{ item.threshold }}</span>
-              </p>
-            </div>
-          </div>
+        <div class="flex justify-between mt-2 text-[10px] text-gray-500 dark:text-gray-400">
+          <span>{{ inStockCount }} in stock</span>
+          <span>{{ lowStockCount }} low</span>
+          <span>{{ outOfStockCount }} out</span>
         </div>
-      </Card>
-
-      <!-- Inventory Status -->
-      <Card extra-class="h-[240px] flex flex-col p-4">
-        <div class="flex items-center justify-between mb-2 flex-shrink-0">
-          <h2 class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">Inventory Status</h2>
-        </div>
-        <div class="space-y-2.5 flex-1 min-h-0 overflow-y-auto">
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[10px] text-gray-600 dark:text-gray-400">In Stock</span>
-              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ inStockCount }} ({{ inStockPercentage }}%)</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-              <div class="bg-green-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${inStockPercentage}%`"></div>
-            </div>
-          </div>
-          
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[10px] text-gray-600 dark:text-gray-400">Low Stock</span>
-              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ lowStockCount }} ({{ lowStockPercentage }}%)</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-              <div class="bg-orange-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${lowStockPercentage}%`"></div>
-        </div>
-      </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-[10px] text-gray-600 dark:text-gray-400">Out of Stock</span>
-              <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ outOfStockCount }} ({{ outOfStockPercentage }}%)</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-              <div class="bg-red-500 h-1.5 rounded-full transition-all duration-300" :style="`width: ${outOfStockPercentage}%`"></div>
-        </div>
-      </div>
-
-          <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-gray-600 dark:text-gray-400">Total Items</span>
-              <span class="text-[11px] font-bold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
-            </div>
-          </div>
+        <div class="flex justify-between items-baseline mt-2 pt-2 border-t border-gray-200/80 dark:border-gray-700/80">
+          <span class="text-[11px] text-gray-500 dark:text-gray-400">Total</span>
+          <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
         </div>
       </Card>
     </div>
@@ -546,6 +427,28 @@ const revenueChangeText = computed(() => {
 })
 const revenueChangeClass = computed(() => {
   return totalRevenue.value > 0 ? 'text-green-600 dark:text-green-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'
+})
+// Percentage change: last 15 days vs previous 15 days (for Shopify-style trend)
+const revenueChangePercent = computed(() => {
+  const daily = dailyRevenueData.value
+  if (!daily || daily.length < 30) return null
+  const recent = daily.slice(-15).reduce((s, d) => s + d.revenue, 0)
+  const previous = daily.slice(-30, -15).reduce((s, d) => s + d.revenue, 0)
+  if (previous === 0) return recent > 0 ? '+100%' : null
+  const pct = Math.round(((recent - previous) / previous) * 100)
+  if (pct === 0) return null
+  return pct > 0 ? `+${pct}%` : `${pct}%`
+})
+const revenueChangePositive = computed(() => {
+  const p = revenueChangePercent.value
+  if (!p || p === null) return null
+  return p.startsWith('+')
+})
+// Sparkline data for revenue card (last 14 days)
+const statCardRevenueSparkline = computed(() => {
+  const daily = dailyRevenueData.value
+  if (!daily || daily.length < 2) return []
+  return daily.slice(-14).map(d => d.revenue)
 })
 
 // Customer metrics
@@ -1009,49 +912,40 @@ const chartHeight = computed(() => isMobile.value ? 256 : 320)
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
-  
+  const lineColor = isDark ? '#60A5FA' : '#2563EB'   // blue-400 / blue-600
+  const gridColor = isDark ? 'rgba(75, 85, 99, 0.25)' : 'rgba(229, 231, 235, 0.8)'
+  const labelColor = isDark ? '#9CA3AF' : '#6B7280'
+
   return {
     chart: {
       type: 'area',
       height: chartHeight.value,
-      toolbar: {
-        show: false
-      },
-      zoom: {
-        enabled: false
-      },
-      sparkline: {
-        enabled: false
-      },
+      toolbar: { show: false },
+      zoom: { enabled: false },
       fontFamily: 'inherit',
-      background: 'transparent'
+      background: 'transparent',
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 600
+      }
     },
-    dataLabels: {
-      enabled: false
-    },
+    dataLabels: { enabled: false },
     stroke: {
       curve: 'smooth',
       width: 2,
-      colors: ['#2563eb']
+      colors: [lineColor]
     },
     fill: {
       type: 'gradient',
       gradient: {
-        shadeIntensity: 1,
-        opacityFrom: 0.4,
-        opacityTo: 0.1,
-        stops: [0, 90, 100],
+        shadeIntensity: 0,
+        opacityFrom: 0.2,
+        opacityTo: 0,
+        stops: [0, 100],
         colorStops: [
-          {
-            offset: 0,
-            color: '#2563eb',
-            opacity: 0.4
-          },
-          {
-            offset: 100,
-            color: '#2563eb',
-            opacity: 0.1
-          }
+          { offset: 0, color: lineColor, opacity: 0.22 },
+          { offset: 100, color: lineColor, opacity: 0 }
         ]
       }
     },
@@ -1071,27 +965,24 @@ const chartOptions = computed(() => {
       })(),
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
+          colors: labelColor,
+          fontSize: '11px',
+          fontWeight: 400
         },
         rotate: chartView.value === 'monthly' ? 0 : -45,
         rotateAlways: false,
-        offsetY: 8
+        offsetY: 4
       },
-      axisBorder: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      },
-      axisTicks: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      }
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      crosshairs: { show: false }
     },
     yaxis: {
       labels: {
         style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
+          colors: labelColor,
+          fontSize: '11px',
+          fontWeight: 400
         },
         formatter: (value: number) => {
           const symbol = currencySymbol.value || '$'
@@ -1101,40 +992,34 @@ const chartOptions = computed(() => {
           return `${symbol}${Math.round(value)}`
         }
       },
-      title: {
-        text: 'Revenue',
-        style: {
-          color: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px',
-          fontWeight: 500
-        }
-      }
+      title: { text: undefined },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      crosshairs: { show: false }
     },
     grid: {
-      borderColor: isDark ? '#374151' : '#E5E7EB',
-      strokeDashArray: 4,
-      xaxis: {
-        lines: {
-          show: false
-        }
-      },
+      borderColor: 'transparent',
+      strokeDashArray: 0,
+      xaxis: { lines: { show: false } },
       yaxis: {
         lines: {
-          show: true
+          show: true,
+          strokeDashArray: 0,
+          color: gridColor
         }
       },
       padding: {
-        top: 0,
-        right: 0,
-        bottom: 20,
-        left: 0
+        top: 8,
+        right: 4,
+        bottom: 36,
+        left: 4
       }
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
-      y: {
-        formatter: (value: number) => formatCurrency(value)
-      },
+      followCursor: true,
+      style: { fontSize: '12px' },
+      y: { formatter: (value: number) => formatCurrency(value) },
       x: {
         formatter: (value: string) => {
           const index = parseInt(value)
@@ -1144,128 +1029,29 @@ const chartOptions = computed(() => {
               const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
               return `Week: ${week.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${week.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
             } else if (chartView.value === 'monthly') {
-              return item.date.toLocaleDateString('en-US', {
-                month: 'long',
-                year: 'numeric'
-              })
+              return item.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
             } else {
-              return item.date.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              })
+              return item.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
             }
           }
           return value
         }
       }
     },
-    theme: {
-      mode: isDark ? 'dark' : 'light'
-    },
-    colors: ['#2563eb'],
-    legend: {
-      show: false
-    },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    colors: [lineColor],
+    legend: { show: false },
     markers: {
-      size: 4,
-      colors: ['#2563eb'],
-      strokeColors: '#fff',
-      strokeWidth: 2,
-      hover: {
-        size: 6
-      }
+      size: 0,
+      strokeColors: lineColor,
+      strokeWidth: 0,
+      hover: { size: 4, strokeWidth: 0 }
+    },
+    states: {
+      hover: { filter: { type: 'none' } },
+      active: { filter: { type: 'none' } }
     }
   }
-})
-
-// Busiest time (like Analytics): peak day × hour by revenue. Last 30 days.
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {
-  if (i === 0) return '12am'
-  if (i === 12) return '12pm'
-  return i < 12 ? `${i}am` : `${i - 12}pm`
-})
-
-const receiptToDate = (r: any) => (r?.date?.toDate ? r.date.toDate() : new Date(r?.date))
-
-const completedReceiptsForBusiestTime = computed(() => {
-  const now = new Date()
-  const cutoff = new Date(now)
-  cutoff.setDate(cutoff.getDate() - 30)
-  return receiptsStore.receipts.filter((r: any) => {
-    if (r.status !== 'completed') return false
-    const d = receiptToDate(r)
-    return d instanceof Date && !Number.isNaN(d.getTime()) && d >= cutoff && d <= now
-  })
-})
-
-const busiestHasData = computed(() => completedReceiptsForBusiestTime.value.length > 0)
-
-const salesByHourForBusiest = computed(() => {
-  const byHour = Array.from({ length: 24 }, (_, hour) => ({ hour, revenue: 0, count: 0 }))
-  completedReceiptsForBusiestTime.value.forEach((r: any) => {
-    const d = receiptToDate(r)
-    const h = d.getHours()
-    const slot = byHour[h]
-    if (slot) {
-      slot.revenue += r.total || 0
-      slot.count += 1
-    }
-  })
-  return byHour
-})
-
-const salesByDayOfWeekForBusiest = computed(() => {
-  const byDay = DAY_NAMES.map((name, i) => ({ dayIndex: i, dayName: name, revenue: 0, count: 0 }))
-  completedReceiptsForBusiestTime.value.forEach((r: any) => {
-    const d = receiptToDate(r)
-    const dayIndex = d.getDay()
-    const slot = byDay[dayIndex]
-    if (slot) {
-      slot.revenue += r.total || 0
-      slot.count += 1
-    }
-  })
-  return byDay
-})
-
-const busiestHourIndex = computed(() => {
-  let max = -1
-  let best = 0
-  salesByHourForBusiest.value.forEach((s, i) => {
-    if (s.revenue > max) {
-      max = s.revenue
-      best = i
-    }
-  })
-  return max > 0 ? best : null
-})
-
-const busiestDayIndex = computed(() => {
-  let max = -1
-  let best = 0
-  salesByDayOfWeekForBusiest.value.forEach((s, i) => {
-    if (s.revenue > max) {
-      max = s.revenue
-      best = i
-    }
-  })
-  return max > 0 ? best : null
-})
-
-const busiestHourLabel = computed(() =>
-  busiestHourIndex.value != null ? HOUR_LABELS[busiestHourIndex.value] : null
-)
-
-const busiestDayName = computed(() =>
-  busiestDayIndex.value != null ? DAY_NAMES[busiestDayIndex.value] : null
-)
-
-const busiestTimeSummary = computed(() => {
-  if (!busiestHasData.value || busiestDayName.value == null || busiestHourLabel.value == null) return 'No sales in period'
-  return `${busiestDayName.value}, ${busiestHourLabel.value}`
 })
 
 // Get currency formatting from preferences

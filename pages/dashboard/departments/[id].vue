@@ -90,6 +90,18 @@
           isStaffFullscreen ? 'shadow-none' : 'rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50'
         ]"
       >
+        <div v-if="canManageDepartments && selectedStaffForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-4 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-primary-50/50 dark:bg-primary-900/10">
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedStaffForBulk.length }} selected</span>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            @click="openBulkDeleteStaffModal"
+          >
+            Delete ({{ selectedStaffForBulk.length }})
+          </Button>
+        </div>
         <div v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen" class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60 bg-white/60 dark:bg-gray-800/60">
           <div class="flex items-center flex-wrap gap-4">
             <div class="flex items-center gap-1.5">
@@ -147,12 +159,20 @@
           <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
               <tr>
-                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
-                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden sm:table-cell">Position</th>
-                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Role</th>
-                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden md:table-cell">Email</th>
-                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
-                <th v-if="canManageDepartments" class="px-4 sm:px-5 py-2.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
+                <th v-if="canManageDepartments" class="px-4 sm:px-5 py-2.5 text-center text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 w-10">
+                  <Checkbox
+                    :model-value="paginatedStaff.length > 0 && selectedStaffForBulk.length === paginatedStaff.length"
+                    @update:model-value="toggleSelectAllStaff"
+                    size="sm"
+                    wrapper-class="justify-center"
+                  />
+                </th>
+                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
+                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden sm:table-cell">Position</th>
+                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Role</th>
+                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 hidden md:table-cell">Email</th>
+                <th class="px-4 sm:px-5 py-2.5 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Status</th>
+                <th v-if="canManageDepartments" class="px-4 sm:px-5 py-2.5 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Action</th>
               </tr>
             </thead>
             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200/80 dark:divide-gray-700/80">
@@ -161,6 +181,15 @@
                 :key="member.id"
                 class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
               >
+              <td v-if="canManageDepartments" class="px-4 sm:px-5 py-2.5 text-center w-10">
+                <Checkbox
+                  :model-value="selectedStaffForBulk.some(s => s.id === member.id)"
+                  @update:model-value="(checked) => toggleStaffSelection(member, checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
+                  @click.stop
+                />
+              </td>
               <td class="px-4 sm:px-5 py-2.5">
                 <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ member.firstName }} {{ member.lastName }}</span>
               </td>
@@ -302,6 +331,51 @@
       </button>
     </div>
 
+    <!-- Bulk Delete Staff Modal -->
+    <Modal
+      v-model="showBulkDeleteStaffModal"
+      @update:model-value="(v: boolean) => { showBulkDeleteStaffModal = v; if (!v) bulkDeleteStaffConfirmed = false }"
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected staff</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedStaffForBulk.length }} staff member{{ selectedStaffForBulk.length !== 1 ? 's' : '' }} selected</p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+          <p class="text-xs text-red-800 dark:text-red-200">This will permanently remove the selected staff members from this department. This action cannot be undone.</p>
+        </div>
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+          <Checkbox
+            v-model="bulkDeleteStaffConfirmed"
+            label="I understand that these staff members will be permanently removed."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button
+          variant="danger"
+          size="sm"
+          :disabled="!bulkDeleteStaffConfirmed || isBulkDeletingStaff"
+          :icon="TrashIcon"
+          class="!rounded-lg"
+          @click="handleConfirmBulkDeleteStaff"
+        >
+          {{ isBulkDeletingStaff ? 'Deleting...' : `Delete ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}
+        </Button>
+      </template>
+    </Modal>
     <!-- Staff Modal -->
     <StaffModal
       v-if="departmentId"
@@ -334,6 +408,8 @@ import {
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import Modal from '~/components/ui/Modal.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
@@ -341,6 +417,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import type { Department } from '~/composables/useDepartments'
 import type { Staff } from '~/composables/useStaff'
+import { usePermissions } from '~/composables/usePermissions'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({
   layout: 'dashboard',
@@ -378,11 +456,18 @@ const getStaffInitialPage = (): number => {
   return 1
 }
 const staffCurrentPage = ref(getStaffInitialPage())
-const staffItemsPerPage = ref(20)
+const staffItemsPerPage = ref(30)
 
 // Staff modal
 const showStaffModal = ref(false)
 const editingStaff = ref<Staff | null>(null)
+
+// Bulk delete staff
+const selectedStaffForBulk = ref<Staff[]>([])
+const showBulkDeleteStaffModal = ref(false)
+const bulkDeleteStaffConfirmed = ref(false)
+const isBulkDeletingStaff = ref(false)
+const toast = useToast()
 
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
@@ -475,6 +560,40 @@ const paginatedStaff = computed(() => {
   const end = start + staffItemsPerPage.value
   return staff.value.slice(start, end)
 })
+
+const toggleStaffSelection = (member: Staff, checked: boolean) => {
+  const idx = selectedStaffForBulk.value.findIndex(s => s.id === member.id)
+  if (checked && idx === -1) selectedStaffForBulk.value.push(member)
+  else if (!checked && idx !== -1) selectedStaffForBulk.value.splice(idx, 1)
+}
+const toggleSelectAllStaff = (checked: boolean) => {
+  if (checked) selectedStaffForBulk.value = [...paginatedStaff.value]
+  else selectedStaffForBulk.value = []
+}
+const openBulkDeleteStaffModal = () => {
+  bulkDeleteStaffConfirmed.value = false
+  showBulkDeleteStaffModal.value = true
+}
+const handleConfirmBulkDeleteStaff = async () => {
+  if (!bulkDeleteStaffConfirmed.value || selectedStaffForBulk.value.length === 0) return
+  isBulkDeletingStaff.value = true
+  const ids = selectedStaffForBulk.value.map(s => s.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await staffStore.deleteStaff(id)
+    }
+    selectedStaffForBulk.value = []
+    showBulkDeleteStaffModal.value = false
+    bulkDeleteStaffConfirmed.value = false
+    await loadDepartmentData()
+    toast.success(`${count} staff member${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some staff members')
+  } finally {
+    isBulkDeletingStaff.value = false
+  }
+}
 
 // Computed stats for compact header
 const totalManagers = computed(() => {

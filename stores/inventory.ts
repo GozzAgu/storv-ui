@@ -586,7 +586,25 @@ export const useInventoryStore = defineStore('inventory', {
         if (!storeId) {
           throw new Error('No store selected')
         }
-        
+
+        // Delete all items in this folder first (same user path as folder owner)
+        const itemsRef = getInventoryItemsCollection(db, userId, storeId)
+        const itemsQuery = query(itemsRef, where('folderId', '==', folderId))
+        const itemsSnapshot = await getDocs(itemsQuery)
+        const BATCH_SIZE = 500 // Firestore batch limit
+        if (!itemsSnapshot.empty) {
+          const docs = itemsSnapshot.docs
+          for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+            const batch = writeBatch(db)
+            const chunk = docs.slice(i, i + BATCH_SIZE)
+            chunk.forEach((d) => batch.delete(d.ref))
+            await batch.commit()
+          }
+        }
+
+        // Remove folder's items from local state
+        delete this.items[folderId]
+
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
         const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
         await deleteDoc(folderRef)

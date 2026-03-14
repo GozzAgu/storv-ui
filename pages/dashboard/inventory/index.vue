@@ -60,14 +60,45 @@
       </div>
     </div>
 
+    <!-- Select all + Bulk actions (folders) -->
+    <div v-if="canManage && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-4">
+      <Button
+        variant="outline"
+        size="sm"
+        class="!rounded-lg"
+        @click="toggleSelectAllFolders"
+      >
+        {{ allFoldersOnPageSelected ? 'Deselect all' : 'Select all' }}
+      </Button>
+      <template v-if="selectedFoldersForBulk.length > 0">
+        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedFoldersForBulk.length }} selected</span>
+        <Button
+          variant="outline"
+          size="sm"
+          :icon="TrashIcon"
+          class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+          @click="openBulkDeleteFoldersModal"
+        >
+          Delete ({{ selectedFoldersForBulk.length }})
+        </Button>
+      </template>
+    </div>
     <!-- Folders grid -->
-    <div v-else-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
         class="group relative flex items-center w-full min-h-[52px] sm:min-h-[50px] rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60 transition-all duration-200 active:scale-[0.99] sm:hover:scale-[1.02] hover:ring-primary-500/30 dark:hover:ring-primary-400/30 cursor-pointer overflow-hidden py-2 px-2.5 sm:py-2 sm:px-0"
         @click="navigateToFolder(folder.id)"
       >
+        <div v-if="canManage" class="flex items-center justify-center w-8 h-8 sm:ml-2 shrink-0" @click.stop>
+          <Checkbox
+            :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
+            @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+            size="sm"
+            wrapper-class="justify-center"
+          />
+        </div>
         <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
           <FolderIcon class="w-5 h-5 text-white" stroke-width="1.75" />
         </div>
@@ -106,15 +137,15 @@
     <!-- Empty state (when not loading and no folders) -->
     <div
       v-else
-      class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 text-center"
+      class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 sm:px-6 text-center min-w-0 w-full"
     >
-      <div class="w-12 h-12 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
+      <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
         <FolderIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
       </div>
-      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
         {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
       </h2>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
         {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
       </p>
       <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -175,6 +206,51 @@
       </button>
     </div>
 
+    <!-- Bulk Delete Folders Modal -->
+    <Modal
+      v-model="showBulkDeleteFoldersModal"
+      @update:model-value="(v: boolean) => { showBulkDeleteFoldersModal = v; if (!v) bulkDeleteFoldersConfirmed = false }"
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected folders</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedFoldersForBulk.length }} folder{{ selectedFoldersForBulk.length !== 1 ? 's' : '' }} selected</p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+          <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected folders and all products inside them. This action cannot be undone.</p>
+        </div>
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+          <Checkbox
+            v-model="bulkDeleteFoldersConfirmed"
+            label="I understand that these folders and their products will be permanently deleted."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="outline" size="sm" @click="showBulkDeleteFoldersModal = false; bulkDeleteFoldersConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button
+          variant="danger"
+          size="sm"
+          :disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
+          :icon="TrashIcon"
+          class="!rounded-lg"
+          @click="handleConfirmBulkDeleteFolders"
+        >
+          {{ isBulkDeletingFolders ? 'Deleting...' : `Delete ${selectedFoldersForBulk.length} folder${selectedFoldersForBulk.length !== 1 ? 's' : ''}` }}
+        </Button>
+      </template>
+    </Modal>
     <!-- Delete Folder Modal -->
     <DeleteFolderModal
       v-model="showDeleteFolderModal"
@@ -439,6 +515,12 @@ const editingFolder = ref<InventoryFolder | null>(null)
 const showDeleteFolderModal = ref(false)
 const selectedFolderForDelete = ref<InventoryFolder | null>(null)
 
+// Bulk delete folders
+const selectedFoldersForBulk = ref<InventoryFolder[]>([])
+const showBulkDeleteFoldersModal = ref(false)
+const bulkDeleteFoldersConfirmed = ref(false)
+const isBulkDeletingFolders = ref(false)
+
 // Department filter - load from localStorage
 const getInitialDepartment = (): string => {
   if (import.meta.client) {
@@ -465,7 +547,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(20)
+const itemsPerPage = ref(30)
 const sidebarCollapsed = ref(false)
 
 // Load sidebar state from localStorage
@@ -902,6 +984,47 @@ const handleEditFolder = (folder: InventoryFolder) => {
     }
   }
   showCreateFolderModal.value = true
+}
+
+const toggleFolderSelection = (folder: InventoryFolder, checked: boolean) => {
+  const idx = selectedFoldersForBulk.value.findIndex(f => f.id === folder.id)
+  if (checked && idx === -1) selectedFoldersForBulk.value.push(folder)
+  else if (!checked && idx !== -1) selectedFoldersForBulk.value.splice(idx, 1)
+}
+const allFoldersOnPageSelected = computed(() =>
+  paginatedFolders.value.length > 0 &&
+  selectedFoldersForBulk.value.length === paginatedFolders.value.length
+)
+const toggleSelectAllFolders = () => {
+  if (allFoldersOnPageSelected.value) {
+    selectedFoldersForBulk.value = []
+  } else {
+    selectedFoldersForBulk.value = [...paginatedFolders.value]
+  }
+}
+const openBulkDeleteFoldersModal = () => {
+  bulkDeleteFoldersConfirmed.value = false
+  showBulkDeleteFoldersModal.value = true
+}
+const handleConfirmBulkDeleteFolders = async () => {
+  if (!bulkDeleteFoldersConfirmed.value || selectedFoldersForBulk.value.length === 0) return
+  isBulkDeletingFolders.value = true
+  const ids = selectedFoldersForBulk.value.map(f => f.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await inventoryStore.deleteFolder(id)
+    }
+    selectedFoldersForBulk.value = []
+    showBulkDeleteFoldersModal.value = false
+    bulkDeleteFoldersConfirmed.value = false
+    await inventoryStore.fetchFolders()
+    toast.success(`${count} folder${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some folders')
+  } finally {
+    isBulkDeletingFolders.value = false
+  }
 }
 
 const handleDeleteFolder = (folder: InventoryFolder) => {

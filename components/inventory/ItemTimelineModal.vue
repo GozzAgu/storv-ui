@@ -5,77 +5,62 @@
     size="md"
   >
     <template #header>
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-          <ClockIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" stroke-width="1.75" />
-        </div>
-        <div class="min-w-0 flex-1">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-            Inventory Timeline
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
-            {{ itemDisplayName }}
-          </p>
-        </div>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate tracking-tight">
+          Inventory Timeline
+        </h3>
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+          {{ itemDisplayName }}
+        </p>
       </div>
     </template>
 
-    <div class="max-h-[calc(100vh-14rem)] overflow-y-auto">
-      <div v-if="timeline.length === 0" class="py-8 text-center">
-        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center">
-          <ClockIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
+    <div class="p-4 sm:p-5 max-h-[calc(100vh-14rem)] overflow-y-auto">
+      <div v-if="timeline.length === 0" class="py-10 text-center">
+        <div class="w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center">
+          <ClockIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
-        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No timeline events yet</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Activity for this item will appear here</p>
+        <p class="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">No events yet</p>
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Activity for this item will appear here</p>
       </div>
 
-      <div v-else class="relative py-1">
-        <!-- Timeline line -->
+      <div v-else class="relative">
         <div
-          class="absolute left-[15px] top-3 bottom-3 w-px bg-gray-200 dark:bg-gray-600"
+          class="absolute left-[11px] top-2 bottom-2 w-px bg-gray-200 dark:bg-gray-600"
           aria-hidden="true"
         />
         <ul class="space-y-0">
           <li
             v-for="(event, index) in timeline"
             :key="`${event.date.getTime()}-${event.type}-${index}`"
-            class="relative flex gap-4 pb-5 last:pb-0"
+            class="relative flex gap-3 pb-5 last:pb-0"
           >
-            <!-- Event icon -->
-            <div
-              :class="[
-                'relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-white dark:border-gray-800 shadow-sm',
-                getEventIconBg(event.type)
-              ]"
-            >
+            <div class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-200/80 dark:border-gray-600">
               <component
                 :is="getEventIcon(event.type)"
-                class="h-4 w-4"
-                :class="getEventIconColor(event.type)"
-                stroke-width="1.75"
+                class="h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
+                stroke-width="2"
               />
             </div>
-            <!-- Event content -->
-            <div class="flex-1 min-w-0 pt-0.5">
-              <div class="flex flex-wrap items-baseline gap-2">
-                <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 tabular-nums">
-                  {{ formatTimelineDate(event.date) }}
-                </span>
-                <span class="text-gray-300 dark:text-gray-600">–</span>
+            <div class="flex-1 min-w-0 pt-px">
+              <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {{ event.label }}
                 </p>
+                <span class="text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+                  {{ formatTimelineDate(event.date) }}
+                </span>
               </div>
-              <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 {{ event.description }}
               </p>
               <div v-if="event.receiptId" class="mt-2">
                 <NuxtLink
                   :to="`/dashboard/receipts?receipt=${event.receiptId}`"
-                  class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                  class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                   @click="emit('update:modelValue', false)"
                 >
-                  View receipt
+                  View receipt →
                 </NuxtLink>
               </div>
             </div>
@@ -161,39 +146,5 @@ function getEventIcon(type: TimelineEventType) {
     updated: PencilSquareIcon,
   }
   return icons[type] || ClockIcon
-}
-
-function getEventIconBg(type: TimelineEventType): string {
-  const map: Record<TimelineEventType, string> = {
-    created: 'bg-blue-100 dark:bg-blue-900/40',
-    assigned_to_folder: 'bg-slate-100 dark:bg-slate-700/60',
-    discount_applied: 'bg-amber-100 dark:bg-amber-900/40',
-    discount_removed: 'bg-gray-100 dark:bg-gray-700',
-    sold: 'bg-green-100 dark:bg-green-900/40',
-    returned: 'bg-amber-100 dark:bg-amber-900/40',
-    transferred_in: 'bg-purple-100 dark:bg-purple-900/40',
-    swap_in: 'bg-cyan-100 dark:bg-cyan-900/40',
-    restocked: 'bg-emerald-100 dark:bg-emerald-900/40',
-    maintenance: 'bg-orange-100 dark:bg-orange-900/40',
-    updated: 'bg-gray-100 dark:bg-gray-700',
-  }
-  return map[type] || 'bg-gray-100 dark:bg-gray-700'
-}
-
-function getEventIconColor(type: TimelineEventType): string {
-  const map: Record<TimelineEventType, string> = {
-    created: 'text-blue-600 dark:text-blue-400',
-    assigned_to_folder: 'text-slate-600 dark:text-slate-400',
-    discount_applied: 'text-amber-600 dark:text-amber-400',
-    discount_removed: 'text-gray-600 dark:text-gray-400',
-    sold: 'text-green-600 dark:text-green-400',
-    returned: 'text-amber-600 dark:text-amber-400',
-    transferred_in: 'text-purple-600 dark:text-purple-400',
-    swap_in: 'text-cyan-600 dark:text-cyan-400',
-    restocked: 'text-emerald-600 dark:text-emerald-400',
-    maintenance: 'text-orange-600 dark:text-orange-400',
-    updated: 'text-gray-600 dark:text-gray-400',
-  }
-  return map[type] || 'text-gray-600 dark:text-gray-400'
 }
 </script>

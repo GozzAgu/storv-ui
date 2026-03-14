@@ -142,10 +142,10 @@
               <table class="w-full text-xs">
                 <thead class="bg-white/60 dark:bg-gray-800/60 sticky top-0">
                   <tr>
-                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
-                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Available</th>
-                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Qty</th>
-                    <th v-else class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Select</th>
+                    <th class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Available</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Qty</th>
+                    <th v-else class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Select</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
@@ -279,10 +279,10 @@
               <table class="w-full text-xs">
                 <thead class="bg-white/60 dark:bg-gray-800/60">
                   <tr>
-                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Store</th>
-                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Revenue</th>
-                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Sales</th>
-                    <th class="px-3 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Items</th>
+                    <th class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Store</th>
+                    <th class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Revenue</th>
+                    <th class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Sales</th>
+                    <th class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Items</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">

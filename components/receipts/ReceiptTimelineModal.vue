@@ -5,68 +5,53 @@
     size="md"
   >
     <template #header>
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-md bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-          <ClockIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
-        </div>
-        <div class="min-w-0 flex-1">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-            Receipt History
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
-            Receipt #{{ receipt?.receiptNumber || '—' }} • {{ receipt?.customerName || '' }}
-          </p>
-        </div>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate tracking-tight">
+          Receipt History
+        </h3>
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+          Receipt #{{ receipt?.receiptNumber || '—' }} · {{ receipt?.customerName || '' }}
+        </p>
       </div>
     </template>
 
-    <div class="max-h-[calc(100vh-14rem)] overflow-y-auto">
-      <div v-if="timeline.length === 0" class="py-8 text-center">
-        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center">
-          <ClockIcon class="w-7 h-7 text-gray-400 dark:text-gray-500" />
+    <div class="p-4 sm:p-5 max-h-[calc(100vh-14rem)] overflow-y-auto">
+      <div v-if="timeline.length === 0" class="py-10 text-center">
+        <div class="w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-gray-700/80 flex items-center justify-center">
+          <ClockIcon class="w-5 h-5 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
-        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No timeline events yet</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Activity for this receipt will appear here</p>
+        <p class="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">No events yet</p>
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Activity for this receipt will appear here</p>
       </div>
 
       <div v-else class="relative">
-        <!-- Timeline line -->
         <div
-          class="absolute left-4 top-2 bottom-2 w-0.5 bg-gray-200 dark:bg-gray-700"
+          class="absolute left-[11px] top-2 bottom-2 w-px bg-gray-200 dark:bg-gray-600"
           aria-hidden="true"
         />
         <ul class="space-y-0">
           <li
             v-for="(event, index) in timeline"
             :key="index"
-            class="relative flex gap-4 pb-4 last:pb-0"
+            class="relative flex gap-3 pb-5 last:pb-0"
           >
-            <!-- Event icon -->
-            <div
-              :class="[
-                'relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 border-white dark:border-gray-800',
-                getEventIconBg(event.type)
-              ]"
-            >
+            <div class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-200/80 dark:border-gray-600">
               <component
                 :is="getEventIcon(event.type)"
-                class="h-4 w-4"
-                :class="getEventIconColor(event.type)"
+                class="h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
+                stroke-width="2"
               />
             </div>
-            <!-- Event content -->
-            <div class="flex-1 min-w-0 pt-0.5">
+            <div class="flex-1 min-w-0 pt-px">
               <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {{ event.label }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                 {{ event.description }}
               </p>
-              <div class="flex items-center gap-2 mt-1.5">
-                <span class="text-[10px] text-gray-500 dark:text-gray-500">
-                  {{ formatDate(event.date) }}
-                </span>
-              </div>
+              <span class="inline-block mt-1.5 text-[11px] text-gray-400 dark:text-gray-500 tabular-nums">
+                {{ formatDate(event.date) }}
+              </span>
             </div>
           </li>
         </ul>
@@ -107,21 +92,5 @@ function getEventIcon(type: ReceiptTimelineEventType) {
     refunded: ArrowPathIcon,
   }
   return icons[type] || ClockIcon
-}
-
-function getEventIconBg(type: ReceiptTimelineEventType): string {
-  const map: Record<ReceiptTimelineEventType, string> = {
-    created: 'bg-blue-100 dark:bg-blue-900/40',
-    refunded: 'bg-amber-100 dark:bg-amber-900/40',
-  }
-  return map[type] || 'bg-gray-100 dark:bg-gray-700'
-}
-
-function getEventIconColor(type: ReceiptTimelineEventType): string {
-  const map: Record<ReceiptTimelineEventType, string> = {
-    created: 'text-blue-600 dark:text-blue-400',
-    refunded: 'text-amber-600 dark:text-amber-400',
-  }
-  return map[type] || 'text-gray-600 dark:text-gray-400'
 }
 </script>

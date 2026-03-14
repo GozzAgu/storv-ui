@@ -132,6 +132,28 @@
     </template>
 
     <div v-else-if="!departmentsStore.error" class="space-y-6">
+      <div v-if="canManageDepartments && paginatedDepartments.length > 0" class="flex flex-wrap items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="!rounded-lg"
+          @click="toggleSelectAllDepartments"
+        >
+          {{ allDepartmentsOnPageSelected ? 'Deselect all' : 'Select all' }}
+        </Button>
+        <template v-if="selectedDepartmentsForBulk.length > 0">
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedDepartmentsForBulk.length }} selected</span>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            @click="openBulkDeleteDepartmentsModal"
+          >
+            Delete ({{ selectedDepartmentsForBulk.length }})
+          </Button>
+        </template>
+      </div>
       <div v-if="paginatedDepartments.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
         <div
           v-for="department in paginatedDepartments"
@@ -140,6 +162,14 @@
           :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false }"
           @click="department.isActive === false ? null : navigateToDepartment(department.id)"
         >
+          <div v-if="canManageDepartments" class="flex items-center justify-center w-8 h-8 sm:ml-2 shrink-0" @click.stop>
+            <Checkbox
+              :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
+              @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+              size="sm"
+              wrapper-class="justify-center"
+            />
+          </div>
           <div class="flex items-center justify-center w-9 h-9 sm:w-8 sm:h-8 sm:ml-2 rounded-lg shrink-0 bg-gradient-to-br from-primary-400 to-primary-600 group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-200">
             <BuildingOfficeIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
@@ -214,6 +244,51 @@
       />
     </div>
 
+    <!-- Bulk Delete Departments Modal -->
+    <Modal
+      v-model="showBulkDeleteDepartmentsModal"
+      @update:model-value="(v: boolean) => { showBulkDeleteDepartmentsModal = v; if (!v) bulkDeleteDepartmentsConfirmed = false }"
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected departments</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedDepartmentsForBulk.length }} department{{ selectedDepartmentsForBulk.length !== 1 ? 's' : '' }} selected</p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+          <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected departments and their staff associations. This action cannot be undone.</p>
+        </div>
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+          <Checkbox
+            v-model="bulkDeleteDepartmentsConfirmed"
+            label="I understand that these departments will be permanently deleted."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button
+          variant="danger"
+          size="sm"
+          :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
+          :icon="TrashIcon"
+          class="!rounded-lg"
+          @click="handleConfirmBulkDeleteDepartments"
+        >
+          {{ isBulkDeletingDepartments ? 'Deleting...' : `Delete ${selectedDepartmentsForBulk.length} department${selectedDepartmentsForBulk.length !== 1 ? 's' : ''}` }}
+        </Button>
+      </template>
+    </Modal>
     <DepartmentModal
       v-model="showDepartmentModal"
       :department="editingDepartment"
@@ -250,6 +325,8 @@ import {
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import Modal from '~/components/ui/Modal.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import type { Department } from '~/composables/useDepartments'
 
@@ -269,6 +346,12 @@ useHead({
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
 
+// Bulk delete departments
+const selectedDepartmentsForBulk = ref<Department[]>([])
+const showBulkDeleteDepartmentsModal = ref(false)
+const bulkDeleteDepartmentsConfirmed = ref(false)
+const isBulkDeletingDepartments = ref(false)
+
 const searchQuery = ref('')
 
 // Load pagination state from localStorage
@@ -284,7 +367,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(20)
+const itemsPerPage = ref(30)
 
 // Import stores directly - Pinia handles SSR automatically
 import { useDepartmentsStore } from '~/stores/departments'
@@ -292,6 +375,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
+import { useToast } from '~/composables/useToast'
 
 // Get store instances - only accessible on client
 const departmentsStore = useDepartmentsStore()
@@ -299,6 +383,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const storesStore = useStoresStore()
+const toast = useToast()
 const sidebarCollapsed = ref(false)
 
 // Load sidebar state from localStorage
@@ -556,6 +641,47 @@ const navigateToDepartment = async (departmentId: string) => {
     } catch (err) {
       console.error('Both navigation methods failed:', err)
     }
+  }
+}
+
+const toggleDepartmentSelection = (department: Department, checked: boolean) => {
+  const idx = selectedDepartmentsForBulk.value.findIndex(d => d.id === department.id)
+  if (checked && idx === -1) selectedDepartmentsForBulk.value.push(department)
+  else if (!checked && idx !== -1) selectedDepartmentsForBulk.value.splice(idx, 1)
+}
+const allDepartmentsOnPageSelected = computed(() =>
+  paginatedDepartments.value.length > 0 &&
+  selectedDepartmentsForBulk.value.length === paginatedDepartments.value.length
+)
+const toggleSelectAllDepartments = () => {
+  if (allDepartmentsOnPageSelected.value) {
+    selectedDepartmentsForBulk.value = []
+  } else {
+    selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
+  }
+}
+const openBulkDeleteDepartmentsModal = () => {
+  bulkDeleteDepartmentsConfirmed.value = false
+  showBulkDeleteDepartmentsModal.value = true
+}
+const handleConfirmBulkDeleteDepartments = async () => {
+  if (!bulkDeleteDepartmentsConfirmed.value || selectedDepartmentsForBulk.value.length === 0) return
+  isBulkDeletingDepartments.value = true
+  const ids = selectedDepartmentsForBulk.value.map(d => d.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await departmentsStore.deleteDepartment(id)
+    }
+    selectedDepartmentsForBulk.value = []
+    showBulkDeleteDepartmentsModal.value = false
+    bulkDeleteDepartmentsConfirmed.value = false
+    await departmentsStore.fetchDepartments()
+    toast.success(`${count} department${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some departments')
+  } finally {
+    isBulkDeletingDepartments.value = false
   }
 }
 

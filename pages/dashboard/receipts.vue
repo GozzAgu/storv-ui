@@ -212,6 +212,19 @@
             </button>
           </div>
         </div>
+        <!-- Bulk actions (receipts) -->
+        <div v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-3 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-primary-50/50 dark:bg-primary-900/10">
+          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedReceiptsForBulk.length }} selected</span>
+          <Button
+            variant="outline"
+            size="sm"
+            :icon="TrashIcon"
+            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            @click="openBulkDeleteReceiptsModal"
+          >
+            Delete ({{ selectedReceiptsForBulk.length }})
+          </Button>
+        </div>
       <!-- Table Loading Skeleton -->
       <div v-if="receiptsStore.loading" class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -231,13 +244,36 @@
           </tbody>
         </table>
       </div>
+      <!-- Standalone empty state (same styling as customers empty state, no button) -->
+      <div
+        v-else-if="sortedFilteredReceipts.length === 0"
+        class="flex flex-col items-center justify-center py-12 sm:py-16 px-4 sm:px-6 text-center min-w-0 w-full"
+      >
+        <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
+          <ReceiptPercentIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        </div>
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+          {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+          {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
+        </p>
+      </div>
       <div v-else class="overflow-x-auto">
         <table class="min-w-full">
           <thead class="border-b border-gray-200 dark:border-gray-700">
             <tr>
+              <th v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 w-10">
+                <Checkbox
+                  :model-value="paginatedReceipts.length > 0 && selectedReceiptsForBulk.length === paginatedReceipts.length"
+                  @update:model-value="toggleSelectAllReceipts"
+                  size="sm"
+                  wrapper-class="justify-center"
+                />
+              </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
@@ -259,7 +295,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('customerName') && toggleSort('customerName')"
@@ -281,7 +317,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('date') && toggleSort('date')"
@@ -303,7 +339,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
@@ -325,7 +361,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('total') && toggleSort('total')"
@@ -347,7 +383,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('paymentMethod') && toggleSort('paymentMethod')"
@@ -369,7 +405,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('status') && toggleSort('status')"
@@ -391,7 +427,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
@@ -411,7 +447,7 @@
                   </template>
                 </div>
               </th>
-              <th class="px-3 sm:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">
+              <th class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
                 Action
               </th>
             </tr>
@@ -422,6 +458,15 @@
               :key="receipt.id"
               class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
             >
+              <td v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center w-10">
+                <Checkbox
+                  :model-value="selectedReceiptsForBulk.some(r => r.id === receipt.id)"
+                  @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
+                  @click.stop
+                />
+              </td>
               <td class="px-3 sm:px-4 py-2">
                 <div class="flex items-center gap-1.5">
                   <div class="text-[10px] font-medium text-gray-900 dark:text-gray-100">
@@ -586,31 +631,6 @@
                 </div>
               </td>
             </tr>
-            <!-- Empty state -->
-            <tr v-if="sortedFilteredReceipts.length === 0" class="bg-white dark:bg-gray-800/40">
-              <td colspan="9" class="px-6 py-16">
-                <div class="text-center">
-                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <ReceiptPercentIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-                  </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-                    {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
-                    {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
-                  </p>
-                  <Button
-                    v-if="!searchQuery && statusFilter === 'all' && dateFilter === 'all'"
-                    variant="primary"
-                    :icon="PlusIcon"
-                    @click="openCreateReceiptModal"
-                    class="rounded-full w-full sm:w-auto"
-                  >
-                    Create first receipt
-                  </Button>
-                </div>
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -652,22 +672,22 @@
       />
     </div>
 
-    <!-- FAB: New receipt -->
+    <!-- FAB: New receipt (same as folder FAB – show when list has items or when empty with no filters) -->
     <div
-      v-if="!isInitialLoading && sortedFilteredReceipts.length > 0 && canCreate"
+      v-if="!isInitialLoading && canCreate && (sortedFilteredReceipts.length > 0 || (sortedFilteredReceipts.length === 0 && !searchQuery && statusFilter === 'all' && dateFilter === 'all'))"
       class="group fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-40 flex items-center justify-end"
     >
       <span
-        class="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
+        class="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
       >
-        New receipt
+        {{ sortedFilteredReceipts.length === 0 ? 'Create first receipt' : 'New receipt' }}
       </span>
       <button
         @click="openCreateReceiptModal"
-        class="w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
+        class="group w-11 h-11 rounded-full bg-primary-600 hover:bg-primary-700 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
         aria-label="Create new receipt"
       >
-        <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5 text-white" stroke-width="1.5" />
+        <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
       </button>
     </div>
 
@@ -691,6 +711,51 @@
       />
 
       <!-- Delete Receipt Modal -->
+      <!-- Bulk Delete Receipts Modal -->
+      <Modal
+        v-model="showBulkDeleteReceiptsModal"
+        @update:model-value="(v: boolean) => { showBulkDeleteReceiptsModal = v; if (!v) bulkDeleteReceiptsConfirmed = false }"
+        size="md"
+      >
+        <template #header>
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+              <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+            </div>
+            <div class="min-w-0">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected receipts</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedReceiptsForBulk.length }} receipt{{ selectedReceiptsForBulk.length !== 1 ? 's' : '' }} selected</p>
+            </div>
+          </div>
+        </template>
+        <div class="space-y-3">
+          <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+            <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected receipts. This action cannot be undone. Associated customer data may be affected.</p>
+          </div>
+          <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+            <Checkbox
+              v-model="bulkDeleteReceiptsConfirmed"
+              label="I understand that these receipts will be permanently deleted."
+              size="sm"
+              wrapper-class="items-start"
+              label-class="text-xs text-gray-700 dark:text-gray-300"
+            />
+          </div>
+        </div>
+        <template #footer>
+          <Button variant="outline" size="sm" @click="showBulkDeleteReceiptsModal = false; bulkDeleteReceiptsConfirmed = false" class="!rounded-lg">Cancel</Button>
+          <Button
+            variant="danger"
+            size="sm"
+            :disabled="!bulkDeleteReceiptsConfirmed || isBulkDeletingReceipts"
+            :icon="TrashIcon"
+            class="!rounded-lg"
+            @click="handleConfirmBulkDeleteReceipts"
+          >
+            {{ isBulkDeletingReceipts ? 'Deleting...' : `Delete ${selectedReceiptsForBulk.length} receipt${selectedReceiptsForBulk.length !== 1 ? 's' : ''}` }}
+          </Button>
+        </template>
+      </Modal>
       <DeleteReceiptModal
         v-model="showDeleteReceiptModal"
         :receipt="selectedReceipt"
@@ -750,19 +815,34 @@
           <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary-500/30 border-t-primary-600"></div>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading customers...</p>
         </div>
+        <!-- Standalone empty state on mobile/desktop so it's never clipped by table scroll -->
+        <div
+          v-else-if="filteredCustomers.length === 0"
+          class="flex flex-col items-center justify-center py-12 sm:py-16 px-4 sm:px-6 text-center min-w-0 w-full"
+        >
+          <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
+            <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          </div>
+          <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+            {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+            {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
+          </p>
+        </div>
         <div v-else class="overflow-x-auto">
           <table class="min-w-full">
             <thead class="bg-white/60 dark:bg-gray-800/60">
               <tr>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500 min-w-[90px] sm:min-w-[100px]">
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 min-w-[90px] sm:min-w-[100px]">
                   Receipts
                 </th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Customer</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Contact</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Orders</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Total Spent</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Last Order</th>
-                <th class="px-3 sm:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">Action</th>
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Customer</th>
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Contact</th>
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Orders</th>
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Total Spent</th>
+                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Last Order</th>
+                <th class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Action</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
@@ -903,21 +983,6 @@
                   </td>
                 </tr>
               </template>
-              <tr v-if="filteredCustomers.length === 0" class="bg-white dark:bg-gray-800/40">
-                <td colspan="7" class="px-6 py-16">
-                  <div class="text-center">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-                      {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
-                    </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-                      {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
-                    </p>
-                  </div>
-                </td>
-              </tr>
             </tbody>
           </table>
         </div>
@@ -978,6 +1043,8 @@ import {
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import Modal from '~/components/ui/Modal.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 // @ts-ignore
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 // @ts-ignore
@@ -1109,7 +1176,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(20)
+const itemsPerPage = ref(30)
 // Hybrid pagination: Load More (20 → 50) then switch to pagination
 const displayedItemsCount = ref(20)
 const usePagination = ref(false)
@@ -1146,7 +1213,7 @@ const getCustomersInitialPage = (): number => {
   return 1
 }
 const customersCurrentPage = ref(getCustomersInitialPage())
-const customersItemsPerPage = ref(20)
+const customersItemsPerPage = ref(30)
 
 // Customer interface for display
 interface CustomerDisplay {
@@ -1547,7 +1614,7 @@ watch([searchQuery, statusFilter, dateFilter, currentSort], () => {
   displayedItemsCount.value = 20
   usePagination.value = false
   currentPage.value = 1
-  itemsPerPage.value = 20
+  itemsPerPage.value = 30
 })
 
 const toggleSort = (key: string) => {
@@ -1590,7 +1657,7 @@ const resetFilters = () => {
   currentPage.value = 1
   displayedItemsCount.value = 20
   usePagination.value = false
-  itemsPerPage.value = 20
+  itemsPerPage.value = 30
   // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {
     try {
@@ -1657,6 +1724,46 @@ const showViewReceiptModal = ref(false)
 const showReturnReceiptModal = ref(false)
 const showTimelineModal = ref(false)
 const showDeleteReceiptModal = ref(false)
+
+// Bulk delete receipts
+const selectedReceiptsForBulk = ref<Receipt[]>([])
+const showBulkDeleteReceiptsModal = ref(false)
+const bulkDeleteReceiptsConfirmed = ref(false)
+const isBulkDeletingReceipts = ref(false)
+const toggleReceiptSelection = (receipt: Receipt, checked: boolean) => {
+  const idx = selectedReceiptsForBulk.value.findIndex(r => r.id === receipt.id)
+  if (checked && idx === -1) selectedReceiptsForBulk.value.push(receipt)
+  else if (!checked && idx !== -1) selectedReceiptsForBulk.value.splice(idx, 1)
+}
+const toggleSelectAllReceipts = (checked: boolean) => {
+  if (checked) selectedReceiptsForBulk.value = [...paginatedReceipts.value]
+  else selectedReceiptsForBulk.value = []
+}
+const openBulkDeleteReceiptsModal = () => {
+  bulkDeleteReceiptsConfirmed.value = false
+  showBulkDeleteReceiptsModal.value = true
+}
+const handleConfirmBulkDeleteReceipts = async () => {
+  if (!bulkDeleteReceiptsConfirmed.value || selectedReceiptsForBulk.value.length === 0) return
+  isBulkDeletingReceipts.value = true
+  const ids = selectedReceiptsForBulk.value.map(r => r.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await receiptsStore.deleteReceipt(id)
+    }
+    selectedReceiptsForBulk.value = []
+    showBulkDeleteReceiptsModal.value = false
+    bulkDeleteReceiptsConfirmed.value = false
+    await receiptsStore.fetchReceipts()
+    await loadCreatorNames()
+    toast.success(`${count} receipt${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some receipts')
+  } finally {
+    isBulkDeletingReceipts.value = false
+  }
+}
 
 
 const { addRecentItem } = useRecentItems()

@@ -36,7 +36,7 @@
             </div>
           </div>
         </div>
-        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center shrink-0">
+        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 shrink-0">
           <Button
             variant="primary"
             @click="openBulkDiscountModal"
@@ -44,6 +44,14 @@
             class="rounded-full"
           >
             Bulk discount ({{ selectedItemsForBulk.length }})
+          </Button>
+          <Button
+            variant="outline"
+            @click="openBulkDeleteModal"
+            :icon="TrashIcon"
+            class="rounded-full !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+          >
+            Delete ({{ selectedItemsForBulk.length }})
           </Button>
         </div>
       </div>
@@ -262,11 +270,22 @@
         <table class="min-w-full">
           <thead :class="[isFullscreen ? 'border-b border-gray-200 dark:border-gray-700' : 'bg-white/60 dark:bg-gray-800/60']">
               <tr>
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
+                <Checkbox
+                  :model-value="(() => {
+                    const availableItems = filteredItems.filter(item => !isItemSold(item))
+                    return selectedItemsForBulk.length === availableItems.length && availableItems.length > 0
+                  })()"
+                  @update:model-value="(checked) => toggleSelectAll(checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
+                />
+              </th>
               <th
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
                   column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
@@ -286,18 +305,7 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">
-                <Checkbox
-                  :model-value="(() => {
-                    const availableItems = filteredItems.filter(item => !isItemSold(item))
-                    return selectedItemsForBulk.length === availableItems.length && availableItems.length > 0
-                  })()"
-                  @update:model-value="(checked) => toggleSelectAll(checked)"
-                  size="sm"
-                  wrapper-class="justify-center"
-                />
-              </th>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-500">
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
                 Action
               </th>
               </tr>
@@ -308,6 +316,16 @@
                 :key="item.id"
                 class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
               >
+              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center">
+                <Checkbox
+                  :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
+                  @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                  :disabled="isItemSold(item)"
+                  size="sm"
+                  wrapper-class="justify-center"
+                  :title="isItemSold(item) ? 'Cannot select sold products for bulk operations' : ''"
+                />
+              </td>
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
@@ -406,16 +424,6 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center">
-                <Checkbox
-                  :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
-                  @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                  :disabled="isItemSold(item)"
-                  size="sm"
-                  wrapper-class="justify-center"
-                  :title="isItemSold(item) ? 'Cannot select sold products for bulk operations' : ''"
-                />
-              </td>
               <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2">
                 <!-- Desktop: Show all action buttons -->
                 <div class="hidden sm:flex items-center justify-end gap-1.5 flex-shrink-0" @click.stop>
@@ -436,6 +444,17 @@
                     :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                   >
                     <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                  </button>
+                  <button
+                    @click="handleDuplicateItem(item)"
+                    :disabled="isItemSold(item)"
+                    :class="[
+                      'p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0',
+                      isItemSold(item) && 'cursor-not-allowed opacity-40'
+                    ]"
+                    :title="isItemSold(item) ? 'Cannot duplicate sold item' : 'Duplicate item'"
+                  >
+                    <DocumentDuplicateIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleDeleteItem(item)"
@@ -481,6 +500,14 @@
                       :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
                     >
                       <PencilSquareIcon class="w-5 h-5" />
+                    </button>
+                    <button
+                      @click="handleDuplicateItem(item); openItemMenuId = null"
+                      :disabled="isItemSold(item)"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Duplicate item"
+                    >
+                      <DocumentDuplicateIcon class="w-5 h-5" />
                     </button>
                     <button
                       @click="handleDeleteItem(item); openItemMenuId = null"
@@ -540,7 +567,7 @@
         <Pagination
           v-else-if="usePagination"
           :current-page="currentPage"
-          :items-per-page="50"
+          :items-per-page="30"
           :total="sortedFilteredItems.length"
           @page-change="handlePageChange"
         />
@@ -820,6 +847,110 @@
       @deleted="handleConfirmDeleteItem"
     />
 
+    <!-- Bulk Delete Modal -->
+    <Modal
+      v-model="showBulkDeleteModal"
+      @update:model-value="(v: boolean) => { showBulkDeleteModal = v; if (!v) bulkDeleteConfirmed = false }"
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected products</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedItemsForBulk.length }} product{{ selectedItemsForBulk.length !== 1 ? 's' : '' }} selected</p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+          <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected products from inventory. This action cannot be undone.</p>
+        </div>
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+          <Checkbox
+            v-model="bulkDeleteConfirmed"
+            label="I understand that these products will be permanently deleted."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button variant="outline" size="sm" @click="showBulkDeleteModal = false; bulkDeleteConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button
+          variant="danger"
+          size="sm"
+          :disabled="!bulkDeleteConfirmed || isBulkDeleting"
+          :icon="TrashIcon"
+          class="!rounded-lg"
+          @click="handleConfirmBulkDelete"
+        >
+          {{ isBulkDeleting ? 'Deleting...' : `Delete ${selectedItemsForBulk.length} product${selectedItemsForBulk.length !== 1 ? 's' : ''}` }}
+        </Button>
+      </template>
+    </Modal>
+
+    <!-- Duplicate Item Modal (multiple serial numbers) -->
+    <Modal
+      v-model="showDuplicateModal"
+      title="Duplicate product"
+      subtitle="Add one or more new serial numbers. Each will create a copy of this product; serial numbers must be unique."
+      size="sm"
+      @update:model-value="(v: boolean) => { if (!v) clearDuplicateModal() }"
+    >
+      <form @submit.prevent="handleConfirmDuplicate" class="space-y-4">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">New serial numbers</label>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              :icon="PlusIcon"
+              @click="addDuplicateSerialNumber"
+              class="!rounded-lg"
+            >
+              Add
+            </Button>
+          </div>
+          <div v-if="duplicateSerialNumbers.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            No serial numbers. Click "Add" to enter one or more.
+          </div>
+          <div v-else class="space-y-2 max-h-48 overflow-y-auto">
+            <div
+              v-for="(serial, index) in duplicateSerialNumbers"
+              :key="index"
+              class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
+            >
+              <input
+                v-model="duplicateSerialNumbers[index]"
+                type="text"
+                :placeholder="`Serial ${index + 1}`"
+                class="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+              />
+              <button
+                type="button"
+                @click="removeDuplicateSerialNumber(index)"
+                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                title="Remove"
+              >
+                <TrashIcon class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <Button variant="outline" size="sm" type="button" @click="showDuplicateModal = false; clearDuplicateModal()" class="!rounded-lg">Cancel</Button>
+          <Button variant="primary" size="sm" type="submit" :disabled="isDuplicating || !hasValidDuplicateSerials" class="!rounded-lg">
+            {{ isDuplicating ? 'Duplicating...' : `Duplicate ${validDuplicateSerialsCount} product${validDuplicateSerialsCount !== 1 ? 's' : ''}` }}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+
     <!-- Item Timeline Modal -->
     <ItemTimelineModal
       v-model="showTimelineModal"
@@ -854,6 +985,7 @@ import {
   ArrowsPointingOutIcon,
   EllipsisVerticalIcon,
   ClockIcon,
+  DocumentDuplicateIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
@@ -961,9 +1093,9 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(20)
-// Hybrid pagination: Load More (20 → 50) then switch to pagination
-const displayedItemsCount = ref(20)
+const itemsPerPage = ref(30)
+// Hybrid pagination: Load More (30 → 50) then switch to pagination
+const displayedItemsCount = ref(30)
 const usePagination = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isImporting = ref(false)
@@ -1015,8 +1147,15 @@ const selectedItemForDiscount = ref<InventoryItem | null>(null)
 const selectedItemsForBulk = ref<InventoryItem[]>([])
 const showDeleteItemModal = ref(false)
 const selectedItemForDelete = ref<InventoryItem | null>(null)
+const showBulkDeleteModal = ref(false)
+const bulkDeleteConfirmed = ref(false)
+const isBulkDeleting = ref(false)
 const showTimelineModal = ref(false)
 const selectedItemForTimeline = ref<InventoryItem | null>(null)
+const showDuplicateModal = ref(false)
+const duplicateSourceItem = ref<InventoryItem | null>(null)
+const duplicateSerialNumbers = ref<string[]>([''])
+const isDuplicating = ref(false)
 
 // Inline edit state (large screens only)
 const editingCell = ref<{ itemId: string; columnKey: string } | null>(null)
@@ -1171,6 +1310,23 @@ const columns = computed(() => {
 
 const items = computed(() => {
   return inventoryStore.items[folderId.value] || []
+})
+
+/** Composite key: serial + product (brand + model). Same serial can exist for different product models. */
+const getSerialProductKey = (serial: string, brand: string, model: string) =>
+  `${String(serial).trim()}|${String(brand ?? '').trim()}|${String(model ?? '').trim()}`
+
+/** Set of (serial + product model) keys that already exist in this folder. Used to block duplicate/add when same serial + product exists. */
+const existingSerialProductKeysInFolder = computed(() => {
+  const set = new Set<string>()
+  const folderItems = items.value
+  folderItems.forEach((item: InventoryItem) => {
+    const serial = item.serialNo ?? item.serialNumber
+    if (serial != null && String(serial).trim() !== '') {
+      set.add(getSerialProductKey(String(serial), item.brand, item.model))
+    }
+  })
+  return set
 })
 
 // Calculate total inventory value from all items
@@ -1343,10 +1499,10 @@ const loadMoreItems = () => {
 
 // Reset to Load More mode when filters change
 watch([searchQuery, currentSort], () => {
-  displayedItemsCount.value = 20
+  displayedItemsCount.value = 30
   usePagination.value = false
   currentPage.value = 1
-  itemsPerPage.value = 20
+  itemsPerPage.value = 30
 })
 
 const toggleSort = (key: string) => {
@@ -1490,9 +1646,9 @@ const resetFilters = () => {
   sortBy.value = 'name'
   currentSort.value = { key: 'name', order: 'asc' }
   currentPage.value = 1
-  displayedItemsCount.value = 20
+  displayedItemsCount.value = 30
   usePagination.value = false
-  itemsPerPage.value = 20
+  itemsPerPage.value = 30
   // Clear pagination from localStorage when filters are reset
   if (import.meta.client) {
     try {
@@ -1621,6 +1777,98 @@ const handleDeleteItem = (item: InventoryItem) => {
   showDeleteItemModal.value = true
 }
 
+const handleDuplicateItem = (item: InventoryItem) => {
+  cancelInlineEdit()
+  openItemMenuId.value = null
+  if (folder.value?.hasSerialNumbers) {
+    duplicateSourceItem.value = item
+    duplicateSerialNumbers.value = ['']
+    showDuplicateModal.value = true
+  } else {
+    // No serial numbers: open add form with prefilled data so user can save as new item
+    editingItem.value = null
+    serialNumbers.value = []
+    Object.keys(itemForm).forEach(key => delete itemForm[key])
+    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId']
+    Object.keys(item).forEach(key => {
+      if (!systemFields.includes(key)) {
+        itemForm[key] = item[key]
+      }
+    })
+    showAddItemModal.value = true
+  }
+}
+
+const clearDuplicateModal = () => {
+  duplicateSourceItem.value = null
+  duplicateSerialNumbers.value = []
+}
+
+const validDuplicateSerials = computed(() => {
+  const trimmed = duplicateSerialNumbers.value.map(s => s?.trim()).filter(Boolean)
+  return [...new Set(trimmed)]
+})
+
+const validDuplicateSerialsCount = computed(() => validDuplicateSerials.value.length)
+
+const hasValidDuplicateSerials = computed(() => validDuplicateSerialsCount.value > 0)
+
+const addDuplicateSerialNumber = () => {
+  duplicateSerialNumbers.value.push('')
+}
+
+const removeDuplicateSerialNumber = (index: number) => {
+  duplicateSerialNumbers.value.splice(index, 1)
+}
+
+const handleConfirmDuplicate = async () => {
+  const source = duplicateSourceItem.value
+  const serials = validDuplicateSerials.value
+  if (!source || serials.length === 0 || !folderId.value) return
+  const trimmedInputs = duplicateSerialNumbers.value.map(s => s?.trim()).filter(Boolean)
+  if (trimmedInputs.length !== serials.length) {
+    toast.error('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
+    return
+  }
+  const existing = existingSerialProductKeysInFolder.value
+  const productLabel = [source.brand, source.model].filter(Boolean).join(' ') || 'this product'
+  const alreadyExist = serials.filter(sn =>
+    existing.has(getSerialProductKey(sn, source.brand, source.model))
+  )
+  if (alreadyExist.length > 0) {
+    toast.error(
+      alreadyExist.length === 1
+        ? `Serial number "${alreadyExist[0]}" for ${productLabel} already exists in this folder. Use a different serial number.`
+        : `These serial numbers for ${productLabel} already exist: ${alreadyExist.join(', ')}. Use different serial numbers.`
+    )
+    return
+  }
+  isDuplicating.value = true
+  try {
+    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId']
+    const baseData: Record<string, any> = {}
+    Object.keys(source).forEach(key => {
+      if (!systemFields.includes(key)) {
+        baseData[key] = source[key]
+      }
+    })
+    delete baseData.serialNo
+    const itemsToCreate = serials.map(serialNo => ({ ...baseData, serialNo }))
+    await inventoryStore.createItemsBatch(folderId.value, itemsToCreate)
+    if (folder.value) {
+      folder.value.itemCount = (folder.value.itemCount || 0) + serials.length
+    }
+    inventoryStore.fetchItems(folderId.value).catch(() => {})
+    showDuplicateModal.value = false
+    clearDuplicateModal()
+    toast.success(`${serials.length} product${serials.length !== 1 ? 's' : ''} duplicated`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to duplicate. A serial number may already exist.')
+  } finally {
+    isDuplicating.value = false
+  }
+}
+
 const handleViewTimeline = async (item: InventoryItem) => {
   selectedItemForTimeline.value = item
   showTimelineModal.value = true
@@ -1656,6 +1904,36 @@ const handleConfirmDeleteItem = (item: InventoryItem) => {
     },
     5000
   )
+}
+
+const openBulkDeleteModal = () => {
+  bulkDeleteConfirmed.value = false
+  showBulkDeleteModal.value = true
+}
+
+const handleConfirmBulkDelete = async () => {
+  if (!bulkDeleteConfirmed.value || selectedItemsForBulk.value.length === 0) return
+  isBulkDeleting.value = true
+  const ids = selectedItemsForBulk.value.map(i => i.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await inventoryStore.deleteItem(folderId.value, id)
+    }
+    selectedItemsForBulk.value = []
+    showBulkDeleteModal.value = false
+    bulkDeleteConfirmed.value = false
+    if (folder.value) {
+      await inventoryStore.fetchFolder(folderId.value)
+      folder.value = inventoryStore.getFolderById(folderId.value) || folder.value
+    }
+    await inventoryStore.fetchFolders()
+    toast.success(`${count} product${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some products')
+  } finally {
+    isBulkDeleting.value = false
+  }
 }
 
 const addSerialNumber = () => {
@@ -1714,10 +1992,25 @@ const handleSaveItem = async () => {
             return
           }
 
-          // Check for duplicate serial numbers
+          // Check for duplicate serial numbers within the list
           const uniqueSerials = new Set(validSerialNumbers)
           if (uniqueSerials.size !== validSerialNumbers.length) {
             toast.error('Duplicate serial numbers are not allowed. Please ensure each serial number is unique.')
+            return
+          }
+
+          // Check that none of the (serial + product model) combinations already exist in this folder
+          const existing = existingSerialProductKeysInFolder.value
+          const productLabel = [itemForm.brand, itemForm.model].filter(Boolean).join(' ') || 'this product'
+          const alreadyExist = validSerialNumbers
+            .map(sn => sn.trim())
+            .filter(sn => existing.has(getSerialProductKey(sn, itemForm.brand, itemForm.model)))
+          if (alreadyExist.length > 0) {
+            toast.error(
+              alreadyExist.length === 1
+                ? `Serial number "${alreadyExist[0]}" for ${productLabel} already exists in this folder. It cannot be added again.`
+                : `These serial numbers for ${productLabel} already exist in this folder: ${alreadyExist.join(', ')}. They cannot be added again.`
+            )
             return
           }
 

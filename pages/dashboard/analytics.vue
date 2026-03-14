@@ -50,79 +50,32 @@
     <template v-else>
       <!-- Key Metrics Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-        <Card padding="sm" class="p-3">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Total Revenue</p>
-              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalRevenue) }}</p>
-              <p class="text-[10px] mt-1" :class="revenueChange >= 0 ? 'text-green-600' : 'text-red-600'">
-                {{ revenueChange >= 0 ? '↑' : '↓' }} {{ Math.abs(revenueChange) }}% vs previous period
-              </p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CurrencyDollarIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Total revenue</p>
+          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ formatCurrency(totalRevenue) }}</p>
+          <p class="mt-0.5 text-[11px]" :class="revenueChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+            {{ revenueChange >= 0 ? '↑' : '↓' }} {{ Math.abs(revenueChange) }}% vs previous
+          </p>
         </Card>
-
-        <Card padding="sm" class="p-3">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Total Sales</p>
-              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ totalSales }}</p>
-              <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
-                {{ totalOrders }} orders
-              </p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <ShoppingBagIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Total sales</p>
+          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ totalSales }}</p>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ totalOrders }} orders</p>
         </Card>
-
-        <Card padding="sm" class="p-3">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Avg. Order Value</p>
-              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(averageOrderValue) }}</p>
-              <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
-                Per transaction
-              </p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <ChartBarIcon class="w-5 h-5 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Avg. order value</p>
+          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ formatCurrency(averageOrderValue) }}</p>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Per transaction</p>
         </Card>
-
-        <Card padding="sm" class="p-3">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Low Stock Items</p>
-              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ lowStockCount }}</p>
-              <p class="text-[10px] mt-1 text-gray-500 dark:text-gray-400">
-                Need restocking
-              </p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-              <ExclamationTriangleIcon class="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            </div>
-          </div>
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock items</p>
+          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ lowStockCount }}</p>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Need restocking</p>
         </Card>
-
-        <Card padding="sm" class="p-3">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mb-1">Refunds</p>
-              <p class="text-base font-bold text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
-              <p class="text-[10px] mt-1 text-red-600 dark:text-red-400">
-                {{ formatCurrency(refundAmount) }} · {{ refundRateText }}
-              </p>
-            </div>
-            <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-              <ArrowPathIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Refunds</p>
+          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
+          <p class="mt-0.5 text-[11px] text-red-600 dark:text-red-400">{{ formatCurrency(refundAmount) }} · {{ refundRateText }}</p>
         </Card>
       </div>
 
@@ -264,103 +217,83 @@
 
       <!-- Detailed Tables -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <!-- Top Products Table -->
-        <Card padding="sm" extra-class="p-4">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Selling Products</h2>
+        <!-- Top Products -->
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Top products</p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Product</th>
-                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Quantity</th>
-                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Revenue</th>
+                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+                  <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Product</th>
+                  <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Qty</th>
+                  <th class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Revenue</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(product, index) in topProducts"
-                  :key="product.id"
-                  class="border-b border-gray-100 dark:border-gray-800"
-                >
-                  <td class="py-2 px-2">
-                    <div class="flex items-center gap-2">
-                      <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-[10px] font-bold text-primary-600 dark:text-primary-400">
-                        {{ index + 1 }}
-                      </span>
-                      <span class="text-gray-900 dark:text-gray-100">{{ product.name }}</span>
-                    </div>
+                <tr v-for="(product, i) in topProducts" :key="product.id" class="border-b border-gray-100 dark:border-gray-800/80 last:border-0">
+                  <td class="py-1.5 pr-2">
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 inline-block">{{ i + 1 }}</span>
+                    <span class="text-gray-900 dark:text-gray-100 truncate">{{ product.name }}</span>
                   </td>
-                  <td class="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{{ product.quantity }}</td>
-                  <td class="py-2 px-2 text-right font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(product.revenue) }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">{{ product.quantity }}</td>
+                  <td class="py-1.5 pl-2 text-right font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(product.revenue) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </Card>
 
-        <!-- Top Customers Table -->
-        <Card padding="sm" extra-class="p-4">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Customers</h2>
+        <!-- Top Customers -->
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Top customers</p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Customer</th>
-                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Orders</th>
-                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Total Spent</th>
+                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+                  <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Customer</th>
+                  <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Orders</th>
+                  <th class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Spent</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(customer, index) in topCustomers"
-                  :key="customer.email"
-                  class="border-b border-gray-100 dark:border-gray-800"
-                >
-                  <td class="py-2 px-2">
-                    <div class="flex items-center gap-2">
-                      <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-[10px] font-bold text-primary-600 dark:text-primary-400">
-                        {{ index + 1 }}
-                      </span>
-                      <div>
-                        <div class="text-gray-900 dark:text-gray-100 font-medium">{{ customer.name }}</div>
-                        <div class="text-[10px] text-gray-500 dark:text-gray-400">{{ customer.email }}</div>
-                      </div>
+                <tr v-for="(customer, i) in topCustomers" :key="customer.email" class="border-b border-gray-100 dark:border-gray-800/80 last:border-0">
+                  <td class="py-1.5 pr-2">
+                    <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 inline-block">{{ i + 1 }}</span>
+                    <div>
+                      <span class="text-gray-900 dark:text-gray-100 font-medium">{{ customer.name }}</span>
+                      <span class="text-[10px] text-gray-500 dark:text-gray-400 block truncate max-w-[140px]">{{ customer.email }}</span>
                     </div>
                   </td>
-                  <td class="py-2 px-2 text-right text-gray-700 dark:text-gray-300">{{ customer.orders }}</td>
-                  <td class="py-2 px-2 text-right font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</td>
+                  <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">{{ customer.orders }}</td>
+                  <td class="py-1.5 pl-2 text-right font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </Card>
 
-        <!-- Recent Returns Table -->
-        <Card padding="sm" extra-class="p-4">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Returns</h2>
+        <!-- Recent Returns -->
+        <Card padding="sm" extra-class="p-3.5">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Recent returns</p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
-                <tr class="border-b border-gray-200 dark:border-gray-700">
-                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Receipt #</th>
-                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Date</th>
-                  <th class="text-right py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Amount</th>
-                  <th class="text-left py-2 px-2 font-semibold text-gray-700 dark:text-gray-300">Reason</th>
+                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+                  <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Receipt</th>
+                  <th class="text-left py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Date</th>
+                  <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Amount</th>
+                  <th class="text-left py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Reason</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="ret in recentReturns"
-                  :key="ret.id"
-                  class="border-b border-gray-100 dark:border-gray-800"
-                >
-                  <td class="py-2 px-2 font-medium text-gray-900 dark:text-gray-100">{{ ret.receiptNumber }}</td>
-                  <td class="py-2 px-2 text-gray-700 dark:text-gray-300">{{ formatReturnDate(ret.date) }}</td>
-                  <td class="py-2 px-2 text-right font-semibold text-red-600 dark:text-red-400">-{{ formatCurrency(ret.amount) }}</td>
-                  <td class="py-2 px-2 text-gray-600 dark:text-gray-400 max-w-[120px] truncate" :title="ret.reason">{{ ret.reason }}</td>
+                <tr v-for="ret in recentReturns" :key="ret.id" class="border-b border-gray-100 dark:border-gray-800/80 last:border-0">
+                  <td class="py-1.5 pr-2 font-medium text-gray-900 dark:text-gray-100">{{ ret.receiptNumber }}</td>
+                  <td class="py-1.5 px-2 text-gray-700 dark:text-gray-300">{{ formatReturnDate(ret.date) }}</td>
+                  <td class="py-1.5 px-2 text-right font-medium text-red-600 dark:text-red-400">-{{ formatCurrency(ret.amount) }}</td>
+                  <td class="py-1.5 pl-2 text-gray-600 dark:text-gray-400 max-w-[100px] truncate" :title="ret.reason">{{ ret.reason }}</td>
                 </tr>
-                <tr v-if="recentReturns.length === 0" class="border-b border-gray-100 dark:border-gray-800">
-                  <td colspan="4" class="py-4 px-2 text-center text-gray-500 dark:text-gray-400">No returns in this period</td>
+                <tr v-if="recentReturns.length === 0">
+                  <td colspan="4" class="py-3 text-center text-[11px] text-gray-500 dark:text-gray-400">No returns in this period</td>
                 </tr>
               </tbody>
             </table>
@@ -368,64 +301,28 @@
         </Card>
       </div>
 
-      <!-- Low Stock Alerts -->
-      <Card padding="none" extra-class="rounded-xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
-        <div class="px-4 sm:px-5 py-4 border-b border-gray-200/80 dark:border-gray-700/80">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                <ExclamationTriangleIcon class="w-5 h-5 text-amber-600 dark:text-amber-400" stroke-width="1.75" />
-              </div>
-              <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Low stock alerts</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Items at or below restock threshold</p>
-              </div>
-            </div>
-            <NuxtLink
-              v-if="lowStockItems.length > 0"
-              to="/dashboard/inventory"
-              class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 whitespace-nowrap"
-            >
-              View inventory →
-            </NuxtLink>
-          </div>
+      <!-- Low stock -->
+      <Card padding="sm" extra-class="p-3.5">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
+          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-600 dark:text-primary-400 hover:underline font-medium">View inventory</NuxtLink>
         </div>
-        <div class="divide-y divide-gray-200/80 dark:divide-gray-700/80">
+        <div class="space-y-1.5">
           <template v-if="lowStockItems.length > 0">
             <NuxtLink
               v-for="item in lowStockItems"
               :key="item.id"
               :to="item.folderId ? `/dashboard/inventory/${item.folderId}` : '/dashboard/inventory'"
-              class="flex items-center gap-4 px-4 sm:px-5 py-3.5 hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors group"
+              class="flex justify-between items-baseline gap-2 py-1 hover:opacity-80 transition-opacity"
             >
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  {{ item.name }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {{ item.folderName }}
-                  <span v-if="item.itemCount > 1" class="text-amber-600 dark:text-amber-400"> · {{ item.itemCount }} items</span>
-                </p>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate">{{ item.folderName }}<span v-if="item.itemCount > 1"> · {{ item.itemCount }} items</span></p>
               </div>
-              <div class="flex items-center gap-3 shrink-0">
-                <span class="text-sm font-semibold text-amber-600 dark:text-amber-400">{{ item.quantity }} left</span>
-                <span class="text-xs text-gray-400 dark:text-gray-500">/ {{ item.threshold }}</span>
-              </div>
+              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">{{ item.quantity }}/{{ item.threshold }}</span>
             </NuxtLink>
           </template>
-          <div v-else class="px-4 sm:px-5 py-8 text-center">
-            <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700/50 mb-3">
-              <ExclamationTriangleIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-            </div>
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No low stock items</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">All items are above the restock threshold</p>
-            <NuxtLink
-              to="/dashboard/inventory"
-              class="inline-block mt-3 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-            >
-              View inventory →
-            </NuxtLink>
-          </div>
+          <p v-else class="text-xs text-gray-500 dark:text-gray-400 py-1">All stocked</p>
         </div>
       </Card>
     </template>
@@ -436,12 +333,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   ArrowDownTrayIcon,
-  ArrowPathIcon,
-  CurrencyDollarIcon,
-  ShoppingBagIcon,
-  ChartBarIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'

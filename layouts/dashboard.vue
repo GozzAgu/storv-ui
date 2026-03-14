@@ -27,7 +27,7 @@
           <img
             :src="logoSource"
             alt="Storvv"
-            :class="['shrink-0 object-contain transition-all duration-300', sidebarCollapsed ? 'h-6 w-6' : 'h-5 max-w-[100px]']"
+            class="shrink-0 object-contain h-5 max-w-[100px] transition-all duration-300"
           />
         </NuxtLink>
         <button
@@ -78,7 +78,7 @@
                       sidebarCollapsed ? '' : 'mr-2.5',
                       isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                     ]"
-                    stroke-width="1.75"
+                    stroke-width="1.5"
                   />
                   <span class="text-xs font-medium truncate" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
                     {{ item.name }}
