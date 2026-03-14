@@ -208,7 +208,7 @@
           </div>
 
           <!-- Department icon (blue) -->
-          <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-500 dark:bg-primary-600 mb-2">
+          <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-400 dark:bg-primary-500 mb-2">
             <BuildingOfficeIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
 
@@ -333,7 +333,7 @@
     <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">New department</span>
     <button
       @click="openCreateDepartmentModal"
-      class="w-12 h-12 rounded-full bg-primary-500 hover:bg-primary-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
+      class="w-12 h-12 rounded-full bg-primary-400 hover:bg-primary-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
       title="Create new department"
     >
       <PlusIcon class="w-5 h-5" />

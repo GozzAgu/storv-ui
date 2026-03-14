@@ -338,7 +338,7 @@
       </span>
       <button
         @click="openCreateStaffModal"
-        class="w-12 h-12 rounded-full bg-primary-500 hover:bg-primary-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
+        class="w-12 h-12 rounded-full bg-primary-400 hover:bg-primary-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
         title="Add new staff"
       >
         <PlusIcon class="w-5 h-5" />

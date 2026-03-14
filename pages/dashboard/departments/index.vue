@@ -60,7 +60,7 @@
     >
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white flex-shrink-0">
+          <div class="w-8 h-8 rounded-lg bg-primary-400 flex items-center justify-center text-white flex-shrink-0">
             <UsersIcon class="w-4 h-4" />
           </div>
           <div class="min-w-0">
@@ -74,7 +74,7 @@
         </div>
         <NuxtLink
           :to="currentDepartment && currentDepartment.isActive === false ? '#' : `/dashboard/departments/${currentStaffMember.departmentId}`"
-          class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-600 hover:bg-primary-700 text-white transition-colors flex-shrink-0"
+          class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-500 hover:bg-primary-600 text-white transition-colors flex-shrink-0"
           :class="{ 'opacity-50 cursor-not-allowed pointer-events-none': currentDepartment && currentDepartment.isActive === false }"
           :title="currentDepartment && currentDepartment.isActive === false ? 'This department is inactive' : ''"
         >
@@ -271,7 +271,7 @@
           </div>
 
           <!-- Department icon (blue) -->
-          <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-500 dark:bg-primary-600 mb-2">
+          <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-400 dark:bg-primary-500 mb-2">
             <BuildingOfficeIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
 
@@ -400,7 +400,7 @@
     </span>
     <button
       @click="openCreateDepartmentModal"
-      class="w-12 h-12 rounded-full bg-primary-500 hover:bg-primary-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
+      class="w-12 h-12 rounded-full bg-primary-400 hover:bg-primary-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
       title="Create new department"
     >
       <PlusIcon class="w-5 h-5" />

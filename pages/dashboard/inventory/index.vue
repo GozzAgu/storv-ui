@@ -79,18 +79,15 @@
 
     <!-- Select all + Bulk actions (folders) -->
     <div v-if="canManage && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-4">
-      <label class="inline-flex items-center gap-2 select-none cursor-pointer">
-        <input
-          type="checkbox"
-          class="h-4 w-4 rounded-full border-gray-300 text-primary-600 focus:ring-primary-500/30"
-          :checked="allFoldersOnPageSelected"
-          @change="toggleSelectAllFolders"
-          aria-label="Select all folders on this page"
-        />
-        <span class="text-xs text-gray-600 dark:text-gray-400">
-          {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
-        </span>
-      </label>
+      <Checkbox
+        :model-value="allFoldersOnPageSelected"
+        @update:model-value="toggleSelectAllFolders"
+        size="sm"
+        wrapper-class="justify-center"
+        label-class="!text-xs !ml-2 !font-normal text-gray-600 dark:text-gray-400"
+      >
+        {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
+      </Checkbox>
       <template v-if="selectedFoldersForBulk.length > 0">
         <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedFoldersForBulk.length }} selected</span>
         <Button
@@ -165,8 +162,8 @@
           </div>
         </div>
 
-        <!-- Folder icon (blue) -->
-        <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-500 dark:bg-primary-600 mb-2">
+        <!-- Folder icon (softer blue) -->
+        <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-400 dark:bg-primary-500 mb-2">
           <FolderIcon class="w-5 h-5 text-white" stroke-width="1.75" />
           </div>
 
