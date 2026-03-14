@@ -52,7 +52,7 @@
       </button>
 
       <!-- Navigation -->
-      <nav class="relative flex-1 py-1.5 overflow-y-auto overflow-x-hidden min-h-0" :class="sidebarCollapsed ? 'px-1.5' : 'px-2.5'">
+      <nav class="relative flex-1 py-1 overflow-y-auto overflow-x-hidden min-h-0" :class="sidebarCollapsed ? 'px-1.5' : 'px-2'">
         <div class="space-y-0.5 min-h-0">
           <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Inventory (expandable) -->
@@ -60,7 +60,7 @@
               <div
                 :class="[
                   'group relative flex items-center justify-between w-full rounded-lg transition-all duration-200',
-                  sidebarCollapsed ? 'px-1.5 py-1.5' : 'px-2.5 py-2',
+                  sidebarCollapsed ? 'px-1.5 py-1.5' : 'px-2 py-1.5',
                   isActive(item.href)
                     ? 'bg-gray-200/90 dark:bg-gray-700/70'
                     : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60'
@@ -98,7 +98,7 @@
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
                   :class="[
-                    'flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-colors',
+                    'flex items-center gap-2 px-2 py-1 rounded-lg text-xs transition-colors',
                     route.params.id === folder.id
                       ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
@@ -119,7 +119,7 @@
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[
                 'group relative flex items-center rounded-lg transition-all duration-200',
-                sidebarCollapsed ? 'justify-center w-full py-2' : 'px-2.5 py-2 gap-2.5',
+                sidebarCollapsed ? 'justify-center w-full py-1.5' : 'px-2 py-1.5 gap-2',
                 isActive(item.href)
                   ? 'bg-gray-200/90 dark:bg-gray-700/70'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60',
@@ -441,7 +441,7 @@
       <div class="h-11 sm:h-12 shrink-0" aria-hidden="true" />
 
       <!-- Page Content -->
-      <main class="px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
+      <main class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
         <slot />
       </main>
     </div>

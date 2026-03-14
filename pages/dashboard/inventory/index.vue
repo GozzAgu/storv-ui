@@ -1,15 +1,15 @@
 <template>
   <div class="pb-24 sm:pb-20">
     <!-- Hero header -->
-    <div class="mb-4 sm:mb-6">
-      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
+    <div class="mb-3 sm:mb-4">
+      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
       <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
     </div>
 
     <!-- Toolbar: search + filters (single bar, modern) -->
     <div
       v-if="!inventoryStore.loading"
-      class="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4"
+      class="flex flex-col sm:flex-row gap-1.5 sm:gap-2 mb-3"
     >
       <div class="relative flex-1 min-w-0">
         <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
@@ -48,37 +48,23 @@
     <!-- Loading skeleton (only while folders are fetching AND we have none yet) -->
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 min-h-[160px]"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2 min-h-[120px]"
     >
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 shadow shadow-gray-200/40 dark:shadow-none pt-3 pb-2.5 px-3 overflow-visible animate-pulse"
+        class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 pt-2.5 pb-2 px-2.5 overflow-visible animate-pulse"
       >
-        <!-- Top row placeholders (checkbox + menu) -->
-        <div class="absolute left-2 top-2 w-4 h-4 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="absolute right-1.5 top-1.5 w-6 h-6 rounded-lg bg-gray-200/70 dark:bg-gray-700/70" />
-
-        <!-- Icon -->
-        <div class="mb-2 w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700" />
-
-        <!-- Label -->
-        <div class="h-2.5 rounded bg-gray-200 dark:bg-gray-700 w-10 mb-1" />
-
-        <!-- Folder name -->
-        <div class="h-3 rounded bg-gray-200 dark:bg-gray-700 w-20 mb-2" />
-
-        <!-- Stats row -->
-        <div class="w-full grid grid-cols-3 gap-1.5">
-          <div class="h-2.5 rounded bg-gray-200 dark:bg-gray-700" />
-          <div class="h-2.5 rounded bg-gray-200 dark:bg-gray-700" />
-          <div class="h-2.5 rounded bg-gray-200 dark:bg-gray-700" />
-        </div>
+        <div class="absolute left-1.5 top-1.5 w-4 h-4 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="absolute right-1 top-1 w-5 h-5 rounded-md bg-gray-200/70 dark:bg-gray-700/70" />
+        <div class="mb-1.5 w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700" />
+        <div class="h-3 rounded bg-gray-200 dark:bg-gray-700 w-16 mb-1" />
+        <div class="h-2 rounded bg-gray-200 dark:bg-gray-700 w-24" />
       </div>
     </div>
 
     <!-- Select all + Bulk actions (folders) -->
-    <div v-if="canManage && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-4">
+    <div v-if="canManage && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-3">
       <Checkbox
         :model-value="allFoldersOnPageSelected"
         @update:model-value="toggleSelectAllFolders"
@@ -102,15 +88,15 @@
       </template>
     </div>
     <!-- Folders grid -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3">
+    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2">
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex flex-col items-center rounded-xl bg-gray-50 dark:bg-gray-800/80 shadow shadow-gray-200/40 dark:shadow-none transition-all duration-200 hover:shadow-md hover:shadow-gray-200/50 active:scale-[0.99] cursor-pointer pt-3 pb-2.5 px-3 overflow-visible"
+        class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:scale-[0.99] cursor-pointer pt-2.5 pb-2 px-2.5 overflow-visible"
         @click="navigateToFolder(folder.id)"
       >
         <!-- Checkbox top-left -->
-        <div v-if="canManage" class="absolute left-2 top-2 z-10" @click.stop>
+        <div v-if="canManage" class="absolute left-1.5 top-1.5 z-10" @click.stop>
           <Checkbox
             :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
             @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -120,18 +106,18 @@
         </div>
 
         <!-- Ellipsis menu top-right -->
-        <div v-if="canManage" class="absolute right-1.5 top-1.5 z-20" @click.stop>
+        <div v-if="canManage" class="absolute right-1 top-1 z-20" @click.stop>
           <button
             type="button"
             @click="toggleFolderMenu(folder.id)"
-            class="p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+            class="p-0.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
             aria-label="Folder options"
           >
             <EllipsisVerticalIcon class="w-4 h-4" />
           </button>
           <div
             v-if="openFolderMenuId === folder.id"
-            class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl ring-1 ring-gray-200/80 dark:ring-gray-600 py-0.5"
+            class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl py-0.5"
             @click.stop
           >
             <button
@@ -162,36 +148,26 @@
           </div>
         </div>
 
-        <!-- Folder icon (softer blue) -->
-        <div class="flex items-center justify-center w-10 h-10 rounded-xl shrink-0 bg-primary-400 dark:bg-primary-500 mb-2">
-          <FolderIcon class="w-5 h-5 text-white" stroke-width="1.75" />
-          </div>
+        <!-- Folder icon (softer blue, compact) -->
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 bg-primary-400/90 dark:bg-primary-500/90 mb-1.5">
+          <FolderIcon class="w-4 h-4 text-white" stroke-width="1.75" />
+        </div>
 
-        <!-- Label (e.g. "X products") -->
-        <span class="text-[11px] text-gray-500 dark:text-gray-400 mb-0.5">{{ folder.itemCount }} product{{ folder.itemCount !== 1 ? 's' : '' }}</span>
-
-        <!-- Folder name (title) -->
+        <!-- Folder name (primary focus for scanning) -->
         <h3
-          class="text-xs font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-2 uppercase"
+          class="text-xs font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-0.5 uppercase"
           :title="folder.name"
         >
           {{ folder.name }}
         </h3>
 
-        <!-- Stats row -->
-        <div class="flex items-center justify-center gap-3 w-full text-gray-500 dark:text-gray-400">
-          <div class="flex items-center gap-1" title="Products">
-            <CubeIcon class="w-3.5 h-3.5 shrink-0" />
-            <span class="text-[11px] tabular-nums">{{ folder.itemCount }}</span>
-            </div>
-          <div class="flex items-center gap-1" title="Total value">
-            <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400 shrink-0">{{ currencySymbol }}</span>
-            <span class="text-[11px] tabular-nums">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
-          </div>
-          <div class="flex items-center gap-1" :title="folder.lowStockCount ? 'Low stock' : 'Stock'">
-            <ExclamationTriangleIcon class="w-3.5 h-3.5 shrink-0" :class="(folder.lowStockCount ?? 0) > 0 ? 'text-amber-500 dark:text-amber-400' : ''" />
-            <span class="text-[11px] tabular-nums">{{ folder.lowStockCount ?? 0 }}</span>
-          </div>
+        <!-- Label + stats (compact single line where possible) -->
+        <div class="flex items-center justify-center gap-2 w-full text-[11px] text-gray-500 dark:text-gray-400">
+          <span>{{ folder.itemCount }} product{{ folder.itemCount !== 1 ? 's' : '' }}</span>
+          <span class="text-gray-300 dark:text-gray-600">·</span>
+          <span class="tabular-nums">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
+          <span class="text-gray-300 dark:text-gray-600">·</span>
+          <span class="tabular-nums" :title="folder.lowStockCount ? 'Low stock' : 'Stock'">{{ folder.lowStockCount ?? 0 }}</span>
         </div>
       </div>
     </div>
@@ -199,7 +175,7 @@
     <!-- Empty state (when not loading and no folders) -->
     <div
       v-else
-      class="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center py-12 px-4 sm:px-6 text-center min-w-0 w-full"
+      class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
     >
       <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
         <FolderIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
