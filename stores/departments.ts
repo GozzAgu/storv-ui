@@ -5,6 +5,8 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getDepartmentsCollection, getDepartmentDocument, getStaffCollection, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getPlanLimits } from '~/types/subscription'
+import type { SubscriptionPlan } from '~/types/subscription'
 import type { Department } from '~/composables/useDepartments'
 // CORE_DEPARTMENTS should be imported directly from '~/composables/useDepartments' to avoid duplication
 
@@ -241,6 +243,20 @@ export const useDepartmentsStore = defineStore('departments', {
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected. Please select a store first.')
+      }
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const limits = getPlanLimits(plan)
+      const departmentsInStore = this.departments.filter(d => d.storeId === storeId)
+      if (limits.maxDepartmentsPerStore >= 0 && departmentsInStore.length >= limits.maxDepartmentsPerStore) {
+        const msg = plan === 'storvv_micro'
+          ? 'Storvv Micro allows 1 department per store. Upgrade to Medium or Enterprise for more.'
+          : `Your plan allows up to ${limits.maxDepartmentsPerStore} departments per store. Upgrade to Enterprise for unlimited.`
+        throw new Error(msg)
       }
 
       try {

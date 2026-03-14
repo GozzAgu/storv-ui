@@ -321,6 +321,8 @@
           v-if="!searchQuery && canManageDepartments"
           variant="primary"
           :icon="PlusIcon"
+          :title="canAddDepartmentForCurrentStore ? 'Create department' : departmentLimitMessage"
+          :disabled="!canAddDepartmentForCurrentStore"
           @click="openCreateDepartmentModal"
           class="mt-6"
         >
@@ -399,12 +401,16 @@
   <!-- FAB -->
   <div v-if="canManageDepartments" class="fixed bottom-24 right-6 z-50 group">
     <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-      New department
+      {{ canAddDepartmentForCurrentStore ? 'New department' : 'Department limit reached' }}
     </span>
     <button
+      :title="canAddDepartmentForCurrentStore ? 'Create new department' : departmentLimitMessage"
+      :disabled="!canAddDepartmentForCurrentStore"
+      :class="[
+        'w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center transition-all duration-200',
+        canAddDepartmentForCurrentStore ? 'bg-primary-400 hover:bg-primary-500 hover:shadow-xl' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+      ]"
       @click="openCreateDepartmentModal"
-      class="w-12 h-12 rounded-full bg-primary-400 hover:bg-primary-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
-      title="Create new department"
     >
       <PlusIcon class="w-5 h-5" />
     </button>
@@ -523,6 +529,18 @@ const isStaff = computed(() => userStore.userData?.role === 'staff')
 const { canCreateStaff, canManage } = usePermissions()
 const canManageDepartments = computed(() => canManage.value) // Super admins and managers can manage
 const canCreateNewStaff = computed(() => canCreateStaff.value) // Only super admins can create staff
+
+const { canAddDepartment, limits: subscriptionLimits } = useSubscriptionFeatures()
+const canAddDepartmentForCurrentStore = computed(() =>
+  canAddDepartment(departmentsStore.departments.length)
+)
+const departmentLimitMessage = computed(() => {
+  const max = subscriptionLimits.value.maxDepartmentsPerStore
+  if (max < 0) return ''
+  return max === 1
+    ? 'Storvv Micro allows 1 department. Upgrade to add more.'
+    : `Your plan allows up to ${max} departments per store. Upgrade for more.`
+})
 
 // Current staff member data (for staff users)
 const currentStaffMember = ref<Staff | null>(null)
@@ -736,6 +754,10 @@ watch(openDepartmentMenuId, (id) => {
 })
 
 const openCreateDepartmentModal = () => {
+  if (!canAddDepartmentForCurrentStore.value) {
+    toast.error(departmentLimitMessage.value || 'Department limit reached. Upgrade your plan to add more.')
+    return
+  }
   editingDepartment.value = null
   showDepartmentModal.value = true
 }

@@ -268,7 +268,129 @@
             </button>
           </div>
         </div>
-      <div :class="['overflow-x-auto', isFullscreen ? 'p-6' : '']">
+      <!-- Empty state: full width (no table) so text/button don't truncate on mobile -->
+      <div
+        v-if="sortedFilteredItems.length === 0"
+        class="rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center min-h-[280px]"
+      >
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
+          <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        </div>
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+          {{ searchQuery ? 'No products found' : 'No products in this folder' }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto break-words">
+          {{ searchQuery ? 'Try adjusting your search or filters' : 'Add products to start tracking inventory' }}
+        </p>
+        <Button
+          v-if="!searchQuery && canManageInventoryItems"
+          variant="primary"
+          :icon="PlusIcon"
+          @click="openAddItemModal"
+          class="rounded-full whitespace-nowrap"
+        >
+          <span class="sm:hidden">Add item</span>
+          <span class="hidden sm:inline">Add your first item</span>
+        </Button>
+      </div>
+      <template v-else>
+      <!-- Mobile: card list when has items -->
+      <div class="block sm:hidden space-y-3 px-1">
+        <div
+          v-for="item in paginatedItems"
+          :key="item.id"
+          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1 flex items-start gap-2">
+              <Checkbox
+                v-if="canManageInventoryItems && !isItemSold(item)"
+                :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
+                @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                size="sm"
+                wrapper-class="justify-center pt-0.5"
+                @click.stop
+              />
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" :title="getItemDisplayValue(columns[0] ? item[columns[0].key] : item.name)">
+                  {{ getItemDisplayValue(columns[0] ? item[columns[0].key] : item.name) }}
+                </p>
+                <div class="mt-1 flex items-center justify-between gap-2 flex-wrap">
+                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {{ item.discountedPrice !== undefined ? formatCurrency(item.discountedPrice) : formatCurrency(item.price ?? item.originalPrice ?? 0) }}
+                  </span>
+                  <span
+                    :class="['inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium shrink-0', getItemAvailability(item).class]"
+                  >
+                    {{ getItemAvailability(item).label }}
+                  </span>
+                </div>
+                <p v-if="item.sku || item.serialNumber || item.serialNo" class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                  {{ item.sku || item.serialNumber || item.serialNo }}
+                </p>
+              </div>
+            </div>
+            <div class="relative shrink-0" @click.stop>
+              <button
+                @click="toggleItemMenu(item.id)"
+                :disabled="isItemSold(item)"
+                :class="['p-1.5 rounded-lg transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700']"
+                title="Actions"
+                aria-label="Item actions"
+              >
+                <EllipsisVerticalIcon class="w-4 h-4" />
+              </button>
+              <div
+                v-if="openItemMenuId === item.id"
+                class="absolute right-0 top-full mt-0.5 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[44px]"
+              >
+                <button
+                  @click="handleViewTimeline(item); openItemMenuId = null"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  title="View product history"
+                >
+                  <ClockIcon class="w-5 h-5" />
+                </button>
+                <button
+                  @click="handleApplyDiscount(item); openItemMenuId = null"
+                  :disabled="isItemSold(item)"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 disabled:opacity-40"
+                  title="Discount"
+                >
+                  <TagIcon class="w-5 h-5" />
+                </button>
+                <button
+                  @click="handleEditItem(item); openItemMenuId = null"
+                  :disabled="isItemSold(item)"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40"
+                  title="Edit"
+                >
+                  <PencilSquareIcon class="w-5 h-5" />
+                </button>
+                <button
+                  v-if="canDuplicateByPlan"
+                  @click="handleDuplicateItem(item); openItemMenuId = null"
+                  :disabled="isItemSold(item)"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40"
+                  title="Duplicate"
+                >
+                  <DocumentDuplicateIcon class="w-5 h-5" />
+                </button>
+                <button
+                  @click="handleDeleteItem(item); openItemMenuId = null"
+                  :disabled="isItemSold(item)"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 disabled:opacity-40"
+                  title="Delete"
+                >
+                  <TrashIcon class="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Desktop: table when has items -->
+      <div class="hidden sm:block overflow-x-auto" :class="[isFullscreen ? 'p-6' : '']">
         <table class="min-w-full">
           <thead :class="[isFullscreen ? 'border-b border-gray-200 dark:border-gray-700' : 'bg-white/60 dark:bg-gray-800/60']">
               <tr>
@@ -548,34 +670,10 @@
                 </div>
               </td>
             </tr>
-            <!-- Empty State -->
-            <tr v-if="sortedFilteredItems.length === 0">
-              <td :colspan="columns.length + (canManageInventoryItems ? 2 : 0)" class="px-6 py-16">
-                <div class="text-center">
-                  <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-                  </div>
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">
-                    {{ searchQuery ? 'No products found' : 'No products in this folder' }}
-                  </h3>
-                  <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
-                    {{ searchQuery ? 'Try adjusting your search or filters' : 'Add products to start tracking inventory' }}
-                  </p>
-                  <Button
-                    v-if="!searchQuery && canManageInventoryItems"
-                    variant="primary"
-                    :icon="PlusIcon"
-                    @click="openAddItemModal"
-                    class="rounded-full"
-                  >
-                    Add your first item
-                  </Button>
-                </div>
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
+      </template>
       </div>
     </div>
 

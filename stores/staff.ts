@@ -6,6 +6,8 @@ import { useUserStore } from './user'
 import { useDepartmentsStore } from './departments'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getStaffCollection, getStaffDocument, getDepartmentDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getPlanLimits } from '~/types/subscription'
+import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 
@@ -329,6 +331,22 @@ export const useStaffStore = defineStore('staff', {
       const storeId = department.storeId
       if (!storeId) {
         throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
+      }
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const limits = getPlanLimits(plan)
+      const staffCountInStore = departmentsStore.departments
+        .filter(d => d.storeId === storeId)
+        .reduce((sum, d) => sum + (d.staffCount || 0), 0)
+      if (limits.maxStaffPerStore >= 0 && staffCountInStore >= limits.maxStaffPerStore) {
+        const msg = plan === 'storvv_micro'
+          ? 'Storvv Micro allows up to 2 staff per store. Upgrade to Medium or Enterprise for more.'
+          : `Your plan allows up to ${limits.maxStaffPerStore} staff per store. Upgrade to Enterprise for unlimited.`
+        throw new Error(msg)
       }
 
       const token = await authStore.currentUser.getIdToken()

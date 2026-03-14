@@ -259,7 +259,121 @@
           {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
         </p>
       </div>
-      <div v-else class="overflow-x-auto">
+      <template v-else>
+      <!-- Mobile: card list (no horizontal scroll) -->
+      <div class="block sm:hidden space-y-3 px-1">
+        <div
+          v-for="receipt in paginatedReceipts"
+          :key="receipt.id"
+          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0 flex-1 flex items-start gap-2">
+              <Checkbox
+                v-if="canDeleteReceipts"
+                :model-value="selectedReceiptsForBulk.some(r => r.id === receipt.id)"
+                @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
+                size="sm"
+                wrapper-class="justify-center pt-0.5"
+                @click.stop
+              />
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ receipt.receiptNumber }}</span>
+                  <button
+                    @click.stop="copyReceiptNumber(receipt.receiptNumber)"
+                    class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
+                    title="Copy"
+                    aria-label="Copy receipt number"
+                  >
+                    <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
+                  </button>
+                  <span
+                    v-if="receipt.isSwapIn"
+                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                  >
+                    Swap
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5 truncate" :title="receipt.customerName">
+                  {{ receipt.customerName }}
+                  <span v-if="receipt.customerEmail" class="text-gray-400 dark:text-gray-500"> · {{ receipt.customerEmail }}</span>
+                </p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5">{{ formatDate(receipt.date) }}</p>
+                <div v-if="receipt.items && receipt.items.length > 0" class="mt-1.5 text-[10px] text-gray-700 dark:text-gray-300 line-clamp-2">
+                  <template v-for="(item, idx) in receipt.items.slice(0, 2)" :key="idx">
+                    <span v-if="idx > 0">, </span>{{ item.itemName }}<span v-if="item.quantity > 1"> × {{ item.quantity }}</span>
+                  </template>
+                  <span v-if="receipt.items.length > 2" class="text-gray-500 dark:text-gray-400"> +{{ receipt.items.length - 2 }} more</span>
+                </div>
+                <div v-else class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ receipt.itemsCount }} items</div>
+                <div class="mt-2 flex items-center justify-between gap-2">
+                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium shrink-0',
+                      receipt.status === 'completed'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                        : receipt.status === 'pending'
+                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                    ]"
+                  >
+                    {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="relative shrink-0" @click.stop>
+              <button
+                @click="toggleReceiptMenu(receipt.id)"
+                class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                title="Actions"
+                aria-label="Receipt actions"
+              >
+                <EllipsisVerticalIcon class="w-4 h-4" />
+              </button>
+              <div
+                v-if="openReceiptMenuId === receipt.id"
+                class="absolute right-0 top-full mt-0.5 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[44px]"
+              >
+                <button
+                  @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  title="View receipt history"
+                >
+                  <ClockIcon class="w-5 h-5" />
+                </button>
+                <button
+                  @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  title="View/Print"
+                >
+                  <PrinterIcon class="w-5 h-5" />
+                </button>
+                <button
+                  v-if="receipt.status === 'completed' && canEditReceipts"
+                  @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  title="Refund"
+                >
+                  <ArrowPathIcon class="w-5 h-5" />
+                </button>
+                <button
+                  v-if="canDeleteReceipts"
+                  @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
+                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10"
+                  title="Delete"
+                >
+                  <TrashIcon class="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Desktop: table -->
+      <div class="hidden sm:block overflow-x-auto">
         <table class="min-w-full">
           <thead class="border-b border-gray-200 dark:border-gray-700">
             <tr>
@@ -634,6 +748,7 @@
           </tbody>
         </table>
       </div>
+      </template>
       </div>
     </div>
 

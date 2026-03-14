@@ -3,6 +3,8 @@ import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { getStoresCollection, getStoreDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getPlanLimits } from '~/types/subscription'
+import type { SubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 
 export const useStoresStore = defineStore('stores', {
@@ -487,6 +489,15 @@ export const useStoresStore = defineStore('stores', {
 
       if (userStore.userData?.role !== 'superAdmin') {
         throw new Error('Only super admins can create stores')
+      }
+
+      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const limits = getPlanLimits(plan)
+      if (limits.maxStores >= 0 && this.stores.length >= limits.maxStores) {
+        const msg = plan === 'storvv_micro'
+          ? 'Storvv Micro allows 1 store. Upgrade to Medium or Enterprise to add more.'
+          : `Your plan allows up to ${limits.maxStores} stores. Upgrade to Enterprise for unlimited stores.`
+        throw new Error(msg)
       }
 
       try {
