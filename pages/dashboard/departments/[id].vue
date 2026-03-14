@@ -230,6 +230,13 @@
                 <!-- Desktop: Show all action buttons -->
                 <div class="hidden sm:flex items-center justify-end gap-2 flex-shrink-0" @click.stop>
                   <button
+                    @click="handleRegenerateTempPassword(member)"
+                    class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex-shrink-0"
+                    title="Generate new temporary password"
+                  >
+                    <KeyIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                  </button>
+                  <button
                     @click="handleToggleStaffRole(member)"
                     class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex-shrink-0"
                     :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
@@ -265,6 +272,13 @@
                     v-if="openStaffMenuId === member.id"
                     class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
                   >
+                    <button
+                      @click="handleRegenerateTempPassword(member); openStaffMenuId = null"
+                      class="w-full px-3 py-2.5 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                      title="Generate new temporary password"
+                    >
+                      <KeyIcon class="w-5 h-5" />
+                    </button>
                     <button
                       @click="handleToggleStaffRole(member); openStaffMenuId = null"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
@@ -386,6 +400,37 @@
       @error="handleStaffError"
     />
 
+    <!-- New temporary password modal (after regenerate) -->
+    <Modal
+      v-model="showTempPasswordModal"
+      title="New temporary password"
+      subtitle="Share this with the staff member. They can sign in with their email and this password."
+      size="sm"
+    >
+      <div class="space-y-4">
+        <p v-if="tempPasswordEmail" class="text-xs text-gray-500 dark:text-gray-400">
+          For <strong class="text-gray-700 dark:text-gray-300">{{ tempPasswordEmail }}</strong>
+        </p>
+        <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-600/80">
+          <code class="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 select-all truncate">{{ tempPasswordValue }}</code>
+          <button
+            type="button"
+            @click="copyTempPassword"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+          >
+            <CheckCircleIcon v-if="copiedTempPassword" class="w-4 h-4 shrink-0 text-emerald-500" stroke-width="2" />
+            <ClipboardDocumentIcon v-else class="w-4 h-4 shrink-0" stroke-width="1.75" />
+            {{ copiedTempPassword ? 'Copied' : 'Copy' }}
+          </button>
+        </div>
+      </div>
+      <template #footer>
+        <Button size="sm" class="!rounded-xl w-full" @click="showTempPasswordModal = false; tempPasswordValue = ''; tempPasswordEmail = ''; copiedTempPassword = false">
+          Done
+        </Button>
+      </template>
+    </Modal>
+
 </template>
 
 <script setup lang="ts">
@@ -404,6 +449,8 @@ import {
   ArrowsPointingOutIcon,
   XMarkIcon,
   EllipsisVerticalIcon,
+  KeyIcon,
+  ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
@@ -461,6 +508,13 @@ const staffItemsPerPage = ref(100)
 // Staff modal
 const showStaffModal = ref(false)
 const editingStaff = ref<Staff | null>(null)
+
+// Regenerate temp password modal
+const showTempPasswordModal = ref(false)
+const tempPasswordValue = ref('')
+const tempPasswordEmail = ref('')
+const copiedTempPassword = ref(false)
+const isRegeneratingPassword = ref(false)
 
 // Bulk delete staff
 const selectedStaffForBulk = ref<Staff[]>([])
@@ -688,6 +742,38 @@ const openCreateStaffModal = () => {
 const handleEditStaff = (staffMember: Staff) => {
   editingStaff.value = staffMember
   showStaffModal.value = true
+}
+
+const copyTempPassword = async () => {
+  if (!tempPasswordValue.value) return
+  try {
+    await navigator.clipboard.writeText(tempPasswordValue.value)
+    copiedTempPassword.value = true
+    setTimeout(() => { copiedTempPassword.value = false }, 2000)
+  } catch {
+    // ignore
+  }
+}
+
+const handleRegenerateTempPassword = async (member: Staff) => {
+  const storeId = department.value?.storeId
+  if (!storeId || !departmentId.value) {
+    toast.error('Department or store not found.')
+    return
+  }
+  isRegeneratingPassword.value = true
+  try {
+    const res = await staffStore.regenerateTemporaryPassword(member.id, departmentId.value, storeId)
+    tempPasswordValue.value = res.temporaryPassword
+    tempPasswordEmail.value = member.email || ''
+    copiedTempPassword.value = false
+    showTempPasswordModal.value = true
+    toast.success('New temporary password generated. Share it with the staff member.')
+  } catch (e: any) {
+    toast.error(e?.data?.message || e?.message || 'Failed to generate new password')
+  } finally {
+    isRegeneratingPassword.value = false
+  }
 }
 
 const handleToggleStaffRole = async (staffMember: Staff) => {

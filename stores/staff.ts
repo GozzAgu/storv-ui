@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
-import { sendPasswordResetEmail } from 'firebase/auth'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -336,7 +335,7 @@ export const useStaffStore = defineStore('staff', {
       const config = useRuntimeConfig()
       const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
       const inviteUrl = apiBase ? `${apiBase}/api/staff/invite` : '/api/staff/invite'
-      const res = await $fetch<{ success: boolean; uid: string; staffId: string }>(inviteUrl, {
+      const res = await $fetch<{ success: boolean; uid: string; staffId: string; temporaryPassword: string }>(inviteUrl, {
         method: 'POST',
         body: {
           email: staffData.email.trim().toLowerCase(),
@@ -353,15 +352,6 @@ export const useStaffStore = defineStore('staff', {
         },
         headers: { Authorization: `Bearer ${token}` },
       })
-
-      const auth = authStore.getAuthInstance()
-      if (auth) {
-        try {
-          await sendPasswordResetEmail(auth, staffData.email.trim().toLowerCase())
-        } catch (e) {
-          console.warn('[Staff Creation] Send set-password email failed (staff was still created):', e)
-        }
-      }
 
       await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
       if (staffData.role === 'manager') {
@@ -393,7 +383,26 @@ export const useStaffStore = defineStore('staff', {
         }, 500)
       }
 
-      return res.staffId
+      return { staffId: res.staffId, temporaryPassword: res.temporaryPassword }
+    },
+
+    // Regenerate a one-time temporary password for existing staff (e.g. if admin closed modal before copying)
+    async regenerateTemporaryPassword(staffId: string, departmentId: string, storeId: string): Promise<{ temporaryPassword: string }> {
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      const token = await authStore.currentUser.getIdToken()
+      const config = useRuntimeConfig()
+      const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
+      const url = apiBase ? `${apiBase}/api/staff/regenerate-temp-password` : '/api/staff/regenerate-temp-password'
+      const res = await $fetch<{ temporaryPassword: string }>(url, {
+        method: 'POST',
+        body: { staffId, departmentId, storeId },
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      return res
     },
 
     // Update a staff member

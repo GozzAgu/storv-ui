@@ -7,85 +7,121 @@
     size="lg"
   >
     <div class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Success state: modern, minimal -->
+      <div
+        v-if="showTemporaryPassword"
+        class="flex flex-col items-center text-center py-2"
+      >
+        <div class="w-12 h-12 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center mb-4">
+          <CheckCircleIcon class="w-6 h-6 text-emerald-600 dark:text-emerald-400" stroke-width="2" />
+        </div>
+        <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 tracking-tight mb-1">
+          Account created
+        </h4>
+        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5">
+          Share this one-time password with <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>. They’ll sign in with it, then can change it in Profile.
+        </p>
+        <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
+          <div class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-600/80">
+            <code class="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 tracking-wide select-all truncate">{{ temporaryPasswordToShow }}</code>
+            <button
+              type="button"
+              @click="copyTemporaryPassword"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+            >
+              <ClipboardDocumentIcon v-if="!copiedPassword" class="w-4 h-4 shrink-0" stroke-width="1.75" />
+              <CheckCircleIcon v-else class="w-4 h-4 shrink-0 text-emerald-500" stroke-width="2" />
+              {{ copiedPassword ? 'Copied' : 'Copy' }}
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
+          Closed by mistake? From the staff list, use the ⋮ menu on their row → <strong>Generate new password</strong>.
+        </p>
+        <Button size="sm" class="!rounded-xl w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
+          Done
+        </Button>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            First Name <span class="text-red-500">*</span>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            First name <span class="text-red-500">*</span>
           </label>
           <input
             v-model="formData.firstName"
             type="text"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="First name"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Last Name <span class="text-red-500">*</span>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Last name <span class="text-red-500">*</span>
           </label>
           <input
             v-model="formData.lastName"
             type="text"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="Last name"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
             Email <span class="text-red-500">*</span>
           </label>
           <input
             v-model="formData.email"
             type="email"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="email@example.com"
           />
         </div>
 
         <div v-if="!isEdit" class="md:col-span-2">
-          <p class="text-xs text-gray-600 dark:text-gray-400">
-            A signup link will be sent to the email above so the staff member can set their own password.
+          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+            You’ll get a one-time password to share. Staff sign in with email + that password, then can change it in Profile.
           </p>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Phone Number
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Phone
           </label>
           <input
             v-model="formData.phone"
             type="tel"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="+1234567890"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
             Position <span class="text-red-500">*</span>
           </label>
           <input
             v-model="formData.position"
             type="text"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            placeholder="e.g., Sales Associate, Manager"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            placeholder="e.g. Sales Associate"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
             Role <span class="text-red-500">*</span>
           </label>
           <select
             v-model="formData.role"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           >
             <option value="staff">Staff</option>
             <option value="manager">Manager</option>
@@ -94,39 +130,39 @@
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Hire Date <span class="text-red-500">*</span>
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Hire date <span class="text-red-500">*</span>
           </label>
           <input
             v-model="formData.hireDate"
             type="date"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Salary (Optional)
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Salary (optional)
           </label>
           <input
             v-model.number="formData.salary"
             type="number"
             min="0"
             step="0.01"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
             Status <span class="text-red-500">*</span>
           </label>
           <select
             v-model="formData.status"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -135,14 +171,15 @@
         </div>
       </div>
 
-      <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+      <div v-if="errorMessage" class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
         <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
-      <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-lg">
+      <template v-if="!showTemporaryPassword">
+        <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-xl">Cancel</Button>
+        <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-xl">
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -152,12 +189,14 @@
         </span>
         <span v-else>{{ isEdit ? 'Update Staff' : 'Add Staff' }}</span>
       </Button>
+      </template>
     </template>
   </Modal>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
+import { CheckCircleIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'
@@ -193,6 +232,9 @@ const formData = ref({
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const showTemporaryPassword = ref(false)
+const temporaryPasswordToShow = ref('')
+const copiedPassword = ref(false)
 
 const isEdit = computed(() => !!props.staff)
 
@@ -217,6 +259,26 @@ const resetForm = () => {
     status: 'active',
   }
   errorMessage.value = ''
+  showTemporaryPassword.value = false
+  temporaryPasswordToShow.value = ''
+  copiedPassword.value = false
+}
+
+const copyTemporaryPassword = async () => {
+  try {
+    await navigator.clipboard.writeText(temporaryPasswordToShow.value)
+    copiedPassword.value = true
+    setTimeout(() => { copiedPassword.value = false }, 2000)
+  } catch {
+    // ignore
+  }
+}
+
+const closeAfterSuccess = () => {
+  showTemporaryPassword.value = false
+  temporaryPasswordToShow.value = ''
+  emit('success')
+  emit('update:modelValue', false)
 }
 
 watch(
@@ -271,7 +333,7 @@ const handleSubmit = async () => {
         status: formData.value.status,
       })
     } else {
-      await staffStore.createStaff({
+      const result = await staffStore.createStaff({
         departmentId: props.departmentId,
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
@@ -283,6 +345,12 @@ const handleSubmit = async () => {
         salary: formData.value.salary,
         status: formData.value.status,
       })
+      const created = result as { staffId: string; temporaryPassword: string }
+      if (created?.temporaryPassword) {
+        temporaryPasswordToShow.value = created.temporaryPassword
+        showTemporaryPassword.value = true
+        return
+      }
     }
 
     emit('success')
@@ -299,3 +367,4 @@ onMounted(() => {
   // Any initialization logic can go here
 })
 </script>
+

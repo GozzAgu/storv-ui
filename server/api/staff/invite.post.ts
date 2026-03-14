@@ -68,9 +68,10 @@ export default defineEventHandler(async (event) => {
     const normalizedEmail = email.trim().toLowerCase()
     const firestore = getAdminFirestore()
 
+    const temporaryPassword = randomPassword(12)
     const userRecord = await auth.createUser({
       email: normalizedEmail,
-      password: randomPassword(),
+      password: temporaryPassword,
       emailVerified: false,
     })
     const staffAuthUid = userRecord.uid
@@ -105,7 +106,7 @@ export default defineEventHandler(async (event) => {
 
     await staffRef.set(newStaff)
 
-    return { success: true, uid: staffAuthUid, staffId: staffRef.id }
+    return { success: true, uid: staffAuthUid, staffId: staffRef.id, temporaryPassword }
   } catch (e: any) {
     if (e.statusCode) throw e
     if (e.code === 'auth/email-already-exists') {
