@@ -117,6 +117,7 @@
             @click.stop
           >
             <button
+              v-if="canDuplicateByPlan"
               type="button"
               @click="handleDuplicateFolder(folder); openFolderMenuId = null"
               class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
@@ -153,7 +154,7 @@
 
         <!-- Folder name (title) -->
         <h3
-          class="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-2"
+          class="text-xs font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-2 uppercase"
           :title="folder.name"
         >
           {{ folder.name }}
@@ -711,6 +712,12 @@ const storesStore = useStoresStore()
 const toast = useToast()
 const { canManage, canCreateInventoryFolders } = usePermissions()
 
+// Duplicate folders/items only on Storvv Medium and Enterprise
+const canDuplicateByPlan = computed(() => {
+  const sub = userStore.userData?.subscription
+  return sub === 'storvv_medium' || sub === 'storvv_enterprise'
+})
+
 // Get current store ID for filtering
 const currentStoreId = computed(() => storesStore.currentStoreId)
 
@@ -1038,6 +1045,10 @@ const openCreateFolderModal = () => {
 }
 
 const handleDuplicateFolder = (folder: InventoryFolder) => {
+  if (!canDuplicateByPlan.value) {
+    toast.error('Duplicating folders is available on Storvv Medium and Enterprise plans.')
+    return
+  }
   duplicateSourceFolder.value = folder
   duplicateFolderNames.value = ['']
   duplicateFolderNamesError.value = null
@@ -1070,6 +1081,10 @@ const removeDuplicateFolderName = (index: number) => {
 }
 
 const handleConfirmDuplicateFolder = async () => {
+  if (!canDuplicateByPlan.value) {
+    toast.error('Duplicating folders is available on Storvv Medium and Enterprise plans.')
+    return
+  }
   const source = duplicateSourceFolder.value
   const names = validDuplicateFolderNames.value
   if (!source || names.length === 0) return

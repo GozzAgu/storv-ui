@@ -446,6 +446,7 @@
                     <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
+                    v-if="canDuplicateByPlan"
                     @click="handleDuplicateItem(item)"
                     :disabled="isItemSold(item)"
                     :class="[
@@ -502,6 +503,7 @@
                       <PencilSquareIcon class="w-5 h-5" />
                     </button>
                     <button
+                      v-if="canDuplicateByPlan"
                       @click="handleDuplicateItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -977,6 +979,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
@@ -1006,9 +1009,16 @@ import type { InventoryItem } from '~/stores/inventory'
 const inventoryStore = useInventoryStore()
 const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
+const userStore = useUserStore()
 const storesStore = useStoresStore()
 const { canManage, canManageInventoryItems } = usePermissions()
 const toast = useToast()
+
+// Duplicate items only on Storvv Medium and Enterprise
+const canDuplicateByPlan = computed(() => {
+  const sub = userStore.userData?.subscription
+  return sub === 'storvv_medium' || sub === 'storvv_enterprise'
+})
 const { formatCurrency } = usePreferences()
 const { copyToClipboard } = useCopy()
 
@@ -1721,6 +1731,10 @@ const handleDeleteItem = (item: InventoryItem) => {
 }
 
 const handleDuplicateItem = (item: InventoryItem) => {
+  if (!canDuplicateByPlan.value) {
+    toast.error('Duplicating products is available on Storvv Medium and Enterprise plans.')
+    return
+  }
   cancelInlineEdit()
   openItemMenuId.value = null
   if (folder.value?.hasSerialNumbers) {
@@ -1765,6 +1779,10 @@ const removeDuplicateSerialNumber = (index: number) => {
 }
 
 const handleConfirmDuplicate = async () => {
+  if (!canDuplicateByPlan.value) {
+    toast.error('Duplicating products is available on Storvv Medium and Enterprise plans.')
+    return
+  }
   const source = duplicateSourceItem.value
   const serials = validDuplicateSerials.value
   if (!source || serials.length === 0 || !folderId.value) return
