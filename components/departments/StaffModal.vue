@@ -3,7 +3,7 @@
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
-    :subtitle="isEdit ? 'Update staff details.' : 'Add a staff member with sign-in. You\u2019ll get a one-time password to share (no email invite).'"
+    :subtitle="isEdit ? 'Update staff details.' : 'Add a staff member with sign-in. Enter a password for them to use; share it manually.'"
     size="lg"
   >
     <div class="space-y-4">
@@ -36,7 +36,7 @@
           </div>
         </div>
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          From the staff list, use the menu on their row to generate a new password if needed.
+          Staff can change their password in Profile after signing in.
         </p>
         <Button size="sm" class="!rounded-xl w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
           Done
@@ -81,6 +81,21 @@
             class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="email@example.com"
           />
+        </div>
+
+        <div v-if="!isEdit">
+          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
+            Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="formData.password"
+            type="password"
+            required
+            autocomplete="new-password"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            placeholder="Password for staff sign-in"
+          />
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Share this with the staff member so they can sign in.</p>
         </div>
 
         <div>
@@ -216,6 +231,7 @@ const formData = ref({
   firstName: '',
   lastName: '',
   email: '',
+  password: '',
   phone: '',
   position: '',
   role: 'staff' as 'manager' | 'staff' | 'intern',
@@ -232,19 +248,24 @@ const copiedPassword = ref(false)
 
 const isEdit = computed(() => !!props.staff)
 
-const isFormValid = computed(() => !!(
-  formData.value.firstName &&
-  formData.value.lastName &&
-  formData.value.email &&
-  formData.value.position &&
-  formData.value.hireDate
-))
+const isFormValid = computed(() => {
+  const base = !!(
+    formData.value.firstName &&
+    formData.value.lastName &&
+    formData.value.email &&
+    formData.value.position &&
+    formData.value.hireDate
+  )
+  if (isEdit.value) return base
+  return base && !!formData.value.password?.trim()
+})
 
 const resetForm = () => {
   formData.value = {
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
     phone: '',
     position: '',
     role: 'staff',
@@ -286,6 +307,7 @@ watch(
           firstName: props.staff.firstName || '',
           lastName: props.staff.lastName || '',
           email: props.staff.email || '',
+          password: '',
           phone: props.staff.phone || '',
           position: props.staff.position || '',
           role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
@@ -333,6 +355,7 @@ const handleSubmit = async () => {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
+        password: formData.value.password,
         phone: formData.value.phone || undefined,
         position: formData.value.position,
         role: formData.value.role,

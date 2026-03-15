@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -10,6 +12,7 @@ import { getPlanLimits } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
+import { getFirebaseConfig } from '~/config/firebase.config'
 
 export const useStaffStore = defineStore('staff', {
   state: () => ({
@@ -313,14 +316,18 @@ export const useStaffStore = defineStore('staff', {
       }
     },
 
-    // Create a new staff member: server creates Firebase Auth account + Firestore doc, returns password to show in modal (no email invite)
-    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'>) {
+    // Create a new staff member: frontend creates Firebase Auth account (secondary app) + Firestore doc. Admin types password in the form.
+    async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'> & { password: string }) {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated to create staff')
       }
       if (!staffData.email?.trim()) {
         throw new Error('Staff email is required')
+      }
+      const password = typeof staffData.password === 'string' ? staffData.password.trim() : ''
+      if (!password || password.length < 6) {
+        throw new Error('Password is required (at least 6 characters)')
       }
 
       const departmentsStore = useDepartmentsStore()
@@ -349,57 +356,66 @@ export const useStaffStore = defineStore('staff', {
         throw new Error(msg)
       }
 
-      const token = await authStore.currentUser.getIdToken()
-      const config = useRuntimeConfig()
-      const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
-      const inviteUrl = apiBase ? `${apiBase}/api/staff/invite` : '/api/staff/invite'
+      const normalizedEmail = staffData.email.trim().toLowerCase()
 
-      let res: { success: boolean; uid: string; staffId: string; temporaryPassword: string }
-      try {
-        res = await $fetch<{ success: boolean; uid: string; staffId: string; temporaryPassword: string }>(inviteUrl, {
-          method: 'POST',
-          body: {
-            email: staffData.email.trim().toLowerCase(),
-            departmentId: staffData.departmentId,
-            storeId,
-            firstName: staffData.firstName.trim(),
-            lastName: staffData.lastName.trim(),
-            phone: staffData.phone ?? '',
-            position: staffData.position.trim(),
-            role: staffData.role,
-            hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
-            salary: staffData.salary,
-            status: staffData.status ?? 'active',
-          },
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      } catch (inviteErr: unknown) {
-        const status = (inviteErr as { statusCode?: number })?.statusCode ?? (inviteErr as { status?: number })?.status
-        if (status === 404) {
-          throw new Error(
-            'To give staff sign-in accounts, run the app as a server (npm run build:server then node .output/server/index.mjs). See DEPLOYMENT.md.'
-          )
-        }
-        throw inviteErr
+      // Use a secondary Firebase app so creating the staff user does not sign out the admin
+      const config = getFirebaseConfig()
+      const apps = getApps()
+      let staffApp: FirebaseApp = apps.find((a: FirebaseApp) => a.name === 'StaffCreation') as FirebaseApp
+      if (!staffApp) {
+        staffApp = initializeApp(config, 'StaffCreation')
       }
+      const authSecondary = getAuth(staffApp)
+      const userCred = await createUserWithEmailAndPassword(authSecondary, normalizedEmail, password)
+      const staffAuthUid = userCred.user.uid
+      await signOut(authSecondary)
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const superAdminUid = authStore.currentUser.uid
+      const staffRef = doc(getStaffCollection(db, superAdminUid, storeId, staffData.departmentId))
+      const staffId = staffRef.id
+
+      const newStaff = {
+        firstName: staffData.firstName.trim(),
+        lastName: staffData.lastName.trim(),
+        email: normalizedEmail,
+        ...(staffData.phone !== undefined && staffData.phone !== '' && { phone: String(staffData.phone).trim() }),
+        departmentId: staffData.departmentId,
+        storeId,
+        position: staffData.position.trim(),
+        role: staffData.role === 'manager' || staffData.role === 'intern' ? staffData.role : 'staff',
+        hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
+        ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
+        status: staffData.status === 'inactive' || staffData.status === 'on_leave' ? staffData.status : 'active',
+        authUid: staffAuthUid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        createdBy: superAdminUid,
+      }
+      await setDoc(staffRef, newStaff)
 
       await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
       if (staffData.role === 'manager') {
         await departmentsStore.updateDepartment(staffData.departmentId, {
           manager: `${staffData.firstName} ${staffData.lastName}`,
-          managerId: res.staffId,
+          managerId: staffId,
         } as Partial<import('~/composables/useDepartments').Department>)
       }
 
       const now = new Date()
+      const { password: _pw, ...staffFields } = staffData
       const staffWithDept: Staff = {
-        id: res.staffId,
-        ...staffData,
+        id: staffId,
+        ...staffFields,
         storeId,
-        authUid: res.uid,
+        authUid: staffAuthUid,
         createdAt: now,
         updatedAt: now,
-        createdBy: authStore.currentUser.uid,
+        createdBy: superAdminUid,
         departmentName: department.name,
       }
       this.staff.unshift(staffWithDept)
@@ -413,7 +429,7 @@ export const useStaffStore = defineStore('staff', {
         }, 500)
       }
 
-      return { staffId: res.staffId, temporaryPassword: res.temporaryPassword }
+      return { staffId, temporaryPassword: password }
     },
 
     // Update a staff member

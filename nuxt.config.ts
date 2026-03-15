@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       appVersion: '1.0',
-      /** When deploying static (nuxt generate), set NUXT_PUBLIC_API_BASE to the URL of a server that runs the same app (nuxt build) so API routes like /api/staff/invite work. */
+      /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       firebase: {
         apiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
