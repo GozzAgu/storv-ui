@@ -323,16 +323,16 @@ export const useStaffStore = defineStore('staff', {
         throw new Error('Staff email is required')
       }
 
-      const departmentsStore = useDepartmentsStore()
-      const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
-      if (!department || department.createdBy !== authStore.currentUser.uid) {
-        throw new Error('Department not found or access denied')
-      }
-      const storeId = department.storeId
-      if (!storeId) {
-        throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
-      }
-
+        const departmentsStore = useDepartmentsStore()
+        const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
+        if (!department || department.createdBy !== authStore.currentUser.uid) {
+          throw new Error('Department not found or access denied')
+        }
+        const storeId = department.storeId
+        if (!storeId) {
+          throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
+        }
+        
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -377,22 +377,22 @@ export const useStaffStore = defineStore('staff', {
         const status = (inviteErr as { statusCode?: number })?.statusCode ?? (inviteErr as { status?: number })?.status
         if (status === 404) {
           throw new Error(
-            'Staff invite is not available on this deployment. The app must be deployed with the API server (see DEPLOYMENT.md), or set NUXT_PUBLIC_API_BASE to your API server URL.'
+            'Staff invite is not available on this deployment. The API server is required for secure staff sign-in (see How to fix below).'
           )
         }
         throw inviteErr
       }
 
-      await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
-      if (staffData.role === 'manager') {
-        await departmentsStore.updateDepartment(staffData.departmentId, {
-          manager: `${staffData.firstName} ${staffData.lastName}`,
+        await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
+        if (staffData.role === 'manager') {
+          await departmentsStore.updateDepartment(staffData.departmentId, {
+            manager: `${staffData.firstName} ${staffData.lastName}`,
           managerId: res.staffId,
-        } as Partial<import('~/composables/useDepartments').Department>)
-      }
+          } as Partial<import('~/composables/useDepartments').Department>)
+        }
 
       const now = new Date()
-      const staffWithDept: Staff = {
+        const staffWithDept: Staff = {
         id: res.staffId,
         ...staffData,
         storeId,
@@ -400,11 +400,11 @@ export const useStaffStore = defineStore('staff', {
         createdAt: now,
         updatedAt: now,
         createdBy: authStore.currentUser.uid,
-        departmentName: department.name,
-      }
-      this.staff.unshift(staffWithDept)
+          departmentName: department.name,
+        }
+        this.staff.unshift(staffWithDept)
 
-      if (import.meta.client) {
+        if (import.meta.client) {
         setTimeout(() => {
           this.fetchStaffByDepartment(staffData.departmentId).catch(() => {})
           this.fetchStaff().catch(() => {})

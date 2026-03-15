@@ -413,25 +413,25 @@
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
           Plans that fit your size
-        </h2>
+          </h2>
         <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
           Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
         </p>
         <div class="flex items-center justify-center gap-3 mt-6">
           <span :class="['text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500']">Monthly</span>
-          <button
-            @click="isYearly = !isYearly"
+            <button
+              @click="isYearly = !isYearly"
             :class="['relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2', isYearly ? 'bg-primary-500' : 'bg-gray-300']"
-            role="switch"
-            :aria-checked="isYearly"
-          >
+              role="switch"
+              :aria-checked="isYearly"
+            >
             <span :class="['inline-block h-5 w-5 rounded-full bg-white shadow transition-transform', isYearly ? 'translate-x-6' : 'translate-x-1']" />
-          </button>
+            </button>
           <span :class="['text-sm font-medium flex items-center gap-2', isYearly ? 'text-gray-900' : 'text-gray-500']">
-            Yearly
+              Yearly
             <span v-if="isYearly" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Save 15%</span>
-          </span>
-        </div>
+            </span>
+          </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
           <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
@@ -447,9 +447,9 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard & notifications</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No analytics; no multiple departments; no multi-store sync</li>
-            </ul>
+                </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
-          </div>
+              </div>
           <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 rounded-2xl border-2 border-primary-200 bg-white p-6 flex flex-col shadow-lg shadow-primary-500/5">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Medium</h3>
@@ -466,9 +466,9 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics & reports</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No stock transfers between stores (Enterprise only)</li>
-            </ul>
+                </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
-          </div>
+              </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Enterprise</h3>
@@ -476,7 +476,7 @@
             <div class="mt-4 flex items-baseline gap-2">
               <span class="text-2xl font-bold text-gray-900">{{ isYearly ? 'N200,000' : 'N25,000' }}</span>
               <span v-if="isYearly" class="text-sm text-gray-400 line-through">N300,000</span>
-            </div>
+              </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium</li>
@@ -484,11 +484,11 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited departments & staff</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
-            </ul>
+                </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
-          </div>
-        </div>
-      </div>
+              </div>
+              </div>
+            </div>
     </section>
 
     <!-- Security -->

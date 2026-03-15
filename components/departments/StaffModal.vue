@@ -171,8 +171,21 @@
         </div>
       </div>
 
-      <div v-if="errorMessage" class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
-        <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+      <div v-if="errorMessage" class="space-y-3">
+        <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
+          <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+        </div>
+        <div
+          v-if="isDeploymentApiError"
+          class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60"
+        >
+          <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2">How to fix</p>
+          <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5 list-disc list-inside">
+            <li><strong>Option A:</strong> Deploy the app as a Node server (run <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">npm run build:server</code> then <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">node .output/server/index.mjs</code>) so the API runs on the same host.</li>
+            <li><strong>Option B:</strong> Keep your current static site and run the same app as a separate API server (e.g. api.storvv.com). When building the static site, set <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">NUXT_PUBLIC_API_BASE=https://api.storvv.com</code> (your API URL).</li>
+          </ul>
+          <p class="text-[11px] text-gray-500 dark:text-gray-500 mt-2">See <strong>DEPLOYMENT.md</strong> in the project for full steps. Staff authentication is unchanged; the invite API must run on a server.</p>
+        </div>
       </div>
     </div>
 
@@ -245,6 +258,15 @@ const isFormValid = computed(() => !!(
   formData.value.position &&
   formData.value.hireDate
 ))
+
+const isDeploymentApiError = computed(() => {
+  const msg = errorMessage.value
+  return !!msg && (
+    msg.includes('Staff invite is not available') ||
+    msg.includes('NUXT_PUBLIC_API_BASE') ||
+    msg.includes('API server')
+  )
+})
 
 const resetForm = () => {
   formData.value = {

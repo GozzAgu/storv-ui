@@ -7,23 +7,23 @@
     <div class="mb-4 sm:mb-6">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div class="flex items-start gap-2.5 min-w-0 flex-1">
-          <button
-            @click="navigateTo('/dashboard/inventory')"
+        <button
+          @click="navigateTo('/dashboard/inventory')"
             class="mt-0.5 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-            title="Back to folders"
-          >
+          title="Back to folders"
+        >
             <ArrowLeftIcon class="w-4 h-4" stroke-width="1.75" />
-          </button>
+        </button>
           <div class="min-w-0 flex-1">
             <h1 v-if="isLoadingFolder" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-              Loading...
-            </h1>
+                Loading...
+              </h1>
             <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
-              {{ folder?.name || 'Folder' }}
-            </h1>
+                {{ folder?.name || 'Folder' }}
+              </h1>
             <p v-if="!isLoadingFolder" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-              {{ folder?.description || 'No description' }}
-            </p>
+                {{ folder?.description || 'No description' }}
+              </p>
             <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
               <span class="flex items-center gap-1.5">
                 <CalendarIcon class="w-4 h-4" />
@@ -35,7 +35,7 @@
               </span>
             </div>
           </div>
-        </div>
+            </div>
         <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
@@ -65,42 +65,42 @@
         <div class="min-w-0">
           <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Items</p>
           <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">
-            {{ folder?.itemCount || 0 }}
-          </p>
-        </div>
+              {{ folder?.itemCount || 0 }}
+            </p>
+          </div>
         <div class="w-8 h-8 rounded-lg bg-blue-100/80 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
           <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
+          </div>
         </div>
-      </div>
       <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 p-3 flex items-center justify-between gap-2">
         <div class="min-w-0">
           <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Value</p>
           <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100 truncate">
-            {{ formatCurrency(totalInventoryValue) }}
-          </p>
-        </div>
+              {{ formatCurrency(totalInventoryValue) }}
+            </p>
+          </div>
         <div class="w-8 h-8 rounded-lg bg-green-100/80 dark:bg-green-900/30 flex items-center justify-center shrink-0">
           <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
+          </div>
         </div>
-      </div>
     </div>
 
     <!-- Loading State - Skeleton -->
     <template v-if="isLoadingFolder">
       <div class="grid grid-cols-2 gap-4 mb-6 lg:hidden">
         <div v-for="i in 2" :key="i" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between">
-          <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0">
             <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-2 animate-pulse"></div>
             <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 animate-pulse"></div>
-          </div>
+            </div>
           <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"></div>
-        </div>
+          </div>
       </div>
       <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-6 mb-6">
         <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl w-3/4 mb-4 animate-pulse"></div>
         <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-full animate-pulse"></div>
         <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mt-3 animate-pulse"></div>
-      </div>
+        </div>
       <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden min-h-[320px]">
         <div class="p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <div class="flex gap-3">
@@ -113,7 +113,7 @@
             <div class="h-4 flex-1 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
             <div class="h-4 w-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
             <div class="h-4 w-16 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-          </div>
+        </div>
         </div>
       </div>
     </template>
@@ -122,36 +122,36 @@
     <div v-else class="lg:hidden flex flex-col sm:flex-row gap-3 mb-6">
       <div class="relative flex-1 min-w-0">
         <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search by name, SKU..."
+          <input
+            v-model="searchQuery"
+            type="text"
+                placeholder="Search by name, SKU..."
           class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
-        />
-      </div>
-      <div class="flex items-center gap-2">
-        <select
-          v-model="sortBy"
-          @change="handleSortByChange"
+          />
+        </div>
+        <div class="flex items-center gap-2">
+          <select
+            v-model="sortBy"
+            @change="handleSortByChange"
           class="flex-1 sm:flex-none px-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
-        >
-          <option value="name">Name</option>
-          <option value="price">Price</option>
-          <option value="sku">SKU</option>
-          <option value="dateIn">Date In</option>
-          <option value="availability">Status</option>
-        </select>
+          >
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+            <option value="sku">SKU</option>
+            <option value="dateIn">Date In</option>
+            <option value="availability">Status</option>
+          </select>
         <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" class="shrink-0 rounded-full" />
-        <button
-          @click="isFullscreen = !isFullscreen"
+          <button
+            @click="isFullscreen = !isFullscreen"
           class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
-          :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-        >
+            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+          >
           <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-5 h-5" />
           <XMarkIcon v-else class="w-5 h-5" />
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
 
     <!-- Enhanced Items Table -->
     <div
@@ -222,52 +222,52 @@
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-1.5">
               <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
-            </div>
+              </div>
             <div class="flex items-center gap-1.5">
               <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
               <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
+              </div>
             </div>
-          </div>
           <div class="flex items-center gap-1.5">
-            <div class="relative">
+              <div class="relative">
               <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search..."
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search..."
                 class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-40"
-              />
-            </div>
-            <select
-              v-model="sortBy"
-              @change="handleSortByChange"
+                />
+              </div>
+              <select
+                v-model="sortBy"
+                @change="handleSortByChange"
               class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
-            >
-              <option value="name">Name</option>
-              <option value="price">Price</option>
-              <option value="sku">SKU</option>
-              <option value="dateIn">Date In</option>
-              <option value="availability">Status</option>
-            </select>
-            <button
-              @click="resetFilters"
+              >
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+                <option value="sku">SKU</option>
+                <option value="dateIn">Date In</option>
+                <option value="availability">Status</option>
+              </select>
+              <button
+                @click="resetFilters"
               class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-              title="Reset filters"
-            >
-              <ArrowPathIcon class="w-4 h-4" />
-            </button>
-            <button
-              @click="isFullscreen = !isFullscreen"
+                title="Reset filters"
+              >
+                <ArrowPathIcon class="w-4 h-4" />
+              </button>
+              <button
+                @click="isFullscreen = !isFullscreen"
               class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-              :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-            >
-              <ArrowsPointingOutIcon class="w-4 h-4" />
-            </button>
+                :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+              >
+                <ArrowsPointingOutIcon class="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
       <!-- Empty state: full width (no table) so text/button don't truncate on mobile -->
       <div
         v-if="sortedFilteredItems.length === 0"
@@ -782,50 +782,50 @@
               </div>
               <!-- Template fields (Product, Price, etc.) -->
               <template
-                v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
-                :key="field.id"
-              >
+              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
+              :key="field.id"
+            >
                 <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
                   <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                  </label>
-                  <input
-                    v-if="field.type === 'text'"
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
+                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                </label>
+                <input
+                  v-if="field.type === 'text'"
+                  v-model="itemForm[field.name]"
+                  type="text"
+                  :required="field.required"
                     class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
+                <input
+                  v-else-if="field.type === 'number'"
+                  v-model.number="itemForm[field.name]"
+                  type="number"
+                  :required="field.required"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
+                <div v-else-if="field.type === 'currency'" class="relative">
+                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                   <input
-                    v-else-if="field.type === 'number'"
                     v-model.number="itemForm[field.name]"
                     type="number"
+                    step="0.01"
+                    min="0"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
-                  <div v-else-if="field.type === 'currency'" class="relative">
-                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
-                    <input
-                      v-model.number="itemForm[field.name]"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      :required="field.required"
                       class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                      :placeholder="field.placeholder || '0.00'"
-                    />
-                  </div>
-                  <select
-                    v-else-if="field.type === 'select' && field.options"
-                    v-model="itemForm[field.name]"
-                    :required="field.required"
+                    :placeholder="field.placeholder || '0.00'"
+                  />
+                </div>
+                <select
+                  v-else-if="field.type === 'select' && field.options"
+                  v-model="itemForm[field.name]"
+                  :required="field.required"
                     class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                  >
-                    <option value="">Select {{ field.label || field.name }}</option>
+                >
+                  <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">{{ option }}</option>
-                  </select>
+                </select>
                   <input
                     v-else
                     v-model="itemForm[field.name]"
@@ -844,13 +844,13 @@
                     :required="field.required"
                     class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   />
-                  <Checkbox
-                    v-else-if="field.type === 'boolean'"
-                    v-model="itemForm[field.name]"
-                    :label="field.label || field.name"
-                    size="sm"
-                  />
-                </div>
+                <Checkbox
+                  v-else-if="field.type === 'boolean'"
+                  v-model="itemForm[field.name]"
+                  :label="field.label || field.name"
+                  size="sm"
+                />
+              </div>
               </template>
             </div>
           </div>
@@ -898,16 +898,16 @@
               <template v-for="field in folder.template.fields" :key="field.id">
                 <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
                   <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ field.label || field.name }} {{ field.required ? '*' : '' }}
-                  </label>
-                  <input
-                    v-if="field.type === 'text'"
-                    v-model="itemForm[field.name]"
-                    type="text"
-                    :required="field.required"
+                  {{ field.label || field.name }} {{ field.required ? '*' : '' }}
+                </label>
+                <input
+                  v-if="field.type === 'text'"
+                  v-model="itemForm[field.name]"
+                  type="text"
+                  :required="field.required"
                     class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
-                    :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
-                  />
+                  :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
+                />
                   <input
                     v-else-if="field.type === 'number'"
                     v-model.number="itemForm[field.name]"
@@ -927,7 +927,7 @@
                       class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
-                  </div>
+              </div>
                   <select
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
@@ -945,7 +945,7 @@
                     class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
-                </div>
+            </div>
                 <div v-else class="col-span-2 sm:col-span-1 min-w-0">
                   <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ field.label || field.name }} {{ field.required ? '*' : '' }}
@@ -963,7 +963,7 @@
                     :label="field.label || field.name"
                     size="sm"
                   />
-                </div>
+          </div>
               </template>
             </div>
           </div>
@@ -1347,7 +1347,7 @@ const handleClickOutsideInlineEdit = (e: MouseEvent) => {
   const target = e.target as Node
   const cell = getEditCellEl()
   if (cell?.contains(target)) return
-  saveInlineEdit()
+    saveInlineEdit()
 }
 
 watch(editingCell, (val) => {
@@ -1441,7 +1441,7 @@ const saveInlineEdit = async () => {
     ? parsedValue !== previousDiscounted && String(parsedValue) !== String(previousDiscounted)
     : isDateField
       ? String(parsedValue).trim() !== String(prevDateStr ?? '').trim()
-      : parsedValue !== previousValue && String(parsedValue) !== String(previousValue)
+    : parsedValue !== previousValue && String(parsedValue) !== String(previousValue)
   if (!hasChanged) {
     cancelInlineEdit()
     return
@@ -1479,10 +1479,10 @@ const columns = computed(() => {
     const mapped = folder.value.template.fields
       .filter(field => field.name !== 'model')
       .map(field => ({
-        key: field.name,
+      key: field.name,
         label: field.name === 'brand' ? 'Product model' : (field.label || field.name),
-        sortable: true,
-        type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
+      sortable: true,
+      type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
       }))
     templateColumns.push(...mapped)
   } else {
@@ -1668,7 +1668,7 @@ const sortedFilteredItems = computed(() => displayItems.value)
 const paginatedItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  return sortedFilteredItems.value.slice(start, end)
+    return sortedFilteredItems.value.slice(start, end)
 })
 
 // Reset to first page when filters change
@@ -2125,7 +2125,7 @@ const handleSaveItem = async () => {
       toast.warning('Please enter a product model')
       return
     }
-    }
+  }
   
   // Validate required fields based on template
   if (folder.value?.template?.fields) {
