@@ -359,21 +359,47 @@
 
             <ThemeToggle />
 
-            <!-- Notifications -->
-            <NuxtLink
-              to="/dashboard/notifications"
-              class="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
-              title="Notifications"
-              aria-label="Notifications"
-            >
-              <BellIcon class="w-4 h-4" stroke-width="1.75" />
-              <span
-                v-if="unreadNotificationCount > 0"
-                class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-0.5 ring-2 ring-white dark:ring-gray-900"
+            <!-- Notifications dropdown -->
+            <div class="relative shrink-0" ref="notificationsRef">
+              <button
+                type="button"
+                @click="notificationsOpen = !notificationsOpen"
+                :class="[
+                  'relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg transition-colors shrink-0',
+                  notificationsOpen
+                    ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ]"
+                title="Notifications"
+                aria-label="Notifications"
+                :aria-expanded="notificationsOpen"
+                aria-haspopup="true"
               >
-                {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
-              </span>
-            </NuxtLink>
+                <BellIcon class="w-4 h-4" stroke-width="1.75" />
+                <span
+                  v-if="unreadNotificationCount > 0"
+                  class="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] bg-red-500 text-white text-[9px] font-semibold rounded-full flex items-center justify-center px-0.5 ring-2 ring-white dark:ring-gray-900"
+                >
+                  {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
+                </span>
+              </button>
+              <Transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 scale-95"
+                enter-to-class="opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 scale-100"
+                leave-to-class="opacity-0 scale-95"
+              >
+                <div
+                  v-if="notificationsOpen"
+                  class="fixed top-14 right-3 md:absolute md:right-0 md:left-auto md:top-full md:mt-1.5 z-[100] origin-top-right"
+                  @click.stop
+                >
+                  <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
+                </div>
+              </Transition>
+            </div>
 
             <!-- Profile -->
             <div class="relative shrink-0" ref="profileMenuRef">
@@ -483,6 +509,7 @@ import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
 import RecentItemsWidget from '~/components/ui/RecentItemsWidget.vue'
+import NotificationsPanel from '~/components/notifications/NotificationsPanel.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAuthStore } from '~/stores/auth'
@@ -532,6 +559,8 @@ const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const sidebarOpen = ref(false)
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
+const notificationsOpen = ref(false)
+const notificationsRef = ref<HTMLElement | null>(null)
 const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
 
 // Track store switching state
@@ -1314,8 +1343,12 @@ const handleSignOut = async () => {
 
 // Close dropdowns on outside click
 const handleClickOutside = (event: MouseEvent) => {
-  if (profileMenuRef.value && !profileMenuRef.value.contains(event.target as Node)) {
+  const target = event.target as Node
+  if (profileMenuRef.value && !profileMenuRef.value.contains(target)) {
     profileMenuOpen.value = false
+  }
+  if (notificationsRef.value && !notificationsRef.value.contains(target)) {
+    notificationsOpen.value = false
   }
 }
 

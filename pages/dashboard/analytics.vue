@@ -46,6 +46,15 @@
       </div>
     </template>
 
+    <!-- No store selected -->
+    <template v-else-if="needsStoreSelection">
+      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 p-8 sm:p-12 text-center">
+        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Select a store to view analytics</p>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Choose a store from the selector in the top bar, or go to Settings to manage your stores.</p>
+        <NuxtLink to="/dashboard/settings" class="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Go to Settings</NuxtLink>
+      </div>
+    </template>
+
     <!-- Analytics Content -->
     <template v-else>
       <!-- Key Metrics Cards -->
@@ -338,6 +347,7 @@ import {
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
+import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
@@ -376,6 +386,11 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 const isLoading = ref(true)
 const isExporting = ref(false)
 const selectedPeriod = ref<'daily' | 'weekly' | 'monthly'>('monthly')
+
+const needsStoreSelection = computed(() => {
+  const msg = (receiptsStore.error || inventoryStore.error || '').toLowerCase()
+  return msg.includes('no store selected') || msg.includes('select a store')
+})
 
 // Analytics Data
 const receipts = ref<any[]>([])
@@ -1219,26 +1234,31 @@ const customerChartOptions = computed(() => {
 const loadAnalytics = async () => {
   isLoading.value = true
   try {
+    // Fetch receipts and folders in parallel
     await Promise.all([
       receiptsStore.fetchReceipts(),
       inventoryStore.fetchFolders()
     ])
-    
     receipts.value = receiptsStore.receipts
-    
-    // Load all items from all folders
+
+    // Fetch items for all folders in parallel (was sequential before)
+    const folders = inventoryStore.folders
+    if (folders.length > 0) {
+      const results = await Promise.allSettled(
+        folders.map((folder) => inventoryStore.fetchItems(folder.id))
+      )
+      results.forEach((result, i) => {
+        if (result.status === 'rejected' && folders[i]) {
+          console.error(`Error loading items for folder ${folders[i].id}:`, result.reason)
+        }
+      })
+    }
     const allItems: any[] = []
-    for (const folder of inventoryStore.folders) {
-      try {
-        await inventoryStore.fetchItems(folder.id)
-        const folderItems = inventoryStore.items[folder.id] || []
-        allItems.push(...folderItems)
-      } catch (error) {
-        console.error(`Error loading items for folder ${folder.id}:`, error)
-      }
+    for (const folder of folders) {
+      const folderItems = inventoryStore.items[folder.id] || []
+      allItems.push(...folderItems)
     }
     inventoryItems.value = allItems
-    
   } catch (error) {
     console.error('Error loading analytics:', error)
     toast.error('Failed to load analytics data')
@@ -1441,10 +1461,22 @@ const exportToPDF = async () => {
 }
 
 onMounted(() => {
-  if (!canUseSubscriptionFeature('analytics')) {
+  const authStore = useAuthStore()
+  if (!authStore.currentUser) {
     navigateTo('/dashboard/settings?upgrade=1')
     return
   }
-  loadAnalytics()
+  // Run in background so the page (loading skeleton) shows immediately
+  const uid = authStore.currentUser.uid
+  ;(async () => {
+    if (!userStore.userData) {
+      await userStore.fetchUserData(uid)
+    }
+    if (!canUseSubscriptionFeature('analytics')) {
+      navigateTo('/dashboard/settings?upgrade=1')
+      return
+    }
+    await loadAnalytics()
+  })()
 })
 </script>
