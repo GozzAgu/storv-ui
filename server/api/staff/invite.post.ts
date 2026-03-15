@@ -1,7 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminAuth, getAdminFirestore } from '~/server/utils/firebase-admin'
 
-function randomPassword(length = 24): string {
+function randomPassword(length = 12): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
   let s = ''
   const bytes = new Uint8Array(length)
@@ -14,6 +14,7 @@ function randomPassword(length = 24): string {
   return s
 }
 
+/** Creates a staff Firebase Auth account + Firestore doc. No email invite – password is returned to show in the modal. */
 export default defineEventHandler(async (event) => {
   try {
     const authHeader = getHeader(event, 'authorization')
@@ -23,7 +24,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const auth = getAdminAuth()
-    let decoded: { uid: string; email?: string }
+    let decoded: { uid: string }
     try {
       decoded = await auth.verifyIdToken(token)
     } catch {
@@ -107,12 +108,13 @@ export default defineEventHandler(async (event) => {
     await staffRef.set(newStaff)
 
     return { success: true, uid: staffAuthUid, staffId: staffRef.id, temporaryPassword }
-  } catch (e: any) {
-    if (e.statusCode) throw e
-    if (e.code === 'auth/email-already-exists') {
+  } catch (e: unknown) {
+    const err = e as { statusCode?: number; code?: string; message?: string }
+    if (err.statusCode) throw e
+    if (err.code === 'auth/email-already-exists') {
       throw createError({ statusCode: 409, message: 'An account with this email already exists.' })
     }
-    const message = e?.message || e?.data?.message || 'Failed to create staff invite'
+    const message = err?.message || 'Failed to create staff account'
     console.error('[staff/invite]', e)
     throw createError({ statusCode: 500, message })
   }

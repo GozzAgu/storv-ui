@@ -313,7 +313,7 @@ export const useStaffStore = defineStore('staff', {
       }
     },
 
-    // Create a new staff member (invite flow: server creates user + Firestore doc, we send set-password email)
+    // Create a new staff member: server creates Firebase Auth account + Firestore doc, returns password to show in modal (no email invite)
     async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'>) {
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
@@ -323,16 +323,16 @@ export const useStaffStore = defineStore('staff', {
         throw new Error('Staff email is required')
       }
 
-        const departmentsStore = useDepartmentsStore()
-        const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
-        if (!department || department.createdBy !== authStore.currentUser.uid) {
-          throw new Error('Department not found or access denied')
-        }
-        const storeId = department.storeId
-        if (!storeId) {
-          throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
-        }
-        
+      const departmentsStore = useDepartmentsStore()
+      const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
+      if (!department || department.createdBy !== authStore.currentUser.uid) {
+        throw new Error('Department not found or access denied')
+      }
+      const storeId = department.storeId
+      if (!storeId) {
+        throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
+      }
+
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -377,22 +377,22 @@ export const useStaffStore = defineStore('staff', {
         const status = (inviteErr as { statusCode?: number })?.statusCode ?? (inviteErr as { status?: number })?.status
         if (status === 404) {
           throw new Error(
-            'Staff invite is not available on this deployment. The API server is required for secure staff sign-in (see How to fix below).'
+            'To give staff sign-in accounts, run the app as a server (npm run build:server then node .output/server/index.mjs). See DEPLOYMENT.md.'
           )
         }
         throw inviteErr
       }
 
-        await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
-        if (staffData.role === 'manager') {
-          await departmentsStore.updateDepartment(staffData.departmentId, {
-            manager: `${staffData.firstName} ${staffData.lastName}`,
+      await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
+      if (staffData.role === 'manager') {
+        await departmentsStore.updateDepartment(staffData.departmentId, {
+          manager: `${staffData.firstName} ${staffData.lastName}`,
           managerId: res.staffId,
-          } as Partial<import('~/composables/useDepartments').Department>)
-        }
+        } as Partial<import('~/composables/useDepartments').Department>)
+      }
 
       const now = new Date()
-        const staffWithDept: Staff = {
+      const staffWithDept: Staff = {
         id: res.staffId,
         ...staffData,
         storeId,
@@ -400,11 +400,11 @@ export const useStaffStore = defineStore('staff', {
         createdAt: now,
         updatedAt: now,
         createdBy: authStore.currentUser.uid,
-          departmentName: department.name,
-        }
-        this.staff.unshift(staffWithDept)
+        departmentName: department.name,
+      }
+      this.staff.unshift(staffWithDept)
 
-        if (import.meta.client) {
+      if (import.meta.client) {
         setTimeout(() => {
           this.fetchStaffByDepartment(staffData.departmentId).catch(() => {})
           this.fetchStaff().catch(() => {})
@@ -414,35 +414,6 @@ export const useStaffStore = defineStore('staff', {
       }
 
       return { staffId: res.staffId, temporaryPassword: res.temporaryPassword }
-    },
-
-    // Regenerate a one-time temporary password for existing staff (e.g. if admin closed modal before copying)
-    async regenerateTemporaryPassword(staffId: string, departmentId: string, storeId: string): Promise<{ temporaryPassword: string }> {
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        throw new Error('User must be authenticated')
-      }
-
-      const token = await authStore.currentUser.getIdToken()
-      const config = useRuntimeConfig()
-      const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
-      const url = apiBase ? `${apiBase}/api/staff/regenerate-temp-password` : '/api/staff/regenerate-temp-password'
-      try {
-        const res = await $fetch<{ temporaryPassword: string }>(url, {
-          method: 'POST',
-          body: { staffId, departmentId, storeId },
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        return res
-      } catch (err: unknown) {
-        const status = (err as { statusCode?: number })?.statusCode ?? (err as { status?: number })?.status
-        if (status === 404) {
-          throw new Error(
-            'This action requires the API server. Deploy with the server (see DEPLOYMENT.md) or set NUXT_PUBLIC_API_BASE.'
-          )
-        }
-        throw err
-      }
     },
 
     // Update a staff member

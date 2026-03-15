@@ -3,11 +3,11 @@
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
-    :subtitle="isEdit ? 'Update staff details.' : 'Add a new staff member with login and role.'"
+    :subtitle="isEdit ? 'Update staff details.' : 'Add a staff member with sign-in. You\u2019ll get a one-time password to share (no email invite).'"
     size="lg"
   >
     <div class="space-y-4">
-      <!-- Success state: modern, minimal -->
+      <!-- Success: show one-time password to copy and share (no email invite) -->
       <div
         v-if="showTemporaryPassword"
         class="flex flex-col items-center text-center py-2"
@@ -19,7 +19,7 @@
           Account created
         </h4>
         <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5">
-          Share this one-time password with <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>. They’ll sign in with it, then can change it in Profile.
+          Share this one-time password with <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>. They sign in with email + this password, then can change it in Profile.
         </p>
         <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
           <div class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-600/80">
@@ -36,7 +36,7 @@
           </div>
         </div>
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
-          Closed by mistake? From the staff list, use the ⋮ menu on their row → <strong>Generate new password</strong>.
+          From the staff list, use the menu on their row to generate a new password if needed.
         </p>
         <Button size="sm" class="!rounded-xl w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
           Done
@@ -81,12 +81,6 @@
             class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="email@example.com"
           />
-        </div>
-
-        <div v-if="!isEdit" class="md:col-span-2">
-          <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-            You’ll get a one-time password to share. Staff sign in with email + that password, then can change it in Profile.
-          </p>
         </div>
 
         <div>
@@ -171,21 +165,8 @@
         </div>
       </div>
 
-      <div v-if="errorMessage" class="space-y-3">
-        <div class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
-          <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-        </div>
-        <div
-          v-if="isDeploymentApiError"
-          class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-700/60"
-        >
-          <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2">How to fix</p>
-          <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1.5 list-disc list-inside">
-            <li><strong>Option A:</strong> Deploy the app as a Node server (run <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">npm run build:server</code> then <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">node .output/server/index.mjs</code>) so the API runs on the same host.</li>
-            <li><strong>Option B:</strong> Keep your current static site and run the same app as a separate API server (e.g. api.storvv.com). When building the static site, set <code class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-[11px]">NUXT_PUBLIC_API_BASE=https://api.storvv.com</code> (your API URL).</li>
-          </ul>
-          <p class="text-[11px] text-gray-500 dark:text-gray-500 mt-2">See <strong>DEPLOYMENT.md</strong> in the project for full steps. Staff authentication is unchanged; the invite API must run on a server.</p>
-        </div>
+      <div v-if="errorMessage" class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
+        <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
     </div>
 
@@ -201,7 +182,7 @@
           {{ isEdit ? 'Updating...' : 'Adding...' }}
         </span>
         <span v-else>{{ isEdit ? 'Update Staff' : 'Add Staff' }}</span>
-      </Button>
+        </Button>
       </template>
     </template>
   </Modal>
@@ -259,15 +240,6 @@ const isFormValid = computed(() => !!(
   formData.value.hireDate
 ))
 
-const isDeploymentApiError = computed(() => {
-  const msg = errorMessage.value
-  return !!msg && (
-    msg.includes('Staff invite is not available') ||
-    msg.includes('NUXT_PUBLIC_API_BASE') ||
-    msg.includes('API server')
-  )
-})
-
 const resetForm = () => {
   formData.value = {
     firstName: '',
@@ -287,6 +259,7 @@ const resetForm = () => {
 }
 
 const copyTemporaryPassword = async () => {
+  if (!temporaryPasswordToShow.value) return
   try {
     await navigator.clipboard.writeText(temporaryPasswordToShow.value)
     copiedPassword.value = true
@@ -367,7 +340,7 @@ const handleSubmit = async () => {
         salary: formData.value.salary,
         status: formData.value.status,
       })
-      const created = result as { staffId: string; temporaryPassword: string }
+      const created = result as { staffId: string; temporaryPassword?: string }
       if (created?.temporaryPassword) {
         temporaryPasswordToShow.value = created.temporaryPassword
         showTemporaryPassword.value = true

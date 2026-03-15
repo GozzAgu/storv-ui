@@ -1,42 +1,26 @@
-# Deployment and API routes
+# Deployment and staff sign-in
 
-## Why `POST /api/staff/invite` returns 404 on the deployed app
+Staff get **Firebase Auth accounts** so they can sign in. There are **no invite links and no email invites** – when you add staff, the server creates their account and returns a one-time password that is shown in the modal for you to copy and share manually.
 
-The app’s **build** script runs `nuxt generate`, which produces a **static** site (HTML/JS/CSS only).  
-Static deployment does **not** include Nitro server API routes, so endpoints like `/api/staff/invite` do not exist on the deployed host and return **404**.
+To create staff with sign-in accounts, the app must run as a **Node server** (so the `/api/staff/invite` route is available):
 
-## Options to fix it
-
-### Option A: Run the Nuxt server (recommended)
-
-Deploy the app as a **Node server** so the same process serves both the app and the API:
-
-1. Build with the server:
+1. **Build with the server**
    ```bash
    npm run build:server
    ```
-   (This runs `nuxt build` and outputs to `.output/`.)
 
-2. Run the server:
+2. **Run the server**
    ```bash
    node .output/server/index.mjs
    ```
 
-3. Point your host at this process (e.g. Railway, Render, Fly.io, or a VPS).  
-   Do **not** deploy only the output of `nuxt generate` if you need API routes.
+3. Point your host (Railway, Render, Fly.io, VPS, etc.) at this process.
 
-### Option B: Static site + separate API server
+If you deploy only the output of `nuxt generate` (static site), those API routes do not exist. Add Staff will fail with a message that you need to run the app as a server. No fallback to creating staff without auth.
 
-If you must keep a static frontend (e.g. from `nuxt generate`):
-
-1. Deploy the **same app** again somewhere that runs the Node server (e.g. a subdomain like `api.storvv.com`), using `nuxt build` and `node .output/server/index.mjs` as in Option A.
-
-2. In the **static** deployment, set the API base URL so the frontend calls that server:
-   ```bash
-   NUXT_PUBLIC_API_BASE=https://api.storvv.com
-   ```
-   (Use your real API URL; no trailing slash.)
-
-3. Ensure the API server allows CORS from your frontend origin.
-
-The staff invite (and any other `/api/*` usage) will then go to `https://api.storvv.com/api/staff/invite` instead of the static site origin.
+**Optional: static frontend + separate API**  
+You can keep a static frontend and run the same app as an API on another URL (e.g. `api.storvv.com`). When building the static site, set:
+```bash
+NUXT_PUBLIC_API_BASE=https://api.storvv.com
+```
+Then staff creation will call that server. Ensure CORS allows your frontend origin. Password changes are done by staff in Profile (no server API for regenerating another user's password).
