@@ -353,23 +353,35 @@ export const useStaffStore = defineStore('staff', {
       const config = useRuntimeConfig()
       const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
       const inviteUrl = apiBase ? `${apiBase}/api/staff/invite` : '/api/staff/invite'
-      const res = await $fetch<{ success: boolean; uid: string; staffId: string; temporaryPassword: string }>(inviteUrl, {
-        method: 'POST',
-        body: {
-          email: staffData.email.trim().toLowerCase(),
-          departmentId: staffData.departmentId,
-          storeId,
-          firstName: staffData.firstName.trim(),
-          lastName: staffData.lastName.trim(),
-          phone: staffData.phone ?? '',
-          position: staffData.position.trim(),
-          role: staffData.role,
-          hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
-          salary: staffData.salary,
-          status: staffData.status ?? 'active',
-        },
-        headers: { Authorization: `Bearer ${token}` },
-      })
+
+      let res: { success: boolean; uid: string; staffId: string; temporaryPassword: string }
+      try {
+        res = await $fetch<{ success: boolean; uid: string; staffId: string; temporaryPassword: string }>(inviteUrl, {
+          method: 'POST',
+          body: {
+            email: staffData.email.trim().toLowerCase(),
+            departmentId: staffData.departmentId,
+            storeId,
+            firstName: staffData.firstName.trim(),
+            lastName: staffData.lastName.trim(),
+            phone: staffData.phone ?? '',
+            position: staffData.position.trim(),
+            role: staffData.role,
+            hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
+            salary: staffData.salary,
+            status: staffData.status ?? 'active',
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      } catch (inviteErr: unknown) {
+        const status = (inviteErr as { statusCode?: number })?.statusCode ?? (inviteErr as { status?: number })?.status
+        if (status === 404) {
+          throw new Error(
+            'Staff invite is not available on this deployment. The app must be deployed with the API server (see DEPLOYMENT.md), or set NUXT_PUBLIC_API_BASE to your API server URL.'
+          )
+        }
+        throw inviteErr
+      }
 
       await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
       if (staffData.role === 'manager') {
@@ -415,12 +427,22 @@ export const useStaffStore = defineStore('staff', {
       const config = useRuntimeConfig()
       const apiBase = (config.public.apiBase as string)?.trim().replace(/\/$/, '') || ''
       const url = apiBase ? `${apiBase}/api/staff/regenerate-temp-password` : '/api/staff/regenerate-temp-password'
-      const res = await $fetch<{ temporaryPassword: string }>(url, {
-        method: 'POST',
-        body: { staffId, departmentId, storeId },
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      return res
+      try {
+        const res = await $fetch<{ temporaryPassword: string }>(url, {
+          method: 'POST',
+          body: { staffId, departmentId, storeId },
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        return res
+      } catch (err: unknown) {
+        const status = (err as { statusCode?: number })?.statusCode ?? (err as { status?: number })?.status
+        if (status === 404) {
+          throw new Error(
+            'This action requires the API server. Deploy with the server (see DEPLOYMENT.md) or set NUXT_PUBLIC_API_BASE.'
+          )
+        }
+        throw err
+      }
     },
 
     // Update a staff member

@@ -40,15 +40,15 @@
         </button>
       </div>
 
-      <!-- Collapse toggle (desktop) - minimal -->
+      <!-- Collapse toggle (desktop) - larger on large screens -->
       <button
         @click="toggleSidebar"
-        class="absolute top-9 -right-2.5 hidden lg:flex items-center justify-center w-4 h-4 rounded-full bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors z-10"
+        class="absolute top-9 -right-3 hidden lg:flex items-center justify-center w-6 h-6 rounded-full bg-gray-200/80 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 transition-colors z-10"
         :title="sidebarCollapsed ? 'Expand' : 'Collapse'"
         aria-label="Toggle sidebar"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-2.5 h-2.5" stroke-width="2.5" />
-        <ChevronLeftIcon v-else class="w-2.5 h-2.5" stroke-width="2.5" />
+        <ChevronRightIcon v-if="sidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
+        <ChevronLeftIcon v-else class="w-3.5 h-3.5" stroke-width="2.5" />
       </button>
 
       <!-- Navigation -->
@@ -383,22 +383,25 @@
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
               </button>
-              <Transition
-                enter-active-class="transition ease-out duration-150"
-                enter-from-class="opacity-0 scale-95"
-                enter-to-class="opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-100"
-                leave-from-class="opacity-100 scale-100"
-                leave-to-class="opacity-0 scale-95"
-              >
-                <div
-                  v-if="notificationsOpen"
-                  class="fixed top-14 right-3 md:absolute md:right-0 md:left-auto md:top-full md:mt-1.5 z-[100] origin-top-right"
-                  @click.stop
+              <Teleport to="body">
+                <Transition
+                  enter-active-class="transition ease-out duration-150"
+                  enter-from-class="opacity-0 scale-95"
+                  enter-to-class="opacity-100 scale-100"
+                  leave-active-class="transition ease-in duration-100"
+                  leave-from-class="opacity-100 scale-100"
+                  leave-to-class="opacity-0 scale-95"
                 >
-                  <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
-                </div>
-              </Transition>
+                  <div
+                    v-if="notificationsOpen"
+                    class="fixed z-[100] origin-top-right"
+                    style="top: 3.5rem; right: 1rem; left: auto; width: min(22rem, calc(100vw - 2rem));"
+                    @click.stop
+                  >
+                    <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
+                  </div>
+                </Transition>
+              </Teleport>
             </div>
 
             <!-- Profile -->

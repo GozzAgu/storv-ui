@@ -8,6 +8,7 @@ import { useStaffStore } from './staff'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
 import { useNotificationsStore } from './notifications'
+import { usePreferences } from '~/composables/usePreferences'
 
 export interface ReceiptItem {
   itemId: string
@@ -368,14 +369,16 @@ export const useReceiptsStore = defineStore('receipts', {
 
         this.receipts.unshift(receiptForState)
 
-        // Create notification
+        // Create notification (use account currency for amounts)
         try {
           const notificationsStore = useNotificationsStore()
+          const preferences = usePreferences()
+          await preferences.initialize()
           const notificationType = receiptData.isSwapIn ? 'swap_in_completed' : 'receipt_created'
           const notificationTitle = receiptData.isSwapIn ? 'Swap-in Completed' : 'New Receipt Created'
           const notificationMessage = receiptData.isSwapIn
             ? `Swap-in receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName}`
-            : `Receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName} - Total: $${receiptData.total.toFixed(2)}`
+            : `Receipt #${receiptData.receiptNumber} was created for ${receiptData.customerName} - Total: ${preferences.formatCurrency(receiptData.total)}`
 
           await notificationsStore.createNotification(
             notificationType,
