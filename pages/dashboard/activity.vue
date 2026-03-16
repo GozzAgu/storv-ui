@@ -23,6 +23,11 @@
       <div v-if="loading" class="p-8 flex justify-center">
         <div class="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
       </div>
+      <div v-else-if="fetchError" class="p-6 text-center">
+        <p class="text-xs text-red-600 dark:text-red-400">Could not load activity logs.</p>
+        <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400 max-w-sm mx-auto">{{ fetchError }}</p>
+        <button type="button" @click="loadLogs()" class="mt-3 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Try again</button>
+      </div>
       <div v-else-if="logs.length === 0" class="p-12 text-center">
         <p class="text-xs text-gray-500 dark:text-gray-400">No activity recorded yet for this store.</p>
         <p class="mt-1 text-[10px] text-gray-400 dark:text-gray-500">Create or edit inventory items to see logs here.</p>
@@ -102,6 +107,7 @@ const accessDeniedByRole = computed(() => !userStore.isSuperAdmin && !isManager.
 const storeId = ref<string | null>(null)
 const logs = ref<ActivityLog[]>([])
 const loading = ref(true)
+const fetchError = ref<string | null>(null)
 
 function formatDate(d: Date | unknown): string {
   if (!d) return '—'
@@ -116,6 +122,7 @@ function formatDate(d: Date | unknown): string {
 async function loadLogs() {
   if (!canAccess.value) return
   loading.value = true
+  fetchError.value = null
   storeId.value = await getCurrentStoreId()
   if (!storeId.value) {
     loading.value = false
@@ -123,8 +130,9 @@ async function loadLogs() {
   }
   try {
     logs.value = await fetchActivityLogs(200)
-  } catch (e) {
+  } catch (e: any) {
     console.error('[Activity] Failed to fetch logs:', e)
+    fetchError.value = e?.message || 'Permission or network error. Check the console for details.'
     logs.value = []
   } finally {
     loading.value = false

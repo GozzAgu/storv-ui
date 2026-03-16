@@ -40,8 +40,16 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return
   try {
-    const userId = await getQueryUserId()
-    if (!userId) return
+    let userId = await getQueryUserId()
+    if (!userId) {
+      const { useAuthStore } = await import('~/stores/auth')
+      const authStore = useAuthStore()
+      userId = authStore.currentUser?.uid ?? null
+    }
+    if (!userId) {
+      console.warn('[useActivityLog] Cannot write log: no userId (auth or getQueryUserId)')
+      return
+    }
     const logsRef = getActivityLogsCollection(db, userId, params.storeId)
     const logRef = doc(logsRef)
     await setDoc(logRef, {
@@ -63,7 +71,12 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
 export async function fetchActivityLogs(limitCount: number = 100): Promise<ActivityLog[]> {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return []
-  const userId = await getQueryUserId()
+  let userId = await getQueryUserId()
+  if (!userId) {
+    const { useAuthStore } = await import('~/stores/auth')
+    const authStore = useAuthStore()
+    userId = authStore.currentUser?.uid ?? null
+  }
   if (!userId) return []
   const storeId = await getCurrentStoreId()
   if (!storeId) return []

@@ -33,22 +33,17 @@ export async function getCurrentStoreId(): Promise<string | null> {
     return staffMember?.storeId || null
   }
 
-  // If super admin, get from stores store
-  if (userStore.userData?.role === 'superAdmin') {
-    const { useStoresStore } = await import('~/stores/stores')
-    const storesStore = useStoresStore()
-    
-    // Initialize if not already done
-    if (!storesStore.currentStoreId && storesStore.stores.length === 0) {
-      await storesStore.fetchStores()
-    }
-    
-    if (!storesStore.currentStoreId) {
-      await storesStore.initializeCurrentStore()
-    }
-    
-    return storesStore.currentStoreId
+  // For super admin (or any non-staff: admin, etc.), get from stores store
+  const { useStoresStore } = await import('~/stores/stores')
+  const storesStore = useStoresStore()
+
+  if (!storesStore.currentStoreId && storesStore.stores.length === 0) {
+    await storesStore.fetchStores()
   }
 
-  return null
+  if (!storesStore.currentStoreId) {
+    await storesStore.initializeCurrentStore()
+  }
+
+  return storesStore.currentStoreId
 }
