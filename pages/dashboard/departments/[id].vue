@@ -20,49 +20,6 @@
       </div>
     </div>
 
-    <div v-if="isLoadingDepartment" class="grid grid-cols-3 gap-3 lg:hidden mb-6">
-      <div v-for="i in 3" :key="i" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
-        <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-2 animate-pulse"></div>
-        <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 animate-pulse"></div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-3 lg:hidden mb-4">
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total staff</p>
-            <p class="mt-1 text-base font-bold text-gray-900 dark:text-gray-100">{{ staff.length }}</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <UsersIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" />
-          </div>
-        </div>
-      </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Managers</p>
-            <p class="mt-1 text-base font-bold text-gray-900 dark:text-gray-100">{{ totalManagers }}</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <UserCircleIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
-      </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Dept type</p>
-            <p class="mt-1 text-base font-bold text-gray-900 dark:text-gray-100 truncate">{{ department?.departmentType || '—' }}</p>
-          </div>
-          <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700/60 flex items-center justify-center">
-            <BuildingOfficeIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div
       :class="[
         'transition-all duration-300 mt-6 sm:mt-8',
@@ -232,9 +189,9 @@
                   <button
                     @click="handleToggleStaffRole(member)"
                     class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex-shrink-0"
-                    :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
+                    :title="`Change role to ${getNextRoleLabel(member.role)}`"
                   >
-                    <ArrowPathIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <UserGroupIcon class="w-3.5 h-3.5 flex-shrink-0" />
                   </button>
                   <button
                     @click="handleEditStaff(member)"
@@ -268,9 +225,9 @@
                     <button
                       @click="handleToggleStaffRole(member); openStaffMenuId = null"
                       class="w-full px-3 py-2.5 flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                      :title="member.role === 'manager' ? 'Change to Staff' : 'Change to Manager'"
+                      :title="`Change role to ${getNextRoleLabel(member.role)}`"
                     >
-                      <ArrowPathIcon class="w-5 h-5" />
+                      <UserGroupIcon class="w-5 h-5" />
                     </button>
                     <button
                       @click="handleEditStaff(member); openStaffMenuId = null"
@@ -396,11 +353,11 @@ import {
   BuildingOfficeIcon,
   UsersIcon,
   UserCircleIcon,
+  UserGroupIcon,
   CheckCircleIcon,
   ClockIcon,
   PencilSquareIcon,
   TrashIcon,
-  ArrowPathIcon,
   ArrowsPointingOutIcon,
   XMarkIcon,
   EllipsisVerticalIcon,
@@ -691,30 +648,39 @@ const handleEditStaff = (staffMember: Staff) => {
   showStaffModal.value = true
 }
 
+// Cycle through roles: Intern → Staff → Manager → Intern
+const ROLE_ORDER: ('intern' | 'staff' | 'manager')[] = ['intern', 'staff', 'manager']
+function getNextRole(current: 'intern' | 'staff' | 'manager'): 'intern' | 'staff' | 'manager' {
+  const idx = ROLE_ORDER.indexOf(current)
+  const nextIdx = idx < 0 ? 1 : (idx + 1) % ROLE_ORDER.length
+  return ROLE_ORDER[nextIdx]!
+}
+function getNextRoleLabel(current: 'intern' | 'staff' | 'manager'): string {
+  const next = getNextRole(current)
+  return next.charAt(0).toUpperCase() + next.slice(1)
+}
+
 const handleToggleStaffRole = async (staffMember: Staff) => {
   const { useToast } = await import('~/composables/useToast')
   const toast = useToast()
   
-  const newRole = staffMember.role === 'manager' ? 'staff' : 'manager'
-  const roleLabel = newRole === 'manager' ? 'Manager' : 'Staff'
+  const newRole = getNextRole(staffMember.role)
+  const roleLabel = getNextRoleLabel(staffMember.role)
   
   // Optimistically update the UI
   const staffIndex = staff.value.findIndex(s => s.id === staffMember.id)
   let originalRole: 'manager' | 'staff' | 'intern' | null = null
   
   if (staffIndex > -1 && staff.value[staffIndex]) {
-    // Store original role for potential revert
     originalRole = staff.value[staffIndex].role
-    // Update the role in the local array directly
-    staff.value[staffIndex].role = newRole as 'manager' | 'staff' | 'intern'
+    staff.value[staffIndex].role = newRole
   }
   
   try {
     await staffStore.updateStaff(staffMember.id, {
-      role: newRole as 'manager' | 'staff' | 'intern',
+      role: newRole,
     })
     
-    // Update department manager field if needed
     if (department.value) {
       const manager = staff.value.find(m => m.role === 'manager')
       if (manager) {
@@ -724,21 +690,16 @@ const handleToggleStaffRole = async (staffMember: Staff) => {
       }
     }
     
-    // Refresh from store to ensure consistency (non-blocking)
     staffStore.fetchStaffByDepartment(departmentId.value).then(() => {
       staff.value = staffStore.getStaffByDepartment(departmentId.value)
-      // Also refresh department to sync manager field
       departmentsStore.fetchDepartment(departmentId.value).then(() => {
         const updatedDept = departmentsStore.getDepartmentById(departmentId.value)
-        if (updatedDept) {
-          department.value = updatedDept
-        }
+        if (updatedDept) department.value = updatedDept
       }).catch(console.error)
     }).catch(console.error)
     
-    toast.success(`${staffMember.firstName} ${staffMember.lastName} role changed to ${roleLabel}`)
+    toast.success(`${staffMember.firstName} ${staffMember.lastName} set to ${roleLabel}`)
   } catch (error: any) {
-    // Revert optimistic update on error
     if (staffIndex > -1 && originalRole !== null && staff.value[staffIndex]) {
       staff.value[staffIndex].role = originalRole
     }

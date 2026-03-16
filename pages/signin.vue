@@ -218,6 +218,12 @@ const handleSignIn = async () => {
         storeCredentials(form.value.email, form.value.password)
       }
       
+      // Staff must change their temporary password before using the app
+      if (userData.role === 'staff' && userData.mustChangePassword) {
+        await navigateTo('/dashboard/change-password')
+        return
+      }
+      
       // Redirect based on onboarding status
       if (!userData.hasCompletedOnboarding) {
         await navigateTo('/dashboard/onboarding')

@@ -1482,6 +1482,11 @@ onMounted(async () => {
           console.error('[Dashboard] Error fetching user data:', err)
         }
       }
+      // Staff with temporary password must change it before using the app
+      const ud = userStore.userData
+      if (ud?.role === 'staff' && ud.mustChangePassword && route.path !== '/dashboard/change-password') {
+        await navigateTo('/dashboard/change-password')
+      }
     }
   }
   

@@ -185,7 +185,7 @@ export async function getQueryUserId(): Promise<string | null> {
             if (fetchedStaff?.createdBy) {
               userId = fetchedStaff.createdBy
               console.log('[useFirestorePaths] Staff fetched and found, using superadmin UID:', userId)
-              (staffStore as any).__fetchingStaffMember = false
+              ;(staffStore as any).__fetchingStaffMember = false
               return userId
             }
             (staffStore as any).__fetchingStaffMember = false

@@ -18,6 +18,7 @@ export interface Staff {
   salary?: number
   status: 'active' | 'inactive' | 'on_leave'
   authUid?: string // Firebase Auth UID
+  mustChangePassword?: boolean // When true, staff must set a new password on next login
   createdAt: any
   updatedAt: any
   createdBy: string

@@ -43,6 +43,7 @@ export interface UserData {
   preferences?: UserPreferences
   hasCompletedOnboarding: boolean
   hasCompletedTutorial: boolean
+  mustChangePassword?: boolean // Staff: must change password on next login
   twoFactorEnabled?: boolean
   twoFactorMethod?: 'totp' | 'phone' | null
   twoFactorSecret?: string | null

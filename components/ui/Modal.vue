@@ -1,36 +1,28 @@
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition ease-out duration-300"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition ease-in duration-200"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+    <div
+      v-if="modelValue"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      @click.self="handleBackdropClick"
     >
+      <!-- Backdrop: no transition so it doesn't "pop" in before the form -->
       <div
-        v-if="modelValue"
-        class="fixed inset-0 z-50 overflow-y-auto"
-        @click.self="handleBackdropClick"
-      >
-        <!-- Backdrop -->
-        <div
-          class="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/75 backdrop-blur-sm"
-          @click="handleBackdropClick"
-        ></div>
+        class="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/75 backdrop-blur-sm"
+        @click="handleBackdropClick"
+      ></div>
 
-        <!-- Modal Container -->
-        <div class="flex min-h-full items-center justify-center p-2 sm:p-3 md:p-4">
-          <Transition
-            enter-active-class="transition ease-out duration-300"
-            enter-from-class="opacity-0 scale-95 translate-y-4"
-            enter-to-class="opacity-100 scale-100 translate-y-0"
-            leave-active-class="transition ease-in duration-200"
-            leave-from-class="opacity-100 scale-100 translate-y-0"
-            leave-to-class="opacity-0 scale-95 translate-y-4"
-          >
-            <div
-              v-if="modelValue"
+      <!-- Modal container + content with transition only on the dialog -->
+      <div class="flex min-h-full items-center justify-center p-2 sm:p-3 md:p-4">
+        <Transition
+          enter-active-class="transition ease-out duration-200"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition ease-in duration-150"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+        >
+          <div
+            v-if="modelValue"
               :class="[
                 'relative w-full bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-xl transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
                 sizeClasses
@@ -80,7 +72,6 @@
           </Transition>
         </div>
       </div>
-    </Transition>
   </Teleport>
 </template>
 

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, collectionGroup } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -392,6 +392,7 @@ export const useStaffStore = defineStore('staff', {
         ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
         status: staffData.status === 'inactive' || staffData.status === 'on_leave' ? staffData.status : 'active',
         authUid: staffAuthUid,
+        mustChangePassword: true, // Staff must set a new password on first login
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         createdBy: superAdminUid,
@@ -413,6 +414,7 @@ export const useStaffStore = defineStore('staff', {
         ...staffFields,
         storeId,
         authUid: staffAuthUid,
+        mustChangePassword: true,
         createdAt: now,
         updatedAt: now,
         createdBy: superAdminUid,
@@ -430,6 +432,23 @@ export const useStaffStore = defineStore('staff', {
       }
 
       return { staffId, temporaryPassword: password }
+    },
+
+    // Clear mustChangePassword for the currently signed-in staff (after they set a new password)
+    async clearMustChangePassword() {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+      const uid = authStore.currentUser.uid
+      const staffCollectionGroup = collectionGroup(db, 'staff')
+      const q = query(staffCollectionGroup, where('authUid', '==', uid))
+      const snapshot = await getDocs(q)
+      if (snapshot.empty || !snapshot.docs[0]) throw new Error('Staff document not found')
+      const staffRef = snapshot.docs[0].ref
+      await updateDoc(staffRef, { mustChangePassword: false, updatedAt: serverTimestamp() })
+      const idx = this.staff.findIndex(s => s.authUid === uid)
+      if (idx !== -1) this.staff[idx] = { ...this.staff[idx]!, mustChangePassword: false }
     },
 
     // Update a staff member
@@ -777,6 +796,7 @@ export const useStaffStore = defineStore('staff', {
                   salary: staffData.salary,
                   status: staffData.status || 'active',
                   authUid: staffData.authUid,
+                  mustChangePassword: staffData.mustChangePassword ?? false,
                   createdAt: staffData.createdAt,
                   updatedAt: staffData.updatedAt,
                   createdBy: staffData.createdBy || superadminUserId,

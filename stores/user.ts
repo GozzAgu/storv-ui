@@ -89,6 +89,7 @@ export const useUserStore = defineStore('user', {
                 subscription: 'storvv_micro',
                 hasCompletedOnboarding: true,
                 hasCompletedTutorial: false,
+                mustChangePassword: !!(cachedStaff as { mustChangePassword?: boolean }).mustChangePassword,
                 createdAt: cachedStaff.createdAt || null,
                 updatedAt: cachedStaff.updatedAt || null,
               }
@@ -135,6 +136,7 @@ export const useUserStore = defineStore('user', {
                   subscription: 'storvv_micro',
                   hasCompletedOnboarding: true,
                   hasCompletedTutorial: false,
+                  mustChangePassword: !!(staffMember as { mustChangePassword?: boolean }).mustChangePassword,
                   createdAt: staffMember.createdAt || null,
                   updatedAt: staffMember.updatedAt || null,
                 }

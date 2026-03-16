@@ -3,7 +3,7 @@
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
-    :subtitle="isEdit ? 'Update staff details.' : 'Add a staff member with sign-in. Enter a password for them to use; share it manually.'"
+    :subtitle="isEdit ? 'Update staff details.' : 'Add a staff member with sign-in. A random password is generated; copy it to share with them (no one else sees it).'"
     size="lg"
   >
     <div class="space-y-4">
@@ -83,19 +83,18 @@
           />
         </div>
 
-        <div v-if="!isEdit">
-          <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
-            Password <span class="text-red-500">*</span>
-          </label>
-          <input
-            v-model="formData.password"
-            type="password"
-            required
-            autocomplete="new-password"
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
-            placeholder="Password for staff sign-in"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Share this with the staff member so they can sign in.</p>
+        <div v-if="!isEdit" class="md:col-span-2 flex items-center gap-3">
+          <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">
+            A random password will be generated. You'll see it after the account is created so you can copy and share it.
+          </p>
+          <button
+            type="button"
+            @click="regeneratePassword"
+            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
+            title="Generate new password"
+          >
+            <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
+          </button>
         </div>
 
         <div>
@@ -205,7 +204,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
-import { CheckCircleIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
+import { CheckCircleIcon, ClipboardDocumentIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'
@@ -231,7 +230,6 @@ const formData = ref({
   firstName: '',
   lastName: '',
   email: '',
-  password: '',
   phone: '',
   position: '',
   role: 'staff' as 'manager' | 'staff' | 'intern',
@@ -239,6 +237,33 @@ const formData = ref({
   salary: undefined as number | undefined,
   status: 'active' as 'active' | 'inactive' | 'on_leave',
 })
+
+// Random password for new staff (generated, not typed – regenerate icon keeps it private)
+const generatedPassword = ref('')
+function generateRandomPassword(length = 14): string {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+  const lower = 'abcdefghjkmnpqrstuvwxyz'
+  const digits = '23456789'
+  const symbols = '!@#$%&*'
+  const all = upper + lower + digits + symbols
+  const getRandom = (str: string) => str[Math.floor(Math.random() * str.length)]!
+  let out = getRandom(upper) + getRandom(lower) + getRandom(digits) + getRandom(symbols)
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const rest = new Uint8Array(length - 4)
+    crypto.getRandomValues(rest)
+    for (let i = 0; i < rest.length; i++) out += all[rest[i]! % all.length]
+  } else {
+    for (let i = 4; i < length; i++) out += all[Math.floor(Math.random() * all.length)]
+  }
+  return out
+    .split('')
+    .sort(() => (Math.random() > 0.5 ? 1 : -1))
+    .join('')
+}
+
+function regeneratePassword() {
+  generatedPassword.value = generateRandomPassword()
+}
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
@@ -257,7 +282,7 @@ const isFormValid = computed(() => {
     formData.value.hireDate
   )
   if (isEdit.value) return base
-  return base && !!formData.value.password?.trim()
+  return base && !!generatedPassword.value
 })
 
 const resetForm = () => {
@@ -265,7 +290,6 @@ const resetForm = () => {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     phone: '',
     position: '',
     role: 'staff',
@@ -273,6 +297,7 @@ const resetForm = () => {
     salary: undefined,
     status: 'active',
   }
+  generatedPassword.value = generateRandomPassword()
   errorMessage.value = ''
   showTemporaryPassword.value = false
   temporaryPasswordToShow.value = ''
@@ -307,7 +332,6 @@ watch(
           firstName: props.staff.firstName || '',
           lastName: props.staff.lastName || '',
           email: props.staff.email || '',
-          password: '',
           phone: props.staff.phone || '',
           position: props.staff.position || '',
           role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
@@ -315,6 +339,8 @@ watch(
           salary: props.staff.salary,
           status: (props.staff.status as 'active' | 'inactive' | 'on_leave') || 'active',
         }
+      } else {
+        generatedPassword.value = generateRandomPassword()
       }
     } else {
       resetForm()
@@ -355,7 +381,7 @@ const handleSubmit = async () => {
         firstName: formData.value.firstName,
         lastName: formData.value.lastName,
         email: formData.value.email,
-        password: formData.value.password,
+        password: generatedPassword.value,
         phone: formData.value.phone || undefined,
         position: formData.value.position,
         role: formData.value.role,
