@@ -119,6 +119,14 @@ export function getNotificationDocument(db: Firestore, userId: string, storeId: 
 }
 
 /**
+ * Get activity logs collection path: users/{userId}/stores/{storeId}/activityLogs
+ * Used for security auditing (who changed what in inventory, etc.)
+ */
+export function getActivityLogsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'activityLogs')
+}
+
+/**
  * Helper to get userId for queries (superadmin's UID)
  * For staff, returns their superadmin's UID from staff document
  */

@@ -14,6 +14,7 @@ export type SubscriptionFeature =
   | 'returns'
   | 'customers'
   | 'analytics'
+  | 'activity_logs'
   | 'departments'
   | 'multi_store_sync'
   | 'settings'
@@ -45,6 +46,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'returns',
     'customers',
     'analytics',
+    'activity_logs',
     'departments',
     'settings',
     'profile',
@@ -57,6 +59,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'returns',
     'customers',
     'analytics',
+    'activity_logs',
     'departments',
     'multi_store_sync',
     'settings',

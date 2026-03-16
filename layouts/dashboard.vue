@@ -506,6 +506,7 @@ import {
   ArrowRightIcon,
   ChartBarIcon,
   ArrowsRightLeftIcon,
+  ShieldCheckIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
@@ -600,12 +601,14 @@ const navigation: Array<{
   href: string
   icon: any
   requiresSuperAdmin?: boolean
+  requiresManagerOrSuperAdmin?: boolean
   subscriptionFeature?: SubscriptionFeature
 }> = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, subscriptionFeature: 'dashboard' },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, subscriptionFeature: 'inventory' },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, subscriptionFeature: 'receipts' },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, subscriptionFeature: 'analytics' },
+  { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
   { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, subscriptionFeature: 'settings' },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, subscriptionFeature: 'profile' },
@@ -613,8 +616,11 @@ const navigation: Array<{
 
 // Filter navigation based on user role and subscription plan
 const filteredNavigation = computed(() => {
+  const isManager = userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
+  const canSeeManagerOnlyFeatures = userStore.isSuperAdmin || isManager
   return navigation.filter(item => {
     if (item.requiresSuperAdmin && !userStore.isSuperAdmin) return false
+    if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
     if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature)) return false
     return true
   })

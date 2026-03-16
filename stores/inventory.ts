@@ -6,6 +6,7 @@ import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventoryItemsCollection, getInventoryItemDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 
 export interface TemplateField {
   id: string
@@ -476,6 +477,17 @@ export const useInventoryStore = defineStore('inventory', {
         }
         this.folders.unshift(folderForState)
 
+        const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'created',
+          entityType: 'folder',
+          entityId: newFolderRef.id,
+          entityName: folderData.name,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameForFolder,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
         return newFolderRef.id
       } catch (error: any) {
         console.error('Error creating folder:', error)
@@ -540,6 +552,18 @@ export const useInventoryStore = defineStore('inventory', {
             updatedAt: new Date(),
           } as InventoryFolder
         }
+
+        const folderName = (updates as { name?: string }).name ?? folder?.name ?? folderId
+        const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'folder',
+          entityId: folderId,
+          entityName: folderName,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameForFolder,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error updating folder:', error)
         throw new Error(error.message || 'Failed to update folder')
@@ -610,10 +634,22 @@ export const useInventoryStore = defineStore('inventory', {
         await deleteDoc(folderRef)
 
         // Remove from local state
+        const folderName = folder?.name ?? folderId
         const index = this.folders.findIndex(f => f.id === folderId)
         if (index > -1) {
           this.folders.splice(index, 1)
         }
+
+        const userDisplayNameForFolder = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'deleted',
+          entityType: 'folder',
+          entityId: folderId,
+          entityName: folderName,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameForFolder,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error deleting folder:', error)
         throw new Error(error.message || 'Failed to delete folder')
@@ -980,18 +1016,21 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to create items')
       }
 
-      // Check permissions - only super admins can create items (all staff have view-only)
+      // Check permissions - super admins and managers can create items; other staff view-only
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can create inventory items
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can add items to inventory. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can add items to inventory.')
+        }
       }
 
-      const createdByUid = authStore.currentUser.uid
+      // Path and createdBy: use store owner UID (getQueryUserId so managers write to super admin's store)
+      const createdByUid = await getQueryUserId() ?? authStore.currentUser.uid
 
       // Get folder to get its storeId
       const folder = this.getFolderById(folderId)
@@ -1075,6 +1114,21 @@ export const useInventoryStore = defineStore('inventory', {
           this.folders[folderIndex].itemCount = (this.folders[folderIndex].itemCount || 0) + 1
         }
 
+        const itemName = (itemData as { name?: string; brand?: string; model?: string }).name
+          || (itemData as { name?: string; brand?: string; model?: string }).brand
+          || (itemData as { name?: string; brand?: string; model?: string }).model
+          || 'Item'
+        const userDisplayNameForItem = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'created',
+          entityType: 'item',
+          entityId: newItemRef.id,
+          entityName: String(itemName),
+          storeId,
+          userId: createdByUid,
+          userDisplayName: userDisplayNameForItem,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
         return newItemRef.id
       } catch (error: any) {
         console.error('Error creating item:', error)
@@ -1101,10 +1155,15 @@ export const useInventoryStore = defineStore('inventory', {
       }
       
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can add items to inventory. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can add items to inventory.')
+        }
       }
 
-      const createdByUid = authStore.currentUser.uid
+      // Path and createdBy: use store owner UID (getQueryUserId so managers write to super admin's store)
+      const createdByUid = await getQueryUserId() ?? authStore.currentUser.uid
       const folder = this.getFolderById(folderId)
       if (!folder) {
         throw new Error('Folder not found')
@@ -1200,6 +1259,17 @@ export const useInventoryStore = defineStore('inventory', {
           this.folders[folderIndex].itemCount = (this.folders[folderIndex].itemCount || 0) + itemsData.length
         }
 
+        const userDisplayNameForBatch = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'created',
+          entityType: 'items_batch',
+          entityId: folderId,
+          entityName: `${itemsData.length} items`,
+          storeId,
+          userId: createdByUid,
+          userDisplayName: userDisplayNameForBatch,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
         return createdItems.map(item => item.id)
       } catch (error: any) {
         console.error('Error creating items batch:', error)
@@ -1219,20 +1289,27 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to update items')
       }
 
-      // Check permissions - only super admins can update (all staff have view-only)
+      // Check permissions - super admins and managers can update; other staff view-only
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can update inventory items
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can update items in inventory. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can update items in inventory.')
+        }
       }
 
-      // Get userId and storeId for hierarchical path
-      const userId = authStore.currentUser.uid
-      const storeId = await getCurrentStoreId()
+      // Path userId: super admin's UID (for managers we use getQueryUserId so we hit the store's collection)
+      const userId = await getQueryUserId() ?? authStore.currentUser.uid
+      const folder = this.getFolderById(folderId)
+      const existingItem = this.items[folderId]?.find(item => item.id === itemId)
+      let storeId = existingItem?.storeId ?? folder?.storeId
+      if (!storeId) {
+        storeId = await getCurrentStoreId() ?? ''
+      }
       if (!storeId) {
         throw new Error('No store selected')
       }
@@ -1255,16 +1332,30 @@ export const useInventoryStore = defineStore('inventory', {
         })
 
         // Update local state
+        let itemName: string = itemId
         if (this.items[folderId]) {
           const index = this.items[folderId].findIndex(item => item.id === itemId)
           if (index > -1) {
+            const existing = this.items[folderId][index]
+            itemName = (updates as { name?: string }).name ?? (updates as { brand?: string }).brand ?? existing?.name ?? existing?.brand ?? existing?.model ?? itemId
             this.items[folderId][index] = {
-              ...this.items[folderId][index],
+              ...existing,
               ...updates,
               updatedAt: new Date(),
             } as InventoryItem
           }
         }
+        const finalItemName = itemName
+        const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'item',
+          entityId: itemId,
+          entityName: String(finalItemName),
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error updating item:', error)
         throw new Error(error.message || 'Failed to update item')
@@ -1299,20 +1390,28 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to delete items')
       }
 
-      // Check permissions - only super admins can delete (all staff have view-only)
+      // Check permissions - super admins and managers can delete; other staff view-only
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can delete inventory items
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can delete items from inventory. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can delete items from inventory.')
+        }
       }
 
-      // Get userId and storeId for hierarchical path
-      const userId = authStore.currentUser.uid
-      const storeId = await getCurrentStoreId()
+      // Path userId: super admin's UID (for managers we use getQueryUserId so we hit the store's collection)
+      const userId = await getQueryUserId() ?? authStore.currentUser.uid
+      const folder = this.getFolderById(folderId)
+      const existingItem = this.items[folderId]?.find(item => item.id === itemId)
+      const itemName = existingItem?.name ?? existingItem?.brand ?? existingItem?.model ?? itemId
+      let storeId = existingItem?.storeId ?? folder?.storeId
+      if (!storeId) {
+        storeId = await getCurrentStoreId() ?? ''
+      }
       if (!storeId) {
         throw new Error('No store selected')
       }
@@ -1332,6 +1431,17 @@ export const useInventoryStore = defineStore('inventory', {
 
         // Update folder item count
         await this.updateItemCount(folderId)
+
+        const userDisplayNameForDelete = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'deleted',
+          entityType: 'item',
+          entityId: itemId,
+          entityName: String(itemName),
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameForDelete,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error deleting item:', error)
         throw new Error(error.message || 'Failed to delete item')
@@ -1619,15 +1729,17 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - only super admins can apply discounts (all staff have view-only)
+      // Check permissions - super admins and managers can apply discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can apply discounts
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can apply discounts. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can apply discounts.')
+        }
       }
 
       try {
@@ -1672,8 +1784,8 @@ export const useInventoryStore = defineStore('inventory', {
           discountedPrice = originalPrice - discountAmount
         }
 
-        // Get userId and storeId for hierarchical path
-        const userId = authStore.currentUser.uid
+        // Path userId: store owner (getQueryUserId for managers)
+        const userId = await getQueryUserId() ?? authStore.currentUser.uid
         const storeId = await getCurrentStoreId()
         if (!storeId) {
           throw new Error('No store selected')
@@ -1724,15 +1836,17 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to apply discounts')
       }
 
-      // Check permissions - only super admins can apply discounts (all staff have view-only)
+      // Check permissions - super admins and managers can apply discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can apply discounts
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can apply discounts. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can apply discounts.')
+        }
       }
 
       try {
@@ -1779,8 +1893,8 @@ export const useInventoryStore = defineStore('inventory', {
           })
         }
 
-        // Get userId and storeId for hierarchical path
-        const userId = authStore.currentUser.uid
+        // Path userId: store owner (getQueryUserId for managers)
+        const userId = await getQueryUserId() ?? authStore.currentUser.uid
         const storeId = await getCurrentStoreId()
         if (!storeId) {
           throw new Error('No store selected')
@@ -1832,15 +1946,17 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - only super admins can remove discounts (all staff have view-only)
+      // Check permissions - super admins and managers can remove discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can remove discounts
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can remove discounts. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can remove discounts.')
+        }
       }
 
       try {
@@ -1857,8 +1973,8 @@ export const useInventoryStore = defineStore('inventory', {
           }
         }
 
-        // Get userId and storeId for hierarchical path
-        const userId = authStore.currentUser.uid
+        // Path userId: store owner (getQueryUserId for managers)
+        const userId = await getQueryUserId() ?? authStore.currentUser.uid
         const storeId = await getCurrentStoreId()
         if (!storeId) {
           throw new Error('No store selected')
@@ -1900,19 +2016,21 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated to remove discounts')
       }
 
-      // Check permissions - only super admins can remove discounts (all staff have view-only)
+      // Check permissions - super admins and managers can remove discounts
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Only super admins can remove discounts
       if (userStore.userData?.role === 'staff') {
-        throw new Error('Only super admins can remove discounts. Staff have view-only access.')
+        const staffStore = useStaffStore()
+        const staffMember = await staffStore.fetchCurrentStaffMember()
+        if (staffMember?.role !== 'manager') {
+          throw new Error('Only super admins and managers can remove discounts.')
+        }
       }
 
-      // Get userId and storeId for hierarchical path
-      const userId = authStore.currentUser.uid
+      // Path userId: store owner (getQueryUserId for managers)
+      const userId = await getQueryUserId() ?? authStore.currentUser.uid
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')

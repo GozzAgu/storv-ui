@@ -2140,17 +2140,20 @@ const handleSaveItem = async () => {
 
   try {
     if (editingItem.value) {
-      // Update existing item
+      // Capture id, folder, and form snapshot before closing modal (handleCancelItem clears editingItem and itemForm)
+      const itemId = editingItem.value.id
+      const currentFolderId = folderId.value
+      const updates = { ...itemForm }
       // Close modal immediately for better UX
       handleCancelItem()
       toast.success('Updating product...')
       
       // CRITICAL: Wait for item update to complete (ensures data is saved to Firestore)
-      await inventoryStore.updateItem(folderId.value, editingItem.value.id, itemForm)
+      await inventoryStore.updateItem(currentFolderId, itemId, updates)
       
       // Refresh items list in background (non-blocking) - only for UI sync
       // Item is already updated in local state, so this is just to ensure consistency
-      inventoryStore.fetchItems(folderId.value).catch((err) => {
+      inventoryStore.fetchItems(currentFolderId).catch((err) => {
         console.warn('Background items refresh failed (non-critical):', err)
         // Item is already updated in local state, so this is just a sync issue
       })
