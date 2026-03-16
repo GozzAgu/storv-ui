@@ -250,10 +250,11 @@ service cloud.firestore {
                           resource.data.createdBy == request.auth.uid ||
                           (request.auth.uid != userId && request.resource.data.createdBy == userId));
           
-          // Allow delete if user owns the item OR if superadmin owns the store
+          // Allow delete if user owns the item, superadmin owns the store, or staff (e.g. manager) in store
           allow delete: if isAuthenticated() && 
                          (resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid);
+                          userId == request.auth.uid ||
+                          request.auth.uid != userId);
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
@@ -358,6 +359,18 @@ service cloud.firestore {
           
           // Allow delete if user is the super admin (userId in path)
           allow delete: if isAuthenticated() && userId == request.auth.uid;
+        }
+        
+        // Activity logs subcollection: users/{userId}/stores/{storeId}/activityLogs/{logId}
+        // Security audit trail (who changed what in inventory)
+        match /activityLogs/{logId} {
+          allow read: if isAuthenticated() && 
+                       (userId == request.auth.uid || 
+                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow create: if isAuthenticated() && 
+                         (userId == request.auth.uid || 
+                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow update, delete: if false;
         }
       }
     }

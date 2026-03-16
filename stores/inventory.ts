@@ -1645,6 +1645,17 @@ export const useInventoryStore = defineStore('inventory', {
             }
           })
         }
+
+        const userDisplayNameDateOut = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'items_batch',
+          entityId: folderId,
+          entityName: `${itemIds.length} item${itemIds.length !== 1 ? 's' : ''} marked as sold`,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameDateOut,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error updating dateOut:', error)
         throw new Error(error.message || 'Failed to update dateOut')
@@ -1687,8 +1698,8 @@ export const useInventoryStore = defineStore('inventory', {
         await Promise.all(batch)
 
         // Update local state
-        Object.keys(this.items).forEach(folderId => {
-          const folderItems = this.items[folderId]
+        Object.keys(this.items).forEach(fid => {
+          const folderItems = this.items[fid]
           if (folderItems) {
             itemIds.forEach(itemId => {
               const index = folderItems.findIndex(item => item.id === itemId)
@@ -1699,6 +1710,17 @@ export const useInventoryStore = defineStore('inventory', {
             })
           }
         })
+
+        const userDisplayNameReturn = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'items_batch',
+          entityId: storeId,
+          entityName: `${itemIds.length} item${itemIds.length !== 1 ? 's' : ''} returned to stock`,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameReturn,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error returning items to stock:', error)
         throw new Error(error.message || 'Failed to return items to stock')
@@ -1811,6 +1833,18 @@ export const useInventoryStore = defineStore('inventory', {
           folderItems[index].discountedPrice = Math.round(discountedPrice * 100) / 100
           folderItems[index].updatedAt = new Date()
         }
+
+        const itemNameForLog = item.name ?? item.brand ?? item.model ?? itemId
+        const userDisplayNameDiscount = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'item',
+          entityId: itemId,
+          entityName: String(itemNameForLog),
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameDiscount,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
 
         return {
           discountPercentage,
@@ -1927,6 +1961,20 @@ export const useInventoryStore = defineStore('inventory', {
           }
         })
 
+        const storeIdBulk = await getCurrentStoreId()
+        if (storeIdBulk) {
+          const userDisplayNameBulk = await getCurrentUserDisplayName().catch(() => 'Unknown')
+          await logActivity({
+            action: 'updated',
+            entityType: 'items_batch',
+            entityId: folderId,
+            entityName: `Discount applied to ${updates.length} item${updates.length !== 1 ? 's' : ''}`,
+            storeId: storeIdBulk,
+            userId: authStore.currentUser!.uid,
+            userDisplayName: userDisplayNameBulk,
+          }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+        }
+
         return updates.length
       } catch (error: any) {
         console.error('Error applying bulk discount:', error)
@@ -1998,6 +2046,19 @@ export const useInventoryStore = defineStore('inventory', {
           delete folderItems[index].discountedPrice
           folderItems[index].updatedAt = new Date()
         }
+
+        const itemForLog = folderItems.find(i => i.id === itemId)
+        const itemNameRemove = itemForLog?.name ?? itemForLog?.brand ?? itemForLog?.model ?? itemId
+        const userDisplayNameRemove = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'item',
+          entityId: itemId,
+          entityName: String(itemNameRemove),
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameRemove,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error removing discount:', error)
         throw new Error(error.message || 'Failed to remove discount')
@@ -2061,6 +2122,17 @@ export const useInventoryStore = defineStore('inventory', {
             folderItems[index].updatedAt = new Date()
           }
         })
+
+        const userDisplayNameBulkRemove = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'items_batch',
+          entityId: folderId,
+          entityName: `Discount removed from ${itemIds.length} item${itemIds.length !== 1 ? 's' : ''}`,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameBulkRemove,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
       } catch (error: any) {
         console.error('Error removing bulk discount:', error)
         throw new Error(error.message || 'Failed to remove bulk discount')
