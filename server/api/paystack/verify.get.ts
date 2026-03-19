@@ -1,3 +1,8 @@
+import type { SubscriptionPlan } from '~/types/subscription'
+import { getAdminFirestore } from '~/server/utils/firebase-admin'
+
+const VALID_PLANS: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
+
 export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
@@ -51,15 +56,26 @@ export default defineEventHandler(async (event) => {
     }
 
     const userId = data.metadata?.userId as string | undefined
-    const planId = data.metadata?.planId as string | undefined
+    const planId = data.metadata?.planId as SubscriptionPlan | undefined
 
-    if (!userId || !planId) {
+    if (!userId || !planId || !VALID_PLANS.includes(planId)) {
       return {
         success: false,
-        message: 'Invalid transaction metadata',
+        message: 'Invalid transaction metadata or plan',
         paid: false,
       }
     }
+
+    // Persist subscription change on server (source of truth)
+    const adminDb = getAdminFirestore()
+    await adminDb.collection('users').doc(userId).set(
+      {
+        subscription: planId,
+        subscriptionUpdatedAt: new Date().toISOString(),
+        lastPaystackReference: data.reference,
+      },
+      { merge: true }
+    )
 
     return {
       success: true,

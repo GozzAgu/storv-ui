@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       appVersion: '1.0',
+      paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
       firebase: {

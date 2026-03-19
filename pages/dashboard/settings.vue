@@ -958,7 +958,7 @@ onMounted(async () => {
         `/api/paystack/verify?reference=${encodeURIComponent(refParam)}`
       )
       if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
-        await updateUserDocument(currentUser.value.uid, { subscription: verify.planId as SubscriptionPlan })
+        // Subscription is persisted server-side during verification; refresh local user data.
         await userStore.fetchUserData(currentUser.value.uid)
         toast.success(`Upgraded to ${SUBSCRIPTION_PLANS.find(p => p.id === verify.planId)?.name || 'new plan'}`)
         selectedUpgradePlan.value = ''
