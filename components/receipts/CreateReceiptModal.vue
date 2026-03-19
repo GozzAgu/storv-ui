@@ -1146,6 +1146,28 @@ const getItemField = (item: InventoryItem, fieldName: string): string => {
   return key ? String(item[key]) : ''
 }
 
+const getReceiptProductDetails = (item: InventoryItem): Record<string, string> => {
+  const candidates = [
+    ['serialNo', ['serialNo', 'serialNumber', 'serial']],
+    ['imei', ['imei', 'imei1', 'imeiNo']],
+    ['imei2', ['imei2', 'secondImei', 'imeiNo2']],
+    ['brand', ['brand']],
+    ['model', ['model']],
+    ['sku', ['sku']],
+    ['barcode', ['barcode']],
+    ['color', ['color']],
+    ['capacity', ['capacity', 'storage']],
+    ['ram', ['ram']],
+  ] as const
+
+  const details: Record<string, string> = {}
+  for (const [key, aliases] of candidates) {
+    const value = aliases.map(alias => getItemField(item, alias)).find(Boolean)
+    if (value && value.trim() !== '') details[key] = value
+  }
+  return details
+}
+
 // formatCurrency is now imported from usePreferences for currency conversion
 
 const getFolderColorClass = (color: string) => {
@@ -1229,6 +1251,11 @@ const handleCreateReceipt = async () => {
         quantity: itemQuantity,
         price: effectivePrice, // Final price after discount
         itemName: getItemDisplayName(si.item),
+        serialNo: getItemField(si.item, 'serialNo') || getItemField(si.item, 'serialNumber') || getItemField(si.item, 'serial'),
+        brand: getItemField(si.item, 'brand'),
+        model: getItemField(si.item, 'model'),
+        sku: getItemField(si.item, 'sku'),
+        productDetails: getReceiptProductDetails(si.item),
         // Include discount information if applicable
         ...(hasDiscount && {
           originalPrice: originalPrice,

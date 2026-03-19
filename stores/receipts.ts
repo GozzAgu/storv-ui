@@ -15,6 +15,11 @@ export interface ReceiptItem {
   quantity: number
   price: number // Final price after discount (if any)
   itemName: string
+  serialNo?: string
+  brand?: string
+  model?: string
+  sku?: string
+  productDetails?: Record<string, string | number | boolean>
   // Discount fields
   originalPrice?: number // Original price before discount
   discountPercentage?: number // Discount percentage applied

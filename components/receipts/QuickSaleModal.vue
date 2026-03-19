@@ -267,6 +267,36 @@ const cartTotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
 })
 
+const getReceiptProductDetails = (item: InventoryItem): Record<string, string> => {
+  const read = (...keys: string[]) => {
+    const key = keys.find(k => (item as any)[k] !== undefined && (item as any)[k] !== null && String((item as any)[k]).trim() !== '')
+    return key ? String((item as any)[key]) : ''
+  }
+  const details: Record<string, string> = {}
+  const serialNo = read('serialNo', 'serialNumber', 'serial')
+  const imei = read('imei', 'imei1', 'imeiNo')
+  const imei2 = read('imei2', 'secondImei', 'imeiNo2')
+  const brand = read('brand')
+  const model = read('model')
+  const sku = read('sku')
+  const barcode = read('barcode')
+  const color = read('color')
+  const capacity = read('capacity', 'storage')
+  const ram = read('ram')
+
+  if (serialNo) details.serialNo = serialNo
+  if (imei) details.imei = imei
+  if (imei2) details.imei2 = imei2
+  if (brand) details.brand = brand
+  if (model) details.model = model
+  if (sku) details.sku = sku
+  if (barcode) details.barcode = barcode
+  if (color) details.color = color
+  if (capacity) details.capacity = capacity
+  if (ram) details.ram = ram
+  return details
+}
+
 const toggleScanner = async () => {
   if (isScanning.value) {
     stopScanner()
@@ -434,6 +464,11 @@ const completeSale = async () => {
       quantity: ci.quantity,
       price: ci.price,
       itemName: ci.name,
+      serialNo: String((ci.item as any).serialNo || (ci.item as any).serialNumber || ''),
+      brand: String((ci.item as any).brand || ''),
+      model: String((ci.item as any).model || ''),
+      sku: String((ci.item as any).sku || ''),
+      productDetails: getReceiptProductDetails(ci.item),
     }))
     
       const itemIds = cartItems.value.map(ci => ci.id)

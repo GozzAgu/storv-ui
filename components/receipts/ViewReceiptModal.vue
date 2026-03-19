@@ -110,6 +110,18 @@
               >
                 <td class="py-2">
                   <p class="text-xs font-medium text-gray-900">{{ item.itemName }}</p>
+                  <div
+                    v-if="getProductDetailLines(item).length > 0"
+                    class="mt-0.5 space-y-0.5"
+                  >
+                    <p
+                      v-for="(line, detailIndex) in getProductDetailLines(item)"
+                      :key="`${index}-detail-${detailIndex}`"
+                      class="text-[10px] text-gray-500"
+                    >
+                      {{ line }}
+                    </p>
+                  </div>
                   <p v-if="item.hasDiscount" class="text-[10px] text-gray-500 mt-0.5">
                     {{ item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}` }}
                   </p>
@@ -385,6 +397,58 @@ const formatReceiptTime = (date: string | Date) => {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+const DETAIL_LABELS: Record<string, string> = {
+  serialNo: 'SN',
+  serialNumber: 'SN',
+  serial: 'SN',
+  imei: 'IMEI',
+  imei1: 'IMEI',
+  imeiNo: 'IMEI',
+  imei2: 'IMEI 2',
+  secondImei: 'IMEI 2',
+  imeiNo2: 'IMEI 2',
+  sku: 'SKU',
+  brand: 'Brand',
+  model: 'Model',
+  barcode: 'Barcode',
+  color: 'Color',
+  capacity: 'Capacity',
+  storage: 'Storage',
+  ram: 'RAM',
+}
+
+const DETAIL_ORDER = [
+  'serialNo', 'serialNumber', 'serial',
+  'imei', 'imei1', 'imeiNo',
+  'imei2', 'secondImei', 'imeiNo2',
+  'brand', 'model', 'sku', 'barcode', 'color', 'capacity', 'storage', 'ram',
+]
+
+function getProductDetailLines(item: any): string[] {
+  const raw: Record<string, unknown> = {
+    ...(item?.productDetails || {}),
+    serialNo: item?.serialNo,
+    brand: item?.brand,
+    model: item?.model,
+    sku: item?.sku,
+  }
+
+  const seen = new Set<string>()
+  const lines: string[] = []
+  for (const key of DETAIL_ORDER) {
+    const value = raw[key]
+    if (value === undefined || value === null) continue
+    const text = String(value).trim()
+    if (!text) continue
+    const label = DETAIL_LABELS[key] || key
+    const normalized = `${label}:${text.toLowerCase()}`
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    lines.push(`${label}: ${text}`)
+  }
+  return lines
 }
 
 /** Convert external images in the receipt to data URLs so html2canvas can draw them (avoids CORS tainting). */
