@@ -501,22 +501,14 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User must be authenticated')
       }
 
-      // Check permissions - super admins and managers can delete
+      // Check permissions - only super admins can delete
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
-      
-      // Super admins can always delete
+
       if (userStore.userData?.role !== 'superAdmin') {
-        // Staff (non-managers) cannot delete
-        if (userStore.userData?.role === 'staff') {
-          const staffStore = useStaffStore()
-          const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-          if (currentStaffMember?.role !== 'manager') {
-            throw new Error('Staff members do not have permission to delete receipts. Only managers and super admins can delete.')
-          }
-        }
+        throw new Error('Only super admins can delete receipts.')
       }
 
       // Get userId and storeId for hierarchical path
@@ -542,14 +534,9 @@ export const useReceiptsStore = defineStore('receipts', {
         const receiptData = receiptSnap.data()
         const receiptCreatedBy = receiptData.createdBy
         
-        // Super admins can delete receipts they have access to (fetched receipts)
-        // For staff/managers, only allow deletion if they created the receipt
-        if (userStore.userData?.role === 'superAdmin') {
-          // Super admins can delete any receipt (they already filter receipts by their UID when fetching)
-          // The receipt must belong to their organization (handled by fetchReceipts filtering)
-        } else if (receiptCreatedBy !== authStore.currentUser.uid) {
-          // Non-super admins can only delete receipts they created
-          throw new Error('Access denied: You can only delete receipts you created')
+        // Super admins can delete receipts they have access to
+        if (userStore.userData?.role !== 'superAdmin') {
+          throw new Error('Access denied')
         }
 
         const receipt = receiptData as Receipt

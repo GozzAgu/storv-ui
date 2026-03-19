@@ -55,14 +55,10 @@ export const usePermissions = () => {
     return isManager.value
   })
 
-  // Check if user can delete receipts - only super admins and managers
+  // Check if user can delete receipts - only super admins
   const canDeleteReceipts = computed(() => {
-    // Super admins can always delete receipts
-    if (!isStaff.value) return true
-    
-    // Managers can also delete receipts
-    // Staff and interns cannot delete receipts
-    return isManager.value
+    // Only super admins can delete receipts
+    return !isStaff.value
   })
 
   // Check if user can manage inventory items - super admins and managers can manage
