@@ -27,7 +27,7 @@
     >
       <div
         v-if="searchStore.isOpen"
-        class="fixed inset-x-2 top-16 sm:inset-x-4 sm:top-20 md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl w-full max-h-[85vh] sm:max-h-[80vh] bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-2xl z-50 flex flex-col overflow-hidden"
+        class="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+0.75rem)] max-h-[70vh] sm:inset-x-4 sm:top-20 sm:max-h-[80vh] md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl md:w-full bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-2xl z-50 flex flex-col overflow-hidden"
         @click.stop
       >
         <!-- Search Input -->

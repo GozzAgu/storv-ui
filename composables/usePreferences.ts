@@ -3,7 +3,7 @@ import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useUser } from '~/composables/useUser'
 import { useFirestore } from '~/composables/useFirestore'
-import { collection, query, where, getDocs } from 'firebase/firestore'
+import { doc, getDoc } from 'firebase/firestore'
 
 export interface UserPreferences {
   currency: string // Currency code (e.g., 'USD', 'NGN', 'EUR')
@@ -74,6 +74,18 @@ export const usePreferences = () => {
   const authStore = useAuthStore()
   const userStore = useUserStore()
 
+  // Resolve the owner user document for preferences (super admin for staff accounts).
+  const getPreferencesOwnerUserId = async (): Promise<string | null> => {
+    if (!authStore.currentUser) return null
+    try {
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const ownerId = await getQueryUserId()
+      return ownerId || authStore.currentUser.uid
+    } catch {
+      return authStore.currentUser.uid
+    }
+  }
+
   // Load base currency from localStorage
   const loadBaseCurrency = () => {
     if (import.meta.client) {
@@ -124,20 +136,33 @@ export const usePreferences = () => {
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
+      const ownerUserId = await getPreferencesOwnerUserId()
+      if (!ownerUserId) {
+        loadFromLocalStorage()
+        return
+      }
 
-      // Check if preferences exist in user document
-      if (userStore.userData && (userStore.userData as any).preferences) {
-        const firestorePrefs = (userStore.userData as any).preferences as Partial<UserPreferences>
+      // For staff/manager accounts, this points to super admin user doc.
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        loadFromLocalStorage()
+        return
+      }
+
+      const ownerSnap = await getDoc(doc(db, 'users', ownerUserId))
+      const ownerData = ownerSnap.exists() ? ownerSnap.data() as any : null
+      const firestorePrefs = (ownerData?.preferences || null) as Partial<UserPreferences> | null
+
+      if (firestorePrefs) {
         preferences.value = { ...defaultPreferences, ...firestorePrefs }
-        
+
         // Set base currency from preferences or use current currency
         if (firestorePrefs.baseCurrency) {
           baseCurrency.value = firestorePrefs.baseCurrency
         } else if (firestorePrefs.currency) {
-          // First time setting currency - use it as base
           baseCurrency.value = firestorePrefs.currency
         }
-        
+
         // Sync to localStorage
         if (import.meta.client) {
           localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences.value))
@@ -169,31 +194,9 @@ export const usePreferences = () => {
     if (!authStore.currentUser) return
 
     try {
-      // Get the correct user ID (super admin UID if staff)
-      let userId = authStore.currentUser.uid
-      
-      if (userStore.userData?.role === 'staff') {
-        const db = useFirestore().getFirestoreInstance()
-        if (db) {
-          try {
-            const staffRef = collection(db, 'staff')
-            const staffQuery = query(staffRef, where('authUid', '==', authStore.currentUser.uid))
-            const staffSnapshot = await getDocs(staffQuery)
-
-            if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-              const staffDoc = staffSnapshot.docs[0]
-              if (staffDoc) {
-                const staffData = staffDoc.data()
-                if (staffData?.createdBy) {
-                  userId = staffData.createdBy
-                }
-              }
-            }
-          } catch (error: any) {
-            console.warn('Could not fetch staff document for preferences:', error.message)
-          }
-        }
-      }
+      // Save preferences on owner user doc (super admin doc for staff/manager).
+      const userId = await getPreferencesOwnerUserId()
+      if (!userId) return
       
       // Ensure baseCurrency is included in preferences
       const prefsWithBase = {

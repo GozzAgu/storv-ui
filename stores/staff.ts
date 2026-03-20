@@ -330,16 +330,16 @@ export const useStaffStore = defineStore('staff', {
         throw new Error('Password is required (at least 6 characters)')
       }
 
-      const departmentsStore = useDepartmentsStore()
-      const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
-      if (!department || department.createdBy !== authStore.currentUser.uid) {
-        throw new Error('Department not found or access denied')
-      }
-      const storeId = department.storeId
-      if (!storeId) {
-        throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
-      }
-
+        const departmentsStore = useDepartmentsStore()
+        const department = departmentsStore.getDepartmentById(staffData.departmentId) || await departmentsStore.fetchDepartment(staffData.departmentId)
+        if (!department || department.createdBy !== authStore.currentUser.uid) {
+          throw new Error('Department not found or access denied')
+        }
+        const storeId = department.storeId
+        if (!storeId) {
+          throw new Error('Department does not have a store assigned. Please assign the department to a store before adding staff.')
+        }
+        
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
@@ -393,23 +393,23 @@ export const useStaffStore = defineStore('staff', {
         status: staffData.status === 'inactive' || staffData.status === 'on_leave' ? staffData.status : 'active',
         authUid: staffAuthUid,
         mustChangePassword: true, // Staff must set a new password on first login
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         createdBy: superAdminUid,
       }
       await setDoc(staffRef, newStaff)
 
-      await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
-      if (staffData.role === 'manager') {
-        await departmentsStore.updateDepartment(staffData.departmentId, {
-          manager: `${staffData.firstName} ${staffData.lastName}`,
+        await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
+        if (staffData.role === 'manager') {
+          await departmentsStore.updateDepartment(staffData.departmentId, {
+            manager: `${staffData.firstName} ${staffData.lastName}`,
           managerId: staffId,
-        } as Partial<import('~/composables/useDepartments').Department>)
-      }
+          } as Partial<import('~/composables/useDepartments').Department>)
+        }
 
       const now = new Date()
       const { password: _pw, ...staffFields } = staffData
-      const staffWithDept: Staff = {
+        const staffWithDept: Staff = {
         id: staffId,
         ...staffFields,
         storeId,
@@ -418,11 +418,11 @@ export const useStaffStore = defineStore('staff', {
         createdAt: now,
         updatedAt: now,
         createdBy: superAdminUid,
-        departmentName: department.name,
-      }
-      this.staff.unshift(staffWithDept)
+          departmentName: department.name,
+        }
+        this.staff.unshift(staffWithDept)
 
-      if (import.meta.client) {
+        if (import.meta.client) {
         setTimeout(() => {
           this.fetchStaffByDepartment(staffData.departmentId).catch(() => {})
           this.fetchStaff().catch(() => {})
