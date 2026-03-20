@@ -692,6 +692,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
+import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 
 interface Props {
   modelValue: boolean
@@ -1144,57 +1145,6 @@ const getItemField = (item: InventoryItem, fieldName: string): string => {
   // Try case-insensitive match
   const key = Object.keys(item).find(k => k.toLowerCase() === fieldName.toLowerCase())
   return key ? String(item[key]) : ''
-}
-
-const getReceiptProductDetails = (item: InventoryItem): Record<string, string | number | boolean> => {
-  const details: Record<string, string | number | boolean> = {}
-  const excludedKeys = new Set([
-    'id',
-    'createdAt',
-    'updatedAt',
-    'createdBy',
-    'folderId',
-    'storeId',
-    'dateIn',
-    'dateOut',
-    'allowedDepartments',
-    'customFields',
-  ])
-
-  const normalizedAliases: Array<[string, string[]]> = [
-    ['serialNo', ['serialNo', 'serialNumber', 'serial']],
-    ['imei', ['imei', 'imei1', 'imeiNo']],
-    ['imei2', ['imei2', 'secondImei', 'imeiNo2']],
-    ['brand', ['brand']],
-    ['model', ['model']],
-    ['sku', ['sku']],
-    ['barcode', ['barcode']],
-    ['color', ['color']],
-    ['capacity', ['capacity', 'storage']],
-    ['ram', ['ram']],
-  ]
-
-  for (const [normalizedKey, aliases] of normalizedAliases) {
-    const key = aliases.find((alias) => {
-      const value = (item as any)[alias]
-      return value !== undefined && value !== null && String(value).trim() !== ''
-    })
-    if (!key) continue
-    details[normalizedKey] = (item as any)[key]
-    excludedKeys.add(key)
-  }
-
-  for (const [key, value] of Object.entries(item as Record<string, unknown>)) {
-    if (excludedKeys.has(key)) continue
-    if (value === undefined || value === null) continue
-    if (Array.isArray(value)) continue
-    if (typeof value === 'object') continue
-    const text = String(value).trim()
-    if (!text) continue
-    details[key] = value as string | number | boolean
-  }
-
-  return details
 }
 
 // formatCurrency is now imported from usePreferences for currency conversion

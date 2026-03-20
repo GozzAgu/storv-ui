@@ -264,6 +264,7 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
+import { getProductDetailLines } from '~/composables/useReceiptProductDetails'
 
 interface Props {
   modelValue: boolean
@@ -397,76 +398,6 @@ const formatReceiptTime = (date: string | Date) => {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-const DETAIL_LABELS: Record<string, string> = {
-  serialNo: 'SN',
-  serialNumber: 'SN',
-  serial: 'SN',
-  imei: 'IMEI',
-  imei1: 'IMEI',
-  imeiNo: 'IMEI',
-  imei2: 'IMEI 2',
-  secondImei: 'IMEI 2',
-  imeiNo2: 'IMEI 2',
-  sku: 'SKU',
-  brand: 'Brand',
-  model: 'Model',
-  barcode: 'Barcode',
-  color: 'Color',
-  capacity: 'Capacity',
-  storage: 'Storage',
-  ram: 'RAM',
-  batteryHealth: 'Battery Health',
-  processor: 'Processor',
-  condition: 'Condition',
-  warranty: 'Warranty',
-}
-
-const DETAIL_ORDER = [
-  'serialNo', 'serialNumber', 'serial',
-  'imei', 'imei1', 'imeiNo',
-  'imei2', 'secondImei', 'imeiNo2',
-  'brand', 'model', 'sku', 'barcode', 'color', 'capacity', 'storage', 'ram',
-]
-
-function getProductDetailLines(item: any): string[] {
-  const raw: Record<string, unknown> = {
-    ...(item?.productDetails || {}),
-    serialNo: item?.serialNo,
-    brand: item?.brand,
-    model: item?.model,
-    sku: item?.sku,
-  }
-
-  const seen = new Set<string>()
-  const lines: string[] = []
-  for (const key of DETAIL_ORDER) {
-    const value = raw[key]
-    if (value === undefined || value === null) continue
-    const text = String(value).trim()
-    if (!text) continue
-    const label = DETAIL_LABELS[key] || key
-    const normalized = `${label}:${text.toLowerCase()}`
-    if (seen.has(normalized)) continue
-    seen.add(normalized)
-    lines.push(`${label}: ${text}`)
-  }
-
-  // Include additional product detail keys not covered by fixed order.
-  for (const [key, value] of Object.entries(raw)) {
-    if (DETAIL_ORDER.includes(key)) continue
-    if (value === undefined || value === null) continue
-    const text = String(value).trim()
-    if (!text) continue
-    const label = DETAIL_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())
-    const normalized = `${label}:${text.toLowerCase()}`
-    if (seen.has(normalized)) continue
-    seen.add(normalized)
-    lines.push(`${label}: ${text}`)
-  }
-
-  return lines
 }
 
 /** Convert external images in the receipt to data URLs so html2canvas can draw them (avoids CORS tainting). */

@@ -2,6 +2,7 @@ import { createError, defineEventHandler, readBody } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
+import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete'
 
 interface DeleteReceiptBody {
   ownerUserId?: string
@@ -87,17 +88,19 @@ export default defineEventHandler(async (event) => {
         totalOrders?: number
         totalSpent?: number
       }
-      const receipts = Array.isArray(customerData.receipts) ? customerData.receipts : []
-      const updatedReceipts = receipts.filter((id) => id !== receiptId)
+      const customerResult = computeCustomerAfterReceiptDelete(
+        customerData,
+        receiptId,
+        Number(receipt.total || 0)
+      )
 
-      if (updatedReceipts.length === 0) {
+      if (customerResult.deleteCustomer) {
         tx.delete(customerDoc.ref)
       } else {
-        const receiptTotal = Number(receipt.total || 0)
         tx.update(customerDoc.ref, {
-          receipts: updatedReceipts,
-          totalOrders: Math.max(0, Number(customerData.totalOrders || 1) - 1),
-          totalSpent: Math.max(0, Number(customerData.totalSpent || receiptTotal) - receiptTotal),
+          receipts: customerResult.receipts,
+          totalOrders: customerResult.totalOrders,
+          totalSpent: customerResult.totalSpent,
           updatedAt: FieldValue.serverTimestamp(),
         })
       }

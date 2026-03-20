@@ -1,13 +1,11 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-
-const VALID_PLANS: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
-const PLAN_AMOUNT_KEYS: Record<SubscriptionPlan, keyof ReturnType<typeof useRuntimeConfig>> = {
-  storvv_micro: 'paystackPlanMicroAmount',
-  storvv_medium: 'paystackPlanMediumAmount',
-  storvv_enterprise: 'paystackPlanEnterpriseAmount',
-}
-const PAYSTACK_CURRENCY = 'NGN'
+import {
+  VALID_PLANS,
+  PAYSTACK_CURRENCY,
+  getExpectedPlanAmount,
+  validatePaidAmountAndCurrency,
+} from '~/server/utils/paystack-validation'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -74,27 +72,12 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const amountKey = PLAN_AMOUNT_KEYS[planId]
-    const expectedAmount = (config as Record<string, number>)[amountKey] as number | undefined
-    if (!expectedAmount || expectedAmount <= 0) {
-      throw createError({
-        statusCode: 500,
-        message: `Invalid server plan amount config for ${planId}`,
-      })
-    }
-
-    if ((data.amount ?? 0) !== expectedAmount) {
+    const expectedAmount = getExpectedPlanAmount(planId, config as Record<string, unknown>)
+    const paymentValidity = validatePaidAmountAndCurrency(data.amount ?? 0, data.currency, expectedAmount)
+    if (!paymentValidity.valid) {
       return {
         success: false,
-        message: 'Payment amount does not match selected plan.',
-        paid: false,
-      }
-    }
-
-    if ((data.currency || '').toUpperCase() !== PAYSTACK_CURRENCY) {
-      return {
-        success: false,
-        message: 'Payment currency is invalid.',
+        message: paymentValidity.message || 'Invalid payment details.',
         paid: false,
       }
     }
