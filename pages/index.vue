@@ -73,13 +73,18 @@
             </div>
 
           <h1 class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.06]">
-            Run inventory, sales, and staff
-            <span class="text-primary-300">without the chaos.</span>
-              </h1>
+            Automate inventory and sales
+            <span class="text-primary-300">without spreadsheets.</span>
+          </h1>
 
           <p class="mt-6 text-lg text-white/80 leading-relaxed max-w-2xl">
-            Storvv is an all-in-one retail system: custom inventory folders, serial number tracking, professional receipts and returns, automatic customer history, departments and staff roles, analytics and low-stock alerts, and—on higher plans—multiple stores and stock transfers between locations.
-            </p>
+            Built for store owners and managers who need clear stock visibility fast.
+          </p>
+          <ul class="mt-4 space-y-2 text-sm text-white/85 max-w-2xl">
+            <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />Track products in real time across your operations</li>
+            <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />Update inventory automatically when sales happen</li>
+            <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />Get insights early to prevent stockouts and overstock</li>
+          </ul>
 
           <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
@@ -92,7 +97,7 @@
                 @click="scrollToSection('features')"
               class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
               >
-              See how it works
+              See it in action
               </button>
           </div>
           
@@ -103,23 +108,49 @@
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
               </div>
-              <p class="text-sm text-white/80">Trusted by retailers like you</p>
+              <p class="text-sm text-white/80">Made for real retail operations</p>
               </div>
             <div class="h-px sm:h-6 sm:w-px bg-white/15" />
             <div class="grid grid-cols-3 gap-6 max-w-md">
               <div>
-                <p class="text-sm font-semibold text-white">Minutes</p>
-                <p class="text-xs text-white/70">to get started</p>
+                <p class="text-sm font-semibold text-white">24/7</p>
+                <p class="text-xs text-white/70">stock visibility</p>
             </div>
               <div>
-                <p class="text-sm font-semibold text-white">Unlimited</p>
-                <p class="text-xs text-white/70">inventory folders</p>
+                <p class="text-sm font-semibold text-white">Auto</p>
+                <p class="text-xs text-white/70">sales-to-stock sync</p>
               </div>
               <div>
-                <p class="text-sm font-semibold text-white">Clean</p>
-                <p class="text-xs text-white/70">receipts & reports</p>
+                <p class="text-sm font-semibold text-white">Clear</p>
+                <p class="text-xs text-white/70">team workflows</p>
             </div>
           </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clarity block: who + outcomes -->
+    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up py-14 sm:py-16 bg-white border-b border-gray-100">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
+          <div class="rounded-2xl border border-gray-200 bg-gray-50/70 p-6">
+            <p class="text-[11px] uppercase tracking-wider font-semibold text-gray-500">Who Storvv is for</p>
+            <h3 class="mt-2 text-xl font-semibold text-gray-900">Retail teams that need control without complexity</h3>
+            <ul class="mt-4 space-y-2 text-sm text-gray-700">
+              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Phone & gadget stores handling serial-number devices</li>
+              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Fashion, beauty, and lifestyle stores tracking fast stock movement</li>
+              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Growing businesses managing multiple branches and staff</li>
+            </ul>
+          </div>
+          <div class="rounded-2xl border border-primary-200 bg-primary-50/50 p-6">
+            <p class="text-[11px] uppercase tracking-wider font-semibold text-primary-700">What you get</p>
+            <h3 class="mt-2 text-xl font-semibold text-gray-900">Clear business outcomes, not just feature lists</h3>
+            <ul class="mt-4 space-y-2 text-sm text-gray-700">
+              <li class="flex items-start gap-2"><ClipboardDocumentCheckIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Fewer stock mistakes with real-time inventory updates</li>
+              <li class="flex items-start gap-2"><ReceiptPercentIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Faster checkout with clean receipts, returns, and customer history</li>
+              <li class="flex items-start gap-2"><ChartBarIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Better decisions from sales trends, low-stock alerts, and reports</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -133,7 +164,7 @@
             Why <span class="text-primary-500">Storvv</span>?
           </h2>
           <p class="mt-4 text-gray-600 max-w-xl mx-auto">
-            One operations layer for inventory, sales, customers, and teams—fast, clean, and flexible as you scale.
+            One operations layer for inventory, sales, customers, and teams.
           </p>
           </div>
           
@@ -233,8 +264,8 @@
     <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up grid lg:grid-cols-2 min-h-[560px]">
       <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 lg:py-24 flex flex-col justify-center">
           <div class="max-w-xl mx-auto lg:mx-0">
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-            Getting started is simple
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+              How Storvv works
             </h2>
           <p class="mt-4 text-lg text-slate-300">
             Five steps to get your store running smoothly.
@@ -304,10 +335,10 @@
           <div>
             <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
               Everything you need, nothing you don't
-          </h2>
+            </h2>
             <p class="mt-3 text-gray-600 max-w-2xl">
-              One solution: consolidate tools, simplify workflow, reduce costs.
-          </p>
+              One system to run inventory, sales, customers, and team operations without tool sprawl.
+            </p>
         </div>
           <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium text-sm shrink-0">
             Explore features
@@ -403,6 +434,32 @@
             <p class="text-sm text-gray-600 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
               Available on Medium and Enterprise. Revenue charts, sales trends, busiest times, and exportable reports so you can make data-driven decisions.
             </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-16 sm:py-20 bg-white">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Who uses Storvv?</h2>
+          <p class="mt-3 text-gray-600 max-w-2xl mx-auto">
+            Whether you run one branch or many, Storvv helps you keep sales and stock in sync.
+          </p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="rounded-2xl border border-gray-200 bg-white p-5">
+            <h3 class="text-base font-semibold text-gray-900">Phone & gadget stores</h3>
+            <p class="mt-2 text-sm text-gray-600">Track serial numbers, IMEI, pricing changes, and swaps without manual logs.</p>
+          </div>
+          <div class="rounded-2xl border border-gray-200 bg-white p-5">
+            <h3 class="text-base font-semibold text-gray-900">Fashion & lifestyle retailers</h3>
+            <p class="mt-2 text-sm text-gray-600">Organize stock by category, monitor fast-moving items, and print clean receipts quickly.</p>
+          </div>
+          <div class="rounded-2xl border border-gray-200 bg-white p-5">
+            <h3 class="text-base font-semibold text-gray-900">Growing multi-branch teams</h3>
+            <p class="mt-2 text-sm text-gray-600">Control staff access, standardize operations, and get visibility across stores.</p>
           </div>
         </div>
       </div>
@@ -789,11 +846,11 @@
             <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
           </div>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
-            Ready to Build Your Perfect Store System?
-        </h2>
+            Ready to simplify your store operations?
+          </h2>
           <p class="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-            Start your free trial and see how Storvv adapts to your business needs
-        </p>
+            Start free, set up fast, and get full inventory and sales visibility in one place.
+          </p>
       </div>
 
         <!-- Features Grid -->
@@ -864,13 +921,21 @@
           <p class="text-lg sm:text-xl font-semibold text-white/90 mb-6">
             Experience the difference a truly flexible system makes.
           </p>
-    <button
-            @click="showContactFormModal = true"
-            class="group inline-flex items-center gap-2 bg-white text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-          >
-            Get Started Now
-            <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
-        </button>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <button
+              @click="showContactFormModal = true"
+              class="group inline-flex items-center justify-center gap-2 rounded-full bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
+            >
+              Start Free Trial
+              <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            </button>
+            <button
+              @click="scrollToSection('features')"
+              class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
+            >
+              See it in action
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -1024,6 +1089,7 @@
       @update:model-value="showContactFormModal = $event"
       size="xl"
       :show-close="true"
+      :blur-backdrop="false"
     >
       <template #header>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Contact Us</h3>

@@ -7,7 +7,10 @@
     >
       <!-- Backdrop: no transition so it doesn't "pop" in before the form -->
       <div
-        class="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/75 backdrop-blur-sm"
+        :class="[
+          'fixed inset-0 bg-gray-900/50 dark:bg-gray-900/75',
+          blurBackdrop ? 'backdrop-blur-sm' : ''
+        ]"
         @click="handleBackdropClick"
       ></div>
 
@@ -87,6 +90,7 @@ interface Props {
   showClose?: boolean
   closeOnBackdrop?: boolean
   contentPadding?: string
+  blurBackdrop?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -95,6 +99,7 @@ const props = withDefaults(defineProps<Props>(), {
   showClose: true,
   closeOnBackdrop: true,
   contentPadding: 'p-3 sm:p-4',
+  blurBackdrop: true,
 })
 
 const emit = defineEmits<{
