@@ -57,7 +57,9 @@ export function getReceiptProductDetails(item: InventoryItem): Record<string, st
       return value !== undefined && value !== null && String(value).trim() !== ''
     })
     if (!key) continue
-    details[normalizedKey] = (item as Record<string, string | number | boolean>)[key]
+    const normalizedValue = (item as Record<string, unknown>)[key]
+    if (normalizedValue === undefined) continue
+    details[normalizedKey] = normalizedValue as string | number | boolean
     excludedKeys.add(key)
   }
 
