@@ -272,48 +272,48 @@
           </p>
           <div class="mt-10 space-y-6">
             <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
-                <BuildingOfficeIcon class="w-5 h-5 text-white" />
-                </div>
+              <div class="flex-shrink-0 pt-0.5">
+                <Cog6ToothSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Set up your store</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Configure currency, timezone, payment methods, and settings to match your business.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Set your store name, currency, timezone, and receipt preferences so totals, dates, and taxes appear correctly from day one. Add payment methods your team actually uses (cash, transfer, POS) and keep business settings consistent across staff accounts.</p>
               </div>
             </div>
             <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
-                <UserGroupIcon class="w-5 h-5 text-white" />
-                </div>
+              <div class="flex-shrink-0 pt-0.5">
+                <UsersSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Departments & staff</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Create departments and assign roles with folder-level permissions.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Create departments for how you already work (shop floor, warehouse, online orders) and invite team members with the right role. Control who can view, sell, edit, or delete items using folder-level permissions so managers and staff only access what they need.</p>
               </div>
             </div>
             <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
-                <FolderIcon class="w-5 h-5 text-white" />
-                </div>
+              <div class="flex-shrink-0 pt-0.5">
+                <RectangleStackSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Custom folders and templates; bulk import from Excel or add products individually.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable.</p>
               </div>
             </div>
             <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
-                <ShoppingCartIcon class="w-5 h-5 text-white" />
-                </div>
+              <div class="flex-shrink-0 pt-0.5">
+                <ReceiptPercentSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Sales & receipts</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Professional receipts, discounts, exchanges; every sale builds your customer database.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Process sales quickly with clean, professional receipts, apply discounts when needed, and handle returns or exchanges without losing inventory accuracy. Each transaction can capture customer details automatically, helping you build a customer database as you sell.</p>
               </div>
             </div>
             <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4">
-              <div class="flex-shrink-0 w-11 h-11 rounded-xl bg-primary-400 flex items-center justify-center">
-                <ChartBarIcon class="w-5 h-5 text-white" />
-                </div>
+              <div class="flex-shrink-0 pt-0.5">
+                <PresentationChartLineSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Monitor & analyze</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Dashboards for revenue, sales patterns, and inventory health.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Use real-time dashboards to understand revenue trends, top-selling products, low-stock alerts, and overall inventory health. Spot what is moving fast, what is tying up cash, and where to restock so you can make better decisions with confidence.</p>
                 </div>
               </div>
             </div>
@@ -440,7 +440,7 @@
     </section>
 
     <!-- Use Cases -->
-    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-16 sm:py-20 bg-white">
+    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-16 sm:py-20 bg-gradient-to-b from-white to-slate-50/70">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
           <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Who uses Storvv?</h2>
@@ -449,16 +449,34 @@
           </p>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="rounded-2xl border border-gray-200 bg-white p-5">
-            <h3 class="text-base font-semibold text-gray-900">Phone & gadget stores</h3>
+          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <CubeIcon class="w-5 h-5" />
+              </div>
+              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Serial tracking</span>
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-gray-900">Phone & gadget stores</h3>
             <p class="mt-2 text-sm text-gray-600">Track serial numbers, IMEI, pricing changes, and swaps without manual logs.</p>
           </div>
-          <div class="rounded-2xl border border-gray-200 bg-white p-5">
-            <h3 class="text-base font-semibold text-gray-900">Fashion & lifestyle retailers</h3>
+          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <TagIcon class="w-5 h-5" />
+              </div>
+              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Fast checkout</span>
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-gray-900">Fashion & lifestyle retailers</h3>
             <p class="mt-2 text-sm text-gray-600">Organize stock by category, monitor fast-moving items, and print clean receipts quickly.</p>
           </div>
-          <div class="rounded-2xl border border-gray-200 bg-white p-5">
-            <h3 class="text-base font-semibold text-gray-900">Growing multi-branch teams</h3>
+          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
+            <div class="flex items-start justify-between gap-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                <UserGroupIcon class="w-5 h-5" />
+              </div>
+              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Role control</span>
+            </div>
+            <h3 class="mt-4 text-base font-semibold text-gray-900">Growing multi-branch teams</h3>
             <p class="mt-2 text-sm text-gray-600">Control staff access, standardize operations, and get visibility across stores.</p>
           </div>
         </div>
@@ -1181,6 +1199,13 @@ import {
   ChevronUpIcon,
   ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
+import {
+  Cog6ToothIcon as Cog6ToothSolidIcon,
+  UsersIcon as UsersSolidIcon,
+  RectangleStackIcon as RectangleStackSolidIcon,
+  ReceiptPercentIcon as ReceiptPercentSolidIcon,
+  PresentationChartLineIcon as PresentationChartLineSolidIcon,
+} from '@heroicons/vue/24/solid'
 
 useForceLightPage()
 
