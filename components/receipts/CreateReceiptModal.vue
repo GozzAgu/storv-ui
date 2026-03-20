@@ -692,6 +692,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
+import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 
 interface Props {
   modelValue: boolean
@@ -1144,28 +1145,6 @@ const getItemField = (item: InventoryItem, fieldName: string): string => {
   // Try case-insensitive match
   const key = Object.keys(item).find(k => k.toLowerCase() === fieldName.toLowerCase())
   return key ? String(item[key]) : ''
-}
-
-const getReceiptProductDetails = (item: InventoryItem): Record<string, string> => {
-  const candidates = [
-    ['serialNo', ['serialNo', 'serialNumber', 'serial']],
-    ['imei', ['imei', 'imei1', 'imeiNo']],
-    ['imei2', ['imei2', 'secondImei', 'imeiNo2']],
-    ['brand', ['brand']],
-    ['model', ['model']],
-    ['sku', ['sku']],
-    ['barcode', ['barcode']],
-    ['color', ['color']],
-    ['capacity', ['capacity', 'storage']],
-    ['ram', ['ram']],
-  ] as const
-
-  const details: Record<string, string> = {}
-  for (const [key, aliases] of candidates) {
-    const value = aliases.map(alias => getItemField(item, alias)).find(Boolean)
-    if (value && value.trim() !== '') details[key] = value
-  }
-  return details
 }
 
 // formatCurrency is now imported from usePreferences for currency conversion

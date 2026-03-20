@@ -1,10 +1,6 @@
 import type { SubscriptionPlan } from '~/types/subscription'
-
-const PLAN_AMOUNT_KEYS: Record<SubscriptionPlan, keyof ReturnType<typeof useRuntimeConfig>> = {
-  storvv_micro: 'paystackPlanMicroAmount',
-  storvv_medium: 'paystackPlanMediumAmount',
-  storvv_enterprise: 'paystackPlanEnterpriseAmount',
-}
+import { getAdminFirestore } from '~/server/utils/firebase-admin'
+import { getExpectedPlanAmount, PAYSTACK_CURRENCY, VALID_PLANS } from '~/server/utils/paystack-validation'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -18,8 +14,7 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const validPlans: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
-    if (!validPlans.includes(planId)) {
+    if (!VALID_PLANS.includes(planId)) {
       throw createError({
         statusCode: 400,
         message: 'Invalid planId',
@@ -35,15 +30,9 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const amountKey = PLAN_AMOUNT_KEYS[planId]
-    const amount = (config as Record<string, number>)[amountKey] as number | undefined
-    if (!amount || amount <= 0) {
-      throw createError({
-        statusCode: 400,
-        message: `Plan ${planId} has no amount configured. Set PAYSTACK_PLAN_*_AMOUNT in kobo.`,
-      })
-    }
+    const amount = getExpectedPlanAmount(planId, config as Record<string, unknown>)
 
+    const normalizedEmail = email.trim().toLowerCase()
     const reference = `storvv_${planId}_${userId}_${Date.now()}`
     const baseUrl = getRequestURL(event).origin
     const callbackUrl = `${baseUrl}/dashboard/settings?paystack_callback=1`
@@ -59,9 +48,10 @@ export default defineEventHandler(async (event) => {
         'Content-Type': 'application/json',
       },
       body: {
-        email,
+        email: normalizedEmail,
         amount,
         reference,
+        currency: PAYSTACK_CURRENCY,
         callback_url: callbackUrl,
         metadata: {
           userId,
@@ -76,6 +66,28 @@ export default defineEventHandler(async (event) => {
         message: response.message || 'Paystack could not create transaction',
       })
     }
+
+    // Persist pending checkout server-side for later verification hard checks.
+    const adminDb = getAdminFirestore()
+    await adminDb
+      .collection('users')
+      .doc(userId)
+      .collection('pendingCheckouts')
+      .doc(reference)
+      .set(
+        {
+          userId,
+          planId,
+          email: normalizedEmail,
+          amount,
+          currency: PAYSTACK_CURRENCY,
+          reference,
+          status: 'initialized',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      )
 
     return {
       success: true,

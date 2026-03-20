@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, collectionGroup } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, collectionGroup, type Firestore } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -13,6 +13,13 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
+
+const getStoreMemberDoc = (
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  memberAuthUid: string
+) => doc(db, `users/${userId}/stores/${storeId}/members/${memberAuthUid}`)
 
 export const useStaffStore = defineStore('staff', {
   state: () => ({
@@ -114,6 +121,31 @@ export const useStaffStore = defineStore('staff', {
           const dateB = b.createdAt?.toMillis?.() || b.createdAt || 0
           return dateB - dateA
         })
+
+        // Security rules now rely on members docs for store-level authorization.
+        // Backfill missing membership docs when super admin fetches staff.
+        if (authStore.currentUser.uid === userId) {
+          await Promise.allSettled(
+            allStaff
+              .filter((s) => s.authUid)
+              .map((s) =>
+                setDoc(
+                  getStoreMemberDoc(db, userId, storeId, s.authUid as string),
+                  {
+                    authUid: s.authUid,
+                    staffId: s.id,
+                    storeId,
+                    departmentId: s.departmentId,
+                    role: s.role || 'staff',
+                    status: s.status || 'active',
+                    createdBy: userId,
+                    updatedAt: serverTimestamp(),
+                  },
+                  { merge: true }
+                )
+              )
+          )
+        }
 
         const staff = allStaff
 
@@ -398,6 +430,21 @@ export const useStaffStore = defineStore('staff', {
         createdBy: superAdminUid,
       }
       await setDoc(staffRef, newStaff)
+      await setDoc(
+        getStoreMemberDoc(db, superAdminUid, storeId, staffAuthUid),
+        {
+          authUid: staffAuthUid,
+          staffId,
+          storeId,
+          departmentId: staffData.departmentId,
+          role: newStaff.role,
+          status: newStaff.status,
+          createdBy: superAdminUid,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      )
 
         await departmentsStore.updateStaffCount(staffData.departmentId, department.staffCount + 1, storeId)
         if (staffData.role === 'manager') {
@@ -525,6 +572,28 @@ export const useStaffStore = defineStore('staff', {
         })
         }
 
+        // Keep store membership index in sync for security rules.
+        const mergedRole = updates.role ?? staffMember.role
+        const mergedStatus = updates.status ?? staffMember.status
+        const mergedDepartmentId = updates.departmentId ?? staffMember.departmentId
+        if (!staffMember.authUid) {
+          throw new Error('Staff member is missing auth UID')
+        }
+        await setDoc(
+          getStoreMemberDoc(db, userId, storeId, staffMember.authUid),
+          {
+            authUid: staffMember.authUid,
+            staffId,
+            storeId,
+            departmentId: mergedDepartmentId,
+            role: mergedRole,
+            status: mergedStatus,
+            createdBy: userId,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        )
+
         // Update in local state
         const index = this.staff.findIndex(s => s.id === staffId)
         if (index > -1) {
@@ -618,6 +687,9 @@ export const useStaffStore = defineStore('staff', {
         // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
         const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
         await deleteDoc(staffRef)
+        if (staffMember.authUid) {
+          await deleteDoc(getStoreMemberDoc(db, userId, storeId, staffMember.authUid))
+        }
 
         // Update department staff count (verify department belongs to user)
         const departmentsStore = useDepartmentsStore()

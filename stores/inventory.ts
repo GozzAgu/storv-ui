@@ -930,77 +930,35 @@ export const useInventoryStore = defineStore('inventory', {
       createdByUid: string,
       userRole?: string
     ): Promise<boolean> {
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error('Firestore not initialized')
-      }
-
       // Only check if serial number, brand, and model are provided
       if (!serialNo || !brand || !model) {
         return false // No duplicate if required fields are missing
       }
 
       try {
-        const itemsRef = getInventoryItemsCollection(db, createdByUid, storeId)
-        const trimmedSerialNo = serialNo.trim()
-        const trimmedBrand = brand.trim()
-        const trimmedModel = model.trim()
-        
-        // Query for items with same serial number in the same folder
-        // We'll filter by brand and model in memory to avoid composite index requirements
-        // For staff: check all items in folder (no createdBy filter)
-        // For superadmin: check only their items
-        let q
-        try {
-          if (userRole === 'staff') {
-            q = query(
-              itemsRef,
-              where('folderId', '==', folderId),
-              where('serialNo', '==', trimmedSerialNo)
-            )
-          } else {
-            q = query(
-              itemsRef,
-              where('folderId', '==', folderId),
-              where('serialNo', '==', trimmedSerialNo),
-              where('createdBy', '==', createdByUid)
-            )
-          }
-        } catch (queryError: any) {
-          // If query fails due to missing index, try simpler query
-          if (queryError.code === 'failed-precondition' || queryError.message?.includes('index')) {
-            // Fallback: query by folderId only and filter in memory
-            if (userRole === 'staff') {
-              q = query(itemsRef, where('folderId', '==', folderId))
-            } else {
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                where('createdBy', '==', createdByUid)
-              )
-            }
-          } else {
-            throw queryError
-          }
+        const authStore = useAuthStore()
+        if (!authStore.currentUser) {
+          throw new Error('User must be authenticated for duplicate validation')
         }
-
-        const querySnapshot = await getDocs(q)
-        
-        // Filter results in memory to check for matching brand and model
-        const duplicateExists = querySnapshot.docs.some(doc => {
-          const data = doc.data()
-          return (
-            data.serialNo?.trim() === trimmedSerialNo &&
-            data.brand?.trim() === trimmedBrand &&
-            data.model?.trim() === trimmedModel
-          )
+        const token = await authStore.currentUser.getIdToken()
+        const response = await $fetch<{ success: boolean; duplicateExists: boolean }>('/api/inventory/validate-serial', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: {
+            ownerUserId: createdByUid,
+            storeId,
+            folderId,
+            serialNo: serialNo.trim(),
+            brand: brand.trim(),
+            model: model.trim(),
+            userRole,
+          },
         })
-
-        return duplicateExists
+        return !!response.duplicateExists
       } catch (error: any) {
-        // If query fails, log warning but don't block creation
-        console.warn('Error checking duplicate serial number:', error)
-        return false // Allow creation if check fails
+        // Fail closed: if validation cannot be completed, block write.
+        console.error('Error checking duplicate serial number:', error)
+        throw new Error(error?.data?.message || error.message || 'Could not validate duplicate serial number. Please try again.')
       }
     },
 

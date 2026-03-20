@@ -1,7 +1,11 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-
-const VALID_PLANS: SubscriptionPlan[] = ['storvv_micro', 'storvv_medium', 'storvv_enterprise']
+import {
+  VALID_PLANS,
+  PAYSTACK_CURRENCY,
+  getExpectedPlanAmount,
+  validatePaidAmountAndCurrency,
+} from '~/server/utils/paystack-validation'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -29,6 +33,8 @@ export default defineEventHandler(async (event) => {
       data?: {
         status: string
         reference: string
+        amount?: number
+        currency?: string
         metadata?: { userId?: string; planId?: string }
       }
       message?: string
@@ -66,22 +72,86 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // Persist subscription change on server (source of truth)
+    const expectedAmount = getExpectedPlanAmount(planId, config as Record<string, unknown>)
+    const paymentValidity = validatePaidAmountAndCurrency(data.amount ?? 0, data.currency, expectedAmount)
+    if (!paymentValidity.valid) {
+      return {
+        success: false,
+        message: paymentValidity.message || 'Invalid payment details.',
+        paid: false,
+      }
+    }
+
+    // Persist subscription change on server (source of truth) with idempotency and pending checkout validation.
     const adminDb = getAdminFirestore()
-    await adminDb.collection('users').doc(userId).set(
-      {
-        subscription: planId,
-        subscriptionUpdatedAt: new Date().toISOString(),
-        lastPaystackReference: data.reference,
-      },
-      { merge: true }
-    )
+    const pendingRef = adminDb.collection('users').doc(userId).collection('pendingCheckouts').doc(reference)
+    const userRef = adminDb.collection('users').doc(userId)
+
+    const txResult = await adminDb.runTransaction(async (tx) => {
+      const pendingSnap = await tx.get(pendingRef)
+      if (!pendingSnap.exists) {
+        throw createError({
+          statusCode: 409,
+          message: 'No matching pending checkout was found for this reference.',
+        })
+      }
+
+      const pending = pendingSnap.data() as {
+        status?: string
+        planId?: SubscriptionPlan
+        amount?: number
+        currency?: string
+        userId?: string
+      }
+
+      if (
+        pending.userId !== userId ||
+        pending.planId !== planId ||
+        pending.amount !== expectedAmount ||
+        (pending.currency || '').toUpperCase() !== PAYSTACK_CURRENCY
+      ) {
+        throw createError({
+          statusCode: 409,
+          message: 'Pending checkout does not match transaction details.',
+        })
+      }
+
+      if (pending.status === 'completed') {
+        return { alreadyProcessed: true }
+      }
+
+      tx.set(
+        userRef,
+        {
+          subscription: planId,
+          subscriptionUpdatedAt: new Date().toISOString(),
+          lastPaystackReference: data.reference,
+        },
+        { merge: true }
+      )
+
+      tx.set(
+        pendingRef,
+        {
+          status: 'completed',
+          paidAt: new Date().toISOString(),
+          verifiedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          paystackStatus: data.status,
+          paystackReference: data.reference,
+        },
+        { merge: true }
+      )
+
+      return { alreadyProcessed: false }
+    })
 
     return {
       success: true,
       paid: true,
       userId,
       planId,
+      alreadyProcessed: txResult.alreadyProcessed,
     }
   } catch (err: any) {
     if (err.statusCode) throw err

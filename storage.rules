@@ -1,16 +1,40 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function ownsStore(userId, storeId) {
+      return isAuthenticated() &&
+        userId == request.auth.uid &&
+        firestore.exists(/databases/(default)/documents/users/$(userId)/stores/$(storeId)) &&
+        firestore.get(/databases/(default)/documents/users/$(userId)/stores/$(storeId)).data.ownerId == request.auth.uid;
+    }
+
+    function hasActiveStoreMembership(userId, storeId) {
+      return isAuthenticated() &&
+        firestore.exists(/databases/(default)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function canAccessStoreAssets(userId, storeId) {
+      return ownsStore(userId, storeId) || hasActiveStoreMembership(userId, storeId);
+    }
+
     // Images: images/{userId}/profile/filename or images/{userId}/{folder}/filename
     // Authenticated users can read/write only their own images
     match /images/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null
+      allow read, write: if isAuthenticated()
         && request.auth.uid == userId;
     }
+
     // Store images (for store-scoped uploads)
-    match /stores/{storeId}/{allPaths=**} {
-      allow read, write: if request.auth != null;
+    // Path format: stores/{userId}/{storeId}/...
+    match /stores/{userId}/{storeId}/{allPaths=**} {
+      allow read, write: if canAccessStoreAssets(userId, storeId);
     }
+
     // Deny all other paths
     match /{allPaths=**} {
       allow read, write: if false;
