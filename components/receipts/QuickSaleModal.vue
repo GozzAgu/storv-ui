@@ -267,12 +267,24 @@ const cartTotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
 })
 
-const getReceiptProductDetails = (item: InventoryItem): Record<string, string> => {
+const getReceiptProductDetails = (item: InventoryItem): Record<string, string | number | boolean> => {
   const read = (...keys: string[]) => {
     const key = keys.find(k => (item as any)[k] !== undefined && (item as any)[k] !== null && String((item as any)[k]).trim() !== '')
-    return key ? String((item as any)[key]) : ''
+    return key ? (item as any)[key] : ''
   }
-  const details: Record<string, string> = {}
+  const details: Record<string, string | number | boolean> = {}
+  const excludedKeys = new Set([
+    'id',
+    'createdAt',
+    'updatedAt',
+    'createdBy',
+    'folderId',
+    'storeId',
+    'dateIn',
+    'dateOut',
+    'allowedDepartments',
+    'customFields',
+  ])
   const serialNo = read('serialNo', 'serialNumber', 'serial')
   const imei = read('imei', 'imei1', 'imeiNo')
   const imei2 = read('imei2', 'secondImei', 'imeiNo2')
@@ -294,6 +306,20 @@ const getReceiptProductDetails = (item: InventoryItem): Record<string, string> =
   if (color) details.color = color
   if (capacity) details.capacity = capacity
   if (ram) details.ram = ram
+
+  ;['serialNo', 'serialNumber', 'serial', 'imei', 'imei1', 'imeiNo', 'imei2', 'secondImei', 'imeiNo2', 'brand', 'model', 'sku', 'barcode', 'color', 'capacity', 'storage', 'ram']
+    .forEach((k) => excludedKeys.add(k))
+
+  for (const [key, value] of Object.entries(item as Record<string, unknown>)) {
+    if (excludedKeys.has(key)) continue
+    if (value === undefined || value === null) continue
+    if (Array.isArray(value)) continue
+    if (typeof value === 'object') continue
+    const text = String(value).trim()
+    if (!text) continue
+    details[key] = value as string | number | boolean
+  }
+
   return details
 }
 

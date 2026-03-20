@@ -37,23 +37,54 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    // Helper function to check if user is staff member accessing their own store
-    function isStaffMember(userId, storeId) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/$(request.resource.data.departmentId)/staff/$(request.auth.uid));
-    }
-    
     // Helper function to check if user owns the store (super admin)
     function ownsStore(userId, storeId) {
       return isAuthenticated() && 
              userId == request.auth.uid &&
              exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)) &&
-             get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)).data.ownerId == request.auth.uid;
+             (
+               !get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)).data.keys().hasAny(['ownerId']) ||
+               get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)).data.ownerId == request.auth.uid
+             );
+    }
+
+    // Membership docs are stored at:
+    // users/{userId}/stores/{storeId}/members/{memberAuthUid}
+    function hasStoreMembership(userId, storeId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid));
+    }
+
+    function isActiveStoreMember(userId, storeId) {
+      return hasStoreMembership(userId, storeId) &&
+             get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isStoreManager(userId, storeId) {
+      return isActiveStoreMember(userId, storeId) &&
+             get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'manager';
+    }
+
+    function canAccessStoreData(userId, storeId) {
+      return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
+    }
+
+    function canManageStoreData(userId, storeId) {
+      return (isAuthenticated() && userId == request.auth.uid) || isStoreManager(userId, storeId);
+    }
+
+    // Backward-compat: older docs may not include storeId yet.
+    function resourceMatchesStore(storeId) {
+      return !resource.data.keys().hasAny(['storeId']) || resource.data.storeId == storeId;
+    }
+
+    function requestMatchesStore(storeId) {
+      return !request.resource.data.keys().hasAny(['storeId']) || request.resource.data.storeId == storeId;
     }
     
     // Users collection - users can read/write their own document
     match /users/{userId} {
-      // Allow read if user is authenticated
+      // Allow read if authenticated (required for staff/superadmin profile flows)
       allow read: if isAuthenticated();
       
       // Allow create if user is creating their own document
@@ -102,10 +133,7 @@ service cloud.firestore {
         // 2. User owns the store (ownerId matches auth.uid)
         // 3. Staff member belongs to this store
         // Note: The exists() check allows staff to query stores to find where they belong
-        allow read: if isAuthenticated() && 
-                     (userId == request.auth.uid || 
-                      resource.data.ownerId == request.auth.uid || 
-                      exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+        allow read: if canAccessStoreData(userId, storeId);
         
         // Allow create if user is the super admin (userId in path) creating store in their account
         allow create: if isAuthenticated() && 
@@ -113,9 +141,15 @@ service cloud.firestore {
                        request.resource.data.ownerId == request.auth.uid;
         
         // Allow update/delete if user is the super admin (userId in path) who owns the store
-        allow update, delete: if isAuthenticated() && 
-                               userId == request.auth.uid && 
-                               resource.data.ownerId == request.auth.uid;
+        allow update, delete: if ownsStore(userId, storeId);
+
+        // Store members subcollection: users/{userId}/stores/{storeId}/members/{memberUid}
+        // This is the canonical access-control index for rule checks.
+        match /members/{memberUid} {
+          // Store owner can read/write all members. A member can read their own membership doc.
+          allow read: if ownsStore(userId, storeId) || (isAuthenticated() && request.auth.uid == memberUid);
+          allow create, update, delete: if ownsStore(userId, storeId);
+        }
         
         // Departments subcollection: users/{userId}/stores/{storeId}/departments/{departmentId}
         match /departments/{departmentId} {
@@ -189,28 +223,20 @@ service cloud.firestore {
           // 2. User created the folder (createdBy matches auth.uid)
           // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
-          allow read: if isAuthenticated() && 
-                       (userId == request.auth.uid || 
-                        resource.data.createdBy == request.auth.uid ||
-                        // Staff accessing their superadmin's store (userId is superadmin's UID from getQueryUserId)
-                        request.auth.uid != userId);
+          allow read: if canAccessStoreData(userId, storeId);
           
           // Allow create if user is creating their own folder OR if staff member belongs to this store
-          allow create: if isAuthenticated() && 
-                         (request.resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid ||
-                          request.auth.uid != userId);
+          allow create: if canManageStoreData(userId, storeId) &&
+                         request.resource.data.storeId == storeId;
           
           // Allow update if user owns the folder OR if staff member belongs to this store
-          allow update: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid ||
-                          request.auth.uid != userId);
+          allow update: if canManageStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId);
           
           // Allow delete if user owns the folder OR if superadmin owns the store
-          allow delete: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid);
+          allow delete: if canManageStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
         }
         
         // Inventory items subcollection: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
@@ -220,11 +246,7 @@ service cloud.firestore {
           // 2. User created the item (createdBy matches auth.uid)
           // 3. Staff member accessing their superadmin's store (userId != auth.uid means staff, and getQueryUserId ensures correct store)
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
-          allow read: if isAuthenticated() && 
-                       (userId == request.auth.uid || 
-                        resource.data.createdBy == request.auth.uid ||
-                        // Staff accessing their superadmin's store (userId is superadmin's UID from getQueryUserId)
-                        request.auth.uid != userId);
+          allow read: if canAccessStoreData(userId, storeId);
           
           // Allow create if:
           // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
@@ -232,10 +254,8 @@ service cloud.firestore {
           // 2. User is creating their own item (createdBy matches auth.uid)
           // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
           // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
-          allow create: if isAuthenticated() && 
-                         (userId == request.auth.uid ||
-                          request.resource.data.createdBy == request.auth.uid ||
-                          request.auth.uid != userId);
+          allow create: if canManageStoreData(userId, storeId) &&
+                         request.resource.data.storeId == storeId;
           
           // Allow update if:
           // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
@@ -245,93 +265,51 @@ service cloud.firestore {
           // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
           // Note: userId == request.auth.uid means the super admin is accessing their own stores
           // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
-          allow update: if isAuthenticated() && 
-                         (userId == request.auth.uid ||
-                          resource.data.createdBy == request.auth.uid ||
-                          (request.auth.uid != userId && request.resource.data.createdBy == userId));
+          allow update: if canManageStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId);
           
           // Allow delete if user owns the item, superadmin owns the store, or staff (e.g. manager) in store
-          allow delete: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid ||
-                          userId == request.auth.uid ||
-                          request.auth.uid != userId);
+          allow delete: if canManageStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
         }
         
         // Receipts subcollection: users/{userId}/stores/{storeId}/receipts/{receiptId}
         match /receipts/{receiptId} {
-          // Helper function to check if authenticated user is staff (using collection group pattern)
-          // Since Firestore rules can't easily check staff in any department with wildcards,
-          // we allow staff members to create receipts when createdBy matches userId (which it does
-          // for staff since both are set to super admin UID by app logic)
-          function isStaffCreatingReceipt() {
-            // When staff creates receipt:
-            // - userId in path = super admin UID (from getQueryUserId)
-            // - createdBy = super admin UID
-            // - actualCreator = staff UID (if different from createdBy)
-            // - request.auth.uid = staff UID
-            // So we check if createdBy matches userId but auth.uid doesn't (indicating staff)
-            return request.resource.data.createdBy == userId && 
-                   request.auth.uid != userId &&
-                   request.resource.data.createdBy != request.auth.uid;
-          }
+          // Allow read to store owner and active members.
+          allow read: if canAccessStoreData(userId, storeId) &&
+                       resourceMatchesStore(storeId);
           
-          // Allow read if:
-          // 1. User is the super admin (userId in path matches auth.uid)
-          // 2. User created the receipt (createdBy matches auth.uid)
-          // 3. Staff member accessing receipts in their store (createdBy == userId means receipt belongs to store, 
-          //    and auth.uid != userId means it's a staff member, not the super admin)
-          //    This allows staff to read all receipts in the store where createdBy matches the super admin UID
-          // 4. Staff member accessing their own receipts (actualCreator matches their UID)
-          allow read: if isAuthenticated() && 
-                       (userId == request.auth.uid || 
-                        resource.data.createdBy == request.auth.uid || 
-                        (resource.data.createdBy == userId && request.auth.uid != userId) ||
-                        resource.data.actualCreator == request.auth.uid);
+          // Allow create/update for store owner or active managers.
+          allow create: if canManageStoreData(userId, storeId) &&
+                         request.resource.data.storeId == storeId;
           
-          // Allow create if:
-          // 1. User is the super admin (userId in path matches auth.uid)
-          // 2. Receipt createdBy matches super admin UID AND auth.uid doesn't match userId (staff creating)
-          //    This allows staff to create receipts since app logic sets createdBy to super admin UID
-          allow create: if isAuthenticated() && 
-                         (userId == request.auth.uid || 
-                          (request.resource.data.createdBy == userId && request.auth.uid != userId));
-          
-          // Allow update if:
-          // 1. User is the super admin (userId in path) who created the receipt
-          // 2. Staff member (actualCreator matches) - application code enforces manager-only restriction
-          // Note: Application-level checks prevent non-managers from updating
-          allow update: if isAuthenticated() && 
-                         ((userId == request.auth.uid && resource.data.createdBy == request.auth.uid) || 
-                          resource.data.actualCreator == request.auth.uid);
+          allow update: if canManageStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId);
           
           // Allow delete if:
           // 1. User is the super admin (userId in path) who created the receipt
           // 2. Staff member (actualCreator matches) - application code enforces manager-only restriction
           // Note: Application-level checks prevent non-managers from deleting
-          allow delete: if isAuthenticated() && 
-                         ((userId == request.auth.uid && resource.data.createdBy == request.auth.uid) || 
-                          resource.data.actualCreator == request.auth.uid);
+          // Tighten: only store owner can delete receipts.
+          allow delete: if ownsStore(userId, storeId) &&
+                         resourceMatchesStore(storeId);
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
         match /customers/{customerId} {
           // Allow read if user owns the store OR if staff member belongs to this store
-          allow read: if isAuthenticated() && 
-                       (resource.data.createdBy == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow read: if canAccessStoreData(userId, storeId);
           
           // Allow create if user is creating their own customer OR if staff member belongs to this store
-          allow create: if isAuthenticated() && 
-                         (request.resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow create: if canManageStoreData(userId, storeId);
           
           // Allow update if user owns the customer OR if staff member belongs to this store
-          allow update: if isAuthenticated() && 
-                         (resource.data.createdBy == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow update: if canManageStoreData(userId, storeId);
           
           // Allow delete if user owns the customer
-          allow delete: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+          allow delete: if canManageStoreData(userId, storeId);
         }
         
         // Notifications subcollection: users/{userId}/stores/{storeId}/notifications/{notificationId}
@@ -339,23 +317,17 @@ service cloud.firestore {
           // Allow read if:
           // 1. User is the super admin (userId in path matches auth.uid)
           // 2. Staff member belongs to this store
-          allow read: if isAuthenticated() && 
-                       (userId == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow read: if canAccessStoreData(userId, storeId);
           
           // Allow create if:
           // 1. User is the super admin (userId in path)
           // 2. Staff member belongs to this store
-          allow create: if isAuthenticated() && 
-                         (userId == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow create: if canManageStoreData(userId, storeId);
           
           // Allow update if:
           // 1. User is the super admin (userId in path)
           // 2. Staff member belongs to this store
-          allow update: if isAuthenticated() && 
-                         (userId == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow update: if canManageStoreData(userId, storeId);
           
           // Allow delete if user is the super admin (userId in path)
           allow delete: if isAuthenticated() && userId == request.auth.uid;
@@ -364,12 +336,10 @@ service cloud.firestore {
         // Activity logs subcollection: users/{userId}/stores/{storeId}/activityLogs/{logId}
         // Security audit trail (who changed what in inventory)
         match /activityLogs/{logId} {
-          allow read: if isAuthenticated() && 
-                       (userId == request.auth.uid || 
-                        exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
-          allow create: if isAuthenticated() && 
-                         (userId == request.auth.uid || 
-                          exists(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/departments/{departmentId}/staff/$(request.auth.uid)));
+          allow read: if canAccessStoreData(userId, storeId);
+          allow create: if canManageStoreData(userId, storeId) &&
+                         request.resource.data.storeId == storeId &&
+                         request.resource.data.userId == userId;
           allow update, delete: if false;
         }
       }

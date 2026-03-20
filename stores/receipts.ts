@@ -491,11 +491,6 @@ export const useReceiptsStore = defineStore('receipts', {
 
     // Delete a receipt
     async deleteReceipt(receiptId: string) {
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error('Firestore not initialized')
-      }
-
       const authStore = useAuthStore()
       if (!authStore.currentUser) {
         throw new Error('User must be authenticated')
@@ -523,53 +518,24 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/receipts/{receiptId}
-        const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
-        const receiptSnap = await getDoc(receiptRef)
+        const token = await authStore.currentUser.getIdToken()
+        await $fetch('/api/receipts/delete', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: {
+            ownerUserId: userId,
+            storeId,
+            receiptId,
+          },
+        })
 
-        if (!receiptSnap.exists()) {
-          throw new Error('Receipt not found')
-        }
-
-        const receiptData = receiptSnap.data()
-        const receiptCreatedBy = receiptData.createdBy
-        
-        // Super admins can delete receipts they have access to
-        if (userStore.userData?.role !== 'superAdmin') {
-          throw new Error('Access denied')
-        }
-
-        const receipt = receiptData as Receipt
-        const itemIds = receipt.itemIds || []
-
-        // 1. Return items to inventory (remove dateOut)
-        if (itemIds.length > 0) {
-          try {
-            const inventoryStore = useInventoryStore()
-            await inventoryStore.returnItemsToStock(itemIds)
-          } catch (error: any) {
-            console.error('[ReceiptsStore] Error returning items to stock:', error)
-            // Continue with deletion even if returning items fails
-          }
-        }
-
-        // 2. Update or delete customer
-        try {
-          const customersStore = useCustomersStore()
-          await customersStore.removeReceiptFromCustomer(receiptId, receipt.total || 0)
-        } catch (error: any) {
-          console.error('[ReceiptsStore] Error removing receipt from customer:', error)
-          // Continue with deletion even if customer update fails
-        }
-
-        // 3. Delete the receipt
-        await deleteDoc(receiptRef)
-
-        // Remove from local state
+        // Refresh state after trusted server workflow succeeds.
         this.receipts = this.receipts.filter(r => r.id !== receiptId)
       } catch (error: any) {
         console.error('Error deleting receipt:', error)
-        throw new Error(error.message || 'Failed to delete receipt')
+        throw new Error(error?.data?.message || error.message || 'Failed to delete receipt')
       }
     },
   },

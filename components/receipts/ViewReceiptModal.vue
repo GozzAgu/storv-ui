@@ -417,6 +417,10 @@ const DETAIL_LABELS: Record<string, string> = {
   capacity: 'Capacity',
   storage: 'Storage',
   ram: 'RAM',
+  batteryHealth: 'Battery Health',
+  processor: 'Processor',
+  condition: 'Condition',
+  warranty: 'Warranty',
 }
 
 const DETAIL_ORDER = [
@@ -448,6 +452,20 @@ function getProductDetailLines(item: any): string[] {
     seen.add(normalized)
     lines.push(`${label}: ${text}`)
   }
+
+  // Include additional product detail keys not covered by fixed order.
+  for (const [key, value] of Object.entries(raw)) {
+    if (DETAIL_ORDER.includes(key)) continue
+    if (value === undefined || value === null) continue
+    const text = String(value).trim()
+    if (!text) continue
+    const label = DETAIL_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())
+    const normalized = `${label}:${text.toLowerCase()}`
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    lines.push(`${label}: ${text}`)
+  }
+
   return lines
 }
 
