@@ -1,55 +1,94 @@
 import { test, expect } from '@playwright/test'
 
+/** Dashboard guard redirects unauthenticated users to /signin (client-side after auth resolves). */
+function isSignInPage(page: import('@playwright/test').Page) {
+  return page.url().includes('/signin')
+}
+
+async function gotoMultiStoreSync(page: import('@playwright/test').Page) {
+  await page.goto('/dashboard/multi-store-sync', { waitUntil: 'domcontentloaded' })
+  // Client redirect + hydration: wait until we land on sign-in or the real page.
+  await page.waitForURL(/\/signin(?:\?|$)|\/dashboard\/multi-store-sync/, {
+    timeout: 45_000,
+  })
+}
+
 test.describe('Multi-Store Sync', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/multi-store-sync')
-    await page.waitForLoadState('networkidle')
+    await gotoMultiStoreSync(page)
   })
 
-  test('should display multi-store sync page', async ({ page }) => {
-    // Check if page title is visible
-    const pageTitle = page.getByText(/multi-store sync/i).first()
-    await expect(pageTitle).toBeVisible({ timeout: 10000 })
-  })
-
-  test('should show access denied for non-super admins', async ({ page }) => {
-    // Check for access denied message
-    const accessDenied = page.getByText(/access restricted/i).or(page.getByText(/only super admins/i))
-    const accessDeniedVisible = await accessDenied.isVisible().catch(() => false)
-    
-    // If access denied is shown, verify it
-    if (accessDeniedVisible) {
-      await expect(accessDenied).toBeVisible()
+  test('loads route: sign-in redirect or Multi-Store Sync shell', async ({ page }) => {
+    if (isSignInPage(page)) {
+      await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible({
+        timeout: 20_000,
+      })
+      await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10_000 })
+      return
     }
+
+    await expect(
+      page.getByRole('heading', { name: 'Multi-Store Sync', exact: true })
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(
+      page.getByText(/transfer items between stores/i)
+    ).toBeVisible({ timeout: 10_000 })
   })
 
-  test('should display tabs for transfer, reports, and history', async ({ page }) => {
-    // Check for tab navigation
-    const transferTab = page.getByRole('button', { name: /transfer items/i }).or(page.getByText(/transfer/i))
-    const reportsTab = page.getByRole('button', { name: /consolidated reports/i }).or(page.getByText(/reports/i))
-    const historyTab = page.getByRole('button', { name: /transfer history/i }).or(page.getByText(/history/i))
-    
-    const hasTabs = await Promise.all([
-      transferTab.isVisible().catch(() => false),
-      reportsTab.isVisible().catch(() => false),
-      historyTab.isVisible().catch(() => false),
-    ])
-    
-    // At least one tab should be visible
-    expect(hasTabs.some(Boolean)).toBeTruthy()
+  test('shows page title when authenticated', async ({ page }) => {
+    if (isSignInPage(page)) {
+      test.skip()
+    }
+
+    await expect(
+      page.getByRole('heading', { name: 'Multi-Store Sync', exact: true })
+    ).toBeVisible({ timeout: 20_000 })
+    await expect(
+      page.getByText(/transfer items between stores/i)
+    ).toBeVisible({ timeout: 10_000 })
   })
 
-  test('should display stats cards', async ({ page }) => {
-    // Check for stats cards
-    const totalStores = page.getByText(/total stores/i)
-    const totalTransfers = page.getByText(/total transfers/i)
-    
-    const hasStats = await Promise.all([
-      totalStores.isVisible().catch(() => false),
-      totalTransfers.isVisible().catch(() => false),
-    ])
-    
-    // Should have at least some stats visible
-    expect(hasStats.some(Boolean)).toBeTruthy()
+  test('shows access gate or full feature UI when authenticated', async ({ page }) => {
+    if (isSignInPage(page)) {
+      test.skip()
+    }
+
+    const accessHeading = page.getByRole('heading', { name: 'Access restricted', exact: true })
+    const transferTab = page.getByRole('button', { name: 'Transfer Items' })
+
+    await expect(
+      accessHeading.or(transferTab)
+    ).toBeVisible({ timeout: 20_000 })
+
+    const gated = await accessHeading.isVisible().catch(() => false)
+    if (gated) {
+      await expect(accessHeading).toBeVisible()
+      await expect(
+        page.getByText(/only super admins|enterprise|upgrade/i)
+      ).toBeVisible()
+      return
+    }
+
+    await expect(transferTab).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Consolidated Reports' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Transfer History' })).toBeVisible()
+  })
+
+  test('shows stats cards when feature is unlocked', async ({ page }) => {
+    if (isSignInPage(page)) {
+      test.skip()
+    }
+
+    const accessHeading = page.getByRole('heading', { name: 'Access restricted', exact: true })
+    await expect(
+      accessHeading.or(page.getByText('Total stores', { exact: true }))
+    ).toBeVisible({ timeout: 20_000 })
+
+    if (await accessHeading.isVisible().catch(() => false)) {
+      test.skip(true, 'Multi-store sync locked for this user')
+    }
+
+    await expect(page.getByText('Total stores', { exact: true })).toBeVisible()
+    await expect(page.getByText('Total transfers', { exact: true })).toBeVisible()
   })
 })

@@ -1,6 +1,5 @@
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
-
-const PAD = 8
+import { clampFabPosition } from '~/utils/viewportClamp'
 
 function clamp(
   left: number,
@@ -9,14 +8,7 @@ function clamp(
   height: number
 ): { left: number; top: number } {
   if (typeof window === 'undefined') return { left, top }
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-  const maxL = Math.max(PAD, vw - width - PAD)
-  const maxT = Math.max(PAD, vh - height - PAD)
-  return {
-    left: Math.min(Math.max(PAD, left), maxL),
-    top: Math.min(Math.max(PAD, top), maxT),
-  }
+  return clampFabPosition(left, top, width, height, window.innerWidth, window.innerHeight)
 }
 
 /**
