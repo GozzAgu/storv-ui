@@ -18,8 +18,10 @@
         sidebarCollapsed ? 'w-[72px]' : 'w-64'
       ]"
     >
-      <!-- Logo / Brand -->
-      <div class="flex items-center justify-between h-11 shrink-0 px-2.5 min-h-[2.75rem]">
+      <!-- Logo / Brand (smaller logo when collapsed so it doesn’t span edge-to-edge in 72px rail) -->
+      <div
+        class="flex items-center justify-between h-11 shrink-0 min-h-[2.75rem] px-2.5"
+      >
         <NuxtLink
           to="/dashboard"
           :class="['flex items-center transition-all duration-300', sidebarCollapsed ? 'justify-center w-full' : 'gap-1.5 min-w-0']"
@@ -27,7 +29,10 @@
           <img
             :src="logoSource"
             alt="Storvv"
-            class="shrink-0 object-contain h-5 max-w-[100px] transition-all duration-300"
+            :class="[
+              'shrink-0 object-contain transition-all duration-300',
+              sidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]',
+            ]"
           />
         </NuxtLink>
         <button
