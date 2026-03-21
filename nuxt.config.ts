@@ -34,6 +34,15 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       appVersion: '1.0',
+      /** Comma-separated extra hostnames treated like www (marketing-only), e.g. preview domains */
+      marketingHosts: (process.env.NUXT_PUBLIC_MARKETING_HOSTS || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      /** App subdomain hostname(s); default app.storvv.com */
+      appHost: process.env.NUXT_PUBLIC_APP_HOST || 'app.storvv.com',
+      /** Origin used when sending users from www → app (no trailing slash) */
+      appOrigin: process.env.NUXT_PUBLIC_APP_ORIGIN || 'https://app.storvv.com',
       paystackPublicKey: process.env.NUXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
       /** Optional: base URL for a separate API server when using a static frontend. Staff creation is client-side and does not require a server. */
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
