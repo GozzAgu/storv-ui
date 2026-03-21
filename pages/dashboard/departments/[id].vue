@@ -275,18 +275,26 @@
       />
     </div>
 
-    <div v-if="canCreateNewStaff && !isLoadingStaff" class="fixed bottom-24 right-6 z-40 group">
-      <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-        Add staff
-      </span>
-      <button
-        @click="openCreateStaffModal"
-        class="w-12 h-12 rounded-full bg-primary-400 hover:bg-primary-500 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200"
-        title="Add new staff"
-      >
-        <PlusIcon class="w-5 h-5" />
-      </button>
-    </div>
+    <DraggableFabContainer
+      v-if="canCreateNewStaff && !isLoadingStaff"
+      :storage-key="`storv-fab:dept-staff:${departmentId}`"
+      layout="row"
+      anchor-class="bottom-24 right-6"
+    >
+      <div class="group relative overflow-visible">
+        <span class="pointer-events-none absolute right-full top-1/2 z-50 mr-2 inline-flex min-w-max max-w-none -translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-gray-700">
+          Add staff
+        </span>
+        <button
+          type="button"
+          @click="openCreateStaffModal"
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-400 text-white shadow-lg transition-all duration-200 hover:bg-primary-500 hover:shadow-xl"
+          title="Add new staff"
+        >
+          <PlusIcon class="h-5 w-5" />
+        </button>
+      </div>
+    </DraggableFabContainer>
 
     <!-- Bulk Delete Staff Modal -->
     <Modal
@@ -363,6 +371,7 @@ import {
   EllipsisVerticalIcon,
   ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'

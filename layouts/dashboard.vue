@@ -100,14 +100,14 @@
                   :class="[
                     'flex items-center gap-2 px-2 py-1 rounded-lg text-xs transition-colors',
                     route.params.id === folder.id
-                      ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
+                      ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-700 dark:text-gray-200 font-medium'
+                      : 'text-gray-500 dark:text-gray-500 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-800 dark:hover:text-gray-100',
                     { 'pointer-events-none opacity-50': switchingStore }
                   ]"
                 >
-                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
+                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'" stroke-width="1.75" />
                   <span class="truncate flex-1">{{ folder.name }}</span>
-                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-gray-700 dark:text-gray-300" stroke-width="2" />
+                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-gray-500 dark:text-gray-400" stroke-width="2" />
                 </NuxtLink>
               </div>
             </div>
@@ -142,7 +142,7 @@
               <!-- Tooltip when collapsed -->
               <div
                 v-if="sidebarCollapsed"
-                class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="absolute left-full ml-1.5 z-50 inline-flex items-center w-max min-w-max max-w-none shrink-0 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap pointer-events-none shadow-xl"
               >
                 {{ item.name }}
                 <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
@@ -257,7 +257,7 @@
 
       <!-- Bottom: user + sign out (minimal Fathom-style) -->
       <div class="shrink-0 border-t border-gray-200/40 dark:border-gray-800 px-2.5 py-2 bg-[#f8f8f8] dark:bg-gray-900" :class="sidebarCollapsed ? 'px-1.5' : ''">
-        <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'justify-center' : ''">
+        <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'justify-center relative group' : ''">
           <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 font-semibold text-xs shrink-0">
             {{ userInitials }}
           </div>
@@ -265,7 +265,7 @@
             <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ userName }}</p>
             <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ userEmail }}</p>
           </div>
-          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
+          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 z-50 inline-flex flex-col items-start w-max min-w-max max-w-none shrink-0 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none shadow-xl whitespace-nowrap">
             {{ userName }}
             <span class="block text-[11px] text-gray-400">{{ userEmail }}</span>
             <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
@@ -275,14 +275,14 @@
           @click="handleSignOut"
           :class="[
             'mt-2 w-full flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors',
-            sidebarCollapsed ? 'w-full py-2' : 'px-2.5',
+            sidebarCollapsed ? 'w-full py-2 relative group' : 'px-2.5',
             'text-gray-600 dark:text-gray-400 hover:bg-gray-200/80 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-gray-100'
           ]"
           title="Sign out"
         >
           <ArrowRightOnRectangleIcon class="w-4 h-4 shrink-0" stroke-width="1.75" />
           <span v-if="!sidebarCollapsed">Sign out</span>
-          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 pointer-events-none shadow-xl whitespace-nowrap">
+          <div v-if="sidebarCollapsed" class="absolute left-full ml-1.5 z-50 inline-flex items-center w-max min-w-max max-w-none shrink-0 px-2.5 py-1.5 bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-none shadow-xl whitespace-nowrap">
             Sign out
             <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
           </div>

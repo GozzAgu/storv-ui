@@ -15,12 +15,15 @@
             <ArrowLeftIcon class="w-4 h-4" stroke-width="1.75" />
         </button>
           <div class="min-w-0 flex-1">
-            <h1 v-if="isLoadingFolder" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+              <h1 v-if="isLoadingFolder" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                 Loading...
               </h1>
-            <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
+              <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate min-w-0">
                 {{ folder?.name || 'Folder' }}
               </h1>
+              <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
+            </div>
             <p v-if="!isLoadingFolder" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                 {{ folder?.description || 'No description' }}
               </p>
@@ -322,57 +325,74 @@
             </div>
             <div class="relative shrink-0" @click.stop>
               <button
+                type="button"
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
-                :class="['p-1.5 rounded-lg transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700']"
+                :class="[
+                  'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                  isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
+                ]"
                 title="Actions"
                 aria-label="Item actions"
+                aria-haspopup="menu"
+                :aria-expanded="openItemMenuId === item.id"
               >
-                <EllipsisVerticalIcon class="w-4 h-4" />
+                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
               </button>
               <div
                 v-if="openItemMenuId === item.id"
-                class="absolute right-0 top-full mt-0.5 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[44px]"
+                class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+                role="menu"
               >
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleViewTimeline(item); openItemMenuId = null"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  title="View product history"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                 >
-                  <ClockIcon class="w-5 h-5" />
+                  <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>History</span>
                 </button>
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleApplyDiscount(item); openItemMenuId = null"
                   :disabled="isItemSold(item)"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 disabled:opacity-40"
-                  title="Discount"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <TagIcon class="w-5 h-5" />
+                  <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>{{ item.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
                 </button>
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleEditItem(item); openItemMenuId = null"
                   :disabled="isItemSold(item)"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40"
-                  title="Edit"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <PencilSquareIcon class="w-5 h-5" />
+                  <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>Edit</span>
                 </button>
                 <button
                   v-if="canDuplicateByPlan"
+                  type="button"
+                  role="menuitem"
                   @click="handleDuplicateItem(item); openItemMenuId = null"
                   :disabled="isItemSold(item)"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40"
-                  title="Duplicate"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <DocumentDuplicateIcon class="w-5 h-5" />
+                  <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>Duplicate</span>
                 </button>
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleDeleteItem(item); openItemMenuId = null"
                   :disabled="isItemSold(item)"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 disabled:opacity-40"
-                  title="Delete"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <TrashIcon class="w-5 h-5" />
+                  <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
@@ -419,8 +439,8 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
-                Action
+              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 w-12 sm:w-[4.5rem]">
+                Actions
               </th>
               </tr>
             </thead>
@@ -539,122 +559,77 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2">
-                <!-- Desktop: Show all action buttons -->
-                <div class="hidden sm:flex items-center justify-end gap-1.5 flex-shrink-0" @click.stop>
+              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right">
+                <div class="relative inline-flex justify-end" @click.stop>
                   <button
-                    @click="handleViewTimeline(item)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors flex-shrink-0"
-                    title="View product history"
-                  >
-                    <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    @click="handleApplyDiscount(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'p-1 transition-colors flex-shrink-0',
-                      item.discountedPrice !== undefined
-                        ? 'text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400',
-                      isItemSold(item) && 'cursor-not-allowed opacity-40'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
-                  >
-                    <TagIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    @click="handleEditItem(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
-                      isItemSold(item) && 'cursor-not-allowed opacity-40'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
-                  >
-                    <PencilSquareIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    v-if="canDuplicateByPlan"
-                    @click="handleDuplicateItem(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'p-1 text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 transition-colors flex-shrink-0',
-                      isItemSold(item) && 'cursor-not-allowed opacity-40'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot duplicate sold item' : 'Duplicate item'"
-                  >
-                    <DocumentDuplicateIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    @click="handleDeleteItem(item)"
-                    :disabled="isItemSold(item)"
-                    :class="[
-                      'p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0',
-                      isItemSold(item) && 'cursor-not-allowed opacity-40'
-                    ]"
-                    :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
-                  >
-                    <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                </div>
-                <!-- Mobile: Show 3-dot menu -->
-                <div class="sm:hidden relative" @click.stop>
-                  <button
+                    type="button"
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0',
-                      isItemSold(item) && 'cursor-not-allowed opacity-40'
+                      'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                      isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
                     ]"
                     title="Actions"
+                    aria-label="Item actions"
+                    aria-haspopup="menu"
+                    :aria-expanded="openItemMenuId === item.id"
                   >
-                    <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                    <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                   </button>
-                  <!-- Dropdown Menu -->
                   <div
                     v-if="openItemMenuId === item.id"
-                    class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                    class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+                    role="menu"
                   >
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handleViewTimeline(item); openItemMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="View product history"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                     >
-                      <ClockIcon class="w-5 h-5" />
+                      <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>History</span>
                     </button>
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handleApplyDiscount(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50/60 dark:hover:bg-primary-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      :title="isItemSold(item) ? 'Cannot modify discount on sold item' : (item.discountedPrice !== undefined ? 'Edit discount' : 'Add discount')"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <TagIcon class="w-5 h-5" />
+                      <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>{{ item.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
                     </button>
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handleEditItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      :title="isItemSold(item) ? 'Cannot edit sold item' : 'Edit item'"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <PencilSquareIcon class="w-5 h-5" />
+                      <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>Edit</span>
                     </button>
                     <button
                       v-if="canDuplicateByPlan"
+                      type="button"
+                      role="menuitem"
                       @click="handleDuplicateItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Duplicate item"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <DocumentDuplicateIcon class="w-5 h-5" />
+                      <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>Duplicate</span>
                     </button>
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handleDeleteItem(item); openItemMenuId = null"
                       :disabled="isItemSold(item)"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      :title="isItemSold(item) ? 'Cannot delete sold item' : 'Delete item'"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <TrashIcon class="w-5 h-5" />
+                      <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                      <span>Delete</span>
                     </button>
                   </div>
                 </div>
@@ -703,40 +678,49 @@
       @change="handleFileImport"
     />
 
-    <!-- Floating Action Buttons - Mobile Optimized -->
-    <div v-if="!isLoadingFolder && canManageInventoryItems" class="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 flex flex-col gap-2.5 sm:gap-2 z-40">
-    <button
-        @click="() => fileInputRef?.click()"
-        :disabled="isImporting"
-        :class="[
-          'w-12 h-12 sm:w-11 sm:h-11 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation',
-          (isImporting || isExporting) ? 'opacity-50 cursor-not-allowed' : ''
-        ]"
-        title="Import from Excel"
-      >
-        <ArrowDownTrayIcon v-if="!isImporting" class="w-5 h-5 sm:w-5 sm:h-5" />
-        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-      </button>
-      <button
-        @click="handleExportToExcel"
-        :disabled="isExporting || items.length === 0"
-        :class="[
-          'w-12 h-12 sm:w-11 sm:h-11 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation',
-          (isExporting || isImporting || items.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
-        ]"
-        title="Export to Excel"
-      >
-        <ArrowUpTrayIcon v-if="!isExporting" class="w-5 h-5 sm:w-5 sm:h-5" />
-        <div v-else class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-      </button>
-      <button
-        @click="openAddItemModal"
-        class="w-14 h-14 sm:w-11 sm:h-11 bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:text-white rounded-full shadow-xl hover:shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 touch-manipulation"
-        title="Add new item"
-      >
-        <PlusIcon class="w-6 h-6 sm:w-5 sm:h-5 text-white" />
-      </button>
-    </div>
+    <!-- Floating Action Buttons (draggable stack — position saved on this device) -->
+    <DraggableFabContainer
+      v-if="!isLoadingFolder && canManageInventoryItems"
+      :storage-key="`storv-fab:inventory-folder:${folderId}`"
+      layout="column"
+    >
+      <div class="flex flex-col gap-2.5 sm:gap-2">
+        <button
+          type="button"
+          @click="() => fileInputRef?.click()"
+          :disabled="isImporting"
+          :class="[
+            'flex h-12 w-12 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11',
+            (isImporting || isExporting) ? 'cursor-not-allowed opacity-50' : ''
+          ]"
+          title="Import from Excel"
+        >
+          <ArrowDownTrayIcon v-if="!isImporting" class="h-5 w-5 sm:h-5 sm:w-5" />
+          <div v-else class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+        </button>
+        <button
+          type="button"
+          @click="handleExportToExcel"
+          :disabled="isExporting || items.length === 0"
+          :class="[
+            'flex h-12 w-12 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11',
+            (isExporting || isImporting || items.length === 0) ? 'cursor-not-allowed opacity-50' : ''
+          ]"
+          title="Export to Excel"
+        >
+          <ArrowUpTrayIcon v-if="!isExporting" class="h-5 w-5 sm:h-5 sm:w-5" />
+          <div v-else class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+        </button>
+        <button
+          type="button"
+          @click="openAddItemModal"
+          class="flex h-14 w-14 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:text-white hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11"
+          title="Add new item"
+        >
+          <PlusIcon class="h-6 w-6 text-white sm:h-5 sm:w-5" />
+        </button>
+      </div>
+    </DraggableFabContainer>
 
     <!-- Enhanced Add/Edit Item Modal -->
     <Modal
@@ -1154,6 +1138,8 @@ import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
+import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 
 definePageMeta({
   layout: 'dashboard'

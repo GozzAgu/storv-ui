@@ -387,23 +387,31 @@
       @error="handleDepartmentError"
     />
 
-  <!-- FAB -->
-  <div v-if="canManageDepartments" class="fixed bottom-24 right-6 z-50 group">
-    <span class="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-gray-700 text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-      {{ canAddDepartmentForCurrentStore ? 'New department' : 'Department limit reached' }}
-    </span>
-    <button
-      :title="canAddDepartmentForCurrentStore ? 'Create new department' : departmentLimitMessage"
-      :disabled="!canAddDepartmentForCurrentStore"
-      :class="[
-        'w-12 h-12 rounded-full text-white shadow-lg flex items-center justify-center transition-all duration-200',
-        canAddDepartmentForCurrentStore ? 'bg-primary-400 hover:bg-primary-500 hover:shadow-xl' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-      ]"
-      @click="openCreateDepartmentModal"
-    >
-      <PlusIcon class="w-5 h-5" />
-    </button>
-  </div>
+  <!-- FAB (draggable) -->
+  <DraggableFabContainer
+    v-if="canManageDepartments"
+    storage-key="storv-fab:departments"
+    layout="row"
+    anchor-class="bottom-24 right-6"
+  >
+    <div class="group relative overflow-visible">
+      <span class="pointer-events-none absolute right-full top-1/2 z-50 mr-2 inline-flex min-w-max max-w-none -translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-gray-700">
+        {{ canAddDepartmentForCurrentStore ? 'New department' : 'Department limit reached' }}
+      </span>
+      <button
+        type="button"
+        :title="canAddDepartmentForCurrentStore ? 'Create new department' : departmentLimitMessage"
+        :disabled="!canAddDepartmentForCurrentStore"
+        :class="[
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200',
+          canAddDepartmentForCurrentStore ? 'bg-primary-400 hover:bg-primary-500 hover:shadow-xl' : 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
+        ]"
+        @click="openCreateDepartmentModal"
+      >
+        <PlusIcon class="h-5 w-5" />
+      </button>
+    </div>
+  </DraggableFabContainer>
 </template>
 
 <script setup lang="ts">
@@ -420,6 +428,7 @@ import {
   TrashIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Modal from '~/components/ui/Modal.vue'

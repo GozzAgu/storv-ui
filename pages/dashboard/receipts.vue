@@ -326,46 +326,58 @@
             </div>
             <div class="relative shrink-0" @click.stop>
               <button
+                type="button"
                 @click="toggleReceiptMenu(receipt.id)"
-                class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                 title="Actions"
                 aria-label="Receipt actions"
+                aria-haspopup="menu"
+                :aria-expanded="openReceiptMenuId === receipt.id"
               >
-                <EllipsisVerticalIcon class="w-4 h-4" />
+                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
               </button>
               <div
                 v-if="openReceiptMenuId === receipt.id"
-                class="absolute right-0 top-full mt-0.5 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 min-w-[44px]"
+                class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+                role="menu"
               >
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  title="View receipt history"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                 >
-                  <ClockIcon class="w-5 h-5" />
+                  <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>History</span>
                 </button>
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  title="View/Print"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                 >
-                  <PrinterIcon class="w-5 h-5" />
+                  <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                  <span>Print</span>
                 </button>
                 <button
                   v-if="receipt.status === 'completed' && canEditReceipts"
+                  type="button"
+                  role="menuitem"
                   @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                  title="Refund"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
                 >
-                  <ArrowPathIcon class="w-5 h-5" />
+                  <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                  <span>Refund</span>
                 </button>
                 <button
                   v-if="canDeleteReceipts"
+                  type="button"
+                  role="menuitem"
                   @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
-                  class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10"
-                  title="Delete"
+                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
                 >
-                  <TrashIcon class="w-5 h-5" />
+                  <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
@@ -561,8 +573,8 @@
                   </template>
                 </div>
               </th>
-              <th class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
-                Action
+              <th class="w-12 px-3 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 sm:w-[4.5rem] sm:px-4">
+                Actions
               </th>
             </tr>
           </thead>
@@ -663,83 +675,61 @@
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <!-- Desktop: Show all action buttons -->
-                <div class="hidden sm:flex items-center justify-end gap-1.5 flex-shrink-0" @click.stop>
+              <td class="px-3 sm:px-4 py-2 text-right">
+                <div class="relative inline-flex justify-end" @click.stop>
                   <button
-                    @click="handleViewReceiptTimeline(receipt)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex-shrink-0"
-                    title="View receipt history"
-                  >
-                    <ClockIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    @click="handlePrintReceipt(receipt)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
-                    title="View/Print"
-                  >
-                    <PrinterIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    v-if="receipt.status === 'completed' && canEditReceipts"
-                    @click="handleRefundReceipt(receipt)"
-                    class="p-1 text-gray-500 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors flex-shrink-0"
-                    title="Refund"
-                  >
-                    <ArrowPathIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                  <button
-                    v-if="canDeleteReceipts"
-                    @click="handleDeleteReceipt(receipt)"
-                    class="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors flex-shrink-0"
-                    title="Delete"
-                  >
-                    <TrashIcon class="w-3.5 h-3.5 flex-shrink-0" />
-                  </button>
-                </div>
-                <!-- Mobile: Show 3-dot menu -->
-                <div class="sm:hidden relative" @click.stop>
-                  <button
+                    type="button"
                     @click="toggleReceiptMenu(receipt.id)"
-                    class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                     title="Actions"
+                    aria-label="Receipt actions"
+                    aria-haspopup="menu"
+                    :aria-expanded="openReceiptMenuId === receipt.id"
                   >
-                    <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                    <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                   </button>
-                  <!-- Dropdown Menu -->
                   <div
                     v-if="openReceiptMenuId === receipt.id"
-                    class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                    class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+                    role="menu"
                   >
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="View receipt history"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                     >
-                      <ClockIcon class="w-5 h-5" />
+                      <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>History</span>
                     </button>
                     <button
+                      type="button"
+                      role="menuitem"
                       @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="View/Print"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                     >
-                      <PrinterIcon class="w-5 h-5" />
+                      <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                      <span>Print</span>
                     </button>
                     <button
                       v-if="receipt.status === 'completed' && canEditReceipts"
+                      type="button"
+                      role="menuitem"
                       @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
-                      title="Refund"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
                     >
-                      <ArrowPathIcon class="w-5 h-5" />
+                      <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                      <span>Refund</span>
                     </button>
                     <button
                       v-if="canDeleteReceipts"
+                      type="button"
+                      role="menuitem"
                       @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
-                      class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/60 dark:hover:bg-red-900/10 transition-colors"
-                      title="Delete"
+                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
                     >
-                      <TrashIcon class="w-5 h-5" />
+                      <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+                      <span>Delete</span>
                     </button>
                   </div>
                 </div>
@@ -778,24 +768,28 @@
       />
     </div>
 
-    <!-- FAB: New receipt (same as folder FAB – show when list has items or when empty with no filters) -->
-    <div
+    <!-- FAB: New receipt (draggable — position saved on this device) -->
+    <DraggableFabContainer
       v-if="!isInitialLoading && canCreate && (sortedFilteredReceipts.length > 0 || (sortedFilteredReceipts.length === 0 && !searchQuery && statusFilter === 'all' && dateFilter === 'all'))"
-      class="group fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-40 flex items-center justify-end"
+      storage-key="storv-fab:receipts"
+      layout="row"
     >
-      <span
-        class="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
-      >
-        {{ sortedFilteredReceipts.length === 0 ? 'Create first receipt' : 'New receipt' }}
-      </span>
-    <button
-      @click="openCreateReceiptModal"
-        class="group w-11 h-11 rounded-full bg-primary-500 hover:bg-primary-600 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-        aria-label="Create new receipt"
-    >
-        <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
-    </button>
-    </div>
+      <div class="group relative flex items-center justify-end overflow-visible">
+        <span
+          class="pointer-events-none invisible absolute right-full top-1/2 z-50 mr-2 inline-flex min-w-max max-w-none -translate-y-1/2 items-center justify-center whitespace-nowrap rounded-lg bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 dark:bg-gray-800"
+        >
+          {{ sortedFilteredReceipts.length === 0 ? 'Create first receipt' : 'New receipt' }}
+        </span>
+        <button
+          type="button"
+          @click="openCreateReceiptModal"
+          class="group flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-600 hover:text-white hover:shadow-xl active:scale-95"
+          aria-label="Create new receipt"
+        >
+          <PlusIcon class="h-5 w-5 stroke-white text-white" stroke-width="2.5" />
+        </button>
+      </div>
+    </DraggableFabContainer>
 
       <!-- Create Receipt Modal -->
       <CreateReceiptModal
@@ -948,7 +942,7 @@
                 <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Orders</th>
                 <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Total Spent</th>
                 <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Last Order</th>
-                <th class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Action</th>
+                <th class="w-12 px-3 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 sm:w-[4.5rem] sm:px-4">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
@@ -988,37 +982,32 @@
                   <td class="px-3 sm:px-4 py-2">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
-                    <!-- Desktop: Show action button -->
-                    <div class="hidden sm:flex items-center justify-end gap-3 flex-shrink-0" @click.stop>
+                  <td class="px-3 sm:px-4 py-2 text-right">
+                    <div class="relative inline-flex justify-end" @click.stop>
                       <button
-                        @click="viewCustomerReceipts(customer)"
-                        class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
-                        title="View Receipts"
-                      >
-                        <PrinterIcon class="w-4 h-4 flex-shrink-0" />
-                      </button>
-                    </div>
-                    <!-- Mobile: Show 3-dot menu -->
-                    <div class="sm:hidden relative" @click.stop>
-                      <button
+                        type="button"
                         @click="toggleCustomerMenu(customer.id)"
-                        class="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex-shrink-0"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                         title="Actions"
+                        aria-label="Customer actions"
+                        aria-haspopup="menu"
+                        :aria-expanded="openCustomerMenuId === customer.id"
                       >
-                        <EllipsisVerticalIcon class="w-4 h-4 flex-shrink-0" />
+                        <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                       </button>
-                      <!-- Dropdown Menu -->
                       <div
                         v-if="openCustomerMenuId === customer.id"
-                        class="absolute right-0 top-8 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1.5 min-w-[44px]"
+                        class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+                        role="menu"
                       >
                         <button
+                          type="button"
+                          role="menuitem"
                           @click="viewCustomerReceipts(customer); openCustomerMenuId = null"
-                          class="w-full px-3 py-2.5 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          title="View Receipts"
+                          class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
                         >
-                          <PrinterIcon class="w-5 h-5" />
+                          <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+                          <span>View receipts</span>
                         </button>
                       </div>
                     </div>
@@ -1149,6 +1138,7 @@ import {
   ArrowsPointingOutIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Modal from '~/components/ui/Modal.vue'

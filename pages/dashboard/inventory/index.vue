@@ -1,9 +1,14 @@
 <template>
   <div class="pb-24 sm:pb-20">
-    <!-- Hero header -->
+    <!-- Hero header (duplicate upsell inline beside title — Micro plan) -->
     <div class="mb-3 sm:mb-4">
-      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Folders</h1>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Organize products into folders and manage stock in one place</p>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h1 class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 tracking-tight">Folders</h1>
+        <DuplicateFeatureUpsellBanner
+          :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
+        />
+      </div>
+      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Organize products into folders and manage stock in one place</p>
     </div>
 
     <!-- Toolbar: search + filters (single bar, modern) -->
@@ -38,7 +43,7 @@
           <option value="items">Products</option>
             <option value="date">Date</option>
           </select>
-        <span class="hidden sm:inline text-xs text-gray-500 dark:text-gray-400 ml-1">
+        <span class="hidden sm:inline text-xs text-gray-400 dark:text-gray-500 ml-1">
           {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
         </span>
         </div>
@@ -70,12 +75,12 @@
         @update:model-value="toggleSelectAllFolders"
         size="sm"
         wrapper-class="justify-center"
-        label-class="!text-xs !ml-2 !font-normal text-gray-600 dark:text-gray-400"
+        label-class="!text-xs !ml-2 !font-normal text-gray-500 dark:text-gray-500"
       >
         {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
       </Checkbox>
       <template v-if="selectedFoldersForBulk.length > 0">
-        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedFoldersForBulk.length }} selected</span>
+        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ selectedFoldersForBulk.length }} selected</span>
         <Button
           variant="outline"
           size="sm"
@@ -87,16 +92,19 @@
         </Button>
       </template>
     </div>
-    <!-- Folders grid -->
-    <div v-if="paginatedFolders.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2">
+    <!-- Folders grid (card style: large folder icon, title, count — reference: file-manager folder tiles) -->
+    <div
+      v-if="paginatedFolders.length > 0"
+      class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5"
+    >
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:scale-[0.99] cursor-pointer pt-2.5 pb-2 px-2.5 overflow-visible"
+        class="group relative flex flex-col items-stretch rounded-lg bg-gray-50/80 dark:bg-gray-800/30 transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-700/40 active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px]"
         @click="navigateToFolder(folder.id)"
       >
         <!-- Checkbox top-left -->
-        <div v-if="canManage" class="absolute left-1.5 top-1.5 z-10" @click.stop>
+        <div v-if="canManage" class="absolute left-2 top-2 z-10" @click.stop>
           <Checkbox
             :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
             @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -106,11 +114,11 @@
         </div>
 
         <!-- Ellipsis menu top-right -->
-        <div v-if="canManage" class="absolute right-1 top-1 z-20" @click.stop>
+        <div v-if="canManage" class="absolute right-1.5 top-1.5 z-20" @click.stop>
           <button
             type="button"
             @click="toggleFolderMenu(folder.id)"
-            class="p-0.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+            class="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/90 dark:hover:bg-gray-700/80 transition-colors"
             aria-label="Folder options"
           >
             <EllipsisVerticalIcon class="w-4 h-4" />
@@ -148,26 +156,29 @@
           </div>
         </div>
 
-        <!-- Folder icon (softer blue, compact) -->
-        <div class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 bg-primary-400/90 dark:bg-primary-500/90 mb-1.5">
-          <FolderIcon class="w-4 h-4 text-white" stroke-width="1.75" />
-        </div>
-
-        <!-- Folder name (primary focus for scanning) -->
-        <h3
-          class="text-xs font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-0.5 uppercase"
-          :title="folder.name"
+        <div
+          class="flex flex-1 flex-col items-center justify-between w-full px-2.5 pb-2.5 text-center"
+          :class="canManage ? 'pt-8' : 'pt-3.5'"
         >
-          {{ folder.name }}
-        </h3>
+          <!-- Folder icon (compact) -->
+          <div class="flex flex-1 flex-col items-center justify-center w-full min-h-[44px] sm:min-h-[48px] mb-1">
+            <FolderIcon
+              class="w-10 h-10 sm:w-11 sm:h-11 text-slate-400 dark:text-slate-400 shrink-0"
+              stroke-width="1.25"
+            />
+          </div>
 
-        <!-- Label + stats (compact single line where possible) -->
-        <div class="flex items-center justify-center gap-2 w-full text-[11px] text-gray-500 dark:text-gray-400">
-          <span>{{ folder.itemCount }} product{{ folder.itemCount !== 1 ? 's' : '' }}</span>
-          <span class="text-gray-300 dark:text-gray-600">·</span>
-          <span class="tabular-nums">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
-          <span class="text-gray-300 dark:text-gray-600">·</span>
-          <span class="tabular-nums" :title="folder.lowStockCount ? 'Low stock' : 'Stock'">{{ folder.lowStockCount ?? 0 }}</span>
+          <div class="w-full min-w-0 mt-auto">
+            <h3
+              class="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center truncate max-w-full px-0.5 leading-tight"
+              :title="folder.name"
+            >
+              {{ folder.name }}
+            </h3>
+            <p class="mt-0.5 text-[11px] font-normal text-gray-400 dark:text-gray-500 text-center">
+              {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'Product' : 'Products' }}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -180,10 +191,10 @@
       <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
         <FolderIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
       </div>
-      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
+      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 break-words max-w-full">
         {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
       </h2>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 max-w-sm mx-auto break-words">
         {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
       </p>
       <div v-if="selectedDepartmentId" class="mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -214,24 +225,28 @@
       </div>
     </div>
 
-    <!-- FAB: New folder (same as receipts – show when list has items or empty with no search/department filter) -->
-    <div
+    <!-- FAB: New folder (draggable handle — position saved per device) -->
+    <DraggableFabContainer
       v-if="canCreateInventoryFolders && !inventoryStore.loading && (paginatedFolders.length > 0 || (paginatedFolders.length === 0 && !searchQuery && !selectedDepartmentId))"
-      class="group fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-40 flex items-center justify-end"
+      storage-key="storv-fab:inventory-folders"
+      layout="row"
     >
-      <span
-        class="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
-      >
-        {{ paginatedFolders.length === 0 ? 'Create first folder' : 'New folder' }}
-      </span>
-    <button
-      @click="openCreateFolderModal"
-        class="group w-11 h-11 rounded-full bg-primary-500 hover:bg-primary-600 text-white hover:text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
-        aria-label="New folder"
-    >
-        <PlusIcon class="w-5 h-5 text-white stroke-white" stroke-width="2.5" />
-    </button>
-    </div>
+      <div class="group relative flex items-center justify-end overflow-visible">
+        <span
+          class="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 z-50 inline-flex items-center justify-center whitespace-nowrap w-max min-w-max shrink-0 max-w-none rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
+        >
+          {{ paginatedFolders.length === 0 ? 'Create first folder' : 'New folder' }}
+        </span>
+        <button
+          type="button"
+          @click="openCreateFolderModal"
+          class="group flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-600 hover:text-white hover:shadow-xl active:scale-95"
+          aria-label="New folder"
+        >
+          <PlusIcon class="h-5 w-5 stroke-white text-white" stroke-width="2.5" />
+        </button>
+      </div>
+    </DraggableFabContainer>
 
     <!-- Bulk Delete Folders Modal -->
     <Modal
@@ -562,6 +577,8 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
+import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
+import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import { useAuthStore } from '~/stores/auth'
