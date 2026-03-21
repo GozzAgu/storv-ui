@@ -311,23 +311,12 @@
         <div class="w-12 h-12 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
           <BuildingOfficeIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
         </div>
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
         </h2>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
           {{ searchQuery ? 'Try a different search.' : 'Create a department to organize your store.' }}
         </p>
-        <Button
-          v-if="!searchQuery && canManageDepartments"
-          variant="primary"
-          :icon="PlusIcon"
-          :title="canAddDepartmentForCurrentStore ? 'Create department' : departmentLimitMessage"
-          :disabled="!canAddDepartmentForCurrentStore"
-          @click="openCreateDepartmentModal"
-          class="mt-6"
-        >
-          Create department
-        </Button>
       </div>
     </div>
 

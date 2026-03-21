@@ -104,12 +104,12 @@
           </div>
         </div>
 
-        <div v-else-if="staff.length === 0" class="text-center py-12 sm:py-16">
-          <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-5 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div v-else-if="staff.length === 0" class="text-center py-10 px-4">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <UsersIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
           </div>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5">No staff members yet</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Add staff to this department to get started</p>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">No staff members yet</h3>
+          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">Add staff to this department to get started</p>
         </div>
 
         <div v-else class="overflow-x-auto">

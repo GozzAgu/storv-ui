@@ -186,25 +186,14 @@
       <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
         {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
       </p>
-      <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <Button
-          v-if="selectedDepartmentId"
-            variant="outline"
-          size="sm"
-          extra-class="!text-xs !py-1.5 !px-3"
-            @click="selectedDepartmentId = ''"
-          >
-          Clear filter
-          </Button>
+      <div v-if="selectedDepartmentId" class="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Button
-          v-if="!searchQuery && !selectedDepartmentId && canCreateInventoryFolders"
-          variant="primary"
+          variant="outline"
           size="sm"
-          :icon="PlusIcon"
           extra-class="!text-xs !py-1.5 !px-3"
-          @click="openCreateFolderModal"
+          @click="selectedDepartmentId = ''"
         >
-          Create folder
+          Clear filter
         </Button>
       </div>
     </div>
@@ -225,15 +214,15 @@
       </div>
     </div>
 
-    <!-- FAB: New folder (when list is not empty) -->
+    <!-- FAB: New folder (same as receipts – show when list has items or empty with no search/department filter) -->
     <div
-      v-if="paginatedFolders.length > 0 && canCreateInventoryFolders"
+      v-if="canCreateInventoryFolders && !inventoryStore.loading && (paginatedFolders.length > 0 || (paginatedFolders.length === 0 && !searchQuery && !selectedDepartmentId))"
       class="group fixed bottom-20 sm:bottom-24 right-4 sm:right-6 z-40 flex items-center justify-end"
     >
       <span
         class="pointer-events-none absolute right-full mr-2 whitespace-nowrap rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
       >
-        New folder
+        {{ paginatedFolders.length === 0 ? 'Create first folder' : 'New folder' }}
       </span>
     <button
       @click="openCreateFolderModal"

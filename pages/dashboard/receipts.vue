@@ -247,15 +247,15 @@
       <!-- Standalone empty state (same styling as customers empty state, no button) -->
       <div
         v-else-if="sortedFilteredReceipts.length === 0"
-        class="flex flex-col items-center justify-center py-12 sm:py-16 px-4 sm:px-6 text-center min-w-0 w-full"
+        class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
       >
-        <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
-          <ReceiptPercentIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+          <ReceiptPercentIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
-        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
           {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
           {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
         </p>
       </div>
@@ -921,18 +921,18 @@
           <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary-500/30 border-t-primary-600"></div>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading customers...</p>
           </div>
-        <!-- Standalone empty state on mobile/desktop so it's never clipped by table scroll -->
+        <!-- Standalone empty state on mobile/desktop so it's never clipped by table scroll (typography matches receipts/folders empty states) -->
         <div
           v-else-if="filteredCustomers.length === 0"
-          class="flex flex-col items-center justify-center py-12 sm:py-16 px-4 sm:px-6 text-center min-w-0 w-full"
+          class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
         >
-          <div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
-            <UsersIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-        </div>
-          <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+          <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+            <UsersIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          </div>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
             {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
           </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
             {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
           </p>
         </div>

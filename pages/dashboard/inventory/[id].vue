@@ -268,30 +268,20 @@
               </button>
             </div>
           </div>
-      <!-- Empty state: full width (no table) so text/button don't truncate on mobile -->
+      <!-- Empty state: full width (no table); typography matches inventory folders index; use FAB to add items -->
       <div
         v-if="sortedFilteredItems.length === 0"
-        class="rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center min-h-[280px]"
+        class="rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden flex flex-col items-center justify-center py-10 px-4 text-center min-h-[200px]"
       >
-        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
-          <CubeIcon class="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
+          <CubeIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
-        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1.5 break-words">
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
           {{ searchQuery ? 'No products found' : 'No products in this folder' }}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto break-words">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
           {{ searchQuery ? 'Try adjusting your search or filters' : 'Add products to start tracking inventory' }}
         </p>
-        <Button
-          v-if="!searchQuery && canManageInventoryItems"
-          variant="primary"
-          :icon="PlusIcon"
-          @click="openAddItemModal"
-          class="rounded-full whitespace-nowrap"
-        >
-          <span class="sm:hidden">Add item</span>
-          <span class="hidden sm:inline">Add your first item</span>
-        </Button>
       </div>
       <template v-else>
       <!-- Mobile: card list when has items -->
