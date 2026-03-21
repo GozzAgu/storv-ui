@@ -469,7 +469,10 @@ export const useStoresStore = defineStore('stores', {
     },
 
     // Create a new store
-    async createStore(storeData: Omit<Store, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'isActive'> & { isActive?: boolean }) {
+    async createStore(
+      storeData: Omit<Store, 'id' | 'ownerId' | 'createdAt' | 'updatedAt' | 'isActive'> & { isActive?: boolean },
+      options?: { setAsCurrent?: boolean }
+    ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -524,9 +527,10 @@ export const useStoresStore = defineStore('stores', {
         } as Store
 
         this.stores.unshift(storeWithId)
+        if (options?.setAsCurrent) {
+          await this.setCurrentStore(newStoreRef.id)
+        }
 
-        // Don't automatically set first store as current - user will select it via modal
-        // Return the store ID and a flag indicating if this is the first store
         return newStoreRef.id
       } catch (error: any) {
         console.error('Error creating store:', error)

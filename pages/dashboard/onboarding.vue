@@ -17,8 +17,9 @@
 
       <!-- Form Card -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 sm:p-10 border border-gray-200 dark:border-gray-700">
-        <!-- Step 1: Currency & Country Selection -->
-        <div v-if="currentStep === 1" class="space-y-6 sm:space-y-8">
+        <Transition name="step-fade" mode="out-in">
+          <!-- Step 1: Currency & Country Selection -->
+          <div v-if="currentStep === 1" key="step-1" class="space-y-6 sm:space-y-8">
           <div class="text-center mb-6 sm:mb-8">
             <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
               <GlobeAltIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
@@ -72,10 +73,10 @@
               This helps us format dates, times, and numbers according to your location.
             </p>
           </div>
-        </div>
+          </div>
 
-        <!-- Step 2: Store Information -->
-        <div v-if="currentStep === 2" class="space-y-4 sm:space-y-5">
+          <!-- Step 2: Store Information -->
+          <div v-else key="step-2" class="space-y-4 sm:space-y-5">
           <div class="text-center mb-6 sm:mb-8">
             <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
               <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
@@ -158,7 +159,8 @@
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
-        </div>
+          </div>
+        </Transition>
 
         <!-- Error Message -->
         <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md mb-6">
@@ -179,7 +181,7 @@
 
           <button
             @click="nextStep"
-            :disabled="isLoading || (currentStep === 1 && (!selectedCurrency || !selectedCountry)) || (currentStep === 2 && !storeDetails.storeName?.trim())"
+            :disabled="isLoading || !canContinue"
             type="button"
             class="px-6 py-2.5 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
           >
@@ -207,6 +209,7 @@ import { GlobeAltIcon, ArrowRightIcon, BuildingStorefrontIcon } from '@heroicons
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
+import { useStoresStore } from '~/stores/stores'
 
 definePageMeta({
   layout: 'dashboard',
@@ -216,6 +219,7 @@ definePageMeta({
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument, updateStoreDetails } = useUser()
 const { updatePreferences } = usePreferences()
+const storesStore = useStoresStore()
 
 const currentStep = ref(1)
 const totalSteps = 2
@@ -236,6 +240,13 @@ const storeDetails = ref<StoreDetails>({
 const selectedCurrencySymbol = computed(() => {
   const currency = currencies.find(c => c.code === selectedCurrency.value)
   return currency?.symbol || '$'
+})
+
+const canContinue = computed(() => {
+  if (currentStep.value === 1) {
+    return !!selectedCurrency.value && !!selectedCountry.value
+  }
+  return !!storeDetails.value.storeName?.trim()
 })
 
 onMounted(async () => {
@@ -259,6 +270,7 @@ const previousStep = () => {
   if (currentStep.value > 1) {
     currentStep.value--
     errorMessage.value = ''
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 }
 
@@ -270,6 +282,7 @@ const nextStep = async () => {
       return
     }
     currentStep.value++
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   } else if (currentStep.value === totalSteps) {
     // Complete onboarding
     await completeOnboarding()
@@ -314,6 +327,22 @@ const completeOnboarding = async () => {
 
     // Save store details
     await updateStoreDetails(currentUser.value.uid, storeDetails.value)
+
+    // Create the first store during onboarding and set it as the current/default store.
+    // Existing users who already have stores keep their existing list.
+    await storesStore.fetchStores()
+    if (storesStore.stores.length === 0) {
+      await storesStore.createStore(
+        {
+          name: storeDetails.value.storeName.trim(),
+          description: storeDetails.value.storeDescription?.trim() || '',
+          address: storeDetails.value.storeAddress?.trim() || '',
+          phone: storeDetails.value.storePhone?.trim() || '',
+          email: storeDetails.value.storeEmail?.trim() || '',
+        },
+        { setAsCurrent: true }
+      )
+    }
     
     // Redirect to dashboard (tutorial will start there)
     await navigateTo('/dashboard')
@@ -325,4 +354,17 @@ const completeOnboarding = async () => {
   }
 }
 </script>
+
+<style scoped>
+.step-fade-enter-active,
+.step-fade-leave-active {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.step-fade-enter-from,
+.step-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+</style>
 

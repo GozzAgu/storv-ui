@@ -589,6 +589,24 @@ const loadDepartmentData = async () => {
     return
   }
 
+  // Staff may only open their own department
+  if (userStore.userData?.role === 'staff') {
+    try {
+      const member = await staffStore.fetchCurrentStaffMember()
+      if (!member?.departmentId) {
+        await navigateTo('/dashboard/departments')
+        return
+      }
+      if (departmentId.value !== member.departmentId) {
+        await navigateTo(`/dashboard/departments/${member.departmentId}`)
+        return
+      }
+    } catch {
+      await navigateTo('/dashboard/departments')
+      return
+    }
+  }
+
   isLoadingDepartment.value = true
   isLoadingStaff.value = true
   

@@ -303,7 +303,7 @@
       :subtitle="editingFolder ? 'Update folder details and template.' : 'Add a new inventory folder and define its table columns.'"
       size="lg"
     >
-      <div class="max-h-[65vh] overflow-y-auto -mx-1 px-1">
+      <div class="max-h-[65vh] overflow-y-auto">
         <form @submit.prevent="handleSaveFolder" class="bg-transparent">
           <!-- Basic info -->
           <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
@@ -362,17 +362,6 @@
                 />
           <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
         </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
-                <div class="flex items-center gap-2.5">
-            <input
-              v-model="folderForm.color"
-              type="color"
-                    class="w-9 h-7 rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 cursor-pointer overflow-hidden"
-            />
-                  <span class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ folderForm.color }}</span>
-                </div>
-              </div>
           </div>
         </div>
 
@@ -388,15 +377,30 @@
           </Checkbox>
         </div>
 
-          <!-- Department access -->
+          <!-- Department access (optional — folders work without departments; restrict later) -->
           <div v-if="canCreateInventoryFolders" class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
-            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Department access</h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">Which departments can use this folder. Empty = all.</p>
+            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Department access <span class="font-normal text-gray-500 dark:text-gray-400">(optional)</span></h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">
+              Leave all unchecked for <span class="font-medium text-gray-700 dark:text-gray-300">all departments</span> in this store.
+              Check specific departments to limit who can use this folder. You can change this anytime by editing the folder.
+            </p>
             <div v-if="departmentsStore.loading" class="text-xs text-gray-500 dark:text-gray-400 py-1.5">Loading departments…</div>
-            <div v-else-if="departmentsStore.departments.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-1.5">No departments yet. Create one in Settings.</div>
+            <div
+              v-else-if="currentStoreDepartments.length === 0"
+              class="rounded-lg bg-gray-50 dark:bg-gray-900/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
+            >
+              <p>No departments in this store yet — you can still create this folder. It will be available to everyone until you add departments and optionally restrict access here.</p>
+              <NuxtLink
+                v-if="currentStoreId"
+                :to="`/dashboard/stores/${currentStoreId}/departments`"
+                class="inline-flex mt-2 text-primary-600 dark:text-primary-400 font-medium hover:underline"
+              >
+                Add departments →
+              </NuxtLink>
+            </div>
             <div v-else class="space-y-0 max-h-40 overflow-y-auto">
               <label
-              v-for="dept in departmentsStore.departments"
+              v-for="dept in currentStoreDepartments"
               :key="dept.id"
                 class="flex items-center gap-2.5 py-2 border-b border-gray-100 dark:border-gray-700/80 last:border-b-0 cursor-pointer"
               >
@@ -426,39 +430,30 @@
             </Button>
           </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Define columns for this folder’s table.</p>
-            <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto">
+            <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto px-1 py-1">
             <div
               v-for="(field, index) in editableFields"
               :key="field.id"
                 class="py-3 border-b border-gray-100 dark:border-gray-700/60 last:border-b-0"
             >
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 items-end">
-                <div class="sm:col-span-3">
-                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Field name *</label>
-                  <input
-                    v-model="field.name"
-                    type="text"
-                    required
-                        class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                        placeholder="e.g. sku"
-                  />
-                </div>
-                <div class="sm:col-span-3">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 items-end min-w-0">
+                <div class="sm:col-span-6 min-w-0">
                       <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Label *</label>
                   <input
                     v-model="field.label"
                     type="text"
                     required
-                        class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                        placeholder="Display name"
+                        class="w-full min-w-0 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0"
+                        placeholder="Column title"
+                        @input="syncTemplateFieldNameFromLabel(field)"
                   />
                 </div>
-                <div class="sm:col-span-3">
+                <div class="sm:col-span-3 min-w-0">
                       <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type *</label>
                   <select
                     v-model="field.type"
                     required
-                        class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                        class="w-full min-w-0 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer"
                   >
                     <option value="text">Text</option>
                     <option value="number">Number</option>
@@ -478,7 +473,7 @@
                         <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
                   </label>
                   <button
-                    v-if="!['name', 'price'].includes(field.name)"
+                    v-if="!isLockedTemplateField(field)"
                     type="button"
                     @click="handleRemoveField(index)"
                         class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -486,7 +481,7 @@
                   >
                     <TrashIcon class="w-4 h-4" />
                   </button>
-                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Default field">Default</span>
+                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Built-in column">Default</span>
                 </div>
               </div>
             </div>
@@ -758,6 +753,49 @@ const getDefaultFields = (): TemplateField[] => {
       required: false,
     },
   ]
+}
+
+/** Internal keys are fixed; only label is shown/edited for these. */
+const LOCKED_TEMPLATE_FIELD_NAMES = new Set([
+  'name',
+  'price',
+  'serialNo',
+  'serialNumber',
+  'brand',
+  'model',
+])
+
+function isLockedTemplateField(field: TemplateField): boolean {
+  return LOCKED_TEMPLATE_FIELD_NAMES.has(field.name)
+}
+
+/** Safe key from label (lowercase, spaces → underscores). */
+function labelToFieldName(label: string): string {
+  return label
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '') || ''
+}
+
+/** For custom columns, keep `name` in sync with what the user types as the label. */
+function syncTemplateFieldNameFromLabel(field: TemplateField) {
+  if (isLockedTemplateField(field)) return
+  const label = field.label.trim()
+  if (!label) {
+    field.name = `field_${field.id.replace(/[^a-z0-9]/gi, '').slice(-12) || 'x'}`
+    return
+  }
+  let base = labelToFieldName(label)
+  if (!base) base = 'field'
+  const others = editableFields.value.filter((f) => f.id !== field.id)
+  const used = new Set(others.map((f) => f.name))
+  let candidate = base
+  let n = 2
+  while (used.has(candidate)) {
+    candidate = `${base}_${n++}`
+  }
+  field.name = candidate
 }
 
 const editableFields = ref<TemplateField[]>(getDefaultFields())
@@ -1087,7 +1125,8 @@ const handleConfirmDuplicateFolder = async () => {
 
   isDuplicatingFolder.value = true
   try {
-    const allowedDepartments = source.allowedDepartments && source.allowedDepartments.length > 0 ? source.allowedDepartments : undefined
+    const allowedDepartments =
+      source.allowedDepartments && source.allowedDepartments.length > 0 ? [...source.allowedDepartments] : []
     const template = source.template ? { ...source.template, fields: source.template.fields.map(f => ({ ...f })) } : undefined
 
     for (const name of names) {
@@ -1175,6 +1214,11 @@ const handleEditFolder = (folder: InventoryFolder) => {
       editableFields.value.push(brandField)
     }
   }
+  nextTick(() => {
+    editableFields.value.forEach((f) => {
+      if (!isLockedTemplateField(f)) syncTemplateFieldNameFromLabel(f)
+    })
+  })
   showCreateFolderModal.value = true
 }
 
@@ -1247,6 +1291,16 @@ const handleSaveFolder = async () => {
     return
   }
 
+  for (const f of editableFields.value) {
+    if (!f.label.trim()) {
+      alert('Please enter a label for every column')
+      return
+    }
+    if (!isLockedTemplateField(f)) {
+      syncTemplateFieldNameFromLabel(f)
+    }
+  }
+
   // Template is always custom, no need to check
 
   // Ensure default fields are always included
@@ -1287,8 +1341,10 @@ const handleSaveFolder = async () => {
   }
 
   try {
-    // Prepare allowedDepartments - use empty array if none selected (accessible to all)
-    const allowedDepartments = folderForm.allowedDepartments.length > 0 ? folderForm.allowedDepartments : undefined
+    // [] = all departments (same as omitting field). Non-empty = restrict to listed departments.
+    // Use [] not undefined so Firestore updates clear a previous restriction when user unchecks all.
+    const allowedDepartments =
+      folderForm.allowedDepartments.length > 0 ? [...folderForm.allowedDepartments] : []
 
     if (editingFolder.value) {
       // Update existing folder
@@ -1299,7 +1355,7 @@ const handleSaveFolder = async () => {
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
         template: template,
-        allowedDepartments: allowedDepartments,
+        allowedDepartments,
       })
       handleCancelFolder()
     } else {
@@ -1311,7 +1367,7 @@ const handleSaveFolder = async () => {
         color: folderForm.color,
         hasSerialNumbers: folderForm.hasSerialNumbers,
         template: template,
-        allowedDepartments: allowedDepartments,
+        allowedDepartments,
       })
       handleCancelFolder()
     }
@@ -1337,20 +1393,21 @@ const handleCancelFolder = () => {
 }
 
 const handleAddField = () => {
+  const id = `field-${Date.now()}-${Math.random()}`
   const newField: TemplateField = {
-    id: `field-${Date.now()}-${Math.random()}`,
-    name: '',
+    id,
+    name: `tmp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     label: '',
     type: 'text',
     required: false,
   }
-  editableFields.value.push(newField)
+  // Top of the list (save will still order name + price first, then other columns)
+  editableFields.value.unshift(newField)
 }
 
 const handleRemoveField = (index: number) => {
   const field = editableFields.value[index]
-  // Prevent removal of default fields
-  if (field && ['name', 'price'].includes(field.name)) {
+  if (field && isLockedTemplateField(field)) {
     return
   }
   editableFields.value.splice(index, 1)

@@ -156,7 +156,24 @@ export const useDepartmentsStore = defineStore('departments', {
           })
         }
 
-        this.departments = departments
+        // Staff: only list the department they belong to (not every department in the store)
+        let visibleDepartments = departments
+        if (userStore.userData?.role === 'staff') {
+          try {
+            const { useStaffStore } = await import('./staff')
+            const staffStore = useStaffStore()
+            const staffMember = await staffStore.fetchCurrentStaffMember()
+            const myDeptId = staffMember?.departmentId
+            visibleDepartments = myDeptId
+              ? departments.filter((d) => d.id === myDeptId)
+              : []
+          } catch (e) {
+            console.warn('[DepartmentsStore] Could not filter departments for staff:', e)
+            visibleDepartments = []
+          }
+        }
+
+        this.departments = visibleDepartments
       } catch (error: any) {
         console.error('[DepartmentsStore] Error fetching departments:', error.message || error)
         this.error = error.message || 'Failed to fetch departments'
@@ -207,6 +224,19 @@ export const useDepartmentsStore = defineStore('departments', {
         // Only return department if it belongs to this user
         if (data.createdBy !== userId) {
           throw new Error('Department not found or access denied')
+        }
+
+        const userStore = useUserStore()
+        if (!userStore.userData) {
+          await userStore.fetchUserData(authStore.currentUser.uid)
+        }
+        if (userStore.userData?.role === 'staff') {
+          const { useStaffStore } = await import('./staff')
+          const staffStore = useStaffStore()
+          const staffMember = await staffStore.fetchCurrentStaffMember()
+          if (!staffMember?.departmentId || staffMember.departmentId !== departmentId) {
+            throw new Error('Access denied: You can only view your own department')
+          }
         }
 
         const department = {
