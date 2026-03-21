@@ -13,7 +13,7 @@
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
-    "test:unit": "vitest run tests/server",
+    "test:unit": "vitest run tests/server tests/integration",
     "test:rules": "firebase emulators:exec --only firestore,storage \"vitest run tests/rules --reporter=dot\"",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",

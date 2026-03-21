@@ -693,6 +693,11 @@ import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
+import {
+  getInventoryItemDisplayName as getItemDisplayName,
+  getInventoryItemField as getItemField,
+  getFolderColorClass,
+} from '~/composables/useInventoryItemDisplay'
 
 interface Props {
   modelValue: boolean
@@ -1122,46 +1127,8 @@ const removeSplitPayment = (index: number) => {
   }
 }
 
-const getItemDisplayName = (item: InventoryItem) => {
-  // Prefer brand + model for serial-number items (e.g. Laptop → Dell XPS 15)
-  const brand = getItemField(item, 'brand')
-  const model = getItemField(item, 'model')
-  if (brand || model) {
-    return [brand, model].filter(Boolean).join(' ').trim()
-  }
-  // Fall back to name/item/title field
-  const nameField = Object.keys(item).find(key => 
-    key.toLowerCase().includes('name') || 
-    key.toLowerCase().includes('item') ||
-    key === 'title'
-  )
-  return nameField ? item[nameField] : `Item ${item.id.slice(0, 8)}`
-}
-
-const getItemField = (item: InventoryItem, fieldName: string): string => {
-  // Try exact match first
-  if (item[fieldName]) return String(item[fieldName])
-  
-  // Try case-insensitive match
-  const key = Object.keys(item).find(k => k.toLowerCase() === fieldName.toLowerCase())
-  return key ? String(item[key]) : ''
-}
-
 // formatCurrency is now imported from usePreferences for currency conversion
-
-const getFolderColorClass = (color: string) => {
-  const colorMap: Record<string, string> = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    purple: 'bg-primary-400',
-    orange: 'bg-orange-500',
-    red: 'bg-red-500',
-    pink: 'bg-pink-500',
-    indigo: 'bg-indigo-500',
-    yellow: 'bg-yellow-500',
-  }
-  return colorMap[color] || 'bg-gray-500'
-}
+// getItemDisplayName, getItemField, getFolderColorClass from useInventoryItemDisplay
 
 const nextStep = () => {
   if (canProceed.value && currentStep.value < steps.length - 1) {

@@ -9,7 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['tests/server/**/*.spec.ts'],
+    include: ['tests/server/**/*.spec.ts', 'tests/integration/**/*.spec.ts'],
     globals: true,
     restoreMocks: true,
     clearMocks: true,

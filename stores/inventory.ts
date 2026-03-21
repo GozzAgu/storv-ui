@@ -7,6 +7,7 @@ import { useStaffStore } from './staff'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventoryItemsCollection, getInventoryItemDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
+import { duplicateSerialExistsViaApi } from '~/utils/inventory-serial-validation'
 
 export interface TemplateField {
   id: string
@@ -940,11 +941,9 @@ export const useInventoryStore = defineStore('inventory', {
         if (!authStore.currentUser) {
           throw new Error('User must be authenticated for duplicate validation')
         }
-        const token = await authStore.currentUser.getIdToken()
-        const response = await $fetch<{ success: boolean; duplicateExists: boolean }>('/api/inventory/validate-serial', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: {
+        return await duplicateSerialExistsViaApi(
+          () => authStore.currentUser!.getIdToken(),
+          {
             ownerUserId: createdByUid,
             storeId,
             folderId,
@@ -952,9 +951,8 @@ export const useInventoryStore = defineStore('inventory', {
             brand: brand.trim(),
             model: model.trim(),
             userRole,
-          },
-        })
-        return !!response.duplicateExists
+          }
+        )
       } catch (error: any) {
         // Fail closed: if validation cannot be completed, block write.
         console.error('Error checking duplicate serial number:', error)

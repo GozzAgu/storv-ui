@@ -567,6 +567,10 @@ import Modal from '~/components/ui/Modal.vue'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { SUBSCRIPTION_PLANS, SUBSCRIPTION_FEATURE_SUMMARY, type SubscriptionPlan } from '~/types/subscription'
+import {
+  initializePaystackSubscription,
+  type PaystackInitializeFetcher,
+} from '~/utils/paystack-upgrade'
 
 definePageMeta({
   layout: 'dashboard'
@@ -634,22 +638,19 @@ const handleUpgradeSubscription = async () => {
 
   isUpgradingSubscription.value = true
   try {
-    const res = await $fetch<{ success: boolean; authorization_url?: string; message?: string }>('/api/paystack/initialize', {
-      method: 'POST',
-      body: {
+    const result = await initializePaystackSubscription(
+      {
         planId: selectedUpgradePlan.value,
         email: currentUser.value.email || '',
         userId: currentUser.value.uid,
       },
-    })
-    if (res.success && res.authorization_url) {
-      window.location.href = res.authorization_url
+      $fetch as PaystackInitializeFetcher
+    )
+    if (result.ok) {
+      window.location.href = result.authorizationUrl
       return
     }
-    toast.error(res.message || 'Could not start payment')
-  } catch (err: any) {
-    const msg = err?.data?.message || err?.message || 'Failed to start payment'
-    toast.error(msg)
+    toast.error(result.message)
   } finally {
     isUpgradingSubscription.value = false
   }

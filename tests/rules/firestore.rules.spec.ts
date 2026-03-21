@@ -44,4 +44,13 @@ describe('firestore.rules', () => {
     const db = testEnv.authenticatedContext('u2').firestore()
     await assertFails(getDoc(doc(db, 'users/u1/stores/s1')))
   })
+
+  it('denies unauthenticated read of store doc', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await setDoc(doc(context.firestore(), 'users/u1/stores/s1'), { ownerId: 'u1' })
+    })
+
+    const db = testEnv.unauthenticatedContext().firestore()
+    await assertFails(getDoc(doc(db, 'users/u1/stores/s1')))
+  })
 })
