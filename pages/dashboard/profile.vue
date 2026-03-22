@@ -485,10 +485,28 @@
             <input
               v-model="passwordForm.newPassword"
               type="password"
+              :minlength="PASSWORD_MIN_LENGTH"
+              autocomplete="new-password"
               class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-              placeholder="Enter new password"
+              placeholder="At least 12 characters, number and capital letter"
             />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
+            </p>
+            <ul
+              v-if="passwordForm.newPassword.length > 0"
+              class="mt-2 space-y-0.5 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
+              aria-label="Password requirements"
+            >
+              <li v-for="rule in passwordRuleChecks" :key="rule.id" class="flex items-center gap-1.5">
+                <span
+                  :class="rule.ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'"
+                  aria-hidden="true"
+                  >{{ rule.ok ? '✓' : '○' }}</span
+                >
+                <span>{{ rule.label }}</span>
+              </li>
+            </ul>
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -511,7 +529,16 @@
       </div>
       <template #footer>
         <Button variant="secondary" @click="showPasswordModal = false; resetPasswordForm()">Cancel</Button>
-        <Button @click="handlePasswordChange" :disabled="isChangingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || passwordForm.newPassword !== passwordForm.confirmPassword">
+        <Button
+          @click="handlePasswordChange"
+          :disabled="
+            isChangingPassword ||
+            !passwordForm.currentPassword ||
+            !passwordForm.newPassword ||
+            passwordForm.newPassword !== passwordForm.confirmPassword ||
+            !isPasswordPolicyValid(passwordForm.newPassword)
+          "
+        >
           <span v-if="isChangingPassword" class="flex items-center gap-2">
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -742,6 +769,12 @@ import { usePermissions } from '~/composables/usePermissions'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
+import {
+  PASSWORD_MIN_LENGTH,
+  getPasswordRuleChecks,
+  isPasswordPolicyValid,
+  getPasswordPolicyErrors,
+} from '~/utils/passwordPolicy'
 
 definePageMeta({
   layout: 'dashboard'
@@ -1025,6 +1058,8 @@ const passwordForm = reactive({
 })
 const passwordError = ref('')
 const isChangingPassword = ref(false)
+
+const passwordRuleChecks = computed(() => getPasswordRuleChecks(passwordForm.newPassword))
 
 // Helper function to reset password form
 const resetPasswordForm = () => {
@@ -1316,8 +1351,10 @@ const handlePasswordChange = async () => {
     return
   }
 
-  if (passwordForm.newPassword.length < 8) {
-    passwordError.value = 'Password must be at least 8 characters long'
+  if (!isPasswordPolicyValid(passwordForm.newPassword)) {
+    const errs = getPasswordPolicyErrors(passwordForm.newPassword)
+    passwordError.value =
+      errs.length > 0 ? `Password requirements: ${errs.join('; ')}.` : 'Please choose a stronger password.'
     return
   }
 

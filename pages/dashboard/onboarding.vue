@@ -2,96 +2,96 @@
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Progress Indicator -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-sm font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
-          <span class="text-sm font-medium text-primary-500 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
+      <div class="mb-5 sm:mb-6">
+        <div class="flex items-center justify-between mb-1.5">
+          <h2 class="text-xs font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
+          <span class="text-xs font-medium text-primary-500 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
         </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
           <div 
-            class="bg-gradient-to-r from-primary-400 to-primary-500 h-2 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-primary-400 to-primary-500 h-1.5 rounded-full transition-all duration-300"
             :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
           ></div>
         </div>
       </div>
 
       <!-- Form Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 sm:p-10 border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 sm:p-6 border border-gray-200 dark:border-gray-700">
         <Transition name="step-fade" mode="out-in">
           <!-- Step 1: Currency & Country Selection -->
-          <div v-if="currentStep === 1" key="step-1" class="space-y-6 sm:space-y-8">
-          <div class="text-center mb-6 sm:mb-8">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
-              <GlobeAltIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+          <div v-if="currentStep === 1" key="step-1" class="space-y-4 sm:space-y-5">
+          <div class="text-center mb-4 sm:mb-5">
+            <div class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5">
+              <GlobeAltIcon class="h-5 w-5 text-white" />
             </div>
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
               Welcome to Storvv!
             </h1>
-            <p class="text-gray-600 dark:text-gray-400">
+            <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
               Let's set up your account. Choose your currency and country to get started.
             </p>
           </div>
 
           <!-- Currency Selection -->
           <div>
-            <label for="currency" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <label for="currency" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Select Currency <span class="text-red-500">*</span>
             </label>
             <select
               id="currency"
               v-model="selectedCurrency"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose a currency...</option>
               <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
                 {{ currency.symbol }} {{ currency.name }} ({{ currency.code }})
               </option>
             </select>
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
               This currency will be used throughout your account for all transactions and reports.
             </p>
           </div>
 
           <!-- Country Selection -->
           <div>
-            <label for="country" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <label for="country" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Select Country <span class="text-red-500">*</span>
             </label>
             <select
               id="country"
               v-model="selectedCountry"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose your country...</option>
               <option v-for="region in regions" :key="region.code" :value="region.code">
                 {{ region.flag }} {{ region.name }}
               </option>
             </select>
-            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <p class="mt-1.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
               This helps us format dates, times, and numbers according to your location.
             </p>
           </div>
           </div>
 
           <!-- Step 2: Store Information -->
-          <div v-else key="step-2" class="space-y-4 sm:space-y-5">
-          <div class="text-center mb-6 sm:mb-8">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-3 sm:mb-4">
-              <BuildingStorefrontIcon class="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+          <div v-else key="step-2" class="space-y-3">
+          <div class="text-center mb-4 sm:mb-5">
+            <div class="mx-auto flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 mb-2.5">
+              <BuildingStorefrontIcon class="h-5 w-5 text-white" />
             </div>
-            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-1">
               Store Information
             </h1>
-            <p class="text-gray-600 dark:text-gray-400">
+            <p class="text-xs text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
               Tell us about your store. This information will be used on receipts and reports.
             </p>
           </div>
 
           <!-- Head store branch -->
           <div>
-            <label for="storeName" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="storeName" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Head store branch <span class="text-red-500">*</span>
             </label>
             <input
@@ -99,63 +99,63 @@
               v-model="storeDetails.storeName"
               type="text"
               required
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Enter head store branch"
             />
           </div>
 
           <!-- Store Address -->
           <div>
-            <label for="storeAddress" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="storeAddress" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Store Address
             </label>
             <textarea
               id="storeAddress"
               v-model="storeDetails.storeAddress"
               rows="3"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="123 Main Street, City, State 12345"
             ></textarea>
           </div>
 
           <!-- Store Phone -->
           <div>
-            <label for="storePhone" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="storePhone" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Store Phone
             </label>
             <input
               id="storePhone"
               v-model="storeDetails.storePhone"
               type="tel"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="+1 (555) 123-4567"
             />
           </div>
 
           <!-- Store Email -->
           <div>
-            <label for="storeEmail" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="storeEmail" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Store Email
             </label>
             <input
               id="storeEmail"
               v-model="storeDetails.storeEmail"
               type="email"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="store@example.com"
             />
           </div>
 
           <!-- Store Description -->
           <div>
-            <label for="storeDescription" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label for="storeDescription" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Store Description
             </label>
             <textarea
               id="storeDescription"
               v-model="storeDetails.storeDescription"
               rows="3"
-              class="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary-400 focus:border-primary-400 transition-all duration-200 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
@@ -163,40 +163,35 @@
         </Transition>
 
         <!-- Error Message -->
-        <div v-if="errorMessage" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md mb-6">
-          <p class="text-sm text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
+        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+          <p class="text-xs text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
         </div>
 
         <!-- Navigation Buttons -->
-        <div class="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button
+        <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <Button
             v-if="currentStep > 1"
-            @click="previousStep"
+            variant="outline"
+            size="sm"
             type="button"
-            class="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            @click="previousStep"
           >
             Previous
-          </button>
-          <div v-else></div>
+          </Button>
+          <div v-else aria-hidden="true" />
 
-          <button
-            @click="nextStep"
-            :disabled="isLoading || !canContinue"
+          <Button
+            variant="primary"
+            size="sm"
             type="button"
-            class="px-6 py-2.5 bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-md font-semibold text-sm hover:brightness-110 hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100 flex items-center gap-2"
+            :icon="ArrowRightIcon"
+            icon-right
+            :loading="isLoading"
+            :disabled="isLoading || !canContinue"
+            @click="nextStep"
           >
-            <span v-if="!isLoading">
-              {{ currentStep === totalSteps ? 'Complete Setup' : 'Continue' }}
-              <ArrowRightIcon class="inline-block w-4 h-4 ml-1" />
-            </span>
-            <span v-else class="flex items-center gap-2">
-              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Saving...
-            </span>
-          </button>
+            {{ isLoading ? 'Saving...' : (currentStep === totalSteps ? 'Complete Setup' : 'Continue') }}
+          </Button>
         </div>
       </div>
     </div>
@@ -206,6 +201,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed } from 'vue'
 import { GlobeAltIcon, ArrowRightIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
@@ -365,6 +361,19 @@ const completeOnboarding = async () => {
 .step-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);
+}
+
+/* Native selects: align height with compact inputs (browser default line-height can look tall) */
+.onboarding-input {
+  min-height: 2.25rem;
+}
+select.onboarding-input {
+  min-height: 2.25rem;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+textarea.onboarding-input {
+  min-height: auto;
 }
 </style>
 

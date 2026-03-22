@@ -137,6 +137,14 @@
           </Button>
         </div>
 
+        <p
+          v-if="isMicroSubscription"
+          class="mx-5 sm:mx-6 -mt-1 mb-1 text-[11px] sm:text-xs leading-snug font-extralight text-amber-500/75 dark:text-amber-400/50"
+        >
+          Multiple store branches are not included on Storvv Micro (free). Upgrade to Medium or Enterprise in the
+          Account section above to add more stores.
+        </p>
+
         <div class="relative px-5 sm:px-6 py-5">
           <div v-if="storesLoading" class="text-center py-10">
             <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary-500/20 border-t-primary-500 animate-spin" />
@@ -618,6 +626,9 @@ const currentSubscription = computed<SubscriptionPlan>(() => {
 const currentSubscriptionLabel = computed(() => {
   return SUBSCRIPTION_PLANS.find(p => p.id === currentSubscription.value)?.name || 'Storvv Micro'
 })
+
+/** Free tier — single store; show upgrade message for multiple branches */
+const isMicroSubscription = computed(() => currentSubscription.value === 'storvv_micro')
 const upgradeOptions = computed(() => {
   const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)
   return SUBSCRIPTION_PLANS.filter(p => subscriptionOrder.indexOf(p.id) > currentIdx)

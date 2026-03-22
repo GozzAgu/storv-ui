@@ -306,7 +306,7 @@
       <!-- Empty state -->
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-6 text-center"
+        class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-6 text-center min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
       >
         <div class="w-12 h-12 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
           <BuildingOfficeIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />

@@ -1,5 +1,5 @@
 <template>
-  <div class="pb-24 sm:pb-20">
+  <div class="pb-24 sm:pb-20 flex flex-col min-h-[calc(100svh-4rem)]">
     <!-- Hero header (duplicate upsell inline beside title — Micro plan) -->
     <div class="mb-3 sm:mb-4">
       <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -186,7 +186,7 @@
     <!-- Empty state (when not loading and no folders) -->
     <div
       v-else
-      class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
+      class="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
     >
       <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
         <FolderIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />

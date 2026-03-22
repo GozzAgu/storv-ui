@@ -209,6 +209,8 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'
+import { useDepartmentsStore } from '~/stores/departments'
+import { useStaffInvitePasswordsStore } from '~/stores/staffInvitePasswords'
 
 interface Props {
   modelValue: boolean
@@ -225,6 +227,8 @@ const emit = defineEmits<{
 }>()
 
 const staffStore = useStaffStore()
+const departmentsStore = useDepartmentsStore()
+const staffInvitePasswordsStore = useStaffInvitePasswordsStore()
 
 const formData = ref({
   firstName: '',
@@ -393,6 +397,16 @@ const handleSubmit = async () => {
       if (created?.temporaryPassword) {
         temporaryPasswordToShow.value = created.temporaryPassword
         showTemporaryPassword.value = true
+        const dept =
+          departmentsStore.getDepartmentById(props.departmentId) ||
+          (await departmentsStore.fetchDepartment(props.departmentId).catch(() => null))
+        staffInvitePasswordsStore.recordInvite({
+          staffEmail: formData.value.email.trim().toLowerCase(),
+          staffName: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+          password: created.temporaryPassword,
+          departmentId: props.departmentId,
+          departmentName: dept?.name || 'Department',
+        })
         return
       }
     }

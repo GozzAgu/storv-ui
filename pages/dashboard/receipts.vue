@@ -247,7 +247,7 @@
       <!-- Standalone empty state (same styling as customers empty state, no button) -->
       <div
         v-else-if="sortedFilteredReceipts.length === 0"
-        class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
+        class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
       >
         <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
           <ReceiptPercentIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
@@ -918,7 +918,7 @@
         <!-- Standalone empty state on mobile/desktop so it's never clipped by table scroll (typography matches receipts/folders empty states) -->
         <div
           v-else-if="filteredCustomers.length === 0"
-          class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full"
+          class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
         >
           <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
             <UsersIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />

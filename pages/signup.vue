@@ -78,7 +78,8 @@
                   autocomplete="new-password"
                   required
                   class="w-full px-3 py-2 pr-10 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
-                  placeholder="Create a password (min 8 characters)"
+                  :minlength="PASSWORD_MIN_LENGTH"
+                  placeholder="At least 12 characters, with a number and capital letter"
                 />
                 <button
                   type="button"
@@ -90,6 +91,56 @@
                   <EyeSlashIcon v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
+
+              <!-- Strength meter -->
+              <div
+                v-if="form.password.length > 0"
+                class="mt-2 space-y-1.5"
+                aria-live="polite"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Password strength</span>
+                  <span class="text-[10px] font-semibold tabular-nums" :class="strengthLabelClass">
+                    {{ passwordStrength.label }}
+                  </span>
+                </div>
+                <div
+                  class="flex gap-1"
+                  role="meter"
+                  :aria-valuenow="passwordStrength.score"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label="Password strength score"
+                >
+                  <div
+                    v-for="seg in 4"
+                    :key="seg"
+                    class="h-1.5 min-w-0 flex-1 rounded-full transition-colors duration-200"
+                    :class="seg <= passwordStrength.segments ? strengthSegmentClass : 'bg-gray-200 dark:bg-gray-700'"
+                  />
+                </div>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                  {{ strengthHint }}
+                </p>
+              </div>
+
+              <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                Required: at least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase letter.
+              </p>
+              <ul
+                v-if="form.password.length > 0"
+                class="mt-2 space-y-1 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
+                aria-label="Password requirements"
+              >
+                <li v-for="rule in passwordRuleChecks" :key="rule.id" class="flex items-center gap-1.5">
+                  <span
+                    :class="rule.ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'"
+                    aria-hidden="true"
+                    >{{ rule.ok ? '✓' : '○' }}</span
+                  >
+                  <span>{{ rule.label }}</span>
+                </li>
+              </ul>
             </div>
 
             <div class="space-y-1.5">
@@ -216,6 +267,13 @@ import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
+import {
+  PASSWORD_MIN_LENGTH,
+  getPasswordRuleChecks,
+  getPasswordPolicyErrors,
+  isPasswordPolicyValid,
+  getPasswordStrength,
+} from '~/utils/passwordPolicy'
 
 definePageMeta({
   layout: false,
@@ -242,6 +300,46 @@ const rulesCopied = ref(false)
 
 const { signUp, sendVerificationEmail } = useFirebaseAuth()
 const { createUserDocument } = useUser()
+
+const passwordRuleChecks = computed(() => getPasswordRuleChecks(form.value.password))
+
+const passwordStrength = computed(() => getPasswordStrength(form.value.password))
+
+const strengthLabelClass = computed(() => {
+  const t = passwordStrength.value.tier
+  return {
+    'text-gray-400 dark:text-gray-500': t === 'empty',
+    'text-red-600 dark:text-red-400': t === 'weak',
+    'text-orange-600 dark:text-orange-400': t === 'fair',
+    'text-amber-600 dark:text-amber-400': t === 'good',
+    'text-green-600 dark:text-green-400': t === 'strong',
+  }
+})
+
+const strengthSegmentClass = computed(() => {
+  const t = passwordStrength.value.tier
+  if (t === 'weak') return 'bg-red-500 dark:bg-red-500'
+  if (t === 'fair') return 'bg-orange-500 dark:bg-orange-400'
+  if (t === 'good') return 'bg-amber-500 dark:bg-amber-400'
+  if (t === 'strong') return 'bg-green-500 dark:bg-green-500'
+  return 'bg-gray-300 dark:bg-gray-600'
+})
+
+const strengthHint = computed(() => {
+  const s = passwordStrength.value
+  const pwd = form.value.password
+  if (!pwd.length) return ''
+  if (!isPasswordPolicyValid(pwd)) {
+    return 'Meet all required checks below to continue.'
+  }
+  if (s.tier === 'strong') {
+    return 'Great — this password looks strong.'
+  }
+  if (s.tier === 'good') {
+    return 'Good. Add variety or length to reach Strong.'
+  }
+  return 'Add lowercase letters, symbols, or more characters to increase strength.'
+})
 
 // Function to copy Firestore rules to clipboard
 const copyRulesToClipboard = async () => {
@@ -303,8 +401,10 @@ const handleSignUp = async () => {
     return
   }
 
-  if (form.value.password.length < 8) {
-    errorMessage.value = 'Password must be at least 8 characters long'
+  if (!isPasswordPolicyValid(form.value.password)) {
+    const errs = getPasswordPolicyErrors(form.value.password)
+    errorMessage.value =
+      errs.length > 0 ? `Password requirements: ${errs.join('; ')}.` : 'Please choose a stronger password.'
     return
   }
 

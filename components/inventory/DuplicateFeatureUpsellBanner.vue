@@ -1,15 +1,14 @@
 <template>
   <p
     v-if="showBanner"
-    class="m-0 max-w-full text-[10px] sm:text-[11px] leading-snug text-gray-400/85 dark:text-gray-500/75"
+    class="m-0 max-w-full text-[10px] sm:text-[11px] leading-snug font-extralight text-amber-500/70 dark:text-amber-400/55"
   >
-    <span class="font-medium text-gray-400/90 dark:text-gray-500/80">Duplicate</span>
-    <span> - Medium &amp; Enterprise.</span>
+    <span>Duplicate — Medium &amp; Enterprise.</span>
     <template v-if="userStore.isSuperAdmin">
       {{ ' ' }}
       <NuxtLink
         to="/dashboard/settings?upgrade=1"
-        class="font-medium text-gray-500/90 dark:text-gray-400/75 hover:text-primary-500/80 dark:hover:text-primary-400/80 hover:underline underline-offset-2 decoration-primary-500/40 whitespace-nowrap"
+        class="font-extralight text-amber-500/75 dark:text-amber-400/60 hover:text-amber-600/90 dark:hover:text-amber-300/80 hover:underline underline-offset-2 whitespace-nowrap"
       >
         Upgrade
       </NuxtLink>

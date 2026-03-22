@@ -1,6 +1,13 @@
 <template>
     <Breadcrumbs :items="departmentBreadcrumbs" />
 
+    <StaffInvitePasswordsPanel
+      v-if="departmentId"
+      :department-id="departmentId"
+      :can-show="canCreateNewStaff"
+      class="mb-4 sm:mb-6"
+    />
+
     <div class="mb-4 sm:mb-6 flex items-start gap-3">
       <button
         @click="navigateTo('/dashboard/departments')"
@@ -378,6 +385,7 @@ import Pagination from '~/components/ui/Pagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
+import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
 import { useAuthStore } from '~/stores/auth'

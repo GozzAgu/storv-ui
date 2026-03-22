@@ -30,10 +30,13 @@
             :type="showNew ? 'text' : 'password'"
             autocomplete="new-password"
             required
-            minlength="6"
+            :minlength="PASSWORD_MIN_LENGTH"
             class="w-full px-3 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/25 focus:ring-offset-0 outline-none"
-            placeholder="At least 6 characters"
+            placeholder="At least 12 characters, number and capital letter"
           />
+          <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+            At least {{ PASSWORD_MIN_LENGTH }} characters, one number, one uppercase letter.
+          </p>
         </div>
         <div>
           <label for="confirm" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirm new password</label>
@@ -54,7 +57,7 @@
           type="submit"
           size="sm"
           class="w-full !rounded-lg"
-          :disabled="isSubmitting || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword || form.newPassword.length < 6"
+          :disabled="isSubmitting || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword || !isPasswordPolicyValid(form.newPassword)"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center gap-2">
             <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -71,6 +74,12 @@
 </template>
 
 <script setup lang="ts">
+import {
+  PASSWORD_MIN_LENGTH,
+  isPasswordPolicyValid,
+  getPasswordPolicyErrors,
+} from '~/utils/passwordPolicy'
+
 definePageMeta({ layout: 'dashboard', middleware: ['auth'] })
 
 const form = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -103,8 +112,10 @@ const handleSubmit = async () => {
     errorMessage.value = 'New password and confirmation do not match.'
     return
   }
-  if (form.value.newPassword.length < 6) {
-    errorMessage.value = 'New password must be at least 6 characters.'
+  if (!isPasswordPolicyValid(form.value.newPassword)) {
+    const errs = getPasswordPolicyErrors(form.value.newPassword)
+    errorMessage.value =
+      errs.length > 0 ? `Password requirements: ${errs.join('; ')}.` : 'Please choose a stronger password.'
     return
   }
   isSubmitting.value = true
