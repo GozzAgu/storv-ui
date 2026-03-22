@@ -3,17 +3,16 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'animated-button group relative inline-flex items-center justify-center overflow-hidden rounded-lg border-none font-semibold cursor-pointer transition-all duration-[0.6s] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
-      'ease-[cubic-bezier(0.23,1,0.32,1)]',
+      'relative inline-flex items-center justify-center rounded-lg border-0 font-semibold cursor-pointer transition duration-200 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
       sizeClasses,
       variantBgClasses,
-      variantRingClasses,
+      variantFocusRingClasses,
       variantTextClasses,
       extraClass
     ]"
     @click="handleClick"
   >
-    <span class="relative z-10 inline-flex items-center gap-1.5 sm:gap-2 text-inherit group-hover:text-white">
+    <span class="relative z-10 inline-flex items-center gap-1.5 sm:gap-2 text-inherit">
       <component
         v-if="loading"
         :is="loadingIcon"
@@ -31,10 +30,6 @@
         :class="iconSize"
       />
     </span>
-    <span
-      aria-hidden="true"
-      :class="['animated-button__ripple', variantRippleClasses]"
-    />
   </button>
 </template>
 
@@ -89,59 +84,50 @@ const iconSize = computed(() => {
 // Solid background for filled variants (fixes “half blue” / transparent default)
 const variantBgClasses = computed(() => {
   const map = {
-    primary: 'bg-primary-400 dark:bg-primary-500 text-white hover:bg-primary-500 dark:hover:bg-primary-600',
-    secondary: 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-500',
-    danger: 'bg-red-500 dark:bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600',
-    success: 'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 dark:hover:bg-green-600',
-    outline: 'bg-transparent dark:bg-transparent',
-    ghost: 'bg-transparent dark:bg-transparent',
+    primary:
+      'bg-primary-400 dark:bg-primary-500 text-white shadow-sm hover:bg-primary-500 hover:shadow dark:hover:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-700',
+    secondary:
+      'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-300 hover:shadow dark:hover:bg-gray-500 active:bg-gray-400 dark:active:bg-gray-400',
+    danger:
+      'bg-red-500 dark:bg-red-500 text-white shadow-sm hover:bg-red-600 hover:shadow-md active:bg-red-700',
+    success:
+      'bg-green-500 dark:bg-green-500 text-white shadow-sm hover:bg-green-600 hover:shadow-md active:bg-green-700',
+    outline:
+      'bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-100 hover:shadow dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-900',
+    ghost:
+      'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700',
   }
   return map[props.variant]
 })
 
-// Ring (subtle border glow) and hover ring – variant-specific
-const variantRingClasses = computed(() => {
+// Keyboard focus only — no ring/border at rest or on hover
+const variantFocusRingClasses = computed(() => {
   const map = {
     primary:
-      'ring-2 ring-primary-400/25 hover:ring-4 hover:ring-primary-400/40 dark:ring-white/15 dark:hover:ring-primary-400/40',
+      'focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400/60',
     secondary:
-      'ring-2 ring-gray-300/80 hover:ring-4 hover:ring-gray-400/60 dark:ring-white/10 dark:hover:ring-white/20',
+      'focus-visible:ring-2 focus-visible:ring-gray-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
     danger:
-      'ring-2 ring-red-500/25 hover:ring-4 hover:ring-red-500/40 dark:ring-red-400/20 dark:hover:ring-red-400/35',
+      'focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-2',
     success:
-      'ring-2 ring-green-500/25 hover:ring-4 hover:ring-green-500/40 dark:ring-green-400/20 dark:hover:ring-green-400/35',
+      'focus-visible:ring-2 focus-visible:ring-green-500/50 focus-visible:ring-offset-2',
     outline:
-      'ring-2 ring-gray-200 hover:ring-4 hover:ring-gray-300 dark:ring-gray-600 dark:hover:ring-gray-500',
+      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
     ghost:
-      'ring-2 ring-transparent hover:ring-2 hover:ring-gray-200 dark:hover:ring-gray-600',
+      'focus-visible:ring-2 focus-visible:ring-gray-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
   }
   return map[props.variant]
 })
 
-// Text color for outline/ghost; filled variants use variantBgClasses for text
+// Extra text tweaks for outline/ghost (filled variants already set text on bg)
 const variantTextClasses = computed(() => {
   const map = {
-    primary: 'focus-visible:ring-primary-500/30',
-    secondary: 'focus-visible:ring-gray-500/30',
-    danger: 'focus-visible:ring-red-500/30',
-    success: 'focus-visible:ring-green-500/30',
-    outline:
-      'text-gray-700 dark:text-gray-300 group-hover:text-white focus-visible:ring-gray-500/30',
-    ghost:
-      'text-gray-600 dark:text-gray-400 group-hover:text-white focus-visible:ring-gray-500/30',
-  }
-  return map[props.variant]
-})
-
-// Ripple circle color
-const variantRippleClasses = computed(() => {
-  const map = {
-    primary: 'bg-primary-400 dark:bg-primary-400',
-    secondary: 'bg-gray-400 dark:bg-gray-500',
-    danger: 'bg-red-500 dark:bg-red-400',
-    success: 'bg-green-500 dark:bg-green-400',
-    outline: 'bg-gray-400 dark:bg-gray-500',
-    ghost: 'bg-gray-300 dark:bg-gray-500',
+    primary: '',
+    secondary: '',
+    danger: '',
+    success: '',
+    outline: 'hover:text-gray-900 dark:hover:text-white',
+    ghost: 'hover:text-gray-900 dark:hover:text-gray-100',
   }
   return map[props.variant]
 })
@@ -152,47 +138,3 @@ const handleClick = (event: MouseEvent) => {
   }
 }
 </script>
-
-<style scoped>
-.animated-button:active {
-  transform: scale(0.95);
-}
-
-.animated-button__ripple {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    width 0.8s cubic-bezier(0.23, 1, 0.32, 1),
-    height 0.8s cubic-bezier(0.23, 1, 0.32, 1),
-    opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.animated-button:hover .animated-button__ripple {
-  width: 150px;
-  height: 150px;
-  opacity: 1;
-}
-
-/* Text and icons white on hover (ripple or darker bg) */
-.animated-button:hover .relative.z-10 {
-  color: white !important;
-}
-
-.animated-button:hover .relative.z-10 svg {
-  color: white !important;
-  stroke: white;
-}
-
-.animated-button:disabled:hover .animated-button__ripple {
-  width: 20px;
-  height: 20px;
-  opacity: 0;
-}
-</style>
