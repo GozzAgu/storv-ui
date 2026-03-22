@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="modelValue"
-      class="fixed inset-0 z-50 overflow-y-auto"
+      class="fixed inset-0 z-50 overflow-hidden"
       @click.self="handleBackdropClick"
     >
       <!-- Backdrop: no transition so it doesn't "pop" in before the form -->
@@ -14,8 +14,8 @@
         @click="handleBackdropClick"
       ></div>
 
-      <!-- Modal container + content with transition only on the dialog -->
-      <div class="flex min-h-full items-center justify-center p-2 sm:p-3 md:p-4">
+      <!-- Modal container: centers dialog; dialog body scrolls via max-h + overflow on panel -->
+      <div class="relative z-10 flex min-h-full items-center justify-center p-2 sm:p-3 md:p-4">
         <Transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 scale-95"
@@ -27,7 +27,7 @@
           <div
             v-if="modelValue"
               :class="[
-                'relative w-full bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-xl transform transition-all max-h-[calc(100vh-2rem)] flex flex-col',
+                'relative w-full min-h-0 max-h-[min(90dvh,calc(100vh-1.5rem))] overflow-hidden flex flex-col bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-xl transform transition-all',
                 sizeClasses
               ]"
               @click.stop
@@ -59,8 +59,11 @@
                 </button>
               </div>
 
-              <!-- Content -->
-              <div class="overflow-y-auto flex-1 min-h-0" :class="contentPadding">
+              <!-- Content: scrolls when taller than max height (flex min-h-0 chain is required) -->
+              <div
+                class="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0"
+                :class="contentPadding"
+              >
                 <slot />
               </div>
 

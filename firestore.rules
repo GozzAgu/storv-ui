@@ -65,12 +65,46 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'manager';
     }
 
+    // Staff / interns: POS — add receipts only (no inventory structure edits; sale fields use narrow item updates).
+    function isStoreStaff(userId, storeId) {
+      return isActiveStoreMember(userId, storeId) && (
+        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'staff' ||
+        get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'intern'
+      );
+    }
+
+    // Business account owner (path users/{userId} matches auth).
+    function isStoreOwnerForPath(userId) {
+      return isAuthenticated() && userId == request.auth.uid;
+    }
+
     function canAccessStoreData(userId, storeId) {
       return (isAuthenticated() && userId == request.auth.uid) || isActiveStoreMember(userId, storeId);
     }
 
+    // Super admin or manager: customers, notifications, etc. (not inventory structure or receipt line edits).
+    function canManageNonInventoryOps(userId, storeId) {
+      return isStoreOwnerForPath(userId) || isStoreManager(userId, storeId);
+    }
+
+    // Create new receipts (POS): owner, manager, or staff/intern.
+    function canCreateReceipt(userId, storeId) {
+      return isStoreOwnerForPath(userId) || isStoreManager(userId, storeId) || isStoreStaff(userId, storeId);
+    }
+
+    // Folders / full item CRUD: super admin (path owner) only.
+    function canManageInventoryStructure(userId, storeId) {
+      return isStoreOwnerForPath(userId) && ownsStore(userId, storeId);
+    }
+
+    // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
+    function inventoryItemOnlySaleOrReturnFieldChange() {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['dateOut', 'updatedAt']);
+    }
+
+    // Legacy name kept for a few rules; prefer the helpers above.
     function canManageStoreData(userId, storeId) {
-      return (isAuthenticated() && userId == request.auth.uid) || isStoreManager(userId, storeId);
+      return canManageNonInventoryOps(userId, storeId);
     }
 
     // Backward-compat: older docs may not include storeId yet.
@@ -225,17 +259,15 @@ service cloud.firestore {
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Allow create if user is creating their own folder OR if staff member belongs to this store
-          allow create: if canManageStoreData(userId, storeId) &&
+          // Create/update/delete: super admin (account owner) only — not managers or staff.
+          allow create: if canManageInventoryStructure(userId, storeId) &&
                          request.resource.data.storeId == storeId;
           
-          // Allow update if user owns the folder OR if staff member belongs to this store
-          allow update: if canManageStoreData(userId, storeId) &&
+          allow update: if canManageInventoryStructure(userId, storeId) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId);
           
-          // Allow delete if user owns the folder OR if superadmin owns the store
-          allow delete: if canManageStoreData(userId, storeId) &&
+          allow delete: if canManageInventoryStructure(userId, storeId) &&
                          resourceMatchesStore(storeId);
         }
         
@@ -248,29 +280,20 @@ service cloud.firestore {
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Allow create if:
-          // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
-          //    CRITICAL: userId == request.auth.uid allows super admin to create items in any of their stores
-          // 2. User is creating their own item (createdBy matches auth.uid)
-          // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
-          // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
-          allow create: if canManageStoreData(userId, storeId) &&
+          // Full create/delete: super admin only. Managers/staff cannot add/remove inventory records.
+          allow create: if canManageInventoryStructure(userId, storeId) &&
                          request.resource.data.storeId == storeId;
           
-          // Allow update if:
-          // 1. User is the super admin (userId in path matches auth.uid) - allows transfers between stores
-          //    CRITICAL: userId == request.auth.uid allows super admin to update ANY item in their stores
-          //    This is essential for transfers - super admin can update items they didn't create
-          // 2. User owns the item (createdBy matches auth.uid)
-          // 3. Staff member belongs to this store (request.auth.uid != userId means staff)
-          // Note: userId == request.auth.uid means the super admin is accessing their own stores
-          // IMPORTANT: The order matters - check userId == request.auth.uid first for super admins
-          allow update: if canManageStoreData(userId, storeId) &&
+          // Full update: super admin. Managers/staff: only dateOut/updatedAt (sale or return-to-stock).
+          allow update: if (canManageInventoryStructure(userId, storeId) &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId);
+                         requestMatchesStore(storeId)) ||
+                        ((isStoreManager(userId, storeId) || isStoreStaff(userId, storeId)) &&
+                         inventoryItemOnlySaleOrReturnFieldChange() &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId));
           
-          // Allow delete if user owns the item, superadmin owns the store, or staff (e.g. manager) in store
-          allow delete: if canManageStoreData(userId, storeId) &&
+          allow delete: if canManageInventoryStructure(userId, storeId) &&
                          resourceMatchesStore(storeId);
         }
         
@@ -280,56 +303,34 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId) &&
                        resourceMatchesStore(storeId);
           
-          // Allow create/update for store owner or active managers.
-          allow create: if canManageStoreData(userId, storeId) &&
+          // Create: super admin, manager, or staff (add receipt). Update: super admin or manager (not staff/intern).
+          allow create: if canCreateReceipt(userId, storeId) &&
                          request.resource.data.storeId == storeId;
-          
-          allow update: if canManageStoreData(userId, storeId) &&
+
+          allow update: if (isStoreOwnerForPath(userId) || isStoreManager(userId, storeId)) &&
                          resourceMatchesStore(storeId) &&
                          requestMatchesStore(storeId);
           
-          // Allow delete if:
-          // 1. User is the super admin (userId in path) who created the receipt
-          // 2. Staff member (actualCreator matches) - application code enforces manager-only restriction
-          // Note: Application-level checks prevent non-managers from deleting
-          // Tighten: only store owner can delete receipts.
           allow delete: if ownsStore(userId, storeId) &&
                          resourceMatchesStore(storeId);
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
         match /customers/{customerId} {
-          // Allow read if user owns the store OR if staff member belongs to this store
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Allow create if user is creating their own customer OR if staff member belongs to this store
-          allow create: if canManageStoreData(userId, storeId);
-          
-          // Allow update if user owns the customer OR if staff member belongs to this store
-          allow update: if canManageStoreData(userId, storeId);
-          
-          // Allow delete if user owns the customer
-          allow delete: if canManageStoreData(userId, storeId);
+          // Staff can upsert from POS; delete: super admin or manager only.
+          allow create: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
+          allow update: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
+          allow delete: if canManageNonInventoryOps(userId, storeId);
         }
         
         // Notifications subcollection: users/{userId}/stores/{storeId}/notifications/{notificationId}
         match /notifications/{notificationId} {
-          // Allow read if:
-          // 1. User is the super admin (userId in path matches auth.uid)
-          // 2. Staff member belongs to this store
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Allow create if:
-          // 1. User is the super admin (userId in path)
-          // 2. Staff member belongs to this store
-          allow create: if canManageStoreData(userId, storeId);
-          
-          // Allow update if:
-          // 1. User is the super admin (userId in path)
-          // 2. Staff member belongs to this store
-          allow update: if canManageStoreData(userId, storeId);
-          
-          // Allow delete if user is the super admin (userId in path)
+          allow create: if canCreateReceipt(userId, storeId);
+          allow update: if canManageNonInventoryOps(userId, storeId);
           allow delete: if isAuthenticated() && userId == request.auth.uid;
         }
         
@@ -337,9 +338,9 @@ service cloud.firestore {
         // Security audit trail (who changed what in inventory)
         match /activityLogs/{logId} {
           allow read: if canAccessStoreData(userId, storeId);
-          allow create: if canManageStoreData(userId, storeId) &&
+          allow create: if (canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId)) &&
                          request.resource.data.storeId == storeId &&
-                         request.resource.data.userId == userId;
+                         (request.resource.data.userId == userId || request.resource.data.userId == request.auth.uid);
           allow update, delete: if false;
         }
       }

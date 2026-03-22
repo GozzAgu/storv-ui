@@ -69,7 +69,7 @@
     </div>
 
     <!-- Select all + Bulk actions (folders) -->
-    <div v-if="canManage && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-3">
+    <div v-if="canCreateInventoryFolders && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-3">
       <Checkbox
         :model-value="allFoldersOnPageSelected"
         @update:model-value="toggleSelectAllFolders"
@@ -104,7 +104,7 @@
         @click="navigateToFolder(folder.id)"
       >
         <!-- Checkbox top-left -->
-        <div v-if="canManage" class="absolute left-2 top-2 z-10" @click.stop>
+        <div v-if="canCreateInventoryFolders" class="absolute left-2 top-2 z-10" @click.stop>
           <Checkbox
             :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
             @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -115,7 +115,7 @@
 
         <!-- Ellipsis menu top-right -->
         <div
-          v-if="canManage"
+          v-if="canCreateInventoryFolders"
           class="absolute right-1.5 top-1.5 z-20"
           data-inventory-folder-menu
           @click.stop
@@ -133,7 +133,7 @@
 
         <div
           class="flex flex-1 flex-col items-center justify-between w-full px-2.5 pb-2.5 text-center"
-          :class="canManage ? 'pt-8' : 'pt-3.5'"
+          :class="canCreateInventoryFolders ? 'pt-8' : 'pt-3.5'"
         >
           <!-- Folder icon (compact) -->
           <div class="flex flex-1 flex-col items-center justify-center w-full min-h-[44px] sm:min-h-[48px] mb-1">
@@ -158,9 +158,9 @@
       </div>
     </div>
 
-    <!-- Empty state (when not loading and no folders) -->
+    <!-- Empty state: NOT while loading (v-else on the grid matched paginatedFolders===0 and showed alongside skeleton) -->
     <div
-      v-else
+      v-if="!inventoryStore.loading && paginatedFolders.length === 0"
       class="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
     >
       <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
@@ -537,7 +537,7 @@
       <div
         v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"
         data-inventory-folder-menu
-        class="fixed z-[1000] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl py-0.5"
+        class="fixed z-[1000] min-w-[120px] rounded-lg py-0.5 bg-white shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
         :style="folderMenuFixedStyle"
         @click.stop
       >
@@ -545,7 +545,7 @@
           v-if="canDuplicateByPlan"
           type="button"
           @click="handleDuplicateFolder(folderForOpenMenu); openFolderMenuId = null"
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
         >
           <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
           Duplicate
@@ -553,7 +553,7 @@
         <button
           type="button"
           @click="handleEditFolder(folderForOpenMenu); openFolderMenuId = null"
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
         >
           <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
           Edit
@@ -561,7 +561,7 @@
         <button
           type="button"
           @click="handleDeleteFolder(folderForOpenMenu); openFolderMenuId = null"
-          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors"
         >
           <TrashIcon class="w-3.5 h-3.5 shrink-0" />
           Delete
@@ -602,7 +602,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAI } from '~/composables/useAI'
 import { useToast } from '~/composables/useToast'
-import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard'
@@ -654,15 +654,13 @@ function updateFolderMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = 120
-  const margin = 4
-  const vw = window.innerWidth
-  let left = r.right - menuWidth
-  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
-  folderMenuFixedStyle.value = {
-    top: `${r.bottom + margin}px`,
-    left: `${left}px`,
-  }
+  /** Enough for Duplicate + Edit + Delete (or Edit + Delete only) */
+  folderMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 120,
+    estimatedMenuHeight: 132,
+    margin: 4,
+    viewportPadding: 8,
+  })
 }
 
 function addFolderMenuPositionListeners() {
@@ -786,7 +784,7 @@ const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const toast = useToast()
-const { canManage, canCreateInventoryFolders } = usePermissions()
+const { canCreateInventoryFolders } = usePermissions()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 
@@ -1562,8 +1560,8 @@ onMounted(async () => {
       } else {
         const userData = userStore.userData
       
-      // Load stores and departments if user can manage (needed for department access UI and filter)
-      if (canManage) {
+      // Load stores and departments when any store member needs filters (not only super admin)
+      if (authStore.currentUser) {
         try {
           // Initialize current store if not set
           if (!storesStore.currentStoreId) {
@@ -1633,7 +1631,7 @@ watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
       // Refetch folders for new store
       await inventoryStore.fetchFolders()
       // Refetch departments for new store
-      if (canManage) {
+      if (authStore.currentUser) {
         await departmentsStore.fetchDepartments()
       }
       console.log('[InventoryPage] Folders refetched after store change:', inventoryStore.folders.length)

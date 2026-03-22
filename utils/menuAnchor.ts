@@ -5,7 +5,12 @@
  * the top-left. This picks the element with a non-zero layout box (the visible one).
  */
 export function getVisibleMenuAnchorElement(
-  attributeName: 'data-item-actions-anchor' | 'data-receipt-actions-anchor' | 'data-customer-actions-anchor' | 'data-folder-actions-anchor',
+  attributeName:
+    | 'data-item-actions-anchor'
+    | 'data-receipt-actions-anchor'
+    | 'data-customer-actions-anchor'
+    | 'data-folder-actions-anchor'
+    | 'data-department-actions-anchor',
   id: string
 ): HTMLElement | null {
   if (!import.meta.client) return null
@@ -26,4 +31,55 @@ export function getVisibleMenuAnchorElement(
     }
   }
   return bestArea > 0 ? best : null
+}
+
+/**
+ * Position a fixed dropdown beside its anchor, flipping above when there isn't
+ * enough room below (e.g. last table row) so the menu stays in the viewport.
+ */
+export function computeFixedAnchoredMenuStyle(
+  anchorRect: DOMRectReadOnly,
+  options: {
+    menuWidth: number
+    estimatedMenuHeight: number
+    margin?: number
+    viewportPadding?: number
+  }
+): Record<string, string> {
+  const margin = options.margin ?? 4
+  const pad = options.viewportPadding ?? 8
+  const menuWidth = options.menuWidth
+  const h = options.estimatedMenuHeight
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 0
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 0
+
+  let left = anchorRect.right - menuWidth
+  left = Math.max(pad, Math.min(left, vw - menuWidth - pad))
+
+  const belowTop = anchorRect.bottom + margin
+  const aboveTop = anchorRect.top - h - margin
+  const spaceBelow = vh - belowTop - pad
+  const spaceAbove = anchorRect.top - margin - pad
+
+  let top: number
+
+  if (h <= spaceBelow) {
+    top = belowTop
+  } else if (h <= spaceAbove) {
+    top = aboveTop
+  } else if (spaceAbove > spaceBelow) {
+    top = Math.max(pad, aboveTop)
+  } else {
+    top = Math.min(belowTop, vh - pad - h)
+  }
+
+  // Keep fully inside viewport vertically when possible
+  const maxTop = vh - pad - h
+  const minTop = pad
+  top = Math.max(minTop, Math.min(top, maxTop))
+
+  return {
+    top: `${Math.round(top)}px`,
+    left: `${Math.round(left)}px`,
+  }
 }

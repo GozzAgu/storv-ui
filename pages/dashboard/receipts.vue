@@ -1016,7 +1016,7 @@
     <div
       v-if="openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle"
       data-receipt-menu
-      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
       role="menu"
       :style="receiptMenuFixedStyle"
     >
@@ -1024,7 +1024,7 @@
         type="button"
         role="menuitem"
         @click="handleViewReceiptTimeline(receiptForOpenMenu); openReceiptMenuId = null"
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
         <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
         <span>History</span>
@@ -1033,7 +1033,7 @@
         type="button"
         role="menuitem"
         @click="handlePrintReceipt(receiptForOpenMenu); openReceiptMenuId = null"
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
         <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
         <span>Print</span>
@@ -1064,7 +1064,7 @@
     <div
       v-if="openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle"
       data-customer-menu
-      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
       role="menu"
       :style="customerMenuFixedStyle"
     >
@@ -1072,7 +1072,7 @@
         type="button"
         role="menuitem"
         @click="viewCustomerReceipts(customerForOpenMenu); openCustomerMenuId = null"
-        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
         <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
         <span>View receipts</span>
@@ -1134,7 +1134,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
-import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1663,15 +1663,12 @@ function updateReceiptMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = 176
-  const margin = 4
-  const vw = window.innerWidth
-  let left = r.right - menuWidth
-  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
-  receiptMenuFixedStyle.value = {
-    top: `${r.bottom + margin}px`,
-    left: `${left}px`,
-  }
+  receiptMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 176,
+    estimatedMenuHeight: 240,
+    margin: 4,
+    viewportPadding: 8,
+  })
 }
 
 function updateCustomerMenuPosition() {
@@ -1686,15 +1683,12 @@ function updateCustomerMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = 176
-  const margin = 4
-  const vw = window.innerWidth
-  let left = r.right - menuWidth
-  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
-  customerMenuFixedStyle.value = {
-    top: `${r.bottom + margin}px`,
-    left: `${left}px`,
-  }
+  customerMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 176,
+    estimatedMenuHeight: 52,
+    margin: 4,
+    viewportPadding: 8,
+  })
 }
 
 function addReceiptMenuPositionListeners() {

@@ -163,7 +163,13 @@
               <template v-else>
                 <div class="flex justify-between text-xs">
                   <span class="text-gray-500">Subtotal</span>
-                  <span>{{ formatCurrency(receipt.total) }}</span>
+                  <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
+                </div>
+              </template>
+              <template v-if="showSwapCreditLine">
+                <div class="flex justify-between text-xs">
+                  <span class="text-gray-500">Swap credit (trade-in)</span>
+                  <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
                 </div>
               </template>
               <div class="flex justify-between text-xs pt-1.5 border-t border-gray-200">
@@ -171,7 +177,7 @@
                 <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
               </div>
               <div class="flex justify-between text-xs font-semibold pt-1.5 border-t border-gray-200">
-                <span>Total</span>
+                <span>{{ receiptTotalLabel }}</span>
                 <span>{{ formatCurrency(receipt.total) }}</span>
               </div>
             </div>
@@ -340,6 +346,26 @@ const calculateTotalDiscount = computed(() => {
     }
     return total
   }, 0)
+})
+
+/** Sum of line totals (final prices × qty) — merchandise before swap credit */
+const lineItemsNetTotal = computed(() => {
+  if (!props.receipt?.items?.length) return 0
+  return props.receipt.items.reduce((t, item) => t + item.price * item.quantity, 0)
+})
+
+const swapCreditAmount = computed(() => {
+  const c = props.receipt?.swapInCredit
+  return typeof c === 'number' && c > 0 ? c : 0
+})
+
+/** Show swap line when we stored credit (new receipts); legacy swap receipts may omit it */
+const showSwapCreditLine = computed(() => {
+  return !!(props.receipt?.isSwapIn && swapCreditAmount.value > 0)
+})
+
+const receiptTotalLabel = computed(() => {
+  return showSwapCreditLine.value ? 'Amount due' : 'Total'
 })
 
 // Pre-fill email when receipt changes

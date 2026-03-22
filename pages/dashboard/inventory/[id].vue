@@ -985,7 +985,7 @@
       <div
         v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
         data-inventory-item-menu
-        class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+        class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
         role="menu"
         :style="itemMenuFixedStyle"
       >
@@ -993,7 +993,7 @@
           type="button"
           role="menuitem"
           @click="handleViewTimeline(itemForOpenMenu); openItemMenuId = null"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
         >
           <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
           <span>History</span>
@@ -1003,7 +1003,7 @@
           role="menuitem"
           @click="handleApplyDiscount(itemForOpenMenu); openItemMenuId = null"
           :disabled="isItemSold(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-950/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
           <span>{{ itemForOpenMenu.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
@@ -1013,7 +1013,7 @@
           role="menuitem"
           @click="handleEditItem(itemForOpenMenu); openItemMenuId = null"
           :disabled="isItemSold(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
           <span>Edit</span>
@@ -1024,7 +1024,7 @@
           role="menuitem"
           @click="handleDuplicateItem(itemForOpenMenu); openItemMenuId = null"
           :disabled="isItemSold(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
           <span>Duplicate</span>
@@ -1034,7 +1034,7 @@
           role="menuitem"
           @click="handleDeleteItem(itemForOpenMenu); openItemMenuId = null"
           :disabled="isItemSold(itemForOpenMenu)"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/45 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
           <span>Delete</span>
@@ -1085,7 +1085,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
-import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -1114,7 +1114,7 @@ const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
-const { canManage, canManageInventoryItems } = usePermissions()
+const { canManageInventoryItems } = usePermissions()
 const toast = useToast()
 
 // Duplicate items only on Storvv Medium and Enterprise
@@ -1231,15 +1231,14 @@ function updateItemMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
-  const menuWidth = 176
-  const margin = 4
-  const vw = window.innerWidth
-  let left = r.right - menuWidth
-  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
-  itemMenuFixedStyle.value = {
-    top: `${r.bottom + margin}px`,
-    left: `${left}px`,
-  }
+  /** Enough for History + discount + edit + optional Duplicate + delete */
+  const estimatedMenuHeight = canDuplicateByPlan.value ? 300 : 260
+  itemMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 176,
+    estimatedMenuHeight,
+    margin: 4,
+    viewportPadding: 8,
+  })
 }
 
 function addItemMenuPositionListeners() {

@@ -4,7 +4,7 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
-import { getCustomersCollection, getCustomerDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import { getCustomersCollection, getCustomerDocument } from '~/composables/useFirestorePaths'
 
 export interface Customer {
   id: string
@@ -53,28 +53,9 @@ export const useCustomersStore = defineStore('customers', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[CustomersStore] Could not fetch staff document:', error.message)
-        }
-      }
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const resolvedOwner = await getQueryUserId()
+      const userId = resolvedOwner ?? authStore.currentUser.uid
 
       try {
         // Get storeId for hierarchical path - we need to search across all stores for the superadmin
@@ -179,28 +160,9 @@ export const useCustomersStore = defineStore('customers', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[CustomersStore] Could not fetch staff document:', error.message)
-        }
-      }
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const resolvedOwner = await getQueryUserId()
+      const userId = resolvedOwner ?? authStore.currentUser.uid
 
       try {
         // Try to find existing customer
@@ -329,34 +291,15 @@ export const useCustomersStore = defineStore('customers', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[CustomersStore] Could not fetch staff document:', error.message)
-        }
-      }
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const resolvedOwner = await getQueryUserId()
+      const userId = resolvedOwner ?? authStore.currentUser.uid
 
       // Get current store ID to filter customers
       const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
       const storeId = await getCurrentStoreId()
       
-      console.log('[CustomersStore] fetchCustomers - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
+      console.log('[CustomersStore] fetchCustomers - userId (store owner):', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
 
       if (!storeId) {
         this.error = 'No store selected. Please select a store first.'
@@ -469,28 +412,9 @@ export const useCustomersStore = defineStore('customers', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      let userId = authStore.currentUser.uid
-
-      // If the current user is staff, get the super admin UID
-      if (userStore.userData?.role === 'staff') {
-        try {
-          const staffRef = collection(db, 'staff')
-          const staffQuery = query(staffRef, where('authUid', '==', userId))
-          const staffSnapshot = await getDocs(staffQuery)
-
-          if (!staffSnapshot.empty && staffSnapshot.docs.length > 0) {
-            const staffDoc = staffSnapshot.docs[0]
-            if (staffDoc) {
-              const staffData = staffDoc.data()
-              if (staffData.createdBy) {
-                userId = staffData.createdBy
-              }
-            }
-          }
-        } catch (error: any) {
-          console.warn('[CustomersStore] Could not fetch staff document:', error.message)
-        }
-      }
+      const { getQueryUserId } = await import('~/composables/useFirestorePaths')
+      const resolvedOwner = await getQueryUserId()
+      const userId = resolvedOwner ?? authStore.currentUser.uid
 
       try {
         // Get storeId for hierarchical path

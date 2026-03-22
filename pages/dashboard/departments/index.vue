@@ -1,8 +1,9 @@
 <template>
-  <!-- Hero header -->
+  <div class="pb-24 sm:pb-20 flex flex-col min-h-[calc(100svh-4rem)]">
+  <!-- Hero header (aligned with Inventory → Folders) -->
     <div class="mb-3 sm:mb-4">
-      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Departments</h1>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage your store departments and staff</p>
+      <h1 class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 tracking-tight">Departments</h1>
+      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Manage your store departments and staff</p>
     </div>
 
     <!-- Stats (mobile) -->
@@ -127,7 +128,7 @@
           </div>
         </div>
         <div class="p-3">
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2 min-h-[120px]">
+          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5 min-h-[120px]">
             <div
               v-for="i in 8"
               :key="i"
@@ -143,7 +144,7 @@
     </template>
 
     <!-- Toolbar + content (desktop when not loading) -->
-    <div v-else-if="!departmentsStore.error" class="space-y-3">
+    <div v-else-if="!departmentsStore.error" class="flex-1 flex flex-col min-h-0 space-y-3">
       <!-- Toolbar (desktop): stats + search -->
       <div class="hidden lg:flex flex-wrap items-center justify-between gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2">
         <div class="flex items-center flex-wrap gap-4">
@@ -214,12 +215,12 @@
     </div>
     <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2"
+        class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5"
       >
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:scale-[0.99] cursor-pointer pt-2.5 pb-2 px-2.5 overflow-visible"
+          class="group relative flex flex-col items-stretch rounded-lg bg-gray-50/80 dark:bg-gray-800/30 transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-700/40 active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px]"
           :class="{
             'opacity-60 cursor-not-allowed': department.isActive === false,
             'pointer-events-none': deletingDepartmentId === department.id
@@ -235,7 +236,7 @@
             <span class="text-[11px] font-medium text-white">Deleting...</span>
           </div>
           <!-- Checkbox top-left -->
-          <div v-if="canManageDepartments" class="absolute left-1.5 top-1.5 z-10" @click.stop>
+          <div v-if="canManageDepartments" class="absolute left-2 top-2 z-10" @click.stop>
             <Checkbox
               :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
               @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
@@ -244,61 +245,53 @@
             />
           </div>
 
-          <!-- Ellipsis menu top-right -->
-          <div v-if="canManageDepartments" class="absolute right-1 top-1 z-20" @click.stop>
+          <!-- Ellipsis menu top-right (dropdown teleported to body — see below) -->
+          <div
+            v-if="canManageDepartments"
+            class="absolute right-1.5 top-1.5 z-20"
+            data-department-menu
+            @click.stop
+          >
             <button
               type="button"
+              :data-department-actions-anchor="department.id"
               @click="toggleDepartmentMenu(department.id)"
-              class="p-0.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+              class="p-1 rounded-lg text-gray-300 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors"
               aria-label="Department options"
             >
               <EllipsisVerticalIcon class="w-4 h-4" />
             </button>
-            <div
-              v-if="openDepartmentMenuId === department.id"
-              class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl py-0.5"
-              @click.stop
-            >
-              <button
-                type="button"
-                @click="handleEditDepartment(department); openDepartmentMenuId = null"
-                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
-              >
-                <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
-                Edit
-              </button>
-              <button
-                type="button"
-                :disabled="deletingDepartmentId === department.id"
-                class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                @click="handleDeleteDepartment(department); openDepartmentMenuId = null"
-              >
-                <ArrowPathIcon v-if="deletingDepartmentId === department.id" class="w-3.5 h-3.5 shrink-0 animate-spin" />
-                <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
-                {{ deletingDepartmentId === department.id ? 'Deleting...' : 'Delete' }}
-              </button>
-            </div>
           </div>
 
-          <!-- Department icon (compact) -->
-          <div class="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 bg-primary-400/90 dark:bg-primary-500/90 mb-1.5">
-            <BuildingOfficeIcon class="w-4 h-4 text-white" stroke-width="1.75" />
-          </div>
-
-          <!-- Department name (primary focus) -->
-          <h3
-            class="text-xs font-semibold text-gray-900 dark:text-gray-100 text-center truncate max-w-full px-0.5 mb-0.5"
-            :title="department.name"
+          <div
+            class="flex flex-1 flex-col items-center justify-between w-full px-2.5 pb-2.5 text-center"
+            :class="canManageDepartments ? 'pt-8' : 'pt-3.5'"
           >
-            {{ department.name }}
-          </h3>
+            <!-- Folder icon: no background, light stroke only -->
+            <div class="flex flex-1 flex-col items-center justify-center w-full min-h-[44px] sm:min-h-[48px] mb-1">
+              <BuildingOfficeIcon
+                class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 text-gray-300 dark:text-gray-500"
+                stroke-width="1.25"
+              />
+            </div>
 
-          <!-- Stats (compact) -->
-          <span class="text-[11px] text-gray-500 dark:text-gray-400 tabular-nums">{{ department.staffCount || 0 }} staff</span>
-
-          <!-- Inactive badge -->
-          <div v-if="department.isActive === false" class="absolute top-1.5 right-1.5 z-10">
-            <span class="px-1 py-0.5 text-[9px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full">Inactive</span>
+            <div class="w-full min-w-0 mt-auto">
+              <h3
+                class="text-xs font-medium text-gray-400 dark:text-gray-500 text-center truncate max-w-full px-0.5 leading-tight"
+                :title="department.name"
+              >
+                {{ department.name }}
+              </h3>
+              <p class="mt-0.5 text-[11px] font-normal text-gray-300 dark:text-gray-600 text-center tabular-nums">
+                {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
+              </p>
+              <span
+                v-if="department.isActive === false"
+                class="mt-1 inline-block text-[9px] font-medium text-gray-400 dark:text-gray-500"
+              >
+                Inactive
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -306,15 +299,13 @@
       <!-- Empty state -->
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-6 text-center min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
+        class="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
       >
-        <div class="w-12 h-12 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
-          <BuildingOfficeIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
-        </div>
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
+        <BuildingOfficeIcon class="w-12 h-12 shrink-0 mb-3 text-gray-300 dark:text-gray-500" stroke-width="1.25" />
+        <h2 class="text-sm font-medium text-gray-400 dark:text-gray-500 break-words max-w-full">
           {{ searchQuery ? 'No departments found' : 'No departments yet' }}
         </h2>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+        <p class="mt-0.5 text-xs text-gray-300 dark:text-gray-600 max-w-sm mx-auto break-words">
           {{ searchQuery ? 'Try a different search.' : 'Create a department to organize your store.' }}
         </p>
       </div>
@@ -380,6 +371,37 @@
         </Button>
       </template>
     </Modal>
+
+    <!-- Department actions (teleported — same pattern as Inventory → Folders) -->
+    <Teleport to="body">
+      <div
+        v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
+        data-department-menu
+        class="fixed z-[1000] min-w-[120px] rounded-lg py-0.5 bg-white shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
+        :style="departmentMenuFixedStyle"
+        @click.stop
+      >
+        <button
+          type="button"
+          @click="handleEditDepartment(departmentForOpenMenu); openDepartmentMenuId = null"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
+        >
+          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
+          Edit
+        </button>
+        <button
+          type="button"
+          :disabled="deletingDepartmentId === departmentForOpenMenu.id"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="handleDeleteDepartment(departmentForOpenMenu); openDepartmentMenuId = null"
+        >
+          <ArrowPathIcon v-if="deletingDepartmentId === departmentForOpenMenu.id" class="w-3.5 h-3.5 shrink-0 animate-spin" />
+          <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
+          {{ deletingDepartmentId === departmentForOpenMenu.id ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </Teleport>
+
     <DepartmentModal
       v-model="showDepartmentModal"
       :department="editingDepartment"
@@ -403,19 +425,20 @@
         :title="canAddDepartmentForCurrentStore ? 'Create new department' : departmentLimitMessage"
         :disabled="!canAddDepartmentForCurrentStore"
         :class="[
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200',
-          canAddDepartmentForCurrentStore ? 'bg-primary-400 hover:bg-primary-500 hover:shadow-xl' : 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
+          'group flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200',
+          canAddDepartmentForCurrentStore ? 'bg-primary-500 hover:scale-105 hover:bg-primary-600 hover:shadow-xl active:scale-95' : 'cursor-not-allowed bg-gray-400 dark:bg-gray-600'
         ]"
         @click="openCreateDepartmentModal"
       >
-        <PlusIcon class="h-5 w-5" />
+        <PlusIcon class="h-5 w-5 stroke-white" stroke-width="2.5" />
       </button>
     </div>
   </DraggableFabContainer>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   BuildingOfficeIcon,
@@ -428,6 +451,7 @@ import {
   TrashIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Pagination from '~/components/ui/Pagination.vue'
@@ -598,6 +622,7 @@ const handlePageChange = (page: number) => {
 
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
+  openDepartmentMenuId.value = null
   if (import.meta.client) {
     try {
       localStorage.setItem('departments-index-page', newPage.toString())
@@ -740,15 +765,86 @@ const toggleDepartmentMenu = (departmentId: string) => {
   openDepartmentMenuId.value = openDepartmentMenuId.value === departmentId ? null : departmentId
 }
 
-// Close department menu when clicking outside
-watch(openDepartmentMenuId, (id) => {
-  if (!id) return
-  const close = () => { openDepartmentMenuId.value = null }
-  const handler = () => {
-    close()
-    document.removeEventListener('click', handler)
+const departmentForOpenMenu = computed(() => {
+  const id = openDepartmentMenuId.value
+  if (!id) return null
+  return filteredDepartments.value.find(d => d.id === id) ?? null
+})
+
+const departmentMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+function updateDepartmentMenuPosition() {
+  const id = openDepartmentMenuId.value
+  if (!id || !import.meta.client) {
+    departmentMenuFixedStyle.value = null
+    return
   }
-  setTimeout(() => document.addEventListener('click', handler), 0)
+  const el = getVisibleMenuAnchorElement('data-department-actions-anchor', id)
+  if (!el) {
+    departmentMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  departmentMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 120,
+    estimatedMenuHeight: 88,
+    margin: 4,
+    viewportPadding: 8,
+  })
+}
+
+function addDepartmentMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateDepartmentMenuPosition, true)
+  window.addEventListener('resize', updateDepartmentMenuPosition)
+}
+
+function removeDepartmentMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateDepartmentMenuPosition, true)
+  window.removeEventListener('resize', updateDepartmentMenuPosition)
+}
+
+/** Capture-phase outside click + scroll/position — same as Inventory → Folders */
+let departmentMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeDepartmentMenuOutsideListener() {
+  if (departmentMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', departmentMenuOutsideHandler, true)
+    departmentMenuOutsideHandler = null
+  }
+}
+
+watch(openDepartmentMenuId, (id) => {
+  removeDepartmentMenuOutsideListener()
+  removeDepartmentMenuPositionListeners()
+  departmentMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateDepartmentMenuPosition()
+    addDepartmentMenuPositionListeners()
+  })
+
+  departmentMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-department-menu]')) return
+    openDepartmentMenuId.value = null
+    removeDepartmentMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openDepartmentMenuId.value && departmentMenuOutsideHandler) {
+        document.addEventListener('click', departmentMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
+
+onBeforeUnmount(() => {
+  removeDepartmentMenuOutsideListener()
+  removeDepartmentMenuPositionListeners()
 })
 
 const openCreateDepartmentModal = () => {

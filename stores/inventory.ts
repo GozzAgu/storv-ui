@@ -1207,7 +1207,9 @@ export const useInventoryStore = defineStore('inventory', {
         this.items[folderId].unshift(...createdItems)
 
         // Update folder item count in background
-        this.updateItemCount(folderId).catch(console.error)
+        this.updateItemCount(folderId).catch((err) => {
+          console.warn('[InventoryStore] Background folder stats update failed (non-critical):', err)
+        })
 
         // Optimistically update folder count
         const folderIndex = this.folders.findIndex(f => f.id === folderId)
@@ -1417,20 +1419,36 @@ export const useInventoryStore = defineStore('inventory', {
         return
       }
 
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
       try {
         // Get actual count from items
         const actualCount = this.items[folderId]?.length || 0
 
-        // Get userId for hierarchical path (superadmin's UID for staff)
+        // Always sync local folder row (sidebar / UI)
+        const index = this.folders.findIndex(f => f.id === folderId)
+        if (index > -1 && this.folders[index]) {
+          this.folders[index].itemCount = actualCount
+        }
+
+        // Only super admins persist folder aggregates. Managers/staff use local counts only.
+        if (userStore.userData?.role !== 'superAdmin') {
+          await this.updateLowStockCount(folderId)
+          return
+        }
+
+        // Get userId for hierarchical path
         const userId = await getQueryUserId()
         if (!userId) {
           console.warn('[InventoryStore] Cannot update folder item count: user ID not available')
           return
         }
-        
+
         const storeId = await getCurrentStoreId()
         if (storeId) {
-          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryFolders/{folderId}
           const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
           await updateDoc(folderRef, {
             itemCount: actualCount,
@@ -1438,17 +1456,19 @@ export const useInventoryStore = defineStore('inventory', {
           })
         }
 
-        // Update in local state
-        const index = this.folders.findIndex(f => f.id === folderId)
-        if (index > -1 && this.folders[index]) {
-          this.folders[index].itemCount = actualCount
-        }
-
-        // Also update low stock count in background (non-blocking)
-        this.updateLowStockCount(folderId).catch(console.error)
+        this.updateLowStockCount(folderId).catch((err) => {
+          if (err?.code === 'permission-denied') {
+            console.warn('[InventoryStore] updateLowStockCount permission denied:', folderId)
+          } else {
+            console.error('[InventoryStore] updateLowStockCount:', err)
+          }
+        })
       } catch (error: any) {
-        console.error('Error updating item count:', error)
-        // Don't throw error, just log it - we don't want to break item creation/deletion
+        if (error?.code === 'permission-denied') {
+          console.warn('[InventoryStore] Cannot persist folder item count (permission):', folderId)
+        } else {
+          console.error('Error updating item count:', error)
+        }
       }
     },
 
@@ -1464,6 +1484,11 @@ export const useInventoryStore = defineStore('inventory', {
       if (!authStore.currentUser) {
         console.warn('[InventoryStore] Cannot update low stock count: user not authenticated')
         return
+      }
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
       try {
@@ -1533,7 +1558,18 @@ export const useInventoryStore = defineStore('inventory', {
           })
         }
 
-        // Update in Firestore
+        // Update in local state (everyone)
+        const index = this.folders.findIndex(f => f.id === folderId)
+        if (index > -1 && this.folders[index]) {
+          this.folders[index].lowStockCount = lowStockCount
+        }
+
+        // Only super admins persist low-stock aggregates to Firestore
+        if (userStore.userData?.role !== 'superAdmin') {
+          return
+        }
+
+        // Persist for account owner / super admin
         const storeId = await getCurrentStoreId()
         if (storeId) {
           const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
@@ -1542,14 +1578,12 @@ export const useInventoryStore = defineStore('inventory', {
             updatedAt: serverTimestamp(),
           })
         }
-
-        // Update in local state
-        const index = this.folders.findIndex(f => f.id === folderId)
-        if (index > -1 && this.folders[index]) {
-          this.folders[index].lowStockCount = lowStockCount
-        }
       } catch (error: any) {
-        console.error('[InventoryStore] Error updating low stock count:', error)
+        if (error?.code === 'permission-denied') {
+          console.warn('[InventoryStore] Low stock count not persisted (permission):', folderId)
+        } else {
+          console.error('[InventoryStore] Error updating low stock count:', error)
+        }
         // Don't throw error, just log it - we don't want to break other operations
       }
     },

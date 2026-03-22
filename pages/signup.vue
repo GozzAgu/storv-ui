@@ -37,17 +37,17 @@
         <div class="p-4 sm:p-5">
           <form @submit.prevent="handleSignUp" class="space-y-4">
             <div class="space-y-1.5">
-              <label for="name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Full name
+              <label for="business-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                Business name
               </label>
               <input
-                id="name"
+                id="business-name"
                 v-model="form.name"
                 type="text"
-                autocomplete="name"
+                autocomplete="organization"
                 required
                 class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
-                placeholder="John Doe"
+                placeholder="Your business or store name"
               />
             </div>
 

@@ -1,4 +1,5 @@
 <template>
+  <div class="pb-24 sm:pb-20 flex flex-col min-h-[calc(100svh-4rem)]">
     <Breadcrumbs :items="departmentBreadcrumbs" />
 
     <StaffInvitePasswordsPanel
@@ -8,7 +9,7 @@
       class="mb-4 sm:mb-6"
     />
 
-    <div class="mb-4 sm:mb-6 flex items-start gap-3">
+    <div class="mb-3 sm:mb-4 flex items-start gap-3">
       <button
         @click="navigateTo('/dashboard/departments')"
         class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0"
@@ -17,20 +18,22 @@
         <ArrowLeftIcon class="w-4 h-4" />
       </button>
       <div class="flex-1 min-w-0">
-        <h1 v-if="isLoadingDepartment" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+        <h1 v-if="isLoadingDepartment" class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 tracking-tight">
           <span class="inline-block h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></span>
         </h1>
-        <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
+        <h1 v-else class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 tracking-tight truncate">
           {{ department?.name || 'Department' }}
         </h1>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Department management</p>
+        <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Department management</p>
       </div>
     </div>
 
     <div
       :class="[
-        'transition-all duration-300 mt-6 sm:mt-8',
-        isStaffFullscreen ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto' : 'relative'
+        'transition-all duration-300 flex flex-col min-h-0',
+        isStaffFullscreen
+          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
+          : 'relative flex-1 mt-3 sm:mt-4'
       ]"
     >
       <div v-if="isStaffFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-5 py-4">
@@ -51,7 +54,10 @@
 
       <div
         :class="[
-          isStaffFullscreen ? 'shadow-none' : 'rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50'
+          'flex flex-col min-h-0',
+          isStaffFullscreen
+            ? 'shadow-none h-full'
+            : 'flex-1 rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden border border-gray-200/50 dark:border-gray-700/50'
         ]"
       >
         <div v-if="canManageDepartments && selectedStaffForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-4 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-primary-50/50 dark:bg-primary-900/10">
@@ -99,7 +105,7 @@
           </button>
         </div>
 
-        <div v-if="isLoadingStaff" class="overflow-x-auto">
+        <div v-if="isLoadingStaff" class="overflow-x-auto flex-1 min-h-[min(420px,calc(100svh-16rem))]">
           <div class="p-4 sm:p-6 space-y-3">
             <div v-for="i in 6" :key="i" class="flex gap-4 items-center">
               <div class="h-10 w-10 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
@@ -111,15 +117,19 @@
           </div>
         </div>
 
-        <div v-else-if="staff.length === 0" class="text-center py-10 px-4">
-          <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <UsersIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <!-- Empty state: match inventory folders page (full-height centered panel) -->
+        <div
+          v-else-if="staff.length === 0"
+          class="flex-1 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
+        >
+          <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
+            <UsersIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
           </div>
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">No staff members yet</h3>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">Add staff to this department to get started</p>
+          <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 break-words max-w-full">No staff members yet</h2>
+          <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 max-w-sm mx-auto break-words">Add staff to this department to get started</p>
         </div>
 
-        <div v-else class="overflow-x-auto">
+        <div v-else class="overflow-x-auto flex-1 min-h-0">
           <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
             <thead class="bg-gray-50 dark:bg-gray-800/50">
               <tr>
@@ -295,10 +305,10 @@
         <button
           type="button"
           @click="openCreateStaffModal"
-          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-400 text-white shadow-lg transition-all duration-200 hover:bg-primary-500 hover:shadow-xl"
+          class="group flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-600 hover:shadow-xl active:scale-95"
           title="Add new staff"
         >
-          <PlusIcon class="h-5 w-5" />
+          <PlusIcon class="h-5 w-5 stroke-white" stroke-width="2.5" />
         </button>
       </div>
     </DraggableFabContainer>
@@ -357,7 +367,7 @@
       @success="handleStaffSuccess"
       @error="handleStaffError"
     />
-
+  </div>
 </template>
 
 <script setup lang="ts">

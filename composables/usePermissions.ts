@@ -25,12 +25,9 @@ export const usePermissions = () => {
     return currentStaffMember?.role === 'manager'
   })
 
-  // Check if user can manage (edit/delete) - either super admin or manager
+  // Store ops except inventory: super admin or manager (departments, settings, etc.)
   const canManage = computed(() => {
-    // Super admins can always manage
     if (!isStaff.value) return true
-    
-    // Staff can only manage if they're managers
     return isManager.value
   })
 
@@ -45,15 +42,8 @@ export const usePermissions = () => {
     return !!authStore.currentUser
   })
 
-  // Check if user can edit receipts - only super admins and managers
-  const canEditReceipts = computed(() => {
-    // Super admins can always edit receipts
-    if (!isStaff.value) return true
-    
-    // Managers can also edit receipts
-    // Staff and interns cannot edit receipts
-    return isManager.value
-  })
+  // Edit receipt / line items / refund flows — super admin or store manager (not regular staff)
+  const canEditReceipts = computed(() => userStore.isSuperAdmin || isManager.value)
 
   // Check if user can delete receipts - only super admins
   const canDeleteReceipts = computed(() => {
@@ -61,25 +51,10 @@ export const usePermissions = () => {
     return !isStaff.value
   })
 
-  // Check if user can manage inventory items - super admins and managers can manage
-  const canManageInventoryItems = computed(() => {
-    // Super admins can always manage inventory items
-    if (!isStaff.value) return true
-    
-    // Managers can also manage inventory items
-    // Staff and interns have view-only access
-    return isManager.value
-  })
+  // Inventory structure (folders/items) — super admin only
+  const canManageInventoryItems = computed(() => userStore.isSuperAdmin)
 
-  // Check if user can create inventory folders - super admins and managers can create
-  const canCreateInventoryFolders = computed(() => {
-    // Super admins can always create inventory folders
-    if (!isStaff.value) return true
-    
-    // Managers can also create inventory folders
-    // Staff and interns cannot create folders
-    return isManager.value
-  })
+  const canCreateInventoryFolders = computed(() => userStore.isSuperAdmin)
 
   // Check if user can create staff - only super admins (managers cannot create staff)
   const canCreateStaff = computed(() => {

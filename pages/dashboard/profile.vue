@@ -12,7 +12,7 @@
           <div class="relative p-6 sm:p-7 flex flex-col items-center text-center">
             <!-- Avatar -->
             <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden bg-primary-400 ring-4 ring-white dark:ring-gray-800 shadow-lg">
-              {{ (profileData.firstName?.[0] || '') + (profileData.lastName?.[0] || profileData.email?.[0] || 'U') }}
+              {{ profileAvatarInitials }}
             </div>
             <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
               <div class="h-4 bg-gray-200/80 dark:bg-gray-700/80 rounded-md animate-pulse" />
@@ -20,12 +20,14 @@
               <div class="h-3 bg-gray-200/80 dark:bg-gray-700/80 rounded animate-pulse w-3/4 mx-auto" />
             </div>
             <template v-else>
-              <h2 class="mt-4 text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-                {{ profileData.firstName || profileData.email?.split('@')[0] || 'User' }} {{ profileData.lastName || '' }}
+              <p class="mt-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Business</p>
+              <h2 class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+                {{ leftCardHeading }}
               </h2>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="profileData.email || 'No email'">
-                {{ profileData.email || 'No email' }}
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="leftCardLine2 || ''">
+                {{ leftCardLine2 || '—' }}
               </p>
+              <p v-if="leftCardBadgeExtra" class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ leftCardBadgeExtra }}</p>
               <span class="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-primary-500 dark:text-primary-400 bg-primary-400/10 dark:bg-primary-500/15 ring-1 ring-primary-400/20 dark:ring-primary-400/20">
                 {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </span>
@@ -58,8 +60,9 @@
         <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Personal information</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Update your personal details</p>
+            <p v-if="isStaff" class="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Staff</p>
+            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ isStaff ? 'Staff profile' : 'Business profile' }}</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ isStaff ? 'Your details as a team member' : 'Update your business details' }}</p>
           </div>
           <div v-if="!isEditingPersonalInfo">
             <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
@@ -70,14 +73,11 @@
           </div>
         </div>
         <div class="p-3 sm:p-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
-              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter first name" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last name</label>
-              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter last name" />
+          <!-- Super admin: business name + contact -->
+          <div v-if="!isStaff" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Business name</label>
+              <input v-model="profileData.businessName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Your business or store name" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
@@ -85,11 +85,34 @@
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone" />
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Business phone" />
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell us about yourself" />
+              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell customers about your business" />
+            </div>
+          </div>
+          <!-- Staff: personal name + contact -->
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
+              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="First name" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last name</label>
+              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Last name" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Work email" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Phone" />
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
+              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Optional note" />
             </div>
           </div>
         </div>
@@ -764,8 +787,10 @@ import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
 import { useAuthStore } from '~/stores/auth'
-import { useUserStore } from '~/stores/user'
 import { usePermissions } from '~/composables/usePermissions'
+import { useStaffStore } from '~/stores/staff'
+import { useStoresStore } from '~/stores/stores'
+import type { Staff } from '~/composables/useStaff'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
@@ -784,8 +809,9 @@ useHead({
   title: 'Profile - Storvv',
 })
 
-// Profile data
+// Profile data — super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
 const profileData = reactive({
+  businessName: '',
   firstName: '',
   lastName: '',
   email: '',
@@ -815,10 +841,14 @@ const isLoadingStats = ref(true)
 const { currentUser, loading: authLoading } = useFirebaseAuth()
 const { getUserDocument, updateUserDocument } = useUser()
 const authStore = useAuthStore()
-const userStore = useUserStore()
 const receiptsStore = useReceiptsStore()
 const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
+const staffStore = useStaffStore()
+const storesStore = useStoresStore()
+
+/** Resolved staff record for signed-in staff (department, store, etc.) */
+const currentStaffMember = ref<Staff | null>(null)
 
 // Function to load profile data
 const loadProfileData = async () => {
@@ -829,16 +859,35 @@ const loadProfileData = async () => {
 
   try {
     const userData = await getUserDocument(currentUser.value.uid)
+    currentStaffMember.value = null
+    profileData.businessName = ''
+
     if (userData) {
-      // Split name into first and last name
-      const nameParts = (userData.name || '').split(' ')
-      profileData.firstName = nameParts[0] || ''
-      profileData.lastName = nameParts.slice(1).join(' ') || ''
       profileData.email = userData.email || currentUser.value.email || ''
-      // Keep original role value for conditional checks (staff, superAdmin, etc.)
       profileData.role = userData.role || 'User'
-      
-      // Load store details if available
+
+      if (userData.role === 'staff') {
+        try {
+          const sm = await staffStore.fetchCurrentStaffMember()
+          currentStaffMember.value = sm
+          if (sm) {
+            profileData.firstName = sm.firstName || ''
+            profileData.lastName = sm.lastName || ''
+            profileData.email = sm.email || userData.email || currentUser.value.email || ''
+            profileData.phone = sm.phone || ''
+          }
+        } catch (e) {
+          console.warn('Could not load staff member profile:', e)
+          profileData.firstName = currentUser.value.displayName?.split(' ')[0] || ''
+          profileData.lastName = currentUser.value.displayName?.split(' ').slice(1).join(' ') || ''
+        }
+      } else {
+        profileData.businessName = (userData.name || '').trim()
+        profileData.firstName = ''
+        profileData.lastName = ''
+      }
+
+      // Load store details if available (super admin; staff may inherit org store info)
       if (userData.storeDetails) {
         storeInfo.storeName = userData.storeDetails.storeName || ''
         storeInfo.storeAddress = userData.storeDetails.storeAddress || ''
@@ -846,7 +895,11 @@ const loadProfileData = async () => {
         storeInfo.storeEmail = userData.storeDetails.storeEmail || ''
         storeInfo.storeDescription = userData.storeDetails.storeDescription || ''
       }
-      
+
+      if (userData.role === 'staff' && !storeInfo.storeName && storesStore.currentStore?.name) {
+        storeInfo.storeName = storesStore.currentStore.name
+      }
+
       // Load 2FA status from Firestore
       if (userData.twoFactorEnabled) {
         securitySettings.twoFactor = true
@@ -854,18 +907,15 @@ const loadProfileData = async () => {
           localStorage.setItem('twoFactorEnabled', 'true')
         }
       }
-      
-      // Update backup
+
       Object.assign(backupData, { ...profileData })
     } else {
-      // No user data found, but user is authenticated - set defaults from auth
       profileData.email = currentUser.value.email || ''
       profileData.firstName = currentUser.value.displayName?.split(' ')[0] || ''
       profileData.lastName = currentUser.value.displayName?.split(' ').slice(1).join(' ') || ''
     }
   } catch (error) {
     console.error('Error loading profile:', error)
-    // Even on error, set email from auth if available
     if (currentUser.value?.email) {
       profileData.email = currentUser.value.email
     }
@@ -1140,6 +1190,42 @@ const {
   canCreateStaff,
 } = usePermissions()
 
+/** Left column: business / store identity */
+const leftCardHeading = computed(() => {
+  if (isStaff.value) {
+    return storeInfo.storeName || storesStore.currentStore?.name || 'Business'
+  }
+  return profileData.businessName || storeInfo.storeName || profileData.email?.split('@')[0] || 'Your business'
+})
+
+const leftCardLine2 = computed(() => {
+  if (isStaff.value) {
+    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '—'
+  }
+  return profileData.email || 'No email'
+})
+
+const leftCardBadgeExtra = computed(() => {
+  if (isStaff.value && currentStaffMember.value?.departmentName) {
+    return currentStaffMember.value.departmentName
+  }
+  return ''
+})
+
+const profileAvatarInitials = computed(() => {
+  const raw = isStaff.value
+    ? (storeInfo.storeName || storesStore.currentStore?.name || profileData.email || 'U')
+    : (profileData.businessName || storeInfo.storeName || profileData.email || 'U')
+  const s = String(raw).trim()
+  const parts = s.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    const a = parts[0]?.[0] ?? ''
+    const b = parts[1]?.[0] ?? ''
+    return (a + b).toUpperCase() || 'U'
+  }
+  return (s.slice(0, 2) || 'U').toUpperCase()
+})
+
 // Computed property for user's actual permissions
 const userPermissions = computed(() => {
   const permissions: string[] = []
@@ -1226,12 +1312,19 @@ const savePersonalInfo = async () => {
   }
 
   try {
-    const fullName = `${profileData.firstName} ${profileData.lastName}`.trim()
-    await updateUserDocument(currentUser.value.uid, {
-      name: fullName || profileData.firstName || profileData.email,
-      email: profileData.email,
-    })
-    
+    if (isStaff.value) {
+      const fullName = `${profileData.firstName} ${profileData.lastName}`.trim()
+      await updateUserDocument(currentUser.value.uid, {
+        name: fullName || profileData.firstName || profileData.email,
+        email: profileData.email,
+      })
+    } else {
+      await updateUserDocument(currentUser.value.uid, {
+        name: profileData.businessName.trim() || profileData.email,
+        email: profileData.email,
+      })
+    }
+
     isEditingPersonalInfo.value = false
     Object.assign(backupData, { ...profileData })
     toast.success('Profile updated successfully!')

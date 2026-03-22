@@ -242,7 +242,7 @@
               Selected Items ({{ totalSelectedQuantity }})
             </p>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-              Total: {{ formatCurrency(receiptTotal) }}
+              Total: {{ formatCurrency(itemsSubtotal) }}
             </p>
           </div>
         </div>
@@ -444,8 +444,8 @@
             ></textarea>
           </div>
 
-          <!-- Swap-In Section -->
-          <div class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+          <!-- Swap-In Section (inventory write — super admin only) -->
+          <div v-if="canUseSwapInReceipt" class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <Checkbox
               v-model="isSwapIn"
               label="This is a swap-in transaction"
@@ -519,7 +519,7 @@
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">$</span>
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
                       <input
                         v-model.number="swapInItemForm[field.name]"
                         type="number"
@@ -571,11 +571,18 @@
               <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ totalSelectedQuantity }}</span>
             </div>
             <div class="flex justify-between items-center mb-1.5">
-              <span class="text-xs text-gray-600 dark:text-gray-400">Subtotal</span>
-              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
+              <span class="text-xs text-gray-600 dark:text-gray-400">Subtotal (items)</span>
+              <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(itemsSubtotal) }}</span>
+            </div>
+            <div
+              v-if="isSwapIn && swapInCreditAmount > 0"
+              class="flex justify-between items-center mb-1.5"
+            >
+              <span class="text-xs text-gray-600 dark:text-gray-400">Swap credit (trade-in)</span>
+              <span class="text-xs font-medium text-emerald-700 dark:text-emerald-400">−{{ formatCurrency(swapInCreditAmount) }}</span>
             </div>
             <div class="flex justify-between items-center pt-1.5 border-t border-gray-200 dark:border-gray-700">
-              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Total</span>
+              <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ isSwapIn ? 'Amount due' : 'Total' }}</span>
               <span class="text-base font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(receiptTotal) }}</span>
             </div>
           </div>
@@ -719,6 +726,9 @@ const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
+// Swap-in creates inventory rows — super admin only (managers/staff cannot edit inventory structure).
+const canUseSwapInReceipt = computed(() => userStore.isSuperAdmin)
+
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
 const emailToSend = ref('')
@@ -758,6 +768,14 @@ const isSwapIn = ref(false)
 const swapInFolderId = ref<string>('')
 const swapInItemForm = ref<Record<string, any>>({})
 
+watch(canUseSwapInReceipt, (ok) => {
+  if (!ok) {
+    isSwapIn.value = false
+    swapInFolderId.value = ''
+    swapInItemForm.value = {}
+  }
+})
+
 // Split payment state
 const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([
@@ -767,7 +785,7 @@ const splitPayments = ref<Array<{ method: string; amount: number }>>([
 const folders = computed(() => inventoryStore.folders)
 
 const matchingCustomers = computed(() => {
-  if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 2) {
+  if (!receiptForm.value.customerName || receiptForm.value.customerName.trim().length < 1) {
     return []
   }
   const query = receiptForm.value.customerName.toLowerCase().trim()
@@ -967,9 +985,12 @@ const loadFolders = async () => {
 
 const loadCustomers = async () => {
   try {
+    // Ensure staff/manager → store owner id is resolved (same path as receipts/customers data)
+    if (userStore.userData?.role === 'staff') {
+      await staffStore.fetchCurrentStaffMember().catch(() => {})
+    }
     await customersStore.fetchCustomers()
-    
-    // Staff can search for all customers in their store (no filtering needed)
+
     allCustomers.value = customersStore.customers.map(customer => ({
       id: customer.id,
       name: customer.name,
@@ -1103,12 +1124,31 @@ const getOriginalPrice = (item: InventoryItem): number => {
   return parseFloat(priceField || '0')
 }
 
-const calculateTotal = () => {
+/** Sum of sold line items (after per-item discounts) before swap credit */
+const calculateItemsSubtotal = () => {
   return selectedItems.value.reduce((total, si) => {
     const price = getEffectivePrice(si.item)
     return total + (price * si.quantity)
   }, 0)
 }
+
+/** Value credited from swapped-in device (sum of currency fields on swap-in form) */
+const getSwapInCredit = () => {
+  if (!isSwapIn.value || !swapInFolder.value) return 0
+  return swapInDisplayFields.value
+    .filter((f: { type?: string }) => f.type === 'currency')
+    .reduce((sum, f: { name: string }) => sum + (Number(swapInItemForm.value[f.name]) || 0), 0)
+}
+
+/** Amount the customer pays: items subtotal minus swap credit (not below zero) */
+const calculateTotal = () => {
+  const sub = calculateItemsSubtotal()
+  if (!isSwapIn.value) return sub
+  return Math.max(0, sub - getSwapInCredit())
+}
+
+const itemsSubtotal = computed(() => calculateItemsSubtotal())
+const swapInCreditAmount = computed(() => getSwapInCredit())
 
 const receiptTotal = computed(() => calculateTotal())
 
@@ -1295,6 +1335,7 @@ const handleCreateReceipt = async () => {
       receiptData.isSwapIn = true
       receiptData.swapInFolderId = swapInFolderId.value
       receiptData.swapInItemId = swapInItemId
+      receiptData.swapInCredit = getSwapInCredit()
     }
     
     // Create receipt first

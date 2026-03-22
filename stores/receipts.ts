@@ -52,6 +52,8 @@ export interface Receipt {
   isSwapIn?: boolean // Indicates if this receipt includes a swap-in
   swapInFolderId?: string // Folder ID where swapped-in device is added
   swapInItemId?: string // Inventory item ID of the swapped-in device
+  /** Credit value of the trade-in (sum of currency fields on swap-in item); amount due = items total − this */
+  swapInCredit?: number
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string // Super admin UID (for fetching/ownership)
@@ -220,6 +222,7 @@ export const useReceiptsStore = defineStore('receipts', {
             isSwapIn: data.isSwapIn || false,
             swapInFolderId: data.swapInFolderId || undefined,
             swapInItemId: data.swapInItemId || undefined,
+            swapInCredit: typeof data.swapInCredit === 'number' ? data.swapInCredit : undefined,
           } as Receipt
         })
 
@@ -422,12 +425,12 @@ export const useReceiptsStore = defineStore('receipts', {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
       
+      // Super admins and store managers can update receipts; regular staff cannot.
       if (userStore.userData?.role === 'staff') {
-        // Check if staff member is a manager
         const staffStore = useStaffStore()
-        const currentStaffMember = await staffStore.fetchCurrentStaffMember()
-        if (currentStaffMember?.role !== 'manager') {
-          throw new Error('Staff members do not have permission to update receipts. Only managers can edit.')
+        const member = await staffStore.fetchCurrentStaffMember()
+        if (member?.role !== 'manager') {
+          throw new Error('Only managers and super admins can update receipts.')
         }
       }
 
