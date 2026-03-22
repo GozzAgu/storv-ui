@@ -324,9 +324,10 @@
                 </div>
               </div>
             </div>
-            <div class="relative shrink-0" @click.stop>
+            <div class="relative shrink-0" data-receipt-menu @click.stop>
               <button
                 type="button"
+                :data-receipt-actions-anchor="receipt.id"
                 @click="toggleReceiptMenu(receipt.id)"
                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                 title="Actions"
@@ -336,50 +337,6 @@
               >
                 <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
               </button>
-              <div
-                v-if="openReceiptMenuId === receipt.id"
-                class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
-                role="menu"
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                >
-                  <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>History</span>
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                >
-                  <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>Print</span>
-                </button>
-                <button
-                  v-if="receipt.status === 'completed' && canEditReceipts"
-                  type="button"
-                  role="menuitem"
-                  @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
-                >
-                  <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                  <span>Refund</span>
-                </button>
-                <button
-                  v-if="canDeleteReceipts"
-                  type="button"
-                  role="menuitem"
-                  @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                >
-                  <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                  <span>Delete</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -676,9 +633,10 @@
                 </div>
               </td>
               <td class="px-3 sm:px-4 py-2 text-right">
-                <div class="relative inline-flex justify-end" @click.stop>
+                <div class="relative inline-flex justify-end" data-receipt-menu @click.stop>
                   <button
                     type="button"
+                    :data-receipt-actions-anchor="receipt.id"
                     @click="toggleReceiptMenu(receipt.id)"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                     title="Actions"
@@ -688,50 +646,6 @@
                   >
                     <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                   </button>
-                  <div
-                    v-if="openReceiptMenuId === receipt.id"
-                    class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
-                    role="menu"
-                  >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handleViewReceiptTimeline(receipt); openReceiptMenuId = null"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                    >
-                      <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>History</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handlePrintReceipt(receipt); openReceiptMenuId = null"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                    >
-                      <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>Print</span>
-                    </button>
-                    <button
-                      v-if="receipt.status === 'completed' && canEditReceipts"
-                      type="button"
-                      role="menuitem"
-                      @click="handleRefundReceipt(receipt); openReceiptMenuId = null"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
-                    >
-                      <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                      <span>Refund</span>
-                    </button>
-                    <button
-                      v-if="canDeleteReceipts"
-                      type="button"
-                      role="menuitem"
-                      @click="handleDeleteReceipt(receipt); openReceiptMenuId = null"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-                    >
-                      <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -983,9 +897,10 @@
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
                   <td class="px-3 sm:px-4 py-2 text-right">
-                    <div class="relative inline-flex justify-end" @click.stop>
+                    <div class="relative inline-flex justify-end" data-customer-menu @click.stop>
                       <button
                         type="button"
+                        :data-customer-actions-anchor="customer.id"
                         @click="toggleCustomerMenu(customer.id)"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                         title="Actions"
@@ -995,21 +910,6 @@
                       >
                         <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                       </button>
-                      <div
-                        v-if="openCustomerMenuId === customer.id"
-                        class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
-                        role="menu"
-                      >
-                        <button
-                          type="button"
-                          role="menuitem"
-                          @click="viewCustomerReceipts(customer); openCustomerMenuId = null"
-                          class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                        >
-                          <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                          <span>View receipts</span>
-                        </button>
-                      </div>
                     </div>
                   </td>
                 </tr>
@@ -1110,6 +1010,75 @@
   </div>
     </template>
   </ClientOnly>
+
+  <!-- Receipt / customer actions (teleported — not clipped by table/card overflow) -->
+  <Teleport to="body">
+    <div
+      v-if="openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle"
+      data-receipt-menu
+      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+      role="menu"
+      :style="receiptMenuFixedStyle"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        @click="handleViewReceiptTimeline(receiptForOpenMenu); openReceiptMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+      >
+        <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+        <span>History</span>
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        @click="handlePrintReceipt(receiptForOpenMenu); openReceiptMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+      >
+        <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+        <span>Print</span>
+      </button>
+      <button
+        v-if="receiptForOpenMenu.status === 'completed' && canEditReceipts"
+        type="button"
+        role="menuitem"
+        @click="handleRefundReceipt(receiptForOpenMenu); openReceiptMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
+      >
+        <ArrowPathIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+        <span>Refund</span>
+      </button>
+      <button
+        v-if="canDeleteReceipts"
+        type="button"
+        role="menuitem"
+        @click="handleDeleteReceipt(receiptForOpenMenu); openReceiptMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+      >
+        <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+        <span>Delete</span>
+      </button>
+    </div>
+  </Teleport>
+  <Teleport to="body">
+    <div
+      v-if="openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle"
+      data-customer-menu
+      class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+      role="menu"
+      :style="customerMenuFixedStyle"
+    >
+      <button
+        type="button"
+        role="menuitem"
+        @click="viewCustomerReceipts(customerForOpenMenu); openCustomerMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+      >
+        <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+        <span>View receipts</span>
+      </button>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -1165,6 +1134,7 @@ import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firesto
 import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
+import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1208,10 +1178,12 @@ const openReceiptMenuId = ref<string | null>(null)
 const openCustomerMenuId = ref<string | null>(null)
 
 const toggleReceiptMenu = (receiptId: string) => {
+  if (openReceiptMenuId.value !== receiptId) openCustomerMenuId.value = null
   openReceiptMenuId.value = openReceiptMenuId.value === receiptId ? null : receiptId
 }
 
 const toggleCustomerMenu = (customerId: string) => {
+  if (openCustomerMenuId.value !== customerId) openReceiptMenuId.value = null
   openCustomerMenuId.value = openCustomerMenuId.value === customerId ? null : customerId
 }
 
@@ -1225,20 +1197,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
       isCustomersFullscreen.value = false
     }
     openReceiptMenuId.value = null
+    openCustomerMenuId.value = null
   }
 }
-
-// Close menus when clicking outside
-onMounted(() => {
-  if (import.meta.client) {
-    document.addEventListener('click', (e) => {
-      if (!(e.target as HTMLElement).closest('.relative')) {
-        openReceiptMenuId.value = null
-        openCustomerMenuId.value = null
-      }
-    })
-  }
-})
 
 // Watch fullscreen state to lock/unlock body scroll
 watch([isReceiptsFullscreen, isCustomersFullscreen], ([receiptsFullscreen, customersFullscreen]) => {
@@ -1407,6 +1368,12 @@ const filteredCustomers = computed(() => {
   })
   
   return result
+})
+
+const customerForOpenMenu = computed(() => {
+  const id = openCustomerMenuId.value
+  if (!id) return null
+  return filteredCustomers.value.find(c => c.id === id) ?? null
 })
 
 // Paginated customers
@@ -1675,6 +1642,156 @@ const paginatedReceipts = computed(() => {
     return sortedFilteredReceipts.value.slice(start, end)
 })
 
+const receiptForOpenMenu = computed(() => {
+  const id = openReceiptMenuId.value
+  if (!id) return null
+  return sortedFilteredReceipts.value.find(r => r.id === id) ?? null
+})
+
+const receiptMenuFixedStyle = ref<Record<string, string> | null>(null)
+const customerMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+function updateReceiptMenuPosition() {
+  const id = openReceiptMenuId.value
+  if (!id || !import.meta.client) {
+    receiptMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-receipt-actions-anchor', id)
+  if (!el) {
+    receiptMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  const menuWidth = 176
+  const margin = 4
+  const vw = window.innerWidth
+  let left = r.right - menuWidth
+  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
+  receiptMenuFixedStyle.value = {
+    top: `${r.bottom + margin}px`,
+    left: `${left}px`,
+  }
+}
+
+function updateCustomerMenuPosition() {
+  const id = openCustomerMenuId.value
+  if (!id || !import.meta.client) {
+    customerMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-customer-actions-anchor', id)
+  if (!el) {
+    customerMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  const menuWidth = 176
+  const margin = 4
+  const vw = window.innerWidth
+  let left = r.right - menuWidth
+  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
+  customerMenuFixedStyle.value = {
+    top: `${r.bottom + margin}px`,
+    left: `${left}px`,
+  }
+}
+
+function addReceiptMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateReceiptMenuPosition, true)
+  window.addEventListener('resize', updateReceiptMenuPosition)
+}
+
+function removeReceiptMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateReceiptMenuPosition, true)
+  window.removeEventListener('resize', updateReceiptMenuPosition)
+}
+
+function addCustomerMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateCustomerMenuPosition, true)
+  window.addEventListener('resize', updateCustomerMenuPosition)
+}
+
+function removeCustomerMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateCustomerMenuPosition, true)
+  window.removeEventListener('resize', updateCustomerMenuPosition)
+}
+
+let receiptMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+let customerMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeReceiptMenuOutsideListener() {
+  if (receiptMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', receiptMenuOutsideHandler, true)
+    receiptMenuOutsideHandler = null
+  }
+}
+
+function removeCustomerMenuOutsideListener() {
+  if (customerMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', customerMenuOutsideHandler, true)
+    customerMenuOutsideHandler = null
+  }
+}
+
+watch(openReceiptMenuId, (id) => {
+  removeReceiptMenuOutsideListener()
+  removeReceiptMenuPositionListeners()
+  receiptMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateReceiptMenuPosition()
+    addReceiptMenuPositionListeners()
+  })
+
+  receiptMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-receipt-menu]')) return
+    openReceiptMenuId.value = null
+    removeReceiptMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openReceiptMenuId.value && receiptMenuOutsideHandler) {
+        document.addEventListener('click', receiptMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
+
+watch(openCustomerMenuId, (id) => {
+  removeCustomerMenuOutsideListener()
+  removeCustomerMenuPositionListeners()
+  customerMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateCustomerMenuPosition()
+    addCustomerMenuPositionListeners()
+  })
+
+  customerMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-customer-menu]')) return
+    openCustomerMenuId.value = null
+    removeCustomerMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openCustomerMenuId.value && customerMenuOutsideHandler) {
+        document.addEventListener('click', customerMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
+
 // Reset to first page when filters change
 watch([searchQuery, statusFilter, dateFilter, currentSort], () => {
   currentPage.value = 1
@@ -1742,6 +1859,7 @@ const handlePageChange = (page: number) => {
 
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
+  openReceiptMenuId.value = null
   if (import.meta.client && activeTab.value === 'receipts') {
     try {
       localStorage.setItem('receipts-page', newPage.toString())
@@ -1753,6 +1871,7 @@ watch(currentPage, (newPage) => {
 
 // Watch for customers tab page changes
 watch(customersCurrentPage, (newPage) => {
+  openCustomerMenuId.value = null
   if (import.meta.client && activeTab.value === 'customers') {
     try {
       localStorage.setItem('receipts-customers-page', newPage.toString())
@@ -2090,6 +2209,10 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
+    removeReceiptMenuOutsideListener()
+    removeCustomerMenuOutsideListener()
+    removeReceiptMenuPositionListeners()
+    removeCustomerMenuPositionListeners()
     document.body.style.overflow = ''
   }
 })

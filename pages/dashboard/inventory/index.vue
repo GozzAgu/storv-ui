@@ -114,46 +114,21 @@
         </div>
 
         <!-- Ellipsis menu top-right -->
-        <div v-if="canManage" class="absolute right-1.5 top-1.5 z-20" @click.stop>
+        <div
+          v-if="canManage"
+          class="absolute right-1.5 top-1.5 z-20"
+          data-inventory-folder-menu
+          @click.stop
+        >
           <button
             type="button"
+            :data-folder-actions-anchor="folder.id"
             @click="toggleFolderMenu(folder.id)"
             class="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/90 dark:hover:bg-gray-700/80 transition-colors"
             aria-label="Folder options"
           >
             <EllipsisVerticalIcon class="w-4 h-4" />
           </button>
-          <div
-            v-if="openFolderMenuId === folder.id"
-            class="absolute right-0 top-full mt-1 z-[100] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl py-0.5"
-            @click.stop
-          >
-            <button
-              v-if="canDuplicateByPlan"
-              type="button"
-              @click="handleDuplicateFolder(folder); openFolderMenuId = null"
-              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
-            >
-              <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
-              Duplicate
-            </button>
-            <button
-              type="button"
-              @click="handleEditFolder(folder); openFolderMenuId = null"
-              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
-            >
-              <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
-              Edit
-            </button>
-            <button
-              type="button"
-              @click="handleDeleteFolder(folder); openFolderMenuId = null"
-              class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            >
-              <TrashIcon class="w-3.5 h-3.5 shrink-0" />
-              Delete
-            </button>
-          </div>
         </div>
 
         <div
@@ -556,11 +531,48 @@
         </Button>
       </template>
     </Modal>
+
+    <!-- Folder actions menu (teleported — not clipped by grid/card overflow) -->
+    <Teleport to="body">
+      <div
+        v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"
+        data-inventory-folder-menu
+        class="fixed z-[1000] min-w-[120px] bg-white dark:bg-gray-800 rounded-lg shadow-xl py-0.5"
+        :style="folderMenuFixedStyle"
+        @click.stop
+      >
+        <button
+          v-if="canDuplicateByPlan"
+          type="button"
+          @click="handleDuplicateFolder(folderForOpenMenu); openFolderMenuId = null"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+        >
+          <DocumentDuplicateIcon class="w-3.5 h-3.5 shrink-0 text-primary-500" />
+          Duplicate
+        </button>
+        <button
+          type="button"
+          @click="handleEditFolder(folderForOpenMenu); openFolderMenuId = null"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+        >
+          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
+          Edit
+        </button>
+        <button
+          type="button"
+          @click="handleDeleteFolder(folderForOpenMenu); openFolderMenuId = null"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+        >
+          <TrashIcon class="w-3.5 h-3.5 shrink-0" />
+          Delete
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import {
   FolderIcon,
   PlusIcon,
@@ -590,6 +602,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAI } from '~/composables/useAI'
 import { useToast } from '~/composables/useToast'
+import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard'
@@ -617,15 +630,83 @@ const toggleFolderMenu = (folderId: string) => {
   openFolderMenuId.value = openFolderMenuId.value === folderId ? null : folderId
 }
 
-// Close folder menu when clicking outside
-watch(openFolderMenuId, (id) => {
-  if (!id) return
-  const close = () => { openFolderMenuId.value = null }
-  const handler = () => {
-    close()
-    document.removeEventListener('click', handler)
+/** Capture-phase outside click so the menu closes reliably (bubble-only listener missed some cases). */
+let folderMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeFolderMenuOutsideListener() {
+  if (folderMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', folderMenuOutsideHandler, true)
+    folderMenuOutsideHandler = null
   }
-  setTimeout(() => document.addEventListener('click', handler), 0)
+}
+
+const folderMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+function updateFolderMenuPosition() {
+  const id = openFolderMenuId.value
+  if (!id || !import.meta.client) {
+    folderMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-folder-actions-anchor', id)
+  if (!el) {
+    folderMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  const menuWidth = 120
+  const margin = 4
+  const vw = window.innerWidth
+  let left = r.right - menuWidth
+  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
+  folderMenuFixedStyle.value = {
+    top: `${r.bottom + margin}px`,
+    left: `${left}px`,
+  }
+}
+
+function addFolderMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateFolderMenuPosition, true)
+  window.addEventListener('resize', updateFolderMenuPosition)
+}
+
+function removeFolderMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateFolderMenuPosition, true)
+  window.removeEventListener('resize', updateFolderMenuPosition)
+}
+
+watch(openFolderMenuId, (id) => {
+  removeFolderMenuOutsideListener()
+  removeFolderMenuPositionListeners()
+  folderMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateFolderMenuPosition()
+    addFolderMenuPositionListeners()
+  })
+
+  folderMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-inventory-folder-menu]')) return
+    openFolderMenuId.value = null
+    removeFolderMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openFolderMenuId.value && folderMenuOutsideHandler) {
+        document.addEventListener('click', folderMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
+
+onBeforeUnmount(() => {
+  removeFolderMenuOutsideListener()
+  removeFolderMenuPositionListeners()
 })
 
 // Duplicate folder
@@ -942,6 +1023,12 @@ const filteredFolders = computed(() => {
   return result
 })
 
+const folderForOpenMenu = computed(() => {
+  const id = openFolderMenuId.value
+  if (!id) return null
+  return filteredFolders.value.find(f => f.id === id) ?? null
+})
+
 const paginatedFolders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
@@ -963,6 +1050,7 @@ const handlePageChange = (page: number) => {
 
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
+  openFolderMenuId.value = null
   if (import.meta.client) {
     try {
       localStorage.setItem('inventory-index-page', newPage.toString())

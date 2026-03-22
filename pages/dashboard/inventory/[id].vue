@@ -323,9 +323,10 @@
                 </p>
               </div>
             </div>
-            <div class="relative shrink-0" @click.stop>
+            <div class="relative shrink-0" data-inventory-item-menu @click.stop>
               <button
                 type="button"
+                :data-item-actions-anchor="item.id"
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
                 :class="[
@@ -339,62 +340,6 @@
               >
                 <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
               </button>
-              <div
-                v-if="openItemMenuId === item.id"
-                class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
-                role="menu"
-              >
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handleViewTimeline(item); openItemMenuId = null"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                >
-                  <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>History</span>
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handleApplyDiscount(item); openItemMenuId = null"
-                  :disabled="isItemSold(item)"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>{{ item.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handleEditItem(item); openItemMenuId = null"
-                  :disabled="isItemSold(item)"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>Edit</span>
-                </button>
-                <button
-                  v-if="canDuplicateByPlan"
-                  type="button"
-                  role="menuitem"
-                  @click="handleDuplicateItem(item); openItemMenuId = null"
-                  :disabled="isItemSold(item)"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                  <span>Duplicate</span>
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  @click="handleDeleteItem(item); openItemMenuId = null"
-                  :disabled="isItemSold(item)"
-                  class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                  <span>Delete</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -560,9 +505,10 @@
                 </div>
               </td>
               <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right">
-                <div class="relative inline-flex justify-end" @click.stop>
+                <div class="relative inline-flex justify-end" data-inventory-item-menu @click.stop>
                   <button
                     type="button"
+                    :data-item-actions-anchor="item.id"
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
                     :class="[
@@ -576,62 +522,6 @@
                   >
                     <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
                   </button>
-                  <div
-                    v-if="openItemMenuId === item.id"
-                    class="absolute right-0 top-full z-[100] mt-1 min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 text-left shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
-                    role="menu"
-                  >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handleViewTimeline(item); openItemMenuId = null"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
-                    >
-                      <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>History</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handleApplyDiscount(item); openItemMenuId = null"
-                      :disabled="isItemSold(item)"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>{{ item.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handleEditItem(item); openItemMenuId = null"
-                      :disabled="isItemSold(item)"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>Edit</span>
-                    </button>
-                    <button
-                      v-if="canDuplicateByPlan"
-                      type="button"
-                      role="menuitem"
-                      @click="handleDuplicateItem(item); openItemMenuId = null"
-                      :disabled="isItemSold(item)"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-                      <span>Duplicate</span>
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      @click="handleDeleteItem(item); openItemMenuId = null"
-                      :disabled="isItemSold(item)"
-                      class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
                 </div>
               </td>
             </tr>
@@ -1089,6 +979,68 @@
       :item="selectedItemForTimeline"
       :folder-name="folder?.name"
     />
+
+    <!-- Item actions menu (teleported — not clipped by table overflow) -->
+    <Teleport to="body">
+      <div
+        v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
+        data-inventory-item-menu
+        class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-lg ring-1 ring-gray-200/90 dark:bg-gray-800 dark:ring-gray-700/80"
+        role="menu"
+        :style="itemMenuFixedStyle"
+      >
+        <button
+          type="button"
+          role="menuitem"
+          @click="handleViewTimeline(itemForOpenMenu); openItemMenuId = null"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60"
+        >
+          <ClockIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+          <span>History</span>
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          @click="handleApplyDiscount(itemForOpenMenu); openItemMenuId = null"
+          :disabled="isItemSold(itemForOpenMenu)"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-900/25 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+          <span>{{ itemForOpenMenu.discountedPrice !== undefined ? 'Discount' : 'Add discount' }}</span>
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          @click="handleEditItem(itemForOpenMenu); openItemMenuId = null"
+          :disabled="isItemSold(itemForOpenMenu)"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+          <span>Edit</span>
+        </button>
+        <button
+          v-if="canDuplicateByPlan"
+          type="button"
+          role="menuitem"
+          @click="handleDuplicateItem(itemForOpenMenu); openItemMenuId = null"
+          :disabled="isItemSold(itemForOpenMenu)"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-700/60 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+          <span>Duplicate</span>
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          @click="handleDeleteItem(itemForOpenMenu); openItemMenuId = null"
+          :disabled="isItemSold(itemForOpenMenu)"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+          <span>Delete</span>
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1133,6 +1085,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useToast } from '~/composables/useToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
+import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -1245,9 +1198,88 @@ const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'name', o
 const isFullscreen = ref(false)
 const openItemMenuId = ref<string | null>(null)
 
+watch(currentPage, () => {
+  openItemMenuId.value = null
+})
+
 const toggleItemMenu = (itemId: string) => {
   openItemMenuId.value = openItemMenuId.value === itemId ? null : itemId
 }
+
+/** Capture-phase outside click — same pattern as inventory folder list (index). */
+let itemMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeItemMenuOutsideListener() {
+  if (itemMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', itemMenuOutsideHandler, true)
+    itemMenuOutsideHandler = null
+  }
+}
+
+const itemMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+function updateItemMenuPosition() {
+  const id = openItemMenuId.value
+  if (!id || !import.meta.client) {
+    itemMenuFixedStyle.value = null
+    return
+  }
+  /** Mobile + desktop both use the same id; querySelector alone picks the hidden row → 0×0 rect → top-left. */
+  const el = getVisibleMenuAnchorElement('data-item-actions-anchor', id)
+  if (!el) {
+    itemMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  const menuWidth = 176
+  const margin = 4
+  const vw = window.innerWidth
+  let left = r.right - menuWidth
+  left = Math.max(8, Math.min(left, vw - menuWidth - 8))
+  itemMenuFixedStyle.value = {
+    top: `${r.bottom + margin}px`,
+    left: `${left}px`,
+  }
+}
+
+function addItemMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateItemMenuPosition, true)
+  window.addEventListener('resize', updateItemMenuPosition)
+}
+
+function removeItemMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateItemMenuPosition, true)
+  window.removeEventListener('resize', updateItemMenuPosition)
+}
+
+watch(openItemMenuId, (id) => {
+  removeItemMenuOutsideListener()
+  removeItemMenuPositionListeners()
+  itemMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateItemMenuPosition()
+    addItemMenuPositionListeners()
+  })
+
+  itemMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-inventory-item-menu]')) return
+    openItemMenuId.value = null
+    removeItemMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openItemMenuId.value && itemMenuOutsideHandler) {
+        document.addEventListener('click', itemMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
 
 // Sync sortBy dropdown with currentSort
 watch(() => currentSort.value.key, (newKey) => {
@@ -1640,6 +1672,12 @@ watch([filteredItems, currentSort], () => {
 }, { immediate: true })
 
 const sortedFilteredItems = computed(() => displayItems.value)
+
+const itemForOpenMenu = computed(() => {
+  const id = openItemMenuId.value
+  if (!id) return null
+  return sortedFilteredItems.value.find(i => i.id === id) ?? null
+})
 
 const paginatedItems = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
@@ -2890,12 +2928,6 @@ onMounted(async () => {
   // Add keyboard listener for ESC key
   if (import.meta.client) {
     window.addEventListener('keydown', handleKeyDown)
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!(e.target as HTMLElement).closest('.relative')) {
-        openItemMenuId.value = null
-      }
-    })
   }
 
   // Wait for auth to be ready
@@ -2935,6 +2967,8 @@ onBeforeUnmount(() => {
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
     document.removeEventListener('mousedown', handleClickOutsideInlineEdit)
+    removeItemMenuOutsideListener()
+    removeItemMenuPositionListeners()
     document.body.style.overflow = ''
   }
 })

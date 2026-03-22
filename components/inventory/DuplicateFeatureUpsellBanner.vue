@@ -3,7 +3,7 @@
     v-if="showBanner"
     class="m-0 max-w-full text-[10px] sm:text-[11px] leading-snug font-extralight text-amber-500/70 dark:text-amber-400/55"
   >
-    <span>Duplicate — Medium &amp; Enterprise.</span>
+    <span>Duplicate isn't available in your plan. Upgrade to Medium &amp; Enterprise.</span>
     <template v-if="userStore.isSuperAdmin">
       {{ ' ' }}
       <NuxtLink
