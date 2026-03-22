@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12"
+    class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10"
   >
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div
@@ -11,33 +11,33 @@
       <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-primary-300/20 dark:bg-primary-500/15 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="max-w-[400px] w-full relative z-10">
-      <div class="text-center mb-8">
+    <div class="max-w-[360px] w-full relative z-10">
+      <div class="text-center mb-6">
         <NuxtLink
           to="/"
-          class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg"
+          class="inline-block mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg"
         >
           <img
             :src="logoSource"
             alt="Storvv"
-            class="h-6 w-auto max-w-[110px] mx-auto object-contain shrink-0"
+            class="h-5 w-auto max-w-[96px] mx-auto object-contain shrink-0"
           />
         </NuxtLink>
-        <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+        <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
           Create your account
         </h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           Get started with Storvv in a few seconds
         </p>
       </div>
 
       <div
-        class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden"
+        class="rounded-xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden"
       >
-        <div class="p-6 sm:p-8">
-          <form @submit.prevent="handleSignUp" class="space-y-5">
-            <div class="space-y-2">
-              <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div class="p-4 sm:p-5">
+          <form @submit.prevent="handleSignUp" class="space-y-4">
+            <div class="space-y-1.5">
+              <label for="name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Full name
               </label>
               <input
@@ -46,13 +46,13 @@
                 type="text"
                 autocomplete="name"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="John Doe"
               />
             </div>
 
-            <div class="space-y-2">
-              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="space-y-1.5">
+              <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Email address
               </label>
               <input
@@ -61,13 +61,13 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="you@example.com"
               />
             </div>
 
-            <div class="space-y-2">
-              <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="space-y-1.5">
+              <label for="password" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div class="relative">
@@ -77,23 +77,23 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-3 py-2 pr-10 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Create a password (min 8 characters)"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   aria-label="Toggle password visibility"
                 >
-                  <EyeIcon v-if="!showPassword" class="w-4 h-4" />
-                  <EyeSlashIcon v-else class="w-4 h-4" />
+                  <EyeIcon v-if="!showPassword" class="w-3.5 h-3.5" />
+                  <EyeSlashIcon v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="space-y-1.5">
+              <label for="confirmPassword" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Confirm password
               </label>
               <div class="relative">
@@ -103,17 +103,17 @@
                   :type="showConfirmPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-3 py-2 pr-10 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Re-enter your password"
                 />
                 <button
                   type="button"
                   @click="showConfirmPassword = !showConfirmPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   aria-label="Toggle confirm password visibility"
                 >
-                  <EyeIcon v-if="!showConfirmPassword" class="w-4 h-4" />
-                  <EyeSlashIcon v-else class="w-4 h-4" />
+                  <EyeIcon v-if="!showConfirmPassword" class="w-3.5 h-3.5" />
+                  <EyeSlashIcon v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
               <p
@@ -126,17 +126,17 @@
 
             <div
               v-if="errorMessage"
-              class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-4"
+              class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
             >
-              <p class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Error</p>
-              <div class="text-sm text-red-700 dark:text-red-300 whitespace-pre-line text-left">
+              <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
+              <div class="text-xs text-red-700 dark:text-red-300 whitespace-pre-line text-left">
                 {{ errorMessage }}
               </div>
-              <div v-if="errorMessage.includes('Firestore')" class="mt-3 space-y-2">
+              <div v-if="errorMessage.includes('Firestore')" class="mt-2 space-y-1.5">
                 <a
                   href="https://console.firebase.google.com/project/storv-ux/firestore/rules"
                   target="_blank"
-                  class="inline-flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-colors"
+                  class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors"
                 >
                   🔧 Open Firestore Rules in Firebase Console →
                 </a>
@@ -144,7 +144,7 @@
                   <button
                     type="button"
                     @click="copyRulesToClipboard"
-                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-colors"
+                    class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold rounded-lg transition-colors"
                   >
                     📋 Copy Rules to Clipboard
                   </button>
@@ -159,9 +159,9 @@
                 v-model="form.acceptTerms"
                 type="checkbox"
                 required
-                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800 mt-0.5"
+                class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800 mt-0.5 shrink-0"
               />
-              <label for="terms" class="ml-2.5 text-xs sm:text-sm text-gray-600 dark:text-gray-300 cursor-pointer select-none">
+              <label for="terms" class="ml-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer select-none leading-snug">
                 I agree to the
                 <NuxtLink
                   to="/terms"
@@ -184,34 +184,17 @@
               "
               :loading="isLoading"
               variant="primary"
-              size="lg"
+              size="md"
               :icon="ArrowRightIcon"
               icon-right
-              extra-class="!w-full !rounded-full"
+              extra-class="!w-full"
             >
               Create account
             </Button>
           </form>
 
-          <div class="mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              :icon="PhoneIcon"
-              extra-class="!w-full !rounded-full"
-              @click="showPhoneSignIn = !showPhoneSignIn"
-            >
-              Sign up with Phone
-            </Button>
-          </div>
-
-          <div v-if="showPhoneSignIn" class="mt-6 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
-            <PhoneSignIn @success="handlePhoneSignUpSuccess" @error="handlePhoneSignInError" />
-          </div>
-
           <p
-            class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-sm text-gray-500 dark:text-gray-400"
+            class="mt-5 pt-4 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-xs text-gray-500 dark:text-gray-400"
           >
             Already have an account?
             <NuxtLink
@@ -229,11 +212,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
+import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
-import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 
 definePageMeta({
   layout: false,
@@ -257,10 +239,9 @@ const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const rulesCopied = ref(false)
-const showPhoneSignIn = ref(false)
 
 const { signUp, sendVerificationEmail } = useFirebaseAuth()
-const { createUserDocument, getUserDocument } = useUser()
+const { createUserDocument } = useUser()
 
 // Function to copy Firestore rules to clipboard
 const copyRulesToClipboard = async () => {
@@ -373,43 +354,6 @@ const handleSignUp = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-const handlePhoneSignUpSuccess = async (user: any) => {
-  try {
-    let userData = await getUserDocument(user.uid)
-    
-    if (!userData) {
-      const phoneNumber = user.phoneNumber || ''
-      const displayName = user.displayName || phoneNumber.split('@')[0] || 'User'
-      
-      await createUserDocument(user.uid, {
-        email: user.email || '',
-        name: displayName,
-        role: 'superAdmin',
-        subscription: 'storvv_micro',
-        hasCompletedOnboarding: false,
-        hasCompletedTutorial: false
-      })
-      
-      userData = await getUserDocument(user.uid)
-    }
-    
-    if (userData && !userData.hasCompletedOnboarding) {
-      await navigateTo('/dashboard/onboarding')
-    } else if (userData && !userData.hasCompletedTutorial) {
-      await navigateTo('/dashboard')
-    } else {
-      await navigateTo('/dashboard')
-    }
-  } catch (error: any) {
-    console.error('Error handling phone sign-up:', error)
-    errorMessage.value = error.message || 'Failed to complete sign-up. Please try again.'
-  }
-}
-
-const handlePhoneSignInError = (error: string) => {
-  errorMessage.value = error
 }
 
 useHead({

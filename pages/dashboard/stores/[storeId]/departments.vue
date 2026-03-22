@@ -102,7 +102,7 @@
       </div>
       <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">Error loading departments</h3>
       <p class="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">{{ departmentsStore.error }}</p>
-      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch" extra-class="!rounded-full">Retry</Button>
+      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch">Retry</Button>
     </div>
 
     <template v-else-if="departmentsStore.loading || storesLoading">

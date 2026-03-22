@@ -1,33 +1,33 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div class="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px); background-size: 48px 48px;"></div>
       <div class="absolute -top-32 -right-32 w-80 h-80 bg-primary-400/25 dark:bg-primary-500/20 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-primary-300/20 dark:bg-primary-500/15 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="max-w-[400px] w-full relative z-10">
-      <div class="text-center mb-8">
-        <NuxtLink to="/" class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
+    <div class="max-w-[360px] w-full relative z-10">
+      <div class="text-center mb-6">
+        <NuxtLink to="/" class="inline-block mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
           <img
             src="/storvv logo 2.png"
             alt="Storvv"
-            class="h-6 w-auto max-w-[110px] mx-auto object-contain shrink-0"
+            class="h-5 w-auto max-w-[96px] mx-auto object-contain shrink-0"
           />
         </NuxtLink>
-        <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+        <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
           Reset your password
         </h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           Enter your email and we'll send you a reset link
         </p>
       </div>
 
-      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
-        <div class="p-6 sm:p-8">
-          <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-5">
-            <div class="space-y-2">
-              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div class="rounded-xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
+        <div class="p-4 sm:p-5">
+          <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4">
+            <div class="space-y-1.5">
+              <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Email address
               </label>
               <input
@@ -36,17 +36,17 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="Enter your email"
               />
             </div>
 
             <div
               v-if="errorMessage"
-              class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-4"
+              class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
             >
-              <p class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Error</p>
-              <p class="text-sm text-red-700 dark:text-red-300">{{ errorMessage }}</p>
+              <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
+              <p class="text-xs text-red-700 dark:text-red-300">{{ errorMessage }}</p>
             </div>
 
             <Button
@@ -54,31 +54,31 @@
               :disabled="isLoading"
               :loading="isLoading"
               variant="primary"
-              size="lg"
+              size="md"
               :icon="ArrowRightIcon"
               icon-right
-              extra-class="!w-full !rounded-full"
+              extra-class="!w-full"
             >
               Send reset link
             </Button>
           </form>
 
-          <div v-else class="space-y-5">
+          <div v-else class="space-y-4">
             <div class="flex justify-center">
-              <div class="flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30">
-                <CheckCircleIcon class="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div class="flex items-center justify-center h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30">
+                <CheckCircleIcon class="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
             <div class="text-center">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
                 Check your email
               </h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400">
+              <p class="text-xs text-gray-600 dark:text-gray-400">
                 We've sent a password reset link to
                 <span class="font-medium text-gray-900 dark:text-gray-100">{{ form.email }}</span>
               </p>
             </div>
-            <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-center text-xs text-gray-500 dark:text-gray-400">
               Didn't receive it? Check spam or
               <button
                 type="button"
@@ -91,7 +91,7 @@
             </p>
           </div>
 
-          <p class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p class="mt-5 pt-4 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-xs text-gray-500 dark:text-gray-400">
             Remember your password?
             <NuxtLink
               to="/signin"

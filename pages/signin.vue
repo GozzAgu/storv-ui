@@ -1,33 +1,33 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div class="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px); background-size: 48px 48px;"></div>
       <div class="absolute -top-32 -right-32 w-80 h-80 bg-primary-400/25 dark:bg-primary-500/20 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-primary-300/20 dark:bg-primary-500/15 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="max-w-[400px] w-full relative z-10">
-      <div class="text-center mb-8">
-        <NuxtLink to="/" class="inline-block mb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
+    <div class="max-w-[360px] w-full relative z-10">
+      <div class="text-center mb-6">
+        <NuxtLink to="/" class="inline-block mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
           <img
             :src="logoSource"
             alt="Storvv"
-            class="h-6 w-auto max-w-[110px] mx-auto object-contain shrink-0"
+            class="h-5 w-auto max-w-[96px] mx-auto object-contain shrink-0"
           />
         </NuxtLink>
-        <h1 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+        <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
           Welcome back
         </h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
           Sign in to continue to your dashboard
         </p>
       </div>
 
-      <div class="rounded-2xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
-        <div class="p-6 sm:p-8">
-          <form @submit.prevent="handleSignIn" class="space-y-5">
-            <div class="space-y-2">
-              <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div class="rounded-xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
+        <div class="p-4 sm:p-5">
+          <form @submit.prevent="handleSignIn" class="space-y-4">
+            <div class="space-y-1.5">
+              <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Email address
               </label>
               <input
@@ -36,19 +36,19 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                 placeholder="Enter your email"
               />
             </div>
 
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <label for="password" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                   Password
                 </label>
                 <NuxtLink
                   to="/forgot-password"
-                  class="text-sm font-medium text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                  class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors shrink-0"
                 >
                   Forgot?
                 </NuxtLink>
@@ -60,17 +60,17 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
                   required
-                  class="w-full px-4 py-3 pr-11 rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full px-3 py-2 pr-10 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   aria-label="Toggle password visibility"
                 >
-                  <EyeIcon v-if="!showPassword" class="w-4 h-4" />
-                  <EyeSlashIcon v-else class="w-4 h-4" />
+                  <EyeIcon v-if="!showPassword" class="w-3.5 h-3.5" />
+                  <EyeSlashIcon v-else class="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -80,24 +80,24 @@
                 id="remember-me"
                 v-model="form.rememberMe"
                 type="checkbox"
-                class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
+                class="h-3.5 w-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
               />
-              <label for="remember-me" class="ml-2.5 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none">
+              <label for="remember-me" class="ml-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
                 Remember me
               </label>
             </div>
 
             <div
               v-if="errorMessage"
-              class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-4"
+              class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
             >
-              <p class="text-sm font-medium text-red-800 dark:text-red-200 mb-1">Error</p>
-              <div class="text-sm text-red-700 dark:text-red-300 whitespace-pre-line text-left">{{ errorMessage }}</div>
+              <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
+              <div class="text-xs text-red-700 dark:text-red-300 whitespace-pre-line text-left">{{ errorMessage }}</div>
               <NuxtLink
                 v-if="errorMessage.includes('Firestore')"
                 to="/QUICK_FIX.md"
                 target="_blank"
-                class="mt-2 inline-block text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline"
+                class="mt-2 inline-block text-[11px] font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline"
               >
                 View Quick Fix Guide →
               </NuxtLink>
@@ -108,33 +108,16 @@
               :disabled="isLoading"
               :loading="isLoading"
               variant="primary"
-              size="lg"
+              size="md"
               :icon="ArrowRightIcon"
               icon-right
-              extra-class="!w-full !rounded-full"
+              extra-class="!w-full"
             >
               Sign in
             </Button>
           </form>
 
-          <div class="mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              :icon="PhoneIcon"
-              extra-class="!w-full !rounded-full"
-              @click="showPhoneSignIn = !showPhoneSignIn"
-            >
-              Sign in with Phone
-            </Button>
-          </div>
-
-          <div v-if="showPhoneSignIn" class="mt-6 pt-6 border-t border-gray-200/80 dark:border-gray-700/80">
-            <PhoneSignIn @success="handlePhoneSignInSuccess" @error="handlePhoneSignInError" />
-          </div>
-
-          <p class="mt-8 pt-6 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-sm text-gray-500 dark:text-gray-400">
+          <p class="mt-5 pt-4 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-xs text-gray-500 dark:text-gray-400">
             Don't have an account?
             <NuxtLink
               to="/signup"
@@ -151,14 +134,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon, PhoneIcon } from '@heroicons/vue/24/outline'
+import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
-import { useUser } from '~/composables/useUser'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
-import PhoneSignIn from '~/components/auth/PhoneSignIn.vue'
 
 definePageMeta({
   layout: false,
@@ -178,10 +159,8 @@ const form = ref({
 const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
-const showPhoneSignIn = ref(false)
 
 const { signIn } = useFirebaseAuth()
-const { getUserDocument, createUserDocument } = useUser()
 const { storeCredentials } = useAdminCredentials()
 const userStore = useUserStore()
 const authStore = useAuthStore()
@@ -250,46 +229,6 @@ const handleSignIn = async () => {
   } finally {
     isLoading.value = false
   }
-}
-
-const handlePhoneSignInSuccess = async (user: any) => {
-  try {
-    // Check if user document exists in Firestore
-    let userData = await getUserDocument(user.uid)
-    
-    // If user doesn't exist in Firestore, create user document
-    if (!userData) {
-      const phoneNumber = user.phoneNumber || ''
-      const displayName = user.displayName || phoneNumber.split('@')[0] || 'User'
-      
-      await createUserDocument(user.uid, {
-        email: user.email || '',
-        name: displayName,
-        role: 'superAdmin',
-        hasCompletedOnboarding: false,
-        hasCompletedTutorial: false
-      })
-      
-      // Get the newly created user data
-      userData = await getUserDocument(user.uid)
-    }
-    
-    // Redirect based on onboarding status
-    if (userData && !userData.hasCompletedOnboarding) {
-      await navigateTo('/dashboard/onboarding')
-    } else if (userData && !userData.hasCompletedTutorial) {
-      await navigateTo('/dashboard')
-    } else {
-      await navigateTo('/dashboard')
-    }
-  } catch (error: any) {
-    console.error('Error handling phone sign-in:', error)
-    errorMessage.value = error.message || 'Failed to complete sign-in. Please try again.'
-  }
-}
-
-const handlePhoneSignInError = (error: string) => {
-  errorMessage.value = error
 }
 
 useHead({

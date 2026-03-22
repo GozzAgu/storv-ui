@@ -3,7 +3,7 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'animated-button group relative inline-flex items-center justify-center overflow-hidden rounded-full border-none font-semibold cursor-pointer transition-all duration-[0.6s] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+      'animated-button group relative inline-flex items-center justify-center overflow-hidden rounded-lg border-none font-semibold cursor-pointer transition-all duration-[0.6s] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
       'ease-[cubic-bezier(0.23,1,0.32,1)]',
       sizeClasses,
       variantBgClasses,

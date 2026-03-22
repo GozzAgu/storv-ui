@@ -95,7 +95,7 @@
             class="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
           />
         </div>
-        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" extra-class="!rounded-full sm:w-auto w-full" size="sm">
+        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" extra-class="sm:w-auto w-full" size="sm">
           Reset
         </Button>
       </div>
@@ -111,7 +111,7 @@
       </div>
       <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">Error loading departments</h3>
       <p class="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">{{ departmentsStore.error }}</p>
-      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch" extra-class="!rounded-full">
+      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch" >
         Retry
       </Button>
     </div>

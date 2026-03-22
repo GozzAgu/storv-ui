@@ -114,11 +114,11 @@
 
     <template #footer>
       <div class="flex items-center justify-end gap-2 w-full">
-        <Button variant="outline" size="sm" @click="handleCancel" class="!rounded-xl">Cancel</Button>
+        <Button variant="outline" size="sm" @click="handleCancel" class="!rounded-lg">Cancel</Button>
         <Button
           variant="primary"
           size="sm"
-          class="!rounded-xl"
+          class="!rounded-lg"
           @click="handleApplyDiscount"
           :disabled="!isValid || isApplying"
         >

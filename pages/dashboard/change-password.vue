@@ -53,7 +53,7 @@
         <Button
           type="submit"
           size="sm"
-          class="w-full !rounded-xl"
+          class="w-full !rounded-lg"
           :disabled="isSubmitting || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword || form.newPassword.length < 6"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center gap-2">

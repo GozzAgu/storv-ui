@@ -19,7 +19,7 @@
             <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
             <button
               @click="showContactFormModal = true"
-              class="rounded-full bg-gray-900 text-white text-sm font-medium px-5 py-2.5 hover:bg-gray-800 transition-colors"
+              class="rounded-lg bg-gray-900 text-white text-sm font-medium px-5 py-2.5 hover:bg-gray-800 transition-colors"
             >
               Start free trial
             </button>
@@ -46,7 +46,7 @@
             <a href="#pricing" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">About</a>
             <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900">Contact</a>
-            <button @click="showContactFormModal = true; mobileMenuOpen = false" class="w-full mt-4 rounded-full bg-gray-900 text-white text-sm font-medium py-3">Start free trial</button>
+            <button @click="showContactFormModal = true; mobileMenuOpen = false" class="w-full mt-4 rounded-lg bg-gray-900 text-white text-sm font-medium py-3">Start free trial</button>
           </div>
         </Transition>
     </nav>
@@ -89,13 +89,13 @@
           <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 @click="showContactFormModal = true"
-              class="inline-flex items-center justify-center rounded-full bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
+              class="inline-flex items-center justify-center rounded-lg bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
               >
               Start free trial
               </button>
               <button
                 @click="scrollToSection('features')"
-              class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
+              class="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
               >
               See it in action
               </button>
@@ -248,7 +248,7 @@
               <div class="pt-2">
                 <button
                   @click="showContactFormModal = true"
-                    class="rounded-full bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
+                    class="rounded-lg bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
                 >
                     Get started
                 </button>
@@ -523,7 +523,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No analytics; no multiple departments; no multi-store sync</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
           <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 rounded-2xl border-2 border-primary-200 bg-white p-6 flex flex-col shadow-lg shadow-primary-500/5">
@@ -542,7 +542,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No stock transfers between stores (Enterprise only)</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
@@ -560,7 +560,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-full bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
               </div>
             </div>
@@ -942,14 +942,14 @@
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
               @click="showContactFormModal = true"
-              class="group inline-flex items-center justify-center gap-2 rounded-full bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
+              class="group inline-flex items-center justify-center gap-2 rounded-lg bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
             >
               Start Free Trial
               <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
             </button>
             <button
               @click="scrollToSection('features')"
-              class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
             >
               See it in action
             </button>
@@ -968,7 +968,7 @@
         <p class="mt-4 text-gray-600">Questions, feedback, or partnership we’d love to hear from you.</p>
           <button
             @click="showContactFormModal = true"
-          class="mt-8 inline-flex items-center gap-2 rounded-full bg-primary-600 text-white font-medium px-6 py-3 hover:bg-primary-700 transition-colors"
+          class="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary-600 text-white font-medium px-6 py-3 hover:bg-primary-700 transition-colors"
           >
           Contact us
           <ArrowRightIcon class="w-5 h-5" />

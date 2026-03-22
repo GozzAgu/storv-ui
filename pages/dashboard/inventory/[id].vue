@@ -144,7 +144,7 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" class="shrink-0 rounded-full" />
+        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" class="shrink-0" />
           <button
             @click="isFullscreen = !isFullscreen"
           class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"

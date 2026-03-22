@@ -38,7 +38,7 @@
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
           Staff can change their password in Profile after signing in.
         </p>
-        <Button size="sm" class="!rounded-xl w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
+        <Button size="sm" class="!rounded-lg w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
           Done
         </Button>
       </div>
@@ -186,8 +186,8 @@
 
     <template #footer>
       <template v-if="!showTemporaryPassword">
-        <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-xl">Cancel</Button>
-        <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-xl">
+        <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+        <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-lg">
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
