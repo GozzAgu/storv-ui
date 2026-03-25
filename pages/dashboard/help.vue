@@ -56,9 +56,8 @@
               :href="`#${cat.id}`"
               class="block rounded-md px-2 py-1.5 font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors"
               @click.prevent="scrollTo(cat.id)"
-            >
-              {{ cat.title }}
-            </a>
+              v-html="highlightText(cat.title, trimmedSearch)"
+            ></a>
           </li>
         </ul>
         <p
@@ -77,18 +76,18 @@
           class="scroll-mt-24 sm:scroll-mt-28"
         >
           <div class="flex items-start gap-2.5 mb-3">
-            <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 dark:bg-primary-400/15 text-primary-600 dark:text-primary-400"
-            >
-              <component :is="cat.icon" class="w-4 h-4" stroke-width="1.5" />
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center text-primary-600 dark:text-primary-400">
+              <component :is="cat.icon" class="w-5 h-5" stroke-width="1.5" />
             </div>
             <div class="min-w-0">
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-                {{ cat.title }}
-              </h2>
-              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                {{ cat.blurb }}
-              </p>
+              <h2
+                class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
+                v-html="highlightText(cat.title, trimmedSearch)"
+              ></h2>
+              <p
+                class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed"
+                v-html="highlightText(cat.blurb, trimmedSearch)"
+              ></p>
             </div>
           </div>
 
@@ -98,17 +97,22 @@
               :key="idx"
               class="rounded-xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 px-4 py-3 sm:px-4 sm:py-3.5"
             >
-              <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-                {{ article.title }}
-              </h3>
+              <h3
+                class="text-xs font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
+                v-html="highlightText(article.title, trimmedSearch)"
+              ></h3>
               <div class="mt-2 space-y-2 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                <p v-for="(para, pIdx) in article.body" :key="pIdx">
-                  {{ para }}
-                </p>
+                <p
+                  v-for="(para, pIdx) in article.body"
+                  :key="pIdx"
+                  v-html="highlightText(para, trimmedSearch)"
+                ></p>
                 <ul v-if="article.bullets?.length" class="list-disc pl-4 space-y-1 marker:text-primary-500/60 dark:marker:text-primary-400/50">
-                  <li v-for="(b, bIdx) in article.bullets" :key="bIdx">
-                    {{ b }}
-                  </li>
+                  <li
+                    v-for="(b, bIdx) in article.bullets"
+                    :key="bIdx"
+                    v-html="highlightText(b, trimmedSearch)"
+                  ></li>
                 </ul>
               </div>
             </article>
@@ -177,7 +181,7 @@ const categories: Category[] = [
         body: [
           'Super admins are account owners: they can edit Settings (store profile, inventory defaults, receipt numbering, Paystack subscription upgrades), create folders and edit item definitions, delete receipts, create staff logins, and run Multi-Store Sync when the plan allows.',
           'Staff users sign in with their own email and password. A staff user is either a store manager or standard staff. Managers can edit receipts and run refunds; standard staff are mostly read-only for inventory structure and settings but can still create new receipts.',
-          'Only super admins can create inventory folders, change item rows, or delete receipts. Only super admins can add staff accounts—managers cannot.',
+          'Only super admins can create inventory folders, change item rows, or delete receipts. Only super admins can add staff accounts; managers cannot.',
         ],
         bullets: [
           'If a control is missing or disabled, check role (super admin vs staff) and subscription first.',
@@ -210,13 +214,13 @@ const categories: Category[] = [
         title: 'Global search (⌘K / Ctrl+K)',
         body: [
           'Click Search in the header or press ⌘K on Mac / Ctrl+K on Windows. The modal searches receipts, inventory, and customers and offers quick filters by entity type.',
-          'Use arrow keys to move through results, Enter to open a result, Esc to close—matching the on-screen hints.',
+          'Use arrow keys to move through results, Enter to open a result, Esc to close; this matches the on-screen hints.',
         ],
       },
       {
         title: 'Working in the correct store',
         body: [
-          'Super admins must pick the right store in the header before editing inventory, recording sales, or reading Analytics—each screen reads the active store’s data only.',
+          'Super admins must pick the right store in the header before editing inventory, recording sales, or reading Analytics; each screen reads the active store’s data only.',
           'If Analytics says to select a store, use the header selector (super admins) or ask an admin to confirm you have an assigned store.',
         ],
       },
@@ -232,7 +236,7 @@ const categories: Category[] = [
         title: 'Folders list (/dashboard/inventory)',
         body: [
           'The Inventory entry opens Folders with the subtitle “Organize products into folders and manage stock in one place”. Search, sort, and paginate folders; super admins can create, rename, delete, and bulk-delete folders where the UI provides those actions.',
-          'Storvv Micro may show DuplicateFeatureUpsellBanner messaging next to the title when folder limits apply—upgrade paths point toward Settings and higher plans.',
+          'Storvv Micro may show DuplicateFeatureUpsellBanner messaging next to the title when folder limits apply; upgrade paths point toward Settings and higher plans.',
         ],
       },
       {
@@ -268,7 +272,7 @@ const categories: Category[] = [
       {
         title: 'Create New Receipt (three steps)',
         body: [
-          'The modal title is “Create New Receipt” with subtitle “Select folder, items, then enter receipt details.” Step 1: Select Folder (search folders; empty state tells you to create folders in Inventory first). Step 2: Select Items and quantities from that folder. Step 3: Receipt Details—customer fields, payment method, Completed or Pending status, and notes.',
+          'The modal title is “Create New Receipt” with subtitle “Select folder, items, then enter receipt details.” Step 1: Select Folder (search folders; empty state tells you to create folders in Inventory first). Step 2: Select Items and quantities from that folder. Step 3: Receipt Details; customer fields, payment method, Completed or Pending status, and notes.',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],
       },
@@ -308,7 +312,7 @@ const categories: Category[] = [
         title: 'Analytics page',
         body: [
           'Analytics & Reports (/dashboard/analytics) appears when your subscription exposes it in the sidebar (Storvv Medium and Enterprise include analytics navigation; Storvv Micro focuses on core sales and inventory).',
-          'You must select a store first—the page shows a centered prompt with a link to Settings if nothing is selected.',
+          'You must select a store first; the page shows a centered prompt with a link to Settings if nothing is selected.',
           'Use the period picker: Daily, Weekly, or Monthly. Cards summarize total revenue (with % change vs previous), total sales and order counts, average order value, low stock count, and refund totals.',
         ],
       },
@@ -316,7 +320,7 @@ const categories: Category[] = [
         title: 'Charts and exports',
         body: [
           'Charts include revenue trend visuals for the active period label.',
-          'Export PDF and Export Excel buttons in the header download reports for the current store and period—they disable while an export is running.',
+          'Export PDF and Export Excel buttons in the header download reports for the current store and period; they disable while an export is running.',
         ],
       },
     ],
@@ -346,14 +350,14 @@ const categories: Category[] = [
       {
         title: 'Departments',
         body: [
-          'The department directory is at /dashboard/departments; opening a department goes to /dashboard/departments/[id] for staff and department settings. Super admins also see each store in the sidebar under Stores—expand a store to open department shortcuts or “View departments” for that location.',
+          'The department directory is at /dashboard/departments; opening a department goes to /dashboard/departments/[id] for staff and department settings. Super admins also see each store in the sidebar under Stores; expand a store to open department shortcuts or “View departments” for that location.',
           'Use these screens to organize teams, roles, and staff per department. How many departments and staff you can add depends on your plan; check caps and upgrades in Settings.',
         ],
       },
       {
         title: 'Creating staff',
         body: [
-          'Super admins create staff logins with email and password (share credentials securely outside the app—there is no automated invite email in the default flow). Managers cannot create staff.',
+          'Super admins create staff logins with email and password (share credentials securely outside the app; there is no automated invite email in the default flow). Managers cannot create staff.',
           'Assign each person as store manager or standard staff so receipt edits, refunds, and locked-down areas match their role.',
         ],
       },
@@ -412,7 +416,7 @@ const categories: Category[] = [
       {
         title: 'Profile & 2FA',
         body: [
-          'Profile (/dashboard/profile) is where you manage your name, contact info, and security— including Two-Factor Authentication, which you can turn on or off using the prompts on that page.',
+          'Profile (/dashboard/profile) is where you manage your name, contact info, and security; Two-Factor Authentication can be turned on or off using the prompts on that page.',
           'Password changes use the Change password screen (/dashboard/change-password), linked from Profile.',
         ],
       },
@@ -425,7 +429,7 @@ const categories: Category[] = [
       {
         title: 'Help center search',
         body: [
-          'The search box on this page filters only these help topics—it does not search your store data. Use Global Search in the header for receipts, inventory, and customers.',
+          'The search box on this page filters only these help topics; it does not search your store data. Use Global Search in the header for receipts, inventory, and customers.',
         ],
       },
     ],
@@ -433,6 +437,37 @@ const categories: Category[] = [
 ]
 
 const searchQuery = ref('')
+
+const trimmedSearch = computed(() => searchQuery.value.trim())
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/** Safe for v-html: escapes source text, wraps case-insensitive query matches in <mark>. */
+function highlightText(text: string, needle: string): string {
+  const escaped = escapeHtml(text)
+  const q = needle.trim()
+  if (!q) {
+    return escaped
+  }
+  const qEscaped = escapeHtml(q)
+  const re = new RegExp(escapeRegExp(qEscaped), 'gi')
+  return escaped.replace(
+    re,
+    (m) =>
+      `<mark class="rounded px-0.5 bg-amber-200/95 text-gray-900 dark:bg-amber-400/30 dark:text-gray-100">${m}</mark>`,
+  )
+}
 
 function textMatches(haystack: string, needle: string): boolean {
   return haystack.toLowerCase().includes(needle.toLowerCase())
