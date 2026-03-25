@@ -8,7 +8,7 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-white dark:bg-gray-900 w-full overflow-x-hidden relative">
+  <div v-else class="min-h-screen bg-white dark:bg-gray-900 w-full overflow-x-clip relative">
     <!-- Sidebar -->
     <aside
       :class="[
@@ -475,7 +475,7 @@
       <div class="h-11 sm:h-12 shrink-0" aria-hidden="true" />
 
       <!-- Page Content -->
-      <main class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full" style="min-width: 0; max-width: 100%; overflow-x: hidden;">
+      <main class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible">
         <slot />
       </main>
     </div>
@@ -512,6 +512,7 @@ import {
   ChartBarIcon,
   ArrowsRightLeftIcon,
   ShieldCheckIcon,
+  BookOpenIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
@@ -615,6 +616,7 @@ const navigation: Array<{
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, subscriptionFeature: 'analytics' },
   { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
   { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
+  { name: 'Help center', href: '/dashboard/help', icon: BookOpenIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, subscriptionFeature: 'settings' },
   { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, subscriptionFeature: 'profile' },
 ]
