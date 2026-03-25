@@ -34,15 +34,6 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       appVersion: '1.0',
-      /**
-       * When true, all routes on the configured app host (e.g. app.storvv.com) require a one-time access code.
-       * Localhost and *.vercel.app are skipped. Set via NUXT_PUBLIC_APP_DEV_GATE=true on the deployment.
-       */
-      appDevGate: process.env.NUXT_PUBLIC_APP_DEV_GATE === 'true',
-      /**
-       * Checked on the client (static deploy). For stricter protection, use hosting-level auth or `nuxt build` with server routes.
-       */
-      appDevAccessCode: process.env.NUXT_PUBLIC_APP_DEV_ACCESS_CODE || '2209',
       /** Comma-separated extra hostnames treated like www (marketing-only), e.g. preview domains */
       marketingHosts: (process.env.NUXT_PUBLIC_MARKETING_HOSTS || '')
         .split(',')
