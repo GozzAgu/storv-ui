@@ -1,19 +1,4 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { isValidInviteHashList, normalizeInviteSha256Env } from './utils/inviteGateConfig'
-
-const inviteAccessCode = (process.env.INVITE_ACCESS_CODE || '').trim()
-const inviteAccessSha256Raw = normalizeInviteSha256Env(process.env.NUXT_PUBLIC_INVITE_ACCESS_SHA256)
-const inviteGateEnabled = inviteAccessCode.length > 0 || isValidInviteHashList(inviteAccessSha256Raw)
-
-const hadInviteEnvHint =
-  (process.env.NUXT_PUBLIC_INVITE_ACCESS_SHA256 || '').trim().length > 0 ||
-  (process.env.INVITE_ACCESS_CODE || '').trim().length > 0
-if (process.env.VERCEL === '1' && !inviteGateEnabled && hadInviteEnvHint) {
-  console.warn(
-    '[storvv] Invite env vars are set but inviteGateEnabled is false in this build. On Vercel, open each variable → check "Build" (not only Production/Preview runtime). For SHA256, paste the 64-char hex (openssl output is OK). Ensure app.storvv.com is not listed in NUXT_PUBLIC_MARKETING_HOSTS.'
-  )
-}
-
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -37,11 +22,6 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    /**
-     * Server-side invite codes for `nuxt build` / deployments with a Nitro server (`POST /api/access/verify`).
-     * For static `nuxt generate` hosting, use NUXT_PUBLIC_INVITE_ACCESS_SHA256 instead.
-     */
-    inviteAccessCode,
     // Private keys (only available on server-side)
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
@@ -53,19 +33,16 @@ export default defineNuxtConfig({
     firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
     // Public keys (exposed to client-side)
     public: {
-      /** True when invite verification is configured at build time (server codes and/or public SHA-256 list). */
-      inviteGateEnabled: inviteGateEnabled,
-      /**
-       * Comma-separated SHA-256 hex digests of allowed codes. Generate e.g.
-       * `printf '%s' 'yourcode' | shasum -a 256` (use the same normalization as the UI: lowercase a-z, 0-9).
-       */
-      inviteAccessSha256: inviteAccessSha256Raw,
-      /** Marketing site for “Get in touch” link on the access page */
-      marketingSiteOrigin: (process.env.NUXT_PUBLIC_MARKETING_SITE_ORIGIN || 'https://www.storvv.com').replace(
-        /\/$/,
-        ''
-      ),
       appVersion: '1.0',
+      /**
+       * When true, all routes on the configured app host (e.g. app.storvv.com) require a one-time access code.
+       * Localhost and *.vercel.app are skipped. Set via NUXT_PUBLIC_APP_DEV_GATE=true on the deployment.
+       */
+      appDevGate: process.env.NUXT_PUBLIC_APP_DEV_GATE === 'true',
+      /**
+       * Checked on the client (static deploy). For stricter protection, use hosting-level auth or `nuxt build` with server routes.
+       */
+      appDevAccessCode: process.env.NUXT_PUBLIC_APP_DEV_ACCESS_CODE || '2209',
       /** Comma-separated extra hostnames treated like www (marketing-only), e.g. preview domains */
       marketingHosts: (process.env.NUXT_PUBLIC_MARKETING_HOSTS || '')
         .split(',')
