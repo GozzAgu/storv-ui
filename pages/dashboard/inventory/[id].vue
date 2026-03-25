@@ -305,8 +305,8 @@
                 @click.stop
               />
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" :title="getItemDisplayValue(columns[0] ? item[columns[0].key] : item.name)">
-                  {{ getItemDisplayValue(columns[0] ? item[columns[0].key] : item.name) }}
+                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" :title="getItemPrimaryLabel(item)">
+                  {{ getItemPrimaryLabel(item) }}
                 </p>
                 <div class="mt-1 flex items-center justify-between gap-2 flex-wrap">
                   <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -439,7 +439,7 @@
                 >
                   <template v-if="colIndex === 0">
                     <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">
-                      {{ getItemDisplayValue(item[column.key]) }}
+                      {{ getItemPrimaryLabel(item) }}
                     </span>
                   </template>
                   <template v-else>
@@ -646,7 +646,7 @@
               </div>
               <!-- Template fields (Product, Price, etc.) -->
               <template
-              v-for="field in folder?.template?.fields?.filter(f => f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model') || []"
+              v-for="field in effectiveTemplateFields.filter(f => f.name !== 'serialNo' && f.name !== 'serialNumber' && f.name !== 'brand' && f.name !== 'model')"
               :key="field.id"
             >
                 <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
@@ -757,9 +757,9 @@
 
         <!-- Single Item Mode (normal or edit) – fields side by side -->
         <div v-else>
-          <div v-if="folder?.template?.fields && folder.template.fields.length > 0" class="space-y-2">
+          <div v-if="effectiveTemplateFields.length > 0" class="space-y-2">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <template v-for="field in folder.template.fields" :key="field.id">
+              <template v-for="field in effectiveTemplateFields" :key="field.id">
                 <div v-if="field.type !== 'boolean' && field.type !== 'date'" class="min-w-0">
                   <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {{ field.label || field.name }} {{ field.required ? '*' : '' }}
@@ -1076,7 +1076,7 @@ import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import { useInventoryStore, type InventoryFolder } from '~/stores/inventory'
+import { useInventoryStore, type InventoryFolder, type TemplateField } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1086,6 +1086,7 @@ import { useToast } from '~/composables/useToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -1426,7 +1427,13 @@ const saveInlineEdit = async () => {
   const rawValue = inlineEditValue.value.trim()
   let parsedValue: string | number | boolean = rawValue
   const colType = column.type || (column as any).type
-  if (colType === 'number' || columnKey.toLowerCase().includes('quantity') || columnKey.toLowerCase() === 'sku') {
+  if (
+    colType === 'number' ||
+    columnKey.toLowerCase().includes('quantity') ||
+    columnKey.toLowerCase() === 'stock' ||
+    columnKey.toLowerCase() === 'qty' ||
+    columnKey.toLowerCase() === 'sku'
+  ) {
     const num = parseFloat(rawValue)
     parsedValue = isNaN(num) ? rawValue : num
   } else if (colType === 'currency' || columnKey.toLowerCase().includes('price')) {
@@ -1477,19 +1484,85 @@ const saveInlineEdit = async () => {
 
 // Folder will be loaded from Firestore via inventoryStore
 
+const STOCK_LIKE_NAMES = ['stock', 'quantity', 'qty'] as const
+
+function templateFieldsHaveStockLike(fields: TemplateField[] | undefined): boolean {
+  if (!fields?.length) return false
+  return fields.some((f) =>
+    STOCK_LIKE_NAMES.includes(f.name.toLowerCase() as (typeof STOCK_LIKE_NAMES)[number]),
+  )
+}
+
+const SYNTH_STOCK_FIELD_ID = 'storvv-synthetic-stock'
+
+/** Template fields shown in forms/table, plus auto Quantity (stock) when folder is bulk (no serials). */
+const effectiveTemplateFields = computed((): TemplateField[] => {
+  const raw = folder.value?.template?.fields
+  if (!raw?.length) return []
+  const fields = raw.map((f) => ({ ...f }))
+  if (folder.value?.hasSerialNumbers || templateFieldsHaveStockLike(fields)) {
+    return fields
+  }
+  const synthetic: TemplateField = {
+    id: SYNTH_STOCK_FIELD_ID,
+    name: 'stock',
+    label: 'Quantity',
+    type: 'number',
+    required: false,
+  }
+  const dateIdx = fields.findIndex((f) => f.type === 'date')
+  if (dateIdx >= 0) {
+    fields.splice(dateIdx, 0, synthetic)
+  } else {
+    fields.push(synthetic)
+  }
+  return fields
+})
+
+function quantityFieldKeyForFolder(): string | undefined {
+  const tmpl = folder.value?.template?.fields
+  const hit = tmpl?.find((f) =>
+    STOCK_LIKE_NAMES.includes(f.name.toLowerCase() as (typeof STOCK_LIKE_NAMES)[number]),
+  )?.name
+  if (hit) return hit
+  if (!folder.value?.hasSerialNumbers) return 'stock'
+  return undefined
+}
+
+/** Ensure bulk (non-serial) rows always persist a positive quantity key expected by receipts. */
+function normalizeNonSerialItemPayload(data: Record<string, any>) {
+  if (folder.value?.hasSerialNumbers) return
+  const qk = quantityFieldKeyForFolder()
+  if (!qk) return
+  const raw = data[qk]
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw ?? '').trim())
+  if (!Number.isFinite(n) || n < 1) {
+    data[qk] = 1
+  } else {
+    data[qk] = Math.floor(n)
+  }
+}
+
 // Generate columns based on folder template (exclude Model column; show Brand as Product model)
 const columns = computed(() => {
   const templateColumns: Array<{ key: string; label: string; sortable: boolean; type?: string }> = []
-  
-  if (folder.value?.template?.fields && folder.value.template.fields.length > 0) {
-    // Generate columns from template fields; exclude 'model'; show 'brand' as 'Product model'
-    const mapped = folder.value.template.fields
-      .filter(field => field.name !== 'model')
-      .map(field => ({
-      key: field.name,
-        label: field.name === 'brand' ? 'Product model' : (field.label || field.name),
-      sortable: true,
-      type: field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
+
+  const fieldSource =
+    effectiveTemplateFields.value.length > 0
+      ? effectiveTemplateFields.value
+      : folder.value?.template?.fields && folder.value.template.fields.length > 0
+        ? folder.value.template.fields
+        : []
+
+  if (fieldSource.length > 0) {
+    const mapped = fieldSource
+      .filter((field) => field.name !== 'model')
+      .map((field) => ({
+        key: field.name,
+        label: field.name === 'brand' ? 'Product model' : field.label || field.name,
+        sortable: true,
+        type:
+          field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
       }))
     templateColumns.push(...mapped)
   } else {
@@ -1497,22 +1570,52 @@ const columns = computed(() => {
     templateColumns.push(
       { key: 'name', label: 'Product', sortable: true },
       { key: 'sku', label: 'SKU', sortable: true },
-      { key: 'price', label: 'Price', sortable: true, type: 'currency' }
+      { key: 'price', label: 'Price', sortable: true, type: 'currency' },
     )
+    if (!folder.value?.hasSerialNumbers) {
+      templateColumns.push({ key: 'stock', label: 'Quantity', sortable: true, type: 'number' })
+    }
   }
-  
+
   // Always add Date In, Date Out, and Availability columns at the end
   templateColumns.push(
     { key: 'dateIn', label: 'Date In', sortable: true, type: 'date' },
     { key: 'dateOut', label: 'Date Out', sortable: true, type: 'date' },
-    { key: 'availability', label: 'Availability', sortable: true, type: 'availability' }
+    { key: 'availability', label: 'Availability', sortable: true, type: 'availability' },
   )
-  
+
   return templateColumns
 })
 
+function getItemPrimaryLabel(item: InventoryItem): string {
+  const first = columns.value[0]
+  if (first?.key) {
+    const v = item[first.key]
+    if (v !== undefined && v !== null && String(v).trim() !== '') {
+      return String(v)
+    }
+  }
+  return getInventoryItemDisplayName(item)
+}
+
 const items = computed(() => {
   return inventoryStore.items[folderId.value] || []
+})
+
+const totalUnitsInFolder = computed(() => {
+  const list = items.value
+  if (!folder.value || list.length === 0) return 0
+  if (folder.value.hasSerialNumbers) {
+    return list.length
+  }
+  const qf = quantityFieldKeyForFolder()
+  if (!qf) return list.length
+  return list.reduce((sum, item) => {
+    const raw = item[qf]
+    const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
+    const add = Number.isFinite(n) && n > 0 ? n : 0
+    return sum + add
+  }, 0)
 })
 
 /** Composite key: serial + product (brand + model). Same serial can exist for different product models. */
@@ -1543,11 +1646,7 @@ const totalInventoryValue = computed(() => {
     f.type === 'currency'
   )?.name || 'price'
   
-  // Find a quantity field name from template (if exists - no default stock field)
-  const quantityField = folder.value?.template?.fields?.find(f => 
-    f.name.toLowerCase() === 'quantity' ||
-    f.name.toLowerCase() === 'qty'
-  )?.name
+  const quantityField = quantityFieldKeyForFolder()
   
   let total = 0
   folderItems.forEach(item => {
@@ -1557,11 +1656,11 @@ const totalInventoryValue = computed(() => {
     
     // For serial number items, quantity is always 1
     let quantity = 1
-    // Only use quantity if it's a custom field and not serial numbers (serial numbers are individual items)
-    if (!folder.value?.hasSerialNumbers && quantityField && item[quantityField] !== undefined) {
-      quantity = typeof item[quantityField] === 'number' 
-        ? item[quantityField] 
-        : parseFloat(item[quantityField]) || 0
+    if (!folder.value?.hasSerialNumbers && quantityField) {
+      const raw = item[quantityField]
+      const parsed =
+        typeof raw === 'number' ? raw : parseFloat(String(raw ?? ''))
+      quantity = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
     }
     
     // Only count available items (not sold) in the total value
@@ -1900,25 +1999,25 @@ const openAddItemModal = () => {
     itemForm.model = ''
   }
   
-  // Initialize form with empty values for all template fields
-  if (folder.value?.template?.fields) {
-    folder.value.template.fields.forEach(field => {
-      // Skip brand and model if serial numbers enabled (they're already added above)
-      if (folder.value?.hasSerialNumbers && (field.name === 'brand' || field.name === 'model')) {
-        return
-      }
-      
-      if (field.type === 'number' || field.type === 'currency') {
-        itemForm[field.name] = 0
-      } else if (field.type === 'boolean') {
-        itemForm[field.name] = false
-      } else if (field.type === 'date') {
-        itemForm[field.name] = new Date().toISOString().split('T')[0]
-      } else {
-        itemForm[field.name] = ''
-      }
-    })
-  }
+  // Initialize form for template + injected Quantity (stock) on bulk folders
+  const fields = effectiveTemplateFields.value.length
+    ? effectiveTemplateFields.value
+    : folder.value?.template?.fields ?? []
+  fields.forEach((field) => {
+    if (folder.value?.hasSerialNumbers && (field.name === 'brand' || field.name === 'model')) {
+      return
+    }
+
+    if (field.type === 'number' || field.type === 'currency') {
+      itemForm[field.name] = field.id === SYNTH_STOCK_FIELD_ID ? 1 : 0
+    } else if (field.type === 'boolean') {
+      itemForm[field.name] = false
+    } else if (field.type === 'date') {
+      itemForm[field.name] = new Date().toISOString().split('T')[0]
+    } else {
+      itemForm[field.name] = ''
+    }
+  })
   showAddItemModal.value = true
 }
 
@@ -1934,21 +2033,19 @@ const handleEditItem = (item: InventoryItem) => {
       itemForm[key] = item[key]
     }
   })
+  const qk = quantityFieldKeyForFolder()
+  if (
+    qk &&
+    !folder.value?.hasSerialNumbers &&
+    (itemForm[qk] === undefined || itemForm[qk] === null || itemForm[qk] === '' || Number(itemForm[qk]) < 1)
+  ) {
+    itemForm[qk] = 1
+  }
   showAddItemModal.value = true
 }
 
 const getItemDisplayName = (item: InventoryItem) => {
-  const firstColumn = columns.value[0]
-  if (firstColumn && item[firstColumn.key]) {
-    return String(item[firstColumn.key])
-  }
-  if (item.name || item.itemName) {
-    return item.name || item.itemName
-  }
-  if (item.brand && item.model) {
-    return `${item.brand} ${item.model}`
-  }
-  return 'this product'
+  return getItemPrimaryLabel(item)
 }
 
 const handleDeleteItem = (item: InventoryItem) => {
@@ -2140,9 +2237,20 @@ const handleSaveItem = async () => {
     }
   }
   
-  // Validate required fields based on template
-  if (folder.value?.template?.fields) {
-    const requiredFields = folder.value.template.fields.filter(f => f.required && f.name !== 'serialNo' && f.name !== 'brand' && f.name !== 'model')
+  // Validate required fields (include synthetic Quantity when injected)
+  const fieldsToValidate =
+    effectiveTemplateFields.value.length > 0
+      ? effectiveTemplateFields.value
+      : folder.value?.template?.fields ?? []
+  if (fieldsToValidate.length) {
+    const requiredFields = fieldsToValidate.filter(
+      (f) =>
+        f.required &&
+        f.name !== 'serialNo' &&
+        f.name !== 'brand' &&
+        f.name !== 'model' &&
+        f.id !== SYNTH_STOCK_FIELD_ID,
+    )
     for (const field of requiredFields) {
       if (!itemForm[field.name] || itemForm[field.name].toString().trim() === '') {
         toast.warning(`Please fill in the required field: ${field.label || field.name}`)
@@ -2157,6 +2265,7 @@ const handleSaveItem = async () => {
       const itemId = editingItem.value.id
       const currentFolderId = folderId.value
       const updates = { ...itemForm }
+      normalizeNonSerialItemPayload(updates)
       // Close modal immediately for better UX
       handleCancelItem()
       toast.success('Updating product...')
@@ -2235,12 +2344,12 @@ const handleSaveItem = async () => {
 
           toast.success(`Successfully created ${validSerialNumbers.length} product${validSerialNumbers.length !== 1 ? 's' : ''}`)
         } else {
-          // Create single item (normal mode)
-          // Close modal immediately for better UX
+          // Create single item (normal mode) — snapshot form BEFORE cancel clears it
+          const newItemPayload = { ...itemForm }
+          normalizeNonSerialItemPayload(newItemPayload)
           handleCancelItem()
 
-          // CRITICAL: Wait for item creation to complete (ensures data is saved to Firestore)
-          await inventoryStore.createItem(folderId.value, itemForm)
+          await inventoryStore.createItem(folderId.value, newItemPayload)
 
           // Update folder stats locally (optimistic update)
           if (folder.value) {

@@ -400,7 +400,7 @@
                   <div
                     v-if="notificationsOpen"
                     class="fixed z-[100] origin-top-right"
-                    style="top: 3.5rem; right: 1rem; left: auto; width: min(22rem, calc(100vw - 2rem));"
+                    style="top: 3.5rem; right: 1rem; left: auto; width: min(18rem, calc(100vw - 2rem));"
                     @click.stop
                   >
                     <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
@@ -430,40 +430,64 @@
 
               <Transition
                 enter-active-class="transition ease-out duration-150"
-                enter-from-class="opacity-0 scale-95"
-                enter-to-class="opacity-100 scale-100"
+                enter-from-class="opacity-0 translate-y-0.5"
+                enter-to-class="opacity-100 translate-y-0"
                 leave-active-class="transition ease-in duration-100"
-                leave-from-class="opacity-100 scale-100"
-                leave-to-class="opacity-0 scale-95"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-0.5"
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="fixed top-12 inset-x-3 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mt-1.5 w-auto md:w-48 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl py-1.5 z-[100]"
+                  class="fixed top-12 inset-x-3 z-[100] max-w-[16.5rem] mx-auto md:mx-0 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mt-1.5 md:w-60 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
                 >
-                  <NuxtLink
-                    to="/dashboard/profile"
-                    class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                    @click="profileMenuOpen = false"
-                  >
-                    <UserCircleIcon class="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
-                    Profile
-                  </NuxtLink>
-                  <NuxtLink
-                    to="/dashboard/settings"
-                    class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                    @click="profileMenuOpen = false"
-                  >
-                    <Cog6ToothIcon class="w-4 h-4 text-gray-500 dark:text-gray-400 shrink-0" stroke-width="1.75" />
-                    Settings
-                  </NuxtLink>
-                  <div class="border-t border-gray-100 dark:border-gray-700 my-1.5" />
-                  <button
-                    @click="handleSignOut"
-                    class="flex items-center gap-2.5 w-full px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors text-left"
-                  >
-                    <ArrowRightOnRectangleIcon class="w-4 h-4 shrink-0" stroke-width="1.75" />
-                    Sign out
-                  </button>
+                  <!-- User -->
+                  <div class="px-3 py-3 border-b border-gray-100 dark:border-gray-800">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div
+                        class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-semibold shrink-0"
+                      >
+                        {{ userInitials }}
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight">
+                          {{ userName }}
+                        </p>
+                        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 truncate leading-snug">
+                          {{ userEmail }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <nav class="py-1 px-1" aria-label="Account menu">
+                    <NuxtLink
+                      to="/dashboard/profile"
+                      class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      @click="profileMenuOpen = false"
+                    >
+                      <UserCircleIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" stroke-width="1.75" aria-hidden="true" />
+                      Profile
+                    </NuxtLink>
+                    <NuxtLink
+                      to="/dashboard/settings"
+                      class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      @click="profileMenuOpen = false"
+                    >
+                      <Cog6ToothIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" stroke-width="1.75" aria-hidden="true" />
+                      Settings
+                    </NuxtLink>
+                  </nav>
+
+                  <div class="border-t border-gray-100 dark:border-gray-800 py-1 px-1">
+                    <button
+                      type="button"
+                      @click="handleSignOut"
+                      class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 focus-visible:ring-inset"
+                    >
+                      <ArrowRightOnRectangleIcon class="w-4 h-4 shrink-0 opacity-90" stroke-width="1.75" aria-hidden="true" />
+                      Sign out
+                    </button>
+                  </div>
                 </div>
               </Transition>
             </div>

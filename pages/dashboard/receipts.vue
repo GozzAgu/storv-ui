@@ -33,33 +33,50 @@
       <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage receipts, customers, and returns</p>
     </div>
 
-    <!-- Tab Navigation - Modern segment style (ring indicator, no bg fill) -->
-    <div class="inline-flex p-1 rounded-xl bg-gray-100/80 dark:bg-gray-800/50 ring-1 ring-gray-200/60 dark:ring-gray-700/50">
-      <nav class="flex gap-0.5">
-        <button
-          @click="activeTab = 'receipts'"
-          :class="[
-            'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
-            activeTab === 'receipts'
-              ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-          ]"
-        >
-          Receipts
-        </button>
-        <button
-          @click="activeTab = 'customers'"
-          :class="[
-            'px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200',
-            activeTab === 'customers'
-              ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-          ]"
-        >
-          Customers
-        </button>
-      </nav>
-    </div>
+    <!-- Tab navigation: minimal underline (no pill / no shadow) -->
+    <nav
+      class="mt-1 flex gap-8 border-b border-gray-200 dark:border-gray-800"
+      aria-label="Sales views"
+    >
+      <button
+        type="button"
+        role="tab"
+        :aria-selected="activeTab === 'receipts'"
+        class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+        :class="
+          activeTab === 'receipts'
+            ? 'text-gray-900 dark:text-gray-100 font-semibold'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+        "
+        @click="activeTab = 'receipts'"
+      >
+        Receipts
+        <span
+          class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+          :class="activeTab === 'receipts' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        role="tab"
+        :aria-selected="activeTab === 'customers'"
+        class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+        :class="
+          activeTab === 'customers'
+            ? 'text-gray-900 dark:text-gray-100 font-semibold'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+        "
+        @click="activeTab = 'customers'"
+      >
+        Customers
+        <span
+          class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+          :class="activeTab === 'customers' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+          aria-hidden="true"
+        />
+      </button>
+    </nav>
 
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
@@ -68,7 +85,7 @@
     <!-- Receipts Table -->
     <div
       :class="[
-        'transition-all duration-300 mt-6 sm:mt-8',
+        'transition-all duration-300 mt-4 sm:mt-5',
         isReceiptsFullscreen
           ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
           : 'relative'
@@ -265,7 +282,13 @@
         <div
           v-for="receipt in paginatedReceipts"
           :key="receipt.id"
-          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
+          :data-receipt-row="receipt.id"
+          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm transition-[background-color] duration-500"
+          :class="
+            flashReceiptId === receipt.id
+              ? 'bg-primary-50 dark:bg-primary-950/40'
+              : ''
+          "
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -539,7 +562,13 @@
             <tr
               v-for="receipt in paginatedReceipts"
               :key="receipt.id"
-              class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
+              :data-receipt-row="receipt.id"
+              class="transition-[background-color] duration-500 hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
+              :class="
+                flashReceiptId === receipt.id
+                  ? '!bg-primary-50/95 dark:!bg-primary-950/35'
+                  : ''
+              "
             >
               <td v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center w-10">
                 <Checkbox
@@ -785,7 +814,7 @@
 
     <!-- Customers tab -->
     <template v-if="activeTab === 'customers'">
-      <div class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden border border-gray-200/50 dark:border-gray-700/50">
+      <div class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden border border-gray-200/50 dark:border-gray-700/50">
         <div v-if="!receiptsStore.loading" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60">
           <div class="flex items-center flex-wrap gap-3 sm:gap-5">
             <div class="flex items-center gap-1.5">
@@ -867,12 +896,22 @@
                       @click="toggleCustomerExpanded(customer.id)"
                       type="button"
                       :title="expandedCustomers[customer.id] ? 'Collapse receipts' : 'Expand to view receipts'"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-300 hover:bg-primary-200 dark:hover:bg-primary-800/50 border border-primary-200/80 dark:border-primary-600/60 transition-colors"
+                      :class="[
+                        'group inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[11px] font-medium transition-colors',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900',
+                        expandedCustomers[customer.id]
+                          ? 'text-primary-600 dark:text-primary-400'
+                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100',
+                      ]"
                     >
                       <ChevronRightIcon
-                        :class="['w-4 h-4 shrink-0 transition-transform duration-200', expandedCustomers[customer.id] ? 'rotate-90' : '']"
+                        :class="[
+                          'w-3.5 h-3.5 shrink-0 transition-transform duration-200',
+                          expandedCustomers[customer.id] ? 'rotate-90' : '',
+                          !expandedCustomers[customer.id] && 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300',
+                        ]"
                       />
-                      <span>View</span>
+                      <span>{{ expandedCustomers[customer.id] ? 'Hide' : 'View' }}</span>
                     </button>
                   </td>
                   <td class="px-3 sm:px-4 py-2">
@@ -914,66 +953,69 @@
                   </td>
                 </tr>
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50/80 dark:bg-gray-800/60">
-                  <td colspan="7" class="px-4 sm:px-5 py-3">
-                    <div class="space-y-2">
-                      <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Purchased items</h4>
-                      <div class="space-y-2">
-                        <div
-                          v-for="receipt in getCustomerReceipts(customer.id)"
-                          :key="receipt.id"
-                          class="bg-white dark:bg-gray-800 rounded-xl ring-1 ring-gray-200/80 dark:ring-gray-700/80 p-3"
-                        >
-                          <div class="flex items-center justify-between mb-1.5">
-                            <div>
-                              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">
-                                Receipt #{{ receipt.receiptNumber }}
-                              </p>
-                              <p class="text-[9px] text-gray-500 dark:text-gray-400">
-                                {{ formatDate(receipt.date) }} • {{ formatTime(receipt.date) }}
-                              </p>
-                            </div>
-                            <div class="text-right">
-                              <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">
-                                {{ formatCurrency(receipt.total) }}
-                              </p>
-                              <span
-                                :class="[
-                                  'inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium',
-                                  receipt.status === 'completed'
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                    : receipt.status === 'pending'
-                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
-                                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                                ]"
-                              >
-                                {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
-                              </span>
-                            </div>
-                          </div>
-                          <div class="space-y-1">
-                            <div
-                              v-for="(item, index) in receipt.items"
-                              :key="index"
-                              class="flex items-center justify-between py-1 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                  <td colspan="7" class="px-3 sm:px-4 py-2">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
+                      Purchased items
+                    </p>
+                    <div
+                      class="rounded-lg border border-gray-200/70 dark:border-gray-700/80 bg-white/90 dark:bg-gray-900/40 divide-y divide-gray-100 dark:divide-gray-700/80 overflow-hidden"
+                    >
+                      <button
+                        v-for="receipt in getCustomerReceipts(customer.id)"
+                        :key="receipt.id"
+                        type="button"
+                        class="w-full text-left px-2.5 py-1.5 sm:px-3 sm:py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-gray-800/55 focus:outline-none focus-visible:bg-gray-50/90 dark:focus-visible:bg-gray-800/55 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-400/35"
+                        :aria-label="`Open receipt ${receipt.receiptNumber} in receipts list`"
+                        @click="goToReceiptFromCustomer(receipt)"
+                      >
+                        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
+                          <p class="text-[10px] leading-tight text-gray-600 dark:text-gray-300 min-w-0">
+                            <span class="font-semibold text-gray-900 dark:text-gray-100">#{{ receipt.receiptNumber }}</span>
+                            <span class="text-gray-300 dark:text-gray-600 mx-1">·</span>
+                            <span>{{ formatDate(receipt.date) }}, {{ formatTime(receipt.date) }}</span>
+                          </p>
+                          <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[10px] font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                              {{ formatCurrency(receipt.total) }}
+                            </span>
+                            <span
+                              :class="[
+                                'inline-flex items-center rounded px-1 py-px text-[8px] font-medium leading-none',
+                                receipt.status === 'completed'
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400'
+                                  : receipt.status === 'pending'
+                                  ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300'
+                                  : 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300',
+                              ]"
                             >
-                              <div class="flex-1">
-                                <p class="text-[10px] text-gray-900 dark:text-gray-100">{{ item.itemName }}</p>
-                                <p class="text-[9px] text-gray-500 dark:text-gray-400">
-                                  Qty: {{ item.quantity }} • {{ formatCurrency(item.price) }}
-                                  <span v-if="item.hasDiscount" class="text-green-600 dark:text-green-400">
-                                    ({{ item.discountPercentage }}% off)
-                                  </span>
-                                </p>
-                              </div>
-                              <div class="text-right">
-                                <p class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">
-                                  {{ formatCurrency(item.price * item.quantity) }}
-                                </p>
-                              </div>
-                            </div>
+                              {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
+                            </span>
                           </div>
                         </div>
-                      </div>
+                        <ul class="mt-1 space-y-0.5">
+                          <li
+                            v-for="(item, index) in receipt.items"
+                            :key="index"
+                            class="flex items-baseline justify-between gap-2 text-[10px] leading-snug"
+                          >
+                            <span class="text-gray-700 dark:text-gray-300 min-w-0 truncate">
+                              {{ item.itemName }}
+                              <span class="font-normal text-gray-400 dark:text-gray-500">
+                                · {{ item.quantity }}× {{ formatCurrency(item.price) }}
+                                <template v-if="item.hasDiscount">
+                                  <span class="text-emerald-600 dark:text-emerald-400"> ({{ item.discountPercentage }}% off)</span>
+                                </template>
+                              </span>
+                            </span>
+                            <span
+                              v-if="receipt.items.length > 1"
+                              class="shrink-0 font-medium tabular-nums text-gray-900 dark:text-gray-100"
+                            >
+                              {{ formatCurrency(item.price * item.quantity) }}
+                            </span>
+                          </li>
+                        </ul>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -1171,6 +1213,51 @@ const loadingCreators = ref(false)
 // Tab management
 const route = useRoute()
 const router = useRouter()
+
+const highlightFromRoute = computed(() => {
+  const raw = route.query.highlight
+  if (typeof raw === 'string' && raw.length > 0) return raw
+  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0]
+  return null
+})
+
+const flashReceiptId = ref<string | null>(null)
+let receiptHighlightClearTimer: ReturnType<typeof setTimeout> | null = null
+
+function clearReceiptHighlightTimer() {
+  if (receiptHighlightClearTimer) {
+    clearTimeout(receiptHighlightClearTimer)
+    receiptHighlightClearTimer = null
+  }
+}
+
+function stripHighlightQuery() {
+  if (route.query.highlight == null || route.query.highlight === '') return
+  const q = { ...route.query }
+  delete q.highlight
+  void router.replace({ query: q })
+}
+
+function applyReceiptHighlight(receiptId: string) {
+  clearReceiptHighlightTimer()
+  flashReceiptId.value = receiptId
+  if (import.meta.client) {
+    const scrollToRow = () => {
+      const el = document.querySelector<HTMLElement>(`[data-receipt-row="${receiptId}"]`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    nextTick(() => {
+      scrollToRow()
+      requestAnimationFrame(scrollToRow)
+    })
+  }
+  receiptHighlightClearTimer = setTimeout(() => {
+    flashReceiptId.value = null
+    receiptHighlightClearTimer = null
+    stripHighlightQuery()
+  }, 3500)
+}
+
 const activeTab = ref<'receipts' | 'customers'>((route.query.tab as any) || 'receipts')
 const isReceiptsFullscreen = ref(false)
 const isCustomersFullscreen = ref(false)
@@ -1214,7 +1301,13 @@ watch([isReceiptsFullscreen, isCustomersFullscreen], ([receiptsFullscreen, custo
 
 // Watch for tab changes and update URL
 watch(activeTab, (newTab) => {
-  router.replace({ query: { ...route.query, tab: newTab } })
+  const q = { ...route.query, tab: newTab } as Record<string, string | string[] | null | undefined>
+  if (newTab !== 'receipts') {
+    delete q.highlight
+    clearReceiptHighlightTimer()
+    flashReceiptId.value = null
+  }
+  void router.replace({ query: q })
 })
 
 // Initialize loading state synchronously on client
@@ -1838,6 +1931,46 @@ const resetFilters = () => {
   }
 }
 
+async function goToReceiptFromCustomer(receipt: Receipt) {
+  activeTab.value = 'receipts'
+  await nextTick()
+  let idx = sortedFilteredReceipts.value.findIndex(r => r.id === receipt.id)
+  if (idx === -1) {
+    resetFilters()
+    await nextTick()
+    idx = sortedFilteredReceipts.value.findIndex(r => r.id === receipt.id)
+  }
+  if (idx === -1) {
+    toast.error('Could not find this receipt in the list.')
+    await router.replace({ query: { ...route.query, tab: 'receipts' } })
+    return
+  }
+  await router.replace({ query: { ...route.query, tab: 'receipts', highlight: receipt.id } })
+}
+
+watch(
+  [highlightFromRoute, isInitialLoading, activeTab],
+  async () => {
+    const id = highlightFromRoute.value
+    if (!id || isInitialLoading.value || activeTab.value !== 'receipts') return
+    await nextTick()
+    let idx = sortedFilteredReceipts.value.findIndex(r => r.id === id)
+    if (idx === -1) {
+      resetFilters()
+      await nextTick()
+      idx = sortedFilteredReceipts.value.findIndex(r => r.id === id)
+    }
+    if (idx === -1) return
+    const page = Math.floor(idx / itemsPerPage.value) + 1
+    if (currentPage.value !== page) {
+      currentPage.value = page
+      await nextTick()
+    }
+    applyReceiptHighlight(id)
+  },
+  { flush: 'post' }
+)
+
 const handlePageChange = (page: number) => {
   currentPage.value = page
   // Save to localStorage
@@ -2201,6 +2334,7 @@ onMounted(async () => {
 
 // Cleanup keyboard listener and restore body overflow
 onBeforeUnmount(() => {
+  clearReceiptHighlightTimer()
   if (import.meta.client) {
     window.removeEventListener('keydown', handleKeyDown)
     removeReceiptMenuOutsideListener()

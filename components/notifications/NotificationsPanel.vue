@@ -1,13 +1,13 @@
 <template>
   <div
     :class="[
-      'rounded-xl border border-gray-200/80 dark:border-gray-700/60 overflow-hidden bg-white dark:bg-gray-800/90 shadow-sm flex flex-col',
-      variant === 'dropdown' ? 'max-h-[min(85vh,28rem)] w-full min-w-0' : ''
+      'rounded-lg border border-gray-200/80 dark:border-gray-700/60 overflow-hidden bg-white dark:bg-gray-800/90 shadow-sm flex flex-col',
+      variant === 'dropdown' ? 'max-h-[min(85vh,22rem)] w-full min-w-0' : ''
     ]"
   >
     <!-- Header: title + Mark all as read -->
-    <div class="flex items-center justify-between px-3 sm:px-4 pt-3 pb-2 border-b border-gray-100 dark:border-gray-700/80 shrink-0">
-      <h2 class="text-sm font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+    <div class="flex items-center justify-between px-2.5 sm:px-3 pt-2 pb-1.5 border-b border-gray-100 dark:border-gray-700/80 shrink-0">
+      <h2 class="text-[11px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">
         Notifications
       </h2>
       <button
@@ -15,18 +15,18 @@
         type="button"
         :disabled="notificationsStore.loading"
         @click="handleMarkAllAsRead"
-        class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
+        class="text-[10px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
       >
         Mark all as read
       </button>
     </div>
 
     <!-- Tabs: Inbox (with badge) / Read + eye -->
-    <div class="flex items-center gap-1 border-b border-gray-100 dark:border-gray-700/80 px-3 sm:px-4 shrink-0">
+    <div class="flex items-center gap-0.5 border-b border-gray-100 dark:border-gray-700/80 px-2.5 sm:px-3 shrink-0">
       <button
         type="button"
         :class="[
-          'relative flex items-center gap-1.5 px-2.5 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px',
+          'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px',
           activeTab === 'inbox'
             ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400'
             : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
@@ -36,7 +36,7 @@
         Inbox
         <span
           v-if="unreadCount > 0"
-          class="min-w-[1.125rem] h-4.5 px-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-[10px] font-medium flex items-center justify-center"
+          class="min-w-4 h-3.5 px-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-[9px] font-medium flex items-center justify-center leading-none"
         >
           {{ unreadCount > 99 ? '99+' : unreadCount }}
         </span>
@@ -44,7 +44,7 @@
       <button
         type="button"
         :class="[
-          'relative flex items-center gap-1.5 px-2.5 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px',
+          'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px',
           activeTab === 'read'
             ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400'
             : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
@@ -54,14 +54,14 @@
         Read
         <span
           v-if="readCount > 0"
-          class="min-w-[1.125rem] h-4.5 px-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-[10px] font-medium flex items-center justify-center"
+          class="min-w-4 h-3.5 px-0.5 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-[9px] font-medium flex items-center justify-center leading-none"
         >
           {{ readCount > 99 ? '99+' : readCount }}
         </span>
       </button>
       <div class="ml-auto flex items-center">
-        <span class="p-1.5 text-gray-400 dark:text-gray-500" aria-hidden="true">
-          <EyeIcon class="w-3.5 h-3.5" stroke-width="1.5" />
+        <span class="p-1 text-gray-400 dark:text-gray-500" aria-hidden="true">
+          <EyeIcon class="w-3 h-3" stroke-width="1.5" />
         </span>
       </div>
     </div>
@@ -73,12 +73,12 @@
         v-if="notificationsStore.loading && notifications.length === 0"
         class="divide-y divide-gray-100 dark:divide-gray-700/80"
       >
-        <div v-for="i in 5" :key="i" class="flex items-center gap-2.5 px-3 sm:px-4 py-2.5">
-          <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0" />
-          <div class="flex-1 min-w-0 space-y-1.5">
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
+        <div v-for="i in 5" :key="i" class="flex items-center gap-2 px-2.5 sm:px-3 py-2">
+          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0" />
+          <div class="flex-1 min-w-0 space-y-1">
+            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
             <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
-            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+            <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
           </div>
         </div>
       </div>
@@ -86,15 +86,15 @@
       <!-- Empty State -->
       <div
         v-else-if="filteredNotifications.length === 0"
-        class="flex flex-col items-center justify-center py-8 px-3 text-center"
+        class="flex flex-col items-center justify-center py-6 px-2.5 text-center"
       >
-        <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center mb-2">
-          <BellIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center mb-1.5">
+          <BellIcon class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
-        <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
+        <h3 class="text-[10px] font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
           {{ activeTab === 'inbox' ? 'No notifications yet' : 'No read notifications' }}
         </h3>
-        <p class="text-[11px] text-gray-500 dark:text-gray-400 max-w-sm">
+        <p class="text-[10px] text-gray-500 dark:text-gray-400 max-w-sm leading-snug">
           {{ activeTab === 'inbox' ? 'Receipts, inventory, and team activity will show up here' : "Notifications you've read will appear here" }}
         </p>
       </div>
@@ -106,28 +106,28 @@
           :key="notification.id"
           type="button"
           @click="handleNotificationClick(notification)"
-          class="w-full flex items-start gap-2.5 px-3 sm:px-4 py-2.5 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
+          class="w-full flex items-start gap-2 px-2.5 sm:px-3 py-2 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
         >
           <div
             :class="[
-              'relative shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white',
+              'relative shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white leading-none',
               getAvatarBgClass(notification)
             ]"
           >
             {{ getAvatarInitial(notification) }}
           </div>
-          <div class="flex-1 min-w-0 pr-1.5">
-            <p class="text-xs text-gray-900 dark:text-gray-100 leading-snug">
+          <div class="flex-1 min-w-0 pr-1">
+            <p class="text-[10px] text-gray-900 dark:text-gray-100 leading-tight">
               <span class="font-semibold">{{ notification.title }}</span>
               <span class="font-normal text-gray-600 dark:text-gray-400"> — {{ formatMessageWithAccountCurrency(notification.message) }}</span>
             </p>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
               {{ formatTime(notification.createdAt) }}
             </p>
           </div>
           <span
             v-if="!notification.read"
-            class="shrink-0 w-1.5 h-1.5 rounded-full bg-violet-500 dark:bg-violet-400 mt-1.5"
+            class="shrink-0 w-1 h-1 rounded-full bg-violet-500 dark:bg-violet-400 mt-1"
             aria-hidden="true"
           />
         </button>
@@ -136,13 +136,13 @@
       <!-- Load More -->
       <div
         v-if="notificationsStore.hasMore && filteredNotifications.length > 0"
-        class="border-t border-gray-100 dark:border-gray-700/80 px-3 sm:px-4 py-2 flex justify-center shrink-0"
+        class="border-t border-gray-100 dark:border-gray-700/80 px-2.5 sm:px-3 py-1.5 flex justify-center shrink-0"
       >
         <button
           type="button"
           @click="loadMoreNotifications"
           :disabled="notificationsStore.loading"
-          class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
+          class="text-[10px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
         >
           {{ notificationsStore.loading ? 'Loading…' : 'Load more' }}
         </button>

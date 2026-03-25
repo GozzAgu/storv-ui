@@ -23,7 +23,7 @@ export function getInventoryItemDisplayName(item: InventoryItem): string {
   )
   if (nameField) {
     const v = (item as Record<string, unknown>)[nameField]
-    if (v !== undefined && v !== null) return String(v)
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v)
   }
   return `Item ${item.id.slice(0, 8)}`
 }

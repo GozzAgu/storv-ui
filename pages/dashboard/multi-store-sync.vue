@@ -46,46 +46,71 @@
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="inline-flex p-0.5 rounded-lg bg-gray-100/80 dark:bg-gray-800/50 ring-1 ring-gray-200/60 dark:ring-gray-700/50">
-        <nav class="flex gap-0.5">
-          <button
-            @click="activeTab = 'transfer'"
-            :class="[
-              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
-              activeTab === 'transfer'
-                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            ]"
-          >
-            Transfer Items
-          </button>
-          <button
-            @click="activeTab = 'reports'"
-            :class="[
-              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
-              activeTab === 'reports'
-                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            ]"
-          >
-            Consolidated Reports
-          </button>
-          <button
-            @click="activeTab = 'history'"
-            :class="[
-              'px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
-              activeTab === 'history'
-                ? 'text-primary-500 dark:text-primary-400 ring-1 ring-primary-400/50 dark:ring-primary-400/50'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            ]"
-          >
-            Transfer History
-          </button>
-        </nav>
-      </div>
+      <!-- Tabs: minimal underline (matches Sales / Receipts page) -->
+      <nav
+        class="mt-1 flex flex-wrap gap-8 border-b border-gray-200 dark:border-gray-800"
+        aria-label="Multi-store sync views"
+      >
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="activeTab === 'transfer'"
+          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+          :class="
+            activeTab === 'transfer'
+              ? 'text-gray-900 dark:text-gray-100 font-semibold'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+          "
+          @click="activeTab = 'transfer'"
+        >
+          Transfer Items
+          <span
+            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+            :class="activeTab === 'transfer' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="activeTab === 'reports'"
+          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+          :class="
+            activeTab === 'reports'
+              ? 'text-gray-900 dark:text-gray-100 font-semibold'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+          "
+          @click="activeTab = 'reports'"
+        >
+          Consolidated Reports
+          <span
+            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+            :class="activeTab === 'reports' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="activeTab === 'history'"
+          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+          :class="
+            activeTab === 'history'
+              ? 'text-gray-900 dark:text-gray-100 font-semibold'
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+          "
+          @click="activeTab = 'history'"
+        >
+          Transfer History
+          <span
+            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+            :class="activeTab === 'history' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+            aria-hidden="true"
+          />
+        </button>
+      </nav>
 
-      <div v-if="activeTab === 'transfer'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+      <div v-if="activeTab === 'transfer'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move stock between warehouses</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
@@ -210,7 +235,7 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'reports'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+      <div v-if="activeTab === 'reports'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Consolidated reports</h2>
         </div>
@@ -299,7 +324,7 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'history'" class="mt-4 sm:mt-6 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+      <div v-if="activeTab === 'history'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Warehouse-to-warehouse transfers with approval and tracking</p>
