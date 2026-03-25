@@ -1,3 +1,17 @@
+/**
+ * Parse env like OpenSSL output (`SHA256(stdin)= abcd…`) or plain 64-char hex.
+ * Comma = multiple digests.
+ */
+export function normalizeInviteSha256Env(raw: string | undefined): string {
+  if (!raw?.trim()) return ''
+  const out: string[] = []
+  for (const seg of raw.split(',')) {
+    const found = seg.toLowerCase().match(/[a-f0-9]{64}/g)
+    if (found) out.push(...found)
+  }
+  return [...new Set(out)].join(',')
+}
+
 /** Comma-separated SHA-256 hex digests (64 chars each) of allowed invite codes (UTF-8, lowercased alphanumeric). */
 export function parseInviteSha256List(raw: string): string[] {
   return raw

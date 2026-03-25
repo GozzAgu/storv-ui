@@ -1,8 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { isValidInviteHashList } from './utils/inviteGateConfig'
+import { isValidInviteHashList, normalizeInviteSha256Env } from './utils/inviteGateConfig'
 
 const inviteAccessCode = (process.env.INVITE_ACCESS_CODE || '').trim()
-const inviteAccessSha256Raw = (process.env.NUXT_PUBLIC_INVITE_ACCESS_SHA256 || '').trim()
+const inviteAccessSha256Raw = normalizeInviteSha256Env(process.env.NUXT_PUBLIC_INVITE_ACCESS_SHA256)
+const inviteGateEnabled = inviteAccessCode.length > 0 || isValidInviteHashList(inviteAccessSha256Raw)
+
+const hadInviteEnvHint =
+  (process.env.NUXT_PUBLIC_INVITE_ACCESS_SHA256 || '').trim().length > 0 ||
+  (process.env.INVITE_ACCESS_CODE || '').trim().length > 0
+if (process.env.VERCEL === '1' && !inviteGateEnabled && hadInviteEnvHint) {
+  console.warn(
+    '[storvv] Invite env vars are set but inviteGateEnabled is false in this build. On Vercel, open each variable → check "Build" (not only Production/Preview runtime). For SHA256, paste the 64-char hex (openssl output is OK). Ensure app.storvv.com is not listed in NUXT_PUBLIC_MARKETING_HOSTS.'
+  )
+}
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -44,7 +54,7 @@ export default defineNuxtConfig({
     // Public keys (exposed to client-side)
     public: {
       /** True when invite verification is configured at build time (server codes and/or public SHA-256 list). */
-      inviteGateEnabled: inviteAccessCode.length > 0 || isValidInviteHashList(inviteAccessSha256Raw),
+      inviteGateEnabled: inviteGateEnabled,
       /**
        * Comma-separated SHA-256 hex digests of allowed codes. Generate e.g.
        * `printf '%s' 'yourcode' | shasum -a 256` (use the same normalization as the UI: lowercase a-z, 0-9).
