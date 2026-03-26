@@ -1,6 +1,7 @@
 import { collection, doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
 import type { SubscriptionPlan } from '~/types/subscription'
+import type { UserPreferences } from '~/composables/usePreferences'
 
 export interface StoreSettings {
   inventory?: {
@@ -26,10 +27,6 @@ export interface StoreDetails {
   storeDescription?: string
   settings?: StoreSettings
 }
-
-// UserPreferences is exported from usePreferences.ts to avoid duplication
-// Re-export for backward compatibility
-export type { UserPreferences } from '~/composables/usePreferences'
 
 export interface UserData {
   uid: string

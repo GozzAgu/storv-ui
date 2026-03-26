@@ -22,7 +22,7 @@ export type SubscriptionFeature =
   | 'notifications'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
-export interface SubscriptionLimits {
+interface SubscriptionLimits {
   maxStores: number
   maxDepartmentsPerStore: number
   maxStaffPerStore: number

@@ -1,9 +1,6 @@
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
-import { useThemeStore, type Theme } from '~/stores/theme'
-
-// Re-export for backward compatibility
-export type { Theme } from '~/stores/theme'
+import { useThemeStore } from '~/stores/theme'
 
 export const useTheme = () => {
   const themeStore = useThemeStore()

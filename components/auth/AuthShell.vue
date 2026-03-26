@@ -74,7 +74,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/vue/24/outline'
 
-export interface AuthShellFeature {
+interface AuthShellFeature {
   icon: Component
   text: string
 }

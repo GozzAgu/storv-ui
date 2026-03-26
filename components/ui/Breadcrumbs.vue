@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 
-export interface BreadcrumbItem {
+interface BreadcrumbItem {
   label: string
   href?: string
   icon?: any
