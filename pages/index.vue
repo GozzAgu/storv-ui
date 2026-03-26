@@ -515,16 +515,15 @@
     <!-- Pricing -->
     <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-gradient-to-b from-white to-slate-50/60">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="rounded-3xl border border-gray-200/80 bg-white/90 backdrop-blur-sm p-6 sm:p-8 lg:p-10 shadow-[0_20px_45px_rgba(15,23,42,0.08)]">
-          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
-            Plans that fit your size
-            </h2>
-          <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
-            Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
-          </p>
-          <p class="mt-2 text-center text-xs text-gray-500">
-            Showing prices in {{ pricing.currency }} based on your region.
-          </p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
+          Plans that fit your size
+          </h2>
+        <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
+          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
+        </p>
+        <p class="mt-2 text-center text-xs text-gray-500">
+          Showing prices in {{ pricing.currency }} based on your region.
+        </p>
         <div class="flex items-center justify-center gap-3 mt-7">
           <span :class="['text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500']">Monthly</span>
             <button
@@ -600,7 +599,6 @@
               </div>
               </div>
             </div>
-            </div>
     </section>
 
     <!-- Security -->
@@ -636,8 +634,8 @@
         <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-gray-500 text-center">Frequently asked questions</p>
         <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">Common questions</h2>
         <p class="mt-2 text-gray-600 text-center text-sm">Answers to help you understand Storvv and billing.</p>
-        <div class="mt-10 space-y-3 rounded-3xl border border-gray-200 bg-white p-3 sm:p-4">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+        <div class="mt-10 space-y-3">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button
               @click="toggleFaq(0)"
               class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
@@ -668,7 +666,7 @@
             </Transition>
             </div>
             
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(1)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <SparklesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -687,7 +685,7 @@
             </Transition>
           </div>
 
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(2)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <ChartBarIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -706,7 +704,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <FolderIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -725,7 +723,7 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <DocumentTextIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -744,7 +742,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(5)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <UsersIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -763,7 +761,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(6)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <ArrowPathIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -782,7 +780,7 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <KeyIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -801,7 +799,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(8)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <BellAlertIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -820,7 +818,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(9)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <BuildingOfficeIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -839,7 +837,7 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <ShieldCheckIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -858,7 +856,7 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300">
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button @click="toggleFaq(11)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
               <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
                 <BanknotesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
