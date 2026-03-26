@@ -12,8 +12,8 @@
       class="relative hidden w-full max-w-lg flex-none flex-col justify-between bg-primary-900 px-10 py-12 text-white lg:flex xl:max-w-xl xl:px-14"
     >
       <div>
-        <NuxtLink
-          to="/"
+        <a
+          href="https://www.storvv.com"
           class="inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
         >
           <img
@@ -21,7 +21,7 @@
             alt="Storvv"
             class="h-7 w-auto max-w-[140px] object-contain opacity-95 lg:h-9 lg:max-w-[180px] xl:h-10 xl:max-w-[200px]"
           />
-        </NuxtLink>
+        </a>
 
         <h2
           class="mt-10 text-2xl font-semibold leading-tight tracking-tight xl:mt-12 xl:text-[1.65rem] xl:leading-snug"

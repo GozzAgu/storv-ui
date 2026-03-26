@@ -130,134 +130,144 @@
       </div>
     </section>
 
-    <!-- Clarity block: who + outcomes -->
-    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up py-14 sm:py-16 bg-white border-b border-gray-100">
+    <!-- Clarity block: editorial layout -->
+    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up bg-white py-16 sm:py-20 border-b border-gray-100">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
-          <div class="rounded-2xl border border-gray-200 bg-gray-50/70 p-6">
-            <p class="text-[11px] uppercase tracking-wider font-semibold text-gray-500">Who Storvv is for</p>
-            <h3 class="mt-2 text-xl font-semibold text-gray-900">Retail teams that need control without complexity</h3>
-            <ul class="mt-4 space-y-2 text-sm text-gray-700">
-              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Phone & gadget stores handling serial-number devices</li>
-              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Fashion, beauty, and lifestyle stores tracking fast stock movement</li>
-              <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-500 mt-0.5 shrink-0" />Growing businesses managing multiple branches and staff</li>
-            </ul>
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-10 items-end">
+          <div class="lg:col-span-7">
+            <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-primary-600">Custom retail operations</p>
+            <h3 class="mt-2 text-3xl sm:text-[2.25rem] font-semibold leading-tight tracking-tight text-gray-900 max-w-xl">
+              Tailored structure for stores that need clarity
+            </h3>
           </div>
-          <div class="rounded-2xl border border-primary-200 bg-primary-50/50 p-6">
-            <p class="text-[11px] uppercase tracking-wider font-semibold text-primary-700">What you get</p>
-            <h3 class="mt-2 text-xl font-semibold text-gray-900">Clear business outcomes, not just feature lists</h3>
-            <ul class="mt-4 space-y-2 text-sm text-gray-700">
-              <li class="flex items-start gap-2"><ClipboardDocumentCheckIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Fewer stock mistakes with real-time inventory updates</li>
-              <li class="flex items-start gap-2"><ReceiptPercentIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Faster checkout with clean receipts, returns, and customer history</li>
-              <li class="flex items-start gap-2"><ChartBarIcon class="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />Better decisions from sales trends, low-stock alerts, and reports</li>
-            </ul>
+          <div class="lg:col-span-5">
+            <p class="text-sm leading-relaxed text-gray-600 max-w-md lg:ml-auto">
+              Storvv helps you run inventory, checkout, and team workflows without the noise.
+              Keep operations consistent across branches and make faster decisions from one clean workspace.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-10 grid gap-7 sm:gap-8 md:grid-cols-3">
+          <div class="border-l border-gray-200 pl-5">
+            <h4 class="text-xl font-semibold tracking-tight text-gray-900">Designed for retail teams</h4>
+            <p class="mt-2 text-sm leading-relaxed text-gray-600">
+              Built for phone, gadget, fashion, beauty, and lifestyle stores that need structure without heavy setup.
+            </p>
+          </div>
+          <div class="border-l border-gray-200 pl-5">
+            <h4 class="text-xl font-semibold tracking-tight text-gray-900">Built for clear outcomes</h4>
+            <p class="mt-2 text-sm leading-relaxed text-gray-600">
+              Reduce stock mistakes, speed up checkout, and keep customer history connected to every sale and return.
+            </p>
+          </div>
+          <div class="border-l border-gray-200 pl-5">
+            <h4 class="text-xl font-semibold tracking-tight text-gray-900">Ready to scale operations</h4>
+            <p class="mt-2 text-sm leading-relaxed text-gray-600">
+              Standardize permissions, departments, and reporting across one store or many branches.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Why Storvv (progress / timeline style) -->
+    <!-- Why Storvv (premium split layout) -->
     <section data-section-id="problem" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14">
-          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
+          <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-gray-500">Why teams choose Storvv</p>
+          <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
             Why <span class="text-primary-500">Storvv</span>?
           </h2>
           <p class="mt-4 text-gray-600 max-w-xl mx-auto">
             One operations layer for inventory, sales, customers, and teams.
           </p>
-          </div>
-          
-        <div class="grid lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-          <!-- Left: image -->
-          <div class="lg:col-span-6 rounded-2xl overflow-hidden shadow-lg ring-1 ring-gray-200/50">
-            <img src="/questions.jpg" alt="Why Storvv" class="w-full h-full object-cover aspect-[4/3]" />
-          </div>
-          
-          <!-- Right: progress rail -->
-          <div class="lg:col-span-6">
-            <div class="relative pl-10">
-              <!-- rail -->
-              <div class="absolute left-3 top-2 bottom-2 w-px bg-gray-200"></div>
-              <div
-                class="absolute left-3 top-2 w-px bg-primary-500/70 transition-[height] duration-500 ease-out"
-                :style="{ height: `${(whyActiveStep + 1) * 33.333}%` }"
-              ></div>
-
-            <div class="space-y-10">
-                <!-- Step 1 -->
-                <div class="group relative">
-                  <div class="absolute left-0 top-1.5 -translate-x-[5px]">
-                    <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-500' : 'bg-gray-300']"></div>
-            </div>
-                  </div>
-                  <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 0 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
-                    <div class="flex items-center justify-between gap-4">
-                      <div class="flex items-center gap-3">
-                        <span class="text-xs font-semibold text-gray-500">01</span>
-                        <h3 class="text-base font-semibold text-gray-900">Career growth for your team</h3>
-                      </div>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-600 leading-relaxed">
-                      Right tools and permissions, fewer errors, clear roles and guided processes.
-                    </p>
-                  </div>
-          </div>
-          
-                <!-- Step 2 -->
-                <div class="group relative">
-                  <div class="absolute left-0 top-1.5 -translate-x-[5px]">
-                    <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-500' : 'bg-gray-300']"></div>
-            </div>
-                  </div>
-                  <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 1 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
-                    <div class="flex items-center justify-between gap-4">
-                      <div class="flex items-center gap-3">
-                        <span class="text-xs font-semibold text-gray-500">02</span>
-                        <h3 class="text-base font-semibold text-gray-900">Visibility that scales</h3>
-                      </div>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-600 leading-relaxed">
-                      Sales trends, top products, low stock alerts, and customer insights in one dashboard.
-                    </p>
-                  </div>
-          </div>
-          
-                <!-- Step 3 -->
-                <div class="group relative">
-                  <div class="absolute left-0 top-1.5 -translate-x-[5px]">
-                    <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
-                      <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-500' : 'bg-gray-300']"></div>
-            </div>
-                  </div>
-                  <div :class="['rounded-2xl border bg-white p-5 transition-colors', whyActiveStep === 2 ? 'border-primary-200' : 'border-gray-200/80 hover:border-primary-200']">
-                    <div class="flex items-center justify-between gap-4">
-                      <div class="flex items-center gap-3">
-                        <span class="text-xs font-semibold text-gray-500">03</span>
-                        <h3 class="text-base font-semibold text-gray-900">Simple operations</h3>
-                      </div>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-600 leading-relaxed">
-                      Less manual work, fewer tools, cleaner workflows: consistent and scalable.
-                    </p>
-                  </div>
         </div>
 
-              <div class="pt-2">
-                <button
-                  @click="showContactFormModal = true"
-                    class="rounded-lg bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
-                >
-                    Get started
-                </button>
-                </div>
-                </div>
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div class="lg:col-span-6 rounded-2xl overflow-hidden ring-1 ring-gray-200/60 shadow-sm">
+              <img src="/questions.jpg" alt="Why Storvv" class="w-full h-full object-cover aspect-[4/3]" />
+            </div>
+
+          <div class="lg:col-span-6">
+              <div class="relative pl-10">
+                <div class="absolute left-3 top-3 bottom-3 w-px bg-gray-200"></div>
+                <div
+                  class="absolute left-3 top-3 w-px bg-primary-500/70 transition-[height] duration-500 ease-out"
+                  :style="{ height: `${(whyActiveStep + 1) * 33.333}%` }"
+                ></div>
+
+                <div class="space-y-5">
+                  <div class="group relative">
+                    <div class="absolute left-0 top-5 -translate-x-[5px]">
+                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
+                        <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-500' : 'bg-gray-300']"></div>
+                      </div>
+                    </div>
+                    <div :class="['rounded-2xl border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 0 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
+                      <div class="flex items-start gap-3">
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500">01</span>
+                        <div>
+                          <h3 class="text-base sm:text-lg font-semibold text-gray-900">Career growth for your team</h3>
+                          <p class="mt-2 text-sm text-gray-600 leading-relaxed">
+                            Right tools and permissions, fewer errors, clear roles and guided processes.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group relative">
+                    <div class="absolute left-0 top-5 -translate-x-[5px]">
+                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
+                        <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-500' : 'bg-gray-300']"></div>
+                      </div>
+                    </div>
+                    <div :class="['rounded-2xl border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 1 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
+                      <div class="flex items-start gap-3">
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500">02</span>
+                        <div>
+                          <h3 class="text-base sm:text-lg font-semibold text-gray-900">Visibility that scales</h3>
+                          <p class="mt-2 text-sm text-gray-600 leading-relaxed">
+                            Sales trends, top products, low stock alerts, and customer insights in one dashboard.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="group relative">
+                    <div class="absolute left-0 top-5 -translate-x-[5px]">
+                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
+                        <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-500' : 'bg-gray-300']"></div>
+                      </div>
+                    </div>
+                    <div :class="['rounded-2xl border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 2 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
+                      <div class="flex items-start gap-3">
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500">03</span>
+                        <div>
+                          <h3 class="text-base sm:text-lg font-semibold text-gray-900">Simple operations</h3>
+                          <p class="mt-2 text-sm text-gray-600 leading-relaxed">
+                            Less manual work, fewer tools, cleaner workflows: consistent and scalable.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pt-1">
+                    <button
+                      @click="showContactFormModal = true"
+                      class="rounded-xl bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors shadow-sm"
+                    >
+                      Get started
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
         </div>
+      </div>
     </section>
 
     <!-- How it works: dark left + primary right (reverted, cleaner) -->
@@ -440,59 +450,82 @@
     </section>
 
     <!-- Use Cases -->
-    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-16 sm:py-20 bg-gradient-to-b from-white to-slate-50/70">
+    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-20 sm:py-24 bg-[#070d1d]">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-10">
-          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Who uses Storvv?</h2>
-          <p class="mt-3 text-gray-600 max-w-2xl mx-auto">
-            Whether you run one branch or many, Storvv helps you keep sales and stock in sync.
-          </p>
-        </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
-            <div class="flex items-start justify-between gap-3">
-              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <CubeIcon class="w-5 h-5" />
-              </div>
-              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Serial tracking</span>
-            </div>
-            <h3 class="mt-4 text-base font-semibold text-gray-900">Phone & gadget stores</h3>
-            <p class="mt-2 text-sm text-gray-600">Track serial numbers, IMEI, pricing changes, and swaps without manual logs.</p>
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-300/90">Built for modern retail teams</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              Who uses Storvv?
+            </h2>
+            <p class="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-slate-300">
+              Whether you run one branch or many, Storvv keeps inventory, sales, and staff operations in one clean workflow.
+            </p>
+            <ul class="mt-6 space-y-3">
+              <li class="flex items-start gap-2.5 text-sm text-slate-200">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+                Phone and gadget stores managing serial numbers and swaps.
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-slate-200">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+                Fashion and lifestyle retailers with fast-moving stock.
+              </li>
+              <li class="flex items-start gap-2.5 text-sm text-slate-200">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+                Growing multi-branch teams standardizing operations.
+              </li>
+            </ul>
           </div>
-          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
-            <div class="flex items-start justify-between gap-3">
-              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <TagIcon class="w-5 h-5" />
+
+          <div class="space-y-4">
+            <div class="rounded-2xl bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+              <div class="flex items-start gap-3">
+                <CubeIcon class="mt-0.5 h-6 w-6 shrink-0 text-orange-300" />
+                <div>
+                  <p class="text-xl font-semibold tracking-tight text-white">Serial-first inventory</p>
+                  <p class="mt-1 text-xs sm:text-sm text-slate-200">Track IMEI, swaps, and pricing updates with clean item history.</p>
+                </div>
               </div>
-              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Fast checkout</span>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-gray-900">Fashion & lifestyle retailers</h3>
-            <p class="mt-2 text-sm text-gray-600">Organize stock by category, monitor fast-moving items, and print clean receipts quickly.</p>
-          </div>
-          <div class="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary-200 transition-all duration-200">
-            <div class="flex items-start justify-between gap-3">
-              <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <UserGroupIcon class="w-5 h-5" />
+
+            <div class="rounded-2xl bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+              <div class="flex items-start gap-3">
+                <TagIcon class="mt-0.5 h-6 w-6 shrink-0 text-sky-300" />
+                <div>
+                  <p class="text-xl font-semibold tracking-tight text-white">Faster daily checkout</p>
+                  <p class="mt-1 text-xs sm:text-sm text-slate-200">Receipts, returns, and customer history connected in one flow.</p>
+                </div>
               </div>
-              <span class="text-[11px] font-medium text-primary-700 bg-primary-50 px-2 py-1 rounded-full">Role control</span>
             </div>
-            <h3 class="mt-4 text-base font-semibold text-gray-900">Growing multi-branch teams</h3>
-            <p class="mt-2 text-sm text-gray-600">Control staff access, standardize operations, and get visibility across stores.</p>
+
+            <div class="rounded-2xl bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+              <div class="flex items-start gap-3">
+                <UserGroupIcon class="mt-0.5 h-6 w-6 shrink-0 text-emerald-300" />
+                <div>
+                  <p class="text-xl font-semibold tracking-tight text-white">Teams that scale</p>
+                  <p class="mt-1 text-xs sm:text-sm text-slate-200">Role-based access and branch-level control for growing operations.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Pricing -->
-    <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white">
+    <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-gradient-to-b from-white to-slate-50/60">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
-          Plans that fit your size
-          </h2>
-        <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
-          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
-        </p>
-        <div class="flex items-center justify-center gap-3 mt-6">
+        <div class="rounded-3xl border border-gray-200/80 bg-white/90 backdrop-blur-sm p-6 sm:p-8 lg:p-10 shadow-[0_20px_45px_rgba(15,23,42,0.08)]">
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">
+            Plans that fit your size
+            </h2>
+          <p class="mt-4 text-gray-600 text-center max-w-2xl mx-auto">
+            Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
+          </p>
+          <p class="mt-2 text-center text-xs text-gray-500">
+            Showing prices in {{ pricing.currency }} based on your region.
+          </p>
+        <div class="flex items-center justify-center gap-3 mt-7">
           <span :class="['text-sm font-medium', !isYearly ? 'text-gray-900' : 'text-gray-500']">Monthly</span>
             <button
               @click="isYearly = !isYearly"
@@ -509,7 +542,7 @@
           </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
-          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
+          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl border border-gray-200/80 bg-white p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 transition-all duration-300">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Micro</h3>
             <p class="mt-1 text-xs text-gray-500">Single store, solo or very small team</p>
             <p class="mt-4 text-2xl font-bold text-gray-900">FREE</p>
@@ -523,15 +556,18 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No analytics; no multiple departments; no multi-store sync</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-xl bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
           <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
-          <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 rounded-2xl border-2 border-primary-200 bg-white p-6 flex flex-col shadow-lg shadow-primary-500/5">
+          <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl border-2 border-primary-200 bg-white p-6 flex flex-col shadow-xl shadow-primary-500/10">
+            <p class="absolute -top-3 right-5 rounded-full bg-primary-500 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+              Most popular
+            </p>
             <h3 class="text-lg font-semibold text-gray-900">Storvv Medium</h3>
             <p class="mt-1 text-xs text-gray-500">Growing business, multiple locations or teams</p>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-2xl font-bold text-gray-900">{{ isYearly ? 'N100,000' : 'N10,000' }}</span>
-              <span v-if="isYearly" class="text-sm text-gray-400 line-through">N120,000</span>
+              <span class="text-2xl font-bold text-gray-900">{{ isYearly ? mediumYearlyPrice : mediumMonthlyPrice }}</span>
+              <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ mediumYearlyListPrice }}</span>
             </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
@@ -542,15 +578,15 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No stock transfers between stores (Enterprise only)</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-xl bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
-          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-2xl border border-gray-200 bg-white p-6 flex flex-col hover:border-primary-200 transition-colors">
+          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl border border-gray-200/80 bg-white p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 transition-all duration-300">
             <h3 class="text-lg font-semibold text-gray-900">Storvv Enterprise</h3>
             <p class="mt-1 text-xs text-gray-500">Larger operations, central management</p>
             <div class="mt-4 flex items-baseline gap-2">
-              <span class="text-2xl font-bold text-gray-900">{{ isYearly ? 'N200,000' : 'N25,000' }}</span>
-              <span v-if="isYearly" class="text-sm text-gray-400 line-through">N300,000</span>
+              <span class="text-2xl font-bold text-gray-900">{{ isYearly ? enterpriseYearlyPrice : enterpriseMonthlyPrice }}</span>
+              <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ enterpriseYearlyListPrice }}</span>
               </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
@@ -560,9 +596,10 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
+            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-xl bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
               </div>
+            </div>
             </div>
     </section>
 
@@ -594,21 +631,22 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-slate-50">
+    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-[#f7f8fa]">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">Common questions</h2>
-        <p class="mt-2 text-gray-600 text-center text-sm">Answers to help you understand Storvv.</p>
-        <div class="mt-10 space-y-2">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-300 transition-colors">
+        <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-gray-500 text-center">Frequently asked questions</p>
+        <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 text-center">Common questions</h2>
+        <p class="mt-2 text-gray-600 text-center text-sm">Answers to help you understand Storvv and billing.</p>
+        <div class="mt-10 space-y-3 rounded-3xl border border-gray-200 bg-white p-3 sm:p-4">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button
               @click="toggleFaq(0)"
               class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
             >
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ClockIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <ClockIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How quickly can I get started?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How quickly can I get started?</h3>
               </div>
               <ChevronUpIcon 
                 :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(0) ? 'rotate-180' : '']" 
@@ -630,13 +668,13 @@
             </Transition>
             </div>
             
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(1)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <SparklesIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <SparklesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Is Storvv difficult to learn?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Is Storvv difficult to learn?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(1) ? 'rotate-180' : '']" />
             </button>
@@ -649,13 +687,13 @@
             </Transition>
           </div>
 
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(2)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ChartBarIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <ChartBarIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I track in-store and online sales together?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I track in-store and online sales together?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(2) ? 'rotate-180' : '']" />
             </button>
@@ -668,13 +706,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <FolderIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <FolderIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
             </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How do custom inventory folders work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How do custom inventory folders work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(3) ? 'rotate-180' : '']" />
             </button>
@@ -687,13 +725,13 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <DocumentTextIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <DocumentTextIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I import products from Excel?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I import products from Excel?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(4) ? 'rotate-180' : '']" />
             </button>
@@ -706,13 +744,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(5)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <UsersIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <UsersIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How does customer tracking work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How does customer tracking work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(5) ? 'rotate-180' : '']" />
             </button>
@@ -725,13 +763,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(6)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ArrowPathIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <ArrowPathIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What are swap-in transactions?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What are swap-in transactions?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(6) ? 'rotate-180' : '']" />
             </button>
@@ -744,13 +782,13 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <KeyIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <KeyIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">How do role-based permissions work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How do role-based permissions work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(7) ? 'rotate-180' : '']" />
             </button>
@@ -763,13 +801,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(8)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <BellAlertIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <BellAlertIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What are low stock alerts?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What are low stock alerts?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(8) ? 'rotate-180' : '']" />
             </button>
@@ -782,13 +820,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(9)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <BuildingOfficeIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <BuildingOfficeIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Can I manage multiple stores?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I manage multiple stores?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(9) ? 'rotate-180' : '']" />
             </button>
@@ -801,13 +839,13 @@
             </Transition>
             </div>
             
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors duration-200">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <ShieldCheckIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <ShieldCheckIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
           </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">Is my data secure?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Is my data secure?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(10) ? 'rotate-180' : '']" />
             </button>
@@ -820,13 +858,13 @@
             </Transition>
           </div>
 
-          <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors duration-200">
+          <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-primary-200 hover:shadow-sm transition-all duration-300">
             <button @click="toggleFaq(11)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center">
-                <BanknotesIcon class="w-4 h-4 text-primary-500 flex-shrink-0" />
+              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
+                <BanknotesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-primary-500 transition-colors pr-8">What’s the difference between Micro, Medium, and Enterprise?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What’s the difference between Micro, Medium, and Enterprise?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-200', openFaqItems.has(11) ? 'rotate-180' : '']" />
             </button>
@@ -1212,11 +1250,96 @@ useForceLightPage()
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
 const isYearly = ref(false)
+const locale = ref('en-NG')
+const pricingRegion = ref<'NG' | 'US' | 'GB' | 'EU'>('NG')
 const showLaunchModal = ref(false)
 const showContactFormModal = ref(false)
 const cookiesAccepted = ref(true)
 const whyActiveStep = ref(0)
 let whyActiveStepInterval: number | null = null
+
+const EU_COUNTRY_CODES = new Set([
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT',
+  'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+])
+
+const pricingByRegion = {
+  NG: {
+    currency: 'NGN',
+    medium: { monthly: 10000, yearly: 100000, yearlyList: 120000 },
+    enterprise: { monthly: 25000, yearly: 200000, yearlyList: 300000 },
+  },
+  US: {
+    currency: 'USD',
+    medium: { monthly: 7, yearly: 70, yearlyList: 84 },
+    enterprise: { monthly: 19, yearly: 190, yearlyList: 228 },
+  },
+  GB: {
+    currency: 'GBP',
+    medium: { monthly: 6, yearly: 60, yearlyList: 72 },
+    enterprise: { monthly: 15, yearly: 150, yearlyList: 180 },
+  },
+  EU: {
+    currency: 'EUR',
+    medium: { monthly: 7, yearly: 70, yearlyList: 84 },
+    enterprise: { monthly: 17, yearly: 170, yearlyList: 204 },
+  },
+} as const
+
+const pricing = computed(() => pricingByRegion[pricingRegion.value])
+
+const formatPrice = (amount: number) =>
+  new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency: pricing.value.currency,
+    maximumFractionDigits: 0,
+  }).format(amount)
+
+const mediumMonthlyPrice = computed(() => formatPrice(pricing.value.medium.monthly))
+const mediumYearlyPrice = computed(() => formatPrice(pricing.value.medium.yearly))
+const mediumYearlyListPrice = computed(() => formatPrice(pricing.value.medium.yearlyList))
+const enterpriseMonthlyPrice = computed(() => formatPrice(pricing.value.enterprise.monthly))
+const enterpriseYearlyPrice = computed(() => formatPrice(pricing.value.enterprise.yearly))
+const enterpriseYearlyListPrice = computed(() => formatPrice(pricing.value.enterprise.yearlyList))
+
+const detectPricingRegion = () => {
+  const browserLocale = Intl.DateTimeFormat().resolvedOptions().locale || 'en-NG'
+  locale.value = browserLocale
+
+  const regionCode = browserLocale.split('-')[1]?.toUpperCase()
+  if (regionCode === 'NG') {
+    pricingRegion.value = 'NG'
+    return
+  }
+  if (regionCode === 'GB') {
+    pricingRegion.value = 'GB'
+    return
+  }
+  if (regionCode === 'US') {
+    pricingRegion.value = 'US'
+    return
+  }
+  if (regionCode && EU_COUNTRY_CODES.has(regionCode)) {
+    pricingRegion.value = 'EU'
+    return
+  }
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+  if (timeZone.startsWith('Africa/Lagos')) {
+    pricingRegion.value = 'NG'
+    return
+  }
+  if (timeZone.startsWith('Europe/London')) {
+    pricingRegion.value = 'GB'
+    return
+  }
+  if (timeZone.startsWith('Europe/')) {
+    pricingRegion.value = 'EU'
+    return
+  }
+
+  pricingRegion.value = 'US'
+}
 
 const acceptCookies = () => {
   cookiesAccepted.value = true
@@ -1431,6 +1554,10 @@ const setupScrollAnimations = () => {
 }
 
 onMounted(() => {
+  if (import.meta.client) {
+    detectPricingRegion()
+  }
+
   if (import.meta.client && !localStorage.getItem('storvv-cookies-accepted')) {
     cookiesAccepted.value = false
   }

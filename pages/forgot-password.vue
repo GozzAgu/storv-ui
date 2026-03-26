@@ -5,8 +5,8 @@
     panel-description="Request a reset link and choose a new password. Your store data stays safe, and you keep the same workspace."
   >
     <div class="mb-8 text-center lg:mb-9 lg:text-left">
-      <NuxtLink
-        to="/"
+      <a
+        href="https://www.storvv.com"
         class="mb-4 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
       >
         <img
@@ -14,7 +14,7 @@
           alt="Storvv"
           class="mx-auto h-6 w-auto max-w-[104px] shrink-0 object-contain sm:h-7"
         />
-      </NuxtLink>
+      </a>
       <p
         class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
       >
@@ -108,12 +108,12 @@
 
           <p class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
             Wrong place?
-            <NuxtLink
-              to="/"
+            <a
+              href="https://www.storvv.com"
               class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
             >
               Back to home
-            </NuxtLink>
+            </a>
           </p>
         </div>
       </div>
