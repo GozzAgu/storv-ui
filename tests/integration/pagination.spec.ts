@@ -113,7 +113,7 @@ describe('getVisiblePageNumbers', () => {
     ])
   })
 
-  it('exactly 8 pages: branch uses ellipsis pattern (not compact 1–8)', () => {
+  it('exactly 8 pages: branch uses ellipsis pattern (not compact 1-8)', () => {
     expect(getVisiblePageNumbers(4, 8)).toEqual([
       1,
       PAGINATION_ELLIPSIS,

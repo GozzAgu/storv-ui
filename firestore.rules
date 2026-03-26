@@ -65,7 +65,7 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'manager';
     }
 
-    // Staff / interns: POS — add receipts only (no inventory structure edits; sale fields use narrow item updates).
+    // Staff / interns: POS, add receipts only (no inventory structure edits; sale fields use narrow item updates).
     function isStoreStaff(userId, storeId) {
       return isActiveStoreMember(userId, storeId) && (
         get(/databases/$(database)/documents/users/$(userId)/stores/$(storeId)/members/$(request.auth.uid)).data.role == 'staff' ||
@@ -259,7 +259,7 @@ service cloud.firestore {
           // Note: For staff, the userId in path is their superadmin's UID (via getQueryUserId), so staff can read their store's inventory
           allow read: if canAccessStoreData(userId, storeId);
           
-          // Create/update/delete: super admin (account owner) only — not managers or staff.
+          // Create/update/delete: super admin (account owner) only; not managers or staff.
           allow create: if canManageInventoryStructure(userId, storeId) &&
                          request.resource.data.storeId == storeId;
           

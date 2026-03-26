@@ -21,7 +21,7 @@
             Departments in {{ store?.name || 'Store' }}
           </h1>
           <p class="mt-0.5 max-w-xl text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-            Manage departments and staff for this store — search and open cards below.
+            Manage departments and staff for this store: search and open cards below.
           </p>
           <div
             v-if="store"
@@ -341,7 +341,7 @@
       </template>
     </Modal>
 
-    <!-- Department ⋮ menu (teleported — same as main Departments list + Inventory folders) -->
+    <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
     <Teleport to="body">
       <div
         v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
@@ -446,7 +446,7 @@ const showBulkDeleteDepartmentsModal = ref(false)
 const bulkDeleteDepartmentsConfirmed = ref(false)
 const isBulkDeletingDepartments = ref(false)
 
-// Single department delete – which card is currently deleting
+// Single department delete: which card is currently deleting
 const deletingDepartmentId = ref<string | null>(null)
 
 const searchQuery = ref('')

@@ -240,7 +240,7 @@
                       </div>
                     </div>
                     <p class="mt-2 text-sm text-gray-600 leading-relaxed">
-                      Less manual work, fewer tools, cleaner workflows—consistent and scalable.
+                      Less manual work, fewer tools, cleaner workflows: consistent and scalable.
                     </p>
                   </div>
         </div>
@@ -521,7 +521,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Receipts, returns & customers</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard & notifications</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
-              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No analytics; no multiple departments; no multi-store sync</li>
+              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No analytics; no multiple departments; no multi-store sync</li>
                 </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
@@ -540,7 +540,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 10 departments, 25 staff per store</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics & reports</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
-              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">—</span> No stock transfers between stores (Enterprise only)</li>
+              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No stock transfers between stores (Enterprise only)</li>
                 </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-lg bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
@@ -643,7 +643,7 @@
             <Transition enter-active-class="transition-all duration-200 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-200 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
               <div v-show="openFaqItems.has(1)" class="px-4 sm:px-5 pb-4 sm:pb-5">
                 <div class="pl-11 sm:pl-12">
-                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward—if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward: if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
                 </div>
               </div>
             </Transition>
@@ -719,7 +719,7 @@
             <Transition enter-active-class="transition-all duration-200 ease-out" enter-from-class="opacity-0 max-h-0" enter-to-class="opacity-100 max-h-[500px]" leave-active-class="transition-all duration-200 ease-in" leave-from-class="opacity-100 max-h-[500px]" leave-to-class="opacity-0 max-h-0">
               <div v-show="openFaqItems.has(5)" class="px-4 sm:px-5 pb-4 sm:pb-5">
                 <div class="pl-11 sm:pl-12">
-                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer—all without manual data entry.</p>
+                  <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer, all without manual data entry.</p>
                 </div>
               </div>
             </Transition>
@@ -1268,7 +1268,7 @@ const visibleFeatures = computed(() => {
 const features = [
   {
     title: 'Custom Inventory Folders',
-    description: 'Create unlimited folders with your own fields (text, numbers, dates, currency, select, boolean). Each folder can have serial number tracking or bulk quantities—organize inventory your way.'
+    description: 'Create unlimited folders with your own fields (text, numbers, dates, currency, select, boolean). Each folder can have serial number tracking or bulk quantities. Organize inventory your way.'
   },
   {
     title: 'Serial Number & Bulk Tracking',
@@ -1296,7 +1296,7 @@ const features = [
   },
   {
     title: 'Dashboard & Analytics',
-    description: 'Overview dashboard with quick stats. On Medium and Enterprise: full analytics—revenue trends, busiest times, product performance, and exportable reports.'
+    description: 'Overview dashboard with quick stats. On Medium and Enterprise: full analytics with revenue trends, busiest times, product performance, and exportable reports.'
   },
   {
     title: 'Multiple Stores',
@@ -1308,7 +1308,7 @@ const features = [
   },
   {
     title: 'In-App Notifications',
-    description: 'Stay updated with notifications for sales, low stock, and important account activity—all in one feed.'
+    description: 'Stay updated with notifications for sales, low stock, and important account activity, all in one feed.'
   },
   {
     title: 'Settings & Profile',

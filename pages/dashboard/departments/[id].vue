@@ -111,7 +111,7 @@
               Expanded view
             </p>
             <h2 class="mt-0.5 truncate text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl">
-              {{ department?.name || 'Department' }} — Staff
+              {{ department?.name || 'Department' }} · Staff
             </h2>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ staff.length }} people · {{ totalManagers }} managers · {{ activeStaff }} active

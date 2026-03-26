@@ -12,7 +12,7 @@
             Settings
           </h1>
           <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            Branches, business details, inventory defaults, and receipts — tuned to match how you work.
+            Branches, business details, inventory defaults, and receipts, tuned to match how you work.
           </p>
         </div>
         <div
@@ -654,7 +654,7 @@ const currentSubscriptionLabel = computed(() => {
   return SUBSCRIPTION_PLANS.find(p => p.id === currentSubscription.value)?.name || 'Storvv Micro'
 })
 
-/** Free tier — single store; show upgrade message for multiple branches */
+/** Free tier: single store; show upgrade message for multiple branches */
 const isMicroSubscription = computed(() => currentSubscription.value === 'storvv_micro')
 const upgradeOptions = computed(() => {
   const currentIdx = subscriptionOrder.indexOf(currentSubscription.value)

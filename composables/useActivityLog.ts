@@ -92,7 +92,7 @@ export async function fetchActivityLogs(limitCount: number = 100): Promise<Activ
       action: data.action ?? 'updated',
       entityType: data.entityType ?? 'item',
       entityId: data.entityId ?? '',
-      entityName: data.entityName ?? '—',
+      entityName: data.entityName ?? '-',
       storeId: data.storeId ?? storeId,
       createdAt: data.createdAt?.toDate?.() ?? new Date(data.createdAt),
     } as ActivityLog

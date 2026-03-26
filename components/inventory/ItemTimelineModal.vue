@@ -127,7 +127,7 @@ function formatTimelineDate(date: Date): string {
 
 const itemDisplayName = computed(() => {
   const i = props.item
-  if (!i) return '—'
+  if (!i) return '-'
   return i.name || i.itemName || (i.brand && i.model ? `${i.brand} ${i.model}` : null) || 'Unnamed Item'
 })
 

@@ -119,7 +119,7 @@
           <div class="flex-1 min-w-0 pr-1">
             <p class="text-[10px] text-gray-900 dark:text-gray-100 leading-tight">
               <span class="font-semibold">{{ notification.title }}</span>
-              <span class="font-normal text-gray-600 dark:text-gray-400"> — {{ formatMessageWithAccountCurrency(notification.message) }}</span>
+              <span class="font-normal text-gray-600 dark:text-gray-400"> · {{ formatMessageWithAccountCurrency(notification.message) }}</span>
             </p>
             <p class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
               {{ formatTime(notification.createdAt) }}

@@ -42,7 +42,7 @@
             Receipts & customers
           </h1>
           <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-            Manage receipts, customers, and returns in one place — fast search, clear status, zero clutter.
+            Manage receipts, customers, and returns in one place: fast search, clear status, zero clutter.
           </p>
         </header>
 
@@ -98,7 +98,7 @@
     >
       <StatCard
         label="Total receipts"
-        :value="receiptsStore.loading ? '—' : String(receiptsStore.totalReceipts)"
+        :value="receiptsStore.loading ? '-' : String(receiptsStore.totalReceipts)"
         subtext="In this store"
       />
       <StatCard
@@ -788,7 +788,7 @@
       </div>
     </div>
 
-    <!-- FAB: New receipt (draggable — position saved on this device) -->
+    <!-- FAB: New receipt (draggable; position saved on this device) -->
     <DraggableFabContainer
       v-if="!isInitialLoading && canCreate && (sortedFilteredReceipts.length > 0 || (sortedFilteredReceipts.length === 0 && !searchQuery && statusFilter === 'all' && dateFilter === 'all'))"
       storage-key="storv-fab:receipts"
@@ -1140,7 +1140,7 @@
     </template>
   </ClientOnly>
 
-  <!-- Receipt / customer actions (teleported — not clipped by table/card overflow) -->
+  <!-- Receipt / customer actions (teleported; not clipped by table/card overflow) -->
   <Teleport to="body">
     <div
       v-if="openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle"

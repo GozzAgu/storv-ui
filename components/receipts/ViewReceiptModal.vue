@@ -348,7 +348,7 @@ const calculateTotalDiscount = computed(() => {
   }, 0)
 })
 
-/** Sum of line totals (final prices × qty) — merchandise before swap credit */
+/** Sum of line totals (final prices × qty); merchandise before swap credit */
 const lineItemsNetTotal = computed(() => {
   if (!props.receipt?.items?.length) return 0
   return props.receipt.items.reduce((t, item) => t + item.price * item.quantity, 0)

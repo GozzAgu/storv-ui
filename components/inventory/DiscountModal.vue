@@ -82,7 +82,7 @@
               class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             />
           </div>
-          <p v-if="discountType === 'percentage'" class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">0–100</p>
+          <p v-if="discountType === 'percentage'" class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">0-100</p>
           <p v-else class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">Max {{ currencySymbol }}{{ formatCurrency(getOriginalPrice(item)) }}</p>
         </div>
 

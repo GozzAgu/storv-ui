@@ -9,7 +9,7 @@
       class="text-[11px] sm:text-xs text-gray-400 dark:text-gray-500 order-2 sm:order-1 tabular-nums tracking-tight"
     >
       <span class="font-medium text-gray-600 dark:text-gray-300">{{ startIndex + 1 }}</span>
-      <span class="mx-1 text-gray-300 dark:text-gray-600" aria-hidden="true">–</span>
+      <span class="mx-1 text-gray-300 dark:text-gray-600" aria-hidden="true">-</span>
       <span class="font-medium text-gray-600 dark:text-gray-300">{{ endIndex }}</span>
       <span class="mx-1.5 text-gray-400 dark:text-gray-500">of</span>
       <span class="font-medium text-gray-600 dark:text-gray-300">{{ total }}</span>

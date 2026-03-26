@@ -23,7 +23,7 @@
               />
             </div>
             <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Search, filter, and open folders — a calm grid built for speed.
+              Search, filter, and open folders: a calm grid built for speed.
             </p>
           </div>
         </div>
@@ -239,7 +239,7 @@
       </div>
     </div>
 
-    <!-- FAB: New folder (draggable handle — position saved per device) -->
+    <!-- FAB: New folder (draggable handle; position saved per device) -->
     <DraggableFabContainer
       v-if="canCreateInventoryFolders && !inventoryStore.loading && (paginatedFolders.length > 0 || (paginatedFolders.length === 0 && !searchQuery && !selectedDepartmentId))"
       storage-key="storv-fab:inventory-folders"
@@ -395,7 +395,7 @@
           </Checkbox>
         </div>
 
-          <!-- Department access (optional — folders work without departments; restrict later) -->
+          <!-- Department access (optional; folders work without departments; restrict later) -->
           <div v-if="canCreateInventoryFolders" class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Department access <span class="font-normal text-gray-500 dark:text-gray-400">(optional)</span></h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">
@@ -407,7 +407,7 @@
               v-else-if="currentStoreDepartments.length === 0"
               class="rounded-lg bg-gray-50 dark:bg-gray-900/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
             >
-              <p>No departments in this store yet — you can still create this folder. It will be available to everyone until you add departments and optionally restrict access here.</p>
+              <p>No departments in this store yet. You can still create this folder. It will be available to everyone until you add departments and optionally restrict access here.</p>
               <NuxtLink
                 v-if="currentStoreId"
                 :to="`/dashboard/stores/${currentStoreId}/departments`"
@@ -571,7 +571,7 @@
       </template>
     </Modal>
 
-    <!-- Folder actions menu (teleported — not clipped by grid/card overflow) -->
+    <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
     <Teleport to="body">
       <div
         v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"

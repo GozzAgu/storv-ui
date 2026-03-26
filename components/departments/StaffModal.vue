@@ -242,7 +242,7 @@ const formData = ref({
   status: 'active' as 'active' | 'inactive' | 'on_leave',
 })
 
-// Random password for new staff (generated, not typed – regenerate icon keeps it private)
+// Random password for new staff (generated, not typed; regenerate icon keeps it private)
 const generatedPassword = ref('')
 function generateRandomPassword(length = 14): string {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ'

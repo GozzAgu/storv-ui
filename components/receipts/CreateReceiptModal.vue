@@ -444,7 +444,7 @@
             ></textarea>
           </div>
 
-          <!-- Swap-In Section (inventory write — super admin only) -->
+          <!-- Swap-In Section (inventory write; super admin only) -->
           <div v-if="canUseSwapInReceipt" class="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
             <Checkbox
               v-model="isSwapIn"
@@ -726,7 +726,7 @@ const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
-// Swap-in creates inventory rows — super admin only (managers/staff cannot edit inventory structure).
+// Swap-in creates inventory rows: super admin only (managers/staff cannot edit inventory structure).
 const canUseSwapInReceipt = computed(() => userStore.isSuperAdmin)
 
 const isSendingEmail = ref(false)

@@ -208,9 +208,9 @@ const loading = ref(true)
 const fetchError = ref<string | null>(null)
 
 function formatDate(d: Date | unknown): string {
-  if (!d) return '—'
+  if (!d) return '-'
   const date = d instanceof Date ? d : new Date(d as string | number)
-  if (Number.isNaN(date.getTime())) return '—'
+  if (Number.isNaN(date.getTime())) return '-'
   return date.toLocaleString(undefined, {
     dateStyle: 'short',
     timeStyle: 'short',

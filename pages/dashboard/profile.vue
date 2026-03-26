@@ -11,7 +11,7 @@
           Profile
         </h1>
         <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-          Identity, preferences, and security — aligned with your dashboard.
+          Identity, preferences, and security, aligned with your dashboard.
         </p>
       </div>
     </header>
@@ -40,7 +40,7 @@
                 {{ leftCardHeading }}
               </h2>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="leftCardLine2 || ''">
-                {{ leftCardLine2 || '—' }}
+                {{ leftCardLine2 || '-' }}
               </p>
               <p v-if="leftCardBadgeExtra" class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ leftCardBadgeExtra }}</p>
               <span
@@ -833,7 +833,7 @@ useHead({
   title: 'Profile - Storvv',
 })
 
-// Profile data — super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
+// Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
 const profileData = reactive({
   businessName: '',
   firstName: '',
@@ -1224,7 +1224,7 @@ const leftCardHeading = computed(() => {
 
 const leftCardLine2 = computed(() => {
   if (isStaff.value) {
-    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '—'
+    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '-'
   }
   return profileData.email || 'No email'
 })

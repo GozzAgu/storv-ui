@@ -826,7 +826,7 @@ const refundRateText = computed(() => `${refundRate.value.toFixed(1)}% refund ra
 function getRefundReason(receipt: { refundReason?: string; notes?: string }): string {
   if (receipt.refundReason && receipt.refundReason.trim()) return receipt.refundReason.trim()
   const notes = receipt.notes
-  if (!notes || !notes.trim()) return '—'
+  if (!notes || !notes.trim()) return '-'
   const prefix = 'Returned: '
   return notes.startsWith(prefix) ? notes.slice(prefix.length).trim() : notes
 }
@@ -858,7 +858,7 @@ const HOUR_LABELS = Array.from({ length: 24 }, (_, i) => {
   return i < 12 ? `${i}am` : `${i - 12}pm`
 })
 
-// Sales by hour (0–23): revenue and order count per hour
+// Sales by hour (0-23): revenue and order count per hour
 const salesByHour = computed(() => {
   const byHour = Array.from({ length: 24 }, (_, hour) => ({ hour, revenue: 0, count: 0 }))
   completedReceiptsInPeriod.value.forEach(r => {
@@ -922,7 +922,7 @@ const busiestTimeSummary = computed(() => {
   return `${busiestDayName.value}, ${busiestHourLabel.value}`
 })
 
-// Heatmap: day × hour, value = revenue. Rows = days (Sun–Sat), cols = hours.
+// Heatmap: day × hour, value = revenue. Rows = days (Sun-Sat), cols = hours.
 const heatmapSeries = computed(() => {
   const dayHourRevenue: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0))
   completedReceiptsInPeriod.value.forEach(r => {
@@ -1619,7 +1619,7 @@ const exportToPDF = async () => {
         doc.text(ret.receiptNumber, 20, yPos)
         doc.text(formatReturnDate(ret.date), 60, yPos)
         doc.text('-' + formatCurrency(ret.amount), 110, yPos)
-        doc.text((ret.reason || '—').substring(0, 25), 150, yPos)
+        doc.text((ret.reason || '-').substring(0, 25), 150, yPos)
         yPos += 6
       })
     }

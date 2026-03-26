@@ -51,7 +51,7 @@ export function getTotalPages(totalItems: number, itemsPerPage: number): number 
 
 /**
  * Inclusive 0-based start index and 1-based inclusive end index for the summary line
- * ("start–end of total").
+ * ("start-end of total").
  */
 export function getPaginationIndices(
   currentPage: number,

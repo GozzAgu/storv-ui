@@ -30,7 +30,7 @@
               <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
             </div>
             <p class="mt-1 max-w-2xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              {{ folder?.description || 'No description yet — add one in folder settings.' }}
+              {{ folder?.description || 'No description yet. Add one in folder settings.' }}
             </p>
             <div class="mt-3 flex flex-wrap gap-2">
               <span
@@ -632,7 +632,7 @@
       @change="handleFileImport"
     />
 
-    <!-- Floating Action Buttons (draggable stack — position saved on this device) -->
+    <!-- Floating Action Buttons (draggable stack; position saved on this device) -->
     <DraggableFabContainer
       v-if="!isLoadingFolder && canManageInventoryItems"
       :storage-key="`storv-fab:inventory-folder:${folderId}`"
@@ -693,7 +693,7 @@
             </p>
           </div>
 
-          <!-- Common Fields (shared) – side by side -->
+          <!-- Common Fields (shared); side by side -->
           <div class="space-y-2">
             <h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Product details (shared)</h4>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -819,7 +819,7 @@
           </div>
         </div>
 
-        <!-- Single Item Mode (normal or edit) – fields side by side -->
+        <!-- Single Item Mode (normal or edit); fields side by side -->
         <div v-else>
           <div v-if="effectiveTemplateFields.length > 0" class="space-y-2">
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -1044,7 +1044,7 @@
       :folder-name="folder?.name"
     />
 
-    <!-- Item actions menu (teleported — not clipped by table overflow) -->
+    <!-- Item actions menu (teleported; not clipped by table overflow) -->
     <Teleport to="body">
       <div
         v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
@@ -1271,7 +1271,7 @@ const toggleItemMenu = (itemId: string) => {
   openItemMenuId.value = openItemMenuId.value === itemId ? null : itemId
 }
 
-/** Capture-phase outside click — same pattern as inventory folder list (index). */
+/** Capture-phase outside click; same pattern as inventory folder list (index). */
 let itemMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
 
 function removeItemMenuOutsideListener() {
@@ -2426,7 +2426,7 @@ const handleSaveItem = async () => {
 
           toast.success(`Successfully created ${validSerialNumbers.length} product${validSerialNumbers.length !== 1 ? 's' : ''}`)
         } else {
-          // Create single item (normal mode) — snapshot form BEFORE cancel clears it
+          // Create single item (normal mode); snapshot form BEFORE cancel clears it
           const newItemPayload = { ...itemForm }
           normalizeNonSerialItemPayload(newItemPayload)
           handleCancelItem()

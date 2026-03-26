@@ -20,12 +20,12 @@ export function getPasswordRuleChecks(password: string): PasswordPolicyCheck[] {
     },
     {
       id: 'number',
-      label: 'At least one number (0–9)',
+      label: 'At least one number (0-9)',
       ok: /[0-9]/.test(password),
     },
     {
       id: 'uppercase',
-      label: 'At least one uppercase letter (A–Z)',
+      label: 'At least one uppercase letter (A-Z)',
       ok: /[A-Z]/.test(password),
     },
   ]
@@ -58,7 +58,7 @@ export function getPasswordBonusChecks(password: string): PasswordBonusCheck[] {
   return [
     {
       id: 'lowercase',
-      label: 'Add a lowercase letter (a–z)',
+      label: 'Add a lowercase letter (a-z)',
       ok: hasLower,
     },
     {
@@ -82,9 +82,9 @@ export function getPasswordBonusChecks(password: string): PasswordBonusCheck[] {
 export type PasswordStrengthTier = 'empty' | 'weak' | 'fair' | 'good' | 'strong'
 
 export type PasswordStrengthResult = {
-  /** 0–100 */
+  /** 0-100 */
   score: number
-  /** 0–4 filled segments for UI */
+  /** 0-4 filled segments for UI */
   segments: 0 | 1 | 2 | 3 | 4
   tier: PasswordStrengthTier
   label: string
@@ -151,10 +151,10 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   if (!isPasswordPolicyValid(password)) {
     if (score >= 48) {
       tier = 'fair'
-      label = 'Almost there — finish required rules'
+      label = 'Almost there: finish required rules'
     } else {
       tier = 'weak'
-      label = 'Weak — check requirements below'
+      label = 'Weak: check requirements below'
     }
   }
 

@@ -245,7 +245,7 @@
             />
           </div>
 
-          <!-- Ellipsis menu top-right (dropdown teleported to body — see below) -->
+          <!-- Ellipsis menu top-right (dropdown teleported to body; see below) -->
           <div
             v-if="canManageDepartments"
             class="absolute right-1.5 top-1.5 z-20"
@@ -372,7 +372,7 @@
       </template>
     </Modal>
 
-    <!-- Department actions (teleported — same pattern as Inventory → Folders) -->
+    <!-- Department actions (teleported; same pattern as Inventory → Folders) -->
     <Teleport to="body">
       <div
         v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
@@ -805,7 +805,7 @@ function removeDepartmentMenuPositionListeners() {
   window.removeEventListener('resize', updateDepartmentMenuPosition)
 }
 
-/** Capture-phase outside click + scroll/position — same as Inventory → Folders */
+/** Capture-phase outside click + scroll/position; same as Inventory → Folders */
 let departmentMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
 
 function removeDepartmentMenuOutsideListener() {

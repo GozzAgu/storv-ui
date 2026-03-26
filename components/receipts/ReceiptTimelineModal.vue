@@ -10,7 +10,7 @@
           Receipt History
         </h3>
         <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
-          Receipt #{{ receipt?.receiptNumber || '—' }} · {{ receipt?.customerName || '' }}
+          Receipt #{{ receipt?.receiptNumber || '-' }} · {{ receipt?.customerName || '' }}
         </p>
       </div>
     </template>

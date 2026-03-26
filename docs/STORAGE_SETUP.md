@@ -69,7 +69,7 @@ await deleteImage('images/user123/products/photo.jpg')
 
 ## Path structure
 
-- `images/{userId}/{folder}/{filename}` – user-scoped images (e.g. products, avatars)
+- `images/{userId}/{folder}/{filename}`: user-scoped images (e.g. products, avatars)
 
 ## Limits
 

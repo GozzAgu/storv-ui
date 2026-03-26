@@ -100,7 +100,7 @@ const variantBgClasses = computed(() => {
   return map[props.variant]
 })
 
-// Keyboard focus only — no ring/border at rest or on hover
+// Keyboard focus only; no ring/border at rest or on hover
 const variantFocusRingClasses = computed(() => {
   const map = {
     primary:

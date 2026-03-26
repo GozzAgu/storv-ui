@@ -1,7 +1,7 @@
 /**
  * Resolve the menu trigger to position against when mobile + desktop both render
  * the same `data-*` anchor id. `querySelector` returns the first node in DOM order (often
- * the hidden breakpoint copy), whose getBoundingClientRect() is 0×0 — menus jump to
+ * the hidden breakpoint copy), whose getBoundingClientRect() is 0×0; menus jump to
  * the top-left. This picks the element with a non-zero layout box (the visible one).
  */
 export function getVisibleMenuAnchorElement(

@@ -42,7 +42,7 @@ export const usePermissions = () => {
     return !!authStore.currentUser
   })
 
-  // Edit receipt / line items / refund flows — super admin or store manager (not regular staff)
+  // Edit receipt / line items / refund flows: super admin or store manager (not regular staff)
   const canEditReceipts = computed(() => userStore.isSuperAdmin || isManager.value)
 
   // Check if user can delete receipts - only super admins
@@ -51,7 +51,7 @@ export const usePermissions = () => {
     return !isStaff.value
   })
 
-  // Inventory structure (folders/items) — super admin only
+  // Inventory structure (folders/items): super admin only
   const canManageInventoryItems = computed(() => userStore.isSuperAdmin)
 
   const canCreateInventoryFolders = computed(() => userStore.isSuperAdmin)

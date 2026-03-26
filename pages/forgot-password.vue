@@ -1,27 +1,44 @@
 <template>
-  <div
-    class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-slate-950 sm:px-6 sm:py-10 lg:px-8"
+  <AuthShell
+    mobile-line="Password help: we'll email you a secure reset link."
+    panel-title="Back to work, without the lockout stress."
+    panel-description="Request a reset link and choose a new password. Your store data stays safe, and you keep the same workspace."
   >
-    <div class="w-full max-w-[360px]">
-      <div class="text-center mb-6">
-        <NuxtLink to="/" class="inline-block mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
-          <img
-            :src="logoSource"
-            alt="Storvv"
-            class="h-5 w-auto max-w-[96px] mx-auto object-contain shrink-0"
-          />
-        </NuxtLink>
-        <h1 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-          Reset your password
-        </h1>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-          Enter your email and we'll send you a reset link
-        </p>
-      </div>
-
-      <div
-        class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+    <div class="mb-8 text-center lg:mb-9 lg:text-left">
+      <NuxtLink
+        to="/"
+        class="mb-4 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
       >
+        <img
+          :src="logoSource"
+          alt="Storvv"
+          class="mx-auto h-6 w-auto max-w-[104px] shrink-0 object-contain sm:h-7"
+        />
+      </NuxtLink>
+      <p
+        class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
+      >
+        Account recovery
+      </p>
+      <h1
+        class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
+      >
+        Reset your password
+      </h1>
+      <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+        We’ll send a link to your inbox. Remembered it?
+        <NuxtLink
+          to="/signin"
+          class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+        >
+          Sign in
+        </NuxtLink>
+      </p>
+    </div>
+
+    <div
+      class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+    >
         <div class="p-4 sm:p-5">
           <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4">
             <div class="space-y-1.5">
@@ -90,23 +107,23 @@
           </div>
 
           <p class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
-            Remember your password?
+            Wrong place?
             <NuxtLink
-              to="/signin"
-              class="font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors"
+              to="/"
+              class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
             >
-              Sign in
+              Back to home
             </NuxtLink>
           </p>
         </div>
       </div>
-    </div>
-  </div>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { CheckCircleIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import AuthShell from '~/components/auth/AuthShell.vue'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'

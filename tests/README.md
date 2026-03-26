@@ -12,11 +12,11 @@
 
 ## Layout
 
-- **`tests/server/`** — pure server/unit helpers (e.g. Paystack validation, receipt delete).
-- **`tests/integration/`** — client-side modules with injectable mocks (serial check, Paystack upgrade, inventory display helpers, **pagination + viewport clamp** pure functions).
-- **`tests/unit/`** — Vue component tests (e.g. `Pagination.vue` mounting + a11y).
-- **`tests/rules/`** — Firestore + Storage security rules (requires emulators).
-- **Root `tests/*.spec.ts`** — Playwright browser tests. Vitest-only specs must live under `tests/integration`, `tests/server`, `tests/unit`, or `tests/rules`.
+- **`tests/server/`**: pure server/unit helpers (e.g. Paystack validation, receipt delete).
+- **`tests/integration/`**: client-side modules with injectable mocks (serial check, Paystack upgrade, inventory display helpers, **pagination + viewport clamp** pure functions).
+- **`tests/unit/`**: Vue component tests (e.g. `Pagination.vue` mounting + a11y).
+- **`tests/rules/`**: Firestore + Storage security rules (requires emulators).
+- **Root `tests/*.spec.ts`**: Playwright browser tests. Vitest-only specs must live under `tests/integration`, `tests/server`, `tests/unit`, or `tests/rules`.
 
 ## Auth in Playwright
 
