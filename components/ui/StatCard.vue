@@ -1,20 +1,32 @@
 <template>
   <div
-    class="relative overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800/80 transition-all duration-200"
+    class="group relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/90 shadow-sm transition duration-300 dark:border-gray-800/70 dark:bg-gray-900/35 dark:shadow-none"
   >
-    <div class="p-2.5 sm:p-3">
-      <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate leading-tight">
+    <div
+      class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-gray-100/90 to-transparent opacity-60 blur-2xl dark:from-gray-800/40 dark:to-transparent"
+      aria-hidden="true"
+    />
+    <div class="relative p-3 sm:p-3.5">
+      <p
+        class="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500"
+      >
         {{ label }}
       </p>
-      <div class="mt-0.5 flex items-baseline justify-between gap-2">
-        <p class="text-base sm:text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 tabular-nums truncate">
+      <div class="mt-1 flex items-baseline justify-between gap-2">
+        <p
+          class="text-lg font-semibold tabular-nums tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl"
+        >
           {{ value }}
         </p>
         <span
           v-if="change !== undefined && change !== null"
           :class="[
-            'flex-shrink-0 text-[11px] font-medium tabular-nums',
-            changePositive === true ? 'text-green-600 dark:text-green-400' : changePositive === false ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+            'flex-shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
+            changePositive === true
+              ? 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
+              : changePositive === false
+                ? 'bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
           ]"
         >
           {{ change }}
@@ -22,20 +34,27 @@
       </div>
       <p
         v-if="subtext"
-        :class="['mt-0.5 text-[10px] truncate leading-tight', subtextClass || 'text-gray-500 dark:text-gray-400']"
+        :class="[
+          'mt-1 text-[10px] leading-snug',
+          subtextClass || 'text-gray-500 dark:text-gray-400',
+        ]"
       >
         {{ subtext }}
       </p>
-      <div v-if="sparklineData && sparklineData.length > 1" class="mt-1.5 h-5 w-full flex items-end">
-        <svg class="w-full h-full min-h-[16px]" viewBox="0 0 200 24" preserveAspectRatio="none">
+      <div v-if="sparklineData && sparklineData.length > 1" class="mt-2 h-5 w-full">
+        <svg class="h-full w-full" viewBox="0 0 200 28" preserveAspectRatio="none">
+          <path
+            :d="sparklineAreaPath"
+            class="fill-gray-400/[0.12] dark:fill-gray-500/[0.15]"
+          />
           <path
             :d="sparklinePath"
             fill="none"
             stroke="currentColor"
-            stroke-width="1.25"
+            stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="text-gray-400/80 dark:text-gray-500/80"
+            class="text-gray-500/90 dark:text-gray-400/90"
           />
         </svg>
       </div>
@@ -52,11 +71,8 @@ const props = withDefaults(
     value: string | number
     subtext?: string
     subtextClass?: string
-    /** e.g. "+28%" or "-5%" - shown in green/red when changePositive is set */
     change?: string | null
-    /** true = green, false = red, undefined = grey */
     changePositive?: boolean | null
-    /** Optional array of numbers for sparkline (e.g. last 14 days revenue) */
     sparklineData?: number[]
     icon?: any
     iconClass?: string
@@ -68,18 +84,31 @@ const props = withDefaults(
     sparklineData: undefined,
     icon: undefined,
     iconClass: '',
-    iconBgClass: ''
+    iconBgClass: '',
   }
 )
 
 const sparklinePath = computed(() => {
   const data = props.sparklineData
   if (!data || data.length < 2) return ''
+  return buildPath(data)
+})
+
+const sparklineAreaPath = computed(() => {
+  const data = props.sparklineData
+  if (!data || data.length < 2) return ''
+  const line = buildPath(data)
+  const w = 200
+  const h = 28
+  return `${line} L ${w},${h} L 0,${h} Z`
+})
+
+function buildPath(data: number[]) {
   const min = Math.min(...data)
   const max = Math.max(...data)
   const range = max - min || 1
   const w = 200
-  const h = 24
+  const h = 28
   const padding = 2
   const step = (w - padding * 2) / (data.length - 1)
   const points = data.map((val, i) => {
@@ -88,5 +117,5 @@ const sparklinePath = computed(() => {
     return `${x},${y}`
   })
   return `M ${points.join(' L ')}`
-})
+}
 </script>

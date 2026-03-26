@@ -45,7 +45,7 @@
             <span class="font-medium text-gray-900 dark:text-gray-100">{{ item.quantity }}</span>
           </div>
           <div v-if="item.price" class="flex justify-between text-xs">
-            <span class="text-gray-500 dark:text-gray-400">Price</span>
+            <span class="text-gray-500 dark:text-gray-400">Unit price</span>
             <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(item.price) }}</span>
           </div>
         </div>

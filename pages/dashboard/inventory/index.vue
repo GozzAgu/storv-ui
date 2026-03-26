@@ -833,7 +833,7 @@ const getDefaultFields = (): TemplateField[] => {
     {
       id: `field-price-${Date.now()}`,
       name: 'price',
-      label: 'Price',
+      label: 'Unit price',
       type: 'currency',
       required: false,
     },

@@ -283,12 +283,9 @@
           v-for="receipt in paginatedReceipts"
           :key="receipt.id"
           :data-receipt-row="receipt.id"
+          :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
           class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm transition-[background-color] duration-500"
-          :class="
-            flashReceiptId === receipt.id
-              ? 'bg-primary-50 dark:bg-primary-950/40'
-              : ''
-          "
+          :class="flashReceiptId === receipt.id ? 'bg-gray-100/95' : ''"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -563,12 +560,9 @@
               v-for="receipt in paginatedReceipts"
               :key="receipt.id"
               :data-receipt-row="receipt.id"
+              :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
               class="transition-[background-color] duration-500 hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
-              :class="
-                flashReceiptId === receipt.id
-                  ? '!bg-primary-50/95 dark:!bg-primary-950/35'
-                  : ''
-              "
+              :class="flashReceiptId === receipt.id ? 'bg-gray-100/95' : ''"
             >
               <td v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center w-10">
                 <Checkbox
@@ -2378,4 +2372,13 @@ watch(() => receiptsStore.receipts, async (newReceipts) => {
   }
 }, { immediate: false })
 </script>
+
+<style>
+/*
+ * Receipt flash (dark): force a gray row tint so `dark:` utilities never lose to a light base bg.
+ */
+html.dark [data-receipt-flash] {
+  background-color: rgb(55 65 81 / 0.55) !important;
+}
+</style>
 

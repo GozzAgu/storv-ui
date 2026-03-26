@@ -139,7 +139,7 @@
           class="flex-1 sm:flex-none px-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
           >
             <option value="name">Name</option>
-            <option value="price">Price</option>
+            <option value="price">Unit price</option>
             <option value="sku">SKU</option>
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
@@ -199,7 +199,7 @@
             class="px-2.5 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
           >
             <option value="name">Name</option>
-            <option value="price">Price</option>
+            <option value="price">Unit price</option>
             <option value="sku">SKU</option>
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
@@ -250,7 +250,7 @@
               class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
               >
                 <option value="name">Name</option>
-                <option value="price">Price</option>
+                <option value="price">Unit price</option>
                 <option value="sku">SKU</option>
                 <option value="dateIn">Date In</option>
                 <option value="availability">Status</option>
@@ -1559,7 +1559,12 @@ const columns = computed(() => {
       .filter((field) => field.name !== 'model')
       .map((field) => ({
         key: field.name,
-        label: field.name === 'brand' ? 'Product model' : field.label || field.name,
+        label:
+          field.name === 'brand'
+            ? 'Product model'
+            : field.name.toLowerCase() === 'price'
+              ? 'Unit price'
+              : field.label || field.name,
         sortable: true,
         type:
           field.type === 'currency' || field.name.toLowerCase() === 'price' ? 'currency' : field.type,
@@ -1570,7 +1575,7 @@ const columns = computed(() => {
     templateColumns.push(
       { key: 'name', label: 'Product', sortable: true },
       { key: 'sku', label: 'SKU', sortable: true },
-      { key: 'price', label: 'Price', sortable: true, type: 'currency' },
+      { key: 'price', label: 'Unit price', sortable: true, type: 'currency' },
     )
     if (!folder.value?.hasSerialNumbers) {
       templateColumns.push({ key: 'stock', label: 'Quantity', sortable: true, type: 'number' })

@@ -112,7 +112,7 @@
 
       <div v-if="activeTab === 'transfer'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move stock between warehouses</h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move stock between branches</h2>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
         </div>
         <div class="p-3 sm:p-4 space-y-4">
@@ -327,7 +327,7 @@
       <div v-if="activeTab === 'history'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
         <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Warehouse-to-warehouse transfers with approval and tracking</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Branch-to-branch transfers with approval and tracking</p>
           </div>
         <div class="p-3 sm:p-4">
           <div v-if="transferHistory.length === 0" class="text-center py-8">

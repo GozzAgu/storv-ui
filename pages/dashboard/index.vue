@@ -1,20 +1,32 @@
 <template>
-  <div class="space-y-3 pb-6 sm:pb-8">
+  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
-    <!-- Welcome Header - Compact -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div class="flex-1">
-        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight" data-tutorial="dashboard">Welcome back, {{ userName }}! 👋</h1>
-        <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Here's what's happening with your inventory today.</p>
+    <!-- Hero -->
+    <header
+      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      data-tutorial="dashboard"
+    >
+      <div class="relative">
+        <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+          Overview
+        </p>
+        <h1
+          class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+        >
+          Welcome back, {{ userName }}
+        </h1>
+        <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          Live snapshot of revenue, stock, and activity — minimal noise, maximum clarity.
+        </p>
       </div>
-    </div>
+    </header>
 
     <!-- Loading State -->
     <template v-if="isLoading">
       <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div v-for="i in 4" :key="i" class="rounded-2xl bg-white dark:bg-gray-800/90 ring-1 ring-gray-200/80 dark:ring-gray-700/60 p-4 sm:p-5">
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+        <div v-for="i in 4" :key="i" class="rounded-xl bg-white p-3 ring-1 ring-gray-200/80 dark:bg-gray-900/50 dark:ring-gray-800/60 sm:p-3.5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
               <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2 animate-pulse"></div>
@@ -102,7 +114,7 @@
     <!-- Actual Content (shown when not loading) -->
     <template v-else>
     <!-- Key Metrics Cards - Shopify style -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
       <StatCard
         label="Total revenue"
         :value="formatCurrency(totalRevenue)"
@@ -135,53 +147,68 @@
     <!-- Charts Row -->
     <div class="grid grid-cols-1 gap-3">
       <!-- Revenue Chart -->
-      <Card padding="sm" extra-class="p-4">
-        <div class="flex items-center justify-between mb-3 sm:mb-4">
+      <Card
+        padding="sm"
+        extra-class="!p-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+      >
+        <div
+          class="flex flex-col gap-2.5 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
+        >
           <div>
-            <h2 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">Revenue Overview</h2>
-            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ chartSubtitle }}</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Revenue
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ chartSubtitle }}</p>
           </div>
-          <!-- View Selector -->
-          <div class="flex items-center gap-0.5 sm:gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 sm:p-1">
+          <div
+            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:bg-gray-900/60"
+            role="group"
+            aria-label="Chart period"
+          >
             <button
+              type="button"
               @click="chartView = 'daily'"
               :class="[
-                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
                 chartView === 'daily'
-                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
               ]"
             >
               Daily
             </button>
             <button
+              type="button"
               @click="chartView = 'weekly'"
               :class="[
-                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
                 chartView === 'weekly'
-                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
               ]"
             >
               Weekly
             </button>
             <button
+              type="button"
               @click="chartView = 'monthly'"
               :class="[
-                'px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-medium rounded-md transition-all',
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
                 chartView === 'monthly'
-                  ? 'bg-white dark:bg-gray-800 text-primary-500 dark:text-primary-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
               ]"
             >
               Monthly
             </button>
           </div>
         </div>
-        <div class="h-48 sm:h-64 lg:h-72 relative pb-8">
-          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
-            <div class="w-14 h-14 mb-3 rounded-xl bg-green-500/10 dark:bg-green-500/15 ring-1 ring-green-500/20 flex items-center justify-center">
-              <ChartBarIcon class="w-7 h-7 text-green-600 dark:text-green-400" stroke-width="1.5" />
+        <div class="relative h-40 px-2 pb-4 sm:h-52 sm:px-3 lg:h-60">
+          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+            <div
+              class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+            >
+              <ChartBarIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start making sales to see your revenue chart</p>
@@ -204,11 +231,20 @@
       </Card>
     </div>
 
-    <!-- Bottom Row - clean compact cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+    <!-- Bento: secondary panels -->
+    <div
+      class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6 xl:grid-rows-[auto_auto]"
+    >
       <!-- Orders & departments -->
-      <Card padding="sm" extra-class="p-3.5">
-        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">Orders & departments</p>
+      <Card
+        padding="sm"
+        extra-class="!p-3 xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <p
+          class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+        >
+          Orders & departments
+        </p>
         <div class="space-y-2.5">
           <div class="flex justify-between items-baseline">
             <span class="text-[11px] text-gray-500 dark:text-gray-400">Completed</span>
@@ -230,10 +266,22 @@
       </Card>
 
       <!-- Recent transactions -->
-      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Recent</p>
-          <NuxtLink to="/dashboard/receipts" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+      <Card
+        padding="sm"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div class="mb-2 flex items-center justify-between">
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Recent
+          </p>
+          <NuxtLink
+            to="/dashboard/receipts"
+            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            View all →
+          </NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="recentTransactions.length === 0">
@@ -252,24 +300,45 @@
       </Card>
 
       <!-- Top products -->
-      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Top products</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+      <Card
+        padding="sm"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div class="mb-2 flex items-center justify-between">
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Top products
+          </p>
+          <NuxtLink
+            to="/dashboard/inventory"
+            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            View all →
+          </NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="topSellingItems.length === 0">
             <p class="text-xs text-gray-500 dark:text-gray-400 py-2">No sales yet</p>
           </template>
           <template v-else>
-            <div v-for="(item, i) in topSellingItems.slice(0, 5)" :key="item.id" class="flex justify-between items-baseline gap-2 py-0.5">
-              <div class="min-w-0 flex-1 flex items-center gap-1.5">
-                <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 w-4 flex-shrink-0">{{ i + 1 }}</span>
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ item.name }}</p>
+            <div
+              v-for="(item, i) in topSellingItems.slice(0, 5)"
+              :key="item.id"
+              class="flex items-start justify-between gap-3 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/80"
+            >
+              <div class="flex min-w-0 flex-1 items-center gap-2">
+                <span
+                  class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  >{{ i + 1 }}</span
+                >
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
               </div>
               <div class="flex-shrink-0 text-right">
-                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(item.revenue) }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ item.sales }} sold</p>
+                <p class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                  {{ formatCurrency(item.sales > 0 ? item.revenue / item.sales : 0) }}
+                </p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-400">avg / unit · {{ item.sales }} sold</p>
               </div>
             </div>
           </template>
@@ -277,10 +346,22 @@
       </Card>
 
       <!-- Low stock -->
-      <Card padding="sm" extra-class="p-3.5 flex flex-col min-h-[180px]">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View all</NuxtLink>
+      <Card
+        padding="sm"
+        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)] dark:border-gray-700/50 dark:bg-gray-950/35"
+      >
+        <div class="mb-3 flex items-center justify-between">
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Low stock
+          </p>
+          <NuxtLink
+            to="/dashboard/inventory"
+            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            View all →
+          </NuxtLink>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
           <template v-if="lowStockItems.length === 0">
@@ -298,8 +379,15 @@
       </Card>
 
       <!-- Inventory status -->
-      <Card padding="sm" extra-class="p-3.5">
-        <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3">Inventory</p>
+      <Card
+        padding="sm"
+        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <p
+          class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+        >
+          Inventory
+        </p>
         <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
           <div class="bg-green-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
           <div class="bg-amber-500 transition-all" :style="`width: ${lowStockPercentage}%`" title="Low stock" />
@@ -908,13 +996,14 @@ if (import.meta.client) {
     isMobile.value = window.innerWidth < 640
   })
 }
-const chartHeight = computed(() => isMobile.value ? 256 : 320)
+const chartHeight = computed(() => (isMobile.value ? 220 : 280))
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
-  const lineColor = isDark ? '#60A5FA' : '#2563EB'   // blue-400 / blue-600
-  const gridColor = isDark ? 'rgba(75, 85, 99, 0.25)' : 'rgba(229, 231, 235, 0.8)'
-  const labelColor = isDark ? '#9CA3AF' : '#6B7280'
+  // Light: neutral slate line (clean, not brand-blue); dark: soft blue for contrast on charcoal
+  const lineColor = isDark ? '#93C5FD' : '#64748B'
+  const gridColor = isDark ? 'rgba(75, 85, 99, 0.28)' : 'rgba(148, 163, 184, 0.35)'
+  const labelColor = isDark ? '#A1A1AA' : '#52525B'
 
   return {
     chart: {

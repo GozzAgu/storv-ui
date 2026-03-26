@@ -8,12 +8,12 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-white dark:bg-gray-900 w-full overflow-x-clip relative">
+  <div v-else class="min-h-screen bg-white dark:bg-gray-950 w-full overflow-x-clip relative">
     <!-- Sidebar -->
     <aside
       :class="[
         'fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0',
-        'bg-[#f8f8f8] dark:bg-gray-900 border-r border-gray-200/40 dark:border-gray-800',
+        'bg-[#f8f8f8] dark:bg-gray-950 border-r border-gray-200/40 dark:border-gray-800/80',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         sidebarCollapsed ? 'w-[72px]' : 'w-64'
       ]"
@@ -67,7 +67,7 @@
                   'group relative flex items-center justify-between w-full rounded-lg transition-all duration-200',
                   sidebarCollapsed ? 'px-1.5 py-1.5' : 'px-2 py-1.5',
                   isActive(item.href)
-                    ? 'bg-gray-200/90 dark:bg-gray-700/70'
+                    ? 'bg-gray-200 dark:bg-gray-700/75'
                     : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60'
                 ]"
               >
@@ -105,7 +105,7 @@
                   :class="[
                     'flex items-center gap-2 px-2 py-1 rounded-lg text-xs transition-colors',
                     route.params.id === folder.id
-                      ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-700 dark:text-gray-200 font-medium'
+                      ? 'bg-gray-200 dark:bg-gray-700/75 text-gray-700 dark:text-gray-200 font-medium'
                       : 'text-gray-500 dark:text-gray-500 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-800 dark:hover:text-gray-100',
                     { 'pointer-events-none opacity-50': switchingStore }
                   ]"
@@ -126,7 +126,7 @@
                 'group relative flex items-center rounded-lg transition-all duration-200',
                 sidebarCollapsed ? 'justify-center w-full py-1.5' : 'px-2 py-1.5 gap-2',
                 isActive(item.href)
-                  ? 'bg-gray-200/90 dark:bg-gray-700/70'
+                  ? 'bg-gray-200 dark:bg-gray-700/75'
                   : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60',
                 { 'pointer-events-none opacity-50': switchingStore }
               ]"
@@ -162,7 +162,7 @@
               @click="storesSectionCollapsed = !storesSectionCollapsed"
               class="flex items-center justify-between w-full px-2.5 py-1 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
             >
-              <span>Stores</span>
+              <span>Branches</span>
               <ChevronDownIcon class="w-3 h-3 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
             </button>
             <div v-if="!storesSectionCollapsed" class="mt-0.5 space-y-0.5 pl-0">
@@ -171,9 +171,9 @@
                   :class="[
                     'flex items-center justify-between rounded-lg px-2.5 py-2 transition-all duration-200',
                     route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                      ? 'bg-gray-200/90 dark:bg-gray-700/70'
+                      ? 'bg-gray-300/45 dark:bg-gray-700/80'
                       : currentStore?.id === store.id
-                        ? 'bg-gray-200/70 dark:bg-gray-700/50'
+                        ? 'bg-gray-200 dark:bg-gray-700/65'
                         : store.id !== storesStore.currentStoreId
                           ? 'opacity-50'
                           : 'hover:bg-gray-200/60 dark:hover:bg-gray-800/60'
@@ -210,7 +210,7 @@
                         :to="`/dashboard/departments/${department.id}`"
                         class="flex items-center gap-2 flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
                         :class="[
-                          route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'bg-gray-200/90 dark:bg-gray-700/70 text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
+                          route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'bg-gray-200 dark:bg-gray-700/75 text-gray-900 dark:text-gray-100 font-medium' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-gray-100',
                           { 'pointer-events-none opacity-50': switchingStore }
                         ]"
                       >
@@ -261,7 +261,7 @@
       </nav>
 
       <!-- Bottom: user + sign out (minimal Fathom-style) -->
-      <div class="shrink-0 border-t border-gray-200/40 dark:border-gray-800 px-2.5 py-2 bg-[#f8f8f8] dark:bg-gray-900" :class="sidebarCollapsed ? 'px-1.5' : ''">
+      <div class="shrink-0 border-t border-gray-200/40 dark:border-gray-800/80 px-2.5 py-2 bg-[#f8f8f8] dark:bg-gray-950" :class="sidebarCollapsed ? 'px-1.5' : ''">
         <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'justify-center relative group' : ''">
           <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-200 font-semibold text-xs shrink-0">
             {{ userInitials }}
@@ -314,7 +314,7 @@
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'fixed top-0 left-0 right-0 z-30 bg-white/95 dark:bg-gray-900/95 border-b border-gray-200/80 dark:border-gray-700/80 backdrop-blur-md transition-[left] duration-300',
+          'fixed top-0 left-0 right-0 z-30 bg-white/95 dark:bg-gray-950/95 border-b border-gray-200/80 dark:border-gray-800/80 backdrop-blur-md transition-[left] duration-300',
           sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'
         ]"
       >
@@ -418,7 +418,7 @@
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-900 shrink-0">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-500 flex items-center justify-center text-white font-semibold text-xs shadow-sm ring-2 ring-white dark:ring-gray-950 shrink-0">
                   {{ userInitials }}
                 </div>
                 <div class="hidden md:block text-left min-w-0">
