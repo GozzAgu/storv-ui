@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto w-full max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
     >
       <div class="min-w-0">
         <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
@@ -11,11 +11,11 @@
           Help center
         </h1>
         <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-          How the Storvv web app works: real screens, permissions, and plan limits. Search or jump to a topic below.
+          How Storvv works: permissions, screens, and plan limits. Filter topics by keyword or open a common screen below.
         </p>
       </div>
 
-      <div class="mt-3 border-t border-gray-100/90 pt-3 dark:border-gray-800/80">
+      <div class="mt-3 space-y-3 border-t border-gray-100/90 pt-3 dark:border-gray-800/80">
         <label for="help-search" class="sr-only">Search help articles</label>
         <div class="relative max-w-md">
           <MagnifyingGlassIcon
@@ -27,25 +27,59 @@
             v-model="searchQuery"
             type="search"
             autocomplete="off"
-            placeholder="Search topics…"
-            class="w-full rounded-lg border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+            placeholder="Search help topics..."
+            class="w-full rounded-lg border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 placeholder:text-gray-400 focus:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/50"
           />
         </div>
-        <button
-          v-if="searchQuery"
-          type="button"
-          class="mt-2 text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-          @click="searchQuery = ''"
-        >
-          Clear search
-        </button>
+        <div v-if="searchQuery" class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            class="text-xs font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            @click="searchQuery = ''"
+          >
+            Clear search
+          </button>
+        </div>
+
+        <div>
+          <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            Popular topics
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="topic in popularTopics"
+              :key="topic.query"
+              type="button"
+              class="rounded-full border border-gray-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:border-primary-300/60 hover:bg-primary-50/80 hover:text-primary-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:border-primary-600/50 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
+              @click="searchQuery = topic.query"
+            >
+              {{ topic.label }}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            Common screens
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <NuxtLink
+              v-for="link in quickScreenLinks"
+              :key="link.to"
+              :to="link.to"
+              class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-800 transition-colors hover:border-primary-300/50 hover:bg-white hover:text-primary-800 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-100 dark:hover:border-primary-600/40 dark:hover:bg-gray-800"
+            >
+              {{ link.label }}
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </header>
 
     <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
       <nav
         aria-label="Topics"
-        class="w-full shrink-0 rounded-xl border border-gray-200/80 bg-white/95 p-3 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40 lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
+        class="w-full shrink-0 rounded-xl border border-gray-200/80 bg-white/95 p-3 dark:border-gray-800/70 dark:bg-gray-900/40 lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
       >
         <p class="mb-2 px-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           On this page
@@ -55,13 +89,13 @@
             <a
               :href="`#${cat.id}`"
               class="block rounded-lg px-2 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100"
-              @click.prevent="scrollTo(cat.id)"
+              @click.prevent="scrollToSection(cat.id)"
               v-html="highlightText(cat.title, trimmedSearch)"
             ></a>
           </li>
         </ul>
         <p v-if="filteredCategories.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
-          No topics match “{{ searchQuery }}”. Try another word.
+          No topics match "{{ searchQuery }}". Try another word or clear the filter.
         </p>
       </nav>
 
@@ -74,9 +108,9 @@
         >
           <div class="mb-3 flex items-start gap-3">
             <div
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50"
             >
-              <component :is="cat.icon" class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
+              <component :is="cat.icon" class="h-4 w-4 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
             <div class="min-w-0">
               <h2
@@ -94,7 +128,7 @@
             <article
               v-for="(article, idx) in cat.articles"
               :key="idx"
-              class="rounded-xl border border-gray-200/80 bg-white/95 px-4 py-3.5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40 sm:px-4 sm:py-4"
+              class="rounded-xl border border-gray-200/80 bg-white/95 px-4 py-3.5 dark:border-gray-800/70 dark:bg-gray-900/40 sm:px-4 sm:py-4"
             >
               <h3
                 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100"
@@ -122,12 +156,23 @@
         </section>
       </div>
     </div>
+
+    <button
+      v-show="showBackToTop"
+      type="button"
+      class="fixed bottom-5 right-5 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200/90 bg-white text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+      aria-label="Back to top"
+      @click="scrollToTop"
+    >
+      <ArrowUpIcon class="h-4 w-4" stroke-width="2" />
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Component } from 'vue'
 import {
+  ArrowUpIcon,
   MagnifyingGlassIcon,
   SparklesIcon,
   Squares2X2Icon,
@@ -140,7 +185,6 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
 } from '@heroicons/vue/24/outline'
-
 definePageMeta({
   layout: 'dashboard',
 })
@@ -438,7 +482,26 @@ const categories: Category[] = [
   },
 ]
 
+const router = useRouter()
+
 const searchQuery = ref('')
+const showBackToTop = ref(false)
+
+const popularTopics = [
+  { label: 'Staff & roles', query: 'staff' },
+  { label: 'Receipts & refunds', query: 'receipt' },
+  { label: 'Inventory & folders', query: 'inventory' },
+  { label: 'Plans & billing', query: 'plan' },
+  { label: 'Departments', query: 'department' },
+] as const
+
+const quickScreenLinks = [
+  { label: 'Dashboard', to: '/dashboard' },
+  { label: 'Inventory', to: '/dashboard/inventory' },
+  { label: 'Receipts', to: '/dashboard/receipts' },
+  { label: 'Settings', to: '/dashboard/settings' },
+  { label: 'Profile', to: '/dashboard/profile' },
+] as const
 
 const trimmedSearch = computed(() => searchQuery.value.trim())
 
@@ -502,9 +565,40 @@ const filteredCategories = computed(() => {
     .filter((c): c is Category => c !== null)
 })
 
-function scrollTo(id: string) {
+function scrollToSection(id: string) {
   if (!import.meta.client) return
-  const documentEl = document.getElementById(id)
-  documentEl?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  router.replace({ hash: `#${id}` })
+  nextTick(() => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
 }
+
+function scrollToTop() {
+  if (!import.meta.client) return
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function onHelpScroll() {
+  if (!import.meta.client) return
+  showBackToTop.value = window.scrollY > 320
+}
+
+onMounted(() => {
+  if (!import.meta.client) return
+  const h = window.location.hash
+  if (h.length > 1) {
+    const id = h.slice(1)
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+  onHelpScroll()
+  window.addEventListener('scroll', onHelpScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  if (import.meta.client) {
+    window.removeEventListener('scroll', onHelpScroll)
+  }
+})
 </script>
