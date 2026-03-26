@@ -1,91 +1,90 @@
 <template>
-  <div class="help-page pb-6 sm:pb-8 w-full">
-    <!-- Match Settings-style page header -->
-    <div class="mb-5 sm:mb-6 flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">
+  <div class="mx-auto w-full max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+    <header
+      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+    >
+      <div class="min-w-0">
+        <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
           Help
         </p>
-        <h1 class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+        <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
           Help center
         </h1>
-        <p class="mt-0.5 max-w-xl text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
           How the Storvv web app works: real screens, permissions, and plan limits. Search or jump to a topic below.
         </p>
       </div>
-    </div>
 
-    <!-- Compact search -->
-    <div class="mb-5 sm:mb-6 max-w-md">
-      <label for="help-search" class="sr-only">Search help articles</label>
-      <div class="relative">
-        <MagnifyingGlassIcon
-          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500"
-          stroke-width="1.75"
-        />
-        <input
-          id="help-search"
-          v-model="searchQuery"
-          type="search"
-          autocomplete="off"
-          placeholder="Search topics…"
-          class="w-full pl-8 pr-3 py-2 rounded-lg text-xs bg-white dark:bg-gray-800/90 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-        />
+      <div class="mt-3 border-t border-gray-100/90 pt-3 dark:border-gray-800/80">
+        <label for="help-search" class="sr-only">Search help articles</label>
+        <div class="relative max-w-md">
+          <MagnifyingGlassIcon
+            class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            stroke-width="1.75"
+          />
+          <input
+            id="help-search"
+            v-model="searchQuery"
+            type="search"
+            autocomplete="off"
+            placeholder="Search topics…"
+            class="w-full rounded-lg border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+          />
+        </div>
+        <button
+          v-if="searchQuery"
+          type="button"
+          class="mt-2 text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+          @click="searchQuery = ''"
+        >
+          Clear search
+        </button>
       </div>
-      <button
-        v-if="searchQuery"
-        type="button"
-        class="mt-2 text-[11px] font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-        @click="searchQuery = ''"
-      >
-        Clear search
-      </button>
-    </div>
+    </header>
 
-    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+    <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
       <nav
         aria-label="Topics"
-        class="w-full lg:w-44 shrink-0 lg:sticky lg:top-14 lg:z-10 lg:self-start text-xs lg:max-h-[calc(100dvh-4rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-1"
+        class="w-full shrink-0 rounded-xl border border-gray-200/80 bg-white/95 p-3 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40 lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
       >
-        <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 px-0.5">
+        <p class="mb-2 px-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           On this page
         </p>
         <ul class="space-y-0.5">
           <li v-for="cat in filteredCategories" :key="cat.id">
             <a
               :href="`#${cat.id}`"
-              class="block rounded-md px-2 py-1.5 font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors"
+              class="block rounded-lg px-2 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100"
               @click.prevent="scrollTo(cat.id)"
               v-html="highlightText(cat.title, trimmedSearch)"
             ></a>
           </li>
         </ul>
-        <p
-          v-if="filteredCategories.length === 0"
-          class="text-xs text-gray-500 dark:text-gray-400 py-2"
-        >
+        <p v-if="filteredCategories.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
           No topics match “{{ searchQuery }}”. Try another word.
         </p>
       </nav>
 
-      <div class="flex-1 min-w-0 space-y-8">
+      <div class="min-w-0 flex-1 space-y-8">
         <section
           v-for="cat in filteredCategories"
           :id="cat.id"
           :key="cat.id"
           class="scroll-mt-24 sm:scroll-mt-28"
         >
-          <div class="flex items-start gap-2.5 mb-3">
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center text-primary-600 dark:text-primary-400">
-              <component :is="cat.icon" class="w-5 h-5" stroke-width="1.5" />
+          <div class="mb-3 flex items-start gap-3">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50"
+            >
+              <component :is="cat.icon" class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
             <div class="min-w-0">
               <h2
-                class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
+                class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100"
                 v-html="highlightText(cat.title, trimmedSearch)"
               ></h2>
               <p
-                class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed"
+                class="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400"
                 v-html="highlightText(cat.blurb, trimmedSearch)"
               ></p>
             </div>
@@ -95,19 +94,22 @@
             <article
               v-for="(article, idx) in cat.articles"
               :key="idx"
-              class="rounded-xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 px-4 py-3 sm:px-4 sm:py-3.5"
+              class="rounded-xl border border-gray-200/80 bg-white/95 px-4 py-3.5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40 sm:px-4 sm:py-4"
             >
               <h3
-                class="text-xs font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
+                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100"
                 v-html="highlightText(article.title, trimmedSearch)"
               ></h3>
-              <div class="mt-2 space-y-2 text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              <div class="mt-2 space-y-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
                 <p
                   v-for="(para, pIdx) in article.body"
                   :key="pIdx"
                   v-html="highlightText(para, trimmedSearch)"
                 ></p>
-                <ul v-if="article.bullets?.length" class="list-disc pl-4 space-y-1 marker:text-primary-500/60 dark:marker:text-primary-400/50">
+                <ul
+                  v-if="article.bullets?.length"
+                  class="list-disc space-y-1 pl-4 marker:text-gray-400 dark:marker:text-gray-500"
+                >
                   <li
                     v-for="(b, bIdx) in article.bullets"
                     :key="bIdx"

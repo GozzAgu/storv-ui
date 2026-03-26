@@ -1,101 +1,186 @@
 <template>
-  <div class="space-y-3 pb-6 sm:pb-8">
-    <!-- Page Header -->
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">Analytics & Reports</h1>
-        <p class="mt-0.5 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Track your sales, inventory, and customer insights</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <select
-          v-model="selectedPeriod"
-          @change="loadAnalytics"
-          class="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-        >
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-        </select>
-        <div class="flex items-center gap-2">
-          <button
-            @click="exportReport('pdf')"
-            :disabled="isExporting"
-            class="px-3 py-1.5 text-xs font-medium bg-primary-500 hover:bg-primary-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+    <!-- Hero -->
+    <header
+      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+    >
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div class="relative min-w-0">
+          <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+            Analytics
+          </p>
+          <h1
+            class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
           >
-            <ArrowDownTrayIcon class="w-4 h-4" />
-            <span>{{ isExporting ? 'Exporting...' : 'Export PDF' }}</span>
-          </button>
-          <button
-            @click="exportReport('excel')"
-            :disabled="isExporting"
-            class="px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            Analytics & Reports
+          </h1>
+          <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            Track your sales, inventory, and customer insights
+          </p>
+        </div>
+        <div class="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+          <div
+            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:bg-gray-900/60"
+            role="group"
+            aria-label="Analytics period"
           >
-            <ArrowDownTrayIcon class="w-4 h-4" />
-            <span>{{ isExporting ? 'Exporting...' : 'Export Excel' }}</span>
-          </button>
+            <button
+              type="button"
+              @click="selectedPeriod = 'daily'; loadAnalytics()"
+              :class="[
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                selectedPeriod === 'daily'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
+              ]"
+            >
+              Daily
+            </button>
+            <button
+              type="button"
+              @click="selectedPeriod = 'weekly'; loadAnalytics()"
+              :class="[
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                selectedPeriod === 'weekly'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
+              ]"
+            >
+              Weekly
+            </button>
+            <button
+              type="button"
+              @click="selectedPeriod = 'monthly'; loadAnalytics()"
+              :class="[
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                selectedPeriod === 'monthly'
+                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
+              ]"
+            >
+              Monthly
+            </button>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              @click="exportReport('pdf')"
+              :disabled="isExporting"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200/90 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/80 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/80"
+            >
+              <ArrowDownTrayIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              <span>{{ isExporting ? 'Exporting...' : 'Export PDF' }}</span>
+            </button>
+            <button
+              type="button"
+              @click="exportReport('excel')"
+              :disabled="isExporting"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200/90 bg-emerald-50/90 px-3 py-1.5 text-xs font-medium text-emerald-800 shadow-sm transition hover:bg-emerald-100/90 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+            >
+              <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
+              <span>{{ isExporting ? 'Exporting...' : 'Export Excel' }}</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </header>
 
     <!-- Loading State -->
     <template v-if="isLoading">
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-2.5">
-        <Card v-for="i in 5" :key="i" padding="sm" class="p-3">
-          <div class="h-16 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-        </Card>
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
+        <div
+          v-for="i in 5"
+          :key="i"
+          class="rounded-xl bg-white p-3 ring-1 ring-gray-200/80 dark:bg-gray-900/50 dark:ring-gray-800/60 sm:p-3.5"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 flex-1">
+              <div class="mb-2 h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+              <div class="mb-1.5 h-7 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700 sm:h-8"></div>
+              <div class="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+            <div class="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700 sm:h-12 sm:w-12"></div>
+          </div>
+        </div>
       </div>
     </template>
 
     <!-- No store selected -->
     <template v-else-if="needsStoreSelection">
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700/60 p-8 sm:p-12 text-center">
+      <div
+        class="rounded-2xl border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-10"
+      >
+        <div
+          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+        >
+          <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
+        </div>
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Select a store to view analytics</p>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto">Choose a store from the selector in the top bar, or go to Settings to manage your stores.</p>
-        <NuxtLink to="/dashboard/settings" class="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">Go to Settings</NuxtLink>
+        <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
+          Choose a store from the selector in the top bar, or go to Settings to manage your stores.
+        </p>
+        <NuxtLink
+          to="/dashboard/settings"
+          class="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 transition hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-600 dark:hover:text-white"
+        >
+          Go to Settings
+        </NuxtLink>
       </div>
     </template>
 
     <!-- Analytics Content -->
     <template v-else>
-      <!-- Key Metrics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Total revenue</p>
-          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ formatCurrency(totalRevenue) }}</p>
-          <p class="mt-0.5 text-[11px]" :class="revenueChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-            {{ revenueChange >= 0 ? '↑' : '↓' }} {{ Math.abs(revenueChange) }}% vs previous
-          </p>
-        </Card>
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Total sales</p>
-          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ totalSales }}</p>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ totalOrders }} orders</p>
-        </Card>
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Avg. order value</p>
-          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ formatCurrency(averageOrderValue) }}</p>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Per transaction</p>
-        </Card>
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock items</p>
-          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ lowStockCount }}</p>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Need restocking</p>
-        </Card>
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Refunds</p>
-          <p class="mt-1 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">{{ refundedCount }}</p>
-          <p class="mt-0.5 text-[11px] text-red-600 dark:text-red-400">{{ formatCurrency(refundAmount) }} · {{ refundRateText }}</p>
-        </Card>
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
+        <StatCard
+          label="Total revenue"
+          :value="formatCurrency(totalRevenue)"
+          subtext="vs previous period"
+          :change="revenueChangeBadge"
+          :change-positive="revenueChangePositive"
+        />
+        <StatCard
+          label="Total sales"
+          :value="totalSales.toString()"
+          :subtext="`${totalOrders} orders`"
+        />
+        <StatCard
+          label="Avg. order value"
+          :value="formatCurrency(averageOrderValue)"
+          subtext="Per transaction"
+        />
+        <StatCard
+          label="Low stock items"
+          :value="lowStockCount.toString()"
+          :subtext="lowStockCount > 0 ? 'Need restocking' : 'All stocked'"
+          :subtext-class="
+            lowStockCount > 0
+              ? 'text-amber-600 dark:text-amber-400 text-xs font-medium'
+              : 'text-gray-500 dark:text-gray-400 text-xs'
+          "
+        />
+        <StatCard
+          label="Refunds"
+          :value="refundedCount.toString()"
+          :subtext="`${formatCurrency(refundAmount)} · ${refundRateText}`"
+          subtext-class="text-red-600 dark:text-red-400 text-xs"
+        />
       </div>
 
       <!-- Charts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <!-- Revenue Trend Chart -->
-        <Card class="lg:col-span-2" padding="sm" extra-class="p-4">
-          <div class="flex items-center justify-between mb-4">
+        <Card
+          class="lg:col-span-2"
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
+          <div class="mb-4 flex items-center justify-between">
             <div>
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Revenue Trends</h2>
-              <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{{ periodLabel }}</p>
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Revenue Trends
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
             </div>
           </div>
           <apexchart
@@ -107,10 +192,15 @@
         </Card>
 
         <!-- Top Products Chart -->
-        <Card padding="sm" extra-class="p-4">
+        <Card
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Top Products</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">By sales volume</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Top Products
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">By sales volume</p>
           </div>
           <apexchart
             type="donut"
@@ -122,12 +212,17 @@
       </div>
 
       <!-- Inventory & Customer Insights Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
         <!-- Inventory Turnover -->
-        <Card padding="sm" extra-class="p-4">
+        <Card
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Inventory Turnover</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Sales vs Stock levels</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Inventory Turnover
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Sales vs Stock levels</p>
           </div>
           <apexchart
             type="bar"
@@ -138,10 +233,15 @@
         </Card>
 
         <!-- Customer Insights -->
-        <Card padding="sm" extra-class="p-4">
+        <Card
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Customer Insights</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Top customers & repeat rate</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Customer Insights
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Top customers & repeat rate</p>
           </div>
           <apexchart
             type="bar"
@@ -153,26 +253,37 @@
       </div>
 
       <!-- Peak hours, Sales by day, Busiest time -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <!-- Busiest day & hour -->
-        <Card padding="sm" extra-class="p-4 overflow-hidden">
+        <Card
+          padding="sm"
+          extra-class="!p-4 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="flex items-start justify-between gap-3">
-            <div class="flex items-start gap-2.5 min-w-0">
-              <div class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0 ring-1 ring-primary-100 dark:ring-primary-900/30">
-                <ClockIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" />
+            <div class="flex min-w-0 items-start gap-2.5">
+              <div
+                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+              >
+                <ClockIcon class="h-4 w-4 text-gray-600 dark:text-gray-300" />
               </div>
               <div class="min-w-0">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">Busiest time</h2>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak day & hour in period</p>
+                <h2 class="text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                  Busiest time
+                </h2>
+                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Peak day & hour in period</p>
               </div>
             </div>
-            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
+            <span
+              class="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800/80 dark:text-gray-300"
+            >
               {{ selectedPeriod === 'daily' ? 'Today' : selectedPeriod === 'weekly' ? 'This week' : 'This month' }}
             </span>
           </div>
 
-          <div class="mt-3 p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-900/30 dark:to-gray-800/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60">
-            <p class="text-[10px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
+          <div
+            class="mt-3 rounded-xl border border-gray-200/80 bg-gray-50/90 p-3 dark:border-gray-800/70 dark:bg-gray-900/50"
+          >
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
             <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               {{ busiestTimeSummary }}
             </p>
@@ -180,10 +291,15 @@
         </Card>
 
         <!-- Sales by hour (peak hours) -->
-        <Card padding="sm" extra-class="p-4 lg:col-span-2">
+        <Card
+          padding="sm"
+          extra-class="!p-4 lg:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sales by hour</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Peak hours (revenue)</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Sales by hour
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Peak hours (revenue)</p>
           </div>
           <apexchart
             type="bar"
@@ -194,12 +310,17 @@
         </Card>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
         <!-- Sales by day of week -->
-        <Card padding="sm" extra-class="p-4">
+        <Card
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sales by day of week</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Best and worst days</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Sales by day of week
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Best and worst days</p>
           </div>
           <apexchart
             type="bar"
@@ -210,10 +331,15 @@
         </Card>
 
         <!-- Traffic heatmap: day × hour -->
-        <Card padding="sm" extra-class="p-4">
+        <Card
+          padding="sm"
+          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
           <div class="mb-4">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Traffic heatmap</h2>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Revenue by day × hour</p>
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Traffic heatmap
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Revenue by day × hour</p>
           </div>
           <apexchart
             type="heatmap"
@@ -225,10 +351,17 @@
       </div>
 
       <!-- Detailed Tables -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <!-- Top Products -->
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Top products</p>
+        <Card
+          padding="sm"
+          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
+          <p
+            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Top products
+          </p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
@@ -253,8 +386,15 @@
         </Card>
 
         <!-- Top Customers -->
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Top customers</p>
+        <Card
+          padding="sm"
+          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
+          <p
+            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Top customers
+          </p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
@@ -282,8 +422,15 @@
         </Card>
 
         <!-- Recent Returns -->
-        <Card padding="sm" extra-class="p-3.5">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-2">Recent returns</p>
+        <Card
+          padding="sm"
+          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
+          <p
+            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Recent returns
+          </p>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
@@ -311,10 +458,22 @@
       </div>
 
       <!-- Low stock -->
-      <Card padding="sm" extra-class="p-3.5">
-        <div class="flex items-center justify-between mb-2">
-          <p class="text-[11px] text-gray-500 dark:text-gray-400">Low stock</p>
-          <NuxtLink to="/dashboard/inventory" class="text-[10px] text-primary-500 dark:text-primary-400 hover:underline font-medium">View inventory</NuxtLink>
+      <Card
+        padding="sm"
+        extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div class="mb-2 flex items-center justify-between">
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          >
+            Low stock
+          </p>
+          <NuxtLink
+            to="/dashboard/inventory"
+            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            View inventory →
+          </NuxtLink>
         </div>
         <div class="space-y-1.5">
           <template v-if="lowStockItems.length > 0">
@@ -342,6 +501,7 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   ArrowDownTrayIcon,
+  BuildingStorefrontIcon,
   ClockIcon,
 } from '@heroicons/vue/24/outline'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -353,6 +513,7 @@ import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 import Card from '~/components/ui/Card.vue'
+import StatCard from '~/components/ui/StatCard.vue'
 import jsPDF from 'jspdf'
 
 definePageMeta({
@@ -491,6 +652,20 @@ const revenueChange = computed(() => {
   
   if (previousPeriodRevenue === 0) return 0
   return ((currentPeriodRevenue - previousPeriodRevenue) / previousPeriodRevenue) * 100
+})
+
+const revenueChangeBadge = computed(() => {
+  const v = revenueChange.value
+  if (Number.isNaN(v)) return null
+  const rounded = Math.round(v)
+  if (rounded === 0) return null
+  return rounded > 0 ? `+${rounded}%` : `${rounded}%`
+})
+
+const revenueChangePositive = computed(() => {
+  const b = revenueChangeBadge.value
+  if (b === null) return null
+  return b.startsWith('+')
 })
 
 const topProducts = computed(() => {

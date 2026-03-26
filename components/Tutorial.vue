@@ -1,34 +1,39 @@
 <template>
   <div v-if="showTutorial" class="fixed inset-0 z-50 overflow-hidden">
     <!-- Backdrop -->
-    <div 
-      class="absolute inset-0 bg-black/60 transition-opacity"
+    <div
+      class="absolute inset-0 bg-slate-950/45 backdrop-blur-md transition-opacity dark:bg-black/60"
       @click="skipTutorial"
     ></div>
 
     <!-- Tutorial Content -->
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
       <div
         ref="tutorialCard"
-        class="bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-2xl max-w-md w-full pointer-events-auto transform transition-all duration-300 overflow-hidden"
+        class="pointer-events-auto max-h-[90dvh] w-full max-w-md transform overflow-hidden rounded-2xl border border-gray-200/90 bg-white text-gray-900 transition-all duration-300 dark:border-gray-800 dark:bg-slate-950 dark:text-gray-100"
         :style="cardPosition"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
-          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-            Step {{ currentStep }} of {{ totalSteps }}
-          </span>
-          <button
-            @click="skipTutorial"
-            class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 rounded-lg transition-colors"
+        <div
+          class="flex items-center justify-between gap-3 border-b border-gray-200/90 bg-white p-3 dark:border-gray-800 dark:bg-slate-950 sm:p-4"
+        >
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
           >
-            <XMarkIcon class="w-4 h-4" />
+            Step {{ currentStep }} of {{ totalSteps }}
+          </p>
+          <button
+            type="button"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+            @click="skipTutorial"
+          >
+            <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
           </button>
         </div>
 
         <!-- Content -->
-        <div class="p-3 sm:p-4 space-y-3">
-          <div class="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 mx-auto">
+        <div class="space-y-3 p-3 sm:p-4">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 dark:bg-primary-500">
             <component :is="tutorialSteps[currentStep - 1]?.icon" class="h-6 w-6 text-white" />
           </div>
           
@@ -42,7 +47,9 @@
         </div>
 
         <!-- Navigation -->
-        <div class="flex items-center justify-between gap-2 p-3 sm:p-4 border-t border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
+        <div
+          class="flex items-center justify-between gap-2 border-t border-gray-200/90 bg-white p-3 dark:border-gray-800 dark:bg-slate-950 sm:p-4"
+        >
           <button
             v-if="currentStep > 1"
             @click="previousStep"

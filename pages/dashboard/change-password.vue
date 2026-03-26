@@ -8,7 +8,10 @@
       </p>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
+    <form
+      @submit.prevent="handleSubmit"
+      class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+    >
       <div class="p-4 sm:p-6 space-y-4">
         <div>
           <label for="current" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Current (temporary) password</label>
@@ -18,7 +21,7 @@
             :type="showCurrent ? 'text' : 'password'"
             autocomplete="current-password"
             required
-            class="w-full px-3 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/25 focus:ring-offset-0 outline-none"
+            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="Enter temporary password"
           />
         </div>
@@ -31,7 +34,7 @@
             autocomplete="new-password"
             required
             :minlength="PASSWORD_MIN_LENGTH"
-            class="w-full px-3 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/25 focus:ring-offset-0 outline-none"
+            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="At least 12 characters, number and capital letter"
           />
           <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
@@ -46,7 +49,7 @@
             :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"
             required
-            class="w-full px-3 py-2.5 text-sm rounded-xl bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary-500/25 focus:ring-offset-0 outline-none"
+            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="Confirm new password"
           />
         </div>

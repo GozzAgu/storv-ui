@@ -17,7 +17,7 @@
           Welcome back, {{ userName }}
         </h1>
         <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          Live snapshot of revenue, stock, and activity — minimal noise, maximum clarity.
+          Live snapshot of revenue, stock, and activity minimal noise, maximum clarity.
         </p>
       </div>
     </header>

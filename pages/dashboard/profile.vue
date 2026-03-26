@@ -1,17 +1,32 @@
 <template>
-    <!-- Minimal page header -->
-    <div class="mb-6 sm:mb-8">
-      <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Account</p>
-      <h1 class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Profile</h1>
-    </div>
+  <div class="mx-auto max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+    <header
+      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+    >
+      <div class="min-w-0">
+        <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
+          Account
+        </p>
+        <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
+          Profile
+        </h1>
+        <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          Identity, preferences, and security — aligned with your dashboard.
+        </p>
+      </div>
+    </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
-      <!-- Profile card: clean, modern -->
-      <div class="lg:col-span-1 w-full shrink-0">
-        <div class="relative rounded-2xl bg-white dark:bg-gray-800/90 shadow-sm ring-1 ring-gray-200/60 dark:ring-gray-700/50 overflow-hidden">
-          <div class="relative p-6 sm:p-7 flex flex-col items-center text-center">
+    <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-3">
+      <!-- Profile card -->
+      <div class="w-full shrink-0 lg:col-span-1">
+        <div
+          class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+        >
+          <div class="relative flex flex-col items-center px-6 py-7 text-center sm:px-7">
             <!-- Avatar -->
-            <div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden bg-primary-400 ring-4 ring-white dark:ring-gray-800 shadow-lg">
+            <div
+              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200/90 bg-gradient-to-br from-primary-500/90 to-primary-600/95 text-sm font-semibold text-white shadow-md dark:border-gray-600/80 dark:from-primary-600/90 dark:to-primary-700/95"
+            >
               {{ profileAvatarInitials }}
             </div>
             <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
@@ -28,12 +43,15 @@
                 {{ leftCardLine2 || '—' }}
               </p>
               <p v-if="leftCardBadgeExtra" class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ leftCardBadgeExtra }}</p>
-              <span class="mt-2.5 inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide text-primary-500 dark:text-primary-400 bg-primary-400/10 dark:bg-primary-500/15 ring-1 ring-primary-400/20 dark:ring-primary-400/20">
+              <span
+                class="mt-2.5 inline-flex items-center rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-[10px] font-medium tracking-wide text-primary-700 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
+              >
                 {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </span>
             </template>
-            <!-- Stats: clean row with dividers -->
-            <div class="mt-6 w-full flex items-center justify-center gap-0 rounded-xl bg-gray-50/80 dark:bg-gray-900/50 py-3 px-2">
+            <div
+              class="mt-6 flex w-full items-center justify-center gap-0 rounded-xl border border-gray-200/70 bg-gray-50/90 px-2 py-3 dark:border-gray-800/60 dark:bg-gray-950/40"
+            >
               <div class="flex-1 min-w-0">
                 <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
@@ -56,9 +74,9 @@
         </div>
       </div>
 
-      <div class="lg:col-span-2 space-y-4">
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+      <div class="space-y-4 lg:col-span-2">
+        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
           <div>
             <p v-if="isStaff" class="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Staff</p>
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ isStaff ? 'Staff profile' : 'Business profile' }}</h2>
@@ -118,16 +136,16 @@
         </div>
         </div>
 
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
           </div>
-          <div class="p-3 sm:p-4 space-y-0">
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+          <div class="space-y-0 p-3 sm:p-4">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <LanguageIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <LanguageIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Language</p>
@@ -136,10 +154,10 @@
               </div>
               <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <GlobeAltIcon class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <GlobeAltIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Region</p>
@@ -148,10 +166,10 @@
               </div>
               <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <CurrencyDollarIcon class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <CurrencyDollarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Currency</p>
@@ -160,10 +178,10 @@
               </div>
               <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <BellIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <BellIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Notifications</p>
@@ -172,10 +190,10 @@
               </div>
               <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
             </div>
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <MoonIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <MoonIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Theme</p>
@@ -186,8 +204,8 @@
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <CalendarIcon class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <CalendarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Timezone</p>
@@ -199,16 +217,16 @@
           </div>
         </div>
 
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Security</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
           </div>
-          <div class="p-3 sm:p-4 space-y-0">
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+          <div class="space-y-0 p-3 sm:p-4">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <KeyIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <KeyIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
@@ -217,10 +235,10 @@
               </div>
               <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Change</button>
             </div>
-            <div class="flex items-center justify-between py-2.5 border-b border-gray-200/80 dark:border-gray-700/80">
+            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <ShieldCheckIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <ShieldCheckIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
@@ -231,8 +249,8 @@
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                  <DevicePhoneMobileIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                  <DevicePhoneMobileIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
@@ -244,8 +262,11 @@
           </div>
         </div>
 
-        <div v-if="storeInfo.storeName || isLoadingProfile" class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
+        <div
+          v-if="storeInfo.storeName || isLoadingProfile"
+          class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+        >
+          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
           </div>
@@ -289,22 +310,24 @@
           </div>
         </div>
 
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-          <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60 flex flex-wrap items-center justify-between gap-3">
+        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <div>
               <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
             </div>
-            <span class="px-2.5 py-1 text-xs font-medium rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">
+            <span
+              class="rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-xs font-medium text-primary-800 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
+            >
               {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
             </span>
           </div>
           <div class="p-3 sm:p-4 space-y-3">
-            <div class="p-3 rounded-xl bg-primary-50/80 dark:bg-primary-900/20 ring-1 ring-primary-200/60 dark:ring-primary-700/40">
-              <p class="text-xs font-medium text-primary-900 dark:text-primary-100 mb-1.5">
+            <div class="rounded-xl border border-primary-200/60 bg-primary-50/50 p-3 dark:border-primary-500/25 dark:bg-primary-950/25">
+              <p class="mb-1.5 text-xs font-medium text-gray-900 dark:text-gray-100">
                 {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
-              <p class="text-xs text-primary-600 dark:text-primary-200 leading-relaxed">
+              <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
                 <template v-if="profileData.role === 'staff'">
                   As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
                 </template>
@@ -320,15 +343,15 @@
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Your permissions</p>
               <div v-if="userPermissions.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-2">Loading permissions...</div>
               <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 p-2.5 rounded-lg bg-white dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60">
+                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 rounded-lg border border-gray-200/70 bg-gray-50/50 p-2.5 dark:border-gray-700/60 dark:bg-gray-950/30">
                   <CheckCircleIcon class="w-3.5 h-3.5 text-green-500 dark:text-green-400 flex-shrink-0" />
                   <span class="text-xs text-gray-700 dark:text-gray-100">{{ permission }}</span>
                 </div>
               </div>
             </div>
-            <div class="pt-3 border-t border-gray-200/80 dark:border-gray-700/80">
-              <div class="flex items-start gap-2.5 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-200/60 dark:ring-blue-700/40">
-                <InformationCircleIcon class="w-4 h-4 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div class="border-t border-gray-100/90 pt-3 dark:border-gray-800/60">
+              <div class="flex items-start gap-2.5 rounded-xl border border-gray-200/70 bg-gray-50/80 p-3 dark:border-gray-700/60 dark:bg-gray-950/30">
+                <InformationCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">About your role</p>
                   <p class="text-xs text-gray-600 dark:text-gray-200 leading-relaxed">
@@ -346,6 +369,7 @@
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Theme Change Modal -->
     <Modal v-model="showThemeModal" title="Change Theme" size="md">

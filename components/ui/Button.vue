@@ -85,15 +85,15 @@ const iconSize = computed(() => {
 const variantBgClasses = computed(() => {
   const map = {
     primary:
-      'bg-primary-400 dark:bg-primary-500 text-white shadow-sm hover:bg-primary-500 hover:shadow dark:hover:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-700',
+      'bg-primary-400 dark:bg-primary-500 text-white hover:bg-primary-500 dark:hover:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-700',
     secondary:
-      'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-300 hover:shadow dark:hover:bg-gray-500 active:bg-gray-400 dark:active:bg-gray-400',
+      'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-500 active:bg-gray-400 dark:active:bg-gray-400',
     danger:
-      'bg-red-500 dark:bg-red-500 text-white shadow-sm hover:bg-red-600 hover:shadow-md active:bg-red-700',
+      'bg-red-500 dark:bg-red-500 text-white hover:bg-red-600 active:bg-red-700',
     success:
-      'bg-green-500 dark:bg-green-500 text-white shadow-sm hover:bg-green-600 hover:shadow-md active:bg-green-700',
+      'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 active:bg-green-700',
     outline:
-      'bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-gray-200 shadow-sm hover:bg-gray-100 hover:shadow dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-900',
+      'bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-900',
     ghost:
       'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700',
   }

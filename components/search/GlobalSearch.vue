@@ -1,45 +1,42 @@
 <template>
   <Teleport to="body">
-    <!-- Backdrop -->
     <Transition
-      enter-active-class="transition-opacity duration-200"
+      enter-active-class="transition-opacity duration-200 ease-out"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-150 ease-in"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
       <div
         v-if="searchStore.isOpen"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-        @click="searchStore.closeSearch()"
-      ></div>
-    </Transition>
-
-    <!-- Search Modal -->
-    <Transition
-      enter-active-class="transition-all duration-200"
-      enter-from-class="opacity-0 scale-95 translate-y-4"
-      enter-to-class="opacity-100 scale-100 translate-y-0"
-      leave-active-class="transition-all duration-200"
-      leave-from-class="opacity-100 scale-100 translate-y-0"
-      leave-to-class="opacity-0 scale-95 translate-y-4"
-    >
-      <div
-        v-if="searchStore.isOpen"
-        class="fixed inset-x-2 top-[calc(env(safe-area-inset-top)+0.75rem)] max-h-[70vh] sm:inset-x-4 sm:top-20 sm:max-h-[80vh] md:top-24 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl md:w-full bg-white dark:bg-gray-800 rounded-2xl ring-1 ring-gray-200/60 dark:ring-gray-700/60 shadow-2xl z-50 flex flex-col overflow-hidden"
-        @click.stop
+        class="fixed inset-0 z-[100]"
+        role="presentation"
       >
+        <!-- Dismiss on overlay click -->
+        <div
+          class="absolute inset-0 bg-slate-950/50 backdrop-blur-md dark:bg-black/70"
+          aria-hidden="true"
+          @click="searchStore.closeSearch()"
+        />
+
+        <div
+          class="pointer-events-none fixed inset-0 flex justify-center overflow-y-auto px-2 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-4 sm:px-4 sm:pt-20 sm:pb-6 md:pt-24"
+        >
+          <div
+            class="pointer-events-auto relative flex max-h-[min(70vh,calc(100dvh-2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-[1.35rem] border border-gray-200/90 bg-white text-gray-900 shadow-none dark:border-gray-800 dark:bg-slate-950 dark:text-gray-100 sm:max-h-[min(80vh,calc(100dvh-3rem))] sm:rounded-2xl"
+            @click.stop
+          >
         <!-- Search Input -->
-        <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
+        <div class="border-b border-gray-200/90 bg-white p-3 dark:border-gray-800 dark:bg-slate-950 sm:p-4">
           <div class="relative">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <MagnifyingGlassIcon class="absolute left-3 top-1/2 w-4 -translate-y-1/2 transform text-gray-400 dark:text-gray-500" />
             <input
               ref="searchInput"
               v-model="searchStore.query"
               type="text"
               placeholder="Search receipts, inventory, customers..."
-              class="w-full pl-9 pr-14 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+              class="w-full rounded-xl border border-gray-200/90 bg-gray-50 py-2 pl-9 pr-14 text-xs text-gray-900 placeholder-gray-400 focus:border-primary-400/40 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-primary-500/35"
               @input="handleSearchInput"
               @keydown.esc="searchStore.closeSearch()"
               @keydown.enter="handleEnter"
@@ -47,7 +44,11 @@
               @keydown.up.prevent="navigateResults(-1)"
             />
             <div class="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1 sm:gap-2">
-              <kbd class="px-2 py-1 text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200/70 dark:border-gray-600/70 rounded-md hidden sm:inline-block">Esc</kbd>
+              <kbd
+                class="hidden rounded-md border border-gray-200/90 bg-gray-100/90 px-2 py-1 text-[10px] font-semibold text-gray-500 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-400 sm:inline-block"
+              >
+                Esc
+              </kbd>
             </div>
           </div>
 
@@ -58,10 +59,10 @@
               :key="entityType.value"
               @click="toggleEntityType(entityType.value)"
               :class="[
-                'px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors',
+                'rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors',
                 isEntityTypeSelected(entityType.value)
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300'
+                  : 'border border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700'
               ]"
             >
               <component :is="entityType.icon" class="w-3.5 h-3.5 inline-block mr-1" />
@@ -78,7 +79,7 @@
         </div>
 
         <!-- Advanced Filters Toggle -->
-        <div class="px-3 sm:px-4 py-2 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/30">
+        <div class="border-b border-gray-200/90 bg-white px-3 py-2 dark:border-gray-800 dark:bg-slate-950 sm:px-4">
           <button
             @click="showAdvancedFilters = !showAdvancedFilters"
             class="flex items-center justify-between w-full text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
@@ -100,7 +101,10 @@
           leave-from-class="opacity-100 max-h-96"
           leave-to-class="opacity-0 max-h-0"
         >
-          <div v-if="showAdvancedFilters" class="px-3 sm:px-4 py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/30 space-y-3">
+          <div
+            v-if="showAdvancedFilters"
+            class="space-y-3 border-b border-gray-200/90 bg-white px-3 py-3 dark:border-gray-800 dark:bg-slate-950 sm:px-4"
+          >
             <!-- Date Range -->
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -146,7 +150,7 @@
         </Transition>
 
         <!-- Results -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="min-h-0 flex-1 overflow-y-auto bg-white dark:bg-slate-950">
           <!-- Loading State -->
           <div v-if="searchStore.loading" class="p-6 text-center">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
@@ -155,7 +159,9 @@
 
           <!-- No Results -->
           <div v-else-if="!searchStore.hasResults && searchStore.query.trim()" class="p-6 text-center">
-            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+            <div
+              class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800"
+            >
               <MagnifyingGlassIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
             </div>
             <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
@@ -164,8 +170,10 @@
 
           <!-- Empty State -->
           <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-4 sm:p-6">
-            <div class="text-center mb-4">
-              <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+            <div class="mb-4 text-center">
+              <div
+                class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100/80 dark:bg-primary-500/15"
+              >
                 <MagnifyingGlassIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
@@ -187,7 +195,7 @@
                 v-for="saved in savedSearches.slice(0, 5)"
                 :key="saved.id"
                 @click="loadSavedSearch(saved.id)"
-                class="w-full px-3 py-2 text-left text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-between group"
+                class="group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800/90"
               >
                 <div class="flex items-center gap-2 flex-1 min-w-0">
                   <ClockIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
@@ -199,14 +207,16 @@
           </div>
 
           <!-- Results List -->
-          <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
+          <div v-else class="divide-y divide-gray-100 dark:divide-gray-800/90">
             <button
               v-for="(result, index) in searchStore.results"
               :key="result.id"
               @click="handleResultClick(result)"
               :class="[
-                'w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
-                selectedIndex === index ? 'bg-primary-50 dark:bg-primary-900/20' : ''
+                'w-full px-3 py-2 text-left transition-colors sm:px-4 sm:py-3',
+                selectedIndex === index
+                  ? 'bg-primary-50 dark:bg-primary-500/10'
+                  : 'hover:bg-gray-50 dark:hover:bg-slate-800/60'
               ]"
             >
               <div class="flex items-start gap-2 sm:gap-3">
@@ -242,7 +252,9 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-3 sm:px-4 py-2.5 border-t border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
+        <div
+          class="flex items-center justify-between border-t border-gray-200/90 bg-white px-3 py-2.5 dark:border-gray-800 dark:bg-slate-950 sm:px-4"
+        >
           <div class="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
             <span class="hidden sm:flex items-center gap-1">
               <ArrowUpIcon class="w-3 h-3" />
@@ -254,12 +266,14 @@
               Select
             </span>
             <span class="hidden sm:flex items-center gap-1">
-              <kbd class="px-1.5 py-0.5 bg-gray-200/70 dark:bg-gray-700 rounded-md">/</kbd>
+              <kbd class="rounded-md bg-gray-200/90 px-1.5 py-0.5 dark:bg-slate-800 dark:text-gray-300">/</kbd>
               Save
             </span>
           </div>
           <div class="text-xs text-gray-500 dark:text-gray-400">
             {{ searchStore.results.length }} result{{ searchStore.results.length !== 1 ? 's' : '' }}
+          </div>
+        </div>
           </div>
         </div>
       </div>

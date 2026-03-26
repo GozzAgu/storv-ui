@@ -1,8 +1,9 @@
 <template>
   <div class="relative" ref="dropdownRef">
     <button
+      type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 rounded-lg transition-colors"
+      class="flex h-9 max-w-[10rem] items-center gap-1.5 rounded-xl border border-gray-200/90 bg-white/90 px-2.5 py-1.5 text-xs font-semibold tracking-tight text-gray-800 transition-all hover:border-gray-300/90 hover:bg-gray-50/90 active:scale-[0.99] dark:border-gray-800/80 dark:bg-gray-900/50 dark:text-gray-100 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/70 sm:max-w-[12rem]"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
       <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
@@ -40,7 +41,7 @@
     >
       <div
         v-if="dropdownOpen"
-        class="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-0.5 w-auto sm:w-60 max-w-none sm:max-w-[280px] bg-white dark:bg-gray-800 rounded-xl shadow-lg shadow-gray-200/40 dark:shadow-black/20 ring-1 ring-gray-200/60 dark:ring-gray-700/60 py-2 z-[50] max-h-[calc(100vh-7rem)] sm:max-h-[380px] overflow-hidden flex flex-col"
+        class="fixed left-4 right-4 top-20 z-[50] flex max-h-[calc(100vh-7rem)] w-auto max-w-none flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white/95 py-2 backdrop-blur-xl dark:border-gray-800/80 dark:bg-slate-950/90 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-1.5 sm:max-h-[380px] sm:w-60 sm:max-w-[280px]"
         @click.stop
       >
         <div class="px-3 pb-2 flex items-center gap-1.5">

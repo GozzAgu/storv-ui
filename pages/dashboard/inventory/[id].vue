@@ -1,142 +1,154 @@
 <template>
-  <div class="pb-24 sm:pb-20 overflow-x-hidden">
-    <!-- Breadcrumbs -->
-    <Breadcrumbs :items="inventoryBreadcrumbs" class="mb-4" />
+  <div class="mx-auto max-w-[1400px] space-y-5 overflow-x-hidden pb-24 sm:space-y-6 sm:pb-24">
+    <Breadcrumbs :items="inventoryBreadcrumbs" class="text-[11px] text-gray-500 dark:text-gray-400" />
 
-    <!-- Hero header: back + title + description + meta -->
-    <div class="mb-4 sm:mb-6">
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div class="flex items-start gap-2.5 min-w-0 flex-1">
-        <button
-          @click="navigateTo('/dashboard/inventory')"
-            class="mt-0.5 p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-          title="Back to folders"
-        >
-            <ArrowLeftIcon class="w-4 h-4" stroke-width="1.75" />
-        </button>
+    <!-- Hero -->
+    <header
+      v-if="!isLoadingFolder"
+      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+    >
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex min-w-0 flex-1 items-start gap-3">
+          <button
+            type="button"
+            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+            title="Back to folders"
+            @click="navigateTo('/dashboard/inventory')"
+          >
+            <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
+          </button>
           <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-              <h1 v-if="isLoadingFolder" class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                Loading...
-              </h1>
-              <h1 v-else class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate min-w-0">
+            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+              Folder
+            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h1
+                class="truncate text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+              >
                 {{ folder?.name || 'Folder' }}
               </h1>
               <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
             </div>
-            <p v-if="!isLoadingFolder" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                {{ folder?.description || 'No description' }}
-              </p>
-            <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-              <span class="flex items-center gap-1.5">
-                <CalendarIcon class="w-4 h-4" />
+            <p class="mt-1 max-w-2xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              {{ folder?.description || 'No description yet — add one in folder settings.' }}
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
+              >
+                <CalendarIcon class="h-3.5 w-3.5 opacity-70" />
                 Created {{ formatDate(folder?.createdAt) }}
               </span>
-              <span class="flex items-center gap-1.5">
-                <CubeIcon class="w-4 h-4" />
+              <span
+                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
+              >
+                <CubeIcon class="h-3.5 w-3.5 opacity-70" />
                 {{ folder?.itemCount || 0 }} items
               </span>
             </div>
           </div>
-            </div>
-        <div v-if="!isLoadingFolder && canManageInventoryItems && selectedItemsForBulk.length > 0" class="flex items-center gap-2 shrink-0">
+        </div>
+        <div
+          v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
+          class="flex shrink-0 flex-wrap items-center gap-2 border-t border-gray-100/90 pt-3 dark:border-gray-800/80 sm:border-t-0 sm:pt-0"
+        >
           <Button
             variant="outline"
             size="sm"
-            @click="openBulkDiscountModal"
             :icon="TagIcon"
-            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-primary-600 dark:hover:!text-primary-300 hover:!border-primary-200/80 dark:hover:!border-primary-700/50 hover:!bg-primary-50/60 dark:hover:!bg-primary-900/10"
+            class="!rounded-lg !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-primary-200/80 hover:!bg-primary-50/60 hover:!text-primary-600 dark:hover:!border-primary-700/50 dark:hover:!bg-primary-900/10 dark:hover:!text-primary-300"
+            @click="openBulkDiscountModal"
           >
             Discount
           </Button>
           <Button
             variant="outline"
             size="sm"
-            @click="openBulkDeleteModal"
             :icon="TrashIcon"
-            class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+            class="!rounded-lg !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-red-200/80 hover:!bg-red-50/60 hover:!text-red-600 dark:hover:!border-red-800/50 dark:hover:!bg-red-900/10 dark:hover:!text-red-400"
+            @click="openBulkDeleteModal"
           >
             Delete
           </Button>
         </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Stats cards - modern, no borders -->
-    <div v-if="!isLoadingFolder" class="grid grid-cols-2 gap-2 mb-4 lg:hidden">
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 p-3 flex items-center justify-between gap-2">
-        <div class="min-w-0">
-          <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Items</p>
-          <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">
-              {{ folder?.itemCount || 0 }}
-            </p>
-          </div>
-        <div class="w-8 h-8 rounded-lg bg-blue-100/80 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-          <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
+    <div
+      v-else
+      class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 p-5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:p-6"
+    >
+      <div class="flex gap-3">
+        <div class="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+        <div class="min-w-0 flex-1 space-y-3">
+          <div class="h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-md bg-gray-200 dark:bg-gray-700"></div>
+          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div class="flex gap-2">
+            <div class="h-7 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-7 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"></div>
           </div>
         </div>
-      <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 p-3 flex items-center justify-between gap-2">
-        <div class="min-w-0">
-          <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total Value</p>
-          <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100 truncate">
-              {{ formatCurrency(totalInventoryValue) }}
-            </p>
-          </div>
-        <div class="w-8 h-8 rounded-lg bg-green-100/80 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-          <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
-          </div>
-        </div>
-    </div>
-
-    <!-- Loading State - Skeleton -->
-    <template v-if="isLoadingFolder">
-      <div class="grid grid-cols-2 gap-4 mb-6 lg:hidden">
-        <div v-for="i in 2" :key="i" class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-4 sm:p-5 flex items-center justify-between">
-            <div class="flex-1 min-w-0">
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mb-2 animate-pulse"></div>
-            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 animate-pulse"></div>
-            </div>
-          <div class="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"></div>
-          </div>
       </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 p-6 mb-6">
-        <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded-xl w-3/4 mb-4 animate-pulse"></div>
-        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-full animate-pulse"></div>
-        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-2/3 mt-3 animate-pulse"></div>
-        </div>
-      <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden min-h-[320px]">
-        <div class="p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex gap-3">
-            <div class="h-10 flex-1 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            <div class="h-10 w-24 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+    </div>
+
+    <!-- KPI strip (hidden in expanded view) -->
+    <div
+      v-if="!isLoadingFolder && !isFullscreen"
+      class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:max-w-2xl lg:grid-cols-2"
+    >
+      <StatCard
+        label="Total items"
+        :value="String(folder?.itemCount ?? 0)"
+        subtext="In this folder"
+      />
+      <StatCard
+        label="Total value"
+        :value="formatCurrency(totalInventoryValue)"
+        subtext="At current prices"
+      />
+    </div>
+
+    <!-- Loading: table shell -->
+    <template v-if="isLoadingFolder">
+      <div
+        class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
+          <div class="flex flex-wrap gap-2">
+            <div class="h-9 flex-1 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700 sm:max-w-xs"></div>
+            <div class="h-9 w-24 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
           </div>
         </div>
-        <div class="p-4 space-y-3">
-          <div v-for="i in 6" :key="i" class="flex gap-4">
-            <div class="h-4 flex-1 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            <div class="h-4 w-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-            <div class="h-4 w-16 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-        </div>
+        <div class="space-y-2.5 p-4 sm:p-5">
+          <div v-for="i in 8" :key="i" class="flex gap-3">
+            <div class="h-4 flex-1 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 w-20 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 w-16 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          </div>
         </div>
       </div>
     </template>
 
-    <!-- Toolbar: search + filters (mobile) -->
-    <div v-else class="lg:hidden flex flex-col sm:flex-row gap-3 mb-6">
-      <div class="relative flex-1 min-w-0">
-        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+    <!-- Mobile / tablet toolbar -->
+    <div v-else class="flex flex-col gap-2.5 lg:hidden">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div class="relative min-w-0 flex-1">
+          <MagnifyingGlassIcon
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+          />
           <input
             v-model="searchQuery"
             type="text"
-                placeholder="Search by name, SKU..."
-          class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+            placeholder="Search by name, SKU…"
+            class="w-full rounded-xl border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
           />
         </div>
         <div class="flex items-center gap-2">
           <select
             v-model="sortBy"
+            class="min-w-[120px] flex-1 cursor-pointer rounded-xl border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
             @change="handleSortByChange"
-          class="flex-1 sm:flex-none px-4 py-2.5 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
           >
             <option value="name">Name</option>
             <option value="price">Unit price</option>
@@ -144,17 +156,19 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-        <Button variant="outline" @click="resetFilters" :icon="ArrowPathIcon" class="shrink-0" />
+          <Button variant="outline" class="shrink-0 !rounded-xl" :icon="ArrowPathIcon" @click="resetFilters" />
           <button
+            type="button"
+            class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2.5 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+            :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
             @click="isFullscreen = !isFullscreen"
-          class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0"
-            :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
           >
-          <ArrowsPointingOutIcon v-if="!isFullscreen" class="w-5 h-5" />
-          <XMarkIcon v-else class="w-5 h-5" />
+            <ArrowsPointingOutIcon v-if="!isFullscreen" class="h-5 w-5" />
+            <XMarkIcon v-else class="h-5 w-5" />
           </button>
         </div>
       </div>
+    </div>
 
     <!-- Enhanced Items Table -->
     <div
@@ -162,128 +176,157 @@
       :class="[
         'transition-all duration-300',
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
+          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:bg-gray-950'
           : 'relative'
       ]"
     >
       <!-- Fullscreen Header -->
-      <div v-if="isFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-4 py-3">
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ folder?.name || 'Inventory Products' }}</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {{ filteredItems.length }} products · {{ formatCurrency(totalInventoryValue) }} total value
-            </p>
+      <div
+        v-if="isFullscreen"
+        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:bg-gray-950/90 sm:px-6"
+      >
+        <div class="mx-auto flex max-w-[1600px] flex-col gap-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                Expanded view
+              </p>
+              <h2 class="mt-0.5 truncate text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl">
+                {{ folder?.name || 'Inventory Products' }}
+              </h2>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ filteredItems.length }} products · {{ formatCurrency(totalInventoryValue) }} total value
+              </p>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+              title="Exit expanded view"
+              @click="isFullscreen = false"
+            >
+              <XMarkIcon class="h-5 w-5" />
+            </button>
           </div>
-          <button
-            @click="isFullscreen = false"
-            class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Exit fullscreen"
-          >
-            <XMarkIcon class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="flex items-center gap-1.5 mt-3">
-          <div class="relative flex-1 max-w-xs">
-            <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search..."
-              class="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-            />
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative min-w-0 flex-1 sm:max-w-sm">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search..."
+                class="w-full rounded-xl border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              />
+            </div>
+            <select
+              v-model="sortBy"
+              class="min-w-[100px] cursor-pointer rounded-xl border border-gray-200/90 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              @change="handleSortByChange"
+            >
+              <option value="name">Name</option>
+              <option value="price">Unit price</option>
+              <option value="sku">SKU</option>
+              <option value="dateIn">Date In</option>
+              <option value="availability">Status</option>
+            </select>
+            <button
+              type="button"
+              class="rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+              title="Reset filters"
+              @click="resetFilters"
+            >
+              <ArrowPathIcon class="h-4 w-4" />
+            </button>
           </div>
-          <select
-            v-model="sortBy"
-            @change="handleSortByChange"
-            class="px-2.5 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
-          >
-            <option value="name">Name</option>
-            <option value="price">Unit price</option>
-            <option value="sku">SKU</option>
-            <option value="dateIn">Date In</option>
-            <option value="availability">Status</option>
-          </select>
-          <button
-            @click="resetFilters"
-            class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Reset filters"
-          >
-            <ArrowPathIcon class="w-4 h-4" />
-          </button>
         </div>
       </div>
 
       <div
         :class="[
-          isFullscreen ? 'shadow-none' : 'rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden',
-          !isFullscreen && 'border border-gray-200/50 dark:border-gray-700/50'
+          isFullscreen
+            ? 'shadow-none'
+            : 'overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35',
         ]"
       >
-        <!-- Desktop toolbar (stats + filters) -->
-        <div v-if="!isFullscreen" class="hidden lg:flex items-center justify-between gap-3 px-3 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1.5">
-              <CubeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Items:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder?.itemCount || 0 }}</span>
-              </div>
-            <div class="flex items-center gap-1.5">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Value:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalInventoryValue) }}</span>
-              </div>
-            </div>
-          <div class="flex items-center gap-1.5">
-              <div class="relative">
-              <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search..."
-                class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 w-40"
-                />
-              </div>
-              <select
-                v-model="sortBy"
-                @change="handleSortByChange"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
-              >
-                <option value="name">Name</option>
-                <option value="price">Unit price</option>
-                <option value="sku">SKU</option>
-                <option value="dateIn">Date In</option>
-                <option value="availability">Status</option>
-              </select>
-              <button
-                @click="resetFilters"
-              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-                title="Reset filters"
-              >
-                <ArrowPathIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="isFullscreen = !isFullscreen"
-              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-                :title="isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-              >
-                <ArrowsPointingOutIcon class="w-4 h-4" />
-              </button>
-            </div>
+        <!-- Desktop toolbar -->
+        <div
+          v-if="!isFullscreen"
+          class="hidden flex-col gap-3 border-b border-gray-100/90 px-3 py-3 dark:border-gray-800/80 lg:flex sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5"
+        >
+          <div class="min-w-0">
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Product list
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              {{ sortedFilteredItems.length }} shown · {{ formatCurrency(totalInventoryValue) }} total value
+            </p>
           </div>
-      <!-- Empty state: full width (no table); typography matches inventory folders index; use FAB to add items -->
+          <div class="flex flex-shrink-0 flex-wrap items-center gap-1.5">
+            <div class="relative">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search…"
+                class="w-40 rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
+              />
+            </div>
+            <select
+              v-model="sortBy"
+              class="min-w-[100px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              @change="handleSortByChange"
+            >
+              <option value="name">Name</option>
+              <option value="price">Unit price</option>
+              <option value="sku">SKU</option>
+              <option value="dateIn">Date In</option>
+              <option value="availability">Status</option>
+            </select>
+            <button
+              type="button"
+              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              title="Reset filters"
+              @click="resetFilters"
+            >
+              <ArrowPathIcon class="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
+              @click="isFullscreen = !isFullscreen"
+            >
+              <ArrowsPointingOutIcon class="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      <!-- Empty state inside table card -->
       <div
         v-if="sortedFilteredItems.length === 0"
-        class="rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden flex flex-col items-center justify-center py-10 px-4 text-center min-h-[200px]"
+        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200/90 bg-gradient-to-b from-gray-50/80 to-gray-50/20 px-5 py-14 text-center dark:border-gray-700/70 dark:from-gray-900/50 dark:to-gray-950/20 sm:mx-5 sm:px-8"
       >
-        <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-          <CubeIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div
+          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/60 dark:shadow-none"
+        >
+          <CubeIcon class="h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.35" />
         </div>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
+        <p
+          class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500"
+        >
+          {{ searchQuery ? 'No match' : 'Empty folder' }}
+        </p>
+        <h3 class="mt-2 max-w-md text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
           {{ searchQuery ? 'No products found' : 'No products in this folder' }}
         </h3>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
-          {{ searchQuery ? 'Try adjusting your search or filters' : 'Add products to start tracking inventory' }}
+        <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          {{
+            searchQuery
+              ? 'Try a different term or reset filters to see everything in this folder.'
+              : 'Use the + button to add your first product and start tracking inventory.'
+          }}
         </p>
       </div>
       <template v-else>
@@ -292,7 +335,7 @@
         <div
           v-for="item in paginatedItems"
           :key="item.id"
-          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm"
+          class="rounded-2xl border border-gray-200/80 bg-white/95 p-3.5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -313,7 +356,10 @@
                     {{ item.discountedPrice !== undefined ? formatCurrency(item.discountedPrice) : formatCurrency(item.price ?? item.originalPrice ?? 0) }}
                   </span>
                   <span
-                    :class="['inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium shrink-0', getItemAvailability(item).class]"
+                    :class="[
+                      'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide',
+                      getItemAvailability(item).class,
+                    ]"
                   >
                     {{ getItemAvailability(item).label }}
                   </span>
@@ -345,11 +391,19 @@
         </div>
       </div>
       <!-- Desktop: table when has items -->
-      <div class="hidden sm:block overflow-x-auto" :class="[isFullscreen ? 'p-6' : '']">
-        <table class="min-w-full">
-          <thead :class="[isFullscreen ? 'border-b border-gray-200 dark:border-gray-700' : 'bg-white/60 dark:bg-gray-800/60']">
+      <div
+        class="hidden overflow-x-auto sm:block"
+        :class="isFullscreen ? 'mx-auto max-w-[1600px] px-4 pb-6 pt-2 sm:px-6' : ''"
+      >
+        <table class="min-w-full border-separate border-spacing-0">
+          <thead
+            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-gray-900/90"
+          >
               <tr>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">
+              <th
+                v-if="canManageInventoryItems"
+                class="px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+              >
                 <Checkbox
                   :model-value="(() => {
                     const availableItems = filteredItems.filter(item => !isItemSold(item))
@@ -364,8 +418,8 @@
                 v-for="column in columns"
                 :key="column.key"
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
-                  column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
+                  column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
                 ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
@@ -384,18 +438,21 @@
                   </template>
                 </div>
               </th>
-              <th v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 w-12 sm:w-[4.5rem]">
+              <th
+                v-if="canManageInventoryItems"
+                class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+              >
                 Actions
               </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
+            <tbody class="bg-white dark:bg-gray-950/40">
               <tr
                 v-for="(item, index) in paginatedItems"
                 :key="item.id"
-                class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors"
+                class="border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
               >
-              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-center">
+              <td v-if="canManageInventoryItems" class="px-3 py-2.5 sm:px-4 text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -408,7 +465,7 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-3 sm:px-4 py-2 align-top"
+                class="px-3 py-2.5 sm:px-4 align-top"
               >
                 <!-- Inline edit mode (large screens only); click outside saves -->
                 <div
@@ -480,8 +537,10 @@
                       </span>
                     </div>
                     <div v-else-if="column.key === 'availability'" class="text-[10px]">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium"
-                        :class="getItemAvailability(item).class">
+                      <span
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide"
+                        :class="getItemAvailability(item).class"
+                      >
                         {{ getItemAvailability(item).label }}
                       </span>
                     </div>
@@ -504,7 +563,7 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-3 sm:px-4 py-2 text-right">
+              <td v-if="canManageInventoryItems" class="px-3 py-2.5 sm:px-4 text-right">
                 <div class="relative inline-flex justify-end" data-inventory-item-menu @click.stop>
                   <button
                     type="button"
@@ -549,13 +608,18 @@
     </div>
 
     <!-- Fullscreen mode: bottom bar -->
-    <div v-if="isFullscreen && sortedFilteredItems.length > 0" class="sticky bottom-0 rounded-none bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-1.5 z-10">
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="sortedFilteredItems.length"
-        @page-change="handlePageChange"
-      />
+    <div
+      v-if="isFullscreen && sortedFilteredItems.length > 0"
+      class="sticky bottom-0 z-10 border-t border-gray-200/90 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-950/95 sm:px-6"
+    >
+      <div class="mx-auto max-w-[1600px]">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="sortedFilteredItems.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- Hidden file input for import -->
@@ -1051,7 +1115,6 @@ import {
   PlusIcon,
   CubeIcon,
   FolderIcon,
-  CurrencyDollarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   MagnifyingGlassIcon,
@@ -1073,6 +1136,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
+import StatCard from '~/components/ui/StatCard.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -1696,16 +1760,29 @@ const getItemAvailability = (item: InventoryItem) => {
   )
   
   if (refundedReceipts.length > 0) {
-    return { status: 'returned', label: 'Returned', class: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300' }
+    return {
+      status: 'returned',
+      label: 'Returned',
+      class:
+        'ring-1 ring-inset ring-amber-500/25 bg-amber-500/10 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/30',
+    }
   }
-  
-  // Check if item has dateOut (was sold via receipt)
+
   if (isItemSold(item)) {
-      return { status: 'sold', label: 'Sold', class: 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' }
+    return {
+      status: 'sold',
+      label: 'Sold',
+      class:
+        'ring-1 ring-inset ring-orange-500/25 bg-orange-500/10 text-orange-900 dark:bg-orange-400/10 dark:text-orange-200 dark:ring-orange-400/30',
+    }
   }
-  
-  // Item is available (not sold, not returned)
-  return { status: 'available', label: 'Available', class: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' }
+
+  return {
+    status: 'available',
+    label: 'Available',
+    class:
+      'ring-1 ring-inset ring-emerald-500/25 bg-emerald-500/10 text-emerald-900 dark:bg-emerald-400/10 dark:text-emerald-200 dark:ring-emerald-400/30',
+  }
 }
 
 const filteredItems = computed(() => {

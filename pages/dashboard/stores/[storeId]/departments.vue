@@ -1,181 +1,204 @@
 <template>
-    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
+  <div class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1400px] flex-col space-y-2 pb-20 sm:space-y-2.5 sm:pb-16">
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-0" />
 
-    <div class="mb-3 sm:mb-4">
-      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-        Departments in {{ store?.name || 'Store' }}
-      </h1>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage departments and staff for this store</p>
-    </div>
-
-    <div
-      v-if="store"
-      class="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-gray-50 dark:bg-gray-800 px-2.5 py-1.5"
+    <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
+    <header
+      class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/90 px-3 py-2.5 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-4 sm:py-3"
     >
-      <div class="flex items-center gap-2 min-w-0">
-        <div class="w-6 h-6 rounded-lg bg-gray-50 dark:bg-gray-800 ring-1 ring-gray-200/70 dark:ring-gray-700/70 flex items-center justify-center flex-shrink-0">
-          <BuildingOfficeIcon class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400" />
-        </div>
+      <div
+        class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/12 via-primary-500/5 to-transparent blur-2xl dark:hidden"
+      />
+      <div
+        class="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-gradient-to-tr from-gray-200/35 to-transparent blur-2xl dark:hidden"
+      />
+      <div class="relative">
         <div class="min-w-0">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{{ store.name }}</span>
+          <p class="text-[8px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+            Store
+          </p>
+          <h1 class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
+            Departments in {{ store?.name || 'Store' }}
+          </h1>
+          <p class="mt-0.5 max-w-xl text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+            Manage departments and staff for this store — search and open cards below.
+          </p>
+          <div
+            v-if="store"
+            class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-600 dark:text-gray-400"
+          >
+            <span class="font-medium text-gray-800 dark:text-gray-200">{{ store.name }}</span>
             <span
               v-if="currentStore?.id === store.id"
-              class="px-2 py-0.5 text-[10px] font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex-shrink-0"
+              class="rounded-full bg-emerald-100/90 px-2 py-px text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/35 dark:text-emerald-300"
             >
               Current
             </span>
+            <span v-if="store.address" class="text-gray-500 dark:text-gray-500">· {{ store.address }}</span>
+            <span class="hidden text-gray-400 sm:inline">·</span>
+            <span v-if="storeDepartments.length" class="tabular-nums text-gray-500 dark:text-gray-500">{{ storeDepartments.length }} depts</span>
+            <span v-if="storeDepartments.length && totalStaffForStore" class="text-gray-400">·</span>
+            <span v-if="totalStaffForStore" class="tabular-nums text-gray-500 dark:text-gray-500">{{ totalStaffForStore }} staff</span>
           </div>
-          <p v-if="store.address" class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-            {{ store.address }}
-          </p>
         </div>
-      </div>
 
-      <div class="flex items-center gap-2 flex-wrap justify-end">
-        <div class="hidden sm:flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400">
-          <span v-if="storeDepartments.length">{{ storeDepartments.length }} depts</span>
-          <span v-if="storeDepartments.length && totalStaffForStore">·</span>
-          <span v-if="totalStaffForStore">{{ totalStaffForStore }} staff</span>
-        </div>
-        <div class="relative w-full sm:w-64">
-          <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search departments..."
-            class="w-full pl-8 pr-9 py-1.5 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/70 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-          />
-          <button
-            v-if="searchQuery"
-            type="button"
-            @click="searchQuery = ''"
-            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
-            title="Clear search"
-            aria-label="Clear search"
-          >
-            <span class="text-xs leading-none">×</span>
-          </button>
-        </div>
-        <button
-          @click="resetFilters"
-          class="hidden sm:inline-flex p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
-          title="Reset filters"
-          aria-label="Reset filters"
+        <div
+          v-if="store && !departmentsStore.loading && !storesLoading"
+          class="mt-2 flex flex-col gap-2 border-t border-gray-100/90 pt-2 dark:border-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
         >
-          <ArrowPathIcon class="w-4 h-4" />
-        </button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-1.5 lg:hidden mb-4">
-      <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-2.5">
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Departments</p>
-            <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100 tabular-nums">{{ storeDepartments.length }}</p>
+          <div class="relative min-w-0 flex-1 sm:min-w-[200px] sm:max-w-md">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search departments…"
+              class="w-full rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+            />
+            <button
+              v-if="searchQuery"
+              type="button"
+              class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              title="Clear search"
+              aria-label="Clear search"
+              @click="searchQuery = ''"
+            >
+              <span class="text-sm leading-none">×</span>
+            </button>
           </div>
-          <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-            <BuildingOfficeIcon class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+          <div class="flex flex-wrap items-center gap-1.5 sm:shrink-0">
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-lg border border-gray-200/90 bg-white p-1.5 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+              title="Reset filters"
+              aria-label="Reset filters"
+              @click="resetFilters"
+            >
+              <ArrowPathIcon class="h-4 w-4" />
+            </button>
+            <span
+              class="hidden items-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 sm:inline-flex"
+            >
+              {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
+            </span>
+          </div>
+
+          <div
+            v-if="canManageDepartments && paginatedDepartments.length > 0"
+            class="flex flex-wrap items-center gap-2 sm:ml-auto sm:border-l sm:border-gray-200/80 sm:pl-3 dark:sm:border-gray-700/80"
+          >
+            <Checkbox
+              :model-value="allDepartmentsOnPageSelected"
+              size="sm"
+              wrapper-class="justify-center"
+              label-class="!text-xs !ml-2 !font-normal text-gray-500 dark:text-gray-500"
+              @update:model-value="setSelectAllDepartmentsBulk"
+            >
+              {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
+            </Checkbox>
+            <template v-if="selectedDepartmentsForBulk.length > 0">
+              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ selectedDepartmentsForBulk.length }} selected</span>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                class="!rounded-lg !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+                @click="openBulkDeleteDepartmentsModal"
+              >
+                Delete
+              </Button>
+            </template>
           </div>
         </div>
       </div>
-      <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-2.5">
+    </header>
+
+    <!-- Mobile stats (compact, same surface language as folder cards) -->
+    <div v-if="store" class="grid grid-cols-2 gap-1.5 lg:hidden">
+      <div
+        class="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-2 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
-            <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Total staff</p>
-            <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100 tabular-nums">{{ totalStaffForStore }}</p>
+            <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Departments</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+              {{ storeDepartments.length }}
+            </p>
           </div>
-          <div class="w-7 h-7 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-            <UsersIcon class="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+          <BuildingOfficeIcon class="h-6 w-6 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
+        </div>
+      </div>
+      <div
+        class="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-2 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total staff</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+              {{ totalStaffForStore }}
+            </p>
           </div>
+          <UsersIcon class="h-6 w-6 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
         </div>
       </div>
     </div>
 
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
-      class="rounded-lg bg-gray-50 dark:bg-gray-800 py-6 px-4 text-center"
+      class="rounded-xl border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
     >
-      <div class="w-11 h-11 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-3">
-        <BuildingOfficeIcon class="w-5 h-5 text-red-600 dark:text-red-400" />
+      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30">
+        <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
-      <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1.5">Error loading departments</h3>
-      <p class="text-xs text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">{{ departmentsStore.error }}</p>
+      <h3 class="mb-1.5 text-base font-semibold text-gray-900 dark:text-gray-100">Error loading departments</h3>
+      <p class="mx-auto mb-4 max-w-md text-xs text-gray-600 dark:text-gray-400">{{ departmentsStore.error }}</p>
       <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch">Retry</Button>
     </div>
 
-    <template v-else-if="departmentsStore.loading || storesLoading">
-      <div class="rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden min-h-[200px]">
-        <div class="p-3 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex flex-wrap gap-2 mb-2">
-            <div class="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse"></div>
-            <div class="h-8 w-40 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-          </div>
-        </div>
-        <div class="p-3">
-          <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5 min-h-[120px]">
-            <div
-              v-for="i in 8"
-              :key="i"
-              class="flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 pt-2.5 pb-2 px-2.5 animate-pulse"
-            >
-              <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700 shrink-0 mb-1.5" />
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-1" />
-              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-14" />
-            </div>
-          </div>
-        </div>
+    <div
+      v-else-if="departmentsStore.loading || storesLoading"
+      class="grid min-h-[96px] grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+    >
+      <div
+        v-for="i in 14"
+        :key="i"
+        class="group relative flex flex-col items-center overflow-hidden rounded-xl border border-gray-200/60 bg-gradient-to-b from-gray-50 to-white px-2 pb-2 pt-2 dark:border-gray-800/60 dark:from-gray-900/40 dark:to-gray-950/30 animate-pulse"
+      >
+        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-md bg-gray-200/80 dark:bg-gray-700/80" />
+        <div class="mb-1.5 mt-3 h-9 w-9 rounded-lg bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10" />
+        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-gray-700" />
       </div>
-    </template>
+    </div>
 
-    <div v-else-if="!departmentsStore.error" class="space-y-6">
-      <div v-if="canManageDepartments && paginatedDepartments.length > 0" class="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          class="!rounded-lg"
-          @click="toggleSelectAllDepartments"
-        >
-          {{ allDepartmentsOnPageSelected ? 'Deselect all' : 'Select all' }}
-        </Button>
-        <template v-if="selectedDepartmentsForBulk.length > 0">
-          <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedDepartmentsForBulk.length }} selected</span>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
-            @click="openBulkDeleteDepartmentsModal"
-          >
-            Delete ({{ selectedDepartmentsForBulk.length }})
-          </Button>
-        </template>
-      </div>
+    <div v-else-if="!departmentsStore.error">
       <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5"
+        class="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
       >
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex flex-col items-stretch rounded-lg bg-gray-50/80 dark:bg-gray-800/30 transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-700/40 active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px]"
+          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 shadow-sm transition-all duration-200 active:scale-[0.99] dark:border-gray-800/70 dark:from-gray-900/45 dark:to-gray-950/40 dark:shadow-none sm:min-h-[112px] hover:-translate-y-px hover:border-primary-300/40 hover:shadow-md hover:shadow-gray-900/[0.05] dark:hover:border-primary-500/25 dark:hover:shadow-black/20"
           :class="{
             'opacity-60 cursor-not-allowed': department.isActive === false,
             'pointer-events-none': deletingDepartmentId === department.id
           }"
           @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
         >
-          <!-- Deleting overlay -->
+          <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:via-primary-500/30"
+          />
           <div
             v-if="deletingDepartmentId === department.id"
-            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-lg bg-gray-900/60 dark:bg-gray-950/70 backdrop-blur-[2px]"
+            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl bg-gray-900/60 backdrop-blur-[2px] dark:bg-gray-950/70"
           >
-            <ArrowPathIcon class="w-6 h-6 animate-spin text-white mb-1" aria-hidden="true" />
+            <ArrowPathIcon class="mb-1 h-6 w-6 animate-spin text-white" aria-hidden="true" />
             <span class="text-[11px] font-medium text-white">Deleting...</span>
           </div>
-          <!-- Checkbox top-left -->
-          <div v-if="canManageDepartments" class="absolute left-2 top-2 z-10" @click.stop>
+          <div v-if="canManageDepartments" class="absolute left-1.5 top-1.5 z-10" @click.stop>
             <Checkbox
               :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
               @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
@@ -184,49 +207,49 @@
             />
           </div>
 
-          <!-- Ellipsis menu top-right (menu panel teleported to body) -->
           <div
             v-if="canManageDepartments"
-            class="absolute right-1.5 top-1.5 z-20"
+            class="absolute right-1 top-1 z-20"
             data-department-menu
             @click.stop
           >
             <button
               type="button"
               :data-department-actions-anchor="department.id"
-              @click="toggleDepartmentMenu(department.id)"
-              class="p-1 rounded-lg text-gray-300 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-700/50 transition-colors"
+              class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
               aria-label="Department options"
+              @click="toggleDepartmentMenu(department.id)"
             >
-              <EllipsisVerticalIcon class="w-4 h-4" />
+              <EllipsisVerticalIcon class="h-3.5 w-3.5" />
             </button>
           </div>
 
           <div
-            class="flex flex-1 flex-col items-center justify-between w-full px-2.5 pb-2.5 text-center"
-            :class="canManageDepartments ? 'pt-8' : 'pt-3.5'"
+            class="flex w-full flex-1 flex-col items-center justify-between px-2 pb-2 pt-1 text-center"
+            :class="canManageDepartments ? 'pt-7' : 'pt-3'"
           >
-            <!-- Folder icon only — matches Inventory → Folders (no colored tile behind icon) -->
-            <div class="flex flex-1 flex-col items-center justify-center w-full min-h-[44px] sm:min-h-[48px] mb-1">
+            <div class="mb-1 flex min-h-[48px] w-full flex-1 flex-col items-center justify-center sm:min-h-[52px]">
               <BuildingOfficeIcon
-                class="w-10 h-10 sm:w-11 sm:h-11 shrink-0 text-gray-300 dark:text-gray-500"
+                class="h-9 w-9 shrink-0 text-gray-400 transition-colors group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400 sm:h-10 sm:w-10"
                 stroke-width="1.25"
               />
             </div>
 
-            <div class="w-full min-w-0 mt-auto">
+            <div class="mt-auto w-full min-w-0">
               <h3
-                class="text-xs font-medium text-gray-400 dark:text-gray-500 text-center truncate max-w-full px-0.5 leading-tight"
+                class="max-w-full truncate px-0.5 text-center text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100"
                 :title="department.name"
               >
                 {{ department.name }}
               </h3>
-              <p class="mt-0.5 text-[11px] font-normal text-gray-300 dark:text-gray-600 text-center tabular-nums">
+              <p
+                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/60 dark:text-gray-400"
+              >
                 {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
               </p>
               <span
                 v-if="department.isActive === false"
-                class="mt-1 inline-block text-[9px] font-medium text-gray-400 dark:text-gray-500"
+                class="mt-1 inline-block text-[9px] font-medium text-amber-700 dark:text-amber-400/90"
               >
                 Inactive
               </span>
@@ -237,29 +260,38 @@
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
+        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-4 py-10 text-center dark:border-gray-800/70 dark:from-gray-900/40 dark:to-gray-950/50 sm:min-h-[min(50vh,24rem)] sm:px-6"
       >
-        <BuildingOfficeIcon class="w-12 h-12 shrink-0 mb-3 text-gray-300 dark:text-gray-500" stroke-width="1.25" />
-        <h2 class="text-sm font-medium text-gray-400 dark:text-gray-500 break-words max-w-full">
-          {{ searchQuery ? 'No departments found' : 'No departments yet' }}
-        </h2>
-        <p class="mt-0.5 text-xs text-gray-300 dark:text-gray-600 max-w-sm mx-auto break-words">
-          {{ searchQuery ? 'Try a different search.' : 'Create a department for this store.' }}
-        </p>
+        <div
+          class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/12 via-transparent to-gray-200/15 blur-3xl dark:from-primary-500/10 dark:to-gray-600/10"
+        />
+        <div class="relative z-10">
+          <div class="mx-auto mb-3 flex items-center justify-center">
+            <BuildingOfficeIcon class="h-10 w-10 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
+          </div>
+          <h2 class="max-w-md break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            {{ searchQuery ? 'No departments found' : 'No departments yet' }}
+          </h2>
+          <p class="mx-auto mt-1.5 max-w-sm break-words text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+            {{ searchQuery ? 'Try a different search.' : 'Create a department for this store.' }}
+          </p>
+        </div>
       </div>
     </div>
 
     <div
       v-if="filteredDepartments.length > 0"
-      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom"
+      class="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200/80 bg-white/95 backdrop-blur-md transition-[left] duration-300 dark:border-gray-800/80 dark:bg-gray-950/90 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="filteredDepartments.length"
-        @page-change="handlePageChange"
-      />
+      <div class="mx-auto max-w-[1400px] rounded-none px-3 py-1.5 sm:px-5">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="filteredDepartments.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- Bulk Delete Departments Modal -->
@@ -366,6 +398,7 @@
       </button>
     </div>
   </DraggableFabContainer>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -824,6 +857,15 @@ const toggleSelectAllDepartments = () => {
     selectedDepartmentsForBulk.value = []
   } else {
     selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
+  }
+}
+
+/** Checkbox "Select all" in header (Inventory Folders pattern) */
+const setSelectAllDepartmentsBulk = (checked: boolean) => {
+  if (checked) {
+    selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
+  } else {
+    selectedDepartmentsForBulk.value = []
   }
 }
 const openBulkDeleteDepartmentsModal = () => {

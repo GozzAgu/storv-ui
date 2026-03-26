@@ -1,54 +1,50 @@
 <template>
-  <div class="pb-8 min-h-screen w-full overflow-x-hidden">
-    <div class="mb-4 sm:mb-6">
-      <h1 class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 tracking-tight">Multi-Store Sync</h1>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Transfer items between stores and view consolidated reports</p>
-    </div>
+  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+    <!-- Hero -->
+    <header
+      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+    >
+      <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+        Enterprise
+      </p>
+      <h1
+        class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+      >
+        Multi-Store Sync
+      </h1>
+      <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+        Transfer items between stores and view consolidated reports
+      </p>
+    </header>
 
     <div
       v-if="!canAccess"
-      class="rounded-xl bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/60 dark:ring-amber-800/50 p-3 sm:p-4 flex items-center gap-3"
+      class="rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-4 shadow-sm dark:border-amber-800/50 dark:bg-amber-950/25 sm:px-5 sm:py-5"
     >
-      <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
-        <ExclamationTriangleIcon class="w-4 h-4 text-amber-600 dark:text-amber-400" />
-      </div>
+      <div class="flex items-start gap-3">
+        <div
+          class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 ring-1 ring-amber-200/80 dark:bg-amber-900/40 dark:ring-amber-800/50"
+        >
+          <ExclamationTriangleIcon class="h-5 w-5 text-amber-600 dark:text-amber-400" />
+        </div>
         <div>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
-        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
-          {{ isStaff ? 'Only super admins can access multi-store sync.' : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.' }}
-        </p>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
+          <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+            {{ isStaff ? 'Only super admins can access multi-store sync.' : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.' }}
+          </p>
         </div>
       </div>
+    </div>
 
     <template v-else>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total stores</p>
-              <p class="mt-0.5 text-base font-bold text-gray-900 dark:text-gray-100">{{ stores.length }}</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <BuildingStorefrontIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-        </div>
-        <div class="rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total transfers</p>
-              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ transferHistory.length }}</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <ArrowPathIcon class="w-4 h-4 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:max-w-3xl lg:grid-cols-2">
+        <StatCard label="Total stores" :value="stores.length.toString()" subtext="Connected branches" />
+        <StatCard label="Total transfers" :value="transferHistory.length.toString()" subtext="All time" />
       </div>
 
-      <!-- Tabs: minimal underline (matches Sales / Receipts page) -->
+      <!-- Tabs -->
       <nav
-        class="mt-1 flex flex-wrap gap-8 border-b border-gray-200 dark:border-gray-800"
+        class="flex flex-wrap gap-8 border-b border-gray-200/80 dark:border-gray-800"
         aria-label="Multi-store sync views"
       >
         <button
@@ -110,12 +106,22 @@
         </button>
       </nav>
 
-      <div v-if="activeTab === 'transfer'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move stock between branches</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Request a transfer → Approve → In transit (add tracking) → Complete to update stock</p>
+      <Card
+        v-if="activeTab === 'transfer'"
+        padding="none"
+        extra-class="!p-0 mt-1 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:mt-2"
+      >
+        <div
+          class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
+        >
+          <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+            Move stock between branches
+          </h2>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+            Request a transfer → Approve → In transit (add tracking) → Complete to update stock
+          </p>
         </div>
-        <div class="p-3 sm:p-4 space-y-4">
+        <div class="space-y-4 p-3 sm:p-4">
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Source store</label>
             <select
@@ -231,15 +237,28 @@
               {{ isTransferring ? 'Creating...' : 'Request transfer' }}
             </Button>
           </div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Transfer will be created as pending. Approve → mark in transit → add tracking (optional) → complete to update stock.</p>
+          <p class="mt-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+            Transfer will be created as pending. Approve → mark in transit → add tracking (optional) → complete to update stock.
+          </p>
         </div>
-      </div>
+      </Card>
 
-      <div v-if="activeTab === 'reports'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Consolidated reports</h2>
+      <Card
+        v-if="activeTab === 'reports'"
+        padding="none"
+        extra-class="!p-0 mt-1 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:mt-2"
+      >
+        <div
+          class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
+        >
+          <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+            Consolidated reports
+          </h2>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+            Revenue and sales across selected stores and date range
+          </p>
         </div>
-        <div class="p-3 sm:p-4 space-y-4">
+        <div class="space-y-4 p-3 sm:p-4">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Date range</label>
@@ -279,28 +298,38 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total revenue</p>
-              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.totalRevenue) }}</p>
-            </div>
-            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total sales</p>
-              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalSales }}</p>
-            </div>
-            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Total items</p>
-              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ consolidatedReport.totalItems }}</p>
-            </div>
-            <div class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-3">
-              <p class="text-xs font-medium text-gray-500 dark:text-gray-400">Avg order value</p>
-              <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-gray-100">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</p>
-            </div>
+          <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+            <StatCard
+              label="Total revenue"
+              :value="formatCurrency(consolidatedReport.totalRevenue)"
+              subtext="In range"
+            />
+            <StatCard
+              label="Total sales"
+              :value="String(consolidatedReport.totalSales)"
+              subtext="Orders"
+            />
+            <StatCard
+              label="Total items"
+              :value="String(consolidatedReport.totalItems)"
+              subtext="Units sold"
+            />
+            <StatCard
+              label="Avg order value"
+              :value="formatCurrency(consolidatedReport.avgOrderValue)"
+              subtext="Per order"
+            />
           </div>
 
           <div>
-            <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-2">Store breakdown</h3>
-            <div class="rounded-lg ring-1 ring-gray-200/80 dark:ring-gray-700/80 overflow-hidden">
+            <h3
+              class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+            >
+              Store breakdown
+            </h3>
+            <div
+              class="overflow-hidden rounded-xl border border-gray-200/80 dark:border-gray-800/70"
+            >
               <table class="w-full text-xs">
                 <thead class="bg-white/60 dark:bg-gray-800/60">
                   <tr>
@@ -322,27 +351,41 @@
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div v-if="activeTab === 'history'" class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 ring-1 ring-gray-200/50 dark:ring-gray-700/50 overflow-hidden">
-        <div class="p-3 sm:p-4 border-b border-gray-200/60 dark:border-gray-700/60">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Transfer history</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Branch-to-branch transfers with approval and tracking</p>
-          </div>
-        <div class="p-3 sm:p-4">
-          <div v-if="transferHistory.length === 0" class="text-center py-8">
-            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <ArrowsRightLeftIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
-            </div>
-            <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-0.5">No transfer history</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Create a transfer from the Transfer Items tab</p>
+      <Card
+        v-if="activeTab === 'history'"
+        padding="none"
+        extra-class="!p-0 mt-1 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:mt-2"
+      >
+        <div
+          class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
+        >
+          <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+            Transfer history
+          </h2>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+            Branch-to-branch transfers with approval and tracking
+          </p>
         </div>
+        <div class="p-3 sm:p-4">
+          <div v-if="transferHistory.length === 0" class="py-10 text-center">
+            <div
+              class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+            >
+              <ArrowsRightLeftIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
+            </div>
+            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No transfer history</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Create a transfer from the Transfer Items tab
+            </p>
+          </div>
 
           <div v-else class="space-y-3">
-          <div
-            v-for="transfer in transferHistory"
-            :key="transfer.id"
-              class="rounded-lg bg-white dark:bg-gray-800/60 ring-1 ring-gray-200/60 dark:ring-gray-700/60 p-3 sm:p-4 hover:ring-gray-300 dark:hover:ring-gray-600/80 transition-colors"
+            <div
+              v-for="transfer in transferHistory"
+              :key="transfer.id"
+              class="rounded-xl border border-gray-200/80 bg-white/90 p-3 shadow-sm transition-colors hover:border-gray-300/90 dark:border-gray-800/70 dark:bg-gray-900/25 dark:hover:border-gray-600/80 sm:p-4"
             >
               <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div class="flex-1 min-w-0">
@@ -400,7 +443,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </Card>
 
       <!-- Tracking modal -->
       <Modal
@@ -440,16 +483,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import {
-  BuildingStorefrontIcon,
-  ArrowPathIcon,
-  CubeIcon,
   ArrowsRightLeftIcon,
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
   TruckIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
+import Card from '~/components/ui/Card.vue'
 import Modal from '~/components/ui/Modal.vue'
+import StatCard from '~/components/ui/StatCard.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'

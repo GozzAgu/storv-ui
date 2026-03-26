@@ -1,110 +1,140 @@
 <template>
-  <div class="pb-24 sm:pb-20 flex flex-col min-h-[calc(100svh-4rem)]">
-    <!-- Hero header (duplicate upsell inline beside title — Micro plan) -->
-    <div class="mb-3 sm:mb-4">
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <h1 class="text-base sm:text-lg font-bold text-gray-700 dark:text-gray-300 tracking-tight">Folders</h1>
-        <DuplicateFeatureUpsellBanner
-          :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
-        />
-      </div>
-      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">Organize products into folders and manage stock in one place</p>
-    </div>
-
-    <!-- Toolbar: search + filters (single bar, modern) -->
-    <div
-      v-if="!inventoryStore.loading"
-      class="flex flex-col sm:flex-row gap-1.5 sm:gap-2 mb-3"
+  <div
+    class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1400px] flex-col space-y-5 pb-20 sm:space-y-6 sm:pb-16"
+  >
+    <!-- Hero + filters -->
+    <header
+      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
     >
-      <div class="relative flex-1 min-w-0">
-        <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
+      <div class="relative">
+        <div class="flex flex-wrap items-start justify-between gap-2 gap-y-1">
+          <div class="min-w-0 flex-1">
+            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+              Inventory
+            </p>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+              <h1
+                class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+              >
+                Folders
+              </h1>
+              <DuplicateFeatureUpsellBanner
+                :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
+              />
+            </div>
+            <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              Search, filter, and open folders — a calm grid built for speed.
+            </p>
+          </div>
+        </div>
+
+        <!-- Filters + select-all -->
+        <div
+          v-if="!inventoryStore.loading"
+          class="mt-4 flex flex-col gap-2.5 border-t border-gray-100/90 pt-4 dark:border-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
+        >
+          <div class="relative min-w-0 flex-1 sm:min-w-[200px] sm:max-w-md">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search folders..."
-          class="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:bg-white dark:focus:bg-gray-800 transition-colors"
+              placeholder="Search folders…"
+              class="w-full rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
           </div>
-      <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5">
-          <select
-            v-model="selectedDepartmentId"
-          class="px-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[120px]"
+          <div class="flex flex-wrap items-center gap-1.5 sm:flex-nowrap sm:shrink-0">
+            <select
+              v-model="selectedDepartmentId"
+              class="min-w-[108px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="">All departments</option>
+              <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+                {{ dept.name }}
+              </option>
+            </select>
+            <select
+              v-model="sortBy"
+              class="min-w-[96px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="name">Name</option>
+              <option value="items">Products</option>
+              <option value="date">Date</option>
+            </select>
+            <span
+              class="hidden items-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 sm:inline-flex"
+            >
+              {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
+            </span>
+          </div>
+
+          <!-- Select all: same row on sm+ -->
+          <div
+            v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
+            class="flex flex-wrap items-center gap-2 sm:ml-auto sm:border-l sm:border-gray-200/80 sm:pl-3 dark:sm:border-gray-700/80"
           >
-          <option value="">All departments</option>
-            <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
-              {{ dept.name }}
-            </option>
-          </select>
-          <select
-            v-model="sortBy"
-          class="px-3 py-2 text-xs rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-w-[100px]"
-          >
-            <option value="name">Name</option>
-          <option value="items">Products</option>
-            <option value="date">Date</option>
-          </select>
-        <span class="hidden sm:inline text-xs text-gray-400 dark:text-gray-500 ml-1">
-          {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
-        </span>
+            <Checkbox
+              :model-value="allFoldersOnPageSelected"
+              @update:model-value="toggleSelectAllFolders"
+              size="sm"
+              wrapper-class="justify-center"
+              label-class="!text-xs !ml-2 !font-normal text-gray-500 dark:text-gray-500"
+            >
+              {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
+            </Checkbox>
+            <template v-if="selectedFoldersForBulk.length > 0">
+              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ selectedFoldersForBulk.length }} selected</span>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                class="!rounded-lg !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+                @click="openBulkDeleteFoldersModal"
+              >
+                Delete
+              </Button>
+            </template>
+          </div>
         </div>
       </div>
+    </header>
 
     <!-- Content area: show only one of skeleton, folders, or empty -->
-    <!-- Loading skeleton (only while folders are fetching AND we have none yet) -->
+    <!-- Loading skeleton -->
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-1.5 sm:gap-2 min-h-[120px]"
+      class="grid min-h-[96px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center rounded-lg bg-gray-50 dark:bg-gray-800 pt-2.5 pb-2 px-2.5 overflow-visible animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 px-2 pb-2 pt-2 shadow-sm dark:border-gray-800/60 dark:bg-gray-900/35 animate-pulse"
       >
-        <div class="absolute left-1.5 top-1.5 w-4 h-4 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="absolute right-1 top-1 w-5 h-5 rounded-md bg-gray-200/70 dark:bg-gray-700/70" />
-        <div class="mb-1.5 w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-700" />
-        <div class="h-3 rounded bg-gray-200 dark:bg-gray-700 w-16 mb-1" />
-        <div class="h-2 rounded bg-gray-200 dark:bg-gray-700 w-24" />
+        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-md bg-gray-200/80 dark:bg-gray-700/80" />
+        <div class="mb-1.5 mt-3 h-9 w-9 rounded-xl bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10" />
+        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-gray-700" />
       </div>
     </div>
 
-    <!-- Select all + Bulk actions (folders) -->
-    <div v-if="canCreateInventoryFolders && paginatedFolders.length > 0" class="flex flex-wrap items-center gap-2 mb-3">
-      <Checkbox
-        :model-value="allFoldersOnPageSelected"
-        @update:model-value="toggleSelectAllFolders"
-        size="sm"
-        wrapper-class="justify-center"
-        label-class="!text-xs !ml-2 !font-normal text-gray-500 dark:text-gray-500"
-      >
-        {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
-      </Checkbox>
-      <template v-if="selectedFoldersForBulk.length > 0">
-        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ selectedFoldersForBulk.length }} selected</span>
-        <Button
-          variant="outline"
-          size="sm"
-          :icon="TrashIcon"
-          class="!rounded-lg !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
-          @click="openBulkDeleteFoldersModal"
-        >
-          Delete
-        </Button>
-      </template>
-    </div>
-    <!-- Folders grid (card style: large folder icon, title, count — reference: file-manager folder tiles) -->
+    <!-- Folders grid -->
     <div
       v-if="paginatedFolders.length > 0"
-      class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-2 sm:gap-2.5"
+      class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex flex-col items-stretch rounded-lg bg-gray-50/80 dark:bg-gray-800/30 transition-all duration-200 hover:bg-gray-100/90 dark:hover:bg-gray-700/40 active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px]"
+        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-2xl border border-gray-200/80 bg-white/95 shadow-sm transition-all duration-300 active:scale-[0.99] dark:border-gray-800/70 dark:bg-gray-900/40 dark:shadow-none sm:min-h-[118px] hover:-translate-y-0.5 hover:border-primary-400/35 hover:shadow-lg hover:shadow-gray-900/[0.06] dark:hover:border-primary-500/30 dark:hover:shadow-black/25"
         @click="navigateToFolder(folder.id)"
       >
-        <!-- Checkbox top-left -->
-        <div v-if="canCreateInventoryFolders" class="absolute left-2 top-2 z-10" @click.stop>
+        <div
+          class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:via-primary-400/35"
+        />
+        <!-- Checkbox -->
+        <div v-if="canCreateInventoryFolders" class="absolute left-1.5 top-1.5 z-10" @click.stop>
           <Checkbox
             :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
             @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
@@ -113,10 +143,10 @@
           />
         </div>
 
-        <!-- Ellipsis menu top-right -->
+        <!-- Menu -->
         <div
           v-if="canCreateInventoryFolders"
-          class="absolute right-1.5 top-1.5 z-20"
+          class="absolute right-1 top-1 z-20"
           data-inventory-folder-menu
           @click.stop
         >
@@ -124,55 +154,64 @@
             type="button"
             :data-folder-actions-anchor="folder.id"
             @click="toggleFolderMenu(folder.id)"
-            class="p-1 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100/90 dark:hover:bg-gray-700/80 transition-colors"
+            class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
             aria-label="Folder options"
           >
-            <EllipsisVerticalIcon class="w-4 h-4" />
+            <EllipsisVerticalIcon class="h-3.5 w-3.5" />
           </button>
         </div>
 
         <div
-          class="flex flex-1 flex-col items-center justify-between w-full px-2.5 pb-2.5 text-center"
-          :class="canCreateInventoryFolders ? 'pt-8' : 'pt-3.5'"
+          class="flex w-full flex-1 flex-col items-center justify-between px-2 pb-2 pt-1 text-center"
+          :class="canCreateInventoryFolders ? 'pt-7' : 'pt-3'"
         >
-          <!-- Folder icon (compact) -->
-          <div class="flex flex-1 flex-col items-center justify-center w-full min-h-[44px] sm:min-h-[48px] mb-1">
-            <FolderIcon
-              class="w-10 h-10 sm:w-11 sm:h-11 text-slate-400 dark:text-slate-400 shrink-0"
-              stroke-width="1.25"
-            />
+          <div class="mb-1 flex min-h-[48px] w-full flex-1 flex-col items-center justify-center sm:min-h-[52px]">
+            <div
+              class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100/90 ring-1 ring-gray-200/80 transition-colors group-hover:bg-primary-50 group-hover:ring-primary-200/40 dark:bg-gray-800/80 dark:ring-gray-700/60 dark:group-hover:bg-primary-950/40 dark:group-hover:ring-primary-800/40 sm:h-12 sm:w-12"
+            >
+              <FolderIcon
+                class="h-6 w-6 shrink-0 text-gray-500 transition-colors group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-400 sm:h-7 sm:w-7"
+                stroke-width="1.25"
+              />
+            </div>
           </div>
 
-          <div class="w-full min-w-0 mt-auto">
+          <div class="mt-auto w-full min-w-0">
             <h3
-              class="text-xs font-semibold text-gray-700 dark:text-gray-300 text-center truncate max-w-full px-0.5 leading-tight"
+              class="max-w-full truncate px-0.5 text-center text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
               :title="folder.name"
             >
               {{ folder.name }}
             </h3>
-            <p class="mt-0.5 text-[11px] font-normal text-gray-400 dark:text-gray-500 text-center">
-              {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'Product' : 'Products' }}
+            <p
+              class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[9px] font-semibold tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-300"
+            >
+              {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'product' : 'products' }}
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty state: NOT while loading (v-else on the grid matched paginatedFolders===0 and showed alongside skeleton) -->
+    <!-- Empty state -->
     <div
       v-if="!inventoryStore.loading && paginatedFolders.length === 0"
-      class="flex-1 rounded-lg bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
+      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-14 text-center shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:min-h-[min(48vh,22rem)] sm:px-6"
     >
-      <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-primary-500/10 dark:bg-primary-500/20 flex items-center justify-center mb-3">
-        <FolderIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" stroke-width="1.5" />
+      <div class="relative z-10">
+        <div
+          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+        >
+          <FolderIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
+        </div>
+        <h2 class="max-w-md break-words text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+          {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
+        </h2>
+        <p class="mx-auto mt-2 max-w-sm break-words text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
+        </p>
       </div>
-      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 break-words max-w-full">
-        {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
-      </h2>
-      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500 max-w-sm mx-auto break-words">
-        {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
-      </p>
-      <div v-if="selectedDepartmentId" class="mt-4 flex flex-wrap items-center justify-center gap-2">
+      <div v-if="selectedDepartmentId" class="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -184,13 +223,13 @@
       </div>
     </div>
 
-    <!-- Pagination bar -->
+    <!-- Pagination -->
     <div
       v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 z-30 safe-area-inset-bottom transition-[left] duration-300"
+      class="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200/80 bg-white/95 backdrop-blur-md transition-[left] duration-300 dark:border-gray-800/80 dark:bg-gray-950/90 safe-area-inset-bottom"
       :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
     >
-      <div class="px-4 sm:px-6 py-1.5 rounded-none">
+      <div class="mx-auto max-w-[1400px] rounded-none px-3 py-1.5 sm:px-5">
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"

@@ -1,12 +1,8 @@
 <template>
-  <div class="min-h-screen relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-primary-50/30 dark:from-gray-950 dark:via-gray-900 dark:to-primary-950/30 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute inset-0 opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px); background-size: 48px 48px;"></div>
-      <div class="absolute -top-32 -right-32 w-80 h-80 bg-primary-400/25 dark:bg-primary-500/20 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-32 -left-32 w-80 h-80 bg-primary-300/20 dark:bg-primary-500/15 rounded-full blur-3xl"></div>
-    </div>
-
-    <div class="max-w-[360px] w-full relative z-10">
+  <div
+    class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8 dark:bg-slate-950 sm:px-6 sm:py-10 lg:px-8"
+  >
+    <div class="w-full max-w-[360px]">
       <div class="text-center mb-6">
         <NuxtLink to="/" class="inline-block mb-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 rounded-lg">
           <img
@@ -23,7 +19,9 @@
         </p>
       </div>
 
-      <div class="rounded-xl bg-white dark:bg-gray-800/90 shadow-xl shadow-gray-200/50 dark:shadow-none ring-1 ring-gray-200/60 dark:ring-gray-700/60 overflow-hidden">
+      <div
+        class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+      >
         <div class="p-4 sm:p-5">
           <form @submit.prevent="handleSignIn" class="space-y-4">
             <div class="space-y-1.5">
@@ -36,7 +34,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                 placeholder="Enter your email"
               />
             </div>
@@ -60,7 +58,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
                   required
-                  class="w-full px-3 py-2 pr-10 rounded-lg bg-gray-50 dark:bg-gray-800/80 border-0 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-xs focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 outline-none transition-shadow"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                   placeholder="Enter your password"
                 />
                 <button
@@ -117,7 +115,7 @@
             </Button>
           </form>
 
-          <p class="mt-5 pt-4 border-t border-gray-200/80 dark:border-gray-700/80 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
             Don't have an account?
             <NuxtLink
               to="/signup"
@@ -137,6 +135,7 @@ import { ref, computed } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
+import { useTheme } from '~/composables/useTheme'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
@@ -146,9 +145,10 @@ definePageMeta({
   middleware: 'guest'
 })
 
-useForceLightPage()
-
-const logoSource = computed(() => '/storvv logo 2.png')
+const { actualTheme } = useTheme()
+const logoSource = computed(() =>
+  actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+)
 
 const form = ref({
   email: '',
@@ -241,18 +241,3 @@ useHead({
   ]
 })
 </script>
-
-<style scoped>
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-</style>

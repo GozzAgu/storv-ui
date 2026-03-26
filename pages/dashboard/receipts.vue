@@ -1,43 +1,56 @@
 <template>
   <ClientOnly>
-    <div class="pb-24 sm:pb-20 min-h-screen w-full overflow-x-hidden">
-      <!-- Initial loading skeleton -->
+    <div class="mx-auto w-full max-w-[1400px] space-y-5 pb-28 sm:space-y-6 sm:pb-24">
+      <!-- Initial loading -->
       <template v-if="isInitialLoading">
-        <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden min-h-[360px] border border-gray-200/50 dark:border-gray-700/50">
-          <div class="p-4 sm:p-6 border-b border-gray-200/60 dark:border-gray-700/60">
-            <div class="flex flex-wrap gap-4">
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-24 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-20 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-28 animate-pulse"></div>
-              </div>
-            <div class="flex gap-3 mt-4">
-              <div class="h-10 flex-1 max-w-xs rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-              <div class="h-10 w-28 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-              <div class="h-10 w-28 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+        <div
+          class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        >
+          <div class="border-b border-gray-100/90 px-4 py-4 dark:border-gray-800/80 sm:px-5 sm:py-5">
+            <div class="h-3 w-20 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div class="mt-3 h-7 max-w-xs animate-pulse rounded-md bg-gray-200 dark:bg-gray-700 sm:h-8"></div>
+            <div class="mt-2 h-3 max-w-md animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5 p-4 sm:gap-3 lg:grid-cols-4 sm:p-5">
+            <div v-for="i in 4" :key="i" class="rounded-xl bg-white p-3 ring-1 ring-gray-200/80 dark:bg-gray-900/50 dark:ring-gray-800/60 sm:p-3.5">
+              <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+              <div class="mt-2 h-8 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+              <div class="mt-2 h-2.5 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
             </div>
-              </div>
-          <div class="p-4 space-y-3">
+          </div>
+          <div class="space-y-2.5 border-t border-gray-100/90 px-4 py-4 dark:border-gray-800/80 sm:px-5">
             <div v-for="i in 6" :key="i" class="flex gap-4">
-              <div class="h-4 flex-1 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-              <div class="h-4 w-24 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-              <div class="h-4 w-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+              <div class="h-4 flex-1 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div class="h-4 w-24 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div class="h-4 w-20 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
             </div>
           </div>
-          </div>
+        </div>
       </template>
-    
-    <template v-else>
-    <!-- Hero header -->
-    <div class="mb-4 sm:mb-6">
-      <h1 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Sales</h1>
-      <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Manage receipts, customers, and returns</p>
-    </div>
 
-    <!-- Tab navigation: minimal underline (no pill / no shadow) -->
-    <nav
-      class="mt-1 flex gap-8 border-b border-gray-200 dark:border-gray-800"
-      aria-label="Sales views"
-    >
+      <template v-else>
+        <!-- Hero -->
+        <header
+          class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+        >
+          <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+            Sales
+          </p>
+          <h1
+            class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+          >
+            Receipts & customers
+          </h1>
+          <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            Manage receipts, customers, and returns in one place — fast search, clear status, zero clutter.
+          </p>
+        </header>
+
+        <!-- Tabs -->
+        <nav
+          class="flex gap-8 border-b border-gray-200/80 dark:border-gray-800"
+          aria-label="Sales views"
+        >
       <button
         type="button"
         role="tab"
@@ -78,159 +91,211 @@
       </button>
     </nav>
 
+    <!-- KPI strip: receipts -->
+    <div
+      v-if="activeTab === 'receipts' && !isReceiptsFullscreen"
+      class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4"
+    >
+      <StatCard
+        label="Total receipts"
+        :value="receiptsStore.loading ? '—' : String(receiptsStore.totalReceipts)"
+        subtext="In this store"
+      />
+      <StatCard
+        label="Total sales"
+        :value="formatCurrency(totalSales)"
+        subtext="Completed orders"
+      />
+      <StatCard
+        label="Today"
+        :value="formatCurrency(todaySales)"
+        :subtext="`${todayReceipts} receipts`"
+      />
+      <StatCard
+        label="This month"
+        :value="formatCurrency(monthSales)"
+        :subtext="`${monthReceipts} receipts`"
+      />
+    </div>
+
+    <!-- KPI strip: customers -->
+    <div v-if="activeTab === 'customers'" class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+      <StatCard
+        label="Customers"
+        :value="String(uniqueCustomers.length)"
+        subtext="Unique contacts"
+      />
+      <StatCard
+        label="Total revenue"
+        :value="formatCurrency(customersTotalRevenue)"
+        subtext="Lifetime value"
+      />
+      <StatCard
+        label="Avg. order value"
+        :value="formatCurrency(customersAverageOrderValue)"
+        subtext="Across orders"
+      />
+      <StatCard
+        label="Orders"
+        :value="String(customersTotalOrders)"
+        subtext="All customer orders"
+      />
+    </div>
+
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
-
-
-    <!-- Receipts Table -->
-    <div
-      :class="[
-        'transition-all duration-300 mt-4 sm:mt-5',
-        isReceiptsFullscreen
-          ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto'
-          : 'relative'
-      ]"
-    >
+      <!-- Receipts Table -->
+      <div
+        :class="[
+          'transition-all duration-300',
+          isReceiptsFullscreen
+            ? 'fixed inset-0 z-50 overflow-auto bg-white dark:bg-gray-950'
+            : 'relative',
+        ]"
+      >
       <!-- Fullscreen header -->
-      <div v-if="isReceiptsFullscreen" class="sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-700/80 px-4 py-3">
-        <div class="flex items-center justify-between gap-3 mb-3">
-          <div>
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">Receipts</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {{ filteredReceipts.length }} receipts · {{ formatCurrency(totalSales) }} total sales
-            </p>
+      <div
+        v-if="isReceiptsFullscreen"
+        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:bg-gray-950/90 sm:px-6"
+      >
+        <div class="mx-auto flex max-w-[1600px] flex-col gap-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+                Expanded view
+              </p>
+              <h2 class="mt-0.5 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl">
+                Receipts
+              </h2>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ filteredReceipts.length }} receipts · {{ formatCurrency(totalSales) }} completed sales
+              </p>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+              title="Exit expanded view"
+              @click="isReceiptsFullscreen = false"
+            >
+              <XMarkIcon class="h-5 w-5" />
+            </button>
           </div>
-          <button
-            @click="isReceiptsFullscreen = false"
-            class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Exit fullscreen"
-          >
-            <XMarkIcon class="w-4 h-4" />
-          </button>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="relative flex-1 min-w-0 max-w-xs">
-            <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search receipts..."
-              class="w-full pl-9 pr-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-            />
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative min-w-0 flex-1 sm:max-w-sm">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search receipts..."
+                class="w-full rounded-xl border border-gray-200/90 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              />
+            </div>
+            <select
+              v-model="statusFilter"
+              class="min-w-[120px] cursor-pointer rounded-xl border border-gray-200/90 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="all">All Status</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="refunded">Refunded</option>
+            </select>
+            <select
+              v-model="dateFilter"
+              class="min-w-[120px] cursor-pointer rounded-xl border border-gray-200/90 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+            <button
+              type="button"
+              class="rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+              title="Reset filters"
+              @click="resetFilters"
+            >
+              <ArrowPathIcon class="h-5 w-5" />
+            </button>
           </div>
-          <select
-            v-model="statusFilter"
-            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[120px]"
-          >
-            <option value="all">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="refunded">Refunded</option>
-          </select>
-          <select
-            v-model="dateFilter"
-            class="px-3 py-2 text-sm rounded-xl bg-gray-50 dark:bg-gray-800/80 border-0 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[120px]"
-          >
-            <option value="all">All Dates</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
-          <button
-            @click="resetFilters"
-            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="Reset filters"
-          >
-            <ArrowPathIcon class="w-5 h-5" />
-          </button>
         </div>
       </div>
 
       <div
         :class="[
-          isReceiptsFullscreen ? 'shadow-none' : 'rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden border border-gray-200/50 dark:border-gray-700/50'
+          isReceiptsFullscreen
+            ? 'shadow-none'
+            : 'overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35',
         ]"
       >
-        <!-- Toolbar: stats + filters (desktop, hidden in fullscreen) -->
-        <div v-if="!receiptsStore.loading && !isReceiptsFullscreen" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex items-center flex-wrap gap-3 sm:gap-5">
-            <div class="flex items-center gap-1.5">
-              <ReceiptPercentIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Receipts:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                <span v-if="receiptsStore.loading">-</span>
-                <span v-else>{{ receiptsStore.totalReceipts }}</span>
-              </span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Sales:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(totalSales) }}</span>
-            </div>
-            <div class="hidden sm:flex items-center gap-1.5">
-              <CalendarIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Today:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                <span v-if="receiptsStore.loading">-</span>
-                <span v-else>{{ formatCurrency(todaySales) }}</span>
-              </span>
-            </div>
-            <div class="hidden lg:flex items-center gap-1.5">
-              <ChartBarIcon class="w-4 h-4 text-orange-600 dark:text-orange-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Month:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                <span v-if="receiptsStore.loading">-</span>
-                <span v-else>{{ formatCurrency(monthSales) }}</span>
-              </span>
-            </div>
+        <!-- Toolbar: title + filters -->
+        <div
+          v-if="!receiptsStore.loading && !isReceiptsFullscreen"
+          class="flex flex-col gap-3 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5 dark:border-gray-800/80"
+        >
+          <div class="min-w-0">
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Receipt list
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              {{ sortedFilteredReceipts.length }} shown · {{ formatCurrency(totalSales) }} completed sales
+            </p>
           </div>
-          <div class="flex items-center gap-1.5 flex-shrink-0">
-              <div class="relative">
-              <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search receipts..."
-                class="pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30 w-40 sm:w-48"
-                />
-              </div>
-              <select
-                v-model="statusFilter"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
-              >
-                <option value="all">All Status</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-                <option value="refunded">Refunded</option>
-              </select>
-              <select
-                v-model="dateFilter"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
-              >
-                <option value="all">All Dates</option>
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-              </select>
-              <button
-                @click="resetFilters"
-              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-                title="Reset filters"
-              >
-                <ArrowPathIcon class="w-4 h-4" />
-              </button>
-              <button
-                @click="isReceiptsFullscreen = !isReceiptsFullscreen"
-              class="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-                :title="isReceiptsFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
-              >
-                <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="w-4 h-4" />
-                <XMarkIcon v-else class="w-4 h-4" />
-              </button>
+          <div class="flex flex-shrink-0 flex-wrap items-center gap-1.5">
+            <div class="relative">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search receipts..."
+                class="w-40 rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 sm:w-48"
+              />
             </div>
+            <select
+              v-model="statusFilter"
+              class="min-w-[100px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="all">All Status</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="refunded">Refunded</option>
+            </select>
+            <select
+              v-model="dateFilter"
+              class="min-w-[100px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+            <button
+              type="button"
+              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              title="Reset filters"
+              @click="resetFilters"
+            >
+              <ArrowPathIcon class="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              :title="isReceiptsFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
+              @click="isReceiptsFullscreen = !isReceiptsFullscreen"
+            >
+              <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="h-4 w-4" />
+              <XMarkIcon v-else class="h-4 w-4" />
+            </button>
           </div>
+        </div>
         <!-- Bulk actions (receipts) -->
-        <div v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0" class="flex flex-wrap items-center gap-2 px-3 sm:px-5 py-2 border-b border-gray-200/60 dark:border-gray-700/60 bg-gray-50/70 dark:bg-gray-900/10">
+        <div
+          v-if="canDeleteReceipts && selectedReceiptsForBulk.length > 0"
+          class="flex flex-wrap items-center gap-2 border-b border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-gray-800/80 dark:bg-gray-900/30 sm:px-5"
+        >
           <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ selectedReceiptsForBulk.length }} selected</span>
           <Button
             variant="outline"
@@ -264,28 +329,30 @@
       <!-- Standalone empty state (same styling as customers empty state, no button) -->
       <div
         v-else-if="sortedFilteredReceipts.length === 0"
-        class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
+        class="flex min-h-[min(50vh,22rem)] w-full min-w-0 flex-col items-center justify-center px-4 py-14 text-center sm:min-h-[min(45vh,20rem)] sm:px-6"
       >
-        <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-          <ReceiptPercentIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+        <div
+          class="mb-3 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+        >
+          <ReceiptPercentIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
         </div>
-        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
+        <h3 class="max-w-full break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
           {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
         </h3>
-        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+        <p class="mx-auto mt-1 max-w-sm break-words text-xs text-gray-500 dark:text-gray-400">
           {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
         </p>
       </div>
       <template v-else>
       <!-- Mobile: card list (no horizontal scroll) -->
-      <div class="block sm:hidden space-y-3 px-1">
+      <div class="block space-y-3 px-1 sm:hidden">
         <div
           v-for="receipt in paginatedReceipts"
           :key="receipt.id"
           :data-receipt-row="receipt.id"
           :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-          class="rounded-xl bg-white dark:bg-gray-800 p-3 shadow-sm transition-[background-color] duration-500"
-          :class="flashReceiptId === receipt.id ? 'bg-gray-100/95' : ''"
+          class="rounded-2xl border border-gray-200/80 bg-white/95 p-3.5 shadow-sm transition-[background-color,box-shadow] duration-300 dark:border-gray-800/70 dark:bg-gray-900/40"
+          :class="flashReceiptId === receipt.id ? 'bg-gray-50 ring-1 ring-gray-200/90 dark:bg-gray-800/80 dark:ring-gray-600/50' : ''"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -331,12 +398,12 @@
                   <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
                   <span
                     :class="[
-                      'inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium shrink-0',
+                      'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset',
                       receipt.status === 'completed'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                        ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25'
                         : receipt.status === 'pending'
-                        ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                          ? 'bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25'
+                          : 'bg-rose-500/10 text-rose-800 ring-rose-500/20 dark:bg-rose-400/10 dark:text-rose-300 dark:ring-rose-400/25',
                     ]"
                   >
                     {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
@@ -362,11 +429,16 @@
         </div>
       </div>
       <!-- Desktop: table -->
-      <div class="hidden sm:block overflow-x-auto">
-        <table class="min-w-full">
-          <thead class="border-b border-gray-200 dark:border-gray-700">
+      <div
+        class="hidden overflow-x-auto sm:block"
+        :class="isReceiptsFullscreen ? 'mx-auto max-w-[1600px] px-4 pb-6 pt-2 sm:px-6' : ''"
+      >
+        <table class="min-w-full border-separate border-spacing-0">
+          <thead
+            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-gray-900/90"
+          >
             <tr>
-              <th v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 w-10">
+              <th v-if="canDeleteReceipts" class="w-10 px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">
                 <Checkbox
                   :model-value="paginatedReceipts.length > 0 && selectedReceiptsForBulk.length === paginatedReceipts.length"
                   @update:model-value="toggleSelectAllReceipts"
@@ -376,7 +448,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
@@ -398,7 +470,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('customerName') && toggleSort('customerName')"
@@ -420,7 +492,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('date') && toggleSort('date')"
@@ -442,7 +514,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
@@ -464,7 +536,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('total') && toggleSort('total')"
@@ -486,7 +558,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('paymentMethod') && toggleSort('paymentMethod')"
@@ -508,7 +580,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('status') && toggleSort('status')"
@@ -530,7 +602,7 @@
               </th>
               <th
                 :class="[
-                  'px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500',
+                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
                   isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100'
                 ]"
                 @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
@@ -550,21 +622,27 @@
                   </template>
                 </div>
               </th>
-              <th class="w-12 px-3 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 sm:w-[4.5rem] sm:px-4">
+              <th
+                class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+              >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
+          <tbody class="bg-white dark:bg-gray-950/40">
             <tr
               v-for="receipt in paginatedReceipts"
               :key="receipt.id"
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-              class="transition-[background-color] duration-500 hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
-              :class="flashReceiptId === receipt.id ? 'bg-gray-100/95' : ''"
+              class="border-b border-gray-100/90 transition-colors duration-300 hover:bg-gray-50/95 dark:border-gray-800/70 dark:hover:bg-gray-900/70"
+              :class="
+                flashReceiptId === receipt.id
+                  ? 'bg-primary-500/[0.07] dark:bg-primary-500/10'
+                  : 'even:bg-gray-50/40 dark:even:bg-gray-900/25'
+              "
             >
-              <td v-if="canDeleteReceipts" class="px-3 sm:px-4 py-2 text-center w-10">
+              <td v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center align-middle sm:px-4">
                 <Checkbox
                   :model-value="selectedReceiptsForBulk.some(r => r.id === receipt.id)"
                   @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
@@ -573,9 +651,9 @@
                   @click.stop
                 />
               </td>
-              <td class="px-3 sm:px-4 py-2">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
                 <div class="flex items-center gap-1.5">
-                  <div class="text-[10px] font-medium text-gray-900 dark:text-gray-100">
+                  <div class="text-[11px] font-medium tabular-nums text-gray-900 dark:text-gray-50">
                     {{ receipt.receiptNumber }}
                   </div>
                   <button
@@ -594,21 +672,21 @@
                   </span>
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <div class="text-[10px] text-gray-900 dark:text-gray-100">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <div class="text-[11px] font-medium text-gray-900 dark:text-gray-50">
                   {{ receipt.customerName }}
                 </div>
-                <div class="text-[9px] text-gray-500 dark:text-gray-400">
+                <div class="text-[10px] text-gray-500 dark:text-gray-400">
                   {{ receipt.customerEmail }}
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <div class="text-[10px] text-gray-600 dark:text-gray-300">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <div class="text-[11px] tabular-nums text-gray-600 dark:text-gray-300">
                   {{ formatDate(receipt.date) }}
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <div class="text-[10px] text-gray-900 dark:text-gray-100">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <div class="text-[11px] text-gray-900 dark:text-gray-100">
                   <div v-if="receipt.items && receipt.items.length > 0" class="space-y-0.5">
                     <div 
                       v-for="(item, idx) in receipt.items.slice(0, 3)" 
@@ -626,36 +704,36 @@
                 </span>
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <span class="text-[11px] font-semibold tabular-nums text-gray-900 dark:text-gray-50">
                   {{ formatCurrency(receipt.total) }}
                 </span>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <span class="text-[10px] text-gray-600 dark:text-gray-300">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <span class="text-[11px] text-gray-600 dark:text-gray-300">
                   {{ receipt.paymentMethod }}
                 </span>
               </td>
-              <td class="px-3 sm:px-4 py-2">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
                 <span
                   :class="[
-                    'inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-medium',
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset',
                     receipt.status === 'completed'
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                      ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25'
                       : receipt.status === 'pending'
-                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                        ? 'bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25'
+                        : 'bg-rose-500/10 text-rose-800 ring-rose-500/20 dark:bg-rose-400/10 dark:text-rose-300 dark:ring-rose-400/25',
                   ]"
                 >
                   {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                 </span>
               </td>
-              <td class="px-3 sm:px-4 py-2">
-                <div class="text-[10px] text-gray-600 dark:text-gray-300">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <div class="text-[11px] text-gray-600 dark:text-gray-300">
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
-              <td class="px-3 sm:px-4 py-2 text-right">
+              <td class="px-3 py-2.5 text-right align-middle sm:px-4">
                 <div class="relative inline-flex justify-end" data-receipt-menu @click.stop>
                   <button
                     type="button"
@@ -696,13 +774,18 @@
     </div>
 
     <!-- Fullscreen pagination -->
-    <div v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0" class="sticky bottom-0 rounded-none bg-white dark:bg-gray-900 border-t border-gray-200/80 dark:border-gray-700/80 px-6 py-1.5 z-10">
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="sortedFilteredReceipts.length"
-        @page-change="handlePageChange"
-      />
+    <div
+      v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0"
+      class="sticky bottom-0 z-10 border-t border-gray-200/90 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-950/95 sm:px-6"
+    >
+      <div class="mx-auto max-w-[1600px]">
+        <Pagination
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="sortedFilteredReceipts.length"
+          @page-change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- FAB: New receipt (draggable — position saved on this device) -->
@@ -808,84 +891,92 @@
 
     <!-- Customers tab -->
     <template v-if="activeTab === 'customers'">
-      <div class="mt-4 sm:mt-5 rounded-xl bg-gray-50 dark:bg-gray-800/80 overflow-hidden border border-gray-200/50 dark:border-gray-700/50">
-        <div v-if="!receiptsStore.loading" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-3 sm:px-5 py-3 border-b border-gray-200/60 dark:border-gray-700/60">
-          <div class="flex items-center flex-wrap gap-3 sm:gap-5">
-            <div class="flex items-center gap-1.5">
-              <UsersIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" stroke-width="1.75" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Customers:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ uniqueCustomers.length }}</span>
-              </div>
-            <div class="flex items-center gap-1.5">
-              <CurrencyDollarIcon class="w-4 h-4 text-green-600 dark:text-green-400" stroke-width="1.75" />
-                <span class="text-xs text-gray-600 dark:text-gray-400">Revenue:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customersTotalRevenue) }}</span>
-              </div>
-            <div class="hidden sm:flex items-center gap-1.5">
-              <ChartBarIcon class="w-4 h-4 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
-              <span class="text-xs text-gray-600 dark:text-gray-400">Avg. order:</span>
-              <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customersAverageOrderValue) }}</span>
-              </div>
+      <div
+        class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+      >
+        <div
+          v-if="!receiptsStore.loading"
+          class="flex flex-col gap-3 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5 dark:border-gray-800/80"
+        >
+          <div class="min-w-0">
+            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              Customer directory
+            </h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              {{ filteredCustomers.length }} shown · expand a row to view receipts
+            </p>
           </div>
-          <div class="flex items-center gap-1.5">
-            <div class="relative flex-1 sm:flex-initial min-w-0 sm:min-w-[160px]">
-              <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
-                  <input
-                    v-model="customersSearchQuery"
-                    type="text"
-                    placeholder="Search customers..."
-                class="w-full pl-8 pr-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-                  />
-                </div>
-                <select
-                  v-model="customersSortBy"
-              class="px-2.5 py-1.5 text-xs rounded-lg bg-white dark:bg-gray-800 border-0 ring-1 ring-gray-200/80 dark:ring-gray-700/80 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-400/30 min-w-[100px]"
-                >
-                  <option value="name">Name</option>
-                  <option value="orders">Orders</option>
-                  <option value="spent">Total Spent</option>
-                  <option value="lastOrder">Last Order</option>
-                </select>
+          <div class="flex flex-wrap items-center gap-1.5 sm:flex-shrink-0">
+            <div class="relative min-w-0 flex-1 sm:min-w-[160px] sm:flex-initial">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="customersSearchQuery"
+                type="text"
+                placeholder="Search customers..."
+                class="w-full rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
+              />
+            </div>
+            <select
+              v-model="customersSortBy"
+              class="min-w-[100px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+            >
+              <option value="name">Name</option>
+              <option value="orders">Orders</option>
+              <option value="spent">Total Spent</option>
+              <option value="lastOrder">Last Order</option>
+            </select>
+          </div>
+        </div>
+        <div v-if="receiptsStore.loading" class="px-4 py-12 sm:px-6">
+          <div class="space-y-3">
+            <div v-for="i in 5" :key="i" class="flex items-center gap-3">
+              <div class="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div class="min-w-0 flex-1 space-y-2">
+                <div class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+                <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
               </div>
             </div>
-        <div v-if="receiptsStore.loading" class="p-8 text-center">
-          <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary-500/30 border-t-primary-600"></div>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading customers...</p>
           </div>
-        <!-- Standalone empty state on mobile/desktop so it's never clipped by table scroll (typography matches receipts/folders empty states) -->
+        </div>
         <div
           v-else-if="filteredCustomers.length === 0"
-          class="flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-10rem)]"
+          class="flex min-h-[min(50vh,22rem)] w-full min-w-0 flex-col items-center justify-center px-4 py-14 text-center sm:min-h-[min(45vh,20rem)] sm:px-6"
         >
-          <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3">
-            <UsersIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+          <div
+            class="mb-3 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          >
+            <UsersIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
           </div>
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words max-w-full">
+          <h3 class="max-w-full break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
             {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
           </h3>
-          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto break-words">
+          <p class="mx-auto mt-1 max-w-sm break-words text-xs text-gray-500 dark:text-gray-400">
             {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
           </p>
         </div>
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full">
-            <thead class="bg-white/60 dark:bg-gray-800/60">
+          <table class="min-w-full border-separate border-spacing-0">
+            <thead class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-gray-900/90">
               <tr>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 min-w-[90px] sm:min-w-[100px]">
+                <th class="min-w-[90px] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:min-w-[100px] sm:px-4">
                   Receipts
                 </th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Customer</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Contact</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Orders</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Total Spent</th>
-                <th class="px-3 sm:px-4 py-2 text-left text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500">Last Order</th>
-                <th class="w-12 px-3 py-2 text-right text-[10px] !font-bold uppercase tracking-wider text-gray-500 dark:text-gray-500 sm:w-[4.5rem] sm:px-4">Actions</th>
+                <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Customer</th>
+                <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Contact</th>
+                <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Orders</th>
+                <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Total Spent</th>
+                <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Last Order</th>
+                <th class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200/80 dark:divide-gray-700/80 bg-white dark:bg-gray-800/40">
+            <tbody class="bg-white dark:bg-gray-950/40">
               <template v-for="customer in paginatedCustomers" :key="customer.id">
-                <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/40 transition-colors">
-                  <td class="px-3 sm:px-4 py-2">
+                <tr
+                  class="border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
+                >
+                  <td class="px-3 py-2.5 align-middle sm:px-4">
                     <button
                       @click="toggleCustomerExpanded(customer.id)"
                       type="button"
@@ -908,28 +999,28 @@
                       <span>{{ expandedCustomers[customer.id] ? 'Hide' : 'View' }}</span>
                     </button>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
+                  <td class="px-3 py-2.5 sm:px-4">
                     <div class="flex items-center gap-2">
                       <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">{{ customer.name }}</span>
                     </div>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
+                  <td class="px-3 py-2.5 sm:px-4">
                     <div class="space-y-0.5">
                       <p v-if="customer.email" class="text-[10px] text-gray-600 dark:text-gray-300 truncate">{{ customer.email }}</p>
                       <p v-if="customer.phone" class="text-[10px] text-gray-600 dark:text-gray-300 truncate">{{ customer.phone }}</p>
                       <p v-if="!customer.email && !customer.phone" class="text-[10px] text-gray-400 dark:text-gray-500">-</p>
                     </div>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
+                  <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ customer.receipts.length }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
+                  <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2">
+                  <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
-                  <td class="px-3 sm:px-4 py-2 text-right">
+                  <td class="px-3 py-2.5 sm:px-4 text-right">
                     <div class="relative inline-flex justify-end" data-customer-menu @click.stop>
                       <button
                         type="button"
@@ -947,7 +1038,7 @@
                   </td>
                 </tr>
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50/80 dark:bg-gray-800/60">
-                  <td colspan="7" class="px-3 sm:px-4 py-2">
+                  <td colspan="7" class="px-3 py-2.5 sm:px-4">
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                       Purchased items
                     </p>
@@ -1038,12 +1129,14 @@
     </template>
     </div>
     <template #fallback>
-      <div class="pb-24 min-h-screen w-full flex items-center justify-center">
+      <div class="mx-auto flex min-h-[40vh] w-full max-w-[1400px] items-center justify-center px-4 pb-24">
         <div class="text-center">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary-500/30 border-t-primary-600"></div>
-          <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Loading receipts...</p>
-          </div>
-  </div>
+          <div
+            class="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary-500 dark:border-gray-700 dark:border-t-primary-400"
+          />
+          <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Loading sales…</p>
+        </div>
+      </div>
     </template>
   </ClientOnly>
 
@@ -1122,9 +1215,6 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
   PlusIcon,
   ReceiptPercentIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ChartBarIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
   PrinterIcon,
@@ -1145,6 +1235,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
+import StatCard from '~/components/ui/StatCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -1479,6 +1570,10 @@ const customersAverageOrderValue = computed(() => {
   const totalOrders = uniqueCustomers.value.reduce((sum, c) => sum + c.receipts.length, 0)
   return totalOrders > 0 ? customersTotalRevenue.value / totalOrders : 0
 })
+
+const customersTotalOrders = computed(() =>
+  uniqueCustomers.value.reduce((sum, c) => sum + c.receipts.length, 0)
+)
 
 // Get receipts for a customer
 const getCustomerReceipts = (customerId: string) => {
@@ -2378,7 +2473,7 @@ watch(() => receiptsStore.receipts, async (newReceipts) => {
  * Receipt flash (dark): force a gray row tint so `dark:` utilities never lose to a light base bg.
  */
 html.dark [data-receipt-flash] {
-  background-color: rgb(55 65 81 / 0.55) !important;
+  background-color: rgb(16 185 129 / 0.12) !important;
 }
 </style>
 
