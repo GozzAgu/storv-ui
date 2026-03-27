@@ -5,7 +5,9 @@
     panel-title="Open a workspace built for multi-branch retail."
     panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
   >
-    <div class="mb-8 text-center lg:mb-9 lg:text-left">
+    <div
+      class="mb-8 text-center opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:40ms] lg:mb-9 lg:text-left"
+    >
       <a
         href="https://www.storvv.com"
         class="mb-4 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
@@ -38,9 +40,13 @@
     </div>
 
     <div
-      class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+      class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] backdrop-blur-sm transition-shadow duration-500 ease-out dark:border-gray-800/90 dark:bg-slate-950/95 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)] opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms] hover:shadow-[0_16px_48px_-14px_rgba(8,27,64,0.18)] dark:hover:shadow-[0_16px_52px_-10px_rgba(0,0,0,0.65)]"
     >
-        <div class="p-4 sm:p-5">
+        <div class="relative p-4 sm:p-5">
+          <div
+            class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent dark:via-primary-500/25"
+            aria-hidden="true"
+          />
           <form @submit.prevent="handleSignUp" class="space-y-4">
             <div class="space-y-1.5">
               <label for="business-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -52,7 +58,7 @@
                 type="text"
                 autocomplete="organization"
                 required
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                 placeholder="Your business or store name"
               />
             </div>
@@ -67,7 +73,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                 placeholder="you@example.com"
               />
             </div>
@@ -83,7 +89,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                   :minlength="PASSWORD_MIN_LENGTH"
                   placeholder="At least 12 characters, with a number and capital letter"
                 />
@@ -160,7 +166,7 @@
                   :type="showConfirmPassword ? 'text' : 'password'"
                   autocomplete="new-password"
                   required
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                   placeholder="Re-enter your password"
                 />
                 <button
