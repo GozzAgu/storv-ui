@@ -587,9 +587,14 @@
       <!-- Spacer so fixed nav never overlaps page content -->
       <div class="h-12 shrink-0 sm:h-[3.25rem]" aria-hidden="true" />
 
-      <!-- Page Content -->
+      <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible">
-        <slot />
+        <div
+          :key="route.path"
+          class="min-w-0 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:40ms]"
+        >
+          <slot />
+        </div>
       </main>
     </div>
     
