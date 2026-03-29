@@ -12,12 +12,9 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 flex flex-col transition-[transform,width] duration-300 ease-in-out lg:translate-x-0',
-        /* Same base as main canvas — separation is shadow only */
-        'bg-gray-100 dark:bg-[#07080c]',
-        'shadow-[8px_0_32px_-12px_rgba(15,23,42,0.08)] dark:shadow-[16px_0_48px_-16px_rgba(0,0,0,0.85)]',
+        'fixed inset-y-0 left-0 z-40 flex flex-col bg-white shadow-[2px_0_10px_-4px_rgba(15,23,42,0.07)] transition-[transform,width] duration-300 ease-in-out dark:!bg-dashboard-card dark:shadow-[2px_0_14px_-4px_rgba(0,0,0,0.45)] lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64'
+        effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
       ]"
     >
       <!-- Logo / Brand -->
@@ -31,10 +28,7 @@
           <img
             :src="logoSource"
             alt="Storvv"
-            :class="[
-              'shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out',
-              effectiveSidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]',
-            ]"
+            :class="['shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out', effectiveSidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]']"
           />
         </NuxtLink>
         <button
@@ -50,7 +44,7 @@
       <!-- Collapse toggle (desktop) - larger on large screens -->
       <button
         @click="toggleSidebar"
-        class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 shadow-md ring-1 ring-gray-200/60 transition-colors hover:text-gray-800 dark:bg-[#12141c] dark:text-gray-400 dark:shadow-lg dark:ring-white/10 dark:hover:bg-[#161922] dark:hover:text-gray-100 lg:flex"
+        class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200/70 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:bg-[#161922] dark:text-gray-400 dark:ring-white/10 dark:hover:bg-[#1c2030] dark:hover:text-gray-100 lg:flex"
         :title="effectiveSidebarCollapsed ? 'Expand' : 'Collapse'"
         aria-label="Toggle sidebar"
       >
@@ -68,13 +62,7 @@
             <!-- Inventory (expandable) -->
             <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
-                :class="[
-                  'group relative flex w-full items-center justify-between rounded-l-[1px] transition-all duration-200',
-                  effectiveSidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5',
-                  isActive(item.href)
-                    ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                    : 'border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold dark:hover:border-primary-400/50'
-                ]"
+                :class="[ 'group relative flex w-full items-center justify-between rounded-l-[1px] transition-all duration-200', effectiveSidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5', isActive(item.href) ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold dark:hover:border-primary-400/50' ]"
               >
                 <NuxtLink
                   :to="item.href"
@@ -83,11 +71,7 @@
                 >
                   <component
                     :is="item.icon"
-                    :class="[
-                      'w-4 h-4 shrink-0 transition-colors',
-                      effectiveSidebarCollapsed ? '' : 'mr-2.5',
-                      isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
-                    ]"
+                    :class="[ 'w-4 h-4 shrink-0 transition-colors', effectiveSidebarCollapsed ? '' : 'mr-2.5', isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100' ]"
                     :stroke-width="isActive(item.href) ? 2.25 : 1.5"
                   />
                   <span class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
@@ -107,13 +91,7 @@
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
-                  :class="[
-                    'group flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors',
-                    route.params.id === folder.id
-                      ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                      : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
-                    { 'pointer-events-none opacity-50': switchingStore }
-                  ]"
+                  :class="[ 'group flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors', route.params.id === folder.id ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                 >
                   <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === folder.id ? 2.25 : 1.75" />
                   <span class="truncate flex-1" :class="route.params.id === folder.id ? 'font-bold' : 'group-hover:font-semibold'">{{ folder.name }}</span>
@@ -127,27 +105,12 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[
-                'group relative flex items-center rounded-l-[1px] transition-all duration-200',
-                effectiveSidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5',
-                isActive(item.href)
-                  ? effectiveSidebarCollapsed
-                    ? 'ring-4 ring-primary-500/50 text-primary-600 dark:text-primary-300 dark:ring-primary-400/45'
-                    : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                  : effectiveSidebarCollapsed
-                    ? 'ring-4 ring-transparent hover:ring-primary-500/40 dark:hover:ring-primary-400/35 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-                    : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
-                { 'pointer-events-none opacity-50': switchingStore }
-              ]"
+              :class="[ 'group relative flex items-center rounded-l-[1px] transition-all duration-200', effectiveSidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5', isActive(item.href) ? effectiveSidebarCollapsed ? 'overflow-visible rounded-lg bg-primary-500/[0.11] text-primary-600 before:pointer-events-none before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-500 dark:bg-primary-400/15 dark:text-primary-300 dark:before:bg-primary-400' : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : effectiveSidebarCollapsed ? 'overflow-visible rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
               :title="effectiveSidebarCollapsed ? item.name : ''"
             >
               <component
                 :is="item.icon"
-                :class="[
-                  'w-4 h-4 shrink-0 transition-colors',
-                  effectiveSidebarCollapsed ? '' : 'mr-0',
-                  isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
-                ]"
+                :class="[ 'w-4 h-4 shrink-0 transition-colors', effectiveSidebarCollapsed ? '' : 'mr-0', isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100' ]"
                 :stroke-width="isActive(item.href) ? 2.25 : 1.75"
               />
               <span v-if="!effectiveSidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
@@ -167,7 +130,7 @@
           <!-- Stores (super admins) - Fathom-style section -->
           <div
             v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
-            class="mt-2 rounded-sm bg-white/55 p-1 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#0c0e14] dark:shadow-inner dark:ring-white/[0.06]"
+            class="mt-2 rounded-sm bg-gray-100/90 p-1 dark:bg-black/25"
           >
             <button
               type="button"
@@ -180,16 +143,7 @@
             <div v-if="!storesSectionCollapsed" class="mt-0.5 space-y-0.5 pl-0">
               <template v-for="store in storesList" :key="store.id">
                 <div
-                  :class="[
-                    'flex items-center justify-between rounded-l-[1px] px-2 py-1 transition-all duration-200',
-                    route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                      ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                      : currentStore?.id === store.id
-                        ? 'border-l-[5px] border-transparent pl-2 font-medium text-gray-900 dark:text-gray-100'
-                        : store.id !== storesStore.currentStoreId
-                          ? 'opacity-50'
-                          : 'group border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:hover:border-primary-400/50 dark:hover:text-gray-100'
-                  ]"
+                  :class="[ 'flex items-center justify-between rounded-l-[1px] px-2 py-1 transition-all duration-200', route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : currentStore?.id === store.id ? 'border-l-[5px] border-transparent pl-2 font-medium text-gray-900 dark:text-gray-100' : store.id !== storesStore.currentStoreId ? 'opacity-50' : 'group border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:hover:border-primary-400/50 dark:hover:text-gray-100' ]"
                 >
                   <NuxtLink
                     :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
@@ -200,13 +154,7 @@
                   >
                     <svg
                       class="w-4 h-4 shrink-0"
-                      :class="
-                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                          ? 'text-primary-600 dark:text-primary-300'
-                          : currentStore?.id === store.id
-                            ? 'text-gray-900 dark:text-gray-100'
-                            : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'
-                      "
+                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'text-primary-600 dark:text-primary-300' : currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -220,13 +168,7 @@
                     </svg>
                     <span
                       class="truncate text-[13px]"
-                      :class="
-                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                          ? 'font-bold text-primary-800 dark:text-primary-200'
-                          : currentStore?.id === store.id
-                            ? 'font-medium text-gray-900 dark:text-gray-100'
-                            : 'font-medium text-gray-700 group-hover:font-semibold group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100'
-                      "
+                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'font-bold text-primary-800 dark:text-primary-200' : currentStore?.id === store.id ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-medium text-gray-700 group-hover:font-semibold group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100'"
                     >
                       {{ store.name }}
                     </span>
@@ -247,12 +189,7 @@
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
                         class="group flex min-w-0 flex-1 items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors"
-                        :class="[
-                          route.params.id === department.id && route.path.startsWith('/dashboard/departments')
-                            ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                            : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
-                          { 'pointer-events-none opacity-50': switchingStore }
-                        ]"
+                        :class="[ route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                       >
                         <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === department.id ? 2.25 : 1.75" />
                         <span class="truncate flex-1" :class="route.params.id === department.id ? 'font-bold' : 'group-hover:font-semibold'">{{ department.name }}</span>
@@ -306,12 +243,12 @@
         :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2 pt-2' : 'px-2.5 pb-2.5 pt-2'"
       >
         <div
-          class="rounded-sm bg-white/70 p-2 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#12141c]/95 dark:shadow-lg dark:ring-white/[0.07]"
+          class="rounded-sm bg-gray-50/95 p-2 dark:bg-white/[0.04]"
           :class="effectiveSidebarCollapsed ? 'px-1.5' : ''"
         >
           <div class="flex items-center gap-2.5" :class="effectiveSidebarCollapsed ? 'relative justify-center group' : ''">
             <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-800 ring-1 ring-gray-200/50 dark:bg-gray-800 dark:text-gray-100 dark:ring-white/10"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-100"
             >
               {{ userInitials }}
             </div>
@@ -330,11 +267,7 @@
           </div>
           <button
             @click="handleSignOut"
-            :class="[
-              'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors',
-              effectiveSidebarCollapsed ? 'relative group py-2' : 'px-2',
-              'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-            ]"
+            :class="[ 'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors', effectiveSidebarCollapsed ? 'relative group py-2' : 'px-2', 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' ]"
             title="Sign out"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
@@ -369,10 +302,7 @@
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
-        :class="[
-          'fixed top-0 left-0 right-0 z-30 border-b border-gray-200/25 bg-gray-100/95 backdrop-blur-sm transition-[left] duration-300 dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm',
-          sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'
-        ]"
+        :class="[ 'fixed top-0 left-0 right-0 z-30 border-b border-gray-200/25 bg-gray-100/95 backdrop-blur-sm transition-[left] duration-300 dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
       >
         <div
           class="flex h-12 w-full items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-6"
@@ -527,7 +457,7 @@
              <div
                   v-if="profileMenuOpen"
                   ref="profileMenuPanelRef"
-                  class="overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] dark:border-gray-800/90 dark:bg-slate-950 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)]"
+                  class="overflow-hidden rounded-sm bg-white dark:bg-slate-950"
                   :style="profileMenuPanelStyle"
                   @click.stop
                 >

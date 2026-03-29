@@ -1,9 +1,6 @@
 <template>
   <div
-    :class="[
-      'frosted-glass rounded-sm border border-gray-200/90 dark:border-gray-700/80 overflow-hidden flex flex-col',
-      variant === 'dropdown' ? 'max-h-[min(85vh,22rem)] w-full min-w-0' : ''
-    ]"
+    :class="[ 'frosted-glass rounded-sm border border-gray-200/90 dark:border-gray-700/80 overflow-hidden flex flex-col', variant === 'dropdown' ? 'max-h-[min(85vh,22rem)] w-full min-w-0' : '' ]"
   >
     <!-- Header: title + Mark all as read -->
     <div class="flex items-center justify-between px-2.5 sm:px-3 pt-2 pb-1.5 border-b border-gray-100 dark:border-gray-700/80 shrink-0">
@@ -25,12 +22,7 @@
     <div class="flex items-center gap-0.5 border-b border-gray-100 dark:border-gray-700/80 px-2.5 sm:px-3 shrink-0">
       <button
         type="button"
-        :class="[
-          'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px',
-          activeTab === 'inbox'
-            ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400'
-            : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
-        ]"
+        :class="[ 'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'inbox' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300' ]"
         @click="activeTab = 'inbox'"
       >
         Inbox
@@ -43,12 +35,7 @@
       </button>
       <button
         type="button"
-        :class="[
-          'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px',
-          activeTab === 'read'
-            ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400'
-            : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'
-        ]"
+        :class="[ 'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'read' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300' ]"
         @click="activeTab = 'read'"
       >
         Read
@@ -109,10 +96,7 @@
           class="w-full flex items-start gap-2 px-2.5 sm:px-3 py-2 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
         >
           <div
-            :class="[
-              'relative shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white leading-none',
-              getAvatarBgClass(notification)
-            ]"
+            :class="[ 'relative shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white leading-none', getAvatarBgClass(notification) ]"
           >
             {{ getAvatarInitial(notification) }}
           </div>

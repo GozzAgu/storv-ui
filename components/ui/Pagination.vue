@@ -40,11 +40,7 @@
               v-if="page !== -1"
               type="button"
               class="min-w-[1.75rem] shrink-0 rounded-sm px-1.5 py-0.5 text-[11px] tabular-nums transition-colors sm:min-w-8 sm:px-2"
-              :class="
-                page === currentPage
-                  ? 'font-semibold text-gray-900 dark:text-gray-50'
-                  : 'font-medium text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
-              "
+              :class="page === currentPage ? 'font-semibold text-gray-900 dark:text-gray-50' : 'font-medium text-gray-500 hover:bg-gray-200/50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'"
               :aria-current="page === currentPage ? 'page' : undefined"
               :aria-label="`Page ${page}`"
               @click="$emit('page-change', page)"

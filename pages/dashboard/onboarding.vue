@@ -16,7 +16,7 @@
       </div>
 
       <!-- Form Card -->
-      <div class="bg-white dark:!bg-dashboard-card rounded-sm shadow-lg p-5 sm:p-6 border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:!bg-dashboard-card rounded-sm p-5 sm:p-6">
         <Transition name="step-fade" mode="out-in">
           <!-- Step 1: Currency & Country Selection -->
           <div v-if="currentStep === 1" key="step-1" class="space-y-4 sm:space-y-5">

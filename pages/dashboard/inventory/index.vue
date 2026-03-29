@@ -4,7 +4,7 @@
   >
     <!-- Hero + filters -->
     <header
-      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="relative">
         <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
@@ -51,13 +51,13 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search folders…"
-              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
           </div>
           <div class="flex flex-wrap items-center gap-1.5 sm:flex-nowrap sm:shrink-0">
             <select
               v-model="selectedDepartmentId"
-              class="min-w-[108px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[108px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
             >
               <option value="">All departments</option>
               <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -66,7 +66,7 @@
             </select>
             <select
               v-model="sortBy"
-              class="min-w-[96px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[96px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
             >
               <option value="name">Name</option>
               <option value="items">Products</option>
@@ -119,7 +119,7 @@
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 dark:!bg-dashboard-card animate-pulse"
       >
         <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
         <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
@@ -137,7 +137,7 @@
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-out active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[118px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-900/15 dark:hover:shadow-xl dark:hover:shadow-black/50"
+        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white duration-300 ease-out active:scale-[0.99] dark:!bg-dashboard-card sm:min-h-[118px] hover:-translate-y-0.5"
         @click="navigateToFolder(folder.id)"
       >
         <div
@@ -206,7 +206,7 @@
     <!-- Empty state -->
     <div
       v-if="!inventoryStore.loading && paginatedFolders.length === 0"
-      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:min-h-[min(48vh,22rem)] sm:px-6"
+      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)] sm:px-6"
     >
       <div class="relative z-10">
         <div

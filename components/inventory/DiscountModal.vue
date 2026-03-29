@@ -34,12 +34,7 @@
             <button
               type="button"
               @click="discountType = 'percentage'"
-              :class="[
-                'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border',
-                discountType === 'percentage'
-                  ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-              ]"
+              :class="[ 'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border', discountType === 'percentage' ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50' ]"
             >
               <span class="block text-sm font-medium">Percentage</span>
               <span class="block text-[11px] opacity-80 mt-0.5">e.g. 10%</span>
@@ -47,12 +42,7 @@
             <button
               type="button"
               @click="discountType = 'amount'"
-              :class="[
-                'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border',
-                discountType === 'amount'
-                  ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-              ]"
+              :class="[ 'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border', discountType === 'amount' ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50' ]"
             >
               <span class="block text-sm font-medium">Fixed amount</span>
               <span class="block text-[11px] opacity-80 mt-0.5">e.g. {{ currencySymbol }}5.00</span>

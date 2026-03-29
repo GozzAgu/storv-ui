@@ -7,13 +7,13 @@
     <!-- Hero -->
     <header
       v-if="!isLoadingFolder"
-      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-1 items-start gap-3">
           <button
             type="button"
-            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
             title="Back to folders"
             @click="navigateTo('/dashboard/inventory')"
           >
@@ -36,13 +36,13 @@
             </p>
             <div class="mt-3 flex flex-wrap gap-2">
               <span
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
+                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
               >
                 <CalendarIcon class="h-3.5 w-3.5 opacity-70" />
                 Created {{ formatDate(folder?.createdAt) }}
               </span>
               <span
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
+                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
               >
                 <CubeIcon class="h-3.5 w-3.5 opacity-70" />
                 {{ folder?.itemCount || 0 }} items
@@ -89,7 +89,7 @@
 
     <div
       v-else
-      class="overflow-hidden rounded-sm bg-white p-5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:p-6"
+      class="overflow-hidden rounded-sm bg-white p-5 dark:!bg-dashboard-card sm:p-6"
     >
       <div class="flex gap-3">
         <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
@@ -125,7 +125,7 @@
     <!-- Loading: table shell -->
     <template v-if="isLoadingFolder">
       <div
-        class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
           <div class="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search by name, SKU…"
-            class="w-full rounded-sm border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+            class="w-full rounded-sm border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
           />
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -194,7 +194,7 @@
           </Button>
           <select
             v-model="sortBy"
-            class="min-w-[120px] flex-1 cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
+            class="min-w-[120px] flex-1 cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
             @change="handleSortByChange"
           >
             <option value="name">Name</option>
@@ -213,12 +213,7 @@
       <Teleport to="body" :disabled="!isFullscreen">
         <div
           data-dashboard-teleport
-          :class="[
-            'transition-colors duration-200 ease-out',
-            isFullscreen
-              ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
-              : 'relative',
-          ]"
+          :class="[ 'transition-colors duration-200 ease-out', isFullscreen ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card' : 'relative', ]"
         >
           <!-- Fullscreen header -->
           <div
@@ -260,13 +255,13 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search…"
-                    class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+                    class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
                   />
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                   <select
                     v-model="sortBy"
-                    class="min-w-[7.5rem] cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+                    class="min-w-[7.5rem] cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2 text-sm font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
                     @change="handleSortByChange"
                   >
                     <option value="name">Name</option>
@@ -277,7 +272,7 @@
                   </select>
                   <button
                     type="button"
-                    class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
+                    class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
                     title="Reset filters"
                     @click="resetFilters"
                   >
@@ -336,11 +331,7 @@
           </div>
 
           <div
-            :class="[
-              isFullscreen
-                ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                : 'data-table-shell',
-            ]"
+            :class="[ isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell', ]"
           >
         <!-- Desktop toolbar -->
         <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
@@ -363,12 +354,12 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search…"
-                class="w-40 rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
+                class="w-40 rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
               />
             </div>
             <select
               v-model="sortBy"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
               @change="handleSortByChange"
             >
               <option value="name">Name</option>
@@ -439,10 +430,10 @@
       <!-- Empty state inside table card -->
       <div
         v-if="sortedFilteredItems.length === 0"
-        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-sm bg-white px-5 py-14 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:mx-5 sm:px-8"
+        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-sm bg-white px-5 py-14 text-center dark:!bg-dashboard-card sm:mx-5 sm:px-8"
       >
         <div
-          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-sm bg-gray-50 shadow-sm dark:bg-gray-800 dark:shadow-md dark:shadow-black/30"
+          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-sm bg-gray-50 dark:bg-gray-800"
         >
           <CubeIcon class="h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.35" />
         </div>
@@ -482,7 +473,7 @@
         <div
           v-for="item in paginatedItems"
           :key="item.id"
-          class="rounded-sm bg-white p-3.5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+          class="rounded-sm bg-white p-3.5 dark:!bg-dashboard-card"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -503,10 +494,7 @@
                     {{ item.discountedPrice !== undefined ? formatCurrency(item.discountedPrice) : formatCurrency(item.price ?? item.originalPrice ?? 0) }}
                   </span>
                   <span
-                    :class="[
-                      'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide',
-                      getItemAvailability(item).class,
-                    ]"
+                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide', getItemAvailability(item).class, ]"
                   >
                     {{ getItemAvailability(item).label }}
                   </span>
@@ -522,10 +510,7 @@
                 :data-item-actions-anchor="item.id"
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
-                :class="[
-                  'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
-                  isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
-                ]"
+                :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                 title="Actions"
                 aria-label="Item actions"
                 aria-haspopup="menu"
@@ -540,16 +525,12 @@
       <!-- Desktop: table when has items -->
       <div
         class="hidden sm:block"
-        :class="
-          isFullscreen
-            ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8'
-            : 'overflow-x-auto'
-        "
+        :class="isFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto'"
       >
         <table class="min-w-full border-separate border-spacing-0">
           <thead
             class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
-            :class="isFullscreen ? 'sticky top-0 z-10 shadow-sm shadow-gray-950/5 dark:shadow-black/35' : ''"
+            :class="isFullscreen ? 'sticky top-0 z-10' : ''"
           >
               <tr>
               <th
@@ -569,10 +550,7 @@
               <th
                 v-for="column in columns"
                 :key="column.key"
-                :class="[
-                  'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4',
-                  column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100',
-                ]"
+                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100', ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
                 <div class="flex items-center gap-1.5">
@@ -640,10 +618,7 @@
                 <!-- Display mode -->
                 <div
                   v-else
-                  :class="[
-                    'flex items-center gap-1.5 min-h-[22px]',
-                    isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors'
-                  ]"
+                  :class="[ 'flex items-center gap-1.5 min-h-[22px]', isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors' ]"
                   @click="startInlineEdit(item, column)"
                 >
                   <template v-if="colIndex === 0">
@@ -722,10 +697,7 @@
                     :data-item-actions-anchor="item.id"
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
-                    :class="[
-                      'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
-                      isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
-                    ]"
+                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                     title="Actions"
                     aria-label="Item actions"
                     aria-haspopup="menu"

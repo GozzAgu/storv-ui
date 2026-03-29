@@ -21,12 +21,7 @@
             <button
               type="button"
               @click="discountType = 'percentage'"
-              :class="[
-                'p-3 border-2 rounded-sm transition-all text-center',
-                discountType === 'percentage'
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
-              ]"
+              :class="[ 'p-3 border-2 rounded-sm transition-all text-center', discountType === 'percentage' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300' ]"
             >
               <p class="font-medium text-sm text-gray-900 dark:text-gray-100">Percentage</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">e.g., 10%</p>
@@ -34,12 +29,7 @@
             <button
               type="button"
               @click="discountType = 'amount'"
-              :class="[
-                'p-3 border-2 rounded-sm transition-all text-center',
-                discountType === 'amount'
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
-              ]"
+              :class="[ 'p-3 border-2 rounded-sm transition-all text-center', discountType === 'amount' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300' ]"
             >
               <p class="font-medium text-sm text-gray-900 dark:text-gray-100">Fixed Amount</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">e.g., $5.00</p>

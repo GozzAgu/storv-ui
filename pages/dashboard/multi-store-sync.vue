@@ -2,7 +2,7 @@
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
     <header
-      class="relative rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
         Enterprise
@@ -19,7 +19,7 @@
 
     <div
       v-if="!canAccess"
-      class="rounded-sm border border-amber-200/80 bg-amber-50/90 px-4 py-4 shadow-sm dark:border-amber-800/50 dark:bg-amber-950/25 sm:px-5 sm:py-5"
+      class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5"
     >
       <div class="flex items-start gap-3">
         <div
@@ -52,11 +52,7 @@
           role="tab"
           :aria-selected="activeTab === 'transfer'"
           class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'transfer'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="activeTab === 'transfer' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
           @click="activeTab = 'transfer'"
         >
           Transfer Items
@@ -71,11 +67,7 @@
           role="tab"
           :aria-selected="activeTab === 'reports'"
           class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'reports'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="activeTab === 'reports' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
           @click="activeTab = 'reports'"
         >
           Consolidated Reports
@@ -90,11 +82,7 @@
           role="tab"
           :aria-selected="activeTab === 'history'"
           class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'history'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="activeTab === 'history' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
           @click="activeTab = 'history'"
         >
           Transfer History
@@ -109,7 +97,7 @@
       <Card
         v-if="activeTab === 'transfer'"
         padding="none"
-        extra-class="!p-0 mt-1 overflow-hidden rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:mt-2"
+        extra-class="!p-0 mt-1 overflow-hidden rounded-sm bg-white/90 dark:!bg-dashboard-card sm:mt-2"
       >
         <div
           class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
@@ -321,7 +309,7 @@
             />
           </div>
 
-          <div class="overflow-hidden rounded-sm border border-gray-200/80 dark:border-gray-800/70">
+          <div class="overflow-hidden rounded-sm bg-white/90 dark:!bg-dashboard-card">
             <DataTableToolbar>
               <template #heading>
                 <div class="min-w-0">
@@ -388,7 +376,7 @@
             <div
               v-for="transfer in transferHistory"
               :key="transfer.id"
-              class="rounded-sm border border-gray-200/80 bg-white/90 p-3 shadow-sm transition-colors hover:border-gray-300/90 dark:border-gray-800/70 dark:!bg-dashboard-card/25 dark:hover:border-gray-600/80 sm:p-4"
+              class="rounded-sm bg-white/90 p-3 transition-colors hover:bg-gray-50/90 dark:!bg-dashboard-card/25 dark:hover:bg-dashboard-card/40 sm:p-4"
             >
               <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div class="flex-1 min-w-0">
@@ -423,10 +411,7 @@
               </div>
                 <div class="flex flex-col items-end gap-2 shrink-0">
               <span
-                :class="[
-                      'px-2 py-0.5 text-xs font-medium rounded-sm capitalize',
-                      getTransferStatusClass(transfer.status)
-                ]"
+                :class="[ 'px-2 py-0.5 text-xs font-medium rounded-sm capitalize', getTransferStatusClass(transfer.status) ]"
               >
                     {{ getTransferStatusLabel(transfer.status) }}
               </span>

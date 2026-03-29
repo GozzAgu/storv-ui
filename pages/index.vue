@@ -2,10 +2,7 @@
   <div class="min-h-screen bg-[#fafafa] text-gray-900 antialiased dark:bg-slate-950 dark:text-gray-100">
     <!-- Nav: glass, minimal -->
     <header
-      :class="[
-        'fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl transition-shadow duration-300 border-b border-gray-200/70 dark:border-gray-800/80 dark:bg-slate-950/90',
-        isScrolled ? 'shadow-sm dark:shadow-black/20' : 'shadow-none'
-      ]"
+      class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl duration-300 border-b border-gray-200/70 dark:border-gray-800/80 dark:bg-slate-950/90"
     >
       <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-18 gap-3">
@@ -187,7 +184,7 @@
         </div>
 
         <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          <div class="lg:col-span-6 rounded-sm overflow-hidden ring-1 ring-gray-200/60 shadow-sm dark:ring-gray-700/60">
+          <div class="lg:col-span-6 rounded-sm overflow-hidden">
               <img src="/questions.jpg" alt="Why Storvv" class="w-full h-full object-cover aspect-[4/3]" />
             </div>
 
@@ -202,13 +199,13 @@
                 <div class="space-y-5">
                   <div class="group relative">
                     <div class="absolute left-0 top-5 -translate-x-[5px]">
-                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center">
+                      <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center">
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-500' : 'bg-gray-300']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 0 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
+                    <div :class="['rounded-sm p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 0 ? 'bg-primary-50/30' : 'bg-white/90 hover:bg-gray-50/90']">
                       <div class="flex items-start gap-3">
-                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500">01</span>
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm bg-gray-100 px-1.5 text-[11px] font-semibold text-gray-500">01</span>
                         <div>
                           <h3 class="text-base sm:text-lg font-semibold text-gray-900">Career growth for your team</h3>
                           <p class="mt-2 text-sm text-gray-600 leading-relaxed">
@@ -221,13 +218,13 @@
 
                   <div class="group relative">
                     <div class="absolute left-0 top-5 -translate-x-[5px]">
-                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center dark:bg-slate-900 dark:ring-gray-600">
+                      <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center dark:bg-slate-900">
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 1 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
+                    <div :class="['rounded-sm p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 1 ? 'bg-primary-50/30 dark:bg-primary-950/30' : 'bg-white/90 hover:bg-gray-50/90 dark:bg-slate-900/90 dark:hover:bg-slate-800/40']">
                       <div class="flex items-start gap-3">
-                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500 dark:border-gray-600 dark:bg-slate-800 dark:text-gray-400">02</span>
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm bg-gray-100 px-1.5 text-[11px] font-semibold text-gray-500 dark:bg-slate-800 dark:text-gray-400">02</span>
                         <div>
                           <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Visibility that scales</h3>
                           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -240,13 +237,13 @@
 
                   <div class="group relative">
                     <div class="absolute left-0 top-5 -translate-x-[5px]">
-                      <div class="w-7 h-7 rounded-full bg-white ring-1 ring-gray-200 flex items-center justify-center dark:bg-slate-900 dark:ring-gray-600">
+                      <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center dark:bg-slate-900">
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 2 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
+                    <div :class="['rounded-sm p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 2 ? 'bg-primary-50/30 dark:bg-primary-950/30' : 'bg-white/90 hover:bg-gray-50/90 dark:bg-slate-900/90 dark:hover:bg-slate-800/40']">
                       <div class="flex items-start gap-3">
-                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500 dark:border-gray-600 dark:bg-slate-800 dark:text-gray-400">03</span>
+                        <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm bg-gray-100 px-1.5 text-[11px] font-semibold text-gray-500 dark:bg-slate-800 dark:text-gray-400">03</span>
                         <div>
                           <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Simple operations</h3>
                           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -260,7 +257,7 @@
                   <div class="pt-1">
                     <button
                       @click="showContactFormModal = true"
-                      class="rounded-sm bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors shadow-sm"
+                      class="rounded-sm bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
                     >
                       Get started
                     </button>
@@ -333,7 +330,7 @@
                 </div>
       <div class="bg-primary-400 flex items-center justify-center p-8 lg:p-12">
         <div class="w-full max-w-2xl">
-          <div class="rounded-sm overflow-hidden shadow-2xl bg-white/5 backdrop-blur-sm">
+          <div class="rounded-sm overflow-hidden bg-white/5 backdrop-blur-sm">
             <img src="/dash.png" alt="Storvv Dashboard" class="w-full h-auto object-contain" />
           </div>
         </div>
@@ -361,7 +358,7 @@
           <button
             @click="previousFeature"
             :disabled="currentFeatureIndex === 0"
-            :class="['absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center transition-all -translate-x-1 dark:bg-slate-900 dark:border-gray-700', currentFeatureIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
+            :class="['absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center transition-all -translate-x-1 dark:bg-slate-900', currentFeatureIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
             aria-label="Previous"
           >
             <ChevronLeftIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -369,7 +366,7 @@
           <button
             @click="nextFeature"
             :disabled="currentFeatureIndex >= features.length - visibleFeatures"
-            :class="['absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center transition-all translate-x-1 dark:bg-slate-900 dark:border-gray-700', currentFeatureIndex >= features.length - visibleFeatures ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
+            :class="['absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center transition-all translate-x-1 dark:bg-slate-900', currentFeatureIndex >= features.length - visibleFeatures ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
             aria-label="Next"
           >
             <ChevronRightIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -377,7 +374,7 @@
           <div class="overflow-hidden px-12">
             <div class="flex transition-transform duration-300 ease-out" :style="{ transform: `translateX(-${currentFeatureIndex * (100 / visibleFeatures)}%)` }">
               <div v-for="(feature, index) in features" :key="index" class="flex-shrink-0 px-3" :style="{ width: `${100 / visibleFeatures}%` }">
-                <div class="h-full rounded-sm border border-gray-200 bg-white p-6 hover:border-gray-300 transition-colors flex flex-col dark:border-gray-700 dark:bg-slate-900 dark:hover:border-gray-600">
+                <div class="h-full rounded-sm bg-white p-6 transition-colors flex flex-col hover:bg-gray-50/90 dark:bg-slate-900 dark:hover:bg-slate-800/80">
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ feature.title }}</h3>
                   <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">{{ feature.description }}</p>
                   <span class="mt-4 inline-flex items-center gap-1.5 text-primary-500 text-sm font-medium">Explore <ArrowRightIcon class="w-4 h-4" /></span>
@@ -480,7 +477,7 @@
           </div>
 
           <div class="space-y-4">
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
               <div class="flex items-start gap-3">
                 <CubeIcon class="mt-0.5 h-6 w-6 shrink-0 text-orange-300" />
                 <div>
@@ -490,7 +487,7 @@
               </div>
             </div>
 
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
               <div class="flex items-start gap-3">
                 <TagIcon class="mt-0.5 h-6 w-6 shrink-0 text-sky-300" />
                 <div>
@@ -500,7 +497,7 @@
               </div>
             </div>
 
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5 shadow-[0_10px_28px_rgba(2,6,23,0.35)]">
+            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
               <div class="flex items-start gap-3">
                 <UserGroupIcon class="mt-0.5 h-6 w-6 shrink-0 text-emerald-300" />
                 <div>
@@ -534,7 +531,7 @@
               role="switch"
               :aria-checked="isYearly"
             >
-            <span :class="['inline-block h-5 w-5 rounded-full bg-white shadow transition-transform', isYearly ? 'translate-x-6' : 'translate-x-1']" />
+            <span :class="['inline-block h-5 w-5 rounded-full bg-white transition-transform', isYearly ? 'translate-x-6' : 'translate-x-1']" />
             </button>
           <span :class="['text-sm font-medium flex items-center gap-2', isYearly ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500']">
               Yearly
@@ -543,7 +540,7 @@
           </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
-          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition duration-200 ease-out">
+          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Micro</h3>
             <p class="mt-1 text-xs text-gray-500">Single store, solo or very small team</p>
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
@@ -560,8 +557,8 @@
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
               </div>
           <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
-          <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl border-2 border-primary-200 bg-white dark:border-primary-500/50 dark:bg-slate-900 p-6 flex flex-col shadow-xl shadow-primary-500/10">
-            <p class="absolute -top-3 right-5 rounded-full bg-primary-500 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
+          <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-primary-50/35 p-6 flex flex-col dark:bg-slate-900">
+            <p class="absolute -top-3 right-5 rounded-full bg-primary-500 px-3 py-1 text-[11px] font-semibold text-white">
               Most popular
             </p>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Medium</h3>
@@ -582,7 +579,7 @@
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
-          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition duration-200 ease-out">
+          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Enterprise</h3>
             <p class="mt-1 text-xs text-gray-500">Larger operations, central management</p>
             <div class="mt-4 flex items-baseline gap-2">
@@ -637,12 +634,12 @@
         <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Common questions</h2>
         <p class="mt-2 text-gray-600 dark:text-gray-400 text-center text-sm">Answers to help you understand Storvv and billing.</p>
         <div class="mt-10 space-y-3">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button
               @click="toggleFaq(0)"
               class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
             >
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <ClockIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -666,9 +663,9 @@
             </div>
             </div>
             
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(1)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <SparklesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -690,9 +687,9 @@
             </div>
           </div>
 
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(2)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <ChartBarIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -714,9 +711,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <FolderIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
             </div>
               <div class="flex-1 min-w-0">
@@ -738,9 +735,9 @@
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <DocumentTextIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -762,9 +759,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(5)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <UsersIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -786,9 +783,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(6)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <ArrowPathIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -810,9 +807,9 @@
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <KeyIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -834,9 +831,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(8)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <BellAlertIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -858,9 +855,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(9)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <BuildingOfficeIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -882,9 +879,9 @@
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <ShieldCheckIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
           </div>
               <div class="flex-1 min-w-0">
@@ -906,9 +903,9 @@
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 dark:border dark:border-gray-800 rounded-sm overflow-hidden">
+          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
             <button @click="toggleFaq(11)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 w-8 h-8 bg-gray-50 border border-gray-200 rounded-sm flex items-center justify-center">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
                 <BanknotesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
@@ -1185,7 +1182,7 @@
     <button
       v-if="showBackToTop"
       @click="scrollToTop"
-      class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-gray-900 text-white shadow-lg hover:bg-gray-800 transition-colors flex items-center justify-center dark:bg-primary-600 dark:hover:bg-primary-500"
+      class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors flex items-center justify-center dark:bg-primary-600 dark:hover:bg-primary-500"
       aria-label="Back to top"
     >
       <ArrowUpIcon class="w-5 h-5" />
@@ -1221,7 +1218,7 @@
     >
       <template #header>
         <div class="text-center w-full">
-          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-sm flex items-center justify-center mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+          <div class="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-sm flex items-center justify-center mb-4 transform rotate-3 hover:rotate-0 transition-transform duration-300">
             <SparklesIcon class="w-8 h-8 text-white" />
           </div>
           </div>
@@ -1240,7 +1237,7 @@
           </p>
           <button
             @click="showLaunchModal = false"
-            class="w-full max-w-xs mx-auto bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-3.5 rounded-sm font-semibold text-base hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+            class="w-full max-w-xs mx-auto bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-3.5 rounded-sm font-semibold text-base hover:from-primary-700 hover:to-primary-800 transition-all transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Understood, Thank You!
           </button>
@@ -1546,16 +1543,12 @@ const scrollToTop = () => {
     })
   }
 
-const isScrolled = ref(false)
-
 let rafId: number | null = null
 
 const handleScroll = () => {
   // Show button when user scrolls down more than 400px
   showBackToTop.value = window.scrollY > 400
-  // Update nav shadow based on scroll
-  isScrolled.value = window.scrollY > 20
-  
+
   // Use requestAnimationFrame for smooth parallax
   if (rafId !== null) {
     cancelAnimationFrame(rafId)

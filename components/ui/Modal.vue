@@ -3,10 +3,7 @@
     <div v-if="modelValue" class="fixed inset-0 z-50 overflow-hidden" role="presentation">
       <!-- Backdrop: receives clicks outside panel -->
       <div
-        :class="[
-          'absolute inset-0 bg-slate-950/55 transition-opacity duration-300 dark:bg-black/65',
-          blurBackdrop ? 'backdrop-blur-[2px]' : '',
-        ]"
+        :class="[ 'absolute inset-0 bg-slate-950/55 transition-opacity duration-300 dark:bg-black/65', blurBackdrop ? 'backdrop-blur-[2px]' : '', ]"
         aria-hidden="true"
         @click="handleBackdropClick"
       />
@@ -29,11 +26,7 @@
             aria-modal="true"
             :aria-labelledby="labelledBy"
             :aria-describedby="describedBy"
-            :class="[
-              'frosted-glass pointer-events-auto relative flex max-h-[min(92dvh,calc(100dvh-1rem))] min-h-0 w-full flex-col overflow-hidden border border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100',
-              'rounded-t-sm sm:rounded-sm',
-              sizeClasses,
-            ]"
+            :class="[ 'frosted-glass pointer-events-auto relative flex max-h-[min(92dvh,calc(100dvh-1rem))] min-h-0 w-full flex-col overflow-hidden border border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'rounded-t-sm sm:rounded-sm', sizeClasses, ]"
             @click.stop
           >
             <!-- Header -->

@@ -80,11 +80,7 @@ const getColorClasses = (color?: string) => {
           v-for="(action, index) in actions"
           :key="action.id"
           @click="handleAction(action)"
-          :class="[
-            'flex items-center gap-3 px-4 py-3 rounded-sm shadow-lg transition-all transform hover:scale-105',
-            getColorClasses(action.color),
-            'min-w-[180px]'
-          ]"
+          :class="[ 'flex items-center gap-3 px-4 py-3 rounded-sm transition-all transform hover:scale-105', getColorClasses(action.color), 'min-w-[180px]' ]"
           :style="{ 
             animationDelay: `${index * 50}ms`,
             transform: isOpen ? 'translateY(0)' : 'translateY(10px)'
@@ -99,14 +95,7 @@ const getColorClasses = (color?: string) => {
     <!-- Main FAB Button -->
     <button
       @click="mainAction ? handleAction(mainAction) : (actions && actions.length > 0 ? toggleMenu() : null)"
-      :class="[
-        'w-14 h-14 rounded-full shadow-lg transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center',
-        mainAction 
-          ? getColorClasses(mainAction.color)
-          : isOpen 
-            ? 'bg-gray-600 hover:bg-gray-700 text-white' 
-            : 'bg-primary-500 hover:bg-primary-600 text-white'
-      ]"
+      :class="[ 'w-14 h-14 rounded-full transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center', mainAction ? getColorClasses(mainAction.color) : isOpen ? 'bg-gray-600 hover:bg-gray-700 text-white' : 'bg-primary-500 hover:bg-primary-600 text-white' ]"
     >
       <Transition
         mode="out-in"

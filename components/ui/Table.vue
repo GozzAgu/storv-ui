@@ -7,12 +7,7 @@
           <th
             v-for="column in columns"
             :key="column.key"
-            :class="[
-              'px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide',
-              column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '',
-              column.class || '',
-              headerClass
-            ]"
+            :class="[ 'px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide', column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '', column.class || '', headerClass ]"
             @click="column.sortable ? handleSort(column.key) : null"
           >
             <div class="flex items-center gap-1.5">
@@ -22,20 +17,10 @@
                 class="flex flex-col"
               >
                 <ChevronUpIcon
-                  :class="[
-                    'w-3 h-3',
-                    sortBy === column.key && sortOrder === 'asc'
-                      ? 'text-primary-500 dark:text-primary-400'
-                      : 'text-gray-300 dark:text-gray-600'
-                  ]"
+                  :class="[ 'w-3 h-3', sortBy === column.key && sortOrder === 'asc' ? 'text-primary-500 dark:text-primary-400' : 'text-gray-300 dark:text-gray-600' ]"
                 />
                 <ChevronDownIcon
-                  :class="[
-                    'w-3 h-3 -mt-1',
-                    sortBy === column.key && sortOrder === 'desc'
-                      ? 'text-primary-500 dark:text-primary-400'
-                      : 'text-gray-300 dark:text-gray-600'
-                  ]"
+                  :class="[ 'w-3 h-3 -mt-1', sortBy === column.key && sortOrder === 'desc' ? 'text-primary-500 dark:text-primary-400' : 'text-gray-300 dark:text-gray-600' ]"
                 />
               </span>
             </div>
@@ -54,10 +39,7 @@
         <tr
           v-for="(row, index) in sortedData"
           :key="getRowKey(row, index)"
-          :class="[
-            'transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]',
-            rowClass
-          ]"
+          :class="[ 'transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]', rowClass ]"
         >
           <td
             v-for="column in columns"

@@ -4,7 +4,7 @@
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
     <!-- Hero -->
     <header
-      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
       data-tutorial="dashboard"
     >
       <div class="relative">
@@ -149,7 +149,7 @@
       <!-- Revenue Chart -->
       <Card
         padding="sm"
-        extra-class="!p-0 overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-0 overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div
           class="flex flex-col gap-2.5 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
@@ -168,36 +168,21 @@
             <button
               type="button"
               @click="chartView = 'daily'"
-              :class="[
-                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-                chartView === 'daily'
-                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
-              ]"
+              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'daily' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Daily
             </button>
             <button
               type="button"
               @click="chartView = 'weekly'"
-              :class="[
-                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-                chartView === 'weekly'
-                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
-              ]"
+              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'weekly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Weekly
             </button>
             <button
               type="button"
               @click="chartView = 'monthly'"
-              :class="[
-                'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200',
-                chartView === 'monthly'
-                  ? 'bg-gray-900 text-white shadow-sm dark:bg-white dark:text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
-              ]"
+              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'monthly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Monthly
             </button>
@@ -238,7 +223,7 @@
       <!-- Orders & departments -->
       <Card
         padding="sm"
-        extra-class="!p-3 xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-3 xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <p
           class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
@@ -268,7 +253,7 @@
       <!-- Recent transactions -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
@@ -302,7 +287,7 @@
       <!-- Top products -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
@@ -348,7 +333,7 @@
       <!-- Low stock -->
       <Card
         padding="sm"
-        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="mb-3 flex items-center justify-between">
           <p
@@ -381,7 +366,7 @@
       <!-- Inventory status -->
       <Card
         padding="sm"
-        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <p
           class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"

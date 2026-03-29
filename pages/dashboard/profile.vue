@@ -1,7 +1,7 @@
 <template>
   <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:!bg-dashboard-card sm:px-5 sm:py-5"
+      class="rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="min-w-0">
         <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
@@ -20,12 +20,12 @@
       <!-- Profile card -->
       <div class="w-full shrink-0 lg:col-span-1">
         <div
-          class="relative overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
+          class="relative overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card"
         >
           <div class="relative flex flex-col items-center px-6 py-7 text-center sm:px-7">
             <!-- Avatar -->
             <div
-              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200/90 bg-gradient-to-br from-primary-500/90 to-primary-600/95 text-sm font-semibold text-white shadow-md dark:border-gray-600/80 dark:from-primary-600/90 dark:to-primary-700/95"
+              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200/90 bg-gradient-to-br from-primary-500/90 to-primary-600/95 text-sm font-semibold text-white dark:border-gray-600/80 dark:from-primary-600/90 dark:to-primary-700/95"
             >
               {{ profileAvatarInitials }}
             </div>
@@ -50,7 +50,7 @@
               </span>
             </template>
             <div
-              class="mt-6 flex w-full items-center justify-center gap-0 rounded-sm border border-gray-200/70 bg-gray-50/90 px-2 py-3 dark:border-gray-800/60 dark:!bg-dashboard-card/55"
+              class="mt-6 flex w-full items-center justify-center gap-0 rounded-sm bg-gray-50/90 px-2 py-3 dark:!bg-dashboard-card/55"
             >
               <div class="flex-1 min-w-0">
                 <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
@@ -75,7 +75,7 @@
       </div>
 
       <div class="space-y-4 lg:col-span-2">
-        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
+        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
           <div>
             <p v-if="isStaff" class="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Staff</p>
@@ -136,7 +136,7 @@
         </div>
         </div>
 
-        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
+        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
@@ -144,7 +144,7 @@
           <div class="space-y-0 p-3 sm:p-4">
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <LanguageIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -156,7 +156,7 @@
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <GlobeAltIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -168,7 +168,7 @@
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <CurrencyDollarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -180,7 +180,7 @@
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <BellIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -192,7 +192,7 @@
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <MoonIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -204,7 +204,7 @@
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <CalendarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -217,7 +217,7 @@
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
+        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Security</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
@@ -225,7 +225,7 @@
           <div class="space-y-0 p-3 sm:p-4">
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <KeyIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -237,7 +237,7 @@
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <ShieldCheckIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -249,7 +249,7 @@
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
                   <DevicePhoneMobileIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -264,7 +264,7 @@
 
         <div
           v-if="storeInfo.storeName || isLoadingProfile"
-          class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
+          class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card"
         >
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
@@ -310,7 +310,7 @@
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
+        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <div>
               <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
@@ -380,12 +380,7 @@
             v-for="themeOption in themeOptions"
             :key="themeOption.value"
             @click="selectTheme(themeOption.value as 'light' | 'dark' | 'system')"
-            :class="[
-              'w-full p-4 rounded-sm border-2 transition-all text-left',
-              currentThemeValue === themeOption.value
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'w-full p-4 rounded-sm border-2 transition-all text-left', currentThemeValue === themeOption.value ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center justify-between">
               <div>
@@ -413,12 +408,7 @@
             v-for="lang in languages"
             :key="lang.code"
             @click="selectLanguage(lang.code, lang.name)"
-            :class="[
-              'w-full p-4 rounded-sm border-2 transition-all text-left',
-              accountSettings.language === lang.name
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'w-full p-4 rounded-sm border-2 transition-all text-left', accountSettings.language === lang.name ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center justify-between">
               <div>
@@ -658,12 +648,7 @@
             v-for="region in regions"
             :key="region.code"
             @click="selectRegion(region.code, region.name)"
-            :class="[
-              'w-full p-4 rounded-sm border-2 transition-all text-left',
-              accountSettings.region === region.name
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'w-full p-4 rounded-sm border-2 transition-all text-left', accountSettings.region === region.name ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
@@ -694,12 +679,7 @@
             v-for="currency in currencies"
             :key="currency.code"
             @click="selectCurrency(currency.code, currency.name, currency.symbol)"
-            :class="[
-              'w-full p-4 rounded-sm border-2 transition-all text-left',
-              accountSettings.currency === currency.code
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'w-full p-4 rounded-sm border-2 transition-all text-left', accountSettings.currency === currency.code ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center justify-between">
               <div>

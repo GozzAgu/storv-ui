@@ -1,7 +1,7 @@
 <template>
   <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
+      class="rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
@@ -29,7 +29,7 @@
       <!-- Account: logo + subscription -->
       <div
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        class="relative overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
@@ -53,7 +53,7 @@
                 type="button"
                 @click="accountLogoInput?.click()"
                 :disabled="isUploadingAccountLogo"
-                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-400 hover:bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-primary-400/25 disabled:opacity-50 transition-all"
+                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-400 hover:bg-primary-500 text-white rounded-full flex items-center justify-center disabled:opacity-50 transition-all"
                 title="Upload logo"
                 aria-label="Upload logo"
               >
@@ -88,12 +88,7 @@
                 <select
                   v-model="selectedUpgradePlan"
                   :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
-                  :class="[
-                    'w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
-                    canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
-                      ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100'
-                      : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed'
-                  ]"
+                  :class="[ 'w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0 ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed' ]"
                 >
                   <option value="" disabled>
                     {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
@@ -137,7 +132,7 @@
       <!-- Stores -->
       <div
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        class="relative overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
       >
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
@@ -184,7 +179,7 @@
           </div>
 
           <div v-else-if="eligibleStores.length === 0" class="text-center py-10">
-            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm border border-gray-200/80 bg-white/80 dark:border-gray-700/80 dark:!bg-dashboard-card/40">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-white/80 dark:!bg-dashboard-card/40">
               <BuildingStorefrontIcon class="h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.25" />
             </div>
             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
@@ -196,15 +191,11 @@
             <div
               v-for="store in eligibleStores"
               :key="store.id"
-              class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-sm border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:border-gray-800/60 dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px sm:hover:border-primary-300/40 sm:hover:shadow-md sm:hover:shadow-gray-900/[0.04] dark:sm:hover:border-primary-500/25"
-              :class="
-                currentStore?.id === store.id
-                  ? 'border-primary-400/50 shadow-sm shadow-primary-500/10 dark:border-primary-500/40'
-                  : ''
-              "
+              class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-sm bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px"
+              :class="currentStore?.id === store.id ? 'bg-primary-50/90 dark:bg-primary-950/20' : ''"
             >
               <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-gray-200/80 bg-gray-100 dark:border-gray-700/80 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
+                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-gray-100 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
               >
                 <img v-if="store.logoUrl || accountLogoUrl" :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="h-full w-full object-cover" />
                 <BuildingStorefrontIcon v-else class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.75" />
@@ -246,7 +237,7 @@
       </div>
 
       <!-- Store information -->
-      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
+      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Store information</h2>
@@ -293,7 +284,7 @@
       </div>
 
       <!-- Inventory settings -->
-      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
+      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Inventory settings</h2>
@@ -357,7 +348,7 @@
       </div>
 
       <!-- Receipt & invoice settings -->
-      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
+      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Receipt & invoice settings</h2>
@@ -536,12 +527,8 @@
             v-for="store in storesStore.stores"
             :key="store.id"
             @click="handleStoreSelection(store.id)"
-            class="w-full text-left p-3 border-2 rounded-sm transition-all"
-            :class="
-              newlyCreatedStoreId === store.id
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-            "
+            class="w-full rounded-sm p-3 text-left transition-all"
+            :class="newlyCreatedStoreId === store.id ? 'bg-primary-50 dark:bg-primary-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">

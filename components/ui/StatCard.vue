@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group relative overflow-hidden rounded-sm border border-transparent bg-white shadow-sm transition duration-300 dark:border-white/[0.06] dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+    class="group relative overflow-hidden rounded-sm bg-white transition duration-300 dark:!bg-dashboard-card"
   >
     <div
       class="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-gray-100/90 to-transparent opacity-60 blur-2xl dark:from-gray-800/40 dark:to-transparent"
@@ -20,24 +20,14 @@
         </p>
         <span
           v-if="change !== undefined && change !== null"
-          :class="[
-            'flex-shrink-0 rounded-sm px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
-            changePositive === true
-              ? 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
-              : changePositive === false
-                ? 'bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400'
-                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-          ]"
+          :class="[ 'flex-shrink-0 rounded-sm px-1.5 py-0.5 text-[11px] font-semibold tabular-nums', changePositive === true ? 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400' : changePositive === false ? 'bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', ]"
         >
           {{ change }}
         </span>
       </div>
       <p
         v-if="subtext"
-        :class="[
-          'mt-1 text-[10px] leading-snug',
-          subtextClass || 'text-gray-500 dark:text-gray-400',
-        ]"
+        :class="[ 'mt-1 text-[10px] leading-snug', subtextClass || 'text-gray-500 dark:text-gray-400', ]"
       >
         {{ subtext }}
       </p>

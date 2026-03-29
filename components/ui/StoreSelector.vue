@@ -79,9 +79,7 @@
               :key="store.id"
               @click="switchStore(store.id)"
               class="w-full text-left flex items-center gap-2.5 rounded-l-sm py-2 pl-2 pr-2.5 text-xs transition-colors duration-150"
-              :class="currentStore?.id === store.id
-                ? 'border-l-[5px] border-primary-500 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                : 'border-l-[5px] border-transparent text-gray-700 dark:text-gray-300'"
+              :class="currentStore?.id === store.id ? 'border-l-[5px] border-primary-500 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent text-gray-700 dark:text-gray-300'"
             >
               <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100/80 dark:bg-gray-800/90">
                 <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">

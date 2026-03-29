@@ -39,7 +39,7 @@
           <img
             src="/storvv logo.png"
             alt="Storvv"
-            class="h-7 w-auto max-w-[140px] object-contain opacity-95 drop-shadow-sm lg:h-9 lg:max-w-[180px] xl:h-10 xl:max-w-[200px]"
+            class="h-7 w-auto max-w-[140px] object-contain opacity-95 lg:h-9 lg:max-w-[180px] xl:h-10 xl:max-w-[200px]"
           />
         </a>
 
@@ -62,7 +62,7 @@
             :style="{ animationDelay: `${180 + i * 70}ms` }"
           >
             <span
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/10 ring-1 ring-white/20 shadow-sm shadow-black/10 transition duration-300 ease-out group-hover:bg-white/16 group-hover:ring-white/30"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/10 transition duration-300 ease-out group-hover:bg-white/16"
             >
               <component :is="item.icon" class="h-5 w-5 text-white/95 transition-transform duration-300 group-hover:scale-105" />
             </span>

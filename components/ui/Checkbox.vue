@@ -1,10 +1,6 @@
 <template>
   <label
-    :class="[
-      'relative inline-flex items-center cursor-pointer group',
-      disabled && 'opacity-50 cursor-not-allowed',
-      wrapperClass
-    ]"
+    :class="[ 'relative inline-flex items-center cursor-pointer group', disabled && 'opacity-50 cursor-not-allowed', wrapperClass ]"
   >
     <input
       type="checkbox"
@@ -14,16 +10,7 @@
       class="sr-only peer"
     />
     <div
-      :class="[
-        'relative flex items-center justify-center rounded-sm border-2 transition-all duration-200 ease-out',
-        'transform',
-        size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5',
-        modelValue
-          ? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary-400 scale-100'
-          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400 dark:group-hover:border-primary-500 scale-100',
-        !disabled && 'group-hover:scale-105 active:scale-95',
-        disabled && 'cursor-not-allowed'
-      ]"
+      :class="[ 'relative flex items-center justify-center rounded-sm border-2 transition-all duration-200 ease-out', 'transform', size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5', modelValue ? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary-400 scale-100' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 group-hover:border-primary-400 dark:group-hover:border-primary-500 scale-100', !disabled && 'group-hover:scale-105 active:scale-95', disabled && 'cursor-not-allowed' ]"
     >
       <!-- Checkmark -->
       <transition
@@ -37,9 +24,7 @@
         <svg
           v-if="modelValue"
           class="text-white"
-          :class="[
-            size === 'sm' ? 'w-2.5 h-2.5' : size === 'lg' ? 'w-4 h-4' : 'w-3 h-3'
-          ]"
+          :class="[ size === 'sm' ? 'w-2.5 h-2.5' : size === 'lg' ? 'w-4 h-4' : 'w-3 h-3' ]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -66,21 +51,13 @@
       <div
         v-if="modelValue"
         class="absolute inset-0 rounded-sm bg-primary-400/20 pointer-events-none animate-ripple"
-        :class="[
-          size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5'
-        ]"
+        :class="[ size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5' ]"
       ></div>
     </transition>
     <!-- Label text -->
     <span
       v-if="$slots.default || label"
-      :class="[
-        'ml-3 text-sm font-medium transition-colors duration-200',
-        modelValue
-          ? 'text-gray-900 dark:text-gray-100'
-          : 'text-gray-700 dark:text-gray-300',
-        labelClass
-      ]"
+      :class="[ 'ml-3 text-sm font-medium transition-colors duration-200', modelValue ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300', labelClass ]"
     >
       <slot>{{ label }}</slot>
     </span>

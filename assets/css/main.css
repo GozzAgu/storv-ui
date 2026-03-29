@@ -71,7 +71,7 @@
 
   /** Card wrapper for dashboard tables — same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
-    @apply overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-950/[0.04] dark:border-gray-800/70 dark:bg-dashboard-card dark:shadow-lg dark:shadow-black/30 dark:ring-white/[0.04];
+    @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
   }
 
   /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#12141c) */
@@ -83,15 +83,9 @@
     background-color: rgba(255, 255, 255, 0.93);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow:
-      0 25px 50px -12px rgba(15, 23, 42, 0.18),
-      0 0 0 1px rgba(15, 23, 42, 0.06);
   }
   .dark .frosted-glass {
     background-color: rgba(3, 7, 18, 0.94);
-    box-shadow:
-      0 25px 50px -12px rgba(0, 0, 0, 0.55),
-      0 0 0 1px rgba(255, 255, 255, 0.08);
   }
   @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
     .frosted-glass {
@@ -415,10 +409,10 @@ html.theme-transitioning *::after {
   /* Pulse animation for CTAs */
   @keyframes pulse-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+      opacity: 1;
     }
     50% {
-      box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+      opacity: 0.85;
     }
   }
   
@@ -428,12 +422,11 @@ html.theme-transitioning *::after {
   
   /* Smooth scale on hover */
   .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
   }
   
   .hover-lift:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
   
   /* Hero parallax effect */
@@ -448,26 +441,20 @@ html.theme-transitioning *::after {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
   
   .glassmorphism-button {
     background: rgba(59, 130, 246, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
   
   .glassmorphism:hover {
     background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
   }
   
   .glassmorphism-button:hover {
     background: rgba(59, 130, 246, 0.95);
-    border-color: rgba(255, 255, 255, 0.3);
   }
 }
 

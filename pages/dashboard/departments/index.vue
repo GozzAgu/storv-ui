@@ -135,7 +135,7 @@
 
     <!-- Loading skeleton -->
     <template v-else-if="departmentsStore.loading">
-      <div class="rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 overflow-hidden min-h-[200px]">
+      <div class="rounded-sm bg-white dark:!bg-dashboard-card overflow-hidden min-h-[200px]">
         <div class="p-3 border-b border-gray-200/60 dark:border-gray-700/60">
           <div class="flex flex-wrap gap-2 mb-2">
             <div class="h-3.5 bg-gray-200 dark:bg-white/10 rounded w-20 animate-pulse"></div>
@@ -162,7 +162,7 @@
     <!-- Toolbar + content (desktop when not loading) -->
     <div v-else-if="!departmentsStore.error" class="flex-1 flex flex-col min-h-0 space-y-3">
       <!-- Toolbar (desktop): stats + search -->
-      <div class="hidden lg:flex flex-wrap items-center justify-between gap-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/30 px-3 py-2">
+      <div class="hidden lg:flex flex-wrap items-center justify-between gap-2 rounded-sm bg-white dark:!bg-dashboard-card px-3 py-2">
         <div class="flex items-center flex-wrap gap-4">
           <div class="flex items-center gap-1.5">
             <BuildingOfficeIcon class="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -236,11 +236,8 @@
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex flex-col items-stretch rounded-sm bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:shadow-md active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 dark:hover:shadow-lg dark:hover:shadow-black/50"
-          :class="{
-            'opacity-60 cursor-not-allowed': department.isActive === false,
-            'pointer-events-none': deletingDepartmentId === department.id
-          }"
+          class="group relative flex flex-col items-stretch rounded-sm bg-white duration-200 ease-out active:scale-[0.99] cursor-pointer overflow-visible min-h-[128px] sm:min-h-[136px] dark:!bg-dashboard-card"
+          :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false, 'pointer-events-none': deletingDepartmentId === department.id }"
           @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
         >
           <!-- Deleting overlay -->
@@ -315,7 +312,7 @@
       <!-- Empty state -->
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="flex-1 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
+        class="flex-1 rounded-sm bg-white dark:!bg-dashboard-card flex flex-col items-center justify-center py-10 px-4 sm:px-6 text-center min-w-0 w-full min-h-[calc(100svh-12rem)] sm:min-h-[calc(100svh-9rem)]"
       >
         <BuildingOfficeIcon class="w-12 h-12 shrink-0 mb-3 text-gray-300 dark:text-gray-500" stroke-width="1.25" />
         <h2 class="text-sm font-medium text-gray-400 dark:text-gray-500 break-words max-w-full">

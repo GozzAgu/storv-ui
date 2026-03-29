@@ -2,7 +2,7 @@
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
     <header
-      class="relative rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
         Security
@@ -19,12 +19,8 @@
 
     <div
       v-if="!canAccess"
-      class="rounded-sm border px-4 py-4 shadow-sm sm:px-5 sm:py-5"
-      :class="
-        accessDeniedByRole
-          ? 'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/25'
-          : 'border-amber-200/80 bg-amber-50/90 dark:border-amber-800/50 dark:bg-amber-950/25'
-      "
+      class="rounded-sm px-4 py-4 sm:px-5 sm:py-5"
+      :class="accessDeniedByRole ? 'bg-red-50/90 dark:bg-red-950/25' : 'bg-amber-50/90 dark:bg-amber-950/25'"
     >
       <p
         class="text-xs font-medium"
@@ -48,10 +44,10 @@
     <template v-else>
       <div
         v-if="!storeId && !loading"
-        class="rounded-sm border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-10"
+        class="rounded-sm bg-white/90 px-6 py-12 text-center dark:!bg-dashboard-card sm:px-10"
       >
         <div
-          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
         >
           <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
         </div>
@@ -101,7 +97,7 @@
 
         <div v-else-if="logs.length === 0" class="px-4 py-14 text-center sm:px-6">
           <div
-            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
           >
             <ClipboardDocumentListIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
           </div>
@@ -152,14 +148,7 @@
                 </td>
                 <td class="whitespace-nowrap px-3 py-2.5 sm:px-4">
                   <span
-                    :class="[
-                      'inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize',
-                      log.action === 'created'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                        : log.action === 'deleted'
-                          ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
-                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
-                    ]"
+                    :class="[ 'inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize', log.action === 'created' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : log.action === 'deleted' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300', ]"
                   >
                     {{ log.action }}
                   </span>

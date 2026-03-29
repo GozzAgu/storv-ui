@@ -9,12 +9,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             @click="selectMethod('totp')"
-            :class="[
-              'p-4 rounded-sm border transition-all text-left',
-              selectedMethod === 'totp'
-                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'p-4 rounded-sm border transition-all text-left', selectedMethod === 'totp' ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center gap-2 mb-1.5">
               <div class="w-8 h-8 rounded-sm bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -32,12 +27,7 @@
           
           <button
             @click="selectMethod('phone')"
-            :class="[
-              'p-4 rounded-sm border transition-all text-left',
-              selectedMethod === 'phone'
-                ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-            ]"
+            :class="[ 'p-4 rounded-sm border transition-all text-left', selectedMethod === 'phone' ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' ]"
           >
             <div class="flex items-center gap-2 mb-1.5">
               <div class="w-8 h-8 rounded-sm bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

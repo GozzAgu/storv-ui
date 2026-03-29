@@ -9,9 +9,8 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-sm border-l-[3px] shadow-sm',
-          'bg-white dark:bg-gray-800/95 border border-gray-200/80 dark:border-gray-700/80 backdrop-blur-md',
-          getAccentBorder(toast.type)
+          'pointer-events-auto flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-sm border-l-[3px] bg-white dark:bg-gray-800/95 border border-gray-200/80 dark:border-gray-700/80 backdrop-blur-md',
+          getAccentBorder(toast.type),
         ]"
         role="alert"
       >

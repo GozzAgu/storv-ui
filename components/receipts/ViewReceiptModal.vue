@@ -52,13 +52,13 @@
       <!-- Receipt Content (used for PDF) -->
       <div
         ref="receiptContent"
-        class="receipt-content bg-white text-gray-900 rounded-sm shadow-sm border border-gray-200 overflow-hidden max-w-lg mx-auto"
+        class="receipt-content bg-white text-gray-900 rounded-sm overflow-hidden max-w-lg mx-auto"
         :class="{ 'pdf-export': isCapturingPdf }"
       >
         <!-- Store header -->
         <div class="text-center pt-6 pb-4 px-6">
           <div v-if="storeLogoUrl" class="flex justify-center mb-2">
-            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-sm object-contain ring-1 ring-gray-200" />
+            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-sm object-contain" />
           </div>
           <h1 class="text-sm font-semibold text-gray-900 tracking-tight">{{ storeName || 'Store' }}</h1>
           <p v-if="storeAddress" class="mt-0.5 text-[10px] text-gray-500">{{ storeAddress }}</p>

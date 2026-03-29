@@ -58,12 +58,7 @@
               v-for="entityType in entityTypes"
               :key="entityType.value"
               @click="toggleEntityType(entityType.value)"
-              :class="[
-                'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
-                isEntityTypeSelected(entityType.value)
-                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300'
-                  : 'border border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700'
-              ]"
+              :class="[ 'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors', isEntityTypeSelected(entityType.value) ? 'bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300' : 'border border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-gray-700 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700' ]"
             >
               <component :is="entityType.icon" class="w-3.5 h-3.5 inline-block mr-1" />
               <span>{{ entityType.label }}</span>
@@ -135,12 +130,7 @@
                   v-for="status in receiptStatuses"
                   :key="status.value"
                   @click="toggleStatus(status.value)"
-                  :class="[
-                    'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors',
-                    isStatusSelected(status.value)
-                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  ]"
+                  :class="[ 'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors', isStatusSelected(status.value) ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' ]"
                 >
                   {{ status.label }}
                 </button>
@@ -212,18 +202,10 @@
               v-for="(result, index) in searchStore.results"
               :key="result.id"
               @click="handleResultClick(result)"
-              :class="[
-                'w-full px-3 py-2 text-left transition-colors sm:px-4 sm:py-3',
-                selectedIndex === index
-                  ? 'bg-primary-50 dark:bg-primary-500/10'
-                  : 'hover:bg-gray-50 dark:hover:bg-slate-800/60'
-              ]"
+              :class="[ 'w-full px-3 py-2 text-left transition-colors sm:px-4 sm:py-3', selectedIndex === index ? 'bg-primary-50 dark:bg-primary-500/10' : 'hover:bg-gray-50 dark:hover:bg-slate-800/60' ]"
             >
               <div class="flex items-start gap-2 sm:gap-3">
-                <div :class="[
-                  'w-8 h-8 sm:w-10 sm:h-10 rounded-sm flex items-center justify-center flex-shrink-0',
-                  getEntityTypeColor(result.type)
-                ]">
+                <div :class="[ 'w-8 h-8 sm:w-10 sm:h-10 rounded-sm flex items-center justify-center flex-shrink-0', getEntityTypeColor(result.type) ]">
                   <component :is="getEntityIcon(result.icon)" class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -231,10 +213,7 @@
                     <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {{ result.title }}
                     </p>
-                    <span :class="[
-                      'px-1.5 sm:px-2 py-0.5 text-xs font-medium rounded',
-                      getEntityTypeBadgeColor(result.type)
-                    ]">
+                    <span :class="[ 'px-1.5 sm:px-2 py-0.5 text-xs font-medium rounded', getEntityTypeBadgeColor(result.type) ]">
                       {{ getEntityTypeLabel(result.type) }}
                     </span>
                   </div>

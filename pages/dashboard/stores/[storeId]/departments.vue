@@ -6,7 +6,7 @@
 
     <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
     <header
-      class="relative overflow-hidden rounded-sm bg-white px-3 py-2.5 shadow-sm dark:bg-[#12141c] dark:shadow-lg dark:shadow-black/40 sm:px-4 sm:py-3"
+      class="relative overflow-hidden rounded-sm bg-white px-3 py-2.5 dark:bg-[#12141c] sm:px-4 sm:py-3"
     >
       <div
         class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/12 via-primary-500/5 to-transparent blur-2xl dark:hidden"
@@ -70,7 +70,7 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search departments…"
-              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
             <button
               v-if="searchQuery"
@@ -86,7 +86,7 @@
           <div class="flex flex-wrap items-center gap-1.5 sm:shrink-0">
             <button
               type="button"
-              class="inline-flex items-center justify-center rounded-sm border border-gray-200/90 bg-white p-1.5 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
+              class="inline-flex items-center justify-center rounded-sm border border-gray-200/90 bg-white p-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
               title="Reset filters"
               aria-label="Reset filters"
               @click="resetFilters"
@@ -133,7 +133,7 @@
     <!-- Mobile stats (compact, same surface language as folder cards) -->
     <div v-if="store" class="grid grid-cols-2 gap-1.5 lg:hidden">
       <div
-        class="rounded-sm bg-white px-2.5 py-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        class="rounded-sm bg-white px-2.5 py-2 dark:!bg-dashboard-card"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -146,7 +146,7 @@
         </div>
       </div>
       <div
-        class="rounded-sm bg-white px-2.5 py-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+        class="rounded-sm bg-white px-2.5 py-2 dark:!bg-dashboard-card"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -179,7 +179,7 @@
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 dark:!bg-dashboard-card animate-pulse"
       >
         <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
         <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
@@ -197,11 +197,8 @@
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[112px] hover:-translate-y-px hover:shadow-md hover:shadow-gray-900/12 dark:hover:shadow-black/20"
-          :class="{
-            'opacity-60 cursor-not-allowed': department.isActive === false,
-            'pointer-events-none': deletingDepartmentId === department.id
-          }"
+          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white duration-200 ease-out active:scale-[0.99] dark:!bg-dashboard-card sm:min-h-[112px] hover:-translate-y-px"
+          :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false, 'pointer-events-none': deletingDepartmentId === department.id }"
           @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
         >
           <div
@@ -259,7 +256,7 @@
                 {{ department.name }}
               </h3>
               <p
-                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-400"
+                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-400"
               >
                 {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
               </p>
@@ -276,7 +273,7 @@
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-10 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:min-h-[min(50vh,24rem)] sm:px-6"
+        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-10 text-center dark:!bg-dashboard-card sm:min-h-[min(50vh,24rem)] sm:px-6"
       >
         <div
           class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/12 via-transparent to-gray-200/15 blur-3xl dark:from-primary-500/10 dark:to-gray-600/10"

@@ -72,8 +72,7 @@ onMounted(() => {
   top: 50%;
   transform: translateY(-50%);
   background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: left 0.15s linear, box-shadow 0.15s linear;
+  transition: left 0.15s linear;
 }
 
 input:checked + .theme-track {
@@ -83,6 +82,5 @@ input:checked + .theme-track {
 input:checked + .theme-track .theme-knob {
   left: calc(100% - var(--knob) - var(--gap));
   background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 </style>

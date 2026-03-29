@@ -8,13 +8,13 @@
       v-if="departmentId"
       :department-id="departmentId"
       :can-show="canCreateNewStaff"
-      class="rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
+      class="rounded-sm bg-white dark:!bg-dashboard-card"
     />
 
     <!-- Hero -->
     <header
       v-if="!isLoadingDepartment"
-      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-1 items-start gap-3">
@@ -80,7 +80,7 @@
     </header>
     <div
       v-else
-      class="overflow-hidden rounded-sm bg-white p-5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:p-6"
+      class="overflow-hidden rounded-sm bg-white p-5 dark:!bg-dashboard-card sm:p-6"
     >
       <div class="flex gap-3">
         <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
@@ -107,12 +107,7 @@
     <Teleport to="body" :disabled="!isStaffFullscreen">
       <div
         data-dashboard-teleport
-        :class="[
-          'flex min-h-0 flex-col transition-colors duration-200 ease-out',
-          isStaffFullscreen
-            ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
-            : 'relative flex-1',
-        ]"
+        :class="[ 'flex min-h-0 flex-col transition-colors duration-200 ease-out', isStaffFullscreen ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card' : 'relative flex-1', ]"
       >
         <!-- Fullscreen header (same pattern as receipts) -->
         <div
@@ -170,12 +165,7 @@
         </div>
 
         <div
-          :class="[
-            'flex min-h-0 flex-col',
-            isStaffFullscreen
-              ? 'min-h-0 flex-1 overflow-hidden'
-              : 'data-table-shell overflow-hidden',
-          ]"
+          :class="[ 'flex min-h-0 flex-col', isStaffFullscreen ? 'min-h-0 flex-1 overflow-hidden' : 'data-table-shell overflow-hidden', ]"
         >
         <div
           v-if="canManageDepartments && selectedStaffForBulk.length > 0"
@@ -249,10 +239,10 @@
           class="flex min-h-[min(280px,calc(100svh-14rem))] flex-1 flex-col items-center justify-center px-4 py-14 text-center sm:px-6"
         >
           <div
-            class="mx-3 max-w-md rounded-sm bg-white px-6 py-12 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:mx-6"
+            class="mx-3 max-w-md rounded-sm bg-white px-6 py-12 dark:!bg-dashboard-card sm:mx-6"
           >
             <div
-              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-50 shadow-sm dark:bg-gray-800 dark:shadow-md dark:shadow-black/30"
+              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-50 dark:bg-gray-800"
             >
               <UsersIcon class="h-7 w-7 text-primary-500 dark:text-primary-400" stroke-width="1.35" />
             </div>
@@ -280,17 +270,12 @@
 
         <div
           v-else
-          :class="[
-            'min-h-0 flex-1',
-            isStaffFullscreen
-              ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8'
-              : 'overflow-x-auto',
-          ]"
+          :class="[ 'min-h-0 flex-1', isStaffFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto', ]"
         >
           <table class="min-w-full divide-y divide-gray-100/90 dark:divide-gray-800/80">
             <thead
               class="bg-gray-50/95 dark:!bg-dashboard-card/85"
-              :class="isStaffFullscreen ? 'sticky top-0 z-10 shadow-sm shadow-gray-950/5 dark:shadow-black/35' : ''"
+              :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''"
             >
               <tr>
                 <th v-if="canManageDepartments" class="w-10 px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">
@@ -338,13 +323,7 @@
               <td class="px-4 py-3 sm:px-5">
                 <span
                   class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                  :class="[
-                    member.role === 'manager'
-                      ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25'
-                      : member.role === 'intern'
-                        ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25'
-                        : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20',
-                  ]"
+                  :class="[ member.role === 'manager' ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25' : member.role === 'intern' ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25' : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20', ]"
                 >
                   {{ member.role }}
                 </span>
@@ -355,13 +334,7 @@
               <td class="px-4 py-3 sm:px-5">
                 <span
                   class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                  :class="[
-                    member.status === 'active'
-                      ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25'
-                      : member.status === 'on_leave'
-                        ? 'bg-amber-500/10 text-amber-800 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/25'
-                        : 'bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25',
-                  ]"
+                  :class="[ member.status === 'active' ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25' : member.status === 'on_leave' ? 'bg-amber-500/10 text-amber-800 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/25' : 'bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25', ]"
                 >
                   {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
                 </span>

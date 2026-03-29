@@ -16,24 +16,13 @@
           >
             <div class="flex items-center flex-1">
               <div
-                :class="[
-                  'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all',
-                  'aspect-square',
-                  currentStep >= index
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                ]"
+                :class="[ 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all', 'aspect-square', currentStep >= index ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' ]"
               >
                 {{ index + 1 }}
               </div>
               <div class="ml-2 hidden sm:block">
                 <p
-                  :class="[
-                    'text-xs font-medium',
-                    currentStep >= index
-                      ? 'text-gray-900 dark:text-gray-100'
-                      : 'text-gray-500 dark:text-gray-400'
-                  ]"
+                  :class="[ 'text-xs font-medium', currentStep >= index ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' ]"
                 >
                   {{ step.label }}
                 </p>
@@ -41,10 +30,7 @@
             </div>
             <div
               v-if="index < steps.length - 1"
-              :class="[
-                'hidden sm:block h-0.5 flex-1 mx-3 transition-all',
-                currentStep > index ? 'bg-primary-500' : 'bg-gray-200 dark:bg-gray-700'
-              ]"
+              :class="[ 'hidden sm:block h-0.5 flex-1 mx-3 transition-all', currentStep > index ? 'bg-primary-500' : 'bg-gray-200 dark:bg-gray-700' ]"
             ></div>
           </div>
         </div>
@@ -93,19 +79,11 @@
                 v-for="folder in filteredFolders"
                 :key="folder.id"
                 @click="selectFolder(folder)"
-                :class="[
-                  'p-3 border-2 rounded-sm transition-all text-left',
-                  selectedFolder?.id === folder.id
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
-                ]"
+                :class="[ 'p-3 border-2 rounded-sm transition-all text-left', selectedFolder?.id === folder.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600' ]"
               >
                 <div class="flex items-center gap-2.5">
                   <div
-                    :class="[
-                      'w-8 h-8 rounded-sm flex items-center justify-center',
-                      getFolderColorClass(folder.color)
-                    ]"
+                    :class="[ 'w-8 h-8 rounded-sm flex items-center justify-center', getFolderColorClass(folder.color) ]"
                   >
                     <FolderIcon class="w-4 h-4 text-white" />
                   </div>
@@ -170,12 +148,7 @@
               <div
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
-                :class="[
-                  'p-3 border rounded-sm transition-all cursor-pointer',
-                  selectedItems.find(si => si.id === item.id)
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
-                ]"
+                :class="[ 'p-3 border rounded-sm transition-all cursor-pointer', selectedItems.find(si => si.id === item.id) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600' ]"
                 @click="toggleItemSelection(item)"
               >
                 <div class="flex items-center justify-between">
@@ -271,7 +244,7 @@
                 <!-- Customer Suggestions Dropdown -->
                 <div
                   v-if="showCustomerSuggestions && receiptForm.customerName && matchingCustomers.length > 0"
-                  class="absolute z-50 w-full mt-1 bg-white dark:!bg-dashboard-card border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg max-h-48 overflow-y-auto"
+                  class="absolute z-50 w-full mt-1 bg-white dark:!bg-dashboard-card border border-gray-200 dark:border-gray-700 rounded-sm max-h-48 overflow-y-auto"
                 >
                   <div
                     v-for="customer in matchingCustomers"

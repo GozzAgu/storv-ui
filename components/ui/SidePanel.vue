@@ -15,10 +15,7 @@
     >
       <div
         v-if="modelValue"
-        :class="[
-          'fixed inset-0 z-[1100] bg-slate-950/55 dark:bg-black/65',
-          blurBackdrop ? 'backdrop-blur-[2px]' : '',
-        ]"
+        :class="[ 'fixed inset-0 z-[1100] bg-slate-950/55 dark:bg-black/65', blurBackdrop ? 'backdrop-blur-[2px]' : '', ]"
         aria-hidden="true"
         @click="handleBackdropClick"
       />
@@ -42,11 +39,7 @@
           aria-modal="true"
           :aria-labelledby="labelledBy"
           :aria-describedby="describedBy"
-          :class="[
-            'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 shadow-2xl dark:border-gray-800 dark:text-gray-100',
-            'w-full min-w-0 rounded-none lg:rounded-l-sm',
-            panelWidthClasses,
-          ]"
+          :class="[ 'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'w-full min-w-0 rounded-none lg:rounded-l-sm', panelWidthClasses, ]"
           @click.stop
         >
             <!-- Header -->
