@@ -96,6 +96,40 @@ export function getPlanLimits(plan: SubscriptionPlan): SubscriptionLimits {
   return LIMITS_BY_PLAN[plan] ?? LIMITS_BY_PLAN.storvv_micro
 }
 
+/** Normalize Firestore Timestamp / Date / string for sorting. Missing dates sort last (newest), so limits trim undated stores first when over capacity. */
+export function storeCreatedAtMillis(createdAt: unknown): number {
+  if (createdAt == null) return Number.MAX_SAFE_INTEGER
+  if (typeof createdAt === 'object' && createdAt !== null && 'toMillis' in createdAt) {
+    const fn = (createdAt as { toMillis?: () => number }).toMillis
+    if (typeof fn === 'function') return fn.call(createdAt)
+  }
+  if (createdAt instanceof Date) return createdAt.getTime()
+  if (typeof createdAt === 'string' || typeof createdAt === 'number') {
+    const t = new Date(createdAt).getTime()
+    return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER
+  }
+  return Number.MAX_SAFE_INTEGER
+}
+
+/**
+ * Stores the plan allows the account to **view and switch to** (e.g. after downgrade).
+ * Keeps the oldest stores by `createdAt` up to `maxStores`; unlimited plans return all.
+ */
+export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unknown }>(
+  stores: T[],
+  plan: SubscriptionPlan
+): T[] {
+  const max = getPlanLimits(plan).maxStores
+  if (max < 0) return [...stores]
+  const sorted = [...stores].sort((a, b) => {
+    const da = storeCreatedAtMillis(a.createdAt)
+    const db = storeCreatedAtMillis(b.createdAt)
+    if (da !== db) return da - db
+    return a.id.localeCompare(b.id)
+  })
+  return sorted.slice(0, max)
+}
+
 /** Human-readable feature summary per plan (for settings/landing). */
 export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = {
   storvv_micro: [

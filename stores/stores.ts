@@ -3,7 +3,7 @@ import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, 
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { getStoresCollection, getStoreDocument, getQueryUserId } from '~/composables/useFirestorePaths'
-import { getPlanLimits } from '~/types/subscription'
+import { getPlanLimits, getEligibleStoresForPlan } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
 
@@ -116,32 +116,71 @@ export const useStoresStore = defineStore('stores', {
         await this.fetchStores()
       }
 
-      // Try to get from localStorage first
+      const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+      const eligible = getEligibleStoresForPlan(this.stores, plan)
+      const eligibleIds = new Set(eligible.map(s => s.id))
+
       let storeWasSet = false
       if (import.meta.client) {
         const savedStoreId = localStorage.getItem('currentStoreId')
-        if (savedStoreId && this.getStoreById(savedStoreId)) {
+        if (savedStoreId && eligibleIds.has(savedStoreId) && this.getStoreById(savedStoreId)) {
           this.currentStoreId = savedStoreId
           storeWasSet = true
         }
       }
 
-      // If no saved store or saved store doesn't exist, use first active store
       if (!storeWasSet) {
-        const firstActiveStore = this.activeStores[0]
-        if (firstActiveStore) {
-          this.currentStoreId = firstActiveStore.id
+        const pick = eligible.find(s => s.isActive !== false) || eligible[0]
+        if (pick) {
+          this.currentStoreId = pick.id
           if (import.meta.client) {
-            localStorage.setItem('currentStoreId', firstActiveStore.id)
+            localStorage.setItem('currentStoreId', pick.id)
           }
           storeWasSet = true
         }
       }
 
-      // Refresh data if store was set
       if (storeWasSet && this.currentStoreId) {
-        // Don't await - let it refresh in background to avoid blocking initialization
         this.refreshStoreData().catch(err => console.warn('Failed to refresh store data on init:', err))
+      }
+    },
+
+    /** After fetch or subscription change: keep super-admin on a plan-eligible branch. */
+    async applyPlanToCurrentStoreSelection() {
+      if (import.meta.server) return
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return
+
+      const { useUserStore } = await import('./user')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      if (userStore.userData?.role !== 'superAdmin') return
+
+      if (this.stores.length === 0) {
+        if (this.currentStoreId) {
+          await this.clearStoreData()
+          this.currentStoreId = null
+          if (import.meta.client) localStorage.removeItem('currentStoreId')
+        }
+        return
+      }
+
+      const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+      const eligibleIds = new Set(getEligibleStoresForPlan(this.stores, plan).map(s => s.id))
+
+      if (this.currentStoreId && eligibleIds.has(this.currentStoreId)) return
+
+      const eligible = getEligibleStoresForPlan(this.stores, plan)
+      const fallback = eligible.find(s => s.isActive !== false) || eligible[0]
+      if (fallback) {
+        await this.setCurrentStore(fallback.id)
+      } else {
+        await this.clearStoreData()
+        this.currentStoreId = null
+        if (import.meta.client) localStorage.removeItem('currentStoreId')
       }
     },
 
@@ -149,6 +188,21 @@ export const useStoresStore = defineStore('stores', {
     async setCurrentStore(storeId: string | null) {
       if (storeId && !this.getStoreById(storeId)) {
         throw new Error('Store not found')
+      }
+
+      if (storeId) {
+        const { useUserStore } = await import('./user')
+        const u = useUserStore()
+        if (!u.userData && useAuthStore().currentUser) {
+          await u.fetchUserData(useAuthStore().currentUser!.uid)
+        }
+        if (u.userData?.role === 'superAdmin') {
+          const plan = (u.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+          const eligibleIds = new Set(getEligibleStoresForPlan(this.stores, plan).map(s => s.id))
+          if (!eligibleIds.has(storeId)) {
+            throw new Error('This branch is not available on your current plan. Upgrade in Settings to access it.')
+          }
+        }
       }
       
       // Clear all data from previous store before switching
@@ -386,7 +440,10 @@ export const useStoresStore = defineStore('stores', {
 
         this.stores = stores
 
-        // Initialize current store if not set
+        if (userStore.userData?.role === 'superAdmin') {
+          await this.applyPlanToCurrentStoreSelection()
+        }
+
         if (!this.currentStoreId && stores.length > 0) {
           await this.initializeCurrentStore()
         }
@@ -636,13 +693,18 @@ export const useStoresStore = defineStore('stores', {
         // Remove from local state
         this.stores = this.stores.filter(s => s.id !== storeId)
 
-        // If this was the current store, switch to another one
         if (this.currentStoreId === storeId) {
-          const nextStore = this.activeStores.find(s => s.id !== storeId) || this.activeStores[0]
+          const remaining = this.stores.filter(s => s.id !== storeId)
+          const { useUserStore } = await import('./user')
+          const u = useUserStore()
+          const plan = (u.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+          const eligible =
+            u.userData?.role === 'superAdmin' ? getEligibleStoresForPlan(remaining, plan) : remaining
+          const nextStore = eligible.find(s => s.isActive !== false) || eligible[0]
           if (nextStore) {
-            this.setCurrentStore(nextStore.id)
+            await this.setCurrentStore(nextStore.id)
           } else {
-            this.setCurrentStore(null)
+            await this.setCurrentStore(null)
           }
         }
       } catch (error: any) {

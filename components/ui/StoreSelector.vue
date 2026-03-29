@@ -153,7 +153,10 @@ const dropdownRef = ref<HTMLElement | null>(null)
 const switchingStore = ref(false)
 
 const loading = computed(() => storesStore.loading)
-const stores = computed(() => storesStore.stores)
+const { eligibleStores } = usePlanEligibleStores()
+const stores = computed(() =>
+  userStore.userData?.role === 'superAdmin' ? eligibleStores.value : storesStore.stores
+)
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
 

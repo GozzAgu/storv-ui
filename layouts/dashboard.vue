@@ -689,6 +689,7 @@ const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const searchStore = useSearchStore()
+const { eligibleStores } = usePlanEligibleStores()
 
 // Fetch notifications on mount
 onMounted(() => {
@@ -953,6 +954,14 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
   }
 }, { immediate: true })
 
+watch(
+  () => userStore.userData?.subscription,
+  async () => {
+    if (userStore.userData?.role !== 'superAdmin' || !storesStore.stores.length) return
+    await storesStore.applyPlanToCurrentStoreSelection()
+  }
+)
+
 // Watch for store changes and auto-expand current store
 watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
   // Track store switching
@@ -1053,14 +1062,12 @@ const recentFolders = computed(() => {
 // Current store
 const currentStore = computed(() => storesStore.currentStore)
 
-// Stores list - show current store first, then others
+// Super-admins: only plan-eligible branches (oldest-first when over limit). Staff: full assigned list.
 const storesList = computed(() => {
-  const allStores = storesStore.stores
+  const allStores =
+    userStore.userData?.role === 'superAdmin' ? eligibleStores.value : storesStore.stores
   const current = currentStore.value
-  
-  if (!current) return allStores
-  
-  // Sort: current store first, then others
+  if (!current || !allStores.some(s => s.id === current.id)) return allStores
   const otherStores = allStores.filter(s => s.id !== current.id)
   return [current, ...otherStores]
 })

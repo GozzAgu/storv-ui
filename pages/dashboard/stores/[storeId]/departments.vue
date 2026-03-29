@@ -414,6 +414,8 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import type { Department } from '~/composables/useDepartments'
+import { getEligibleStoresForPlan } from '~/types/subscription'
+import type { SubscriptionPlan } from '~/types/subscription'
 
 definePageMeta({
   layout: 'dashboard',
@@ -674,7 +676,6 @@ onMounted(async () => {
       }
     }
 
-    // Fetch store data
     if (!store.value) {
       console.log('[StoreDepartmentsPage] Fetching stores...')
       try {
@@ -683,7 +684,23 @@ onMounted(async () => {
         console.error('[StoreDepartmentsPage] Error fetching stores:', error)
       }
     }
-    
+
+    if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
+      const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+      const eligible = getEligibleStoresForPlan(storesStore.stores, plan)
+      const eligibleIds = new Set(eligible.map(s => s.id))
+      if (!eligibleIds.has(storeId.value)) {
+        const fallback = eligible[0]
+        if (fallback) {
+          toast.info('This branch is not on your current plan. Opening an available branch.')
+          await navigateTo(`/dashboard/stores/${fallback.id}/departments`, { replace: true })
+          return
+        }
+        await navigateTo('/dashboard/settings', { replace: true })
+        return
+      }
+    }
+
     // Load departments
     console.log('[StoreDepartmentsPage] Fetching departments...')
     try {

@@ -164,6 +164,14 @@
           Multiple store branches are not included on Storvv Micro (free). Upgrade to Medium or Enterprise in the
           Account section above to add more stores.
         </p>
+        <p
+          v-if="hiddenStoreCount > 0"
+          class="mx-5 sm:mx-6 -mt-1 mb-3 text-[11px] sm:text-xs leading-snug text-amber-600/90 dark:text-amber-400/80"
+        >
+          {{ hiddenStoreCount }}
+          {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your account but not available on your
+          current plan. Upgrade in Account above to access them again. The oldest branches stay available first.
+        </p>
 
         <div class="relative px-5 sm:px-6 py-5">
           <div v-if="storesLoading" class="text-center py-10">
@@ -175,7 +183,7 @@
             <p class="text-xs font-medium text-red-800 dark:text-red-200">{{ storesError }}</p>
           </div>
 
-          <div v-else-if="stores.length === 0" class="text-center py-10">
+          <div v-else-if="eligibleStores.length === 0" class="text-center py-10">
             <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm border border-gray-200/80 bg-white/80 dark:border-gray-700/80 dark:!bg-dashboard-card/40">
               <BuildingStorefrontIcon class="h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.25" />
             </div>
@@ -186,7 +194,7 @@
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             <div
-              v-for="store in stores"
+              v-for="store in eligibleStores"
               :key="store.id"
               class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-sm border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:border-gray-800/60 dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px sm:hover:border-primary-300/40 sm:hover:shadow-md sm:hover:shadow-gray-900/[0.04] dark:sm:hover:border-primary-500/25"
               :class="
@@ -525,7 +533,7 @@
         </p>
         <div class="space-y-2 max-h-96 overflow-y-auto">
           <button
-            v-for="store in stores"
+            v-for="store in storesStore.stores"
             :key="store.id"
             @click="handleStoreSelection(store.id)"
             class="w-full text-left p-3 border-2 rounded-sm transition-all"
@@ -623,6 +631,7 @@ const authStore = useAuthStore()
 const inventoryStore = useInventoryStore()
 const toast = useToast()
 const { limits } = useSubscriptionFeatures()
+const { eligibleStores, hiddenStoreCount } = usePlanEligibleStores()
 const route = useRoute()
 
 // Check if user is super admin (only super admins can edit settings)
@@ -683,19 +692,13 @@ const handleUpgradeSubscription = async () => {
 // Stores management
 const storesLoading = computed(() => storesStore.loading)
 const storesError = computed(() => storesStore.error)
-const stores = computed(() => storesStore.stores)
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
-const otherStores = computed(() => {
-  const allStores = stores.value
-  const current = currentStore.value
-  return current ? allStores.filter(s => s.id !== current.id) : allStores
-})
 
 const canAddStore = computed(() => {
   const max = limits.value.maxStores
   if (max < 0) return true
-  return stores.value.length < max
+  return storesStore.stores.length < max
 })
 
 // Store management state
@@ -842,7 +845,7 @@ const handleStoreSubmit = async () => {
       toast.success('Store updated successfully')
       closeStoreModal()
     } else {
-      const wasFirstStore = stores.value.length === 0
+      const wasFirstStore = storesStore.stores.length === 0
       const logoUrl = userStore.userData?.storeLogoUrl || ''
       const newStoreId = await storesStore.createStore({ ...storeForm.value, logoUrl })
       toast.success('Store created successfully')
