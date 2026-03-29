@@ -221,7 +221,7 @@
     <div
       v-if="!isLoadingFolder"
       :class="[
-        'transition-all duration-300',
+        'transition-colors duration-200 ease-out',
         isFullscreen
           ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
           : 'relative'
@@ -732,7 +732,6 @@
         :items-per-page="itemsPerPage"
         :total="sortedFilteredItems.length"
         @page-change="handlePageChange"
-        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
       />
     </DashboardFixedFooter>
 
@@ -749,7 +748,6 @@
           :items-per-page="itemsPerPage"
           :total="sortedFilteredItems.length"
           @page-change="handlePageChange"
-          @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
         />
       </div>
     </div>

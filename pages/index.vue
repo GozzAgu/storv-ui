@@ -208,7 +208,7 @@
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 0 ? 'bg-primary-500' : 'bg-gray-300']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 0 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
+                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 0 ? 'border-primary-200 bg-primary-50/30 shadow-sm' : 'border-gray-200/90 bg-white/90 hover:border-gray-300']">
                       <div class="flex items-start gap-3">
                         <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500">01</span>
                         <div>
@@ -227,7 +227,7 @@
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 1 ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 1 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
+                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 1 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
                       <div class="flex items-start gap-3">
                         <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500 dark:border-gray-600 dark:bg-slate-800 dark:text-gray-400">02</span>
                         <div>
@@ -246,7 +246,7 @@
                         <div :class="['w-2.5 h-2.5 rounded-full transition-colors', whyActiveStep >= 2 ? 'bg-primary-500' : 'bg-gray-300 dark:bg-gray-600']"></div>
                       </div>
                     </div>
-                    <div :class="['rounded-sm border p-5 sm:p-6 transition-all duration-300', whyActiveStep === 2 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
+                    <div :class="['rounded-sm border p-5 sm:p-6 transition duration-200 ease-out', whyActiveStep === 2 ? 'border-primary-200 bg-primary-50/30 shadow-sm dark:border-primary-500/40 dark:bg-primary-950/30' : 'border-gray-200/90 bg-white/90 hover:border-gray-300 dark:border-gray-700 dark:bg-slate-900/90 dark:hover:border-gray-600']">
                       <div class="flex items-start gap-3">
                         <span class="inline-flex h-6 min-w-6 items-center justify-center rounded-sm border border-gray-200 bg-gray-50 px-1.5 text-[11px] font-semibold text-gray-500 dark:border-gray-600 dark:bg-slate-800 dark:text-gray-400">03</span>
                         <div>
@@ -545,7 +545,7 @@
           </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
           <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
-          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition-all duration-300">
+          <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition duration-200 ease-out">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Micro</h3>
             <p class="mt-1 text-xs text-gray-500">Single store, solo or very small team</p>
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
@@ -584,7 +584,7 @@
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get started</button>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
-          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition-all duration-300">
+          <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl border border-gray-200/80 bg-white dark:border-gray-700 dark:bg-slate-900 p-6 flex flex-col shadow-sm hover:shadow-md hover:border-primary-200 dark:hover:border-primary-500/50 transition duration-200 ease-out">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Enterprise</h3>
             <p class="mt-1 text-xs text-gray-500">Larger operations, central management</p>
             <div class="mt-4 flex items-baseline gap-2">
@@ -970,7 +970,7 @@
             Store owners choose Storvv because it gives them:
           </p>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -981,7 +981,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -992,7 +992,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1003,7 +1003,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1014,7 +1014,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out sm:col-span-2 lg:col-span-1">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />

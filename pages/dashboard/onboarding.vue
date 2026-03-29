@@ -9,7 +9,7 @@
         </div>
         <div class="h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10">
           <div 
-            class="bg-gradient-to-r from-primary-400 to-primary-500 h-1.5 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-primary-400 to-primary-500 h-1.5 rounded-full transition-[width] duration-300 ease-out"
             :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
           ></div>
         </div>

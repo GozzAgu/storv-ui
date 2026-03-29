@@ -152,7 +152,7 @@
       <div
         data-dashboard-teleport
         :class="[
-          'transition-all duration-300',
+          'transition-colors duration-200 ease-out',
           isReceiptsFullscreen
             ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
             : 'relative',
@@ -831,7 +831,6 @@
             :items-per-page="itemsPerPage"
             :total="sortedFilteredReceipts.length"
             @page-change="handlePageChange"
-            @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
           />
         </div>
       </div>
@@ -848,7 +847,6 @@
         :items-per-page="itemsPerPage"
         :total="sortedFilteredReceipts.length"
         @page-change="handlePageChange"
-        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
       />
     </DashboardFixedFooter>
 
@@ -1156,7 +1154,6 @@
           :items-per-page="customersItemsPerPage"
           :total="filteredCustomers.length"
           @page-change="handleCustomersPageChange"
-          @items-per-page-change="(n: number) => { customersItemsPerPage = n; customersCurrentPage = 1 }"
         />
       </DashboardFixedFooter>
     </template>

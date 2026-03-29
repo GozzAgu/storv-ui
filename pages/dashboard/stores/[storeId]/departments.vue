@@ -197,7 +197,7 @@
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-all duration-200 active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[112px] hover:-translate-y-px hover:shadow-md hover:shadow-gray-900/12 dark:hover:shadow-black/20"
+          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[112px] hover:-translate-y-px hover:shadow-md hover:shadow-gray-900/12 dark:hover:shadow-black/20"
           :class="{
             'opacity-60 cursor-not-allowed': department.isActive === false,
             'pointer-events-none': deletingDepartmentId === department.id
@@ -301,7 +301,6 @@
         :items-per-page="itemsPerPage"
         :total="filteredDepartments.length"
         @page-change="handlePageChange"
-        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
       />
     </DashboardFixedFooter>
 

@@ -106,7 +106,7 @@
 
     <div
       :class="[
-        'flex min-h-0 flex-col transition-all duration-300',
+        'flex min-h-0 flex-col transition-colors duration-200 ease-out',
         isStaffFullscreen
           ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
           : 'relative flex-1',
@@ -405,7 +405,6 @@
         :items-per-page="staffItemsPerPage"
         :total="staff.length"
         @page-change="handleStaffPageChange"
-        @items-per-page-change="(n: number) => { staffItemsPerPage = n; staffCurrentPage = 1 }"
       />
     </DashboardFixedFooter>
 
@@ -421,7 +420,6 @@
           :items-per-page="staffItemsPerPage"
           :total="staff.length"
           @page-change="handleStaffPageChange"
-          @items-per-page-change="(n: number) => { staffItemsPerPage = n; staffCurrentPage = 1 }"
         />
       </div>
     </div>

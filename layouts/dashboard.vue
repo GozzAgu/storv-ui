@@ -12,7 +12,7 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-40 flex flex-col transition-[transform,width] duration-300 ease-in-out lg:translate-x-0',
         /* Same base as main canvas — separation is shadow only */
         'bg-gray-100 dark:bg-[#07080c]',
         'shadow-[8px_0_32px_-12px_rgba(15,23,42,0.08)] dark:shadow-[16px_0_48px_-16px_rgba(0,0,0,0.85)]',
@@ -32,7 +32,7 @@
             :src="logoSource"
             alt="Storvv"
             :class="[
-              'shrink-0 object-contain transition-all duration-300',
+              'shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out',
               sidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]',
             ]"
           />
@@ -363,7 +363,7 @@
 
     <!-- Main Content -->
     <div 
-      :class="['min-h-screen transition-all duration-300', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
+      :class="['min-h-screen transition-[padding-left] duration-300 ease-in-out', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
       class="w-full"
       style="min-width: 0; max-width: 100vw;"
     >

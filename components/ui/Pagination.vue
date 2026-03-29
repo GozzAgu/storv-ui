@@ -19,21 +19,6 @@
     <div
       class="flex w-full min-w-0 shrink-0 flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end sm:gap-3"
     >
-      <!-- Rows per page -->
-      <div v-if="showPerPageSelect && mergedPerPageOptions.length > 0" class="flex shrink-0 items-center gap-2">
-        <label :for="selectId" class="sr-only">Rows per page</label>
-        <select
-          :id="selectId"
-          :value="itemsPerPage"
-          class="cursor-pointer rounded-sm border border-gray-200/90 bg-white py-0.5 pl-1.5 pr-7 text-[10px] font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-1 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-[#12141c] dark:text-gray-200 dark:focus:border-primary-500/40 sm:text-[11px]"
-          @change="onPerPageChange"
-        >
-          <option v-for="opt in mergedPerPageOptions" :key="opt" :value="opt">
-            {{ opt }} / page
-          </option>
-        </select>
-      </div>
-
       <!-- Page nav: flat chevrons + numbers (minimal, no heavy chrome) -->
       <div
         data-testid="pagination-controls"
@@ -91,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useId } from 'vue'
+import { computed } from 'vue'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
 import {
   getPaginationIndices,
@@ -102,25 +87,18 @@ import {
 const props = withDefaults(
   defineProps<{
     currentPage: number
-    itemsPerPage: number
+    /** Page size used for range math (default 100; no UI to change) */
+    itemsPerPage?: number
     total: number
-    /** Show “N / page” dropdown (Grovio / BluNest style) */
-    showPerPageSelect?: boolean
-    /** Allowed page sizes; current `itemsPerPage` is merged in if missing */
-    perPageOptions?: number[]
   }>(),
   {
-    showPerPageSelect: true,
-    perPageOptions: () => [10, 25, 50, 100],
+    itemsPerPage: 100,
   },
 )
 
-const emit = defineEmits<{
+defineEmits<{
   'page-change': [page: number]
-  'items-per-page-change': [itemsPerPage: number]
 }>()
-
-const selectId = useId()
 
 const totalPages = computed(() => getTotalPages(props.total, props.itemsPerPage))
 
@@ -136,19 +114,4 @@ const displayStart = computed(() => {
 const displayEnd = computed(() => indices.value.endIndex)
 
 const visiblePages = computed(() => getVisiblePageNumbers(props.currentPage, totalPages.value))
-
-const mergedPerPageOptions = computed(() => {
-  const base = [...(props.perPageOptions?.length ? props.perPageOptions : [10, 25, 50, 100])]
-  if (!base.includes(props.itemsPerPage)) {
-    base.push(props.itemsPerPage)
-  }
-  return [...new Set(base)].sort((a, b) => a - b)
-})
-
-function onPerPageChange(e: Event) {
-  const el = e.target as HTMLSelectElement
-  const v = Number(el.value)
-  if (!Number.isFinite(v) || v <= 0) return
-  emit('items-per-page-change', v)
-}
 </script>

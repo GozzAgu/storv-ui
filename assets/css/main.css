@@ -105,29 +105,20 @@
 
 /**
  * Theme cross-fade (light ↔ dark) — only while `theme-transitioning` is on <html>
- * (see `stores/theme.ts`). Keep duration in sync with `transitionMs` there.
- * Fast enough to feel responsive; ease-out curve keeps the change feeling seamless.
+ * (see `stores/theme.ts`). Durations stay aligned with `THEME_TRANSITION_MS` there.
+ * Covers every route (dashboard, marketing, auth) — no layout-specific hook required.
  */
 html.theme-transitioning,
 html.theme-transitioning *,
 html.theme-transitioning *::before,
 html.theme-transitioning *::after {
-  transition-property:
-    background-color,
-    background-image,
-    color,
-    border-color,
-    outline-color,
-    box-shadow,
-    text-shadow,
-    text-decoration-color,
-    fill,
-    stroke,
-    opacity,
-    backdrop-filter,
-    -webkit-backdrop-filter !important;
-  transition-duration: 0.22s !important;
-  transition-timing-function: cubic-bezier(0.33, 0.86, 0.2, 1) !important;
+  /* One declaration so `!important` reliably wins over Tailwind transition-* utilities */
+  transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
+    text-shadow, text-decoration-color, fill, stroke, opacity, filter, backdrop-filter, -webkit-backdrop-filter,
+    accent-color, caret-color, column-rule-color !important;
+  /* Short + linear so cards/backgrounds move together (no ease “wave” across the screen) */
+  transition-duration: 0.15s !important;
+  transition-timing-function: linear !important;
   transition-delay: 0s !important;
 }
 
@@ -136,7 +127,7 @@ html.theme-transitioning *::after {
   html.theme-transitioning *,
   html.theme-transitioning *::before,
   html.theme-transitioning *::after {
-    transition-duration: 0.06s !important;
+    transition-duration: 0.05s !important;
     transition-timing-function: ease-out !important;
   }
 }

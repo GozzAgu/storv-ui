@@ -10,7 +10,7 @@
     <div class="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
       <div
         ref="tutorialCard"
-        class="frosted-glass pointer-events-auto max-h-[90dvh] w-full max-w-md transform overflow-hidden rounded-sm border border-gray-200/90 text-gray-900 transition-all duration-300 dark:border-gray-800 dark:text-gray-100"
+        class="frosted-glass pointer-events-auto max-h-[90dvh] w-full max-w-md transform overflow-hidden rounded-sm border border-gray-200/90 text-gray-900 transition duration-200 ease-out dark:border-gray-800 dark:text-gray-100"
         :style="cardPosition"
       >
         <!-- Header -->

@@ -60,7 +60,7 @@ onMounted(() => {
   inset: 0;
   border-radius: 999px;
   background: #e5e7eb;
-  transition: background 0.25s ease;
+  transition: background 0.15s linear;
 }
 
 .theme-knob {
@@ -73,7 +73,7 @@ onMounted(() => {
   transform: translateY(-50%);
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
+  transition: left 0.15s linear, box-shadow 0.15s linear;
 }
 
 input:checked + .theme-track {

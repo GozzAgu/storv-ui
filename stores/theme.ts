@@ -2,6 +2,21 @@ import { defineStore } from 'pinia'
 
 export type Theme = 'light' | 'dark' | 'system'
 
+/** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
+const THEME_TRANSITION_MS = 190
+const THEME_TRANSITION_MS_REDUCED = 72
+
+/** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
+let themeTransitionTimer: number | null = null
+
+function syncThemeColorMeta(isDark: boolean) {
+  if (!import.meta.client) return
+  const el = document.getElementById('theme-color-meta')
+  if (el) {
+    el.setAttribute('content', isDark ? '#07080c' : '#fafafa')
+  }
+}
+
 export const useThemeStore = defineStore('theme', {
   state: () => ({
     theme: 'light' as Theme,
@@ -33,7 +48,7 @@ export const useThemeStore = defineStore('theme', {
           this.theme = 'light'
           localStorage.setItem('theme', 'light')
         }
-        
+
         // Apply theme immediately to ensure consistency
         this.applyTheme()
         this.watchSystemTheme()
@@ -51,13 +66,17 @@ export const useThemeStore = defineStore('theme', {
         const reducedMotion =
           typeof window.matchMedia === 'function' &&
           window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        // Must finish after CSS `transition-duration` on `html.theme-transitioning` (see `assets/css/main.css`)
-        const transitionMs = reducedMotion ? 80 : 280
+        const transitionMs = reducedMotion ? THEME_TRANSITION_MS_REDUCED : THEME_TRANSITION_MS
 
+        if (themeTransitionTimer) {
+          clearTimeout(themeTransitionTimer)
+          themeTransitionTimer = null
+        }
+
+        // Avoid `void html.offsetHeight` here: on large list pages (inventory, receipts) it forces
+        // a full synchronous layout and feels like a pause. Class + `.dark` in one turn still transition.
         if (shouldAnimate) {
           html.classList.add('theme-transitioning')
-          // Ensure transition class is committed before toggling `.dark` so the browser interpolates
-          void html.offsetHeight
         }
         if (isDark) {
           html.classList.add('dark')
@@ -66,9 +85,11 @@ export const useThemeStore = defineStore('theme', {
         }
         // Native scrollbars / form controls follow the palette immediately (pairs with global CSS transition)
         html.style.colorScheme = isDark ? 'dark' : 'light'
+        syncThemeColorMeta(isDark)
         if (shouldAnimate) {
-          window.setTimeout(() => {
+          themeTransitionTimer = window.setTimeout(() => {
             html.classList.remove('theme-transitioning')
+            themeTransitionTimer = null
           }, transitionMs)
         }
       }
@@ -103,4 +124,3 @@ export const useThemeStore = defineStore('theme', {
     },
   },
 })
-

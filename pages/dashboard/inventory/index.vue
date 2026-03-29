@@ -137,7 +137,7 @@
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-all duration-300 active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[118px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-900/15 dark:hover:shadow-xl dark:hover:shadow-black/50"
+        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-[transform,box-shadow] duration-300 ease-out active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[118px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-900/15 dark:hover:shadow-xl dark:hover:shadow-black/50"
         @click="navigateToFolder(folder.id)"
       >
         <div
@@ -239,7 +239,6 @@
         :items-per-page="itemsPerPage"
         :total="filteredFolders.length"
         @page-change="handlePageChange"
-        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
       />
     </DashboardFixedFooter>
 

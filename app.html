@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" id="theme-color-meta" content="#fafafa">
     
     <!-- CRITICAL: Apply theme IMMEDIATELY - blocking script that runs before rendering -->
     <script>
@@ -42,6 +43,13 @@
         } else {
           html.className = html.className.replace(/\s*dark\s*/g, ' ').trim();
         }
+        try {
+          html.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (e) {}
+        try {
+          var meta = document.getElementById('theme-color-meta');
+          if (meta) meta.setAttribute('content', isDark ? '#07080c' : '#fafafa');
+        } catch (e) {}
       }();
     </script>
     
@@ -64,9 +72,9 @@
         display: block !important;
         opacity: 1 !important; 
       }
-      /* Background colors */
-      html.dark { background-color: #111827 !important; }
-      html:not(.dark) { background-color: #ffffff !important; }
+      /* Must match dashboard canvas + marketing shells — avoids visible seams on overscroll */
+      html.dark { background-color: #07080c !important; }
+      html:not(.dark) { background-color: #fafafa !important; }
       body { 
         background-color: inherit !important; 
         margin: 0 !important; 
