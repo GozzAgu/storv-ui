@@ -56,50 +56,50 @@
         :class="{ 'pdf-export': isCapturingPdf }"
       >
         <!-- Store header -->
-        <div class="text-center pt-6 pb-4 px-6">
-          <div v-if="storeLogoUrl" class="flex justify-center mb-2">
-            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-sm object-contain" />
+        <div class="text-center px-4 pt-3 pb-2">
+          <div v-if="storeLogoUrl" class="mb-1 flex justify-center">
+            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo h-8 w-8 rounded-sm object-contain" />
           </div>
-          <h1 class="text-sm font-semibold text-gray-900 tracking-tight">{{ storeName || 'Store' }}</h1>
-          <p v-if="storeAddress" class="mt-0.5 text-[10px] text-gray-500">{{ storeAddress }}</p>
-          <p v-if="storePhone || storeEmail" class="mt-0.5 text-[10px] text-gray-500">
+          <h1 class="text-xs font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
+          <p v-if="storeAddress" class="mt-0.5 text-[9px] leading-snug text-gray-500">{{ storeAddress }}</p>
+          <p v-if="storePhone || storeEmail" class="mt-0.5 text-[9px] leading-snug text-gray-500">
             <span v-if="storePhone">{{ storePhone }}</span><span v-if="storePhone && storeEmail"> · </span><span v-if="storeEmail">{{ storeEmail }}</span>
           </p>
         </div>
 
         <!-- Meta block -->
-        <div class="px-6 pb-4">
-          <div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+        <div class="px-4 pb-2">
+          <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
             <div>
-              <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Receipt</p>
-              <p class="text-xs font-medium text-gray-900 mt-0.5">
+              <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Receipt</p>
+              <p class="mt-0.5 text-[11px] font-medium leading-tight text-gray-900">
                 {{ receipt.receiptNumber }}
-                <span v-if="receipt.isSwapIn" class="text-gray-500 font-normal"> · Swap-in</span>
+                <span v-if="receipt.isSwapIn" class="font-normal text-gray-500"> · Swap-in</span>
               </p>
             </div>
             <div class="text-right">
-              <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Date & time</p>
-              <p class="text-xs text-gray-900 mt-0.5">{{ formatReceiptDate(receipt.date) }}</p>
-              <p class="text-[10px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
+              <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Date & time</p>
+              <p class="mt-0.5 text-[11px] leading-tight text-gray-900">{{ formatReceiptDate(receipt.date) }}</p>
+              <p class="text-[9px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
             </div>
           </div>
-          <div class="mt-3 pt-3 border-t border-gray-100">
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Customer</p>
-            <p class="text-xs font-medium text-gray-900 mt-0.5">{{ receipt.customerName }}</p>
-            <p v-if="receipt.customerEmail" class="text-[10px] text-gray-500 mt-0.5">{{ receipt.customerEmail }}</p>
+          <div class="mt-2 border-t border-gray-100 pt-2">
+            <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
+            <p class="mt-0.5 text-[11px] font-medium leading-tight text-gray-900">{{ receipt.customerName }}</p>
+            <p v-if="receipt.customerEmail" class="mt-0.5 text-[9px] leading-snug text-gray-500">{{ receipt.customerEmail }}</p>
           </div>
         </div>
 
         <!-- Items -->
-        <div class="px-6 pb-4">
-          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1.5">Items</p>
+        <div class="px-4 pb-2">
+          <p class="mb-1 text-[9px] font-medium uppercase tracking-wider text-gray-500">Items</p>
           <table class="w-full">
             <thead class="bg-gray-50 dark:!bg-dashboard-card/85">
               <tr class="border-b border-gray-200 dark:border-gray-800/80">
-                <th class="py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Product</th>
-                <th class="w-10 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Qty</th>
-                <th class="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Price</th>
-                <th class="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
+                <th class="py-1 text-left text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Product</th>
+                <th class="w-9 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Qty</th>
+                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Price</th>
+                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -108,36 +108,36 @@
                 :key="index"
                 class="border-b border-gray-100"
               >
-                <td class="py-2">
-                  <p class="text-xs font-medium text-gray-900">{{ item.itemName }}</p>
+                <td class="py-1 align-top">
+                  <p class="text-[11px] font-medium leading-tight text-gray-900">{{ item.itemName }}</p>
                   <div
                     v-if="getProductDetailLines(item).length > 0"
-                    class="mt-0.5 space-y-0.5"
+                    class="mt-0.5 space-y-px"
                   >
                     <p
                       v-for="(line, detailIndex) in getProductDetailLines(item)"
                       :key="`${index}-detail-${detailIndex}`"
-                      class="text-[10px] text-gray-500"
+                      class="text-[9px] leading-snug text-gray-500"
                     >
                       {{ line }}
                     </p>
                   </div>
-                  <p v-if="item.hasDiscount" class="text-[10px] text-gray-500 mt-0.5">
+                  <p v-if="item.hasDiscount" class="mt-0.5 text-[9px] text-gray-500">
                     {{ item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}` }}
                   </p>
                 </td>
-                <td class="py-2 text-center text-xs text-gray-700">{{ item.quantity }}</td>
-                <td class="py-2 text-right text-xs text-gray-700">
+                <td class="py-1 text-center text-[11px] text-gray-700">{{ item.quantity }}</td>
+                <td class="py-1 text-right text-[11px] text-gray-700">
                   <template v-if="item.hasDiscount && item.originalPrice">
-                    <span class="text-[10px] text-gray-400 line-through block">{{ formatCurrency(item.originalPrice) }}</span>
-                    <span>{{ formatCurrency(item.price) }}</span>
+                    <span class="block text-[9px] leading-tight text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
+                    <span class="leading-tight">{{ formatCurrency(item.price) }}</span>
                   </template>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
-                <td class="py-2 text-right text-xs font-medium text-gray-900">
+                <td class="py-1 text-right text-[11px] font-medium text-gray-900">
                   <template v-if="item.hasDiscount && item.originalPrice">
-                    <span class="text-[10px] text-gray-400 font-normal line-through block">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
-                    <span>{{ formatCurrency(item.price * item.quantity) }}</span>
+                    <span class="block text-[9px] font-normal leading-tight text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                    <span class="leading-tight">{{ formatCurrency(item.price * item.quantity) }}</span>
                   </template>
                   <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
                 </td>
@@ -147,36 +147,36 @@
         </div>
 
         <!-- Totals -->
-        <div class="px-6 pb-4">
+        <div class="px-4 pb-2">
           <div class="flex justify-end">
-            <div class="w-44 space-y-1">
+            <div class="w-40 space-y-0.5">
               <template v-if="hasAnyDiscount">
-                <div class="flex justify-between text-xs">
+                <div class="flex justify-between text-[11px] leading-tight">
                   <span class="text-gray-500">Subtotal</span>
                   <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
                 </div>
-                <div class="flex justify-between text-xs">
+                <div class="flex justify-between text-[11px] leading-tight">
                   <span class="text-gray-500">Discount</span>
                   <span class="text-gray-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
                 </div>
               </template>
               <template v-else>
-                <div class="flex justify-between text-xs">
+                <div class="flex justify-between text-[11px] leading-tight">
                   <span class="text-gray-500">Subtotal</span>
                   <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
                 </div>
               </template>
               <template v-if="showSwapCreditLine">
-                <div class="flex justify-between text-xs">
+                <div class="flex justify-between text-[11px] leading-tight">
                   <span class="text-gray-500">Swap credit (trade-in)</span>
                   <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
                 </div>
               </template>
-              <div class="flex justify-between text-xs pt-1.5 border-t border-gray-200">
+              <div class="flex justify-between border-t border-gray-200 pt-1 text-[11px] leading-tight">
                 <span class="text-gray-500">Payment</span>
                 <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
               </div>
-              <div class="flex justify-between text-xs font-semibold pt-1.5 border-t border-gray-200">
+              <div class="flex justify-between border-t border-gray-200 pt-1 text-[11px] font-semibold leading-tight">
                 <span>{{ receiptTotalLabel }}</span>
                 <span>{{ formatCurrency(receipt.total) }}</span>
               </div>
@@ -185,34 +185,34 @@
         </div>
 
         <!-- Status -->
-        <div class="px-6 pb-4">
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700">
+        <div class="px-4 pb-2">
+          <span class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-medium bg-gray-100 text-gray-700">
             {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
           </span>
         </div>
 
         <!-- Notes -->
-        <div v-if="receipt.notes" class="px-6 pb-4">
-          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-0.5">Notes</p>
-          <p class="text-xs text-gray-700 whitespace-pre-wrap">{{ receipt.notes }}</p>
+        <div v-if="receipt.notes" class="px-4 pb-2">
+          <p class="mb-0.5 text-[9px] font-medium uppercase tracking-wider text-gray-500">Notes</p>
+          <p class="whitespace-pre-wrap text-[11px] leading-snug text-gray-700">{{ receipt.notes }}</p>
         </div>
 
         <!-- Swap-in -->
-        <div v-if="receipt.isSwapIn && swapInFolderName" class="px-6 pb-4">
-          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-0.5">Swap-in</p>
-          <p class="text-xs text-gray-700">Device added to {{ swapInFolderName }}</p>
+        <div v-if="receipt.isSwapIn && swapInFolderName" class="px-4 pb-2">
+          <p class="mb-0.5 text-[9px] font-medium uppercase tracking-wider text-gray-500">Swap-in</p>
+          <p class="text-[11px] leading-snug text-gray-700">Device added to {{ swapInFolderName }}</p>
         </div>
 
         <!-- Branch & generated by -->
-        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="px-6 pb-4 flex flex-wrap justify-between gap-2 text-[10px] text-gray-500">
+        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="flex flex-wrap justify-between gap-2 px-4 pb-2 text-[9px] leading-snug text-gray-500">
           <span v-if="receipt.storeBranchName">Branch: {{ receipt.storeBranchName }}</span>
           <span v-if="receipt.createdByUserName">Generated by {{ receipt.createdByUserName }}</span>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 text-center">
-          <p class="text-xs text-gray-600">Thank you for your business</p>
-          <p class="text-[10px] text-gray-500 mt-0.5">Computer-generated receipt</p>
+        <div class="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center">
+          <p class="text-[11px] leading-tight text-gray-600">Thank you for your business</p>
+          <p class="mt-0.5 text-[9px] text-gray-500">Computer-generated receipt</p>
         </div>
       </div>
     </div>
@@ -624,7 +624,7 @@ const handleSendEmail = async () => {
 <style scoped>
 .receipt-content {
   font-family: inherit;
-  line-height: 1.5;
+  line-height: 1.35;
 }
 
 /* Logo: preserve aspect ratio (no stretch) in PDF and on screen */
@@ -633,27 +633,37 @@ const handleSendEmail = async () => {
   object-position: center;
 }
 
-/* PDF export: reduce font sizes so text appears ~12px on A4 (scale 2 capture → 210mm width) */
+/* PDF export: extra-compact type (html2canvas scale 2 → full A4 width) */
 .receipt-content.pdf-export {
-  font-size: 10px;
+  font-size: 7px;
+  line-height: 1.2;
 }
-.receipt-content.pdf-export h1,
-.receipt-content.pdf-export .text-sm {
-  font-size: 10px !important;
+.receipt-content.pdf-export h1 {
+  font-size: 8px !important;
+  line-height: 1.2 !important;
 }
 .receipt-content.pdf-export .text-xs,
+.receipt-content.pdf-export .text-sm,
+.receipt-content.pdf-export .text-\[11px\],
 .receipt-content.pdf-export p {
-  font-size: 10px !important;
+  font-size: 7px !important;
+  line-height: 1.25 !important;
 }
-.receipt-content.pdf-export .text-\[10px\] {
-  font-size: 8px !important;
+.receipt-content.pdf-export .text-\[10px\],
+.receipt-content.pdf-export .text-\[9px\] {
+  font-size: 6px !important;
+  line-height: 1.2 !important;
 }
 .receipt-content.pdf-export th,
 .receipt-content.pdf-export td {
-  font-size: 10px !important;
+  font-size: 6.5px !important;
+  line-height: 1.2 !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
 }
-.receipt-content.pdf-export .text-\[11px\] {
-  font-size: 8px !important;
+.receipt-content.pdf-export .receipt-logo {
+  width: 28px !important;
+  height: 28px !important;
 }
 
 /* PDF capture: ensure clean print look */
