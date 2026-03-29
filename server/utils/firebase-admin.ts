@@ -6,12 +6,21 @@ import { isAbsolute, resolve } from 'node:path'
 
 let adminApp: App | null = null
 
-/** Resolve JSON string from runtime config, process env, or base64 (common on Vercel for large secrets). */
+/** File-based credentials are local-only; serverless bundles do not include gitignored JSON keys. */
+function isServerlessRuntime(): boolean {
+  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.AWSLAMBDA_FUNCTION_NAME)
+}
+
+/**
+ * Resolve JSON: prefer live `process.env` on serverless (Vercel injects secrets at runtime; build-time
+ * nuxt config may have been empty). Locally, runtimeConfig from nuxt.config is fine.
+ */
 function resolveServiceAccountJsonString(config: { firebaseServiceAccount?: string }): string {
-  const fromConfig = (config.firebaseServiceAccount as string)?.trim() || ''
-  const fromNuxtEnv = process.env.NUXT_FIREBASE_SERVICE_ACCOUNT?.trim() || ''
   const fromEnv = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim() || ''
-  const raw = fromConfig || fromNuxtEnv || fromEnv
+  const fromNuxtEnv = process.env.NUXT_FIREBASE_SERVICE_ACCOUNT?.trim() || ''
+  const fromConfig = (config.firebaseServiceAccount as string)?.trim() || ''
+  const order = isServerlessRuntime() ? [fromEnv, fromNuxtEnv, fromConfig] : [fromConfig, fromNuxtEnv, fromEnv]
+  const raw = order.find(Boolean) || ''
   if (raw) return raw
   const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64?.trim() || ''
   if (b64) {
@@ -24,18 +33,15 @@ function resolveServiceAccountJsonString(config: { firebaseServiceAccount?: stri
   return ''
 }
 
+/** Paths are ignored on Vercel/Lambda so a path baked in at build time cannot override JSON env. */
 function resolveCredentialPath(config: { firebaseServiceAccountPath?: string }): string {
+  if (isServerlessRuntime()) return ''
   return (
     (config.firebaseServiceAccountPath as string)?.trim() ||
     process.env.FIREBASE_SERVICE_ACCOUNT_PATH?.trim() ||
     process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim() ||
     ''
   )
-}
-
-/** File-based credentials are local-only; serverless bundles do not include gitignored JSON keys. */
-function isServerlessRuntime(): boolean {
-  return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.AWSLAMBDA_FUNCTION_NAME)
 }
 
 const SERVERLESS_USE_JSON_NOT_PATH =
@@ -94,9 +100,6 @@ function getAdminApp(): App {
           'Use a single-line object in .env, or FIREBASE_SERVICE_ACCOUNT_PATH=./your-key.json locally. Restart nuxt dev after changing .env.'
       )
     } else if (credentialsPath) {
-      if (isServerlessRuntime()) {
-        throw new Error(SERVERLESS_USE_JSON_NOT_PATH)
-      }
       const pathToRead = isAbsolute(credentialsPath) ? credentialsPath : resolve(process.cwd(), credentialsPath)
       const fileContent = readFileSync(pathToRead, 'utf8')
       const fromFile = tryParseServiceAccountJson(fileContent)
