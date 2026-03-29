@@ -337,7 +337,7 @@ const loadFolderItems = async () => {
   if (!selectedFolderId.value) return
   
   try {
-    await inventoryStore.fetchItems(selectedFolderId.value)
+    await inventoryStore.fetchItems(selectedFolderId.value, { force: true })
   } catch (error: any) {
     showErrorToast('Failed to load folder items')
   }

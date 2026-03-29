@@ -664,7 +664,7 @@ const loadFolderItems = async () => {
     const currentStoreId = storesStore.currentStoreId
     await storesStore.setCurrentStore(transferForm.value.sourceStoreId)
     
-    await inventoryStore.fetchItems(transferForm.value.folderId)
+    await inventoryStore.fetchItems(transferForm.value.folderId, { force: true })
     const folderItems = inventoryStore.items[transferForm.value.folderId] || []
     
     // Get folder info to check if it has serial numbers

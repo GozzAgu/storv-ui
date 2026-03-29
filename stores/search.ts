@@ -227,7 +227,7 @@ export const useSearchStore = defineStore('search', {
           // Search items in folders
           for (const folder of inventoryStore.folders) {
             if (inventoryStore.items[folder.id] === undefined) {
-              await inventoryStore.fetchItems(folder.id)
+              await inventoryStore.fetchItems(folder.id, { force: true })
             }
 
             const items = inventoryStore.items[folder.id] || []

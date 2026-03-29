@@ -858,26 +858,19 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
   if (finalUserData?.role === 'superAdmin') {
     await storesStore.fetchStores()
     await storesStore.initializeCurrentStore()
-    await departmentsStore.fetchDepartments()
-    // Fetch all staff so sidebar can display them
-    await staffStore.fetchStaff().catch(err => {
-      console.warn('[Dashboard] Error fetching staff:', err)
-    })
-    // Fetch inventory and receipts in parallel
+    await Promise.all([
+      departmentsStore.fetchDepartments(),
+      staffStore.fetchStaff().catch(err => {
+        console.warn('[Dashboard] Error fetching staff:', err)
+      }),
+    ])
+    // Inventory item lists are loaded on-demand (folder page, dashboard home, search) — avoids N queries on every route.
     await Promise.all([
       inventoryStore.fetchFolders(),
-      receiptsStore.fetchReceipts()
+      receiptsStore.fetchReceipts(),
     ]).catch(err => {
       console.warn('[Dashboard] Error fetching inventory/receipts:', err)
     })
-    // Fetch items for all folders after folders are loaded
-    if (inventoryStore.folders.length > 0) {
-      await Promise.all(
-        inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-      ).catch(err => {
-        console.warn('[Dashboard] Error fetching inventory items:', err)
-      })
-    }
     // Auto-expand current store
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
@@ -907,91 +900,18 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
     }
     await storesStore.initializeCurrentStore()
     await departmentsStore.fetchDepartments()
-    // Fetch inventory and receipts in parallel
     await Promise.all([
       inventoryStore.fetchFolders(),
-      receiptsStore.fetchReceipts()
+      receiptsStore.fetchReceipts(),
     ]).catch(err => {
       console.warn('[Dashboard] Error fetching inventory/receipts:', err)
     })
-    // Fetch items for all folders after folders are loaded
-    if (inventoryStore.folders.length > 0) {
-      await Promise.all(
-        inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-      ).catch(err => {
-        console.warn('[Dashboard] Error fetching inventory items:', err)
-      })
-    }
     // Auto-expand current store for staff
     if (storesStore.currentStoreId) {
       expandedStores[storesStore.currentStoreId] = true
     }
   }
 }, { immediate: true })
-
-// Also load on mount
-onMounted(async () => {
-  if (authStore.currentUser) {
-    if (!userStore.userData) {
-      await userStore.fetchUserData(authStore.currentUser.uid)
-    }
-    
-    if (userStore.isSuperAdmin) {
-      await storesStore.fetchStores()
-      await storesStore.initializeCurrentStore()
-      await departmentsStore.fetchDepartments()
-      // Fetch all staff so sidebar can display them
-      await staffStore.fetchStaff().catch(err => {
-        console.warn('[Dashboard] Error fetching staff on mount:', err)
-      })
-      // Fetch inventory and receipts in parallel
-      await Promise.all([
-        inventoryStore.fetchFolders(),
-        receiptsStore.fetchReceipts()
-      ]).catch(err => {
-        console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
-      })
-      // Fetch items for all folders after folders are loaded
-      if (inventoryStore.folders.length > 0) {
-        await Promise.all(
-          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-        ).catch(err => {
-          console.warn('[Dashboard] Error fetching inventory items on mount:', err)
-        })
-      }
-      if (storesStore.currentStoreId) {
-        expandedStores[storesStore.currentStoreId] = true
-      }
-    } else if (userStore.userData?.role === 'staff') {
-      // Fetch staff member data first to ensure getQueryUserId works correctly
-      try {
-        await staffStore.fetchCurrentStaffMember()
-      } catch (err) {
-        console.warn('[Dashboard] Error fetching staff member on mount:', err)
-      }
-      await storesStore.initializeCurrentStore()
-      await departmentsStore.fetchDepartments()
-      // Fetch inventory and receipts in parallel
-      await Promise.all([
-        inventoryStore.fetchFolders(),
-        receiptsStore.fetchReceipts()
-      ]).catch(err => {
-        console.warn('[Dashboard] Error fetching inventory/receipts on mount:', err)
-      })
-      // Fetch items for all folders after folders are loaded
-      if (inventoryStore.folders.length > 0) {
-        await Promise.all(
-          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-        ).catch(err => {
-          console.warn('[Dashboard] Error fetching inventory items on mount:', err)
-        })
-      }
-      if (storesStore.currentStoreId) {
-        expandedStores[storesStore.currentStoreId] = true
-      }
-    }
-  }
-})
 
 // Watch for store changes and auto-expand current store
 watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
@@ -1152,14 +1072,6 @@ watch(() => route.path, async (path) => {
   if (path.startsWith('/dashboard/inventory') && authStore.currentUser) {
     try {
       await inventoryStore.fetchFolders()
-      // Also fetch items for all folders
-      if (inventoryStore.folders.length > 0) {
-        await Promise.all(
-          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-        ).catch(err => {
-          console.warn('[Dashboard] Error fetching inventory items on route change:', err)
-        })
-      }
     } catch (error) {
       console.error('Error fetching inventory folders:', error)
     }
@@ -1178,14 +1090,6 @@ watch(() => authStore.currentUser, async (user) => {
   if (user && isInventoryRoute.value) {
     try {
       await inventoryStore.fetchFolders()
-      // Also fetch items for all folders
-      if (inventoryStore.folders.length > 0) {
-        await Promise.all(
-          inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
-        ).catch(err => {
-          console.warn('[Dashboard] Error fetching inventory items on auth change:', err)
-        })
-      }
     } catch (error) {
       console.error('Error fetching inventory folders:', error)
     }

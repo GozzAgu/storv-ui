@@ -10,6 +10,9 @@ import { useInventoryStore } from './inventory'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 
+/** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
+let fetchReceiptsInflight: Promise<void> | null = null
+
 export interface ReceiptItem {
   itemId: string
   quantity: number
@@ -93,7 +96,15 @@ export const useReceiptsStore = defineStore('receipts', {
 
   actions: {
     // Fetch all receipts
-    async fetchReceipts() {
+    async fetchReceipts(options?: { force?: boolean }) {
+      if (options?.force) {
+        fetchReceiptsInflight = null
+      }
+      if (!options?.force && fetchReceiptsInflight) {
+        return fetchReceiptsInflight
+      }
+
+      const run = (async () => {
       this.loading = true
       this.error = null
 
@@ -243,6 +254,12 @@ export const useReceiptsStore = defineStore('receipts', {
       } finally {
         this.loading = false
       }
+      })()
+
+      fetchReceiptsInflight = run.finally(() => {
+        if (fetchReceiptsInflight === run) fetchReceiptsInflight = null
+      })
+      return fetchReceiptsInflight
     },
 
     // Fetch a single receipt

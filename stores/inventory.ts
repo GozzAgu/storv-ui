@@ -9,6 +9,9 @@ import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventory
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { duplicateSerialExistsViaApi } from '~/utils/inventory-serial-validation'
 
+/** Coalesce concurrent fetchItems(folderId) calls; cleared when store switches (items reset). */
+const inventoryItemsInflight = new Map<string, Promise<InventoryItem[]>>()
+
 export interface TemplateField {
   id: string
   name: string
@@ -658,7 +661,20 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     // Get all items for a folder
-    async fetchItems(folderId: string) {
+    async fetchItems(folderId: string, options?: { force?: boolean }) {
+      const force = options?.force === true
+      if (force) {
+        inventoryItemsInflight.delete(folderId)
+      }
+      if (!force) {
+        if (Object.prototype.hasOwnProperty.call(this.items, folderId)) {
+          return this.items[folderId]!
+        }
+        const existing = inventoryItemsInflight.get(folderId)
+        if (existing) return existing
+      }
+
+      const promise = (async (): Promise<InventoryItem[]> => {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -919,6 +935,13 @@ export const useInventoryStore = defineStore('inventory', {
         this.itemsLoading[folderId] = false
         throw new Error(error.message || 'Failed to fetch items')
       }
+      })()
+
+      inventoryItemsInflight.set(folderId, promise)
+      promise.finally(() => {
+        inventoryItemsInflight.delete(folderId)
+      })
+      return promise
     },
 
     // Check if a serial number already exists for the same brand and model

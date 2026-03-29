@@ -2313,7 +2313,7 @@ const handleConfirmDuplicate = async () => {
     if (folder.value) {
       folder.value.itemCount = (folder.value.itemCount || 0) + serials.length
     }
-    inventoryStore.fetchItems(folderId.value).catch(() => {})
+    inventoryStore.fetchItems(folderId.value, { force: true }).catch(() => {})
     showDuplicateModal.value = false
     clearDuplicateModal()
     toast.success(`${serials.length} product${serials.length !== 1 ? 's' : ''} duplicated`)
@@ -2446,7 +2446,7 @@ const handleSaveItem = async () => {
       
       // Refresh items list in background (non-blocking) - only for UI sync
       // Item is already updated in local state, so this is just to ensure consistency
-      inventoryStore.fetchItems(currentFolderId).catch((err) => {
+      inventoryStore.fetchItems(currentFolderId, { force: true }).catch((err) => {
         console.warn('Background items refresh failed (non-critical):', err)
         // Item is already updated in local state, so this is just a sync issue
       })
@@ -2508,7 +2508,7 @@ const handleSaveItem = async () => {
 
           // Refresh items list in background (non-blocking) - only for UI sync
           // Item is already in local state, so this is just to ensure consistency
-          inventoryStore.fetchItems(folderId.value).catch((err) => {
+          inventoryStore.fetchItems(folderId.value, { force: true }).catch((err) => {
             console.warn('Background items refresh failed (non-critical):', err)
             // Item is already created and in local state, so this is just a sync issue
           })
@@ -2529,7 +2529,7 @@ const handleSaveItem = async () => {
 
           // Refresh items list in background (non-blocking) - only for UI sync
           // Item is already in local state, so this is just to ensure consistency
-          inventoryStore.fetchItems(folderId.value).catch((err) => {
+          inventoryStore.fetchItems(folderId.value, { force: true }).catch((err) => {
             console.warn('Background items refresh failed (non-critical):', err)
             // Item is already created and in local state, so this is just a sync issue
           })
@@ -2570,7 +2570,7 @@ const handleRemoveDiscount = async (item: InventoryItem) => {
     try {
       await inventoryStore.removeDiscount(folderId.value, item.id)
       // Reload items to refresh the display
-      await inventoryStore.fetchItems(folderId.value)
+      await inventoryStore.fetchItems(folderId.value, { force: true })
       toast.success('Discount removed successfully!')
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove discount')
@@ -2580,14 +2580,14 @@ const handleRemoveDiscount = async (item: InventoryItem) => {
 
 const handleDiscountApplied = async () => {
   // Reload items to refresh the display
-  await inventoryStore.fetchItems(folderId.value)
+  await inventoryStore.fetchItems(folderId.value, { force: true })
   showDiscountModal.value = false
   selectedItemForDiscount.value = null
 }
 
 const handleBulkDiscountApplied = async () => {
   // Reload items to refresh the display
-  await inventoryStore.fetchItems(folderId.value)
+  await inventoryStore.fetchItems(folderId.value, { force: true })
   showBulkDiscountModal.value = false
   selectedItemsForBulk.value = []
 }
@@ -2951,7 +2951,7 @@ const handleFileImport = async (event: Event) => {
         console.log('[Import] Current folder ID:', currentFolderId)
         
         // Force fetch items for this folder (this ensures we get fresh data)
-        let existingItems = await inventoryStore.fetchItems(currentFolderId)
+        let existingItems = await inventoryStore.fetchItems(currentFolderId, { force: true })
         
         // STEP 2: Filter to ONLY items from this folder (extra safety check)
         existingItems = existingItems.filter(item => {
@@ -3325,7 +3325,7 @@ const loadItems = async () => {
   try {
     // Fetch items and receipts in parallel
     await Promise.all([
-      inventoryStore.fetchItems(folderId.value),
+      inventoryStore.fetchItems(folderId.value, { force: true }),
       receiptsStore.fetchReceipts()
     ])
     // Refresh folder list to update item counts
