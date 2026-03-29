@@ -1,5 +1,5 @@
 <template>
-  <Modal
+  <SidePanel
     :modelValue="props.modelValue"
     @update:modelValue="(value: boolean) => emit('update:modelValue', value)"
     :title="isEdit ? 'Edit Staff Member' : 'Add Staff Member'"
@@ -199,13 +199,13 @@
         </Button>
       </template>
     </template>
-  </Modal>
+  </SidePanel>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
 import { CheckCircleIcon, ClipboardDocumentIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
-import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import type { Staff } from '~/composables/useStaff'
 import { useStaffStore } from '~/stores/staff'

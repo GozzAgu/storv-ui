@@ -104,49 +104,79 @@
       </div>
     </div>
 
-    <div
-      :class="[
-        'flex min-h-0 flex-col transition-colors duration-200 ease-out',
-        isStaffFullscreen
-          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
-          : 'relative flex-1',
-      ]"
-    >
+    <Teleport to="body" :disabled="!isStaffFullscreen">
       <div
-        v-if="isStaffFullscreen"
-        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:!bg-dashboard-card/90 sm:px-6"
-      >
-        <div class="flex w-full max-w-none items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Expanded view
-            </p>
-            <h2 class="mt-0.5 truncate text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl">
-              {{ department?.name || 'Department' }} · Staff
-            </h2>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ staff.length }} people · {{ totalManagers }} managers · {{ activeStaff }} active
-            </p>
-          </div>
-          <button
-            type="button"
-            class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-            title="Exit expanded view"
-            @click="isStaffFullscreen = false"
-          >
-            <XMarkIcon class="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
-      <div
+        data-dashboard-teleport
         :class="[
-          'flex min-h-0 flex-col',
+          'flex min-h-0 flex-col transition-colors duration-200 ease-out',
           isStaffFullscreen
-            ? 'min-h-0 w-full max-w-none flex-1 px-3 pb-6 pt-3 sm:px-5'
-            : 'data-table-shell overflow-hidden',
+            ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+            : 'relative flex-1',
         ]"
       >
+        <!-- Fullscreen header (same pattern as receipts) -->
+        <div
+          v-if="isStaffFullscreen"
+          class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
+          style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+        >
+          <div class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+            <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
+              <div class="min-w-0">
+                <p class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+                  Expanded view
+                </p>
+                <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <h2 class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
+                    {{ department?.name || 'Department' }} · Staff
+                  </h2>
+                  <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                    {{ staff.length }} · {{ totalManagers }} managers · {{ activeStaff }} active
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                title="Exit expanded view"
+                aria-label="Exit expanded view"
+                @click="isStaffFullscreen = false"
+              >
+                <XMarkIcon class="h-5 w-5" />
+              </button>
+            </div>
+            <div class="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+              <Button
+                v-if="canCreateNewStaff"
+                variant="primary"
+                size="sm"
+                :icon="PlusIcon"
+                extra-class="!rounded-sm"
+                @click="openCreateStaffModal"
+              >
+                Add staff
+              </Button>
+              <button
+                type="button"
+                class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                title="Exit expanded view"
+                aria-label="Exit expanded view"
+                @click="isStaffFullscreen = false"
+              >
+                <XMarkIcon class="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          :class="[
+            'flex min-h-0 flex-col',
+            isStaffFullscreen
+              ? 'min-h-0 flex-1 overflow-hidden'
+              : 'data-table-shell overflow-hidden',
+          ]"
+        >
         <div
           v-if="canManageDepartments && selectedStaffForBulk.length > 0"
           class="flex flex-wrap items-center gap-2 border-b border-gray-100/90 bg-primary-50/60 px-4 py-2.5 dark:border-gray-800/80 dark:bg-primary-900/15 sm:px-5"
@@ -190,7 +220,7 @@
             </Button>
             <button
               type="button"
-              class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800"
+              class="hidden rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800 lg:inline-flex"
               title="Expanded table"
               @click="isStaffFullscreen = true"
             >
@@ -248,9 +278,20 @@
           </div>
         </div>
 
-        <div v-else class="min-h-0 flex-1 overflow-x-auto">
+        <div
+          v-else
+          :class="[
+            'min-h-0 flex-1',
+            isStaffFullscreen
+              ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8'
+              : 'overflow-x-auto',
+          ]"
+        >
           <table class="min-w-full divide-y divide-gray-100/90 dark:divide-gray-800/80">
-            <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+            <thead
+              class="bg-gray-50/95 dark:!bg-dashboard-card/85"
+              :class="isStaffFullscreen ? 'sticky top-0 z-10 shadow-sm shadow-gray-950/5 dark:shadow-black/35' : ''"
+            >
               <tr>
                 <th v-if="canManageDepartments" class="w-10 px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">
                   <Checkbox
@@ -396,8 +437,27 @@
           </tbody>
         </table>
         </div>
+
+        <!-- Fullscreen: pagination pinned inside overlay -->
+        <div
+          v-if="isStaffFullscreen && staff.length > 0"
+          class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
+          style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+        >
+          <div
+            class="w-full min-w-0 max-w-full overflow-x-hidden px-3 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-1.5 lg:px-7"
+          >
+            <Pagination
+              :current-page="staffCurrentPage"
+              :items-per-page="staffItemsPerPage"
+              :total="staff.length"
+              @page-change="handleStaffPageChange"
+            />
+          </div>
+        </div>
       </div>
-    </div>
+      </div>
+    </Teleport>
 
     <DashboardFixedFooter v-if="staff.length > 0 && !isStaffFullscreen" :sidebar-collapsed="sidebarCollapsed">
       <Pagination
@@ -407,22 +467,6 @@
         @page-change="handleStaffPageChange"
       />
     </DashboardFixedFooter>
-
-    <div
-      v-if="isStaffFullscreen && staff.length > 0"
-      class="sticky bottom-0 z-10 w-full border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
-    >
-      <div
-        class="w-full min-w-0 px-4 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-1.5"
-      >
-        <Pagination
-          :current-page="staffCurrentPage"
-          :items-per-page="staffItemsPerPage"
-          :total="staff.length"
-          @page-change="handleStaffPageChange"
-        />
-      </div>
-    </div>
 
     <!-- Bulk Delete Staff Modal -->
     <Modal

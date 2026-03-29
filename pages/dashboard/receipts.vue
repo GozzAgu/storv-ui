@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div
-      class="w-full max-w-none space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+      class="flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
     >
       <!-- Initial loading -->
       <template v-if="isInitialLoading">
@@ -31,6 +31,7 @@
       </template>
 
       <template v-else>
+        <div class="flex w-full min-h-0 flex-1 flex-col gap-5 sm:gap-6">
         <!-- Hero -->
         <header
           class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
@@ -155,7 +156,7 @@
           'transition-colors duration-200 ease-out',
           isReceiptsFullscreen
             ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
-            : 'relative',
+            : 'relative flex min-h-0 flex-1 flex-col',
         ]"
       >
       <!-- Fullscreen header -->
@@ -257,7 +258,7 @@
         :class="[
           isReceiptsFullscreen
             ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-            : 'data-table-shell',
+            : 'data-table-shell flex flex-1 flex-col min-h-[calc(100svh-20rem)]',
         ]"
       >
         <!-- Toolbar: search + filters (left), primary action (right) -->
@@ -312,7 +313,7 @@
             </button>
             <button
               type="button"
-              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
               :title="isReceiptsFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
               @click="isReceiptsFullscreen = !isReceiptsFullscreen"
             >
@@ -351,7 +352,14 @@
           </Button>
       </div>
       <!-- Table Loading Skeleton -->
-      <div v-if="receiptsStore.loading" :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'overflow-x-auto'">
+      <div
+        v-if="receiptsStore.loading"
+        :class="
+          isReceiptsFullscreen
+            ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8'
+            : 'min-h-0 flex-1 overflow-x-auto'
+        "
+      >
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:!bg-dashboard-card/85">
             <tr>
@@ -1158,6 +1166,7 @@
       </DashboardFixedFooter>
     </template>
 
+        </div>
     </template>
     </div>
     <template #fallback>

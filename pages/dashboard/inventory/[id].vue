@@ -204,136 +204,144 @@
             <option value="availability">Status</option>
           </select>
           <Button variant="outline" class="shrink-0 !rounded-sm" :icon="ArrowPathIcon" @click="resetFilters" />
-          <button
-            type="button"
-            class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2.5 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-            :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
-            @click="isFullscreen = !isFullscreen"
-          >
-            <ArrowsPointingOutIcon v-if="!isFullscreen" class="h-5 w-5" />
-            <XMarkIcon v-else class="h-5 w-5" />
-          </button>
         </div>
       </div>
     </div>
 
-    <!-- Enhanced Items Table -->
-    <div
-      v-if="!isLoadingFolder"
-      :class="[
-        'transition-colors duration-200 ease-out',
-        isFullscreen
-          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
-          : 'relative'
-      ]"
-    >
-      <!-- Fullscreen Header -->
-      <div
-        v-if="isFullscreen"
-        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:!bg-dashboard-card/90 sm:px-6"
-      >
-        <div class="flex w-full max-w-none flex-col gap-4">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-                Expanded view
-              </p>
-              <h2 class="mt-0.5 truncate text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-xl">
-                {{ folder?.name || 'Inventory Products' }}
-              </h2>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                {{ filteredItems.length }} products · {{ formatCurrency(totalInventoryValue) }} total value
-              </p>
+    <!-- Enhanced Items Table (teleport to body in expanded view — same pattern as receipts) -->
+    <template v-if="!isLoadingFolder">
+      <Teleport to="body" :disabled="!isFullscreen">
+        <div
+          data-dashboard-teleport
+          :class="[
+            'transition-colors duration-200 ease-out',
+            isFullscreen
+              ? 'fixed inset-0 z-[100] flex min-h-0 flex-col overflow-hidden bg-white dark:!bg-dashboard-card'
+              : 'relative',
+          ]"
+        >
+          <!-- Fullscreen header -->
+          <div
+            v-if="isFullscreen"
+            class="shrink-0 border-b border-gray-200/80 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-gray-800/80 dark:!bg-dashboard-card/95 sm:px-6 lg:px-8"
+            style="padding-top: max(0.75rem, env(safe-area-inset-top, 0px))"
+          >
+            <div class="flex w-full flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+              <div class="flex min-w-0 items-start justify-between gap-3 lg:items-center">
+                <div class="min-w-0">
+                  <p class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+                    Expanded view
+                  </p>
+                  <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <h2 class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
+                      {{ folder?.name || 'Inventory Products' }}
+                    </h2>
+                    <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
+                      {{ filteredItems.length }} · {{ formatCurrency(totalInventoryValue) }}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
+                  title="Exit expanded view"
+                  aria-label="Exit expanded view"
+                  @click="isFullscreen = false"
+                >
+                  <XMarkIcon class="h-5 w-5" />
+                </button>
+              </div>
+              <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2 lg:max-w-none lg:justify-end">
+                <div class="relative min-w-0 w-full sm:max-w-[min(100%,20rem)] lg:w-56 lg:max-w-[16rem] lg:flex-initial">
+                  <MagnifyingGlassIcon
+                    class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                  />
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Search…"
+                    class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+                  />
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <select
+                    v-model="sortBy"
+                    class="min-w-[7.5rem] cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+                    @change="handleSortByChange"
+                  >
+                    <option value="name">Name</option>
+                    <option value="price">Unit price</option>
+                    <option value="sku">SKU</option>
+                    <option value="dateIn">Date In</option>
+                    <option value="availability">Status</option>
+                  </select>
+                  <button
+                    type="button"
+                    class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
+                    title="Reset filters"
+                    @click="resetFilters"
+                  >
+                    <ArrowPathIcon class="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
+                    title="Exit expanded view"
+                    aria-label="Exit expanded view"
+                    @click="isFullscreen = false"
+                  >
+                    <XMarkIcon class="h-5 w-5" />
+                  </button>
+                  <template v-if="canManageInventoryItems">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      :icon="ArrowDownTrayIcon"
+                      :loading="isImporting"
+                      :disabled="isExporting"
+                      title="Import from Excel"
+                      extra-class="!rounded-sm"
+                      aria-label="Import from Excel"
+                      @click="fileInputRef?.click()"
+                    >
+                      Import
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      :icon="ArrowUpTrayIcon"
+                      :loading="isExporting"
+                      :disabled="isImporting || items.length === 0"
+                      title="Export to Excel"
+                      extra-class="!rounded-sm"
+                      aria-label="Export to Excel"
+                      @click="handleExportToExcel"
+                    >
+                      Export
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      :icon="PlusIcon"
+                      extra-class="!rounded-sm"
+                      aria-label="Add product"
+                      @click="openAddItemModal"
+                    >
+                      Add product
+                    </Button>
+                  </template>
+                </div>
+              </div>
             </div>
-            <button
-              type="button"
-              class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-              title="Exit expanded view"
-              @click="isFullscreen = false"
-            >
-              <XMarkIcon class="h-5 w-5" />
-            </button>
           </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="relative min-w-0 flex-1 sm:max-w-sm">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search..."
-                class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
-              />
-            </div>
-            <select
-              v-model="sortBy"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
-              @change="handleSortByChange"
-            >
-              <option value="name">Name</option>
-              <option value="price">Unit price</option>
-              <option value="sku">SKU</option>
-              <option value="dateIn">Date In</option>
-              <option value="availability">Status</option>
-            </select>
-            <button
-              type="button"
-              class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-              title="Reset filters"
-              @click="resetFilters"
-            >
-              <ArrowPathIcon class="h-4 w-4" />
-            </button>
-            <template v-if="canManageInventoryItems">
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="ArrowDownTrayIcon"
-                :loading="isImporting"
-                :disabled="isExporting"
-                title="Import from Excel"
-                extra-class="!rounded-sm"
-                aria-label="Import from Excel"
-                @click="fileInputRef?.click()"
-              >
-                Import
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="ArrowUpTrayIcon"
-                :loading="isExporting"
-                :disabled="isImporting || items.length === 0"
-                title="Export to Excel"
-                extra-class="!rounded-sm"
-                aria-label="Export to Excel"
-                @click="handleExportToExcel"
-              >
-                Export
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                :icon="PlusIcon"
-                extra-class="!rounded-sm"
-                aria-label="Add product"
-                @click="openAddItemModal"
-              >
-                Add product
-              </Button>
-            </template>
-          </div>
-        </div>
-      </div>
 
-      <div
-        :class="[
-          isFullscreen
-            ? 'shadow-none'
-            : 'data-table-shell',
-        ]"
-      >
+          <div
+            :class="[
+              isFullscreen
+                ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+                : 'data-table-shell',
+            ]"
+          >
         <!-- Desktop toolbar -->
         <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
           <template #heading>
@@ -379,7 +387,7 @@
             </button>
             <button
               type="button"
-              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
               :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
               @click="isFullscreen = !isFullscreen"
             >
@@ -465,8 +473,12 @@
         </Button>
       </div>
       <template v-else>
+      <div :class="isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'contents'">
       <!-- Mobile: card list when has items -->
-      <div class="block sm:hidden space-y-3 px-1">
+      <div
+        class="block space-y-3 sm:hidden"
+        :class="isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-1'"
+      >
         <div
           v-for="item in paginatedItems"
           :key="item.id"
@@ -527,12 +539,17 @@
       </div>
       <!-- Desktop: table when has items -->
       <div
-        class="hidden overflow-x-auto sm:block"
-        :class="isFullscreen ? 'w-full max-w-none px-4 pb-6 pt-2 sm:px-6' : ''"
+        class="hidden sm:block"
+        :class="
+          isFullscreen
+            ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8'
+            : 'overflow-x-auto'
+        "
       >
         <table class="min-w-full border-separate border-spacing-0">
           <thead
             class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
+            :class="isFullscreen ? 'sticky top-0 z-10 shadow-sm shadow-gray-950/5 dark:shadow-black/35' : ''"
           >
               <tr>
               <th
@@ -722,9 +739,30 @@
           </tbody>
         </table>
       </div>
-      </template>
       </div>
-    </div>
+      </template>
+
+      <!-- Fullscreen: pagination pinned inside overlay -->
+      <div
+        v-if="isFullscreen && sortedFilteredItems.length > 0"
+        class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
+        style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+      >
+        <div
+          class="w-full min-w-0 max-w-full overflow-x-hidden px-3 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-1.5 lg:px-7"
+        >
+          <Pagination
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="sortedFilteredItems.length"
+            @page-change="handlePageChange"
+          />
+        </div>
+      </div>
+          </div>
+        </div>
+      </Teleport>
+    </template>
 
     <DashboardFixedFooter v-if="sortedFilteredItems.length > 0 && !isFullscreen" :sidebar-collapsed="sidebarCollapsed">
       <Pagination
@@ -734,23 +772,6 @@
         @page-change="handlePageChange"
       />
     </DashboardFixedFooter>
-
-    <!-- Fullscreen mode: bottom bar (sticky within fullscreen panel; full width) -->
-    <div
-      v-if="isFullscreen && sortedFilteredItems.length > 0"
-      class="sticky bottom-0 z-10 w-full border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
-    >
-      <div
-        class="w-full min-w-0 px-4 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-1.5"
-      >
-        <Pagination
-          :current-page="currentPage"
-          :items-per-page="itemsPerPage"
-          :total="sortedFilteredItems.length"
-          @page-change="handlePageChange"
-        />
-      </div>
-    </div>
 
     <!-- Hidden file input for import -->
     <input
@@ -762,12 +783,11 @@
       @change="handleFileImport"
     />
 
-    <!-- Enhanced Add/Edit Item Modal -->
-    <Modal
+    <!-- Enhanced Add/Edit Item (slide-over) -->
+    <SidePanel
       v-model="showAddItemModal"
       :title="editingItem ? 'Edit Product' : (folder?.hasSerialNumbers && !editingItem ? 'Add Products with Serial Numbers' : 'Add New Product')"
       :subtitle="folder?.hasSerialNumbers && !editingItem ? 'Enter shared details, then add serial numbers' : (editingItem ? 'Update product details' : 'Add a new product to this folder')"
-      :size="editingItem || !folder?.hasSerialNumbers ? 'md' : 'lg'"
       content-padding="p-3"
     >
       <form @submit.prevent="handleSaveItem" class="space-y-2">
@@ -993,7 +1013,7 @@
           {{ editingItem ? 'Update Product' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Product') }}
         </Button>
       </template>
-    </Modal>
+    </SidePanel>
 
     <!-- Discount Modal -->
     <DiscountModal
@@ -1224,6 +1244,7 @@ import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'

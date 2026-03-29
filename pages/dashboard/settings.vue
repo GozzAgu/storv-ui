@@ -405,8 +405,8 @@
     </div>
   </div>
 
-    <!-- Create/Edit Store Modal -->
-    <Modal
+    <!-- Create/Edit Branch (slide-over) -->
+    <SidePanel
       v-model="showCreateModal"
       :title="editingStore ? 'Edit Branch' : 'Create Branch'"
       :subtitle="editingStore ? 'Update branch details.' : 'Add a new branch with name, description, and contact info.'"
@@ -427,22 +427,7 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
-            <button
-              type="button"
-              @click="generateAIDescription"
-              :disabled="isGeneratingDescription || !storeForm.name"
-              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-sm"
-            >
-              <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
-              <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ isGeneratingDescription ? 'Generating...' : 'AI Complete' }}
-            </button>
-          </div>
+          <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
           <textarea
             v-model="storeForm.description"
             rows="2"
@@ -500,7 +485,7 @@
           {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
         </Button>
       </template>
-    </Modal>
+    </SidePanel>
 
     <!-- Delete Store Confirmation Modal -->
     <Modal
@@ -586,7 +571,6 @@ import {
   CheckIcon,
   PencilSquareIcon,
   PlusIcon,
-  SparklesIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -599,6 +583,7 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useToast } from '~/composables/useToast'
 import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import type { Store } from '~/composables/useStores'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { SUBSCRIPTION_PLANS, SUBSCRIPTION_FEATURE_SUMMARY, type SubscriptionPlan } from '~/types/subscription'
@@ -721,7 +706,6 @@ const storeToDelete = ref<Store | null>(null)
 const isSubmittingStore = ref(false)
 const isDeletingStore = ref(false)
 const newlyCreatedStoreId = ref<string | null>(null)
-const isGeneratingDescription = ref(false)
 
 const storeForm = ref({
   name: '',
@@ -781,38 +765,6 @@ const removeAccountLogo = async () => {
     toast.success('Logo removed from all stores')
   } catch (err: any) {
     toast.error(err.message || 'Failed to remove logo')
-  }
-}
-
-const generateAIDescription = async () => {
-  if (!storeForm.value.name?.trim()) {
-    toast.error('Please enter a branch name first')
-    return
-  }
-
-  isGeneratingDescription.value = true
-
-  try {
-    const response = await $fetch<{ success: boolean; description?: string; error?: string }>('/api/ai/generate-store-description', {
-      method: 'POST',
-      body: {
-        storeName: storeForm.value.name.trim(),
-        storeAddress: storeForm.value.address?.trim() || '',
-        storeType: 'general'
-      }
-    })
-
-    if (response.success && response.description) {
-      storeForm.value.description = response.description
-      toast.success('Description generated successfully')
-    } else {
-      toast.error(response.error || 'Failed to generate description. Please try again.')
-    }
-  } catch (err: any) {
-    console.error('AI generation error:', err)
-    toast.error(err.message || 'Failed to generate description. Please try again.')
-  } finally {
-    isGeneratingDescription.value = false
   }
 }
 

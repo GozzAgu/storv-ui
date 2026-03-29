@@ -6,9 +6,9 @@
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div class="flex min-h-0 flex-1 flex-col gap-4">
+      <div class="space-y-4">
         <!-- Step Indicator -->
-        <div class="flex shrink-0 items-center justify-between">
+        <div class="flex items-center justify-between mb-4">
           <div
             v-for="(step, index) in steps"
             :key="step.id"
@@ -50,14 +50,14 @@
         </div>
 
         <!-- Step 1: Select Folder -->
-        <div v-if="currentStep === 0" class="flex min-h-0 flex-1 flex-col gap-3">
-          <div class="shrink-0 space-y-3">
+        <div v-if="currentStep === 0" class="space-y-3">
+          <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Select Inventory Folder
             </label>
-
+            
             <!-- Search Bar for Folders -->
-            <div>
+            <div class="mb-3">
               <div class="relative">
                 <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
@@ -68,15 +68,14 @@
                 />
               </div>
             </div>
-          </div>
-
-            <div v-if="loadingFolders" class="flex min-h-0 flex-1 flex-col items-center justify-center py-8">
+            
+            <div v-if="loadingFolders" class="text-center py-6">
               <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading folders...</p>
             </div>
             <div
               v-else-if="filteredFolders.length === 0"
-              class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-sm border border-dashed border-gray-300 px-4 py-8 text-center dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
             >
               <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                 <FolderIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
@@ -88,7 +87,7 @@
                 {{ folderSearchQuery ? 'Try a different search' : 'Create a folder in Inventory first' }}
               </p>
             </div>
-            <div v-else class="grid min-h-0 flex-1 auto-rows-min grid-cols-1 gap-2.5 overflow-y-auto sm:grid-cols-2">
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto">
               <button
                 v-for="folder in filteredFolders"
                 :key="folder.id"
@@ -122,12 +121,13 @@
                 </div>
               </button>
             </div>
+          </div>
         </div>
 
         <!-- Step 2: Select Items -->
-        <div v-if="currentStep === 1" class="flex min-h-0 flex-1 flex-col gap-3">
-          <div class="shrink-0 space-y-3">
-            <div class="flex items-center justify-between">
+        <div v-if="currentStep === 1" class="space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-3">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Select Items from {{ selectedFolder?.name }}
               </label>
@@ -138,9 +138,9 @@
                 Refresh
               </button>
             </div>
-
+            
             <!-- Search Bar for Items -->
-            <div>
+            <div class="mb-3">
               <div class="relative">
                 <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                 <input
@@ -151,14 +151,13 @@
                 />
               </div>
             </div>
-          </div>
-            <div v-if="loadingItems" class="flex min-h-0 flex-1 flex-col items-center justify-center py-8">
+            <div v-if="loadingItems" class="text-center py-6">
               <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
               <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
             </div>
             <div
               v-else-if="availableItems.length === 0"
-              class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-sm border border-dashed border-gray-300 px-4 py-8 text-center dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
             >
               <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                 <CubeIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
@@ -166,7 +165,7 @@
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No items available</p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">This folder has no items to add</p>
             </div>
-            <div v-else class="min-h-0 flex-1 space-y-2 overflow-y-auto">
+            <div v-else class="max-h-[360px] overflow-y-auto space-y-2">
               <div
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
@@ -236,7 +235,8 @@
                 </div>
               </div>
             </div>
-          <div v-if="selectedItems.length > 0" class="shrink-0 p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm">
+          </div>
+          <div v-if="selectedItems.length > 0" class="p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm">
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Selected Items ({{ totalSelectedQuantity }})
             </p>

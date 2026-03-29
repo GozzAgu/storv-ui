@@ -23,7 +23,6 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     // Private keys (only available on server-side)
-    openaiApiKey: process.env.OPENAI_API_KEY || '',
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
     // Plan amounts in kobo (NGN) - override via env: PAYSTACK_PLAN_MICRO_AMOUNT, etc.
     paystackPlanMicroAmount: parseInt(process.env.PAYSTACK_PLAN_MICRO_AMOUNT || '0', 10),

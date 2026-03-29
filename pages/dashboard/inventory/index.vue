@@ -294,14 +294,13 @@
       @deleted="handleConfirmDeleteFolder"
     />
 
-    <!-- Create Folder Modal -->
-    <Modal
+    <!-- Create Folder (slide-over) -->
+    <SidePanel
       v-model="showCreateFolderModal"
       :title="editingFolder ? 'Edit Folder' : 'Create New Folder'"
       :subtitle="editingFolder ? 'Update folder details and template.' : 'Add a new inventory folder and define its table columns.'"
-      size="lg"
     >
-      <div class="max-h-[65vh] overflow-y-auto">
+      <div class="min-h-0">
         <form @submit.prevent="handleSaveFolder" class="bg-transparent">
           <!-- Basic info -->
           <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
@@ -338,27 +337,13 @@
           </div>
         </div>
               <div>
-                <div class="flex items-center justify-between mb-1">
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
-            <button
-              type="button"
-              @click="handleGenerateDescription"
-              :disabled="!folderForm.name || isGeneratingDescription"
-                    class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Generate description with AI"
-            >
-                    <SparklesIcon :class="['w-3.5 h-3.5', isGeneratingDescription ? 'animate-spin' : '']" />
-                    {{ isGeneratingDescription ? 'Generating...' : 'AI Generate' }}
-            </button>
-          </div>
+                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
           <textarea
             v-model="folderForm.description"
-            @input="aiError = null"
             rows="3"
                   class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             placeholder="Describe the folder's purpose"
                 />
-          <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
         </div>
           </div>
         </div>
@@ -499,7 +484,7 @@
           {{ editingFolder ? 'Update' : 'Create' }} folder
         </Button>
       </template>
-    </Modal>
+    </SidePanel>
 
     <!-- Duplicate Folder Modal (multiple folder names) -->
     <Modal
@@ -602,10 +587,10 @@ import {
   DocumentDuplicateIcon,
   EllipsisVerticalIcon,
   ExclamationTriangleIcon,
-  SparklesIcon,
   Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
+import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
@@ -619,7 +604,6 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
-import { useAI } from '~/composables/useAI'
 import { useToast } from '~/composables/useToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
@@ -824,20 +808,6 @@ const folderForm = reactive({
   hasSerialNumbers: false,
   allowedDepartments: [] as string[], // Array of department IDs
 })
-
-// AI generation
-const { generateDescription, isGenerating: isGeneratingDescription, error: aiError } = useAI()
-
-const handleGenerateDescription = async () => {
-  if (!folderForm.name || folderForm.name.trim().length === 0) {
-    return
-  }
-
-  const description = await generateDescription(folderForm.name, folderForm.type)
-  if (description) {
-    folderForm.description = description
-  }
-}
 
 // Default fields that should always be included
 const getDefaultFields = (): TemplateField[] => {
@@ -1497,10 +1467,6 @@ const handleCancelFolder = () => {
   folderForm.hasSerialNumbers = false
   folderForm.allowedDepartments = []
   editableFields.value = getDefaultFields()
-  // Clear AI error when closing modal
-  if (aiError.value) {
-    aiError.value = null
-  }
 }
 
 const handleAddField = () => {
