@@ -5,6 +5,7 @@ import {
   PAYSTACK_CURRENCY,
   getExpectedPlanAmount,
   validatePaidAmountAndCurrency,
+  resolvePaystackSecretKey,
 } from '~/server/utils/paystack-validation'
 
 export default defineEventHandler(async (event) => {
@@ -20,7 +21,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const config = useRuntimeConfig()
-    const secretKey = config.paystackSecretKey
+    const secretKey = resolvePaystackSecretKey(config)
     if (!secretKey) {
       throw createError({
         statusCode: 503,

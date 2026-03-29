@@ -1,6 +1,11 @@
 import type { SubscriptionPlan } from '~/types/subscription'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { getExpectedPlanAmount, PAYSTACK_CURRENCY, VALID_PLANS } from '~/server/utils/paystack-validation'
+import {
+  getExpectedPlanAmount,
+  PAYSTACK_CURRENCY,
+  VALID_PLANS,
+  resolvePaystackSecretKey,
+} from '~/server/utils/paystack-validation'
 
 export default defineEventHandler(async (event) => {
   try {
@@ -22,7 +27,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const config = useRuntimeConfig()
-    const secretKey = config.paystackSecretKey
+    const secretKey = resolvePaystackSecretKey(config)
     if (!secretKey) {
       throw createError({
         statusCode: 503,

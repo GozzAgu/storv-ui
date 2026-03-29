@@ -34,3 +34,9 @@ export function validatePaidAmountAndCurrency(
   }
   return { valid: true }
 }
+
+/** Server-only: useRuntimeConfig first; `process.env` fallback matches Vercel runtime secrets. */
+export function resolvePaystackSecretKey(config: { paystackSecretKey?: string }): string {
+  const fromConfig = typeof config.paystackSecretKey === 'string' ? config.paystackSecretKey : ''
+  return (fromConfig || process.env.PAYSTACK_SECRET_KEY || '').trim()
+}

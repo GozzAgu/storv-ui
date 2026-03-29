@@ -25,6 +25,8 @@ logs
 
 # Firebase service account key (never commit)
 firebase-service-account.json
+*-firebase-adminsdk-*.json
+secrets/
 
 # Capacitor iOS
 ios/App/Pods/
