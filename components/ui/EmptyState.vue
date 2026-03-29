@@ -2,7 +2,7 @@
   <div class="text-center" :class="compact ? 'py-4 sm:py-6' : 'py-6 sm:py-8'">
     <div
       :class="[
-        'mx-auto flex items-center justify-center rounded-2xl mb-3 sm:mb-4',
+        'mx-auto flex items-center justify-center rounded-sm mb-3 sm:mb-4',
         iconBgClass,
         compact ? 'w-14 h-14' : 'w-16 h-16 sm:w-20 sm:h-20'
       ]"

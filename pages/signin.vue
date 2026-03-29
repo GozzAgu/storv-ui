@@ -9,7 +9,7 @@
     >
       <a
         href="https://www.storvv.com"
-        class="mb-4 inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden rounded-lg dark:focus-visible:ring-offset-slate-950"
+        class="mb-4 inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden rounded-sm dark:focus-visible:ring-offset-slate-950"
       >
         <img
           :src="logoSource"
@@ -39,7 +39,7 @@
     </div>
 
     <div
-      class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] backdrop-blur-sm transition-shadow duration-500 ease-out dark:border-gray-800/90 dark:bg-slate-950/95 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)] opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms] hover:shadow-[0_16px_48px_-14px_rgba(8,27,64,0.18)] dark:hover:shadow-[0_16px_52px_-10px_rgba(0,0,0,0.65)]"
+      class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/90 shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] backdrop-blur-sm transition-shadow duration-500 ease-out dark:border-gray-800/90 dark:bg-slate-950/95 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)] opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms] hover:shadow-[0_16px_48px_-14px_rgba(8,27,64,0.18)] dark:hover:shadow-[0_16px_52px_-10px_rgba(0,0,0,0.65)]"
     >
         <div class="relative p-4 sm:p-5">
           <div
@@ -57,7 +57,7 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
+                class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                 placeholder="Enter your email"
               />
             </div>
@@ -81,7 +81,7 @@
                   :type="showPassword ? 'text' : 'password'"
                   autocomplete="current-password"
                   required
-                  class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
+                  class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:shadow-[0_0_0_3px_rgba(20,63,141,0.08)] dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:shadow-[0_0_0_3px_rgba(110,148,214,0.12)]"
                   placeholder="Enter your password"
                 />
                 <button
@@ -110,7 +110,7 @@
 
             <div
               v-if="errorMessage"
-              class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
+              class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
             >
               <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
               <div class="text-xs text-red-700 dark:text-red-300 whitespace-pre-line text-left">{{ errorMessage }}</div>

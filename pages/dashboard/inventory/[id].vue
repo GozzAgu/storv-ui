@@ -1,17 +1,19 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-5 overflow-x-hidden pb-24 sm:space-y-6 sm:pb-24">
+  <div
+    class="w-full max-w-none space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+  >
     <Breadcrumbs :items="inventoryBreadcrumbs" class="text-[11px] text-gray-500 dark:text-gray-400" />
 
     <!-- Hero -->
     <header
       v-if="!isLoadingFolder"
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
     >
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-1 items-start gap-3">
           <button
             type="button"
-            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
             title="Back to folders"
             @click="navigateTo('/dashboard/inventory')"
           >
@@ -49,44 +51,55 @@
           </div>
         </div>
         <div
-          v-if="canManageInventoryItems && selectedItemsForBulk.length > 0"
+          v-if="canManageInventoryItems"
           class="flex shrink-0 flex-wrap items-center gap-2 border-t border-gray-100/90 pt-3 dark:border-gray-800/80 sm:border-t-0 sm:pt-0"
         >
           <Button
-            variant="outline"
+            variant="primary"
             size="sm"
-            :icon="TagIcon"
-            class="!rounded-lg !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-primary-200/80 hover:!bg-primary-50/60 hover:!text-primary-600 dark:hover:!border-primary-700/50 dark:hover:!bg-primary-900/10 dark:hover:!text-primary-300"
-            @click="openBulkDiscountModal"
+            :icon="PlusIcon"
+            extra-class="!rounded-sm"
+            @click="openAddItemModal"
           >
-            Discount
+            Add product
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            :icon="TrashIcon"
-            class="!rounded-lg !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-red-200/80 hover:!bg-red-50/60 hover:!text-red-600 dark:hover:!border-red-800/50 dark:hover:!bg-red-900/10 dark:hover:!text-red-400"
-            @click="openBulkDeleteModal"
-          >
-            Delete
-          </Button>
+          <template v-if="selectedItemsForBulk.length > 0">
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TagIcon"
+              class="!rounded-sm !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-primary-200/80 hover:!bg-primary-50/60 hover:!text-primary-600 dark:hover:!border-primary-700/50 dark:hover:!bg-primary-900/10 dark:hover:!text-primary-300"
+              @click="openBulkDiscountModal"
+            >
+              Discount
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              class="!rounded-sm !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-red-200/80 hover:!bg-red-50/60 hover:!text-red-600 dark:hover:!border-red-800/50 dark:hover:!bg-red-900/10 dark:hover:!text-red-400"
+              @click="openBulkDeleteModal"
+            >
+              Delete
+            </Button>
+          </template>
         </div>
       </div>
     </header>
 
     <div
       v-else
-      class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 p-5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:p-6"
+      class="overflow-hidden rounded-sm bg-white p-5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:p-6"
     >
       <div class="flex gap-3">
-        <div class="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+        <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
         <div class="min-w-0 flex-1 space-y-3">
-          <div class="h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-md bg-gray-200 dark:bg-gray-700"></div>
-          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div class="h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
           <div class="flex gap-2">
-            <div class="h-7 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"></div>
-            <div class="h-7 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-7 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-white/10"></div>
+            <div class="h-7 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10"></div>
           </div>
         </div>
       </div>
@@ -112,19 +125,19 @@
     <!-- Loading: table shell -->
     <template v-if="isLoadingFolder">
       <div
-        class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
           <div class="flex flex-wrap gap-2">
-            <div class="h-9 flex-1 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700 sm:max-w-xs"></div>
-            <div class="h-9 w-24 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-9 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:max-w-xs"></div>
+            <div class="h-9 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
           </div>
         </div>
         <div class="space-y-2.5 p-4 sm:p-5">
           <div v-for="i in 8" :key="i" class="flex gap-3">
-            <div class="h-4 flex-1 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-            <div class="h-4 w-20 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-            <div class="h-4 w-16 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+            <div class="h-4 w-20 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+            <div class="h-4 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
           </div>
         </div>
       </div>
@@ -141,13 +154,47 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search by name, SKU…"
-            class="w-full rounded-xl border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+            class="w-full rounded-sm border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
           />
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            v-if="canManageInventoryItems"
+            variant="outline"
+            size="sm"
+            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 sm:!px-3"
+            :icon="ArrowDownTrayIcon"
+            :loading="isImporting"
+            :disabled="isExporting"
+            aria-label="Import from Excel"
+            title="Import from Excel"
+            @click="fileInputRef?.click()"
+          />
+          <Button
+            v-if="canManageInventoryItems"
+            variant="outline"
+            size="sm"
+            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 sm:!px-3"
+            :icon="ArrowUpTrayIcon"
+            :loading="isExporting"
+            :disabled="isImporting || items.length === 0"
+            aria-label="Export to Excel"
+            title="Export to Excel"
+            @click="handleExportToExcel"
+          />
+          <Button
+            v-if="canManageInventoryItems"
+            variant="primary"
+            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 text-sm sm:!px-3"
+            :icon="PlusIcon"
+            aria-label="Add product"
+            @click="openAddItemModal"
+          >
+            <span class="hidden sm:inline">Add</span>
+          </Button>
           <select
             v-model="sortBy"
-            class="min-w-[120px] flex-1 cursor-pointer rounded-xl border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
+            class="min-w-[120px] flex-1 cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
             @change="handleSortByChange"
           >
             <option value="name">Name</option>
@@ -156,10 +203,10 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-          <Button variant="outline" class="shrink-0 !rounded-xl" :icon="ArrowPathIcon" @click="resetFilters" />
+          <Button variant="outline" class="shrink-0 !rounded-sm" :icon="ArrowPathIcon" @click="resetFilters" />
           <button
             type="button"
-            class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2.5 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+            class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2.5 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
             :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
             @click="isFullscreen = !isFullscreen"
           >
@@ -176,16 +223,16 @@
       :class="[
         'transition-all duration-300',
         isFullscreen
-          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:bg-gray-950'
+          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
           : 'relative'
       ]"
     >
       <!-- Fullscreen Header -->
       <div
         v-if="isFullscreen"
-        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:bg-gray-950/90 sm:px-6"
+        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:!bg-dashboard-card/90 sm:px-6"
       >
-        <div class="mx-auto flex max-w-[1600px] flex-col gap-4">
+        <div class="flex w-full max-w-none flex-col gap-4">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
@@ -200,7 +247,7 @@
             </div>
             <button
               type="button"
-              class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+              class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               title="Exit expanded view"
               @click="isFullscreen = false"
             >
@@ -216,12 +263,12 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search..."
-                class="w-full rounded-xl border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+                class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
               />
             </div>
             <select
               v-model="sortBy"
-              class="min-w-[100px] cursor-pointer rounded-xl border border-gray-200/90 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white px-2.5 py-2 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
               @change="handleSortByChange"
             >
               <option value="name">Name</option>
@@ -232,12 +279,50 @@
             </select>
             <button
               type="button"
-              class="rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+              class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
               title="Reset filters"
               @click="resetFilters"
             >
               <ArrowPathIcon class="h-4 w-4" />
             </button>
+            <template v-if="canManageInventoryItems">
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="ArrowDownTrayIcon"
+                :loading="isImporting"
+                :disabled="isExporting"
+                title="Import from Excel"
+                extra-class="!rounded-sm"
+                aria-label="Import from Excel"
+                @click="fileInputRef?.click()"
+              >
+                Import
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="ArrowUpTrayIcon"
+                :loading="isExporting"
+                :disabled="isImporting || items.length === 0"
+                title="Export to Excel"
+                extra-class="!rounded-sm"
+                aria-label="Export to Excel"
+                @click="handleExportToExcel"
+              >
+                Export
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                :icon="PlusIcon"
+                extra-class="!rounded-sm"
+                aria-label="Add product"
+                @click="openAddItemModal"
+              >
+                Add product
+              </Button>
+            </template>
           </div>
         </div>
       </div>
@@ -246,23 +331,22 @@
         :class="[
           isFullscreen
             ? 'shadow-none'
-            : 'overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35',
+            : 'data-table-shell',
         ]"
       >
         <!-- Desktop toolbar -->
-        <div
-          v-if="!isFullscreen"
-          class="hidden flex-col gap-3 border-b border-gray-100/90 px-3 py-3 dark:border-gray-800/80 lg:flex sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5"
-        >
-          <div class="min-w-0">
-            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Product list
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              {{ sortedFilteredItems.length }} shown · {{ formatCurrency(totalInventoryValue) }} total value
-            </p>
-          </div>
-          <div class="flex flex-shrink-0 flex-wrap items-center gap-1.5">
+        <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
+          <template #heading>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Product list
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                {{ sortedFilteredItems.length }} shown · {{ formatCurrency(totalInventoryValue) }} total value
+              </p>
+            </div>
+          </template>
+          <template #filters>
             <div class="relative">
               <MagnifyingGlassIcon
                 class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
@@ -271,12 +355,12 @@
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search…"
-                class="w-40 rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
+                class="w-40 rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
               />
             </div>
             <select
               v-model="sortBy"
-              class="min-w-[100px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 shadow-sm focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
               @change="handleSortByChange"
             >
               <option value="name">Name</option>
@@ -287,7 +371,7 @@
             </select>
             <button
               type="button"
-              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
               title="Reset filters"
               @click="resetFilters"
             >
@@ -295,21 +379,62 @@
             </button>
             <button
               type="button"
-              class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
+              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
               :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
               @click="isFullscreen = !isFullscreen"
             >
               <ArrowsPointingOutIcon class="h-4 w-4" />
             </button>
-          </div>
-        </div>
+          </template>
+          <template #actions>
+            <Button
+              v-if="canManageInventoryItems"
+              variant="outline"
+              size="sm"
+              :icon="ArrowDownTrayIcon"
+              :loading="isImporting"
+              :disabled="isExporting"
+              title="Import from Excel"
+              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              aria-label="Import from Excel"
+              @click="fileInputRef?.click()"
+            >
+              <span class="hidden sm:inline">Import</span>
+            </Button>
+            <Button
+              v-if="canManageInventoryItems"
+              variant="outline"
+              size="sm"
+              :icon="ArrowUpTrayIcon"
+              :loading="isExporting"
+              :disabled="isImporting || items.length === 0"
+              title="Export to Excel"
+              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              aria-label="Export to Excel"
+              @click="handleExportToExcel"
+            >
+              <span class="hidden sm:inline">Export</span>
+            </Button>
+            <Button
+              v-if="canManageInventoryItems"
+              variant="primary"
+              size="sm"
+              :icon="PlusIcon"
+              aria-label="Add product"
+              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              @click="openAddItemModal"
+            >
+              <span class="hidden sm:inline">Add product</span>
+            </Button>
+          </template>
+        </DataTableToolbar>
       <!-- Empty state inside table card -->
       <div
         v-if="sortedFilteredItems.length === 0"
-        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200/90 bg-gradient-to-b from-gray-50/80 to-gray-50/20 px-5 py-14 text-center dark:border-gray-700/70 dark:from-gray-900/50 dark:to-gray-950/20 sm:mx-5 sm:px-8"
+        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-sm bg-white px-5 py-14 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:mx-5 sm:px-8"
       >
         <div
-          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/60 dark:shadow-none"
+          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-sm bg-gray-50 shadow-sm dark:bg-gray-800 dark:shadow-md dark:shadow-black/30"
         >
           <CubeIcon class="h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.35" />
         </div>
@@ -325,9 +450,19 @@
           {{
             searchQuery
               ? 'Try a different term or reset filters to see everything in this folder.'
-              : 'Use the + button to add your first product and start tracking inventory.'
+              : 'Add your first product to start tracking inventory in this folder.'
           }}
         </p>
+        <Button
+          v-if="canManageInventoryItems"
+          variant="primary"
+          size="sm"
+          :icon="PlusIcon"
+          extra-class="!rounded-sm mt-5"
+          @click="openAddItemModal"
+        >
+          Add product
+        </Button>
       </div>
       <template v-else>
       <!-- Mobile: card list when has items -->
@@ -335,7 +470,7 @@
         <div
           v-for="item in paginatedItems"
           :key="item.id"
-          class="rounded-2xl border border-gray-200/80 bg-white/95 p-3.5 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+          class="rounded-sm bg-white p-3.5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -376,7 +511,7 @@
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
                 :class="[
-                  'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                  'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
                   isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
                 ]"
                 title="Actions"
@@ -393,11 +528,11 @@
       <!-- Desktop: table when has items -->
       <div
         class="hidden overflow-x-auto sm:block"
-        :class="isFullscreen ? 'mx-auto max-w-[1600px] px-4 pb-6 pt-2 sm:px-6' : ''"
+        :class="isFullscreen ? 'w-full max-w-none px-4 pb-6 pt-2 sm:px-6' : ''"
       >
         <table class="min-w-full border-separate border-spacing-0">
           <thead
-            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-gray-900/90"
+            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
           >
               <tr>
               <th
@@ -446,7 +581,7 @@
               </th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-950/40">
+            <tbody class="bg-white dark:!bg-dashboard-card/35">
               <tr
                 v-for="(item, index) in paginatedItems"
                 :key="item.id"
@@ -571,7 +706,7 @@
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
                     :class="[
-                      'inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                      'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors',
                       isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200'
                     ]"
                     title="Actions"
@@ -591,33 +726,30 @@
       </div>
     </div>
 
-    <!-- Bottom bar: Pagination -->
-    <div
-      v-if="sortedFilteredItems.length > 0 && !isFullscreen"
-      class="fixed bottom-0 left-0 right-0 rounded-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-700/80 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.3)] z-30 transition-[left] duration-300 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
-    >
-      <div class="px-4 sm:px-6 py-1.5 rounded-none">
-        <Pagination
-          :current-page="currentPage"
-          :items-per-page="itemsPerPage"
-          :total="sortedFilteredItems.length"
-          @page-change="handlePageChange"
-        />
-      </div>
-    </div>
+    <DashboardFixedFooter v-if="sortedFilteredItems.length > 0 && !isFullscreen" :sidebar-collapsed="sidebarCollapsed">
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="sortedFilteredItems.length"
+        @page-change="handlePageChange"
+        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
+      />
+    </DashboardFixedFooter>
 
-    <!-- Fullscreen mode: bottom bar -->
+    <!-- Fullscreen mode: bottom bar (sticky within fullscreen panel; full width) -->
     <div
       v-if="isFullscreen && sortedFilteredItems.length > 0"
-      class="sticky bottom-0 z-10 border-t border-gray-200/90 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-950/95 sm:px-6"
+      class="sticky bottom-0 z-10 w-full border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
     >
-      <div class="mx-auto max-w-[1600px]">
+      <div
+        class="w-full min-w-0 px-4 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-1.5"
+      >
         <Pagination
           :current-page="currentPage"
           :items-per-page="itemsPerPage"
           :total="sortedFilteredItems.length"
           @page-change="handlePageChange"
+          @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
         />
       </div>
     </div>
@@ -632,50 +764,6 @@
       @change="handleFileImport"
     />
 
-    <!-- Floating Action Buttons (draggable stack; position saved on this device) -->
-    <DraggableFabContainer
-      v-if="!isLoadingFolder && canManageInventoryItems"
-      :storage-key="`storv-fab:inventory-folder:${folderId}`"
-      layout="column"
-    >
-      <div class="flex flex-col gap-2.5 sm:gap-2">
-        <button
-          type="button"
-          @click="() => fileInputRef?.click()"
-          :disabled="isImporting"
-          :class="[
-            'flex h-12 w-12 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11',
-            (isImporting || isExporting) ? 'cursor-not-allowed opacity-50' : ''
-          ]"
-          title="Import from Excel"
-        >
-          <ArrowDownTrayIcon v-if="!isImporting" class="h-5 w-5 sm:h-5 sm:w-5" />
-          <div v-else class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-        </button>
-        <button
-          type="button"
-          @click="handleExportToExcel"
-          :disabled="isExporting || items.length === 0"
-          :class="[
-            'flex h-12 w-12 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11',
-            (isExporting || isImporting || items.length === 0) ? 'cursor-not-allowed opacity-50' : ''
-          ]"
-          title="Export to Excel"
-        >
-          <ArrowUpTrayIcon v-if="!isExporting" class="h-5 w-5 sm:h-5 sm:w-5" />
-          <div v-else class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-        </button>
-        <button
-          type="button"
-          @click="openAddItemModal"
-          class="flex h-14 w-14 touch-manipulation items-center justify-center rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-xl transition-all duration-300 hover:scale-110 hover:text-white hover:shadow-2xl active:scale-95 sm:h-11 sm:w-11"
-          title="Add new item"
-        >
-          <PlusIcon class="h-6 w-6 text-white sm:h-5 sm:w-5" />
-        </button>
-      </div>
-    </DraggableFabContainer>
-
     <!-- Enhanced Add/Edit Item Modal -->
     <Modal
       v-model="showAddItemModal"
@@ -687,7 +775,7 @@
       <form @submit.prevent="handleSaveItem" class="space-y-2">
         <!-- Bulk Add Mode for Serial Numbers -->
         <div v-if="folder?.hasSerialNumbers && !editingItem" class="space-y-2">
-          <div class="p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-lg">
+          <div class="p-2 bg-primary-50 dark:bg-primary-900/20 ring-1 ring-primary-200/50 dark:ring-primary-800/40 rounded-sm">
             <p class="text-[11px] text-blue-800 dark:text-blue-200">
               <strong>Bulk Add Mode:</strong> Enter details once, then add serial numbers below. Each serial creates a separate product.
             </p>
@@ -704,7 +792,7 @@
                   v-model="itemForm.brand"
                   type="text"
                   required
-                  class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                  class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   placeholder="Enter product model"
                 />
               </div>
@@ -722,7 +810,7 @@
                   v-model="itemForm[field.name]"
                   type="text"
                   :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <input
@@ -730,7 +818,7 @@
                   v-model.number="itemForm[field.name]"
                   type="number"
                   :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                 <div v-else-if="field.type === 'currency'" class="relative">
@@ -741,7 +829,7 @@
                     step="0.01"
                     min="0"
                     :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || '0.00'"
                   />
                 </div>
@@ -749,7 +837,7 @@
                   v-else-if="field.type === 'select' && field.options"
                   v-model="itemForm[field.name]"
                   :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                 >
                   <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">{{ option }}</option>
@@ -759,7 +847,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                 </div>
@@ -770,7 +858,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   />
                 <Checkbox
                   v-else-if="field.type === 'boolean'"
@@ -791,20 +879,20 @@
                 Add Serial Number
               </Button>
             </div>
-            <div v-if="serialNumbers.length === 0" class="text-center py-2 text-[11px] text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+            <div v-if="serialNumbers.length === 0" class="text-center py-2 text-[11px] text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm">
               No serial numbers added. Click "Add Serial Number" to start.
             </div>
             <div v-else class="space-y-1.5 max-h-52 overflow-y-auto">
               <div
                 v-for="(serial, index) in serialNumbers"
                 :key="index"
-                class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
+                class="flex items-center gap-1.5 p-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-sm border border-gray-200 dark:border-gray-600"
               >
                 <input
                   v-model="serialNumbers[index]"
                   type="text"
                   :placeholder="`Serial ${index + 1}`"
-                  class="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                  class="flex-1 min-w-0 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
                 />
                 <button
                   type="button"
@@ -833,7 +921,7 @@
                   v-model="itemForm[field.name]"
                   type="text"
                   :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                 />
                   <input
@@ -841,7 +929,7 @@
                     v-model.number="itemForm[field.name]"
                     type="number"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
                   <div v-else-if="field.type === 'currency'" class="relative">
@@ -852,7 +940,7 @@
                       step="0.01"
                       min="0"
                       :required="field.required"
-                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                      class="w-full pl-7 pr-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                       :placeholder="field.placeholder || '0.00'"
                     />
               </div>
@@ -860,7 +948,7 @@
                     v-else-if="field.type === 'select' && field.options"
                     v-model="itemForm[field.name]"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   >
                     <option value="">Select {{ field.label || field.name }}</option>
                     <option v-for="option in field.options" :key="option" :value="option">{{ option }}</option>
@@ -870,7 +958,7 @@
                     v-model="itemForm[field.name]"
                     type="text"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                     :placeholder="field.placeholder || `Enter ${field.label || field.name}`"
                   />
             </div>
@@ -883,7 +971,7 @@
                     v-model="itemForm[field.name]"
                     type="date"
                     :required="field.required"
-                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
+                    class="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500 transition-all"
                   />
                   <Checkbox
                     v-else-if="field.type === 'boolean'"
@@ -902,8 +990,8 @@
       </form>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
-        <Button variant="primary" size="sm" type="submit" @click="handleSaveItem" class="w-full sm:w-auto !rounded-lg">
+        <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+        <Button variant="primary" size="sm" type="submit" @click="handleSaveItem" class="w-full sm:w-auto !rounded-sm">
           {{ editingItem ? 'Update Product' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Product') }}
         </Button>
       </template>
@@ -941,7 +1029,7 @@
     >
       <template #header>
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
             <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div class="min-w-0">
@@ -951,10 +1039,10 @@
         </div>
       </template>
       <div class="space-y-3">
-        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
           <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected products from inventory. This action cannot be undone.</p>
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
           <Checkbox
             v-model="bulkDeleteConfirmed"
             label="I understand that these products will be permanently deleted."
@@ -965,13 +1053,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteModal = false; bulkDeleteConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteModal = false; bulkDeleteConfirmed = false" class="!rounded-sm">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteConfirmed || isBulkDeleting"
           :icon="TrashIcon"
-          class="!rounded-lg"
+          class="!rounded-sm"
           @click="handleConfirmBulkDelete"
         >
           {{ isBulkDeleting ? 'Deleting...' : `Delete ${selectedItemsForBulk.length} product${selectedItemsForBulk.length !== 1 ? 's' : ''}` }}
@@ -997,30 +1085,30 @@
               type="button"
               :icon="PlusIcon"
               @click="addDuplicateSerialNumber"
-              class="!rounded-lg"
+              class="!rounded-sm"
             >
               Add
             </Button>
           </div>
-          <div v-if="duplicateSerialNumbers.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+          <div v-if="duplicateSerialNumbers.length === 0" class="text-center py-3 text-xs text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm">
             No serial numbers. Click "Add" to enter one or more.
           </div>
           <div v-else class="space-y-2 max-h-48 overflow-y-auto">
             <div
               v-for="(serial, index) in duplicateSerialNumbers"
               :key="index"
-              class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-gray-200 dark:border-gray-600"
+              class="flex items-center gap-1.5 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-sm border border-gray-200 dark:border-gray-600"
             >
               <input
                 v-model="duplicateSerialNumbers[index]"
                 type="text"
                 :placeholder="`Serial ${index + 1}`"
-                class="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
+                class="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500/50 focus:border-primary-500"
               />
               <button
                 type="button"
                 @click="removeDuplicateSerialNumber(index)"
-                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
                 title="Remove"
               >
                 <TrashIcon class="w-4 h-4" />
@@ -1029,8 +1117,8 @@
           </div>
         </div>
         <div class="flex justify-end gap-2">
-          <Button variant="outline" size="sm" type="button" @click="showDuplicateModal = false; clearDuplicateModal()" class="!rounded-lg">Cancel</Button>
-          <Button variant="primary" size="sm" type="submit" :disabled="isDuplicating || !hasValidDuplicateSerials" class="!rounded-lg">
+          <Button variant="outline" size="sm" type="button" @click="showDuplicateModal = false; clearDuplicateModal()" class="!rounded-sm">Cancel</Button>
+          <Button variant="primary" size="sm" type="submit" :disabled="isDuplicating || !hasValidDuplicateSerials" class="!rounded-sm">
             {{ isDuplicating ? 'Duplicating...' : `Duplicate ${validDuplicateSerialsCount} product${validDuplicateSerialsCount !== 1 ? 's' : ''}` }}
           </Button>
         </div>
@@ -1049,7 +1137,7 @@
       <div
         v-if="openItemMenuId && itemForOpenMenu && itemMenuFixedStyle"
         data-inventory-item-menu
-        class="fixed z-[1000] min-w-[11rem] overflow-hidden rounded-lg bg-white py-1 shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
+        class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm border border-gray-200/90 py-1 dark:border-gray-700/80"
         role="menu"
         :style="itemMenuFixedStyle"
       >
@@ -1139,6 +1227,8 @@ import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type TemplateField } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
@@ -1157,7 +1247,6 @@ import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
-import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 
 definePageMeta({
   layout: 'dashboard'

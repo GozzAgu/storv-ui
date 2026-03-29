@@ -1,10 +1,10 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
     <!-- Hero -->
     <header
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
       data-tutorial="dashboard"
     >
       <div class="relative">
@@ -26,14 +26,14 @@
     <template v-if="isLoading">
       <!-- Stats Cards Skeleton -->
       <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-        <div v-for="i in 4" :key="i" class="rounded-xl bg-white p-3 ring-1 ring-gray-200/80 dark:bg-gray-900/50 dark:ring-gray-800/60 sm:p-3.5">
+        <div v-for="i in 4" :key="i" class="rounded-sm bg-white p-3 ring-1 ring-gray-200/80 dark:!bg-dashboard-card dark:ring-gray-800/60 sm:p-3.5">
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-2 animate-pulse"></div>
-              <div class="h-7 sm:h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-1.5 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-2/3 mb-2 animate-pulse"></div>
+              <div class="h-7 sm:h-8 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-1.5 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2 animate-pulse"></div>
             </div>
-            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0"></div>
+            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse shrink-0"></div>
           </div>
         </div>
       </div>
@@ -44,16 +44,16 @@
         <Card>
           <div class="flex items-center justify-between mb-3 sm:mb-4">
             <div>
-              <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 mb-2 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-24 animate-pulse"></div>
+              <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-32 mb-2 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-24 animate-pulse"></div>
             </div>
-            <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
-              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
-              <div class="h-7 w-16 bg-gray-200 dark:bg-gray-600 rounded-md animate-pulse"></div>
+            <div class="flex gap-1 rounded-sm bg-gray-100 p-1 dark:!bg-white/[0.06]">
+              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
             </div>
           </div>
-          <div class="h-48 sm:h-64 lg:h-72 bg-gray-100 dark:bg-gray-800 rounded-md animate-pulse"></div>
+          <div class="h-48 animate-pulse rounded-sm bg-gray-100 dark:!bg-white/[0.06] sm:h-64 lg:h-72"></div>
         </Card>
       </div>
 
@@ -62,19 +62,19 @@
         <!-- Recent Transactions Skeleton -->
         <Card>
           <div class="flex items-center justify-between mb-4">
-            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-32 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-32 animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
           </div>
           <div class="space-y-3">
             <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2">
               <div class="flex items-center gap-3 flex-1">
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse"></div>
                 <div class="flex-1">
-                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-32 mb-2 animate-pulse"></div>
-                  <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+                  <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-32 mb-2 animate-pulse"></div>
+                  <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
                 </div>
               </div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
             </div>
           </div>
         </Card>
@@ -82,30 +82,30 @@
         <!-- Top Selling Products Skeleton -->
         <Card>
           <div class="flex items-center justify-between mb-4">
-            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-36 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-36 animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
           </div>
           <div class="space-y-3">
             <div v-for="i in 3" :key="i" class="flex items-center justify-between">
               <div class="flex items-center gap-3 flex-1">
-                <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div class="w-10 h-10 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse"></div>
                 <div class="flex-1">
-                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-24 mb-1 animate-pulse"></div>
-                  <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+                  <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-24 mb-1 animate-pulse"></div>
+                  <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
                 </div>
               </div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
             </div>
           </div>
         </Card>
 
         <!-- Inventory Status Skeleton -->
         <Card>
-          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-28 mb-4 animate-pulse"></div>
+          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-28 mb-4 animate-pulse"></div>
           <div class="space-y-3">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-20 animate-pulse"></div>
-            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
+            <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full w-full animate-pulse"></div>
+            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
           </div>
         </Card>
       </div>
@@ -149,7 +149,7 @@
       <!-- Revenue Chart -->
       <Card
         padding="sm"
-        extra-class="!p-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+        extra-class="!p-0 overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div
           class="flex flex-col gap-2.5 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
@@ -161,7 +161,7 @@
             <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ chartSubtitle }}</p>
           </div>
           <div
-            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:bg-gray-900/60"
+            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:!bg-dashboard-card/60"
             role="group"
             aria-label="Chart period"
           >
@@ -206,7 +206,7 @@
         <div class="relative h-40 px-2 pb-4 sm:h-52 sm:px-3 lg:h-60">
           <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
             <div
-              class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+              class="mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
             >
               <ChartBarIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
@@ -238,7 +238,7 @@
       <!-- Orders & departments -->
       <Card
         padding="sm"
-        extra-class="!p-3 xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        extra-class="!p-3 xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <p
           class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
@@ -268,7 +268,7 @@
       <!-- Recent transactions -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
@@ -302,7 +302,7 @@
       <!-- Top products -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
@@ -329,7 +329,7 @@
             >
               <div class="flex min-w-0 flex-1 items-center gap-2">
                 <span
-                  class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                   >{{ i + 1 }}</span
                 >
                 <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
@@ -348,7 +348,7 @@
       <!-- Low stock -->
       <Card
         padding="sm"
-        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-[0_1px_0_rgba(15,23,42,0.04)] dark:border-gray-700/50 dark:bg-gray-950/35"
+        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="mb-3 flex items-center justify-between">
           <p
@@ -381,14 +381,14 @@
       <!-- Inventory status -->
       <Card
         padding="sm"
-        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <p
           class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
         >
           Inventory
         </p>
-        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-white/10">
           <div class="bg-green-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
           <div class="bg-amber-500 transition-all" :style="`width: ${lowStockPercentage}%`" title="Low stock" />
           <div class="bg-red-500 transition-all" :style="`width: ${outOfStockPercentage}%`" title="Out of stock" />

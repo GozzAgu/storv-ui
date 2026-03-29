@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'rounded-lg border border-gray-200/80 dark:border-gray-700/60 overflow-hidden bg-white dark:bg-gray-800/90 shadow-sm flex flex-col',
+      'frosted-glass rounded-sm border border-gray-200/90 dark:border-gray-700/80 overflow-hidden flex flex-col',
       variant === 'dropdown' ? 'max-h-[min(85vh,22rem)] w-full min-w-0' : ''
     ]"
   >
@@ -74,11 +74,11 @@
         class="divide-y divide-gray-100 dark:divide-gray-700/80"
       >
         <div v-for="i in 5" :key="i" class="flex items-center gap-2 px-2.5 sm:px-3 py-2">
-          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse shrink-0" />
+          <div class="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/10 animate-pulse shrink-0" />
           <div class="flex-1 min-w-0 space-y-1">
-            <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded w-2/3 animate-pulse" />
-            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
-            <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+            <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-2/3 animate-pulse" />
+            <div class="h-2 bg-gray-200 dark:bg-white/10 rounded w-full animate-pulse" />
+            <div class="h-1.5 bg-gray-200 dark:bg-white/10 rounded w-1/4 animate-pulse" />
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
         v-else-if="filteredNotifications.length === 0"
         class="flex flex-col items-center justify-center py-6 px-2.5 text-center"
       >
-        <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center mb-1.5">
+        <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-1.5">
           <BellIcon class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
         </div>
         <h3 class="text-[10px] font-semibold text-gray-900 dark:text-gray-100 mb-0.5">

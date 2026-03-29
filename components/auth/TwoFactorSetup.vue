@@ -10,14 +10,14 @@
           <button
             @click="selectMethod('totp')"
             :class="[
-              'p-4 rounded-md border transition-all text-left',
+              'p-4 rounded-sm border transition-all text-left',
               selectedMethod === 'totp'
                 ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
             <div class="flex items-center gap-2 mb-1.5">
-              <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <div class="w-8 h-8 rounded-sm bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                 <ShieldCheckIcon class="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
@@ -33,14 +33,14 @@
           <button
             @click="selectMethod('phone')"
             :class="[
-              'p-4 rounded-md border transition-all text-left',
+              'p-4 rounded-sm border transition-all text-left',
               selectedMethod === 'phone'
                 ? 'border-primary-400 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             ]"
           >
             <div class="flex items-center gap-2 mb-1.5">
-              <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <div class="w-8 h-8 rounded-sm bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <DevicePhoneMobileIcon class="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
               <p class="font-semibold text-sm text-gray-900 dark:text-gray-100">SMS</p>
@@ -64,10 +64,10 @@
           
           <!-- QR Code -->
           <div class="flex justify-center mb-4">
-            <div v-if="qrCodeUrl" class="p-3 bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700">
+            <div v-if="qrCodeUrl" class="p-3 bg-white dark:!bg-dashboard-card rounded-sm border border-gray-200 dark:border-gray-700">
               <img :src="qrCodeUrl" alt="2FA QR Code" class="w-56 h-56" />
             </div>
-            <div v-else class="w-56 h-56 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
+            <div v-else class="w-56 h-56 bg-gray-100 dark:!bg-dashboard-card rounded-sm flex items-center justify-center">
               <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-500 mb-2"></div>
                 <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Generating QR code...</p>
@@ -76,24 +76,24 @@
           </div>
 
           <!-- Manual Entry -->
-          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3">
             <p class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Can't scan? Enter this code manually:
             </p>
             <div class="flex items-center justify-between gap-2">
-              <code class="flex-1 px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 break-all">
+              <code class="flex-1 px-3 py-1.5 bg-white dark:!bg-dashboard-card border border-gray-300 dark:border-gray-700 rounded-sm text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 break-all">
                 {{ secretKey }}
               </code>
               <button
                 @click="copySecret"
-                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
               >
                 Copy
               </button>
             </div>
           </div>
 
-          <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800">
             <p class="text-xs sm:text-sm text-blue-900 dark:text-blue-100">
               <strong>Popular authenticator apps:</strong> Google Authenticator, Microsoft Authenticator, Authy, 1Password
             </p>
@@ -110,7 +110,7 @@
           <input
             v-model="phoneNumber"
             type="tel"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-sm"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-sm"
             placeholder="+1234567890"
           />
           <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
@@ -139,13 +139,13 @@
             v-model="verificationCode"
             type="text"
             maxlength="6"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-center text-xl tracking-widest font-mono"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400 focus:border-primary-400 outline-none text-center text-xl tracking-widest font-mono"
             placeholder="000000"
             @input="formatCode"
           />
         </div>
 
-        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm">
           <p class="text-xs sm:text-sm text-red-600 dark:text-red-400">{{ errorMessage }}</p>
         </div>
       </div>
@@ -162,12 +162,12 @@
           </p>
         </div>
 
-        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-dashed border-gray-300 dark:border-gray-700">
+        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-dashed border-gray-300 dark:border-gray-700">
           <div class="grid grid-cols-2 gap-1.5">
             <div
               v-for="(code, index) in backupCodes"
               :key="index"
-              class="px-2.5 py-1.5 bg-white dark:bg-gray-900 rounded text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 text-center"
+              class="px-2.5 py-1.5 bg-white dark:!bg-dashboard-card rounded text-xs sm:text-sm font-mono text-gray-900 dark:text-gray-100 text-center"
             >
               {{ code }}
             </div>
@@ -177,19 +177,19 @@
         <div class="flex gap-2">
           <button
             @click="copyBackupCodes"
-            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-sm transition-colors"
           >
             Copy Codes
           </button>
           <button
             @click="downloadBackupCodes"
-            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
+            class="flex-1 px-3 py-1.5 text-xs sm:text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-sm transition-colors"
           >
             Download
           </button>
         </div>
 
-        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm border border-yellow-200 dark:border-yellow-800">
           <p class="text-xs sm:text-sm text-yellow-900 dark:text-yellow-100">
             <strong>Important:</strong> Each backup code can only be used once. Store them securely.
           </p>
@@ -205,7 +205,7 @@
           size="sm"
           @click="previousStep"
           :disabled="isVerifying"
-          extra-class="!rounded-lg"
+          extra-class="!rounded-sm"
         >
           Back
         </Button>
@@ -218,7 +218,7 @@
             size="sm"
             @click="$emit('update:modelValue', false)"
             :disabled="isVerifying"
-            extra-class="!rounded-lg"
+            extra-class="!rounded-sm"
           >
             Cancel
           </Button>
@@ -227,7 +227,7 @@
             size="sm"
             @click="nextStep"
             :disabled="!selectedMethod"
-            extra-class="!rounded-lg"
+            extra-class="!rounded-sm"
           >
             Continue
           </Button>
@@ -236,7 +236,7 @@
             size="sm"
             @click="initiateSetup"
             :disabled="isLoading || (selectedMethod === 'phone' && !phoneNumber)"
-            extra-class="!rounded-lg"
+            extra-class="!rounded-sm"
           >
             <span v-if="isLoading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -252,7 +252,7 @@
             size="sm"
             @click="verifyCode"
             :disabled="isVerifying || !verificationCode || verificationCode.length !== 6"
-            extra-class="!rounded-lg"
+            extra-class="!rounded-sm"
           >
             <span v-if="isVerifying" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -267,7 +267,7 @@
             v-if="step === 4"
             size="sm"
             @click="completeSetup"
-            extra-class="!rounded-lg"
+            extra-class="!rounded-sm"
           >
             Done
           </Button>

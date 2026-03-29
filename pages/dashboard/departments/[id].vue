@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1400px] flex-col space-y-5 overflow-x-hidden pb-24 sm:space-y-6 sm:pb-24"
+    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
     <Breadcrumbs :items="departmentBreadcrumbs" class="text-[11px] text-gray-500 dark:text-gray-400" />
 
@@ -8,19 +8,19 @@
       v-if="departmentId"
       :department-id="departmentId"
       :can-show="canCreateNewStaff"
-      class="rounded-2xl border border-gray-200/80 bg-white/90 dark:border-gray-800/70 dark:bg-gray-900/35"
+      class="rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
     />
 
     <!-- Hero -->
     <header
       v-if="!isLoadingDepartment"
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
     >
       <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex min-w-0 flex-1 items-start gap-3">
           <button
             type="button"
-            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
             title="Back to departments"
             @click="navigateTo('/dashboard/departments')"
           >
@@ -65,18 +65,29 @@
             </div>
           </div>
         </div>
+        <div v-if="canCreateNewStaff" class="flex shrink-0 items-stretch sm:items-center">
+          <Button
+            variant="primary"
+            size="sm"
+            :icon="PlusIcon"
+            extra-class="!rounded-sm w-full sm:w-auto"
+            @click="openCreateStaffModal"
+          >
+            Add staff
+          </Button>
+        </div>
       </div>
     </header>
     <div
       v-else
-      class="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 p-5 dark:border-gray-800/70 dark:bg-gray-900/35 sm:p-6"
+      class="overflow-hidden rounded-sm bg-white p-5 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:p-6"
     >
       <div class="flex gap-3">
-        <div class="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700"></div>
+        <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
         <div class="min-w-0 flex-1 space-y-3">
-          <div class="h-2.5 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-md bg-gray-200 dark:bg-gray-700"></div>
-          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+          <div class="h-2.5 w-24 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
         </div>
       </div>
     </div>
@@ -97,15 +108,15 @@
       :class="[
         'flex min-h-0 flex-col transition-all duration-300',
         isStaffFullscreen
-          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:bg-gray-950'
+          ? 'fixed inset-0 z-50 overflow-auto bg-gray-50 dark:!bg-dashboard-card'
           : 'relative flex-1',
       ]"
     >
       <div
         v-if="isStaffFullscreen"
-        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:bg-gray-950/90 sm:px-6"
+        class="sticky top-0 z-20 border-b border-gray-200/90 bg-white/90 px-4 py-4 backdrop-blur-xl dark:border-gray-800/80 dark:!bg-dashboard-card/90 sm:px-6"
       >
-        <div class="mx-auto flex max-w-[1400px] items-start justify-between gap-3">
+        <div class="flex w-full max-w-none items-start justify-between gap-3">
           <div class="min-w-0">
             <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
               Expanded view
@@ -119,7 +130,7 @@
           </div>
           <button
             type="button"
-            class="shrink-0 rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+            class="shrink-0 rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
             title="Exit expanded view"
             @click="isStaffFullscreen = false"
           >
@@ -132,8 +143,8 @@
         :class="[
           'flex min-h-0 flex-col',
           isStaffFullscreen
-            ? 'mx-auto min-h-0 w-full max-w-[1400px] flex-1 px-3 pb-6 pt-3 sm:px-5'
-            : 'overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 dark:border-gray-800/70 dark:bg-gray-900/35',
+            ? 'min-h-0 w-full max-w-none flex-1 px-3 pb-6 pt-3 sm:px-5'
+            : 'data-table-shell overflow-hidden',
         ]"
       >
         <div
@@ -147,7 +158,7 @@
             variant="outline"
             size="sm"
             :icon="TrashIcon"
-            class="!rounded-lg !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            class="!rounded-sm !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
             @click="openBulkDeleteStaffModal"
           >
             Delete ({{ selectedStaffForBulk.length }})
@@ -155,27 +166,38 @@
         </div>
 
         <!-- Table toolbar -->
-        <div
-          v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen"
-          class="flex flex-col gap-3 border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5"
-        >
-          <div class="min-w-0">
-            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Team roster
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              {{ paginatedStaff.length }} on this page · {{ staff.length }} total
-            </p>
-          </div>
-          <button
-            type="button"
-            class="self-end rounded-xl border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800 sm:self-auto"
-            title="Expanded table"
-            @click="isStaffFullscreen = true"
-          >
-            <ArrowsPointingOutIcon class="h-4 w-4" />
-          </button>
-        </div>
+        <DataTableToolbar v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen">
+          <template #heading>
+            <div class="min-w-0">
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Team roster
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                {{ paginatedStaff.length }} on this page · {{ staff.length }} total
+              </p>
+            </div>
+          </template>
+          <template #actions>
+            <Button
+              v-if="canCreateNewStaff"
+              variant="primary"
+              size="sm"
+              :icon="PlusIcon"
+              extra-class="!rounded-sm"
+              @click="openCreateStaffModal"
+            >
+              Add staff
+            </Button>
+            <button
+              type="button"
+              class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800"
+              title="Expanded table"
+              @click="isStaffFullscreen = true"
+            >
+              <ArrowsPointingOutIcon class="h-4 w-4" />
+            </button>
+          </template>
+        </DataTableToolbar>
 
         <div
           v-if="isLoadingStaff"
@@ -183,10 +205,10 @@
         >
           <div class="space-y-3 p-4 sm:p-6">
             <div v-for="i in 6" :key="i" class="flex items-center gap-4">
-              <div class="h-10 w-10 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-800"></div>
+              <div class="h-10 w-10 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
               <div class="flex-1 space-y-2">
-                <div class="h-4 w-1/3 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-800"></div>
-                <div class="h-3 w-1/4 animate-pulse rounded bg-gray-200 dark:bg-gray-800"></div>
+                <div class="h-4 w-1/3 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+                <div class="h-3 w-1/4 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
               </div>
             </div>
           </div>
@@ -197,10 +219,10 @@
           class="flex min-h-[min(280px,calc(100svh-14rem))] flex-1 flex-col items-center justify-center px-4 py-14 text-center sm:px-6"
         >
           <div
-            class="mx-3 max-w-md rounded-2xl border border-dashed border-gray-200/90 bg-gradient-to-b from-gray-50/90 to-transparent px-6 py-12 dark:border-gray-700/70 dark:from-gray-900/40 dark:to-transparent sm:mx-6"
+            class="mx-3 max-w-md rounded-sm bg-white px-6 py-12 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:mx-6"
           >
             <div
-              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/90 dark:border-gray-700/80 dark:bg-gray-900/60"
+              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-50 shadow-sm dark:bg-gray-800 dark:shadow-md dark:shadow-black/30"
             >
               <UsersIcon class="h-7 w-7 text-primary-500 dark:text-primary-400" stroke-width="1.35" />
             </div>
@@ -213,12 +235,22 @@
             <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
               Add people to this department to assign roles, track status, and control access.
             </p>
+            <Button
+              v-if="canCreateNewStaff"
+              variant="primary"
+              size="sm"
+              :icon="PlusIcon"
+              extra-class="!rounded-sm mt-6"
+              @click="openCreateStaffModal"
+            >
+              Add staff
+            </Button>
           </div>
         </div>
 
         <div v-else class="min-h-0 flex-1 overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-100/90 dark:divide-gray-800/80">
-            <thead class="bg-gray-50/95 dark:bg-gray-900/55">
+            <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
               <tr>
                 <th v-if="canManageDepartments" class="w-10 px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">
                   <Checkbox
@@ -241,7 +273,7 @@
                   <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Name</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100/90 bg-white/80 dark:divide-gray-800/80 dark:bg-gray-950/20">
+            <tbody class="divide-y divide-gray-100/90 bg-white/80 dark:divide-gray-800/80 dark:!bg-dashboard-card/25">
               <tr
                 v-for="member in paginatedStaff"
                 :key="member.id"
@@ -297,7 +329,7 @@
                 <div class="hidden shrink-0 items-center justify-end gap-1 sm:flex" @click.stop>
                   <button
                     type="button"
-                    class="shrink-0 rounded-lg border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-blue-400"
+                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-blue-400"
                     :title="`Change role to ${getNextRoleLabel(member.role)}`"
                     @click="handleToggleStaffRole(member)"
                   >
@@ -305,7 +337,7 @@
                   </button>
                   <button
                     type="button"
-                    class="shrink-0 rounded-lg border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-gray-100"
+                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-gray-100"
                     title="Edit"
                     @click="handleEditStaff(member)"
                   >
@@ -313,7 +345,7 @@
                   </button>
                   <button
                     type="button"
-                    class="shrink-0 rounded-lg border border-transparent p-1.5 text-gray-500 transition-colors hover:border-red-200/80 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:border-red-800/50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-red-200/80 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:border-red-800/50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                     title="Delete"
                     @click="handleDeleteStaff(member)"
                   >
@@ -323,7 +355,7 @@
                 <div class="relative sm:hidden" @click.stop>
                   <button
                     type="button"
-                    class="shrink-0 rounded-lg border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60"
+                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60"
                     title="Actions"
                     @click="toggleStaffMenu(member.id)"
                   >
@@ -331,7 +363,7 @@
                   </button>
                   <div
                     v-if="openStaffMenuId === member.id"
-                    class="absolute right-0 top-9 z-50 min-w-[44px] overflow-hidden rounded-xl border border-gray-200/90 bg-white/95 py-1 backdrop-blur-xl dark:border-gray-700/80 dark:bg-slate-950/95"
+                    class="absolute right-0 top-9 z-50 min-w-[44px] overflow-hidden rounded-sm border border-gray-200/90 bg-white/95 py-1 backdrop-blur-xl dark:border-gray-700/80 dark:bg-slate-950/95"
                   >
                     <button
                       type="button"
@@ -367,53 +399,32 @@
       </div>
     </div>
 
-    <div
-      v-if="staff.length > 0 && !isStaffFullscreen"
-      class="fixed bottom-0 left-0 right-0 z-30 rounded-none border-t border-gray-200/90 bg-white/95 backdrop-blur-md transition-[left] duration-300 dark:border-gray-800/80 dark:bg-gray-950/95 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
-    >
+    <DashboardFixedFooter v-if="staff.length > 0 && !isStaffFullscreen" :sidebar-collapsed="sidebarCollapsed">
       <Pagination
         :current-page="staffCurrentPage"
         :items-per-page="staffItemsPerPage"
         :total="staff.length"
         @page-change="handleStaffPageChange"
+        @items-per-page-change="(n: number) => { staffItemsPerPage = n; staffCurrentPage = 1 }"
       />
-    </div>
+    </DashboardFixedFooter>
 
     <div
       v-if="isStaffFullscreen && staff.length > 0"
-      class="sticky bottom-0 z-10 rounded-none border-t border-gray-200/90 bg-white/95 px-4 py-2 backdrop-blur-md dark:border-gray-800/80 dark:bg-gray-950/95 sm:px-6"
+      class="sticky bottom-0 z-10 w-full border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
     >
-      <Pagination
-        :current-page="staffCurrentPage"
-        :items-per-page="staffItemsPerPage"
-        :total="staff.length"
-        @page-change="handleStaffPageChange"
-      />
-    </div>
-
-    <DraggableFabContainer
-      v-if="canCreateNewStaff && !isLoadingStaff"
-      :storage-key="`storv-fab:dept-staff:${departmentId}`"
-      layout="row"
-      anchor-class="bottom-24 right-6"
-    >
-      <div class="group relative overflow-visible">
-        <span
-          class="pointer-events-none absolute right-full top-1/2 z-50 mr-2 inline-flex min-w-max max-w-none -translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full border border-gray-700/50 bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 dark:border-gray-600/50 dark:bg-gray-800"
-        >
-          Add staff
-        </span>
-        <button
-          type="button"
-          @click="openCreateStaffModal"
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 text-white ring-2 ring-primary-500/25 transition-all duration-200 hover:scale-105 hover:bg-primary-600 active:scale-95 dark:ring-primary-400/20"
-          title="Add new staff"
-        >
-          <PlusIcon class="h-5 w-5 stroke-white" stroke-width="2.5" />
-        </button>
+      <div
+        class="w-full min-w-0 px-4 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:py-1.5"
+      >
+        <Pagination
+          :current-page="staffCurrentPage"
+          :items-per-page="staffItemsPerPage"
+          :total="staff.length"
+          @page-change="handleStaffPageChange"
+          @items-per-page-change="(n: number) => { staffItemsPerPage = n; staffCurrentPage = 1 }"
+        />
       </div>
-    </DraggableFabContainer>
+    </div>
 
     <!-- Bulk Delete Staff Modal -->
     <Modal
@@ -423,7 +434,7 @@
     >
       <template #header>
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
             <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div class="min-w-0">
@@ -433,10 +444,10 @@
         </div>
       </template>
       <div class="space-y-3">
-        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
           <p class="text-xs text-red-800 dark:text-red-200">This will permanently remove the selected staff members from this department. This action cannot be undone.</p>
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
           <Checkbox
             v-model="bulkDeleteStaffConfirmed"
             label="I understand that these staff members will be permanently removed."
@@ -447,13 +458,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-sm">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteStaffConfirmed || isBulkDeletingStaff"
           :icon="TrashIcon"
-          class="!rounded-lg"
+          class="!rounded-sm"
           @click="handleConfirmBulkDeleteStaff"
         >
           {{ isBulkDeletingStaff ? 'Deleting...' : `Delete ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}
@@ -490,10 +501,11 @@ import {
   EllipsisVerticalIcon,
   ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline'
-import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
+import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'

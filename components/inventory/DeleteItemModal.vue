@@ -6,7 +6,7 @@
   >
     <template #header>
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+        <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
           <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
         </div>
         <div class="min-w-0">
@@ -18,7 +18,7 @@
 
     <div class="max-h-[calc(100vh-14rem)] overflow-y-auto space-y-3">
       <!-- Warning -->
-      <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+      <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
         <div class="flex items-start gap-2.5">
           <ExclamationTriangleIcon class="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
@@ -31,7 +31,7 @@
       <!-- Item Details -->
       <div v-if="item" class="space-y-2">
         <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Item information</h4>
-        <div class="bg-gray-50/80 dark:bg-gray-700/40 rounded-lg p-2.5 space-y-1.5">
+        <div class="bg-gray-50/80 dark:bg-gray-700/40 rounded-sm p-2.5 space-y-1.5">
           <div v-if="item.brand || item.model" class="flex justify-between text-xs">
             <span class="text-gray-500 dark:text-gray-400">Product model</span>
             <span class="font-medium text-gray-900 dark:text-gray-100">{{ item.brand || '' }}{{ item.brand && item.model ? ' ' : '' }}{{ item.model || '' }}</span>
@@ -52,7 +52,7 @@
       </div>
 
       <!-- What will happen -->
-      <div class="p-2.5 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-xl">
+      <div class="p-2.5 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-200/50 dark:ring-amber-800/40 rounded-sm">
         <h4 class="text-xs font-semibold text-amber-900 dark:text-amber-100 mb-1">What will happen</h4>
         <ul class="space-y-0.5 text-xs text-amber-800 dark:text-amber-200 list-disc list-inside">
           <li>Product permanently deleted from inventory</li>
@@ -62,7 +62,7 @@
       </div>
 
       <!-- Confirmation -->
-      <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+      <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-sm">
         <Checkbox
           v-model="confirmed"
           label="I understand that this action cannot be undone and will permanently delete this product."
@@ -74,14 +74,14 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
       <Button
         variant="danger"
         size="sm"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmDelete"
         :icon="TrashIcon"
-        class="w-full sm:w-auto !rounded-lg"
+        class="w-full sm:w-auto !rounded-sm"
       >
         {{ isProcessing ? 'Deleting...' : 'Delete Product' }}
       </Button>

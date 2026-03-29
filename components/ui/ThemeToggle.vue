@@ -16,28 +16,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 
 const { actualTheme, setTheme, applyTheme } = useTheme()
 
 const currentTheme = computed(() => actualTheme.value || 'light')
 
 const toggleTheme = () => {
-  // Get current actual theme to determine what we're switching from
   const current = actualTheme.value
-  
-  // Toggle to opposite theme (always set to explicit light or dark, not system)
   const newTheme = current === 'dark' ? 'light' : 'dark'
   setTheme(newTheme)
 }
 
-// Apply theme on mount
+// Sync document theme class if store and DOM drift (e.g. after navigation)
 onMounted(() => {
-  applyTheme()
-})
-
-// Watch for theme changes and apply
-watch(() => actualTheme.value, () => {
   applyTheme()
 })
 </script>

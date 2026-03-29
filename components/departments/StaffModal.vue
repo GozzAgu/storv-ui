@@ -22,12 +22,12 @@
           Share this one-time password with <span class="font-medium text-gray-700 dark:text-gray-300">{{ formData.email }}</span>. They sign in with email + this password, then can change it in Profile.
         </p>
         <div class="w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-6">
-          <div class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-600/80">
+          <div class="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-sm bg-gray-50 dark:!bg-dashboard-card/90 border border-gray-200/80 dark:border-gray-600/80">
             <code class="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 tracking-wide select-all truncate">{{ temporaryPasswordToShow }}</code>
             <button
               type="button"
               @click="copyTemporaryPassword"
-              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
             >
               <ClipboardDocumentIcon v-if="!copiedPassword" class="w-4 h-4 shrink-0" stroke-width="1.75" />
               <CheckCircleIcon v-else class="w-4 h-4 shrink-0 text-emerald-500" stroke-width="2" />
@@ -38,7 +38,7 @@
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">
           Staff can change their password in Profile after signing in.
         </p>
-        <Button size="sm" class="!rounded-lg w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
+        <Button size="sm" class="!rounded-sm w-full sm:w-auto min-w-[120px]" @click="closeAfterSuccess">
           Done
         </Button>
       </div>
@@ -52,7 +52,7 @@
             v-model="formData.firstName"
             type="text"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="First name"
           />
         </div>
@@ -65,7 +65,7 @@
             v-model="formData.lastName"
             type="text"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="Last name"
           />
         </div>
@@ -78,7 +78,7 @@
             v-model="formData.email"
             type="email"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="email@example.com"
           />
         </div>
@@ -90,7 +90,7 @@
           <button
             type="button"
             @click="regeneratePassword"
-            class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
+            class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
             title="Generate new password"
           >
             <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
@@ -104,7 +104,7 @@
           <input
             v-model="formData.phone"
             type="tel"
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="+1234567890"
           />
         </div>
@@ -117,7 +117,7 @@
             v-model="formData.position"
             type="text"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="e.g. Sales Associate"
           />
         </div>
@@ -129,7 +129,7 @@
           <select
             v-model="formData.role"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           >
             <option value="staff">Staff</option>
             <option value="manager">Manager</option>
@@ -145,7 +145,7 @@
             v-model="formData.hireDate"
             type="date"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           />
         </div>
 
@@ -158,7 +158,7 @@
             type="number"
             min="0"
             step="0.01"
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             placeholder="0.00"
           />
         </div>
@@ -170,7 +170,7 @@
           <select
             v-model="formData.status"
             required
-            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+            class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -179,15 +179,15 @@
         </div>
       </div>
 
-      <div v-if="errorMessage" class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
+      <div v-if="errorMessage" class="p-3 rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
         <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
     </div>
 
     <template #footer>
       <template v-if="!showTemporaryPassword">
-        <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
-        <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-lg">
+        <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+        <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !isFormValid" class="w-full sm:w-auto !rounded-sm">
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

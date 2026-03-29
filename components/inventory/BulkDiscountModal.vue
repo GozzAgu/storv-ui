@@ -7,7 +7,7 @@
   >
     <template #default>
       <div class="space-y-4">
-        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-sm">
           <p class="text-sm text-blue-800 dark:text-blue-200">
             <strong>Bulk Discount:</strong> This discount will be applied to <strong>{{ selectedItems.length }}</strong> selected product{{ selectedItems.length !== 1 ? 's' : '' }}.
           </p>
@@ -22,7 +22,7 @@
               type="button"
               @click="discountType = 'percentage'"
               :class="[
-                'p-3 border-2 rounded-lg transition-all text-center',
+                'p-3 border-2 rounded-sm transition-all text-center',
                 discountType === 'percentage'
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
@@ -35,7 +35,7 @@
               type="button"
               @click="discountType = 'amount'"
               :class="[
-                'p-3 border-2 rounded-lg transition-all text-center',
+                'p-3 border-2 rounded-sm transition-all text-center',
                 discountType === 'amount'
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
@@ -71,7 +71,7 @@
               :max="discountType === 'percentage' ? 100 : undefined"
               step="any"
               :placeholder="discountType === 'percentage' ? '10' : '5.00'"
-              class="w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
           <p v-if="discountType === 'percentage'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -83,13 +83,13 @@
         </div>
 
         <!-- Preview Sample -->
-        <div v-if="discountValue && discountValue > 0 && previewItems.length > 0" class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div v-if="discountValue && discountValue > 0 && previewItems.length > 0" class="p-4 bg-gray-50 dark:!bg-dashboard-card rounded-sm">
           <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Preview (showing first {{ Math.min(3, previewItems.length) }} products):</p>
           <div class="space-y-2 max-h-64 overflow-y-auto">
             <div
               v-for="(item, index) in previewItems.slice(0, 3)"
               :key="item.id || index"
-              class="p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+              class="p-3 bg-white dark:bg-gray-700 rounded-sm border border-gray-200 dark:border-gray-600"
             >
               <div class="flex justify-between items-start mb-2">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate flex-1">
@@ -119,7 +119,7 @@
           </div>
         </div>
 
-        <div v-if="discountValue && discountValue > 0" class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <div v-if="discountValue && discountValue > 0" class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-sm">
           <p class="text-xs text-yellow-800 dark:text-yellow-200">
             <strong>Note:</strong> Items without a valid price will be skipped automatically.
           </p>
@@ -128,11 +128,11 @@
     </template>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
       <Button
         variant="primary"
         size="sm"
-        extra-class="!rounded-lg"
+        extra-class="!rounded-sm"
         @click="handleApplyBulkDiscount"
         :disabled="!isValid || isApplying"
         class="w-full sm:w-auto"

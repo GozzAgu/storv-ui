@@ -1,13 +1,13 @@
 <template>
   <div
-    class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1400px] flex-col space-y-5 pb-20 sm:space-y-6 sm:pb-16"
+    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
     <!-- Hero + filters -->
     <header
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
     >
       <div class="relative">
-        <div class="flex flex-wrap items-start justify-between gap-2 gap-y-1">
+        <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
           <div class="min-w-0 flex-1">
             <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
               Inventory
@@ -26,6 +26,16 @@
               Search, filter, and open folders: a calm grid built for speed.
             </p>
           </div>
+          <Button
+            v-if="canCreateInventoryFolders"
+            variant="primary"
+            size="sm"
+            :icon="PlusIcon"
+            extra-class="!rounded-sm shrink-0"
+            @click="openCreateFolderModal"
+          >
+            New folder
+          </Button>
         </div>
 
         <!-- Filters + select-all -->
@@ -41,13 +51,13 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search folders…"
-              class="w-full rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
           </div>
           <div class="flex flex-wrap items-center gap-1.5 sm:flex-nowrap sm:shrink-0">
             <select
               v-model="selectedDepartmentId"
-              class="min-w-[108px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[108px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
             >
               <option value="">All departments</option>
               <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
@@ -56,7 +66,7 @@
             </select>
             <select
               v-model="sortBy"
-              class="min-w-[96px] cursor-pointer rounded-lg border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-200 dark:focus:border-primary-500/40"
+              class="min-w-[96px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-[11px] font-medium text-gray-800 shadow-sm transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
             >
               <option value="name">Name</option>
               <option value="items">Products</option>
@@ -89,7 +99,7 @@
                 variant="outline"
                 size="sm"
                 :icon="TrashIcon"
-                class="!rounded-lg !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+                class="!rounded-sm !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
                 @click="openBulkDeleteFoldersModal"
               >
                 Delete
@@ -109,13 +119,13 @@
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-2xl border border-gray-200/70 bg-white/90 px-2 pb-2 pt-2 shadow-sm dark:border-gray-800/60 dark:bg-gray-900/35 animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 animate-pulse"
       >
-        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-md bg-gray-200/80 dark:bg-gray-700/80" />
-        <div class="mb-1.5 mt-3 h-9 w-9 rounded-xl bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10" />
-        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
+        <div class="mb-1.5 mt-3 h-9 w-9 rounded-sm bg-gray-200 dark:bg-white/10 sm:h-10 sm:w-10" />
+        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-white/10" />
       </div>
     </div>
 
@@ -127,7 +137,7 @@
       <div
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-2xl border border-gray-200/80 bg-white/95 shadow-sm transition-all duration-300 active:scale-[0.99] dark:border-gray-800/70 dark:bg-gray-900/40 dark:shadow-none sm:min-h-[118px] hover:-translate-y-0.5 hover:border-primary-400/35 hover:shadow-lg hover:shadow-gray-900/[0.06] dark:hover:border-primary-500/30 dark:hover:shadow-black/25"
+        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-all duration-300 active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[118px] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gray-900/15 dark:hover:shadow-xl dark:hover:shadow-black/50"
         @click="navigateToFolder(folder.id)"
       >
         <div
@@ -154,7 +164,7 @@
             type="button"
             :data-folder-actions-anchor="folder.id"
             @click="toggleFolderMenu(folder.id)"
-            class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+            class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
             aria-label="Folder options"
           >
             <EllipsisVerticalIcon class="h-3.5 w-3.5" />
@@ -167,7 +177,7 @@
         >
           <div class="mb-1 flex min-h-[48px] w-full flex-1 flex-col items-center justify-center sm:min-h-[52px]">
             <div
-              class="flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100/90 ring-1 ring-gray-200/80 transition-colors group-hover:bg-primary-50 group-hover:ring-primary-200/40 dark:bg-gray-800/80 dark:ring-gray-700/60 dark:group-hover:bg-primary-950/40 dark:group-hover:ring-primary-800/40 sm:h-12 sm:w-12"
+              class="flex h-11 w-11 items-center justify-center rounded-sm bg-gray-100/90 ring-1 ring-gray-200/80 transition-colors group-hover:bg-primary-50 group-hover:ring-primary-200/40 dark:bg-gray-800/80 dark:ring-gray-700/60 dark:group-hover:bg-primary-950/40 dark:group-hover:ring-primary-800/40 sm:h-12 sm:w-12"
             >
               <FolderIcon
                 class="h-6 w-6 shrink-0 text-gray-500 transition-colors group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-400 sm:h-7 sm:w-7"
@@ -196,11 +206,11 @@
     <!-- Empty state -->
     <div
       v-if="!inventoryStore.loading && paginatedFolders.length === 0"
-      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-14 text-center shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:min-h-[min(48vh,22rem)] sm:px-6"
+      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:min-h-[min(48vh,22rem)] sm:px-6"
     >
       <div class="relative z-10">
         <div
-          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
         >
           <FolderIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
         </div>
@@ -223,44 +233,15 @@
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div
-      v-if="filteredFolders.length > 0"
-      class="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200/80 bg-white/95 backdrop-blur-md transition-[left] duration-300 dark:border-gray-800/80 dark:bg-gray-950/90 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
-    >
-      <div class="mx-auto max-w-[1400px] rounded-none px-3 py-1.5 sm:px-5">
-        <Pagination
-          :current-page="currentPage"
-          :items-per-page="itemsPerPage"
-          :total="filteredFolders.length"
-          @page-change="handlePageChange"
-        />
-      </div>
-    </div>
-
-    <!-- FAB: New folder (draggable handle; position saved per device) -->
-    <DraggableFabContainer
-      v-if="canCreateInventoryFolders && !inventoryStore.loading && (paginatedFolders.length > 0 || (paginatedFolders.length === 0 && !searchQuery && !selectedDepartmentId))"
-      storage-key="storv-fab:inventory-folders"
-      layout="row"
-    >
-      <div class="group relative flex items-center justify-end overflow-visible">
-        <span
-          class="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2 z-50 inline-flex items-center justify-center whitespace-nowrap w-max min-w-max shrink-0 max-w-none rounded-lg bg-gray-900 dark:bg-gray-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible"
-        >
-          {{ paginatedFolders.length === 0 ? 'Create first folder' : 'New folder' }}
-        </span>
-        <button
-          type="button"
-          @click="openCreateFolderModal"
-          class="group flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-500 shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-600 hover:text-white hover:shadow-xl active:scale-95"
-          aria-label="New folder"
-        >
-          <PlusIcon class="h-5 w-5 stroke-white text-white" stroke-width="2.5" />
-        </button>
-      </div>
-    </DraggableFabContainer>
+    <DashboardFixedFooter v-if="filteredFolders.length > 0" :sidebar-collapsed="sidebarCollapsed">
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredFolders.length"
+        @page-change="handlePageChange"
+        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
+      />
+    </DashboardFixedFooter>
 
     <!-- Bulk Delete Folders Modal -->
     <Modal
@@ -270,7 +251,7 @@
     >
       <template #header>
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
             <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div class="min-w-0">
@@ -280,10 +261,10 @@
         </div>
       </template>
       <div class="space-y-3">
-        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
           <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected folders and all products inside them. This action cannot be undone.</p>
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
           <Checkbox
             v-model="bulkDeleteFoldersConfirmed"
             label="I understand that these folders and their products will be permanently deleted."
@@ -294,13 +275,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteFoldersModal = false; bulkDeleteFoldersConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteFoldersModal = false; bulkDeleteFoldersConfirmed = false" class="!rounded-sm">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
           :icon="TrashIcon"
-          class="!rounded-lg"
+          class="!rounded-sm"
           @click="handleConfirmBulkDeleteFolders"
         >
           {{ isBulkDeletingFolders ? 'Deleting...' : `Delete ${selectedFoldersForBulk.length} folder${selectedFoldersForBulk.length !== 1 ? 's' : ''}` }}
@@ -335,7 +316,7 @@
               v-model="folderForm.name"
               type="text"
               required
-                    class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                    class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
               placeholder="Enter folder name"
             />
           </div>
@@ -344,7 +325,7 @@
             <select
               v-model="folderForm.type"
               required
-                    class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
+                    class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
             >
               <option value="">Select type</option>
               <option value="general">General</option>
@@ -364,7 +345,7 @@
               type="button"
               @click="handleGenerateDescription"
               :disabled="!folderForm.name || isGeneratingDescription"
-                    class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Generate description with AI"
             >
                     <SparklesIcon :class="['w-3.5 h-3.5', isGeneratingDescription ? 'animate-spin' : '']" />
@@ -375,7 +356,7 @@
             v-model="folderForm.description"
             @input="aiError = null"
             rows="3"
-                  class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                  class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             placeholder="Describe the folder's purpose"
                 />
           <p v-if="aiError" class="text-xs text-red-600 dark:text-red-400 mt-1">{{ aiError }}</p>
@@ -405,7 +386,7 @@
             <div v-if="departmentsStore.loading" class="text-xs text-gray-500 dark:text-gray-400 py-1.5">Loading departments…</div>
             <div
               v-else-if="currentStoreDepartments.length === 0"
-              class="rounded-lg bg-gray-50 dark:bg-gray-900/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
+              class="rounded-sm bg-gray-50 dark:!bg-dashboard-card/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
             >
               <p>No departments in this store yet. You can still create this folder. It will be available to everyone until you add departments and optionally restrict access here.</p>
               <NuxtLink
@@ -443,7 +424,7 @@
                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
                 <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">Custom</span>
               </div>
-              <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-lg sm:ml-auto">
+              <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-sm sm:ml-auto">
                 + Add field
             </Button>
           </div>
@@ -461,7 +442,7 @@
                     v-model="field.label"
                     type="text"
                     required
-                        class="w-full min-w-0 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0"
+                        class="w-full min-w-0 px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0"
                         placeholder="Column title"
                         @input="syncTemplateFieldNameFromLabel(field)"
                   />
@@ -471,7 +452,7 @@
                   <select
                     v-model="field.type"
                     required
-                        class="w-full min-w-0 px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer"
+                        class="w-full min-w-0 px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer"
                   >
                     <option value="text">Text</option>
                     <option value="number">Number</option>
@@ -494,12 +475,12 @@
                     v-if="!isLockedTemplateField(field)"
                     type="button"
                     @click="handleRemoveField(index)"
-                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
                     title="Remove field"
                   >
                     <TrashIcon class="w-4 h-4" />
                   </button>
-                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Built-in column">Default</span>
+                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-sm bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Built-in column">Default</span>
                 </div>
               </div>
             </div>
@@ -514,8 +495,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-lg">Cancel</Button>
-        <Button variant="primary" size="sm" type="submit" @click="handleSaveFolder" extra-class="!rounded-lg">
+        <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="primary" size="sm" type="submit" @click="handleSaveFolder" extra-class="!rounded-sm">
           {{ editingFolder ? 'Update' : 'Create' }} folder
         </Button>
       </template>
@@ -532,12 +513,12 @@
       <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Folder name(s)</label>
-          <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-lg">
+          <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-sm">
             + Add name
           </Button>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
-          <div v-if="duplicateFolderNames.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50/50 dark:bg-gray-800/30">
+          <div v-if="duplicateFolderNames.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/30">
             Click "+ Add name" to enter folder name(s)
           </div>
           <div
@@ -548,13 +529,13 @@
             <input
               v-model="duplicateFolderNames[index]"
               type="text"
-              class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+              class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
               placeholder="New folder name"
             />
             <button
               type="button"
               @click="removeDuplicateFolderName(index)"
-              class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
+              class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors shrink-0"
               aria-label="Remove"
             >
               <TrashIcon class="w-4 h-4" />
@@ -564,8 +545,8 @@
         <p v-if="duplicateFolderNamesError" class="text-xs text-red-600 dark:text-red-400">{{ duplicateFolderNamesError }}</p>
       </form>
       <template #footer>
-        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-lg">Cancel</Button>
-        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-lg">
+        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-sm">
           {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} folder${validDuplicateFolderNamesCount !== 1 ? 's' : ''}` }}
         </Button>
       </template>
@@ -576,7 +557,7 @@
       <div
         v-if="openFolderMenuId && folderForOpenMenu && folderMenuFixedStyle"
         data-inventory-folder-menu
-        class="fixed z-[1000] min-w-[120px] rounded-lg py-0.5 bg-white shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
+        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm border border-gray-200/90 py-0.5 dark:border-gray-700/80"
         :style="folderMenuFixedStyle"
         @click.stop
       >
@@ -629,9 +610,9 @@ import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
-import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'

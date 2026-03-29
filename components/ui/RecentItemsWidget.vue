@@ -78,7 +78,7 @@ const formatTime = (timestamp: number) => {
         v-for="item in recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').slice(0, 5)"
         :key="`${item.type}-${item.id}`"
         @click="handleItemClick(item)"
-        class="w-full px-2.5 py-1.5 text-left rounded-lg hover:bg-gray-200/60 dark:hover:bg-gray-800/60 transition-colors group flex items-center gap-1.5"
+        class="w-full px-2.5 py-1.5 text-left rounded-sm hover:bg-white/60 dark:hover:bg-white/[0.05] transition-colors group flex items-center gap-1.5"
       >
         <component
           :is="getIcon(item.type)"

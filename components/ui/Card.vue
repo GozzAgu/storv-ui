@@ -1,6 +1,6 @@
 <template>
   <div 
-    :class="['bg-gray-50 dark:bg-gray-800/80 rounded-lg transition-all duration-200', paddingClass, extraClass]"
+    :class="['rounded-sm border border-transparent bg-gray-50 transition-all duration-200 dark:border-white/[0.05] dark:!bg-dashboard-card/55', paddingClass, extraClass]"
     v-bind="$attrs"
   >
     <slot />

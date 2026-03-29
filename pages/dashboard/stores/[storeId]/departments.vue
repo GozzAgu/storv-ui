@@ -1,10 +1,12 @@
 <template>
-  <div class="mx-auto flex min-h-[calc(100svh-4rem)] max-w-[1400px] flex-col space-y-2 pb-20 sm:space-y-2.5 sm:pb-16">
+  <div
+    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-2 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-2.5 sm:pb-32"
+  >
     <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-0" />
 
     <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
     <header
-      class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/90 px-3 py-2.5 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-4 sm:py-3"
+      class="relative overflow-hidden rounded-sm bg-white px-3 py-2.5 shadow-sm dark:bg-[#12141c] dark:shadow-lg dark:shadow-black/40 sm:px-4 sm:py-3"
     >
       <div
         class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/12 via-primary-500/5 to-transparent blur-2xl dark:hidden"
@@ -13,33 +15,47 @@
         class="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-gradient-to-tr from-gray-200/35 to-transparent blur-2xl dark:hidden"
       />
       <div class="relative">
-        <div class="min-w-0">
-          <p class="text-[8px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-            Store
-          </p>
-          <h1 class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
-            Departments in {{ store?.name || 'Store' }}
-          </h1>
-          <p class="mt-0.5 max-w-xl text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-            Manage departments and staff for this store: search and open cards below.
-          </p>
-          <div
-            v-if="store"
-            class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-600 dark:text-gray-400"
-          >
-            <span class="font-medium text-gray-800 dark:text-gray-200">{{ store.name }}</span>
-            <span
-              v-if="currentStore?.id === store.id"
-              class="rounded-full bg-emerald-100/90 px-2 py-px text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/35 dark:text-emerald-300"
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div class="min-w-0">
+            <p class="text-[8px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+              Store
+            </p>
+            <h1 class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
+              Departments in {{ store?.name || 'Store' }}
+            </h1>
+            <p class="mt-0.5 max-w-xl text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+              Manage departments and staff for this store: search and open cards below.
+            </p>
+            <div
+              v-if="store"
+              class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-600 dark:text-gray-400"
             >
-              Current
-            </span>
-            <span v-if="store.address" class="text-gray-500 dark:text-gray-500">· {{ store.address }}</span>
-            <span class="hidden text-gray-400 sm:inline">·</span>
-            <span v-if="storeDepartments.length" class="tabular-nums text-gray-500 dark:text-gray-500">{{ storeDepartments.length }} depts</span>
-            <span v-if="storeDepartments.length && totalStaffForStore" class="text-gray-400">·</span>
-            <span v-if="totalStaffForStore" class="tabular-nums text-gray-500 dark:text-gray-500">{{ totalStaffForStore }} staff</span>
+              <span class="font-medium text-gray-800 dark:text-gray-200">{{ store.name }}</span>
+              <span
+                v-if="currentStore?.id === store.id"
+                class="rounded-full bg-emerald-100/90 px-2 py-px text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/35 dark:text-emerald-300"
+              >
+                Current
+              </span>
+              <span v-if="store.address" class="text-gray-500 dark:text-gray-500">· {{ store.address }}</span>
+              <span class="hidden text-gray-400 sm:inline">·</span>
+              <span v-if="storeDepartments.length" class="tabular-nums text-gray-500 dark:text-gray-500">{{ storeDepartments.length }} depts</span>
+              <span v-if="storeDepartments.length && totalStaffForStore" class="text-gray-400">·</span>
+              <span v-if="totalStaffForStore" class="tabular-nums text-gray-500 dark:text-gray-500">{{ totalStaffForStore }} staff</span>
+            </div>
           </div>
+          <Button
+            v-if="canManageDepartments"
+            variant="primary"
+            size="sm"
+            :icon="PlusIcon"
+            :disabled="!canAddDepartmentForStore"
+            :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
+            extra-class="!rounded-sm w-full shrink-0 sm:w-auto"
+            @click="openCreateDepartmentModal"
+          >
+            New department
+          </Button>
         </div>
 
         <div
@@ -54,12 +70,12 @@
               v-model="searchQuery"
               type="text"
               placeholder="Search departments…"
-              class="w-full rounded-lg border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 shadow-sm placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
             <button
               v-if="searchQuery"
               type="button"
-              class="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              class="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
               title="Clear search"
               aria-label="Clear search"
               @click="searchQuery = ''"
@@ -70,7 +86,7 @@
           <div class="flex flex-wrap items-center gap-1.5 sm:shrink-0">
             <button
               type="button"
-              class="inline-flex items-center justify-center rounded-lg border border-gray-200/90 bg-white p-1.5 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800"
+              class="inline-flex items-center justify-center rounded-sm border border-gray-200/90 bg-white p-1.5 text-gray-600 shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
               title="Reset filters"
               aria-label="Reset filters"
               @click="resetFilters"
@@ -103,7 +119,7 @@
                 variant="outline"
                 size="sm"
                 :icon="TrashIcon"
-                class="!rounded-lg !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+                class="!rounded-sm !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
                 @click="openBulkDeleteDepartmentsModal"
               >
                 Delete
@@ -117,7 +133,7 @@
     <!-- Mobile stats (compact, same surface language as folder cards) -->
     <div v-if="store" class="grid grid-cols-2 gap-1.5 lg:hidden">
       <div
-        class="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-2 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        class="rounded-sm bg-white px-2.5 py-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -130,7 +146,7 @@
         </div>
       </div>
       <div
-        class="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-2 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+        class="rounded-sm bg-white px-2.5 py-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -146,9 +162,9 @@
 
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
-      class="rounded-xl border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
+      class="rounded-sm border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
     >
-      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-red-100 dark:bg-red-900/30">
+      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30">
         <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
       <h3 class="mb-1.5 text-base font-semibold text-gray-900 dark:text-gray-100">Error loading departments</h3>
@@ -163,13 +179,13 @@
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-xl border border-gray-200/60 bg-gradient-to-b from-gray-50 to-white px-2 pb-2 pt-2 dark:border-gray-800/60 dark:from-gray-900/40 dark:to-gray-950/30 animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 animate-pulse"
       >
-        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-md bg-gray-200/80 dark:bg-gray-700/80" />
-        <div class="mb-1.5 mt-3 h-9 w-9 rounded-lg bg-gray-200 dark:bg-gray-700 sm:h-10 sm:w-10" />
-        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-gray-700" />
-        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-gray-700" />
+        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
+        <div class="mb-1.5 mt-3 h-9 w-9 rounded-sm bg-gray-200 dark:bg-white/10 sm:h-10 sm:w-10" />
+        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-white/10" />
       </div>
     </div>
 
@@ -181,7 +197,7 @@
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 shadow-sm transition-all duration-200 active:scale-[0.99] dark:border-gray-800/70 dark:from-gray-900/45 dark:to-gray-950/40 dark:shadow-none sm:min-h-[112px] hover:-translate-y-px hover:border-primary-300/40 hover:shadow-md hover:shadow-gray-900/[0.05] dark:hover:border-primary-500/25 dark:hover:shadow-black/20"
+          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white shadow-sm transition-all duration-200 active:scale-[0.99] dark:!bg-dashboard-card dark:shadow-md dark:shadow-black/35 sm:min-h-[112px] hover:-translate-y-px hover:shadow-md hover:shadow-gray-900/12 dark:hover:shadow-black/20"
           :class="{
             'opacity-60 cursor-not-allowed': department.isActive === false,
             'pointer-events-none': deletingDepartmentId === department.id
@@ -193,7 +209,7 @@
           />
           <div
             v-if="deletingDepartmentId === department.id"
-            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-xl bg-gray-900/60 backdrop-blur-[2px] dark:bg-gray-950/70"
+            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-sm bg-gray-900/60 backdrop-blur-[2px] dark:bg-gray-950/70"
           >
             <ArrowPathIcon class="mb-1 h-6 w-6 animate-spin text-white" aria-hidden="true" />
             <span class="text-[11px] font-medium text-white">Deleting...</span>
@@ -216,7 +232,7 @@
             <button
               type="button"
               :data-department-actions-anchor="department.id"
-              class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+              class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
               aria-label="Department options"
               @click="toggleDepartmentMenu(department.id)"
             >
@@ -243,7 +259,7 @@
                 {{ department.name }}
               </h3>
               <p
-                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/60 dark:text-gray-400"
+                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 shadow-sm dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-400"
               >
                 {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
               </p>
@@ -260,7 +276,7 @@
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-4 py-10 text-center dark:border-gray-800/70 dark:from-gray-900/40 dark:to-gray-950/50 sm:min-h-[min(50vh,24rem)] sm:px-6"
+        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-10 text-center shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:min-h-[min(50vh,24rem)] sm:px-6"
       >
         <div
           class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/12 via-transparent to-gray-200/15 blur-3xl dark:from-primary-500/10 dark:to-gray-600/10"
@@ -279,20 +295,15 @@
       </div>
     </div>
 
-    <div
-      v-if="filteredDepartments.length > 0"
-      class="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200/80 bg-white/95 backdrop-blur-md transition-[left] duration-300 dark:border-gray-800/80 dark:bg-gray-950/90 safe-area-inset-bottom"
-      :class="sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'"
-    >
-      <div class="mx-auto max-w-[1400px] rounded-none px-3 py-1.5 sm:px-5">
-        <Pagination
-          :current-page="currentPage"
-          :items-per-page="itemsPerPage"
-          :total="filteredDepartments.length"
-          @page-change="handlePageChange"
-        />
-      </div>
-    </div>
+    <DashboardFixedFooter v-if="filteredDepartments.length > 0" :sidebar-collapsed="sidebarCollapsed">
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredDepartments.length"
+        @page-change="handlePageChange"
+        @items-per-page-change="(n: number) => { itemsPerPage = n; currentPage = 1 }"
+      />
+    </DashboardFixedFooter>
 
     <!-- Bulk Delete Departments Modal -->
     <Modal
@@ -302,7 +313,7 @@
     >
       <template #header>
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
             <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div class="min-w-0">
@@ -312,10 +323,10 @@
         </div>
       </template>
       <div class="space-y-3">
-        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-xl">
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
           <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected departments and their staff associations. This action cannot be undone.</p>
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-700/40 rounded-xl">
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
           <Checkbox
             v-model="bulkDeleteDepartmentsConfirmed"
             label="I understand that these departments will be permanently deleted."
@@ -326,14 +337,14 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-lg">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-sm">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
           :loading="isBulkDeletingDepartments"
           :icon="TrashIcon"
-          class="!rounded-lg"
+          class="!rounded-sm"
           @click="handleConfirmBulkDeleteDepartments"
         >
           {{ isBulkDeletingDepartments ? 'Deleting...' : `Delete ${selectedDepartmentsForBulk.length} department${selectedDepartmentsForBulk.length !== 1 ? 's' : ''}` }}
@@ -346,7 +357,7 @@
       <div
         v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
         data-department-menu
-        class="fixed z-[1000] min-w-[120px] rounded-lg py-0.5 bg-white shadow-xl ring-1 ring-gray-200/90 dark:bg-gray-900 dark:ring-1 dark:ring-gray-700/45 dark:shadow-[0_10px_38px_-6px_rgba(0,0,0,0.45)]"
+        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm border border-gray-200/90 py-0.5 dark:border-gray-700/80"
         :style="departmentMenuFixedStyle"
         @click.stop
       >
@@ -379,25 +390,6 @@
       @error="handleDepartmentError"
     />
 
-  <DraggableFabContainer
-    v-if="canManageDepartments"
-    :storage-key="`storv-fab:store-departments:${storeId}`"
-    layout="row"
-    anchor-class="bottom-24 right-6"
-  >
-    <div class="group relative overflow-visible">
-      <span class="pointer-events-none absolute right-full top-1/2 z-50 mr-2 inline-flex min-w-max max-w-none -translate-y-1/2 items-center justify-center whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-gray-700">{{ canAddDepartmentForStore ? 'New department' : 'Department limit reached' }}</span>
-      <button
-        type="button"
-        :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
-        :disabled="!canAddDepartmentForStore"
-        :class="['group flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200', canAddDepartmentForStore ? 'bg-primary-500 hover:scale-105 hover:bg-primary-600 hover:shadow-xl active:scale-95' : 'cursor-not-allowed bg-gray-400 dark:bg-gray-600']"
-        @click="openCreateDepartmentModal"
-      >
-        <PlusIcon class="h-5 w-5 stroke-white" stroke-width="2.5" />
-      </button>
-    </div>
-  </DraggableFabContainer>
   </div>
 </template>
 
@@ -415,10 +407,10 @@ import {
   TrashIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
-import DraggableFabContainer from '~/components/ui/DraggableFabContainer.vue'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
+import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'

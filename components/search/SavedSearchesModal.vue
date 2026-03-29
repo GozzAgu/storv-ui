@@ -13,7 +13,7 @@
         </div>
         <button
           @click="showCreateModal = true"
-          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+          class="flex-shrink-0 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
         >
           + Save Current
         </button>
@@ -29,7 +29,7 @@
 
       <!-- Empty State -->
       <div v-else-if="searchStore.savedSearches.length === 0" class="text-center py-8">
-        <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
           <MagnifyingGlassIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
         </div>
         <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No saved searches</p>
@@ -44,7 +44,7 @@
         <div
           v-for="saved in searchStore.savedSearches"
           :key="saved.id"
-          class="group p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
+          class="group p-3 border border-gray-200 dark:border-gray-700 rounded-sm hover:border-primary-300 dark:hover:border-primary-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
@@ -66,14 +66,14 @@
             <div class="flex items-center gap-1 flex-shrink-0">
               <button
                 @click="$emit('load', saved.id)"
-                class="p-1.5 text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
+                class="p-1.5 text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
                 title="Load search"
               >
                 <ArrowRightIcon class="w-4 h-4" />
               </button>
               <button
                 @click="handleDelete(saved.id)"
-                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors opacity-0 group-hover:opacity-100"
                 title="Delete search"
               >
                 <TrashIcon class="w-4 h-4" />
@@ -98,11 +98,11 @@
             v-model="searchName"
             type="text"
             placeholder="e.g., High-value customers"
-            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+            class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
             @keydown.enter="handleSave"
           />
         </div>
-        <div class="p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+        <div class="p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-sm">
           <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Query</p>
           <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ searchStore.query || '(empty)' }}</p>
           <p v-if="searchStore.hasActiveFilters" class="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Filters: {{ getFiltersSummary() }}</p>
@@ -110,8 +110,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="showCreateModal = false" extra-class="!rounded-lg">Cancel</Button>
-        <Button variant="primary" size="sm" @click="handleSave" :disabled="!searchName.trim()" extra-class="!rounded-lg">Save</Button>
+        <Button variant="outline" size="sm" @click="showCreateModal = false" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="primary" size="sm" @click="handleSave" :disabled="!searchName.trim()" extra-class="!rounded-sm">Save</Button>
       </template>
     </Modal>
   </Modal>

@@ -1,7 +1,7 @@
 <template>
-  <div class="mx-auto w-full max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+      class="rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 dark:border-gray-800/80 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="min-w-0">
         <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
@@ -28,7 +28,7 @@
             type="search"
             autocomplete="off"
             placeholder="Search help topics..."
-            class="w-full rounded-lg border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 placeholder:text-gray-400 focus:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/50"
+            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 placeholder:text-gray-400 focus:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/50"
           />
         </div>
         <div v-if="searchQuery" class="flex flex-wrap items-center gap-2">
@@ -50,7 +50,7 @@
               v-for="topic in popularTopics"
               :key="topic.query"
               type="button"
-              class="rounded-full border border-gray-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:border-primary-300/60 hover:bg-primary-50/80 hover:text-primary-800 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:border-primary-600/50 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
+              class="rounded-full border border-gray-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:border-primary-300/60 hover:bg-primary-50/80 hover:text-primary-800 dark:border-gray-700 dark:!bg-dashboard-card/60 dark:text-gray-200 dark:hover:border-primary-600/50 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
               @click="searchQuery = topic.query"
             >
               {{ topic.label }}
@@ -79,7 +79,7 @@
     <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
       <nav
         aria-label="Topics"
-        class="w-full shrink-0 rounded-xl border border-gray-200/80 bg-white/95 p-3 dark:border-gray-800/70 dark:bg-gray-900/40 lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
+        class="w-full shrink-0 rounded-sm border border-gray-200/80 bg-white/95 p-3 dark:border-gray-800/70 dark:!bg-dashboard-card lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
       >
         <p class="mb-2 px-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           On this page
@@ -88,7 +88,7 @@
           <li v-for="cat in filteredCategories" :key="cat.id">
             <a
               :href="`#${cat.id}`"
-              class="block rounded-lg px-2 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100"
+              class="block rounded-sm px-2 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100"
               @click.prevent="scrollToSection(cat.id)"
               v-html="highlightText(cat.title, trimmedSearch)"
             ></a>
@@ -108,7 +108,7 @@
         >
           <div class="mb-3 flex items-start gap-3">
             <div
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50"
             >
               <component :is="cat.icon" class="h-4 w-4 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
@@ -128,7 +128,7 @@
             <article
               v-for="(article, idx) in cat.articles"
               :key="idx"
-              class="rounded-xl border border-gray-200/80 bg-white/95 px-4 py-3.5 dark:border-gray-800/70 dark:bg-gray-900/40 sm:px-4 sm:py-4"
+              class="rounded-sm border border-gray-200/80 bg-white/95 px-4 py-3.5 dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-4 sm:py-4"
             >
               <h3
                 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100"
@@ -160,7 +160,7 @@
     <button
       v-show="showBackToTop"
       type="button"
-      class="fixed bottom-5 right-5 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200/90 bg-white text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+      class="fixed bottom-5 right-5 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200/90 bg-white text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:!bg-dashboard-card dark:text-gray-100 dark:hover:bg-gray-800"
       aria-label="Back to top"
       @click="scrollToTop"
     >
@@ -312,7 +312,7 @@ const categories: Category[] = [
         body: [
           'Sidebar label is Receipts, but the page title reads “Sales” with subtitle “Manage receipts, customers, and returns”. Two tabs exist: Receipts (default) and Customers.',
           'Receipts shows totals for receipt count, sales amount, today, and month, plus search, status filters (All, Completed, Pending, Refunded), and date filters (All dates, Today, This week, This month). Use fullscreen mode for dense lists; filters stay pinned at the top.',
-          'The “+” floating action button opens Create New Receipt; its drag position is saved per browser.',
+          'Use the “New receipt” button in the receipts table toolbar (top of the list) to open Create New Receipt.',
         ],
       },
       {

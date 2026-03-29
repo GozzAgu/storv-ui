@@ -81,7 +81,7 @@ const getColorClasses = (color?: string) => {
           :key="action.id"
           @click="handleAction(action)"
           :class="[
-            'flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg transition-all transform hover:scale-105',
+            'flex items-center gap-3 px-4 py-3 rounded-sm shadow-lg transition-all transform hover:scale-105',
             getColorClasses(action.color),
             'min-w-[180px]'
           ]"

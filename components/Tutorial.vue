@@ -10,12 +10,12 @@
     <div class="pointer-events-none absolute inset-0 flex items-center justify-center p-4">
       <div
         ref="tutorialCard"
-        class="pointer-events-auto max-h-[90dvh] w-full max-w-md transform overflow-hidden rounded-2xl border border-gray-200/90 bg-white text-gray-900 transition-all duration-300 dark:border-gray-800 dark:bg-slate-950 dark:text-gray-100"
+        class="frosted-glass pointer-events-auto max-h-[90dvh] w-full max-w-md transform overflow-hidden rounded-sm border border-gray-200/90 text-gray-900 transition-all duration-300 dark:border-gray-800 dark:text-gray-100"
         :style="cardPosition"
       >
         <!-- Header -->
         <div
-          class="flex items-center justify-between gap-3 border-b border-gray-200/90 bg-white p-3 dark:border-gray-800 dark:bg-slate-950 sm:p-4"
+          class="flex items-center justify-between gap-3 border-b border-gray-200/90 bg-transparent p-3 dark:border-gray-800 sm:p-4"
         >
           <p
             class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
@@ -24,7 +24,7 @@
           </p>
           <button
             type="button"
-            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
             @click="skipTutorial"
           >
             <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
@@ -33,7 +33,7 @@
 
         <!-- Content -->
         <div class="space-y-3 p-3 sm:p-4">
-          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 dark:bg-primary-500">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-sm bg-primary-600 dark:bg-primary-500">
             <component :is="tutorialSteps[currentStep - 1]?.icon" class="h-6 w-6 text-white" />
           </div>
           
@@ -48,12 +48,12 @@
 
         <!-- Navigation -->
         <div
-          class="flex items-center justify-between gap-2 border-t border-gray-200/90 bg-white p-3 dark:border-gray-800 dark:bg-slate-950 sm:p-4"
+          class="flex items-center justify-between gap-2 border-t border-gray-200/90 bg-transparent p-3 dark:border-gray-800 sm:p-4"
         >
           <button
             v-if="currentStep > 1"
             @click="previousStep"
-            class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
+            class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-sm transition-colors"
           >
             Previous
           </button>
@@ -62,13 +62,13 @@
           <div class="flex items-center gap-2">
             <button
               @click="skipTutorial"
-              class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
+              class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-sm transition-colors"
             >
               Skip
             </button>
             <button
               @click="nextStep"
-              class="px-3.5 py-1.5 text-xs font-semibold bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+              class="px-3.5 py-1.5 text-xs font-semibold bg-primary-500 hover:bg-primary-600 text-white rounded-sm transition-colors"
             >
               {{ currentStep === totalSteps ? 'Get Started' : 'Next' }}
             </button>

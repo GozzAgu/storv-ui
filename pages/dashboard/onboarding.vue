@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <div class="min-h-screen bg-gray-50 dark:!bg-dashboard-card">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <!-- Progress Indicator -->
       <div class="mb-5 sm:mb-6">
@@ -7,7 +7,7 @@
           <h2 class="text-xs font-medium text-gray-600 dark:text-gray-400">Account Setup</h2>
           <span class="text-xs font-medium text-primary-500 dark:text-primary-400">Step {{ currentStep }} of {{ totalSteps }}</span>
         </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+        <div class="h-1.5 w-full rounded-full bg-gray-200 dark:bg-white/10">
           <div 
             class="bg-gradient-to-r from-primary-400 to-primary-500 h-1.5 rounded-full transition-all duration-300"
             :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
@@ -16,7 +16,7 @@
       </div>
 
       <!-- Form Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-5 sm:p-6 border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:!bg-dashboard-card rounded-sm shadow-lg p-5 sm:p-6 border border-gray-200 dark:border-gray-700">
         <Transition name="step-fade" mode="out-in">
           <!-- Step 1: Currency & Country Selection -->
           <div v-if="currentStep === 1" key="step-1" class="space-y-4 sm:space-y-5">
@@ -41,7 +41,7 @@
               id="currency"
               v-model="selectedCurrency"
               required
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose a currency...</option>
               <option v-for="currency in currencies" :key="currency.code" :value="currency.code">
@@ -62,7 +62,7 @@
               id="country"
               v-model="selectedCountry"
               required
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100"
             >
               <option value="" disabled>Choose your country...</option>
               <option v-for="region in regions" :key="region.code" :value="region.code">
@@ -99,7 +99,7 @@
               v-model="storeDetails.storeName"
               type="text"
               required
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Enter head store branch"
             />
           </div>
@@ -113,7 +113,7 @@
               id="storeAddress"
               v-model="storeDetails.storeAddress"
               rows="3"
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="123 Main Street, City, State 12345"
             ></textarea>
           </div>
@@ -127,7 +127,7 @@
               id="storePhone"
               v-model="storeDetails.storePhone"
               type="tel"
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -141,7 +141,7 @@
               id="storeEmail"
               v-model="storeDetails.storeEmail"
               type="email"
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="store@example.com"
             />
           </div>
@@ -155,7 +155,7 @@
               id="storeDescription"
               v-model="storeDetails.storeDescription"
               rows="3"
-              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              class="onboarding-input w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-sm focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Tell us about your store..."
             ></textarea>
           </div>
@@ -163,7 +163,7 @@
         </Transition>
 
         <!-- Error Message -->
-        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+        <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm mb-4">
           <p class="text-xs text-red-600 dark:text-red-400 text-center">{{ errorMessage }}</p>
         </div>
 

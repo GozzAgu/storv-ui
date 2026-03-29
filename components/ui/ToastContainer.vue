@@ -9,7 +9,7 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-lg border-l-[3px] shadow-sm',
+          'pointer-events-auto flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-sm border-l-[3px] shadow-sm',
           'bg-white dark:bg-gray-800/95 border border-gray-200/80 dark:border-gray-700/80 backdrop-blur-md',
           getAccentBorder(toast.type)
         ]"
@@ -34,7 +34,7 @@
         </template>
         <button
           @click="removeToast(toast.id)"
-          class="flex-shrink-0 p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
+          class="flex-shrink-0 p-1 rounded-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 transition-colors"
           aria-label="Close"
         >
           <XMarkIcon class="w-3.5 h-3.5" stroke-width="2" />

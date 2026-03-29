@@ -6,7 +6,7 @@
   >
     <template #header>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-primary-500/10 dark:bg-primary-400/10 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-sm bg-primary-500/10 dark:bg-primary-400/10 flex items-center justify-center">
           <TagIcon class="w-5 h-5 text-primary-500 dark:text-primary-400" stroke-width="1.75" />
         </div>
         <div>
@@ -19,7 +19,7 @@
     <template #default>
       <div v-if="item" class="space-y-6">
         <!-- Product summary -->
-        <div class="rounded-xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/60 dark:border-gray-700/50 p-4">
+        <div class="rounded-sm bg-gray-50/80 dark:bg-gray-800/50 border border-gray-200/60 dark:border-gray-700/50 p-4">
           <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Product</p>
           <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ getItemName(item) }}</p>
           <p class="text-xs text-gray-600 dark:text-gray-400 mt-1.5">
@@ -35,7 +35,7 @@
               type="button"
               @click="discountType = 'percentage'"
               :class="[
-                'py-2.5 px-3 rounded-xl text-left transition-all duration-200 border',
+                'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border',
                 discountType === 'percentage'
                   ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -48,7 +48,7 @@
               type="button"
               @click="discountType = 'amount'"
               :class="[
-                'py-2.5 px-3 rounded-xl text-left transition-all duration-200 border',
+                'py-2.5 px-3 rounded-sm text-left transition-all duration-200 border',
                 discountType === 'amount'
                   ? 'border-primary-400/60 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-300 ring-1 ring-primary-400/30'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -79,7 +79,7 @@
               :max="discountType === 'percentage' ? 100 : getOriginalPrice(item)"
               step="any"
               :placeholder="discountType === 'percentage' ? '0' : '0.00'"
-              class="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
+              class="w-full pl-9 pr-4 py-2.5 text-sm rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
             />
           </div>
           <p v-if="discountType === 'percentage'" class="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5">0-100</p>
@@ -89,7 +89,7 @@
         <!-- Preview -->
         <div
           v-if="discountValue != null && discountValue > 0 && isValid"
-          class="rounded-xl bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4"
+          class="rounded-sm bg-emerald-50/80 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/40 p-4"
         >
           <p class="text-xs font-medium text-emerald-800 dark:text-emerald-200 mb-3">Preview</p>
           <div class="space-y-2 text-sm">
@@ -114,11 +114,11 @@
 
     <template #footer>
       <div class="flex items-center justify-end gap-2 w-full">
-        <Button variant="outline" size="sm" @click="handleCancel" class="!rounded-lg">Cancel</Button>
+        <Button variant="outline" size="sm" @click="handleCancel" class="!rounded-sm">Cancel</Button>
         <Button
           variant="primary"
           size="sm"
-          class="!rounded-lg"
+          class="!rounded-sm"
           @click="handleApplyDiscount"
           :disabled="!isValid || isApplying"
         >

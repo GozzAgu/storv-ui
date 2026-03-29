@@ -1,8 +1,8 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
     <header
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
         Security
@@ -19,7 +19,7 @@
 
     <div
       v-if="!canAccess"
-      class="rounded-2xl border px-4 py-4 shadow-sm sm:px-5 sm:py-5"
+      class="rounded-sm border px-4 py-4 shadow-sm sm:px-5 sm:py-5"
       :class="
         accessDeniedByRole
           ? 'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/25'
@@ -48,10 +48,10 @@
     <template v-else>
       <div
         v-if="!storeId && !loading"
-        class="rounded-2xl border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-10"
+        class="rounded-sm border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-10"
       >
         <div
-          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
         >
           <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
         </div>
@@ -61,29 +61,27 @@
         </p>
       </div>
 
-      <Card
-        v-else
-        padding="none"
-        extra-class="!p-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
-      >
-        <div
-          class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
-        >
-          <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-            Recent activity
-          </h2>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-            Inventory changes for the current store
-          </p>
-        </div>
+      <div v-else class="data-table-shell overflow-hidden">
+        <DataTableToolbar>
+          <template #heading>
+            <div class="min-w-0">
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Recent activity
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                Inventory changes for the current store
+              </p>
+            </div>
+          </template>
+        </DataTableToolbar>
 
         <div v-if="loading" class="p-6 sm:p-8">
           <div class="space-y-3">
             <div v-for="i in 6" :key="i" class="flex items-center gap-3">
-              <div class="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+              <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
               <div class="min-w-0 flex-1 space-y-2">
-                <div class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-                <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+                <div class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+                <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
               </div>
             </div>
           </div>
@@ -103,7 +101,7 @@
 
         <div v-else-if="logs.length === 0" class="px-4 py-14 text-center sm:px-6">
           <div
-            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
           >
             <ClipboardDocumentListIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
           </div>
@@ -115,7 +113,7 @@
 
         <div v-else class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
-            <thead class="bg-gray-50/90 dark:bg-gray-900/40">
+            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
               <tr>
                 <th
                   scope="col"
@@ -143,7 +141,7 @@
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200/80 bg-white/90 dark:divide-gray-700/80 dark:bg-gray-900/20">
+            <tbody class="divide-y divide-gray-200/80 bg-white/90 dark:divide-gray-700/80 dark:!bg-dashboard-card">
               <tr
                 v-for="log in logs"
                 :key="log.id"
@@ -179,7 +177,7 @@
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
     </template>
   </div>
 </template>
@@ -191,7 +189,7 @@ import { BuildingStorefrontIcon, ClipboardDocumentListIcon } from '@heroicons/vu
 import type { ActivityLog } from '~/composables/useActivityLog'
 import { fetchActivityLogs } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import Card from '~/components/ui/Card.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()

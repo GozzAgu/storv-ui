@@ -5,7 +5,7 @@
         <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Quick Sale</h2>
         <button
           @click="$emit('update:modelValue', false)"
-          class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
         >
           <XMarkIcon class="w-5 h-5" />
         </button>
@@ -15,7 +15,7 @@
     <template #body>
       <div class="space-y-4">
         <!-- Barcode Scanner Toggle -->
-        <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800">
           <div class="flex items-center gap-3">
             <QrCodeIcon class="w-6 h-6 text-blue-600 dark:text-blue-400" />
             <div>
@@ -26,7 +26,7 @@
           <button
             @click="toggleScanner"
             :class="[
-              'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+              'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
               isScanning
                 ? 'bg-red-600 text-white hover:bg-red-700'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -38,7 +38,7 @@
 
         <!-- Scanner View -->
         <div v-if="isScanning" class="relative">
-          <div ref="scannerContainer" id="scanner-container" class="w-full h-64 bg-black rounded-lg overflow-hidden">
+          <div ref="scannerContainer" id="scanner-container" class="w-full h-64 bg-black rounded-sm overflow-hidden">
             <div v-if="!scannerReady" class="flex items-center justify-center h-full text-white">
               <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
@@ -62,7 +62,7 @@
               @keyup.enter="searchByBarcode"
               type="text"
               placeholder="Enter barcode..."
-              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
             <Button @click="searchByBarcode" :loading="isSearching">Search</Button>
           </div>
@@ -76,7 +76,7 @@
           <select
             v-model="selectedFolderId"
             @change="loadFolderItems"
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
           >
             <option value="">Select a folder...</option>
             <option v-for="folder in folders" :key="folder.id" :value="folder.id">
@@ -88,8 +88,8 @@
         <!-- Selected Items -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
           <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Selected Items</h3>
-          <div v-if="cartItems.length === 0" class="text-center py-8 px-4 border border-dashed border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/30">
-            <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+          <div v-if="cartItems.length === 0" class="text-center py-8 px-4 border border-dashed border-gray-200 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/30">
+            <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
               <ShoppingBagIcon class="w-7 h-7 text-green-600 dark:text-green-400" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your cart is empty</p>
@@ -99,7 +99,7 @@
             <div
               v-for="(item, index) in cartItems"
               :key="index"
-              class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+              class="flex items-center justify-between p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm"
             >
               <div class="flex-1">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
@@ -150,13 +150,13 @@
               v-model="customerName"
               type="text"
               placeholder="Customer Name"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
             <input
               v-model="customerPhone"
               type="tel"
               placeholder="Phone (Optional)"
-              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
             />
           </div>
         </div>
@@ -172,7 +172,7 @@
               :key="method"
               @click="paymentMethod = method"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                'px-4 py-2 rounded-sm text-sm font-medium transition-colors',
                 paymentMethod === method
                   ? 'bg-primary-500 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -197,8 +197,8 @@
 
     <template #footer>
       <div class="flex gap-2 justify-end">
-        <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-lg">Cancel</Button>
-        <Button size="sm" @click="completeSale" :loading="isProcessing" :disabled="cartItems.length === 0 || !paymentMethod || !selectedFolderId" extra-class="!rounded-lg">
+        <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-sm">Cancel</Button>
+        <Button size="sm" @click="completeSale" :loading="isProcessing" :disabled="cartItems.length === 0 || !paymentMethod || !selectedFolderId" extra-class="!rounded-sm">
           Complete Sale (${{ formatCurrency(cartTotal) }})
         </Button>
       </div>

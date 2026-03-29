@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="canShow && filteredEntries.length > 0"
-    class="rounded-xl border border-amber-200/80 dark:border-amber-800/60 bg-amber-50/90 dark:bg-amber-950/30 px-4 py-3 sm:px-5 sm:py-4"
+    class="rounded-sm border border-amber-200/80 dark:border-amber-800/60 bg-amber-50/90 dark:bg-amber-950/30 px-4 py-3 sm:px-5 sm:py-4"
   >
     <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
       <div class="min-w-0">
@@ -26,7 +26,7 @@
       <li
         v-for="entry in filteredEntries"
         :key="entry.id"
-        class="rounded-lg bg-white/80 dark:bg-gray-900/50 ring-1 ring-amber-200/60 dark:ring-amber-800/40 px-3 py-2.5"
+        class="rounded-sm bg-white/80 dark:!bg-dashboard-card ring-1 ring-amber-200/60 dark:ring-amber-800/40 px-3 py-2.5"
       >
         <div class="flex flex-wrap items-start justify-between gap-2">
           <div class="min-w-0 flex-1">
@@ -41,7 +41,7 @@
           <div class="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
-              class="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+              class="p-1.5 rounded-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
               title="Copy password"
               @click="copyPassword(entry)"
             >
@@ -50,7 +50,7 @@
             </button>
             <button
               type="button"
-              class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+              class="p-1.5 rounded-sm text-gray-400 hover:text-red-600 dark:hover:text-red-400"
               title="Remove from list"
               @click="removeInvite(entry.id)"
             >

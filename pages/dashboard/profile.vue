@@ -1,7 +1,7 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+      class="rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="min-w-0">
         <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
@@ -20,7 +20,7 @@
       <!-- Profile card -->
       <div class="w-full shrink-0 lg:col-span-1">
         <div
-          class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+          class="relative overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="relative flex flex-col items-center px-6 py-7 text-center sm:px-7">
             <!-- Avatar -->
@@ -30,9 +30,9 @@
               {{ profileAvatarInitials }}
             </div>
             <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
-              <div class="h-4 bg-gray-200/80 dark:bg-gray-700/80 rounded-md animate-pulse" />
-              <div class="h-3 bg-gray-200/80 dark:bg-gray-700/80 rounded animate-pulse" />
-              <div class="h-3 bg-gray-200/80 dark:bg-gray-700/80 rounded animate-pulse w-3/4 mx-auto" />
+              <div class="h-4 bg-gray-200/80 dark:bg-white/10 rounded-sm animate-pulse" />
+              <div class="h-3 bg-gray-200/80 dark:bg-white/10 rounded animate-pulse" />
+              <div class="h-3 bg-gray-200/80 dark:bg-white/10 rounded animate-pulse w-3/4 mx-auto" />
             </div>
             <template v-else>
               <p class="mt-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Business</p>
@@ -50,22 +50,22 @@
               </span>
             </template>
             <div
-              class="mt-6 flex w-full items-center justify-center gap-0 rounded-xl border border-gray-200/70 bg-gray-50/90 px-2 py-3 dark:border-gray-800/60 dark:bg-gray-950/40"
+              class="mt-6 flex w-full items-center justify-center gap-0 rounded-sm border border-gray-200/70 bg-gray-50/90 px-2 py-3 dark:border-gray-800/60 dark:!bg-dashboard-card/55"
             >
               <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
               </div>
               <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
               <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
               </div>
               <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
               <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-gray-700/80 rounded w-8 mx-auto animate-pulse" />
+                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
               </div>
@@ -75,7 +75,7 @@
       </div>
 
       <div class="space-y-4 lg:col-span-2">
-        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
           <div>
             <p v-if="isStaff" class="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Staff</p>
@@ -83,11 +83,11 @@
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ isStaff ? 'Your details as a team member' : 'Update your business details' }}</p>
           </div>
           <div v-if="!isEditingPersonalInfo">
-            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
+            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           </div>
           <div v-else class="flex gap-1.5">
-            <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Save changes</button>
+            <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Save changes</button>
           </div>
         </div>
         <div class="p-3 sm:p-4">
@@ -95,48 +95,48 @@
           <div v-if="!isStaff" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="sm:col-span-2">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Business name</label>
-              <input v-model="profileData.businessName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Your business or store name" />
+              <input v-model="profileData.businessName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Your business or store name" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter email" />
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter email" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Business phone" />
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Business phone" />
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell customers about your business" />
+              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell customers about your business" />
             </div>
           </div>
           <!-- Staff: personal name + contact -->
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
-              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="First name" />
+              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="First name" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last name</label>
-              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Last name" />
+              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Last name" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Work email" />
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Work email" />
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Phone" />
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Phone" />
             </div>
             <div class="sm:col-span-2">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Optional note" />
+              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Optional note" />
             </div>
           </div>
         </div>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
@@ -144,7 +144,7 @@
           <div class="space-y-0 p-3 sm:p-4">
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <LanguageIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -152,11 +152,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
                 </div>
               </div>
-              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <GlobeAltIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -164,11 +164,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
                 </div>
               </div>
-              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <CurrencyDollarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -176,11 +176,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
                 </div>
               </div>
-              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <BellIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -188,11 +188,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
                 </div>
               </div>
-              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
+              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <MoonIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -200,11 +200,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
                 </div>
               </div>
-              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <CalendarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -212,12 +212,12 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
                 </div>
               </div>
-              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
             </div>
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Security</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
@@ -225,7 +225,7 @@
           <div class="space-y-0 p-3 sm:p-4">
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <KeyIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -233,11 +233,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
                 </div>
               </div>
-              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Change</button>
+              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Change</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <ShieldCheckIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -245,11 +245,11 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
                 </div>
               </div>
-              <button @click="handle2FAToggle" :class="['px-3 py-1.5 text-xs font-medium rounded-lg transition-colors', securitySettings.twoFactor ? 'bg-red-600 hover:bg-red-700 text-white' : 'ring-1 ring-gray-200/80 dark:ring-gray-600/80 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300']">{{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}</button>
+              <button @click="handle2FAToggle" :class="['px-3 py-1.5 text-xs font-medium rounded-sm transition-colors', securitySettings.twoFactor ? 'bg-red-600 hover:bg-red-700 text-white' : 'ring-1 ring-gray-200/80 dark:ring-gray-600/80 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300']">{{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}</button>
             </div>
             <div class="flex items-center justify-between py-2.5">
               <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/80 bg-gray-50/90 dark:border-gray-700/60 dark:bg-gray-800/50">
                   <DevicePhoneMobileIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
@@ -257,14 +257,14 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
                 </div>
               </div>
-              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
+              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
             </div>
           </div>
         </div>
 
         <div
           v-if="storeInfo.storeName || isLoadingProfile"
-          class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+          class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
@@ -272,9 +272,9 @@
           </div>
           <div class="p-3 sm:p-4">
             <div v-if="isLoadingProfile" class="space-y-4">
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-xl w-3/4 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-xl w-1/2 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-xl w-2/3 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
             </div>
             <div v-else-if="storeInfo.storeName" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -305,12 +305,12 @@
             </div>
             <div v-else class="text-center py-8">
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors">Set up store information</NuxtLink>
+              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Set up store information</NuxtLink>
             </div>
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+        <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <div>
               <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
@@ -323,7 +323,7 @@
             </span>
           </div>
           <div class="p-3 sm:p-4 space-y-3">
-            <div class="rounded-xl border border-primary-200/60 bg-primary-50/50 p-3 dark:border-primary-500/25 dark:bg-primary-950/25">
+            <div class="rounded-sm border border-primary-200/60 bg-primary-50/50 p-3 dark:border-primary-500/25 dark:bg-primary-950/25">
               <p class="mb-1.5 text-xs font-medium text-gray-900 dark:text-gray-100">
                 {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
@@ -343,14 +343,14 @@
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Your permissions</p>
               <div v-if="userPermissions.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-2">Loading permissions...</div>
               <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 rounded-lg border border-gray-200/70 bg-gray-50/50 p-2.5 dark:border-gray-700/60 dark:bg-gray-950/30">
+                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 rounded-sm border border-gray-200/70 bg-gray-50/50 p-2.5 dark:border-gray-700/60 dark:!bg-dashboard-card/30">
                   <CheckCircleIcon class="w-3.5 h-3.5 text-green-500 dark:text-green-400 flex-shrink-0" />
                   <span class="text-xs text-gray-700 dark:text-gray-100">{{ permission }}</span>
                 </div>
               </div>
             </div>
             <div class="border-t border-gray-100/90 pt-3 dark:border-gray-800/60">
-              <div class="flex items-start gap-2.5 rounded-xl border border-gray-200/70 bg-gray-50/80 p-3 dark:border-gray-700/60 dark:bg-gray-950/30">
+              <div class="flex items-start gap-2.5 rounded-sm border border-gray-200/70 bg-gray-50/80 p-3 dark:border-gray-700/60 dark:!bg-dashboard-card/30">
                 <InformationCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">About your role</p>
@@ -381,7 +381,7 @@
             :key="themeOption.value"
             @click="selectTheme(themeOption.value as 'light' | 'dark' | 'system')"
             :class="[
-              'w-full p-4 rounded-md border-2 transition-all text-left',
+              'w-full p-4 rounded-sm border-2 transition-all text-left',
               currentThemeValue === themeOption.value
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -414,7 +414,7 @@
             :key="lang.code"
             @click="selectLanguage(lang.code, lang.name)"
             :class="[
-              'w-full p-4 rounded-md border-2 transition-all text-left',
+              'w-full p-4 rounded-sm border-2 transition-all text-left',
               accountSettings.language === lang.name
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -521,7 +521,7 @@
             <input
               v-model="passwordForm.currentPassword"
               type="password"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Enter current password"
             />
           </div>
@@ -534,7 +534,7 @@
               type="password"
               :minlength="PASSWORD_MIN_LENGTH"
               autocomplete="new-password"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="At least 12 characters, number and capital letter"
             />
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -562,14 +562,14 @@
             <input
               v-model="passwordForm.confirmPassword"
               type="password"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               placeholder="Confirm new password"
             />
             <p v-if="passwordForm.newPassword && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="text-xs text-red-500 mt-1">
               Passwords do not match
             </p>
           </div>
-          <div v-if="passwordError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div v-if="passwordError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm">
             <p class="text-xs text-red-600 dark:text-red-400">{{ passwordError }}</p>
           </div>
         </div>
@@ -603,12 +603,12 @@
       <div class="space-y-4">
         <p class="text-xs text-gray-600 dark:text-gray-400">Manage devices where you're currently signed in</p>
         <div v-if="isLoadingSessions" class="space-y-3">
-          <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-md">
+          <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-sm">
             <div class="flex-1 space-y-2">
-              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-md w-1/4 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/3 animate-pulse"></div>
+              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-1/4 animate-pulse"></div>
             </div>
-            <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded-md w-16 animate-pulse"></div>
+            <div class="h-6 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
           </div>
         </div>
         <div v-else-if="activeSessions.length === 0" class="text-center py-8">
@@ -618,7 +618,7 @@
           <div
             v-for="(session, index) in activeSessions"
             :key="index"
-            class="p-4 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+            class="p-4 border border-gray-200 dark:border-gray-700 rounded-sm hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
           >
             <div class="flex items-center justify-between">
               <div class="flex-1">
@@ -635,7 +635,7 @@
               <button
                 v-if="!session.current"
                 @click="revokeSession(index)"
-                class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
               >
                 Revoke
               </button>
@@ -659,7 +659,7 @@
             :key="region.code"
             @click="selectRegion(region.code, region.name)"
             :class="[
-              'w-full p-4 rounded-md border-2 transition-all text-left',
+              'w-full p-4 rounded-sm border-2 transition-all text-left',
               accountSettings.region === region.name
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -695,7 +695,7 @@
             :key="currency.code"
             @click="selectCurrency(currency.code, currency.name, currency.symbol)"
             :class="[
-              'w-full p-4 rounded-md border-2 transition-all text-left',
+              'w-full p-4 rounded-sm border-2 transition-all text-left',
               accountSettings.currency === currency.code
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -728,7 +728,7 @@
           </label>
           <select
             v-model="selectedTimezone"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
             <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
               {{ tz.label }}
@@ -762,12 +762,12 @@
           <input
             v-model="disable2FAPassword"
             type="password"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="Enter your password"
             @keyup.enter="handleDisable2FA"
           />
         </div>
-        <div v-if="disable2FAError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div v-if="disable2FAError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm">
           <p class="text-xs text-red-600 dark:text-red-400">{{ disable2FAError }}</p>
         </div>
       </div>

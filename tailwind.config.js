@@ -28,6 +28,11 @@ export default {
           800: '#0a2453',
           900: '#081b40',
         },
+        /** Elevated panels on dashboard canvas (matches layout dark shell) */
+        dashboard: {
+          canvas: '#07080c',
+          card: '#12141c',
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -45,9 +50,11 @@ export default {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        // End with transform:none so descendants can use position:fixed relative to the viewport
+        // (translateY(0) still creates a fixed containing block and breaks sticky/fixed footers).
         authFadeUp: {
           '0%': { opacity: '0', transform: 'translateY(14px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+          '100%': { opacity: '1', transform: 'none' },
         },
         authGlowDrift: {
           '0%': { transform: 'translate(0, 0) scale(1)' },
@@ -57,6 +64,10 @@ export default {
       transitionDelay: {
         '75': '75ms',
         '150': '150ms',
+      },
+      /* Same radius as sidebar panels & nav controls (rounded-sm = 2px) */
+      borderRadius: {
+        sidenav: '0.125rem',
       },
     },
   },

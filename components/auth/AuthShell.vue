@@ -34,7 +34,7 @@
       <div class="relative z-10">
         <a
           href="https://www.storvv.com"
-          class="inline-flex rounded-lg opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
+          class="inline-flex rounded-sm opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
         >
           <img
             src="/storvv logo.png"
@@ -62,7 +62,7 @@
             :style="{ animationDelay: `${180 + i * 70}ms` }"
           >
             <span
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 shadow-sm shadow-black/10 transition duration-300 ease-out group-hover:bg-white/16 group-hover:ring-white/30"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/10 ring-1 ring-white/20 shadow-sm shadow-black/10 transition duration-300 ease-out group-hover:bg-white/16 group-hover:ring-white/30"
             >
               <component :is="item.icon" class="h-5 w-5 text-white/95 transition-transform duration-300 group-hover:scale-105" />
             </span>
@@ -84,6 +84,9 @@
     <div
       class="relative flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:px-12 lg:py-12"
     >
+      <div class="absolute right-4 top-4 z-10 sm:right-6 sm:top-6 lg:right-12 lg:top-10">
+        <ThemeToggle />
+      </div>
       <div
         class="pointer-events-none absolute inset-0 opacity-40 dark:opacity-20"
         aria-hidden="true"
@@ -101,6 +104,7 @@
 
 <script setup lang="ts">
 import { computed, type Component } from 'vue'
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import {
   ChartBarSquareIcon,
   CubeIcon,

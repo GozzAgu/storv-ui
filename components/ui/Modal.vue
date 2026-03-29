@@ -30,8 +30,8 @@
             :aria-labelledby="labelledBy"
             :aria-describedby="describedBy"
             :class="[
-              'pointer-events-auto relative flex max-h-[min(92dvh,calc(100dvh-1rem))] min-h-0 w-full flex-col overflow-hidden border border-gray-200/90 bg-white pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:bg-slate-950 dark:text-gray-100',
-              'rounded-t-[1.35rem] sm:rounded-2xl',
+              'frosted-glass pointer-events-auto relative flex max-h-[min(92dvh,calc(100dvh-1rem))] min-h-0 w-full flex-col overflow-hidden border border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100',
+              'rounded-t-sm sm:rounded-sm',
               sizeClasses,
             ]"
             @click.stop
@@ -39,7 +39,7 @@
             <!-- Header -->
             <div
               v-if="title || subtitle || $slots.header || showClose"
-              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-200/90 bg-white px-4 py-3.5 dark:border-gray-800 dark:bg-slate-950 sm:px-5 sm:py-4"
+              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-200/90 bg-transparent px-4 py-3.5 dark:border-gray-800 sm:px-5 sm:py-4"
             >
               <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
                 <slot name="header">
@@ -70,7 +70,7 @@
               <button
                 v-if="showClose"
                 type="button"
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
                 aria-label="Close modal"
                 @click="handleClose"
               >
@@ -80,7 +80,7 @@
 
             <!-- Body -->
             <div
-              class="modal-body-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-white dark:bg-slate-950"
+              class="modal-body-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-transparent"
               :class="contentPadding"
             >
               <slot />
@@ -89,7 +89,7 @@
             <!-- Footer -->
             <div
               v-if="$slots.footer"
-              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-200/90 bg-white px-4 py-3 dark:border-gray-800 dark:bg-slate-950 sm:flex-row sm:items-center sm:px-5 sm:py-4"
+              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-200/90 bg-transparent px-4 py-3 dark:border-gray-800 sm:flex-row sm:items-center sm:px-5 sm:py-4"
             >
               <slot name="footer" />
             </div>

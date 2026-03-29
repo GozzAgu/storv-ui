@@ -1,7 +1,7 @@
 <template>
   <div
     ref="rootRef"
-    class="fixed z-50 touch-none select-none overflow-visible"
+    class="fixed z-[100] touch-none select-none overflow-visible"
     :class="[
       anchorClasses,
       layout === 'column' ? 'flex flex-col items-end gap-1.5' : 'flex flex-row items-end gap-2',
@@ -42,7 +42,8 @@ const props = withDefaults(
   }>(),
   {
     layout: 'row',
-    anchorClass: 'bottom-20 right-4 sm:bottom-24 sm:right-6',
+    /** Clears fixed pagination bars (~48px) + safe area */
+    anchorClass: 'bottom-32 right-4 sm:bottom-36 sm:right-6',
   }
 )
 

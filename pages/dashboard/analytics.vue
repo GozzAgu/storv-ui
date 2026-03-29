@@ -1,8 +1,8 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
     <header
-      class="relative rounded-2xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-5 sm:py-5"
+      class="relative rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div class="relative min-w-0">
@@ -20,7 +20,7 @@
         </div>
         <div class="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
           <div
-            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:bg-gray-900/60"
+            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:!bg-dashboard-card/60"
             role="group"
             aria-label="Analytics period"
           >
@@ -66,7 +66,7 @@
               type="button"
               @click="exportReport('pdf')"
               :disabled="isExporting"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200/90 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/80 dark:bg-gray-900/60 dark:text-gray-100 dark:hover:bg-gray-800/80"
+              class="inline-flex items-center gap-1.5 rounded-sm border border-gray-200/90 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-100 dark:hover:bg-gray-800/80"
             >
               <ArrowDownTrayIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
               <span>{{ isExporting ? 'Exporting...' : 'Export PDF' }}</span>
@@ -75,7 +75,7 @@
               type="button"
               @click="exportReport('excel')"
               :disabled="isExporting"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200/90 bg-emerald-50/90 px-3 py-1.5 text-xs font-medium text-emerald-800 shadow-sm transition hover:bg-emerald-100/90 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+              class="inline-flex items-center gap-1.5 rounded-sm border border-emerald-200/90 bg-emerald-50/90 px-3 py-1.5 text-xs font-medium text-emerald-800 shadow-sm transition hover:bg-emerald-100/90 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
             >
               <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
               <span>{{ isExporting ? 'Exporting...' : 'Export Excel' }}</span>
@@ -91,15 +91,15 @@
         <div
           v-for="i in 5"
           :key="i"
-          class="rounded-xl bg-white p-3 ring-1 ring-gray-200/80 dark:bg-gray-900/50 dark:ring-gray-800/60 sm:p-3.5"
+          class="rounded-sm bg-white p-3 ring-1 ring-gray-200/80 dark:!bg-dashboard-card dark:ring-gray-800/60 sm:p-3.5"
         >
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
-              <div class="mb-2 h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-              <div class="mb-1.5 h-7 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-gray-700 sm:h-8"></div>
-              <div class="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
+              <div class="mb-2 h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+              <div class="mb-1.5 h-7 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-white/10 sm:h-8"></div>
+              <div class="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
             </div>
-            <div class="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-700 sm:h-12 sm:w-12"></div>
+            <div class="h-11 w-11 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:h-12 sm:w-12"></div>
           </div>
         </div>
       </div>
@@ -108,10 +108,10 @@
     <!-- No store selected -->
     <template v-else-if="needsStoreSelection">
       <div
-        class="rounded-2xl border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35 sm:px-10"
+        class="rounded-sm border border-gray-200/80 bg-white/90 px-6 py-12 text-center shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-10"
       >
         <div
-          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
         >
           <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
         </div>
@@ -173,7 +173,7 @@
         <Card
           class="lg:col-span-2"
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4 flex items-center justify-between">
             <div>
@@ -194,7 +194,7 @@
         <!-- Top Products Chart -->
         <Card
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -216,7 +216,7 @@
         <!-- Inventory Turnover -->
         <Card
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -235,7 +235,7 @@
         <!-- Customer Insights -->
         <Card
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -257,12 +257,12 @@
         <!-- Busiest day & hour -->
         <Card
           padding="sm"
-          extra-class="!p-4 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 overflow-hidden rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="flex items-start justify-between gap-3">
             <div class="flex min-w-0 items-start gap-2.5">
               <div
-                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
               >
                 <ClockIcon class="h-4 w-4 text-gray-600 dark:text-gray-300" />
               </div>
@@ -281,7 +281,7 @@
           </div>
 
           <div
-            class="mt-3 rounded-xl border border-gray-200/80 bg-gray-50/90 p-3 dark:border-gray-800/70 dark:bg-gray-900/50"
+            class="mt-3 rounded-sm border border-gray-200/80 bg-gray-50/90 p-3 dark:border-gray-800/70 dark:!bg-dashboard-card"
           >
             <p class="text-[11px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
             <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
@@ -293,7 +293,7 @@
         <!-- Sales by hour (peak hours) -->
         <Card
           padding="sm"
-          extra-class="!p-4 lg:col-span-2 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 lg:col-span-2 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -314,7 +314,7 @@
         <!-- Sales by day of week -->
         <Card
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -333,7 +333,7 @@
         <!-- Traffic heatmap: day × hour -->
         <Card
           padding="sm"
-          extra-class="!p-4 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
+          extra-class="!p-4 rounded-sm border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:!bg-dashboard-card"
         >
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -353,19 +353,23 @@
       <!-- Detailed Tables -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <!-- Top Products -->
-        <Card
-          padding="sm"
-          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
-        >
-          <p
-            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-          >
-            Top products
-          </p>
-          <div class="overflow-x-auto">
+        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+          <DataTableToolbar>
+            <template #heading>
+              <div class="min-w-0">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+                >
+                  Top products
+                </p>
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+              </div>
+            </template>
+          </DataTableToolbar>
+          <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="w-full text-xs">
-              <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Product</th>
                   <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Qty</th>
                   <th class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Revenue</th>
@@ -383,22 +387,26 @@
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
 
         <!-- Top Customers -->
-        <Card
-          padding="sm"
-          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
-        >
-          <p
-            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-          >
-            Top customers
-          </p>
-          <div class="overflow-x-auto">
+        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+          <DataTableToolbar>
+            <template #heading>
+              <div class="min-w-0">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+                >
+                  Top customers
+                </p>
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+              </div>
+            </template>
+          </DataTableToolbar>
+          <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="w-full text-xs">
-              <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Customer</th>
                   <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Orders</th>
                   <th class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Spent</th>
@@ -419,22 +427,26 @@
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
 
         <!-- Recent Returns -->
-        <Card
-          padding="sm"
-          extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
-        >
-          <p
-            class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-          >
-            Recent returns
-          </p>
-          <div class="overflow-x-auto">
+        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+          <DataTableToolbar>
+            <template #heading>
+              <div class="min-w-0">
+                <p
+                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+                >
+                  Recent returns
+                </p>
+                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+              </div>
+            </template>
+          </DataTableToolbar>
+          <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="w-full text-xs">
-              <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-700/80">
+              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Receipt</th>
                   <th class="text-left py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Date</th>
                   <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Amount</th>
@@ -454,28 +466,32 @@
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       </div>
 
       <!-- Low stock -->
-      <Card
-        padding="sm"
-        extra-class="!p-3.5 rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/35"
-      >
-        <div class="mb-2 flex items-center justify-between">
-          <p
-            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-          >
-            Low stock
-          </p>
-          <NuxtLink
-            to="/dashboard/inventory"
-            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-          >
-            View inventory →
-          </NuxtLink>
-        </div>
-        <div class="space-y-1.5">
+      <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+        <DataTableToolbar>
+          <template #heading>
+            <div class="min-w-0">
+              <p
+                class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+              >
+                Low stock
+              </p>
+              <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Items at or below threshold</p>
+            </div>
+          </template>
+          <template #actions>
+            <NuxtLink
+              to="/dashboard/inventory"
+              class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              View inventory →
+            </NuxtLink>
+          </template>
+        </DataTableToolbar>
+        <div class="space-y-1.5 px-3 pb-3 sm:px-4">
           <template v-if="lowStockItems.length > 0">
             <NuxtLink
               v-for="item in lowStockItems"
@@ -492,7 +508,7 @@
           </template>
           <p v-else class="text-xs text-gray-500 dark:text-gray-400 py-1">All stocked</p>
         </div>
-      </Card>
+      </div>
     </template>
   </div>
 </template>
@@ -513,6 +529,7 @@ import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 import Card from '~/components/ui/Card.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import jsPDF from 'jspdf'
 
@@ -1287,10 +1304,8 @@ const inventoryTurnoverChartSeries = computed(() => {
 })
 
 const inventoryTurnoverChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
-  
+  const isDark = themeStore.actualTheme === 'dark'
+
   return {
     chart: {
       type: 'bar',
@@ -1352,10 +1367,8 @@ const customerChartSeries = computed(() => {
 })
 
 const customerChartOptions = computed(() => {
-  const isDark = import.meta.client 
-    ? document.documentElement.classList.contains('dark')
-    : false
-  
+  const isDark = themeStore.actualTheme === 'dark'
+
   return {
     chart: {
       type: 'bar',

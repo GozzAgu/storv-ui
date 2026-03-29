@@ -65,7 +65,7 @@
                   v-model="folderSearchQuery"
                   type="text"
                   placeholder="Search folders..."
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 />
               </div>
             </div>
@@ -76,9 +76,9 @@
             </div>
             <div
               v-else-if="filteredFolders.length === 0"
-              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
             >
-              <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+              <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                 <FolderIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -94,7 +94,7 @@
                 :key="folder.id"
                 @click="selectFolder(folder)"
                 :class="[
-                  'p-3 border-2 rounded-md transition-all text-left',
+                  'p-3 border-2 rounded-sm transition-all text-left',
                   selectedFolder?.id === folder.id
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
@@ -103,7 +103,7 @@
                 <div class="flex items-center gap-2.5">
                   <div
                     :class="[
-                      'w-8 h-8 rounded-md flex items-center justify-center',
+                      'w-8 h-8 rounded-sm flex items-center justify-center',
                       getFolderColorClass(folder.color)
                     ]"
                   >
@@ -148,7 +148,7 @@
                   v-model="itemSearchQuery"
                   type="text"
                   :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by product name or serial number...' : 'Search by product name...'"
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 />
               </div>
             </div>
@@ -158,9 +158,9 @@
             </div>
             <div
               v-else-if="availableItems.length === 0"
-              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
             >
-              <div class="w-14 h-14 mx-auto mb-3 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+              <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                 <CubeIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No items available</p>
@@ -171,7 +171,7 @@
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
                 :class="[
-                  'p-3 border rounded-md transition-all cursor-pointer',
+                  'p-3 border rounded-sm transition-all cursor-pointer',
                   selectedItems.find(si => si.id === item.id)
                     ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                     : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
@@ -229,7 +229,7 @@
                         @click.stop
                         min="1"
                         :max="getItemField(item, 'stock') || 1"
-                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                       />
                     </div>
                   </div>
@@ -237,7 +237,7 @@
               </div>
             </div>
           </div>
-          <div v-if="selectedItems.length > 0" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+          <div v-if="selectedItems.length > 0" class="p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm">
             <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
               Selected Items ({{ totalSelectedQuantity }})
             </p>
@@ -262,7 +262,7 @@
                   @input="handleCustomerNameInput"
                   @focus="showCustomerSuggestions = true"
                   @blur="handleCustomerNameBlur"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="John Doe"
               />
                 <MagnifyingGlassIcon 
@@ -272,7 +272,7 @@
                 <!-- Customer Suggestions Dropdown -->
                 <div
                   v-if="showCustomerSuggestions && receiptForm.customerName && matchingCustomers.length > 0"
-                  class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                  class="absolute z-50 w-full mt-1 bg-white dark:!bg-dashboard-card border border-gray-200 dark:border-gray-700 rounded-sm shadow-lg max-h-48 overflow-y-auto"
                 >
                   <div
                     v-for="customer in matchingCustomers"
@@ -305,7 +305,7 @@
               <input
                 v-model="receiptForm.customerEmail"
                 type="email"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="john@example.com"
               />
             </div>
@@ -316,7 +316,7 @@
               <input
                 v-model="receiptForm.customerPhone"
                 type="tel"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="+1 234 567 8900"
               />
             </div>
@@ -327,7 +327,7 @@
               <input
                 v-model="receiptForm.customerAddress"
                 type="text"
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 placeholder="123 Main St, City, State"
               />
             </div>
@@ -348,7 +348,7 @@
               <select
                 v-model="receiptForm.paymentMethod"
                 required
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
               >
                 <option value="">Select payment method</option>
                 <option value="Cash">Cash</option>
@@ -368,7 +368,7 @@
                   <select
                     v-model="payment.method"
                     required
-                    class="flex-1 px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                    class="flex-1 px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                   >
                     <option value="">Select method</option>
                     <option value="Cash">Cash</option>
@@ -385,7 +385,7 @@
                       min="0"
                       :max="receiptTotal - splitPaymentsTotal + payment.amount"
                       required
-                      class="w-full pl-6 pr-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                      class="w-full pl-6 pr-2.5 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                       placeholder="0.00"
                     />
                   </div>
@@ -393,7 +393,7 @@
                     v-if="splitPayments.length > 1"
                     @click="removeSplitPayment(index)"
                     type="button"
-                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
                   >
                     <XMarkIcon class="w-4 h-4" />
                   </button>
@@ -401,11 +401,11 @@
                 <button
                   @click="addSplitPayment"
                   type="button"
-                  class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md border border-primary-300 dark:border-primary-600 transition-colors"
+                  class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm border border-primary-300 dark:border-primary-600 transition-colors"
                 >
                   + Add Payment Method
                 </button>
-                <div class="flex justify-between items-center p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+                <div class="flex justify-between items-center p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
                   <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Total:</span>
                   <div class="text-right">
                     <span class="text-xs font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
@@ -425,7 +425,7 @@
               <select
                 v-model="receiptForm.status"
                 required
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
               >
                 <option value="completed">Completed</option>
                 <option value="pending">Pending</option>
@@ -439,7 +439,7 @@
             <textarea
               v-model="receiptForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60 resize-none"
+              class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60 resize-none"
               placeholder="Additional notes..."
             ></textarea>
           </div>
@@ -462,9 +462,9 @@
                 </div>
                 <div
                   v-else-if="folders.length === 0"
-                  class="text-center py-4 px-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50/50 dark:bg-gray-800/50"
+                  class="text-center py-4 px-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
                 >
-                  <div class="w-10 h-10 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <div class="w-10 h-10 mx-auto mb-2 rounded-sm bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                     <FolderIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </div>
                   <p class="text-xs text-gray-500 dark:text-gray-400">No inventory folders found</p>
@@ -473,7 +473,7 @@
                   v-else
                   v-model="swapInFolderId"
                   required
-                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                 >
                   <option value="">Select folder for swapped-in device</option>
                   <option
@@ -506,7 +506,7 @@
                       :required="field.required"
                       type="text"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Number Input -->
                     <input
@@ -515,7 +515,7 @@
                       :required="field.required"
                       type="number"
                       :placeholder="swapInFieldPlaceholder(field)"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Currency Input -->
                     <div v-else-if="field.type === 'currency'" class="relative">
@@ -526,7 +526,7 @@
                         step="0.01"
                         min="0"
                         :required="field.required"
-                        class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                        class="w-full pl-7 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                         placeholder="0.00"
                       />
                     </div>
@@ -536,14 +536,14 @@
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
                       type="date"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     />
                     <!-- Select Input -->
                     <select
                       v-else-if="field.type === 'select' && field.options"
                       v-model="swapInItemForm[field.name]"
                       :required="field.required"
-                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
+                      class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/50 focus:border-primary-400"
                     >
                       <option value="">Select {{ swapInFieldLabel(field) }}</option>
                       <option v-for="option in field.options" :key="option" :value="option">
@@ -565,7 +565,7 @@
               </div>
             </div>
           </div>
-          <div class="p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div class="p-3 rounded-sm border border-gray-200 dark:border-gray-700">
             <div class="flex justify-between items-center mb-1.5">
               <span class="text-xs text-gray-600 dark:text-gray-400">Products</span>
               <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ totalSelectedQuantity }}</span>
@@ -597,7 +597,7 @@
           variant="outline"
           size="sm"
           @click="previousStep"
-          class="w-full sm:w-auto order-2 sm:order-1 !rounded-lg"
+          class="w-full sm:w-auto order-2 sm:order-1 !rounded-sm"
         >
           Previous
         </Button>
@@ -607,7 +607,7 @@
             variant="outline"
             size="sm"
             @click="handleCancel"
-            class="w-full sm:w-auto !rounded-lg"
+            class="w-full sm:w-auto !rounded-sm"
           >
             Cancel
           </Button>
@@ -615,7 +615,7 @@
             v-if="currentStep < 2"
             variant="primary"
             size="sm"
-            class="w-full sm:w-auto !rounded-lg"
+            class="w-full sm:w-auto !rounded-sm"
             @click="nextStep"
             :disabled="!canProceed"
           >
@@ -627,7 +627,7 @@
             size="sm"
             @click="handleCreateReceipt"
             :disabled="!isFormValid || isCreating"
-            class="w-full sm:w-auto !rounded-lg"
+            class="w-full sm:w-auto !rounded-sm"
           >
             <span v-if="isCreating">Creating...</span>
             <span v-else>Create Receipt</span>
@@ -654,21 +654,21 @@
             v-model="emailToSend"
             type="email"
             placeholder="Enter email address"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
             @keyup.enter="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
           />
         </div>
         <div class="flex gap-2 justify-end">
           <button
             @click="showEmailModal = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
           >
             Cancel
           </button>
           <button
             @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
             :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-md transition-colors"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
           >
             {{ isSendingEmail ? 'Sending...' : 'Send' }}
           </button>

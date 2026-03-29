@@ -6,7 +6,7 @@
   >
     <template #header>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-md bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+        <div class="w-10 h-10 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
           <TrashIcon class="w-6 h-6 text-red-600 dark:text-red-400" />
         </div>
         <div>
@@ -27,7 +27,7 @@
 
     <div v-else class="max-h-[calc(100vh-16rem)] overflow-y-auto space-y-4">
       <!-- Warning Message -->
-      <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+      <div class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm">
         <div class="flex items-start gap-3">
           <ExclamationTriangleIcon class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
           <div>
@@ -45,7 +45,7 @@
       <div class="space-y-3">
         <div>
           <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Receipt Information</h4>
-          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 space-y-1.5">
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-sm p-3 space-y-1.5">
             <div class="flex justify-between text-sm">
               <span class="text-gray-600 dark:text-gray-400">Receipt Number:</span>
               <span class="font-medium text-gray-900 dark:text-gray-100">{{ receipt.receiptNumber }}</span>
@@ -76,10 +76,10 @@
         <!-- Items to be Returned -->
         <div>
           <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Items to be Returned to Inventory</h4>
-          <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div class="border border-gray-200 dark:border-gray-700 rounded-sm overflow-hidden">
             <div class="overflow-x-auto max-h-48 overflow-y-auto">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="sticky top-0">
+                <thead class="sticky top-0 bg-gray-50/95 dark:!bg-dashboard-card/90">
                   <tr>
                     <th class="px-4 py-3 text-left text-xs !font-bold text-gray-500 dark:text-gray-400 uppercase">Product</th>
                     <th class="px-4 py-3 text-center text-xs !font-bold text-gray-500 dark:text-gray-400 uppercase">Quantity</th>
@@ -97,7 +97,7 @@
                     </td>
                   </tr>
                 </tbody>
-                <tfoot class="bg-gray-50 dark:bg-gray-700/50">
+                <tfoot class="bg-gray-50 dark:!bg-dashboard-card/70">
                   <tr>
                     <td colspan="3" class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-right">
                       Total:
@@ -113,7 +113,7 @@
         </div>
 
         <!-- What Will Happen -->
-        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+        <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-sm">
           <h4 class="text-xs font-semibold text-yellow-900 dark:text-yellow-100 mb-1.5">What will happen:</h4>
           <ul class="space-y-0.5 text-xs text-yellow-800 dark:text-yellow-200 list-disc list-inside">
             <li>All items from this receipt will be returned to inventory</li>
@@ -124,7 +124,7 @@
         </div>
 
         <!-- Confirmation Checkbox -->
-        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
           <Checkbox
             v-model="confirmed"
             label="I understand that this action cannot be undone and will permanently delete this receipt and its associated data."
@@ -137,11 +137,11 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
       <Button
         variant="danger"
         size="sm"
-        extra-class="!rounded-lg"
+        extra-class="!rounded-sm"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmDelete"
         :icon="TrashIcon"

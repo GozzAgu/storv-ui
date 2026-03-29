@@ -2,14 +2,14 @@
   <div class="overflow-x-auto">
     <table :class="['w-full', tableClass]">
       <!-- Header -->
-      <thead v-if="columns && columns.length > 0" class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+      <thead v-if="columns && columns.length > 0" class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90">
         <tr>
           <th
             v-for="column in columns"
             :key="column.key"
             :class="[
-              'px-2 py-1.5 text-left text-[10px] !font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider',
-              column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none' : '',
+              'px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide',
+              column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '',
               column.class || '',
               headerClass
             ]"
@@ -42,7 +42,7 @@
           </th>
           <th
             v-if="showActions"
-            class="px-2 py-1.5 text-right text-[10px] !font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+            class="px-3 py-2.5 text-right text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide"
           >
             Actions
           </th>
@@ -50,19 +50,19 @@
       </thead>
 
       <!-- Body -->
-      <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+      <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800/80 dark:!bg-dashboard-card">
         <tr
           v-for="(row, index) in sortedData"
           :key="getRowKey(row, index)"
           :class="[
-            'hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors',
+            'transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]',
             rowClass
           ]"
         >
           <td
             v-for="column in columns"
             :key="column.key"
-            :class="['px-2 py-1.5 whitespace-nowrap text-xs', column.class || '', cellClass]"
+            :class="['whitespace-nowrap px-3 py-2.5 text-xs', column.class || '', cellClass]"
           >
             <slot
               :name="`cell-${column.key}`"
@@ -77,7 +77,7 @@
           </td>
           <td
             v-if="showActions"
-            class="px-2 py-1.5 whitespace-nowrap text-right text-xs font-medium"
+            class="whitespace-nowrap px-3 py-2.5 text-right text-xs font-medium"
           >
             <slot
               name="actions"
@@ -114,7 +114,7 @@
           >
             <slot name="empty">
               <div class="flex flex-col items-center justify-center">
-                <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2">
+                <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-2">
                   <InboxIcon class="w-4 h-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <p class="text-xs font-medium text-gray-900 dark:text-gray-100">No data available</p>

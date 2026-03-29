@@ -46,15 +46,31 @@ export const useThemeStore = defineStore('theme', {
       if (import.meta.client) {
         const html = document.documentElement
         const isDark = this.actualTheme === 'dark'
-        html.classList.add('theme-transitioning')
+        // First paint during initTheme: apply class immediately (no transition) to avoid a long flash
+        const shouldAnimate = this.initialized
+        const reducedMotion =
+          typeof window.matchMedia === 'function' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        // Must finish after CSS `transition-duration` on `html.theme-transitioning` (see `assets/css/main.css`)
+        const transitionMs = reducedMotion ? 80 : 280
+
+        if (shouldAnimate) {
+          html.classList.add('theme-transitioning')
+          // Ensure transition class is committed before toggling `.dark` so the browser interpolates
+          void html.offsetHeight
+        }
         if (isDark) {
           html.classList.add('dark')
         } else {
           html.classList.remove('dark')
         }
-        setTimeout(() => {
-          html.classList.remove('theme-transitioning')
-        }, 320)
+        // Native scrollbars / form controls follow the palette immediately (pairs with global CSS transition)
+        html.style.colorScheme = isDark ? 'dark' : 'light'
+        if (shouldAnimate) {
+          window.setTimeout(() => {
+            html.classList.remove('theme-transitioning')
+          }, transitionMs)
+        }
       }
     },
 

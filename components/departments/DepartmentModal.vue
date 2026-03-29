@@ -15,7 +15,7 @@
           <select
             v-model="formData.departmentType"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
             <option value="">Select department type</option>
             <option v-for="deptType in coreDepartments" :key="deptType" :value="deptType">
@@ -32,7 +32,7 @@
             v-model="formData.name"
             type="text"
             required
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none"
             placeholder="Enter department name"
           />
         </div>
@@ -59,20 +59,20 @@
           <textarea
             v-model="formData.description"
             rows="3"
-            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
+            class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
             placeholder="Brief description of the department..."
           ></textarea>
         </div>
       </div>
 
-      <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+      <div v-if="errorMessage" class="p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-sm">
         <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
       </div>
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-lg">Cancel</Button>
-      <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !formData.name || !formData.departmentType" class="w-full sm:w-auto !rounded-lg">
+      <Button variant="outline" size="sm" @click="handleClose" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+      <Button size="sm" @click="handleSubmit" :disabled="isSubmitting || !formData.name || !formData.departmentType" class="w-full sm:w-auto !rounded-sm">
         <span v-if="isSubmitting" class="flex items-center gap-1.5">
           <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -3,7 +3,7 @@
     <button
       type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="flex h-9 max-w-[10rem] items-center gap-1.5 rounded-xl border border-gray-200/90 bg-white/90 px-2.5 py-1.5 text-xs font-semibold tracking-tight text-gray-800 transition-all hover:border-gray-300/90 hover:bg-gray-50/90 active:scale-[0.99] dark:border-gray-800/80 dark:bg-gray-900/50 dark:text-gray-100 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/70 sm:max-w-[12rem]"
+      class="flex h-9 max-w-[10rem] items-center gap-1.5 rounded-sm border-0 bg-transparent px-2.5 py-1.5 text-xs font-medium tracking-tight text-gray-800 dark:text-gray-100 sm:max-w-[12rem]"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
       <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
@@ -41,11 +41,11 @@
     >
       <div
         v-if="dropdownOpen"
-        class="fixed left-4 right-4 top-20 z-[50] flex max-h-[calc(100vh-7rem)] w-auto max-w-none flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white/95 py-2 backdrop-blur-xl dark:border-gray-800/80 dark:bg-slate-950/90 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-1.5 sm:max-h-[380px] sm:w-60 sm:max-w-[280px]"
+        class="frosted-glass fixed left-4 right-4 top-20 z-[50] flex max-h-[calc(100vh-7rem)] w-auto max-w-none flex-col overflow-hidden rounded-sm border border-gray-200/90 py-2 dark:border-gray-700/80 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-1.5 sm:max-h-[380px] sm:w-60 sm:max-w-[280px]"
         @click.stop
       >
         <div class="px-3 pb-2 flex items-center gap-1.5">
-          <div class="flex items-center justify-center w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-700/80 text-gray-600 dark:text-gray-400">
+          <div class="flex h-6 w-6 items-center justify-center rounded-none bg-gray-200/60 text-gray-600 dark:bg-gray-700/80 dark:text-gray-400">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
@@ -78,18 +78,18 @@
               v-for="store in stores"
               :key="store.id"
               @click="switchStore(store.id)"
-              class="w-full text-left flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs transition-colors duration-150"
+              class="w-full text-left flex items-center gap-2.5 rounded-l-sm py-2 pl-2 pr-2.5 text-xs transition-colors duration-150"
               :class="currentStore?.id === store.id
-                ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-300'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/80 active:bg-gray-200 dark:active:bg-gray-700'"
+                ? 'border-l-[5px] border-primary-500 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
+                : 'border-l-[5px] border-transparent text-gray-700 dark:text-gray-300'"
             >
-              <div class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 ring-1 ring-gray-200/50 dark:ring-gray-600/50">
+              <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100/80 dark:bg-gray-800/90">
                 <svg class="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="font-medium truncate pr-1 text-xs">
+                <p class="truncate pr-1 text-xs" :class="currentStore?.id === store.id ? 'font-bold' : 'font-medium'">
                   {{ store.name || 'Unnamed Store' }}
                 </p>
                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -123,7 +123,7 @@
         <div v-if="!isStaff" class="border-t border-gray-100 dark:border-gray-700/80 pt-1.5 mt-0.5 px-2">
           <NuxtLink
             to="/dashboard/settings"
-            class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            class="flex items-center gap-2 rounded-sm px-2.5 py-2 text-xs font-medium text-gray-600 dark:text-gray-400"
             @click="dropdownOpen = false"
           >
             <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">

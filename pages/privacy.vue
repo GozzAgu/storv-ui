@@ -1,15 +1,18 @@
 <template>
-  <div class="min-h-screen bg-white">
+  <div class="min-h-screen bg-white dark:bg-slate-950">
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 dark:bg-slate-950/90">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16 lg:h-20">
+        <div class="flex justify-between items-center gap-3 h-16 lg:h-20">
           <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
             Storvv
           </NuxtLink>
-          <NuxtLink to="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-            Back to Home
-          </NuxtLink>
+          <div class="flex items-center gap-3 sm:gap-4">
+            <ThemeToggle />
+            <NuxtLink to="/" class="text-gray-600 hover:text-gray-900 font-medium transition-colors dark:text-gray-300 dark:hover:text-white text-sm sm:text-base">
+              Back to Home
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </nav>
@@ -18,20 +21,20 @@
     <div class="pt-24 pb-16 sm:pt-32 sm:pb-24">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="prose prose-lg max-w-none">
-          <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
-          <p class="text-gray-600 mb-8">Last updated: January 2025</p>
+          <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Privacy Policy</h1>
+          <p class="text-gray-600 dark:text-gray-400 mb-8">Last updated: January 2025</p>
 
-          <div class="space-y-8 text-gray-700">
+          <div class="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Introduction</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Introduction</h2>
               <p class="mb-4">
                 Welcome to Storvv ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our inventory management service.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">2. Information We Collect</h2>
-              <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">2.1 Information You Provide</h3>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">2. Information We Collect</h2>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">2.1 Information You Provide</h3>
               <p class="mb-4">
                 We collect information that you provide directly to us, including:
               </p>
@@ -43,7 +46,7 @@
                 <li>Communication data (support requests, feedback)</li>
               </ul>
 
-              <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-3">2.2 Automatically Collected Information</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">2.2 Automatically Collected Information</h3>
               <p class="mb-4">
                 We automatically collect certain information when you use our service:
               </p>
@@ -55,7 +58,7 @@
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">3. How We Use Your Information</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">3. How We Use Your Information</h2>
               <p class="mb-4">We use the information we collect to:</p>
               <ul class="list-disc pl-6 mb-4 space-y-2">
                 <li>Provide, maintain, and improve our services</li>
@@ -69,7 +72,7 @@
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">4. Information Sharing and Disclosure</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">4. Information Sharing and Disclosure</h2>
               <p class="mb-4">We do not sell your personal information. We may share your information only in the following circumstances:</p>
               <ul class="list-disc pl-6 mb-4 space-y-2">
                 <li><strong>Service Providers:</strong> With third-party vendors who perform services on our behalf</li>
@@ -80,14 +83,14 @@
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">5. Data Security</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">5. Data Security</h2>
               <p class="mb-4">
                 We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your information, we cannot guarantee absolute security.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">6. Your Rights and Choices</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">6. Your Rights and Choices</h2>
               <p class="mb-4">You have the right to:</p>
               <ul class="list-disc pl-6 mb-4 space-y-2">
                 <li>Access and receive a copy of your personal data</li>
@@ -103,42 +106,42 @@
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">7. Cookies and Tracking Technologies</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">7. Cookies and Tracking Technologies</h2>
               <p class="mb-4">
                 We use cookies and similar tracking technologies to track activity on our service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">8. Data Retention</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">8. Data Retention</h2>
               <p class="mb-4">
                 We retain your personal information only for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">9. Children's Privacy</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">9. Children's Privacy</h2>
               <p class="mb-4">
                 Our service is not intended for children under the age of 18. We do not knowingly collect personal information from children. If you are a parent or guardian and believe your child has provided us with personal information, please contact us.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">10. International Data Transfers</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">10. International Data Transfers</h2>
               <p class="mb-4">
                 Your information may be transferred to and maintained on computers located outside of your state, province, country, or other governmental jurisdiction where data protection laws may differ. By using our service, you consent to the transfer of your information to these facilities.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">11. Changes to This Privacy Policy</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">11. Changes to This Privacy Policy</h2>
               <p class="mb-4">
                 We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically for any changes.
               </p>
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mt-6 sm:mt-8 mb-3 sm:mb-4">12. Contact Us</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">12. Contact Us</h2>
               <p class="mb-4">
                 If you have any questions about this Privacy Policy, please contact us:
               </p>
@@ -169,6 +172,8 @@
 </template>
 
 <script setup lang="ts">
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+
 useHead({
   title: 'Privacy Policy - Storvv',
   meta: [
@@ -182,13 +187,13 @@ useHead({
 
 <style scoped>
 .prose h2 {
-  @apply border-b border-gray-200 pb-2;
+  @apply border-b border-gray-200 pb-2 dark:border-gray-700;
 }
 .prose ul {
-  @apply text-gray-700;
+  @apply text-gray-700 dark:text-gray-300;
 }
 .prose strong {
-  @apply text-gray-900;
+  @apply text-gray-900 dark:text-gray-100;
 }
 </style>
 

@@ -7,7 +7,7 @@
     <div class="mb-8 text-center lg:mb-9 lg:text-left">
       <a
         href="https://www.storvv.com"
-        class="mb-4 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
+        class="mb-4 inline-block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
       >
         <img
           :src="logoSource"
@@ -37,7 +37,7 @@
     </div>
 
     <div
-      class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+      class="overflow-hidden rounded-sm border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
     >
         <div class="p-4 sm:p-5">
           <form v-if="!emailSent" @submit.prevent="handleForgotPassword" class="space-y-4">
@@ -51,14 +51,14 @@
                 type="email"
                 autocomplete="email"
                 required
-                class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                 placeholder="Enter your email"
               />
             </div>
 
             <div
               v-if="errorMessage"
-              class="rounded-lg bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
+              class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
             >
               <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
               <p class="text-xs text-red-700 dark:text-red-300">{{ errorMessage }}</p>

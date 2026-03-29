@@ -16,7 +16,7 @@
           <button
             v-if="receipt"
             @click="copyReceiptNumber(receipt.receiptNumber)"
-            class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+            class="p-1.5 rounded-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
             title="Copy receipt number"
           >
             <ClipboardDocumentIcon class="w-4 h-4" stroke-width="1.5" />
@@ -26,7 +26,7 @@
           <button
             @click="showEmailModal = true"
             :disabled="isSendingEmail || !receipt"
-            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
+            class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
           >
             <EnvelopeIcon class="w-4 h-4" stroke-width="1.5" />
             <span>{{ isSendingEmail ? 'Sending...' : 'Email' }}</span>
@@ -34,7 +34,7 @@
           <button
             @click="handlePrintPDF"
             :disabled="isPrinting || !receipt"
-            class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
+            class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
           >
             <PrinterIcon class="w-4 h-4" stroke-width="1.5" />
             <span>{{ isPrinting ? 'Generating...' : 'Print' }}</span>
@@ -52,13 +52,13 @@
       <!-- Receipt Content (used for PDF) -->
       <div
         ref="receiptContent"
-        class="receipt-content bg-white text-gray-900 rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-lg mx-auto"
+        class="receipt-content bg-white text-gray-900 rounded-sm shadow-sm border border-gray-200 overflow-hidden max-w-lg mx-auto"
         :class="{ 'pdf-export': isCapturingPdf }"
       >
         <!-- Store header -->
         <div class="text-center pt-6 pb-4 px-6">
           <div v-if="storeLogoUrl" class="flex justify-center mb-2">
-            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-lg object-contain ring-1 ring-gray-200" />
+            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo w-10 h-10 rounded-sm object-contain ring-1 ring-gray-200" />
           </div>
           <h1 class="text-sm font-semibold text-gray-900 tracking-tight">{{ storeName || 'Store' }}</h1>
           <p v-if="storeAddress" class="mt-0.5 text-[10px] text-gray-500">{{ storeAddress }}</p>
@@ -94,12 +94,12 @@
         <div class="px-6 pb-4">
           <p class="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1.5">Items</p>
           <table class="w-full">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="text-left py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Product</th>
-                <th class="text-center py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider w-10">Qty</th>
-                <th class="text-right py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Price</th>
-                <th class="text-right py-1.5 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+            <thead class="bg-gray-50 dark:!bg-dashboard-card/85">
+              <tr class="border-b border-gray-200 dark:border-gray-800/80">
+                <th class="py-1.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Product</th>
+                <th class="w-10 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Qty</th>
+                <th class="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Price</th>
+                <th class="py-1.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -235,21 +235,21 @@
             v-model="emailToSend"
             type="email"
             placeholder="Enter email address"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400"
             @keyup.enter="handleSendEmail"
           />
         </div>
         <div class="flex gap-2 justify-end">
           <button
             @click="showEmailModal = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
           >
             Cancel
           </button>
           <button
             @click="handleSendEmail"
             :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-md transition-colors"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
           >
             {{ isSendingEmail ? 'Sending...' : 'Send' }}
           </button>

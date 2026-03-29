@@ -8,19 +8,21 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-white dark:bg-gray-950 w-full overflow-x-clip relative">
+  <div v-else class="min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
     <!-- Sidebar -->
     <aside
       :class="[
         'fixed inset-y-0 left-0 z-40 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0',
-        'bg-[#f5f5f7] dark:bg-gray-950 border-r border-gray-200/50 dark:border-gray-800/80',
+        /* Same base as main canvas — separation is shadow only */
+        'bg-gray-100 dark:bg-[#07080c]',
+        'shadow-[8px_0_32px_-12px_rgba(15,23,42,0.08)] dark:shadow-[16px_0_48px_-16px_rgba(0,0,0,0.85)]',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         sidebarCollapsed ? 'w-[72px]' : 'w-64'
       ]"
     >
       <!-- Logo / Brand -->
       <div
-        class="flex h-12 min-h-[3rem] shrink-0 items-center justify-between border-b border-gray-200/50 px-3 dark:border-gray-800/60"
+        class="flex h-12 min-h-[3rem] shrink-0 items-center justify-between border-b border-gray-200/25 px-3 dark:border-white/[0.05]"
       >
         <NuxtLink
           to="/dashboard"
@@ -38,7 +40,7 @@
         <button
           v-if="!sidebarCollapsed"
           @click="sidebarOpen = false"
-          class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
+          class="rounded-sm p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
           aria-label="Close menu"
         >
           <XMarkIcon class="w-4 h-4" stroke-width="2" />
@@ -48,7 +50,7 @@
       <!-- Collapse toggle (desktop) - larger on large screens -->
       <button
         @click="toggleSidebar"
-        class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full border border-gray-200/90 bg-white text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-800 dark:border-gray-700/80 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-100 lg:flex"
+        class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 shadow-md ring-1 ring-gray-200/60 transition-colors hover:text-gray-800 dark:bg-[#12141c] dark:text-gray-400 dark:shadow-lg dark:ring-white/10 dark:hover:bg-[#161922] dark:hover:text-gray-100 lg:flex"
         :title="sidebarCollapsed ? 'Expand' : 'Collapse'"
         aria-label="Toggle sidebar"
       >
@@ -67,11 +69,11 @@
             <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-0.5">
               <div
                 :class="[
-                  'group relative flex w-full items-center justify-between rounded-xl transition-all duration-200',
+                  'group relative flex w-full items-center justify-between rounded-l-[1px] transition-all duration-200',
                   sidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5',
                   isActive(item.href)
-                    ? 'border border-gray-200/70 bg-white text-gray-900 dark:border-gray-800/70 dark:bg-gray-900/55 dark:text-gray-100'
-                    : 'border border-transparent hover:bg-white/70 dark:hover:bg-gray-900/35'
+                    ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
+                    : 'border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold dark:hover:border-primary-400/50'
                 ]"
               >
                 <NuxtLink
@@ -84,38 +86,38 @@
                     :class="[
                       'w-4 h-4 shrink-0 transition-colors',
                       sidebarCollapsed ? '' : 'mr-2.5',
-                      isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
+                      isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                     ]"
-                    stroke-width="1.5"
+                    :stroke-width="isActive(item.href) ? 2.25 : 1.5"
                   />
-                  <span class="truncate text-[13px] font-medium" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+                  <span class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
                     {{ item.name }}
                   </span>
                 </NuxtLink>
                 <button
                   @click.stop="inventoryExpanded = !inventoryExpanded"
-                  class="shrink-0 rounded-full p-1 transition-colors hover:bg-gray-100/90 dark:hover:bg-gray-800/60"
-                  :class="isActive(item.href) ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'"
+                  class="shrink-0 rounded-full p-1 transition-colors hover:text-gray-700 dark:hover:text-gray-200"
+                  :class="isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
                 >
                   <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />
                 </button>
               </div>
-              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="space-y-0.5 border-l border-gray-200/80 py-0.5 pl-3 pr-1.5 dark:border-gray-700/80">
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1.5 dark:border-white/[0.06]">
                 <NuxtLink
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
                   :class="[
-                    'flex items-center gap-2 rounded-lg px-2 py-1 text-[13px] transition-all',
+                    'group flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors',
                     route.params.id === folder.id
-                      ? 'border border-gray-200/70 bg-white font-medium text-gray-900 dark:border-gray-800/70 dark:bg-gray-900/50 dark:text-gray-100'
-                      : 'border border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/30 dark:hover:text-gray-100',
+                      ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
+                      : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
                     { 'pointer-events-none opacity-50': switchingStore }
                   ]"
                 >
-                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-gray-600 dark:text-gray-300' : 'text-gray-400 dark:text-gray-500'" stroke-width="1.75" />
-                  <span class="truncate flex-1">{{ folder.name }}</span>
-                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-gray-500 dark:text-gray-400" stroke-width="2" />
+                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === folder.id ? 2.25 : 1.75" />
+                  <span class="truncate flex-1" :class="route.params.id === folder.id ? 'font-bold' : 'group-hover:font-semibold'">{{ folder.name }}</span>
+                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-primary-500 dark:text-primary-400" stroke-width="2" />
                 </NuxtLink>
               </div>
             </div>
@@ -126,11 +128,15 @@
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[
-                'group relative flex items-center rounded-xl transition-all duration-200',
+                'group relative flex items-center rounded-l-[1px] transition-all duration-200',
                 sidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5',
                 isActive(item.href)
-                  ? 'border border-gray-200/70 bg-white text-gray-900 dark:border-gray-800/70 dark:bg-gray-900/55 dark:text-gray-100'
-                  : 'border border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/35 dark:hover:text-gray-100',
+                  ? sidebarCollapsed
+                    ? 'ring-4 ring-primary-500/50 text-primary-600 dark:text-primary-300 dark:ring-primary-400/45'
+                    : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
+                  : sidebarCollapsed
+                    ? 'ring-4 ring-transparent hover:ring-primary-500/40 dark:hover:ring-primary-400/35 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
+                    : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
                 { 'pointer-events-none opacity-50': switchingStore }
               ]"
               :title="sidebarCollapsed ? item.name : ''"
@@ -140,17 +146,17 @@
                 :class="[
                   'w-4 h-4 shrink-0 transition-colors',
                   sidebarCollapsed ? '' : 'mr-0',
-                  isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
+                  isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                 ]"
-                stroke-width="1.75"
+                :stroke-width="isActive(item.href) ? 2.25 : 1.75"
               />
-              <span v-if="!sidebarCollapsed" class="truncate text-[13px] font-medium" :class="isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+              <span v-if="!sidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
                 {{ item.name }}
               </span>
               <!-- Tooltip when collapsed -->
               <div
                 v-if="sidebarCollapsed"
-                class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-lg border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
+                class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
               >
                 {{ item.name }}
                 <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
@@ -161,12 +167,12 @@
           <!-- Stores (super admins) - Fathom-style section -->
           <div
             v-if="userStore.isSuperAdmin && !sidebarCollapsed"
-            class="mt-2 rounded-xl border border-gray-200/50 bg-white/40 p-1 dark:border-gray-800/60 dark:bg-gray-900/25"
+            class="mt-2 rounded-sm bg-white/55 p-1 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#0c0e14] dark:shadow-inner dark:ring-white/[0.06]"
           >
             <button
               type="button"
               @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="flex w-full items-center justify-between rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:bg-white/60 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/40 dark:hover:text-gray-300"
+              class="flex w-full items-center justify-between rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
             >
               <span>Branches</span>
               <ChevronDownIcon class="w-3 h-3 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
@@ -175,14 +181,14 @@
               <template v-for="store in storesList" :key="store.id">
                 <div
                   :class="[
-                    'flex items-center justify-between rounded-lg px-2 py-1 transition-all duration-200',
+                    'flex items-center justify-between rounded-l-[1px] px-2 py-1 transition-all duration-200',
                     route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                      ? 'border border-gray-200/70 bg-white dark:border-gray-800/70 dark:bg-gray-900/50'
+                      ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
                       : currentStore?.id === store.id
-                        ? 'border border-gray-200/50 bg-white/80 dark:border-gray-800/60 dark:bg-gray-900/40'
+                        ? 'border-l-[5px] border-transparent pl-2 font-medium text-gray-900 dark:text-gray-100'
                         : store.id !== storesStore.currentStoreId
                           ? 'opacity-50'
-                          : 'border border-transparent hover:bg-white/60 dark:hover:bg-gray-900/30'
+                          : 'group border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:hover:border-primary-400/50 dark:hover:text-gray-100'
                   ]"
                 >
                   <NuxtLink
@@ -192,10 +198,36 @@
                     :title="store.id !== storesStore.currentStoreId ? 'Switch to this store to access it' : ''"
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
-                    <svg class="w-4 h-4 shrink-0" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
+                    <svg
+                      class="w-4 h-4 shrink-0"
+                      :class="
+                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                          ? 'text-primary-600 dark:text-primary-300'
+                          : currentStore?.id === store.id
+                            ? 'text-gray-900 dark:text-gray-100'
+                            : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'
+                      "
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      :stroke-width="
+                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                          ? 2.25
+                          : 1.75
+                      "
+                    >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span class="truncate text-[13px] font-medium" :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'">
+                    <span
+                      class="truncate text-[13px]"
+                      :class="
+                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
+                          ? 'font-bold text-primary-800 dark:text-primary-200'
+                          : currentStore?.id === store.id
+                            ? 'font-medium text-gray-900 dark:text-gray-100'
+                            : 'font-medium text-gray-700 group-hover:font-semibold group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100'
+                      "
+                    >
                       {{ store.name }}
                     </span>
                     <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active store"></span>
@@ -204,30 +236,30 @@
                   <button
                     v-if="store.id === storesStore.currentStoreId"
                     @click.stop="toggleStoreExpanded(store.id)"
-                    class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-200"
+                    class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                   >
                     <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedStores[store.id] ? 'rotate-180' : ''" stroke-width="2" />
                   </button>
                 </div>
-                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="space-y-0.5 border-l border-gray-200/70 py-0.5 pl-3 pr-1 dark:border-gray-700/80">
+                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1 dark:border-white/[0.06]">
                   <template v-for="department in getDepartmentsForStore(store.id)" :key="department.id">
-                    <div class="flex items-center justify-between gap-1 rounded-lg group">
+                    <div class="group flex items-center justify-between gap-1 rounded-l-[1px]">
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
-                        class="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1 text-[13px] transition-all"
+                        class="group flex min-w-0 flex-1 items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors"
                         :class="[
                           route.params.id === department.id && route.path.startsWith('/dashboard/departments')
-                            ? 'border border-gray-200/70 bg-white font-medium text-gray-900 dark:border-gray-800/70 dark:bg-gray-900/50 dark:text-gray-100'
-                            : 'border border-transparent text-gray-600 hover:bg-white/70 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/30 dark:hover:text-gray-100',
+                            ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
+                            : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
                           { 'pointer-events-none opacity-50': switchingStore }
                         ]"
                       >
-                        <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500'" stroke-width="1.75" />
-                        <span class="truncate flex-1">{{ department.name }}</span>
+                        <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === department.id ? 2.25 : 1.75" />
+                        <span class="truncate flex-1" :class="route.params.id === department.id ? 'font-bold' : 'group-hover:font-semibold'">{{ department.name }}</span>
                       </NuxtLink>
                       <button
                         @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-200"
+                        class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                         :aria-expanded="expandedDepartments[department.id]"
                       >
                         <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedDepartments[department.id] ? 'rotate-180' : ''" stroke-width="2" />
@@ -239,7 +271,7 @@
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[11px] text-gray-500 transition-colors hover:bg-white/70 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/35 dark:hover:text-gray-100"
+                          class="flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[11px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                         >
                           <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
@@ -270,16 +302,16 @@
 
       <!-- Bottom: user + sign out -->
       <div
-        class="shrink-0 border-t border-gray-200/50 dark:border-gray-800/80"
+        class="shrink-0 border-t border-gray-200/25 dark:border-white/[0.05]"
         :class="sidebarCollapsed ? 'px-1.5 pb-2 pt-2' : 'px-2.5 pb-2.5 pt-2'"
       >
         <div
-          class="rounded-xl border border-gray-200/60 bg-white/60 p-2 dark:border-gray-800/70 dark:bg-gray-900/40"
+          class="rounded-sm bg-white/70 p-2 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#12141c]/95 dark:shadow-lg dark:ring-white/[0.07]"
           :class="sidebarCollapsed ? 'px-1.5' : ''"
         >
           <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'relative justify-center group' : ''">
             <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200/80 bg-gray-100 text-xs font-semibold text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-800 ring-1 ring-gray-200/50 dark:bg-gray-800 dark:text-gray-100 dark:ring-white/10"
             >
               {{ userInitials }}
             </div>
@@ -289,7 +321,7 @@
             </div>
             <div
               v-if="sidebarCollapsed"
-              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 flex-col items-start whitespace-nowrap rounded-lg border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
+              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 flex-col items-start whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
             >
               {{ userName }}
               <span class="block text-[11px] text-gray-400">{{ userEmail }}</span>
@@ -299,9 +331,9 @@
           <button
             @click="handleSignOut"
             :class="[
-              'mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors',
+              'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors',
               sidebarCollapsed ? 'relative group py-2' : 'px-2',
-              'text-gray-600 hover:bg-white/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900/40 dark:hover:text-gray-100'
+              'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
             ]"
             title="Sign out"
           >
@@ -309,7 +341,7 @@
             <span v-if="!sidebarCollapsed">Sign out</span>
             <div
               v-if="sidebarCollapsed"
-              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-lg border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
+              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
             >
               Sign out
               <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
@@ -338,39 +370,37 @@
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'fixed top-0 left-0 right-0 z-30 border-b border-gray-200/70 bg-white/75 backdrop-blur-xl transition-[left] duration-300 dark:border-gray-800/70 dark:bg-slate-950/55',
+          'fixed top-0 left-0 right-0 z-30 border-b border-gray-200/25 bg-gray-100/95 backdrop-blur-sm transition-[left] duration-300 dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm',
           sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64'
         ]"
       >
         <div
-          class="mx-auto flex h-12 max-w-[1400px] items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-6"
+          class="flex h-12 w-full items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-6"
         >
           <div class="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
             <button
               @click="sidebarOpen = true"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white/90 text-gray-700 transition-all active:scale-[0.97] hover:border-gray-300/90 hover:bg-gray-50/90 hover:text-gray-900 dark:border-gray-800/80 dark:bg-gray-900/60 dark:text-gray-200 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/80 dark:hover:text-white lg:hidden"
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 lg:hidden"
               aria-label="Open menu"
             >
               <Squares2X2Icon class="h-5 w-5" stroke-width="1.75" />
             </button>
-            <!-- Current page -->
-            <div class="hidden min-w-0 items-center gap-3 md:flex">
-              <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-gradient-to-b from-gray-50/95 to-white/80 text-gray-600 dark:border-gray-800/70 dark:from-gray-900/80 dark:to-gray-950/60 dark:text-gray-300"
-              >
-                <component :is="currentPageIcon" class="h-4 w-4" stroke-width="1.75" />
-              </div>
-              <div class="min-w-0">
-                <p
-                  class="text-[9px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                >
-                  Current page
-                </p>
-                <h1
-                  class="truncate text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50"
-                >
-                  {{ currentPageName }}
-                </h1>
+            <!-- Current page (neutral — no primary “active” treatment) -->
+            <div class="hidden min-w-0 items-center md:flex">
+              <div class="flex min-w-0 items-center gap-3 py-0.5">
+                <component
+                  :is="currentPageIcon"
+                  class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400"
+                  stroke-width="1.75"
+                />
+                <div class="min-w-0">
+                  <p class="text-[9px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+                    Current page
+                  </p>
+                  <h1 class="truncate text-sm font-medium tracking-tight text-gray-900 dark:text-gray-100">
+                    {{ currentPageName }}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>
@@ -382,20 +412,18 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-xl border border-gray-200/90 bg-white/90 py-1.5 pl-3 pr-2 transition-all hover:border-primary-300/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:border-gray-800/80 dark:bg-gray-900/50 dark:hover:border-primary-500/30 md:flex"
+              class="hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:text-gray-400 md:flex"
               title="Search (⌘K)"
             >
               <MagnifyingGlassIcon
-                class="h-4 w-4 shrink-0 text-gray-400 transition-colors group-hover:text-primary-500 dark:text-gray-500 dark:group-hover:text-primary-400"
+                class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-500"
                 stroke-width="1.75"
               />
-              <span
-                class="flex-1 truncate text-left text-xs font-medium text-gray-500 dark:text-gray-400"
-              >
+              <span class="flex-1 truncate text-left text-xs font-medium text-gray-600 dark:text-gray-400">
                 Search workspace…
               </span>
               <kbd
-                class="hidden items-center gap-0.5 rounded-md border border-gray-200/90 bg-gray-50/95 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-500 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 lg:inline-flex"
+                class="hidden items-center gap-0.5 rounded-sm border border-gray-200/90 bg-gray-50/95 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-500 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 lg:inline-flex"
               >
                 ⌘K
               </kbd>
@@ -405,7 +433,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white/90 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50/90 hover:text-gray-800 dark:border-gray-800/80 dark:bg-gray-900/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 md:hidden"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
               title="Search"
               aria-label="Search"
             >
@@ -414,9 +442,7 @@
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
 
-            <div
-              class="flex h-9 items-center justify-center rounded-xl border border-gray-200/90 bg-white/80 px-2 dark:border-gray-800/80 dark:bg-gray-900/45"
-            >
+            <div class="flex h-9 items-center justify-center rounded-sm bg-transparent px-1">
               <ThemeToggle />
             </div>
 
@@ -425,12 +451,7 @@
               <button
                 type="button"
                 @click="notificationsOpen = !notificationsOpen"
-                :class="[
-                  'relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all',
-                  notificationsOpen
-                    ? 'border-primary-300/50 bg-primary-50/90 text-primary-600 dark:border-primary-500/35 dark:bg-primary-500/10 dark:text-primary-300'
-                    : 'border-gray-200/90 bg-white/90 text-gray-500 hover:border-gray-300/90 hover:bg-gray-50/90 hover:text-gray-800 dark:border-gray-800/80 dark:bg-gray-900/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/80 dark:hover:text-gray-100',
-                ]"
+                class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400"
                 title="Notifications"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
@@ -470,24 +491,17 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex min-w-0 items-center gap-2 rounded-xl border border-gray-200/90 bg-white/90 py-1 pl-1 pr-2 transition-all hover:border-gray-300/90 hover:bg-gray-50/90 dark:border-gray-800/80 dark:bg-gray-900/50 dark:hover:border-gray-600/80 dark:hover:bg-gray-800/60 sm:pr-2.5"
-                :class="
-                  profileMenuOpen
-                    ? 'border-primary-300/40 ring-2 ring-primary-500/15 dark:border-primary-500/35 dark:ring-primary-500/20'
-                    : ''
-                "
+                class="flex min-w-0 items-center gap-2 rounded-sm border-0 bg-transparent py-1 pl-1 pr-2 font-medium text-gray-700 dark:text-gray-200 sm:pr-2.5"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
                 <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-[11px] font-bold text-white ring-2 ring-white/25 dark:ring-primary-900/40 sm:h-8 sm:w-8"
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-[11px] font-bold text-white ring-2 ring-white/25 dark:ring-primary-900/40 sm:h-8 sm:w-8"
                 >
                   {{ userInitials }}
                 </div>
                 <div class="hidden min-w-0 text-left md:block">
-                  <p
-                    class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50"
-                  >
+                  <p class="truncate text-xs font-medium tracking-tight text-gray-900 dark:text-gray-50">
                     {{ userName }}
                   </p>
                   <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">
@@ -502,24 +516,24 @@
               </button>
 
               <Transition
-                enter-active-class="transition ease-out duration-150"
-                enter-from-class="opacity-0 translate-y-0.5"
+                enter-active-class="transition-[opacity,transform] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:duration-150 motion-reduce:ease-out"
+                enter-from-class="opacity-0 translate-y-[14px]"
                 enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition ease-in duration-100"
+                leave-active-class="transition-[opacity,transform] duration-[380ms] ease-[cubic-bezier(0.4,0,1,1)] motion-reduce:duration-100"
                 leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 translate-y-0.5"
+                leave-to-class="opacity-0 translate-y-2"
               >
                 <div
                   v-if="profileMenuOpen"
-                  class="fixed inset-x-3 top-14 z-[100] mx-auto max-w-[16.5rem] overflow-hidden rounded-2xl border border-gray-200/90 bg-white/95 backdrop-blur-xl dark:border-gray-800/80 dark:bg-slate-950/90 md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mx-0 md:mt-2 md:w-60"
+                  class="fixed inset-x-3 top-14 z-[100] mx-auto max-w-[16.5rem] overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] dark:border-gray-800/90 dark:bg-slate-950 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)] md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mx-0 md:mt-2 md:w-60"
                 >
                   <!-- User -->
                   <div
-                    class="border-b border-gray-100/90 bg-gradient-to-b from-gray-50/80 to-transparent px-3 py-3.5 dark:border-gray-800/80 dark:from-gray-900/60"
+                    class="border-b border-gray-200/25 px-3 py-3.5 dark:border-white/[0.06]"
                   >
                     <div class="flex min-w-0 items-center gap-2.5">
                       <div
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-xs font-bold text-white ring-2 ring-primary-400/20"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-xs font-bold text-white ring-2 ring-primary-400/20"
                       >
                         {{ userInitials }}
                       </div>
@@ -539,7 +553,7 @@
                   <nav class="p-1.5" aria-label="Account menu">
                     <NuxtLink
                       to="/dashboard/profile"
-                      class="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100/90 dark:text-gray-300 dark:hover:bg-gray-800/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      class="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
                       @click="profileMenuOpen = false"
                     >
                       <UserCircleIcon
@@ -551,7 +565,7 @@
                     </NuxtLink>
                     <NuxtLink
                       to="/dashboard/settings"
-                      class="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100/90 dark:text-gray-300 dark:hover:bg-gray-800/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      class="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
                       @click="profileMenuOpen = false"
                     >
                       <Cog6ToothIcon
@@ -567,7 +581,7 @@
                     <button
                       type="button"
                       @click="handleSignOut"
-                      class="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-xs font-medium text-red-600 transition-colors hover:bg-red-50/90 dark:text-red-400 dark:hover:bg-red-950/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 focus-visible:ring-inset"
+                      class="flex w-full items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-xs font-medium text-red-600 dark:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 focus-visible:ring-inset"
                     >
                       <ArrowRightOnRectangleIcon
                         class="h-4 w-4 shrink-0 opacity-90"
@@ -588,10 +602,13 @@
       <div class="h-12 shrink-0 sm:h-[3.25rem]" aria-hidden="true" />
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
-      <main class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible">
+      <main
+        data-dashboard-main
+        class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible"
+      >
         <div
           :key="route.path"
-          class="min-w-0 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:40ms]"
+          class="min-w-0 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none animate-auth-fade-up [animation-delay:40ms]"
         >
           <slot />
         </div>
@@ -800,8 +817,8 @@ const isInventoryRoute = computed(() => {
   return route.path.startsWith('/dashboard/inventory')
 })
 
-// Expanded state for Inventory folders - auto-expand when on inventory route
-const inventoryExpanded = ref(true)
+// Expanded state for Inventory folders — open on inventory routes; closed elsewhere (see watch below)
+const inventoryExpanded = ref(false)
 
 // Expanded state for Stores - manage which stores are expanded
 // Use reactive object instead of Set for better Vue reactivity
@@ -1042,12 +1059,14 @@ watch(() => route.path, (path) => {
   }
 }, { immediate: true })
 
-// Auto-expand folders when navigating to inventory route
-watch(() => route.path, (path) => {
-  if (path.startsWith('/dashboard/inventory')) {
-    inventoryExpanded.value = true
-  }
-}, { immediate: true })
+// Open folder list while on inventory; collapse when navigating away (keeps sidenav tidy)
+watch(
+  () => route.path,
+  (path) => {
+    inventoryExpanded.value = path.startsWith('/dashboard/inventory')
+  },
+  { immediate: true },
+)
 
 const inventoryFolders = computed(() => {
   if (!inventoryStore.folders) return []

@@ -15,7 +15,7 @@
     />
     <div
       :class="[
-        'relative flex items-center justify-center rounded-lg border-2 transition-all duration-200 ease-out',
+        'relative flex items-center justify-center rounded-sm border-2 transition-all duration-200 ease-out',
         'transform',
         size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5',
         modelValue
@@ -65,7 +65,7 @@
     >
       <div
         v-if="modelValue"
-        class="absolute inset-0 rounded-lg bg-primary-400/20 pointer-events-none animate-ripple"
+        class="absolute inset-0 rounded-sm bg-primary-400/20 pointer-events-none animate-ripple"
         :class="[
           size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-6 h-6' : 'w-5 h-5'
         ]"

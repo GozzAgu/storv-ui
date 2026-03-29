@@ -10,7 +10,7 @@
 
     <form
       @submit.prevent="handleSubmit"
-      class="overflow-hidden rounded-2xl border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
+      class="overflow-hidden rounded-sm border border-gray-200/90 bg-white dark:border-gray-800 dark:bg-slate-950"
     >
       <div class="p-4 sm:p-6 space-y-4">
         <div>
@@ -21,7 +21,7 @@
             :type="showCurrent ? 'text' : 'password'"
             autocomplete="current-password"
             required
-            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+            class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="Enter temporary password"
           />
         </div>
@@ -34,7 +34,7 @@
             autocomplete="new-password"
             required
             :minlength="PASSWORD_MIN_LENGTH"
-            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+            class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="At least 12 characters, number and capital letter"
           />
           <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
@@ -49,17 +49,17 @@
             :type="showConfirm ? 'text' : 'password'"
             autocomplete="new-password"
             required
-            class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+            class="w-full rounded-sm border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:border-gray-600 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder-gray-500"
             placeholder="Confirm new password"
           />
         </div>
-        <div v-if="errorMessage" class="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
+        <div v-if="errorMessage" class="p-3 rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40">
           <p class="text-xs text-red-600 dark:text-red-400">{{ errorMessage }}</p>
         </div>
         <Button
           type="submit"
           size="sm"
-          class="w-full !rounded-lg"
+          class="w-full !rounded-sm"
           :disabled="isSubmitting || !form.currentPassword || !form.newPassword || form.newPassword !== form.confirmPassword || !isPasswordPolicyValid(form.newPassword)"
         >
           <span v-if="isSubmitting" class="flex items-center justify-center gap-2">

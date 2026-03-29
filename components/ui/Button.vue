@@ -3,7 +3,7 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'relative inline-flex items-center justify-center rounded-lg border-0 font-semibold cursor-pointer transition duration-200 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
+      'relative inline-flex items-center justify-center rounded-sm border-0 font-semibold cursor-pointer transition duration-200 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
       sizeClasses,
       variantBgClasses,
       variantFocusRingClasses,

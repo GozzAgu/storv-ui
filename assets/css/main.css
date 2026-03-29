@@ -2,14 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Smooth theme transition (light ↔ dark) */
+/* Dropdowns, modals, command palette — solid frosted glass (not fully transparent) */
+@layer components {
+  /**
+   * Dashboard dark mode: `bg-white` can still win over `dark:!bg-dashboard-card` depending on
+   * Tailwind’s generated rule order. Force elevated surfaces to the dashboard card color.
+   * (Token-based selectors avoid matching `hover:bg-white` / `dark:bg-white` on toggles.)
+   */
+  html.dark main[data-dashboard-main] [class~='bg-white'],
+  html.dark main[data-dashboard-main] [class~='!bg-white'],
+  html.dark main[data-dashboard-main] [class~='bg-white/90'],
+  html.dark main[data-dashboard-main] [class~='bg-white/95'],
+  html.dark main[data-dashboard-main] [class~='bg-white/80'],
+  html.dark main[data-dashboard-main] [class~='bg-white/70'],
+  html.dark main[data-dashboard-main] [class~='bg-white/60'],
+  html.dark main[data-dashboard-main] [class~='bg-white/50'],
+  html.dark main[data-dashboard-main] [class~='bg-white/40'],
+  html.dark main[data-dashboard-main] [class~='bg-white/35'],
+  html.dark main[data-dashboard-main] [class~='bg-white/30'],
+  html.dark main[data-dashboard-main] [class~='bg-white/25'],
+  html.dark main[data-dashboard-main] [class~='bg-white/20'],
+  html.dark [data-dashboard-teleport] [class~='bg-white'],
+  html.dark [data-dashboard-teleport] [class~='!bg-white'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/90'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/95'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/80'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/70'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/60'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/50'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/40'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/35'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/30'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/25'],
+  html.dark [data-dashboard-teleport] [class~='bg-white/20'] {
+    background-color: #12141c !important;
+  }
+
+  /**
+   * Same ordering issue as `bg-white`: `bg-gray-50` on Card / panels can load after `dark:!bg-*`
+   * and leave huge near-white slabs (dashboard skeletons, profile stats strip).
+   */
+  html.dark main[data-dashboard-main] [class~='bg-gray-50'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/95'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/90'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/80'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/70'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/60'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/50'],
+  html.dark main[data-dashboard-main] [class~='bg-gray-50/40'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/95'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/90'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/80'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/70'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/60'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/50'],
+  html.dark [data-dashboard-teleport] [class~='bg-gray-50/40'] {
+    background-color: #12141c !important;
+  }
+
+  /**
+   * With `border-separate`, `thead` background often does not paint `th` cells — they stay default
+   * (white). Force header cells dark anywhere the app uses tables in dark mode.
+   */
+  html.dark table thead th {
+    background-color: #12141c !important;
+  }
+
+  /** Card wrapper for dashboard tables — same corner radius as cards/buttons (`rounded-sm`) */
+  .data-table-shell {
+    @apply overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-sm ring-1 ring-gray-950/[0.04] dark:border-gray-800/70 dark:bg-dashboard-card dark:shadow-lg dark:shadow-black/30 dark:ring-white/[0.04];
+  }
+
+  /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#12141c) */
+  html.dark .data-table-shell {
+    background-color: #12141c !important;
+  }
+
+  .frosted-glass {
+    background-color: rgba(255, 255, 255, 0.93);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 25px 50px -12px rgba(15, 23, 42, 0.18),
+      0 0 0 1px rgba(15, 23, 42, 0.06);
+  }
+  .dark .frosted-glass {
+    background-color: rgba(3, 7, 18, 0.94);
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .frosted-glass {
+      background-color: #f3f4f6;
+    }
+    .dark .frosted-glass {
+      background-color: #030712;
+    }
+  }
+}
+
+/**
+ * Theme cross-fade (light ↔ dark) — only while `theme-transitioning` is on <html>
+ * (see `stores/theme.ts`). Keep duration in sync with `transitionMs` there.
+ * Fast enough to feel responsive; ease-out curve keeps the change feeling seamless.
+ */
 html.theme-transitioning,
 html.theme-transitioning *,
 html.theme-transitioning *::before,
 html.theme-transitioning *::after {
-  transition-property: background-color, color, border-color, box-shadow, fill, stroke !important;
-  transition-duration: 0.3s !important;
-  transition-timing-function: ease !important;
+  transition-property:
+    background-color,
+    background-image,
+    color,
+    border-color,
+    outline-color,
+    box-shadow,
+    text-shadow,
+    text-decoration-color,
+    fill,
+    stroke,
+    opacity,
+    backdrop-filter,
+    -webkit-backdrop-filter !important;
+  transition-duration: 0.22s !important;
+  transition-timing-function: cubic-bezier(0.33, 0.86, 0.2, 1) !important;
+  transition-delay: 0s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition-duration: 0.06s !important;
+    transition-timing-function: ease-out !important;
+  }
 }
 
 @layer base {

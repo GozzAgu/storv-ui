@@ -1,7 +1,7 @@
 <template>
-  <div class="mx-auto max-w-[1400px] space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
     <header
-      class="rounded-xl border border-gray-200/80 bg-white/90 px-4 py-4 shadow-sm dark:border-gray-800/80 dark:bg-gray-950 sm:px-5 sm:py-5"
+      class="rounded-sm bg-white px-4 py-4 shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35 sm:px-5 sm:py-5"
     >
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
@@ -29,7 +29,7 @@
       <!-- Account: logo + subscription -->
       <div
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+        class="relative overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
@@ -45,7 +45,7 @@
           <!-- Logo -->
           <div class="flex items-center gap-5">
             <div class="relative shrink-0">
-              <div class="w-16 h-16 rounded-xl flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
+              <div class="w-16 h-16 rounded-sm flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
                 <img v-if="accountLogoUrl" :src="accountLogoUrl" alt="Account logo" class="w-full h-full object-cover" />
                 <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
@@ -89,7 +89,7 @@
                   v-model="selectedUpgradePlan"
                   :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
                   :class="[
-                    'w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30',
+                    'w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30',
                     canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0
                       ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100'
                       : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed'
@@ -107,7 +107,7 @@
               <Button
                 variant="primary"
                 size="sm"
-                extra-class="!rounded-lg"
+                extra-class="!rounded-sm"
                 :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
                 @click="handleUpgradeSubscription"
               >
@@ -137,7 +137,7 @@
       <!-- Stores -->
       <div
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40"
+        class="relative overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35"
       >
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
@@ -148,7 +148,7 @@
             v-if="!isStaff"
             @click="openCreateStoreModal"
             size="sm"
-            extra-class="!rounded-lg !px-2"
+            extra-class="!rounded-sm !px-2"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             aria-label="Create branch"
             :disabled="!canAddStore"
@@ -171,24 +171,24 @@
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Loading stores...</p>
           </div>
 
-          <div v-else-if="storesError" class="rounded-xl bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 px-4 py-3">
+          <div v-else-if="storesError" class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 px-4 py-3">
             <p class="text-xs font-medium text-red-800 dark:text-red-200">{{ storesError }}</p>
           </div>
 
           <div v-else-if="stores.length === 0" class="text-center py-10">
-            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl border border-gray-200/80 bg-white/80 dark:border-gray-700/80 dark:bg-gray-900/40">
+            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm border border-gray-200/80 bg-white/80 dark:border-gray-700/80 dark:!bg-dashboard-card/40">
               <BuildingStorefrontIcon class="h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.25" />
             </div>
             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Create your first store to get started.</p>
-            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-lg mt-5">Create branch</Button>
+            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-sm mt-5">Create branch</Button>
           </div>
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
             <div
               v-for="store in stores"
               :key="store.id"
-              class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:border-gray-800/60 dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px sm:hover:border-primary-300/40 sm:hover:shadow-md sm:hover:shadow-gray-900/[0.04] dark:sm:hover:border-primary-500/25"
+              class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-sm border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:border-gray-800/60 dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px sm:hover:border-primary-300/40 sm:hover:shadow-md sm:hover:shadow-gray-900/[0.04] dark:sm:hover:border-primary-500/25"
               :class="
                 currentStore?.id === store.id
                   ? 'border-primary-400/50 shadow-sm shadow-primary-500/10 dark:border-primary-500/40'
@@ -196,7 +196,7 @@
               "
             >
               <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200/80 bg-gray-100 dark:border-gray-700/80 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
+                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-gray-200/80 bg-gray-100 dark:border-gray-700/80 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
               >
                 <img v-if="store.logoUrl || accountLogoUrl" :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="h-full w-full object-cover" />
                 <BuildingStorefrontIcon v-else class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.75" />
@@ -210,7 +210,7 @@
               <div class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                 <button
                   @click.stop="editStore(store)"
-                  class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
+                  class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
                   title="Edit store"
                   aria-label="Edit store"
                 >
@@ -219,7 +219,7 @@
                 <button
                   @click.stop="confirmDelete(store)"
                   :disabled="currentStore?.id === store.id"
-                  class="p-1.5 sm:p-1 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Delete store"
                   aria-label="Delete store"
                 >
@@ -227,7 +227,7 @@
                 </button>
               </div>
               <div v-if="currentStore?.id === store.id" class="absolute top-1.5 right-1.5 z-10 sm:right-10">
-                <span class="px-1.5 py-0.5 text-[9px] font-medium rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-nowrap">Current</span>
+                <span class="px-1.5 py-0.5 text-[9px] font-medium rounded-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-nowrap">Current</span>
               </div>
               <div v-else-if="!store.isActive" class="absolute top-1.5 right-1.5 z-10 sm:right-10">
                 <span class="px-1 py-0.5 text-[9px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full whitespace-nowrap">Inactive</span>
@@ -238,54 +238,54 @@
       </div>
 
       <!-- Store information -->
-      <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Store information</h2>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Update your business details</p>
           </div>
-          <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
+          <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
           <div v-else-if="canEditSettings && isEditingStore" class="flex gap-1.5">
-            <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+            <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
             <button
               @click="saveStoreInfo"
-              class="inline-flex items-center justify-center w-9 h-8 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors"
+              class="inline-flex items-center justify-center w-9 h-8 rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors"
               title="Done"
               aria-label="Done"
             >
               <CheckIcon class="w-4 h-4" />
             </button>
           </div>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
+          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
         <div class="px-5 sm:px-6 py-5">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Branch name</label>
-            <input v-model="storeInfo.name" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter branch name" />
+            <input v-model="storeInfo.name" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter branch name" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Business type</label>
-            <input v-model="storeInfo.businessType" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter business type" />
+            <input v-model="storeInfo.businessType" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter business type" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-            <input v-model="storeInfo.email" type="email" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store email" />
+            <input v-model="storeInfo.email" type="email" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store email" />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-            <input v-model="storeInfo.phone" type="tel" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone number" />
+            <input v-model="storeInfo.phone" type="tel" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone number" />
           </div>
           <div class="sm:col-span-2">
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address</label>
-            <textarea v-model="storeInfo.address" rows="2" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store address" />
+            <textarea v-model="storeInfo.address" rows="2" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store address" />
           </div>
         </div>
         </div>
       </div>
 
       <!-- Inventory settings -->
-      <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Inventory settings</h2>
@@ -296,13 +296,13 @@
             @click="saveInventorySettings"
             variant="primary"
             size="sm"
-            extra-class="!rounded-lg !px-2"
+            extra-class="!rounded-sm !px-2"
             title="Done"
             aria-label="Done"
           >
             <CheckIcon class="w-4 h-4" />
           </Button>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
+          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
         <div class="space-y-0 px-5 py-4 sm:px-6">
           <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
@@ -311,7 +311,7 @@
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alert when stock falls below this quantity</p>
             </div>
             <div class="flex items-center gap-2">
-              <input v-model.number="inventorySettings.lowStockThreshold" type="number" min="1" :disabled="!canEditSettings" :class="['w-16 px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
+              <input v-model.number="inventorySettings.lowStockThreshold" type="number" min="1" :disabled="!canEditSettings" :class="['w-16 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
               <span class="text-xs text-gray-600 dark:text-gray-400">units</span>
             </div>
           </div>
@@ -337,7 +337,7 @@
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Default category</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Default category for new products</p>
             </div>
-            <select v-model="inventorySettings.defaultCategory" :disabled="!canEditSettings" :class="['px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']">
+            <select v-model="inventorySettings.defaultCategory" :disabled="!canEditSettings" :class="['px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']">
               <option value="general">General</option>
               <option value="electronics">Electronics</option>
               <option value="clothing">Clothing</option>
@@ -349,7 +349,7 @@
       </div>
 
       <!-- Receipt & invoice settings -->
-      <div class="overflow-hidden rounded-xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-800/70 dark:bg-gray-900/40">
+      <div class="overflow-hidden rounded-sm bg-white shadow-sm dark:!bg-dashboard-card dark:shadow-lg dark:shadow-black/35">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
           <div>
             <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Receipt & invoice settings</h2>
@@ -360,13 +360,13 @@
             @click="saveReceiptSettings"
             variant="primary"
             size="sm"
-            extra-class="!rounded-lg !px-2"
+            extra-class="!rounded-sm !px-2"
             title="Done"
             aria-label="Done"
           >
             <CheckIcon class="w-4 h-4" />
           </Button>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
+          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
         </div>
         <div class="space-y-0 px-5 py-4 sm:px-6">
           <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
@@ -374,7 +374,7 @@
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Receipt prefix</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prefix for receipt numbers (e.g. REC-)</p>
             </div>
-            <input v-model="receiptSettings.prefix" type="text" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="REC-" />
+            <input v-model="receiptSettings.prefix" type="text" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="REC-" />
           </div>
 
           <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
@@ -382,7 +382,7 @@
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Next receipt number</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Starting number for next receipt</p>
             </div>
-            <input v-model.number="receiptSettings.nextNumber" type="number" min="1" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
+            <input v-model.number="receiptSettings.nextNumber" type="number" min="1" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
           </div>
 
           <div class="flex items-center justify-between py-3">
@@ -421,7 +421,7 @@
             v-model="storeForm.name"
             type="text"
             required
-            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+            class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
             placeholder="My Branch"
           />
         </div>
@@ -433,7 +433,7 @@
               type="button"
               @click="generateAIDescription"
               :disabled="isGeneratingDescription || !storeForm.name"
-              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-lg"
+              class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-sm"
             >
               <SparklesIcon v-if="!isGeneratingDescription" class="w-3.5 h-3.5" />
               <svg v-else class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -446,7 +446,7 @@
           <textarea
             v-model="storeForm.description"
             rows="2"
-            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-none"
+            class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-none"
             placeholder="Store description..."
           />
         </div>
@@ -456,7 +456,7 @@
           <input
             v-model="storeForm.address"
             type="text"
-            class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+            class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
             placeholder="123 Main St, City, State ZIP"
           />
         </div>
@@ -467,7 +467,7 @@
             <input
               v-model="storeForm.phone"
               type="tel"
-              class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+              class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
               placeholder="+1234567890"
             />
           </div>
@@ -476,7 +476,7 @@
             <input
               v-model="storeForm.email"
               type="email"
-              class="w-full px-3 py-2 text-xs rounded-lg ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
+              class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none"
               placeholder="store@example.com"
             />
           </div>
@@ -495,8 +495,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-lg">Cancel</Button>
-        <Button size="sm" @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore" extra-class="!rounded-lg">
+        <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-sm">Cancel</Button>
+        <Button size="sm" @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore" extra-class="!rounded-sm">
           {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
         </Button>
       </template>
@@ -519,8 +519,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="showDeleteModal = false" extra-class="!rounded-lg">Cancel</Button>
-        <Button variant="danger" size="sm" @click="handleStoreDelete" :disabled="isDeletingStore" extra-class="!rounded-lg">
+        <Button variant="outline" size="sm" @click="showDeleteModal = false" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="danger" size="sm" @click="handleStoreDelete" :disabled="isDeletingStore" extra-class="!rounded-sm">
           {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
         </Button>
       </template>
@@ -543,7 +543,7 @@
             v-for="store in stores"
             :key="store.id"
             @click="handleStoreSelection(store.id)"
-            class="w-full text-left p-3 border-2 rounded-xl transition-all"
+            class="w-full text-left p-3 border-2 rounded-sm transition-all"
             :class="
               newlyCreatedStoreId === store.id
                 ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
