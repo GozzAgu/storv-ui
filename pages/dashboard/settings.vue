@@ -667,7 +667,8 @@ const handleUpgradeSubscription = async () => {
         email: currentUser.value.email || '',
         userId: currentUser.value.uid,
       },
-      $fetch as PaystackInitializeFetcher
+      $fetch as PaystackInitializeFetcher,
+      useRuntimeConfig().public.apiBase || undefined
     )
     if (result.ok) {
       window.location.href = result.authorizationUrl

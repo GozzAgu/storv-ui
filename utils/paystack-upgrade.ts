@@ -18,13 +18,17 @@ export type PaystackInitializeFetcher = (
 
 /**
  * Start Paystack subscription upgrade (client). Pass `$fetch` from Nuxt or a mock in tests.
+ * When `NUXT_PUBLIC_API_BASE` is set (separate API origin), the request goes to `{apiBase}/api/paystack/initialize`.
  */
 export async function initializePaystackSubscription(
   params: { planId: SubscriptionPlan; email: string; userId: string },
-  fetcher: PaystackInitializeFetcher
+  fetcher: PaystackInitializeFetcher,
+  apiBaseUrl?: string
 ): Promise<InitializeSubscriptionResult> {
   try {
-    const res = await fetcher('/api/paystack/initialize', {
+    const base = (apiBaseUrl || '').replace(/\/$/, '')
+    const url = base ? `${base}/api/paystack/initialize` : '/api/paystack/initialize'
+    const res = await fetcher(url, {
       method: 'POST',
       body: {
         planId: params.planId,

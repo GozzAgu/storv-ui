@@ -11,6 +11,8 @@ export default defineNuxtConfig({
   // For Capacitor: Generate static site
   ssr: false,
   nitro: {
+    // On Vercel, force the serverless output so `/api/*` is a real function (not SPA fallback).
+    ...(process.env.VERCEL ? { preset: 'vercel' as const } : {}),
     prerender: {
       routes: ['/'],
       crawlLinks: true
