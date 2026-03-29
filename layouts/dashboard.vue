@@ -476,8 +476,8 @@
                 >
                   <div
                     v-if="notificationsOpen"
-                    class="fixed z-[100] origin-top-right"
-                    style="top: calc(3.25rem + 0.25rem); right: 1rem; left: auto; width: min(18rem, calc(100vw - 2rem));"
+                    class="fixed z-[100] w-[min(18rem,calc(100vw-2rem))] origin-top-right top-[calc(3rem+0.25rem)] sm:top-[calc(3.25rem+0.25rem)]"
+                    style="right: max(1rem, env(safe-area-inset-right, 0px)); left: auto;"
                     @click.stop
                   >
                     <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
@@ -515,6 +515,7 @@
                 />
               </button>
 
+              <Teleport to="body">
               <Transition
                 enter-active-class="transition-[opacity,transform] duration-[650ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:duration-150 motion-reduce:ease-out"
                 enter-from-class="opacity-0 translate-y-[14px]"
@@ -523,9 +524,12 @@
                 leave-from-class="opacity-100 translate-y-0"
                 leave-to-class="opacity-0 translate-y-2"
               >
-                <div
+             <div
                   v-if="profileMenuOpen"
-                  class="fixed inset-x-3 top-14 z-[100] mx-auto max-w-[16.5rem] overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] dark:border-gray-800/90 dark:bg-slate-950 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)] md:inset-auto md:absolute md:right-0 md:left-auto md:top-full md:mx-0 md:mt-2 md:w-60"
+                  ref="profileMenuPanelRef"
+                  class="overflow-hidden rounded-sm border border-gray-200/80 bg-white shadow-[0_12px_40px_-16px_rgba(8,27,64,0.14)] dark:border-gray-800/90 dark:bg-slate-950 dark:shadow-[0_12px_48px_-12px_rgba(0,0,0,0.55)]"
+                  :style="profileMenuPanelStyle"
+                  @click.stop
                 >
                   <!-- User -->
                   <div
@@ -593,6 +597,7 @@
                   </div>
                 </div>
               </Transition>
+              </Teleport>
             </div>
           </div>
         </div>
@@ -624,7 +629,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import {
   Squares2X2Icon,
   XMarkIcon,
@@ -704,6 +709,41 @@ const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const sidebarOpen = ref(false)
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
+const profileMenuPanelRef = ref<HTMLElement | null>(null)
+const profileMenuPanelStyle = ref<Record<string, string>>({})
+
+function positionProfileMenuPanel() {
+  if (!import.meta.client || !profileMenuOpen.value || !profileMenuRef.value) return
+  const trigger = profileMenuRef.value
+  const r = trigger.getBoundingClientRect()
+  const gap = 8
+  const vw = window.innerWidth
+  const margin = 12
+  const panelMax = 16.5 * 16 // 16.5rem
+  const widthPx = Math.min(panelMax, vw - 2 * margin)
+  let right = vw - r.right
+  const leftEdge = vw - right - widthPx
+  if (leftEdge < margin) {
+    right = Math.max(margin, vw - widthPx - margin)
+  }
+  profileMenuPanelStyle.value = {
+    position: 'fixed',
+    top: `${Math.round(r.bottom + gap)}px`,
+    right: `${Math.round(right)}px`,
+    left: 'auto',
+    width: `${Math.round(widthPx)}px`,
+    zIndex: '100',
+  }
+}
+
+function scheduleProfileMenuPosition() {
+  if (!import.meta.client) return
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      positionProfileMenuPanel()
+    })
+  })
+}
 const notificationsOpen = ref(false)
 const notificationsRef = ref<HTMLElement | null>(null)
 const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
@@ -1401,7 +1441,10 @@ const handleSignOut = async () => {
 // Close dropdowns on outside click
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as Node
-  if (profileMenuRef.value && !profileMenuRef.value.contains(target)) {
+  const inProfile =
+    profileMenuRef.value?.contains(target) ||
+    profileMenuPanelRef.value?.contains(target)
+  if (profileMenuOpen.value && !inProfile) {
     profileMenuOpen.value = false
   }
   if (notificationsRef.value && !notificationsRef.value.contains(target)) {
@@ -1502,7 +1545,11 @@ const checkAuth = async () => {
 
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
-  
+  if (import.meta.client) {
+    window.addEventListener('resize', onProfileMenuScrollOrResize)
+    window.addEventListener('scroll', onProfileMenuScrollOrResize, true)
+  }
+
   // Check authentication first
   if (import.meta.client) {
     await checkAuth()
@@ -1632,8 +1679,23 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
   }
 }, { immediate: true })
 
+watch(profileMenuOpen, async (open) => {
+  if (!import.meta.client || !open) return
+  await nextTick()
+  positionProfileMenuPanel()
+  scheduleProfileMenuPosition()
+})
+
+const onProfileMenuScrollOrResize = () => {
+  if (profileMenuOpen.value) positionProfileMenuPanel()
+}
+
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  if (import.meta.client) {
+    window.removeEventListener('resize', onProfileMenuScrollOrResize)
+    window.removeEventListener('scroll', onProfileMenuScrollOrResize, true)
+  }
 })
 </script>
 
