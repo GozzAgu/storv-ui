@@ -13,7 +13,6 @@
             <img :src="marketingLogoSrc" alt="Storvv" class="h-6 sm:h-8 w-auto object-contain" />
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
-            <ThemeToggle />
             <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">Features</a>
             <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">About</a>
@@ -26,7 +25,6 @@
             </button>
           </div>
           <div class="flex items-center gap-1.5 md:hidden">
-            <ThemeToggle />
             <button 
               @click="mobileMenuOpen = !mobileMenuOpen"
               class="p-2 -m-2 text-gray-600 rounded-sm hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-white/10"
@@ -1299,13 +1297,21 @@ import {
   ReceiptPercentIcon as ReceiptPercentSolidIcon,
   PresentationChartLineIcon as PresentationChartLineSolidIcon,
 } from '@heroicons/vue/24/solid'
-import ThemeToggle from '~/components/ui/ThemeToggle.vue'
-import { useTheme } from '~/composables/useTheme'
+import { useThemeStore } from '~/stores/theme'
 
-const { actualTheme } = useTheme()
-const marketingLogoSrc = computed(() =>
-  actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-)
+/** Marketing site is light-only; logo asset for light backgrounds. */
+const marketingLogoSrc = '/storvv logo 2.png'
+
+const themeStore = useThemeStore()
+
+function applyLandingLightDocument() {
+  if (!import.meta.client) return
+  const html = document.documentElement
+  html.classList.remove('dark')
+  html.style.colorScheme = 'light'
+  const meta = document.getElementById('theme-color-meta')
+  if (meta) meta.setAttribute('content', '#fafafa')
+}
 
 const mobileMenuOpen = ref(false)
 const showBackToTop = ref(false)
@@ -1614,6 +1620,7 @@ const setupScrollAnimations = () => {
 
 onMounted(() => {
   if (import.meta.client) {
+    applyLandingLightDocument()
     detectPricingRegion()
   }
 
@@ -1650,6 +1657,7 @@ onMounted(() => {
 onUnmounted(() => {
   // Clean up scroll event listener
   if (import.meta.client) {
+    themeStore.applyTheme()
     window.removeEventListener('scroll', handleScroll)
     if (rafId !== null) {
       cancelAnimationFrame(rafId)
