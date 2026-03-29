@@ -322,12 +322,14 @@ export const useStoresStore = defineStore('stores', {
         receiptsStore.loading = true
         customersStore.loading = true
 
-        // Fetch all data in parallel for the new store
+        // Fetch all data in parallel for the new store.
+        // Receipts uses in-flight dedup: an outer fetchReceipts may be blocked inside getCurrentStoreId
+        // while this refresh runs — force bypasses returning that same promise (avoids deadlock).
         await Promise.all([
           departmentsStore.fetchDepartments().catch(err => console.warn('[StoresStore] Failed to fetch departments:', err)),
           staffStore.fetchStaff().catch(err => console.warn('[StoresStore] Failed to fetch staff:', err)),
           inventoryStore.fetchFolders().catch(err => console.warn('[StoresStore] Failed to fetch inventory folders:', err)),
-          receiptsStore.fetchReceipts().catch(err => console.warn('[StoresStore] Failed to fetch receipts:', err)),
+          receiptsStore.fetchReceipts({ force: true }).catch(err => console.warn('[StoresStore] Failed to fetch receipts:', err)),
           customersStore.fetchCustomers().catch(err => console.warn('[StoresStore] Failed to fetch customers:', err)),
         ])
 

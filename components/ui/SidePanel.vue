@@ -44,7 +44,7 @@
           :aria-describedby="describedBy"
           :class="[
             'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 shadow-2xl dark:border-gray-800 dark:text-gray-100',
-            'w-full min-w-0 rounded-none sm:rounded-l-sm',
+            'w-full min-w-0 rounded-none lg:rounded-l-sm',
             panelWidthClasses,
           ]"
           @click.stop
@@ -153,12 +153,11 @@ const labelledBy = computed(() => (props.title ? titleId : undefined))
 const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
 const panelWidthClasses = computed(() => {
-  // Wide multi-step flows (e.g. create receipt)
+  // Full width through tablet (`lg`); partial-width drawer on desktop only
   if (props.size === 'xl') {
-    return 'max-sm:w-full sm:w-[min(92vw,72rem)]'
+    return 'max-lg:w-full lg:w-[min(92vw,72rem)]'
   }
-  // Drawer: full width only on phones; from `sm` up use 35% of the viewport
-  return 'max-sm:w-full sm:w-[35%]'
+  return 'max-lg:w-full lg:w-[35%]'
 })
 
 const handleClose = () => {

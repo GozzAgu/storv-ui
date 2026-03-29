@@ -17,7 +17,7 @@
         'bg-gray-100 dark:bg-[#07080c]',
         'shadow-[8px_0_32px_-12px_rgba(15,23,42,0.08)] dark:shadow-[16px_0_48px_-16px_rgba(0,0,0,0.85)]',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        sidebarCollapsed ? 'w-[72px]' : 'w-64'
+        effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64'
       ]"
     >
       <!-- Logo / Brand -->
@@ -26,19 +26,19 @@
       >
         <NuxtLink
           to="/dashboard"
-          :class="['flex items-center transition-all duration-300', sidebarCollapsed ? 'justify-center w-full' : 'gap-1.5 min-w-0']"
+          :class="['flex items-center transition-all duration-300', effectiveSidebarCollapsed ? 'justify-center w-full' : 'gap-1.5 min-w-0']"
         >
           <img
             :src="logoSource"
             alt="Storvv"
             :class="[
               'shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out',
-              sidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]',
+              effectiveSidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]',
             ]"
           />
         </NuxtLink>
         <button
-          v-if="!sidebarCollapsed"
+          v-if="!effectiveSidebarCollapsed"
           @click="sidebarOpen = false"
           class="rounded-sm p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
           aria-label="Close menu"
@@ -51,26 +51,26 @@
       <button
         @click="toggleSidebar"
         class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 shadow-md ring-1 ring-gray-200/60 transition-colors hover:text-gray-800 dark:bg-[#12141c] dark:text-gray-400 dark:shadow-lg dark:ring-white/10 dark:hover:bg-[#161922] dark:hover:text-gray-100 lg:flex"
-        :title="sidebarCollapsed ? 'Expand' : 'Collapse'"
+        :title="effectiveSidebarCollapsed ? 'Expand' : 'Collapse'"
         aria-label="Toggle sidebar"
       >
-        <ChevronRightIcon v-if="sidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
+        <ChevronRightIcon v-if="effectiveSidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
         <ChevronLeftIcon v-else class="w-3.5 h-3.5" stroke-width="2.5" />
       </button>
 
       <!-- Navigation -->
       <nav
         class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-1.5"
-        :class="sidebarCollapsed ? 'px-1.5' : 'px-2.5'"
+        :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2.5'"
       >
         <div class="min-h-0 space-y-0.5">
           <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Inventory (expandable) -->
-            <div v-if="item.name === 'Inventory' && !sidebarCollapsed" class="space-y-0.5">
+            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
                 :class="[
                   'group relative flex w-full items-center justify-between rounded-l-[1px] transition-all duration-200',
-                  sidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5',
+                  effectiveSidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5',
                   isActive(item.href)
                     ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
                     : 'border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold dark:hover:border-primary-400/50'
@@ -85,7 +85,7 @@
                     :is="item.icon"
                     :class="[
                       'w-4 h-4 shrink-0 transition-colors',
-                      sidebarCollapsed ? '' : 'mr-2.5',
+                      effectiveSidebarCollapsed ? '' : 'mr-2.5',
                       isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                     ]"
                     :stroke-width="isActive(item.href) ? 2.25 : 1.5"
@@ -124,38 +124,38 @@
 
             <!-- Regular nav items -->
             <NuxtLink
-              v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || sidebarCollapsed"
+              v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[
                 'group relative flex items-center rounded-l-[1px] transition-all duration-200',
-                sidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5',
+                effectiveSidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5',
                 isActive(item.href)
-                  ? sidebarCollapsed
+                  ? effectiveSidebarCollapsed
                     ? 'ring-4 ring-primary-500/50 text-primary-600 dark:text-primary-300 dark:ring-primary-400/45'
                     : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200'
-                  : sidebarCollapsed
+                  : effectiveSidebarCollapsed
                     ? 'ring-4 ring-transparent hover:ring-primary-500/40 dark:hover:ring-primary-400/35 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
                     : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100',
                 { 'pointer-events-none opacity-50': switchingStore }
               ]"
-              :title="sidebarCollapsed ? item.name : ''"
+              :title="effectiveSidebarCollapsed ? item.name : ''"
             >
               <component
                 :is="item.icon"
                 :class="[
                   'w-4 h-4 shrink-0 transition-colors',
-                  sidebarCollapsed ? '' : 'mr-0',
+                  effectiveSidebarCollapsed ? '' : 'mr-0',
                   isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100'
                 ]"
                 :stroke-width="isActive(item.href) ? 2.25 : 1.75"
               />
-              <span v-if="!sidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
+              <span v-if="!effectiveSidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
                 {{ item.name }}
               </span>
               <!-- Tooltip when collapsed -->
               <div
-                v-if="sidebarCollapsed"
+                v-if="effectiveSidebarCollapsed"
                 class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
               >
                 {{ item.name }}
@@ -166,7 +166,7 @@
           
           <!-- Stores (super admins) - Fathom-style section -->
           <div
-            v-if="userStore.isSuperAdmin && !sidebarCollapsed"
+            v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
             class="mt-2 rounded-sm bg-white/55 p-1 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#0c0e14] dark:shadow-inner dark:ring-white/[0.06]"
           >
             <button
@@ -295,7 +295,7 @@
         </div>
 
         <!-- Recent Items -->
-        <div v-if="!sidebarCollapsed" class="mt-auto pt-2">
+        <div v-if="!effectiveSidebarCollapsed" class="mt-auto pt-2">
           <RecentItemsWidget />
         </div>
       </nav>
@@ -303,24 +303,24 @@
       <!-- Bottom: user + sign out -->
       <div
         class="shrink-0 border-t border-gray-200/25 dark:border-white/[0.05]"
-        :class="sidebarCollapsed ? 'px-1.5 pb-2 pt-2' : 'px-2.5 pb-2.5 pt-2'"
+        :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2 pt-2' : 'px-2.5 pb-2.5 pt-2'"
       >
         <div
           class="rounded-sm bg-white/70 p-2 shadow-sm ring-1 ring-gray-200/45 dark:bg-[#12141c]/95 dark:shadow-lg dark:ring-white/[0.07]"
-          :class="sidebarCollapsed ? 'px-1.5' : ''"
+          :class="effectiveSidebarCollapsed ? 'px-1.5' : ''"
         >
-          <div class="flex items-center gap-2.5" :class="sidebarCollapsed ? 'relative justify-center group' : ''">
+          <div class="flex items-center gap-2.5" :class="effectiveSidebarCollapsed ? 'relative justify-center group' : ''">
             <div
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-800 ring-1 ring-gray-200/50 dark:bg-gray-800 dark:text-gray-100 dark:ring-white/10"
             >
               {{ userInitials }}
             </div>
-            <div v-if="!sidebarCollapsed" class="min-w-0 flex-1">
+            <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
               <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
               <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
             </div>
             <div
-              v-if="sidebarCollapsed"
+              v-if="effectiveSidebarCollapsed"
               class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 flex-col items-start whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
             >
               {{ userName }}
@@ -332,22 +332,22 @@
             @click="handleSignOut"
             :class="[
               'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors',
-              sidebarCollapsed ? 'relative group py-2' : 'px-2',
+              effectiveSidebarCollapsed ? 'relative group py-2' : 'px-2',
               'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
             ]"
             title="Sign out"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-            <span v-if="!sidebarCollapsed">Sign out</span>
+            <span v-if="!effectiveSidebarCollapsed">Sign out</span>
             <div
-              v-if="sidebarCollapsed"
+              v-if="effectiveSidebarCollapsed"
               class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
             >
               Sign out
               <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
             </div>
           </button>
-          <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="sidebarCollapsed ? 'text-center' : 'text-left'">
+          <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'">
             v{{ appVersion }}
           </p>
         </div>
@@ -777,6 +777,9 @@ const toggleSidebar = () => {
   }
 }
 
+/** Narrow icon rail only when lg+ and user collapsed; tablet drawer always shows full labels. */
+const isLgUp = useMinWidthQuery(1024)
+const effectiveSidebarCollapsed = computed(() => sidebarCollapsed.value && isLgUp.value)
 
 const navigation: Array<{
   name: string
