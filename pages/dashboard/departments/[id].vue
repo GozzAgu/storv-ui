@@ -11,99 +11,6 @@
       class="rounded-sm bg-white dark:!bg-dashboard-card"
     />
 
-    <!-- Hero -->
-    <header
-      v-if="!isLoadingDepartment"
-      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex min-w-0 flex-1 items-start gap-3">
-          <button
-            type="button"
-            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-            title="Back to departments"
-            @click="navigateTo('/dashboard/departments')"
-          >
-            <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
-          </button>
-          <div class="min-w-0 flex-1">
-            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Department
-            </p>
-            <h1
-              class="mt-1 truncate text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
-            >
-              {{ department?.name || 'Department' }}
-            </h1>
-            <p class="mt-1 max-w-2xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              {{
-                department?.description ||
-                'Manage roles, contact info, and status for everyone in this department.'
-              }}
-            </p>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
-              >
-                <BuildingOfficeIcon class="h-3.5 w-3.5 opacity-70" />
-                {{ department?.departmentType || 'Type' }}
-              </span>
-              <span
-                class="inline-flex max-w-[220px] items-center gap-1.5 truncate rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300 sm:max-w-xs"
-                :title="currentManager"
-              >
-                <UserCircleIcon class="h-3.5 w-3.5 shrink-0 opacity-70" />
-                <span class="truncate">Lead: {{ currentManager }}</span>
-              </span>
-              <span
-                v-if="!isLoadingStaff"
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
-              >
-                <UsersIcon class="h-3.5 w-3.5 opacity-70" />
-                {{ staff.length }} {{ staff.length === 1 ? 'member' : 'members' }}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div v-if="canCreateNewStaff" class="flex shrink-0 items-stretch sm:items-center">
-          <Button
-            variant="primary"
-            size="sm"
-            :icon="PlusIcon"
-            extra-class="!rounded-sm w-full sm:w-auto"
-            @click="openCreateStaffModal"
-          >
-            Add staff
-          </Button>
-        </div>
-      </div>
-    </header>
-    <div
-      v-else
-      class="overflow-hidden rounded-sm bg-white p-5 dark:!bg-dashboard-card sm:p-6"
-    >
-      <div class="flex gap-3">
-        <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-        <div class="min-w-0 flex-1 space-y-3">
-          <div class="h-2.5 w-24 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI strip -->
-    <div
-      v-if="!isLoadingStaff && !isStaffFullscreen"
-      class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3"
-    >
-      <StatCard label="Team size" :value="String(staff.length)" subtext="In this department" />
-      <StatCard label="Active" :value="String(activeStaff)" subtext="Available to work" />
-      <div class="col-span-2 lg:col-span-1">
-        <StatCard label="Managers" :value="String(totalManagers)" subtext="Leadership roles" />
-      </div>
-    </div>
-
     <Teleport to="body" :disabled="!isStaffFullscreen">
       <div
         data-dashboard-teleport
@@ -123,10 +30,10 @@
                 </p>
                 <div class="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                   <h2 class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
-                    {{ department?.name || 'Department' }} · Staff
+                    {{ department?.name || 'Department' }}
                   </h2>
                   <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
-                    {{ staff.length }} · {{ totalManagers }} managers · {{ activeStaff }} active
+                    {{ staff.length }} members · {{ activeStaff }} active · {{ totalManagers }} managers
                   </span>
                 </div>
               </div>
@@ -186,15 +93,33 @@
         </div>
 
         <!-- Table toolbar -->
-        <DataTableToolbar v-if="!isLoadingStaff && staff.length > 0 && !isStaffFullscreen">
+        <DataTableToolbar v-if="!isLoadingStaff && !isStaffFullscreen">
           <template #heading>
-            <div class="min-w-0">
-              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                Team roster
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                {{ paginatedStaff.length }} on this page · {{ staff.length }} total
-              </p>
+            <div class="flex min-w-0 flex-1 items-start gap-2">
+              <button
+                type="button"
+                class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                title="Back to departments"
+                @click="navigateTo('/dashboard/departments')"
+              >
+                <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
+              </button>
+              <div class="min-w-0 flex-1">
+                <h2 class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                  {{ department?.name || 'Department' }}
+                </h2>
+                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                  <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ staff.length }} members</span>
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span class="tabular-nums">{{ activeStaff }} active</span>
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span class="tabular-nums">{{ totalManagers }} managers</span>
+                  <template v-if="staff.length > 0">
+                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                    <span>{{ paginatedStaff.length }} on this page</span>
+                  </template>
+                </p>
+              </div>
             </div>
           </template>
           <template #actions>
@@ -505,7 +430,6 @@ import {
   PlusIcon,
   BuildingOfficeIcon,
   UsersIcon,
-  UserCircleIcon,
   UserGroupIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -525,7 +449,6 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
 import { useAuthStore } from '~/stores/auth'
@@ -552,7 +475,6 @@ const departmentBreadcrumbs = computed(() => [
 
 const department = ref<Department | null>(null)
 const staff = ref<Staff[]>([])
-const isLoadingDepartment = ref(true)
 const isLoadingStaff = ref(true)
 
 // Staff pagination - load from localStorage per department
@@ -719,20 +641,6 @@ const activeStaff = computed(() => {
   return staff.value.filter(m => m.status === 'active').length
 })
 
-const onLeaveStaff = computed(() => {
-  return staff.value.filter(m => m.status === 'on_leave').length
-})
-
-// Computed property for current manager name
-const currentManager = computed(() => {
-  const manager = staff.value.find(m => m.role === 'manager')
-  if (manager) {
-    return `${manager.firstName} ${manager.lastName}`
-  }
-  return 'Not assigned'
-})
-
-
 // Load department and staff data
 const loadDepartmentData = async () => {
   // Fetch user data if authenticated and not already loaded
@@ -764,9 +672,8 @@ const loadDepartmentData = async () => {
     }
   }
 
-  isLoadingDepartment.value = true
   isLoadingStaff.value = true
-  
+
   try {
     // Load department using Pinia store
     const dept = await departmentsStore.fetchDepartment(departmentId.value)
@@ -806,7 +713,6 @@ const loadDepartmentData = async () => {
     alert(error.message || 'Failed to load department data')
     navigateTo('/dashboard/departments')
   } finally {
-    isLoadingDepartment.value = false
     isLoadingStaff.value = false
   }
 }
@@ -984,7 +890,6 @@ watch(() => route.params.id, async (newId, oldId) => {
     // Clear previous data
     department.value = null
     staff.value = []
-    isLoadingDepartment.value = true
     isLoadingStaff.value = true
     // Load new data
     try {

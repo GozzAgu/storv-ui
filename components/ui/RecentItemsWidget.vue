@@ -10,6 +10,7 @@ import {
   FolderIcon,
   XMarkIcon,
 } from '@heroicons/vue/24/outline'
+import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 
 const { recentItems, removeRecentItem } = useRecentItems()
 const router = useRouter()
@@ -93,10 +94,15 @@ const formatTime = (timestamp: number) => {
           </p>
         </div>
         <button
+          type="button"
           @click="handleRemove($event, item)"
-          class="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all"
+          class="group/remove relative opacity-0 transition-all group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+          aria-label="Remove from recent"
         >
           <XMarkIcon class="w-2.5 h-2.5" />
+          <DashboardHoverTooltip placement="bottom" named-group="remove">
+            Remove from recent
+          </DashboardHoverTooltip>
         </button>
       </button>
     </div>

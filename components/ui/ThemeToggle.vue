@@ -2,7 +2,6 @@
   <label
     class="theme-switch"
     :aria-label="`Switch to ${currentTheme === 'dark' ? 'light' : 'dark'} mode`"
-    title="Toggle theme"
   >
     <input
       type="checkbox"

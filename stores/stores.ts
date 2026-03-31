@@ -169,11 +169,21 @@ export const useStoresStore = defineStore('stores', {
       }
 
       const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
-      const eligibleIds = new Set(getEligibleStoresForPlan(this.stores, plan).map(s => s.id))
+      const eligible = getEligibleStoresForPlan(this.stores, plan)
+      const eligibleIds = new Set(eligible.map(s => s.id))
+
+      // Full refresh resets Pinia while localStorage still has the user's branch; if we skip this,
+      // the null currentStoreId path below calls setCurrentStore(fallback), which overwrites
+      // localStorage with the first eligible store and the active branch appears to "switch".
+      if (!this.currentStoreId && import.meta.client) {
+        const savedStoreId = localStorage.getItem('currentStoreId')
+        if (savedStoreId && eligibleIds.has(savedStoreId) && this.getStoreById(savedStoreId)) {
+          this.currentStoreId = savedStoreId
+        }
+      }
 
       if (this.currentStoreId && eligibleIds.has(this.currentStoreId)) return
 
-      const eligible = getEligibleStoresForPlan(this.stores, plan)
       const fallback = eligible.find(s => s.isActive !== false) || eligible[0]
       if (fallback) {
         await this.setCurrentStore(fallback.id)

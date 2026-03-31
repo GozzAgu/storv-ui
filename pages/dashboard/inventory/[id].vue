@@ -4,124 +4,6 @@
   >
     <Breadcrumbs :items="inventoryBreadcrumbs" class="text-[11px] text-gray-500 dark:text-gray-400" />
 
-    <!-- Hero -->
-    <header
-      v-if="!isLoadingFolder"
-      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex min-w-0 flex-1 items-start gap-3">
-          <button
-            type="button"
-            class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-            title="Back to folders"
-            @click="navigateTo('/dashboard/inventory')"
-          >
-            <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
-          </button>
-          <div class="min-w-0 flex-1">
-            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Folder
-            </p>
-            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h1
-                class="truncate text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
-              >
-                {{ folder?.name || 'Folder' }}
-              </h1>
-              <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
-            </div>
-            <p class="mt-1 max-w-2xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              {{ folder?.description || 'No description yet. Add one in folder settings.' }}
-            </p>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
-              >
-                <CalendarIcon class="h-3.5 w-3.5 opacity-70" />
-                Created {{ formatDate(folder?.createdAt) }}
-              </span>
-              <span
-                class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/70 dark:text-gray-300"
-              >
-                <CubeIcon class="h-3.5 w-3.5 opacity-70" />
-                {{ folder?.itemCount || 0 }} items
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="canManageInventoryItems"
-          class="flex shrink-0 flex-wrap items-center gap-2 border-t border-gray-100/90 pt-3 dark:border-gray-800/80 sm:border-t-0 sm:pt-0"
-        >
-          <Button
-            variant="primary"
-            size="sm"
-            :icon="PlusIcon"
-            extra-class="!rounded-sm"
-            @click="openAddItemModal"
-          >
-            Add product
-          </Button>
-          <template v-if="selectedItemsForBulk.length > 0">
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TagIcon"
-              class="!rounded-sm !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-primary-200/80 hover:!bg-primary-50/60 hover:!text-primary-600 dark:hover:!border-primary-700/50 dark:hover:!bg-primary-900/10 dark:hover:!text-primary-300"
-              @click="openBulkDiscountModal"
-            >
-              Discount
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              :icon="TrashIcon"
-              class="!rounded-sm !border-gray-200/80 !px-2.5 !py-1.5 !text-xs !text-gray-600 dark:!border-gray-700/80 dark:!text-gray-300 hover:!border-red-200/80 hover:!bg-red-50/60 hover:!text-red-600 dark:hover:!border-red-800/50 dark:hover:!bg-red-900/10 dark:hover:!text-red-400"
-              @click="openBulkDeleteModal"
-            >
-              Delete
-            </Button>
-          </template>
-        </div>
-      </div>
-    </header>
-
-    <div
-      v-else
-      class="overflow-hidden rounded-sm bg-white p-5 dark:!bg-dashboard-card sm:p-6"
-    >
-      <div class="flex gap-3">
-        <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-        <div class="min-w-0 flex-1 space-y-3">
-          <div class="h-2.5 w-16 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-          <div class="h-7 w-2/3 max-w-sm animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-          <div class="h-3 w-full max-w-md animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-          <div class="flex gap-2">
-            <div class="h-7 w-28 animate-pulse rounded-full bg-gray-200 dark:bg-white/10"></div>
-            <div class="h-7 w-24 animate-pulse rounded-full bg-gray-200 dark:bg-white/10"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPI strip (hidden in expanded view) -->
-    <div
-      v-if="!isLoadingFolder && !isFullscreen"
-      class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:max-w-2xl lg:grid-cols-2"
-    >
-      <StatCard
-        label="Total items"
-        :value="String(folder?.itemCount ?? 0)"
-        subtext="In this folder"
-      />
-      <StatCard
-        label="Total value"
-        :value="formatCurrency(totalInventoryValue)"
-        subtext="At current prices"
-      />
-    </div>
-
     <!-- Loading: table shell -->
     <template v-if="isLoadingFolder">
       <div
@@ -145,6 +27,35 @@
 
     <!-- Mobile / tablet toolbar -->
     <div v-else class="flex flex-col gap-2.5 lg:hidden">
+      <div
+        class="flex items-start gap-2 rounded-sm border border-gray-200/80 bg-white px-3 py-2.5 dark:border-gray-700/80 dark:!bg-dashboard-card"
+      >
+        <button
+          type="button"
+          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+          title="Back to folders"
+          @click="navigateTo('/dashboard/inventory')"
+        >
+          <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
+        </button>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <h2 class="truncate text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+              {{ folder?.name || 'Folder' }}
+            </h2>
+            <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
+          </div>
+          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+            <span class="tabular-nums font-medium text-gray-700 dark:text-gray-300">{{ folder?.itemCount ?? 0 }} items</span>
+            <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+            <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
+            <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+              <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+              <span>{{ sortedFilteredItems.length }} shown</span>
+            </template>
+          </p>
+        </div>
+      </div>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div class="relative min-w-0 flex-1">
           <MagnifyingGlassIcon
@@ -158,6 +69,26 @@
           />
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TagIcon"
+              class="shrink-0 !rounded-sm !px-2.5 !py-2.5 !text-xs sm:!px-3"
+              @click="openBulkDiscountModal"
+            >
+              <span class="hidden sm:inline">Discount</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              class="shrink-0 !rounded-sm !border-red-200/80 !px-2.5 !py-2.5 !text-xs dark:!border-red-800/40 sm:!px-3"
+              @click="openBulkDeleteModal"
+            >
+              <span class="hidden sm:inline">Delete</span>
+            </Button>
+          </template>
           <Button
             v-if="canManageInventoryItems"
             variant="outline"
@@ -232,7 +163,10 @@
                       {{ folder?.name || 'Inventory Products' }}
                     </h2>
                     <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
-                      {{ filteredItems.length }} · {{ formatCurrency(totalInventoryValue) }}
+                      {{ folder?.itemCount ?? 0 }} items · {{ formatCurrency(totalInventoryValue) }}
+                      <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+                        · {{ sortedFilteredItems.length }} shown
+                      </template>
                     </span>
                   </div>
                 </div>
@@ -288,6 +222,26 @@
                     <XMarkIcon class="h-5 w-5" />
                   </button>
                   <template v-if="canManageInventoryItems">
+                    <template v-if="selectedItemsForBulk.length > 0">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        :icon="TagIcon"
+                        extra-class="!rounded-sm"
+                        @click="openBulkDiscountModal"
+                      >
+                        Discount
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        :icon="TrashIcon"
+                        extra-class="!rounded-sm !border-red-200/80 dark:!border-red-800/40"
+                        @click="openBulkDeleteModal"
+                      >
+                        Delete
+                      </Button>
+                    </template>
                     <Button
                       variant="outline"
                       size="sm"
@@ -336,13 +290,32 @@
         <!-- Desktop toolbar -->
         <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
           <template #heading>
-            <div class="min-w-0 flex-1">
-              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                Product list
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                {{ sortedFilteredItems.length }} shown · {{ formatCurrency(totalInventoryValue) }} total value
-              </p>
+            <div class="flex min-w-0 flex-1 items-start gap-2">
+              <button
+                type="button"
+                class="mt-0.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white lg:inline-flex"
+                title="Back to folders"
+                @click="navigateTo('/dashboard/inventory')"
+              >
+                <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
+              </button>
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <h2 class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                    {{ folder?.name || 'Folder' }}
+                  </h2>
+                  <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
+                </div>
+                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                  <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ folder?.itemCount ?? 0 }} items</span>
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
+                  <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                    <span>{{ sortedFilteredItems.length }} shown</span>
+                  </template>
+                </p>
+              </div>
             </div>
           </template>
           <template #filters>
@@ -386,6 +359,26 @@
             </button>
           </template>
           <template #actions>
+            <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TagIcon"
+                extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+                @click="openBulkDiscountModal"
+              >
+                <span class="hidden sm:inline">Discount</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="TrashIcon"
+                extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5 !border-red-200/80 dark:!border-red-800/40"
+                @click="openBulkDeleteModal"
+              >
+                <span class="hidden sm:inline">Delete</span>
+              </Button>
+            </template>
             <Button
               v-if="canManageInventoryItems"
               variant="outline"
@@ -1198,7 +1191,6 @@ import {
   MagnifyingGlassIcon,
   PencilSquareIcon,
   TrashIcon,
-  CalendarIcon,
   ArrowPathIcon,
   ChevronUpIcon,
   ChevronDownIcon,
@@ -1214,7 +1206,6 @@ import {
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import Pagination from '~/components/ui/Pagination.vue'
@@ -2074,16 +2065,6 @@ const getItemDisplayValue = (value: any) => {
   }
   
   return value
-}
-
-const formatDate = (date?: Date | string) => {
-  if (!date) return 'Unknown'
-  try {
-    const dateObj = date instanceof Date ? date : new Date(date)
-    return dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  } catch {
-    return 'Unknown'
-  }
 }
 
 const resetFilters = () => {

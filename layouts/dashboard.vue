@@ -12,7 +12,8 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed inset-y-0 left-0 z-40 flex flex-col bg-white shadow-[2px_0_10px_-4px_rgba(15,23,42,0.07)] transition-[transform,width] duration-300 ease-in-out dark:!bg-dashboard-card dark:shadow-[2px_0_14px_-4px_rgba(0,0,0,0.45)] lg:translate-x-0',
+        /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
+        'fixed inset-y-0 left-0 z-[55] flex flex-col bg-white shadow-[2px_0_10px_-4px_rgba(15,23,42,0.07)] transition-[transform,width] duration-300 ease-in-out dark:!bg-dashboard-card dark:shadow-[2px_0_14px_-4px_rgba(0,0,0,0.45)] lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
       ]"
@@ -23,33 +24,43 @@
       >
         <NuxtLink
           to="/dashboard"
-          :class="['flex items-center transition-all duration-300', effectiveSidebarCollapsed ? 'justify-center w-full' : 'gap-1.5 min-w-0']"
+          :class="['flex items-center transition-all duration-300', effectiveSidebarCollapsed ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0']"
         >
           <img
             :src="logoSource"
             alt="Storvv"
             :class="['shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out', effectiveSidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]']"
           />
+          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
+            Dashboard home
+          </DashboardHoverTooltip>
         </NuxtLink>
         <button
           v-if="!effectiveSidebarCollapsed"
+          type="button"
           @click="sidebarOpen = false"
-          class="rounded-sm p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
+          class="group relative rounded-sm p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
           aria-label="Close menu"
         >
           <XMarkIcon class="w-4 h-4" stroke-width="2" />
+          <DashboardHoverTooltip placement="bottom">
+            Close menu
+          </DashboardHoverTooltip>
         </button>
       </div>
 
       <!-- Collapse toggle (desktop) - larger on large screens -->
       <button
+        type="button"
         @click="toggleSidebar"
-        class="absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200/70 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:bg-[#161922] dark:text-gray-400 dark:ring-white/10 dark:hover:bg-[#1c2030] dark:hover:text-gray-100 lg:flex"
-        :title="effectiveSidebarCollapsed ? 'Expand' : 'Collapse'"
+        class="group absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200/70 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:bg-[#161922] dark:text-gray-400 dark:ring-white/10 dark:hover:bg-[#1c2030] dark:hover:text-gray-100 lg:flex"
         aria-label="Toggle sidebar"
       >
         <ChevronRightIcon v-if="effectiveSidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
         <ChevronLeftIcon v-else class="w-3.5 h-3.5" stroke-width="2.5" />
+        <DashboardHoverTooltip placement="bottom">
+          {{ effectiveSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar' }}
+        </DashboardHoverTooltip>
       </button>
 
       <!-- Navigation -->
@@ -79,11 +90,19 @@
                   </span>
                 </NuxtLink>
                 <button
+                  type="button"
                   @click.stop="inventoryExpanded = !inventoryExpanded"
                   class="shrink-0 rounded-full p-1 transition-colors hover:text-gray-700 dark:hover:text-gray-200"
                   :class="isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  :aria-expanded="inventoryExpanded"
+                  aria-label="Toggle inventory folders"
                 >
-                  <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />
+                  <span class="group relative inline-flex">
+                    <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />
+                    <DashboardHoverTooltip placement="bottom">
+                      {{ inventoryExpanded ? 'Hide folders' : 'Show folders' }}
+                    </DashboardHoverTooltip>
+                  </span>
                 </button>
               </div>
               <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1.5 dark:border-white/[0.06]">
@@ -91,11 +110,14 @@
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
-                  :class="[ 'group flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors', route.params.id === folder.id ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+                  :class="[ 'group relative flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors', route.params.id === folder.id ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                 >
                   <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === folder.id ? 2.25 : 1.75" />
                   <span class="truncate flex-1" :class="route.params.id === folder.id ? 'font-bold' : 'group-hover:font-semibold'">{{ folder.name }}</span>
                   <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-primary-500 dark:text-primary-400" stroke-width="2" />
+                  <DashboardHoverTooltip placement="right">
+                    {{ folder.name }}
+                  </DashboardHoverTooltip>
                 </NuxtLink>
               </div>
             </div>
@@ -106,7 +128,6 @@
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
               :class="[ 'group relative flex items-center rounded-l-[1px] transition-all duration-200', effectiveSidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5', isActive(item.href) ? effectiveSidebarCollapsed ? 'overflow-visible rounded-lg bg-primary-500/[0.11] text-primary-600 before:pointer-events-none before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-500 dark:bg-primary-400/15 dark:text-primary-300 dark:before:bg-primary-400' : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : effectiveSidebarCollapsed ? 'overflow-visible rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
-              :title="effectiveSidebarCollapsed ? item.name : ''"
             >
               <component
                 :is="item.icon"
@@ -116,14 +137,9 @@
               <span v-if="!effectiveSidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
                 {{ item.name }}
               </span>
-              <!-- Tooltip when collapsed -->
-              <div
-                v-if="effectiveSidebarCollapsed"
-                class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs font-medium text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
-              >
+              <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
                 {{ item.name }}
-                <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
-              </div>
+              </DashboardHoverTooltip>
             </NuxtLink>
           </template>
           
@@ -135,10 +151,14 @@
             <button
               type="button"
               @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="flex w-full items-center justify-between rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+              class="group relative flex w-full items-center justify-between rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+              :aria-expanded="!storesSectionCollapsed"
             >
               <span>Branches</span>
               <ChevronDownIcon class="w-3 h-3 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
+              <DashboardHoverTooltip placement="bottom">
+                {{ storesSectionCollapsed ? 'Show branches' : 'Hide branches' }}
+              </DashboardHoverTooltip>
             </button>
             <div v-if="!storesSectionCollapsed" class="mt-0.5 space-y-0.5 pl-0">
               <template v-for="store in storesList" :key="store.id">
@@ -147,9 +167,8 @@
                 >
                   <NuxtLink
                     :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
-                    class="flex items-center flex-1 min-w-0 gap-2"
+                    class="group relative flex min-w-0 flex-1 items-center gap-2"
                     :class="{ 'pointer-events-none cursor-not-allowed': switchingStore || (store.id !== storesStore.currentStoreId) }"
-                    :title="store.id !== storesStore.currentStoreId ? 'Switch to this store to access it' : ''"
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
                     <svg
@@ -174,13 +193,23 @@
                     </span>
                     <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active store"></span>
                     <span v-if="store.id !== storesStore.currentStoreId" class="text-[9px] text-gray-400 dark:text-gray-500 italic shrink-0">Inactive</span>
+                    <DashboardHoverTooltip v-if="store.id === storesStore.currentStoreId" placement="right">
+                      Branch departments
+                      <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{ store.name }}</span>
+                    </DashboardHoverTooltip>
                   </NuxtLink>
                   <button
                     v-if="store.id === storesStore.currentStoreId"
+                    type="button"
                     @click.stop="toggleStoreExpanded(store.id)"
-                    class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    class="group relative shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    :aria-expanded="!!expandedStores[store.id]"
+                    aria-label="Toggle departments"
                   >
                     <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedStores[store.id] ? 'rotate-180' : ''" stroke-width="2" />
+                    <DashboardHoverTooltip placement="bottom">
+                      {{ expandedStores[store.id] ? 'Hide departments' : 'Show departments' }}
+                    </DashboardHoverTooltip>
                   </button>
                 </div>
                 <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1 dark:border-white/[0.06]">
@@ -188,18 +217,26 @@
                     <div class="group flex items-center justify-between gap-1 rounded-l-[1px]">
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
-                        class="group flex min-w-0 flex-1 items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors"
+                        class="group relative flex min-w-0 flex-1 items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors"
                         :class="[ route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                       >
                         <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === department.id ? 2.25 : 1.75" />
                         <span class="truncate flex-1" :class="route.params.id === department.id ? 'font-bold' : 'group-hover:font-semibold'">{{ department.name }}</span>
+                        <DashboardHoverTooltip placement="right">
+                          {{ department.name }}
+                        </DashboardHoverTooltip>
                       </NuxtLink>
                       <button
+                        type="button"
                         @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        class="group relative shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                         :aria-expanded="expandedDepartments[department.id]"
+                        aria-label="Toggle staff list"
                       >
                         <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedDepartments[department.id] ? 'rotate-180' : ''" stroke-width="2" />
+                        <DashboardHoverTooltip placement="bottom">
+                          {{ expandedDepartments[department.id] ? 'Hide staff' : 'Show staff' }}
+                        </DashboardHoverTooltip>
                       </button>
                     </div>
                     <div v-if="expandedDepartments[department.id]" class="pl-5 pr-1.5 pb-0.5 space-y-0.5">
@@ -208,10 +245,14 @@
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[11px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                          class="group relative flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[11px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                         >
                           <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
+                          <DashboardHoverTooltip placement="right">
+                            {{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}
+                            <span class="mt-0.5 block text-[11px] font-normal text-gray-400">Open department</span>
+                          </DashboardHoverTooltip>
                         </NuxtLink>
                       </template>
                       <p v-else class="px-2.5 py-1 text-[11px] text-gray-400 dark:text-gray-500">No staff</p>
@@ -256,29 +297,21 @@
               <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
               <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
             </div>
-            <div
-              v-if="effectiveSidebarCollapsed"
-              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 flex-col items-start whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
-            >
+            <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
               {{ userName }}
-              <span class="block text-[11px] text-gray-400">{{ userEmail }}</span>
-              <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
-            </div>
+              <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{ userEmail }}</span>
+            </DashboardHoverTooltip>
           </div>
           <button
             @click="handleSignOut"
             :class="[ 'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors', effectiveSidebarCollapsed ? 'relative group py-2' : 'px-2', 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' ]"
-            title="Sign out"
+            :title="effectiveSidebarCollapsed ? undefined : 'Sign out'"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
             <span v-if="!effectiveSidebarCollapsed">Sign out</span>
-            <div
-              v-if="effectiveSidebarCollapsed"
-              class="pointer-events-none invisible absolute left-full z-50 ml-2 inline-flex w-max min-w-max max-w-none shrink-0 items-center whitespace-nowrap rounded-sm border border-gray-700/40 bg-gray-900 px-2.5 py-1.5 text-xs text-white opacity-0 transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700/50 dark:bg-gray-950"
-            >
+            <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
               Sign out
-              <div class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-gray-900 dark:border-r-gray-800"></div>
-            </div>
+            </DashboardHoverTooltip>
           </button>
           <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'">
             v{{ appVersion }}
@@ -309,11 +342,15 @@
         >
           <div class="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
             <button
+              type="button"
               @click="sidebarOpen = true"
-              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 lg:hidden"
+              class="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 lg:hidden"
               aria-label="Open menu"
             >
               <Squares2X2Icon class="h-5 w-5" stroke-width="1.75" />
+              <DashboardHoverTooltip placement="bottom">
+                Open menu
+              </DashboardHoverTooltip>
             </button>
             <!-- Current page (neutral — no primary “active” treatment) -->
             <div class="hidden min-w-0 items-center md:flex">
@@ -342,8 +379,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:text-gray-400 md:flex"
-              title="Search (⌘K)"
+              class="group relative hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:text-gray-400 md:flex"
             >
               <MagnifyingGlassIcon
                 class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-500"
@@ -357,23 +393,32 @@
               >
                 ⌘K
               </kbd>
+              <DashboardHoverTooltip placement="bottom">
+                Search workspace
+                <span class="mt-0.5 block text-[11px] font-normal text-gray-400">⌘K</span>
+              </DashboardHoverTooltip>
             </button>
 
             <!-- Mobile search -->
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
-              title="Search"
+              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
               aria-label="Search"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
+              <DashboardHoverTooltip placement="bottom">
+                Search
+              </DashboardHoverTooltip>
             </button>
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
 
-            <div class="flex h-9 items-center justify-center rounded-sm bg-transparent px-1">
+            <div class="group relative flex h-9 items-center justify-center rounded-sm bg-transparent px-1">
               <ThemeToggle />
+              <DashboardHoverTooltip placement="bottom">
+                {{ themeTooltipLabel }}
+              </DashboardHoverTooltip>
             </div>
 
             <!-- Notifications dropdown -->
@@ -381,8 +426,7 @@
               <button
                 type="button"
                 @click="notificationsOpen = !notificationsOpen"
-                class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400"
-                title="Notifications"
+                class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
@@ -394,6 +438,13 @@
                 >
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
+                <DashboardHoverTooltip placement="bottom">
+                  <template v-if="unreadNotificationCount > 0">
+                    Notifications
+                    <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{ unreadNotificationCount }} unread</span>
+                  </template>
+                  <template v-else>Notifications</template>
+                </DashboardHoverTooltip>
               </button>
               <Teleport to="body">
                 <Transition
@@ -421,7 +472,7 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="flex min-w-0 items-center gap-2 rounded-sm border-0 bg-transparent py-1 pl-1 pr-2 font-medium text-gray-700 dark:text-gray-200 sm:pr-2.5"
+                class="group relative flex min-w-0 items-center gap-2 rounded-sm border-0 bg-transparent py-1 pl-1 pr-2 font-medium text-gray-700 dark:text-gray-200 sm:pr-2.5"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
@@ -443,6 +494,10 @@
                   :class="profileMenuOpen ? 'rotate-180' : ''"
                   stroke-width="2"
                 />
+                <DashboardHoverTooltip placement="bottom">
+                  Account menu
+                  <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{ userName }}</span>
+                </DashboardHoverTooltip>
               </button>
 
               <Teleport to="body">
@@ -585,6 +640,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
@@ -608,6 +664,11 @@ const { actualTheme } = useTheme()
 const logoSource = computed(() => {
   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 })
+
+const themeTooltipLabel = computed(() =>
+  actualTheme.value === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+)
+
 const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '1.0'
 const authStore = useAuthStore()
 const userStore = useUserStore()

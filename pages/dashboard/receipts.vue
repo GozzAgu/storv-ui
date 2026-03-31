@@ -8,19 +8,19 @@
         <div
           class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
         >
-          <div class="border-b border-gray-100/90 px-4 py-4 dark:border-gray-800/80 sm:px-5 sm:py-5">
-            <div class="h-3 w-20 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-            <div class="mt-3 h-7 max-w-xs animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:h-8"></div>
-            <div class="mt-2 h-3 max-w-md animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-          </div>
-          <div class="grid grid-cols-2 gap-2.5 p-4 sm:gap-3 lg:grid-cols-4 sm:p-5">
-            <div v-for="i in 4" :key="i" class="rounded-sm bg-white p-3 ring-1 ring-gray-200/80 dark:!bg-dashboard-card dark:ring-gray-800/60 sm:p-3.5">
-              <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-              <div class="mt-2 h-8 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-              <div class="mt-2 h-2.5 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+          <div class="border-b border-gray-200/80 px-4 py-3 dark:border-gray-800">
+            <div class="flex gap-8">
+              <div class="h-4 w-20 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
+              <div class="h-4 w-24 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
             </div>
           </div>
-          <div class="space-y-2.5 border-t border-gray-100/90 px-4 py-4 dark:border-gray-800/80 sm:px-5">
+          <div class="border-b border-gray-100/90 px-4 py-3 dark:border-gray-800/80 sm:px-5">
+            <div class="flex flex-wrap gap-2">
+              <div class="h-9 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:max-w-xs"></div>
+              <div class="h-9 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
+            </div>
+          </div>
+          <div class="space-y-2.5 p-4 sm:p-5">
             <div v-for="i in 6" :key="i" class="flex gap-4">
               <div class="h-4 flex-1 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
               <div class="h-4 w-24 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
@@ -32,23 +32,6 @@
 
       <template v-else>
         <div class="flex w-full min-h-0 flex-1 flex-col gap-5 sm:gap-6">
-        <!-- Hero -->
-        <header
-          class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-        >
-          <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-            Sales
-          </p>
-          <h1
-            class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
-          >
-            Receipts & customers
-          </h1>
-          <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-            Manage receipts, customers, and returns in one place: fast search, clear status, zero clutter.
-          </p>
-        </header>
-
         <!-- Tabs -->
         <nav
           class="flex gap-8 border-b border-gray-200/80 dark:border-gray-800"
@@ -86,57 +69,6 @@
       </button>
     </nav>
 
-    <!-- KPI strip: receipts -->
-    <div
-      v-if="activeTab === 'receipts' && !isReceiptsFullscreen"
-      class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4"
-    >
-      <StatCard
-        label="Total receipts"
-        :value="receiptsStore.loading ? '-' : String(receiptsStore.totalReceipts)"
-        subtext="In this store"
-      />
-      <StatCard
-        label="Total sales"
-        :value="formatCurrency(totalSales)"
-        subtext="Completed orders"
-      />
-      <StatCard
-        label="Today"
-        :value="formatCurrency(todaySales)"
-        :subtext="`${todayReceipts} receipts`"
-      />
-      <StatCard
-        label="This month"
-        :value="formatCurrency(monthSales)"
-        :subtext="`${monthReceipts} receipts`"
-      />
-    </div>
-
-    <!-- KPI strip: customers -->
-    <div v-if="activeTab === 'customers'" class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-      <StatCard
-        label="Customers"
-        :value="String(uniqueCustomers.length)"
-        subtext="Unique contacts"
-      />
-      <StatCard
-        label="Total revenue"
-        :value="formatCurrency(customersTotalRevenue)"
-        subtext="Lifetime value"
-      />
-      <StatCard
-        label="Avg. order value"
-        :value="formatCurrency(customersAverageOrderValue)"
-        subtext="Across orders"
-      />
-      <StatCard
-        label="Orders"
-        :value="String(customersTotalOrders)"
-        subtext="All customer orders"
-      />
-    </div>
-
     <!-- Receipts Tab Content -->
     <template v-if="activeTab === 'receipts'">
       <!-- Teleport fullscreen to body so position:fixed is not clipped by layout page transition (transform) -->
@@ -163,7 +95,8 @@
                   Receipts
                 </h2>
                 <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
-                  {{ filteredReceipts.length }} · {{ formatCurrency(totalSales) }}
+                  {{ receipts.length }} in store · {{ formatCurrency(totalSales) }} completed · Today {{ formatCurrency(todaySales) }}
+                  ({{ todayReceipts }}) · Month {{ formatCurrency(monthSales) }} ({{ monthReceipts }})
                 </span>
               </div>
             </div>
@@ -249,10 +182,20 @@
           <template #heading>
             <div class="min-w-0 flex-1">
               <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                Receipt list
+                Receipts
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                {{ sortedFilteredReceipts.length }} shown · {{ formatCurrency(totalSales) }} completed sales
+                <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ receipts.length }} in store</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">{{ formatCurrency(totalSales) }} completed</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">Today {{ formatCurrency(todaySales) }} ({{ todayReceipts }})</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">Month {{ formatCurrency(monthSales) }} ({{ monthReceipts }})</span>
+                <template v-if="sortedFilteredReceipts.length !== receipts.length">
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span>{{ sortedFilteredReceipts.length }} shown</span>
+                </template>
               </p>
             </div>
           </template>
@@ -870,10 +813,24 @@
           <template #heading>
             <div class="min-w-0 flex-1">
               <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                Customer directory
+                Customers
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                {{ filteredCustomers.length }} shown · expand a row to view receipts
+                <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ uniqueCustomers.length }} customers</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">{{ formatCurrency(customersTotalRevenue) }} lifetime revenue</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">{{ formatCurrency(customersAverageOrderValue) }} avg order</span>
+                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                <span class="tabular-nums">{{ customersTotalOrders }} orders</span>
+                <template v-if="customersSearchQuery.trim() && filteredCustomers.length !== uniqueCustomers.length">
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span>{{ filteredCustomers.length }} shown</span>
+                </template>
+                <template v-if="uniqueCustomers.length > 0">
+                  <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                  <span>Expand a row for receipts</span>
+                </template>
               </p>
             </div>
           </template>
@@ -1183,7 +1140,6 @@ import {
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
-import StatCard from '~/components/ui/StatCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'

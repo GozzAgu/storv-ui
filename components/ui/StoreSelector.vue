@@ -3,7 +3,7 @@
     <button
       type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="flex h-9 max-w-[10rem] items-center gap-1.5 rounded-sm border-0 bg-transparent px-2.5 py-1.5 text-xs font-medium tracking-tight text-gray-800 dark:text-gray-100 sm:max-w-[12rem]"
+      class="group relative flex h-9 max-w-[10rem] items-center gap-1.5 rounded-sm border-0 bg-transparent px-2.5 py-1.5 text-xs font-medium tracking-tight text-gray-800 dark:text-gray-100 sm:max-w-[12rem]"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
       <svg v-if="!switchingStore" class="w-4 h-4 shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75">
@@ -20,15 +20,19 @@
         <span class="sm:hidden">
           {{ switchingStore ? '...' : (currentStore?.name?.substring(0, 8) || 'Store') }}
         </span>
-        <span 
+        <span
           v-if="!switchingStore && currentStore"
           class="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full animate-pulse ring-2 ring-white dark:ring-gray-800"
-          title="Active store"
+          aria-hidden="true"
         ></span>
       </span>
       <svg v-if="!switchingStore" class="w-3.5 h-3.5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
+      <DashboardHoverTooltip v-if="!switchingStore" placement="bottom">
+        {{ isStaff ? 'Your store' : 'Switch store' }}
+        <span v-if="currentStore?.name" class="mt-0.5 block max-w-[14rem] truncate text-[11px] font-normal text-gray-400">{{ currentStore.name }}</span>
+      </DashboardHoverTooltip>
     </button>
 
     <Transition
@@ -138,6 +142,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useToast } from '~/composables/useToast'
