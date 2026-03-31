@@ -35,6 +35,17 @@ export default defineNuxtPlugin(() => {
     return el
   }
 
+  /** After show we strip `title`, so `closest('[title]')` no longer finds the host — walk up for an active entry. */
+  const findActiveTooltipHost = (target: EventTarget | null): HTMLElement | null => {
+    if (!(target instanceof Element)) return null
+    let el: Element | null = target
+    while (el) {
+      if (el instanceof HTMLElement && activeTitles.has(el)) return el
+      el = el.parentElement
+    }
+    return null
+  }
+
   const positionTooltip = (el: HTMLElement) => {
     const rect = el.getBoundingClientRect()
     const tooltipRect = tooltipEl.getBoundingClientRect()
@@ -87,6 +98,9 @@ export default defineNuxtPlugin(() => {
   const activate = (el: HTMLElement) => {
     const title = el.getAttribute('title')
     if (!title) return
+    if (activeEl && activeEl !== el) {
+      deactivate(activeEl)
+    }
     activeTitles.set(el, title)
     el.removeAttribute('title')
     activeEl = el
@@ -104,18 +118,37 @@ export default defineNuxtPlugin(() => {
     }
   }
 
+  /**
+   * Bubble phase: whenever the pointer enters *any* node, hide if we left the active host.
+   * (Title was removed from the host, so mouseout + closest('[title]') never matched — tooltips stuck open.)
+   */
   const onMouseOver = (event: MouseEvent) => {
+    const target = event.target
+    if (!(target instanceof Node)) return
+
+    if (activeEl && !activeEl.contains(target)) {
+      deactivate(activeEl)
+    }
+
     const el = getEligibleElement(event.target)
     if (!el || !el.hasAttribute('title')) return
     if (event.relatedTarget instanceof Node && el.contains(event.relatedTarget)) return
     activate(el)
   }
 
+  /** Leaving the document (relatedTarget null / outside root) without entering another element. */
   const onMouseOut = (event: MouseEvent) => {
-    const el = getEligibleElement(event.target)
-    if (!el || !activeTitles.has(el)) return
-    if (event.relatedTarget instanceof Node && el.contains(event.relatedTarget)) return
-    deactivate(el)
+    if (!activeEl) return
+    const rt = event.relatedTarget
+    if (!(rt instanceof Node) || !document.documentElement.contains(rt)) {
+      deactivate(activeEl)
+      return
+    }
+    const host = findActiveTooltipHost(event.target)
+    if (!host || host !== activeEl) return
+    if (!host.contains(rt)) {
+      deactivate(host)
+    }
   }
 
   const onFocusIn = (event: FocusEvent) => {
@@ -125,8 +158,10 @@ export default defineNuxtPlugin(() => {
   }
 
   const onFocusOut = (event: FocusEvent) => {
-    const el = getEligibleElement(event.target)
-    if (!el || !activeTitles.has(el)) return
+    const el = findActiveTooltipHost(event.target)
+    if (!el) return
+    const rt = event.relatedTarget
+    if (rt instanceof Node && el.contains(rt)) return
     deactivate(el)
   }
 
@@ -136,7 +171,7 @@ export default defineNuxtPlugin(() => {
     }
   }
 
-  document.addEventListener('mouseover', onMouseOver, true)
+  document.addEventListener('mouseover', onMouseOver, false)
   document.addEventListener('mouseout', onMouseOut, true)
   document.addEventListener('focusin', onFocusIn, true)
   document.addEventListener('focusout', onFocusOut, true)

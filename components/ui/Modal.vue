@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
-    <div v-if="modelValue" class="fixed inset-0 z-50 overflow-hidden" role="presentation">
+    <!-- z above dashboard sidebar (55), fixed footer/pagination (50), and header (30); below SidePanel (1100) and toasts -->
+    <div v-if="modelValue" class="fixed inset-0 z-[105] overflow-hidden" role="presentation">
       <!-- Backdrop: receives clicks outside panel -->
       <div
         :class="[ 'absolute inset-0 bg-slate-950/55 transition-opacity duration-300 dark:bg-black/65', blurBackdrop ? 'backdrop-blur-[2px]' : '', ]"

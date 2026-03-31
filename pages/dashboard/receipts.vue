@@ -360,18 +360,19 @@
                     Swap
                   </span>
                 </div>
-                <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5 truncate" :title="receipt.customerName">
-                  {{ receipt.customerName }}
-                  <span v-if="receipt.customerEmail" class="text-gray-400 dark:text-gray-500"> · {{ receipt.customerEmail }}</span>
+                <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5">
+                  <span class="line-clamp-2">{{ receipt.customerName }}</span>
+                  <span v-if="receipt.customerEmail" class="block text-[10px] text-gray-500 dark:text-gray-500 truncate">{{ receipt.customerEmail }}</span>
+                  <span v-if="receipt.customerPhone" class="block text-[10px] text-gray-500 dark:text-gray-500 tabular-nums">{{ receipt.customerPhone }}</span>
                 </p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5">{{ formatDate(receipt.date) }}</p>
-                <div v-if="receipt.items && receipt.items.length > 0" class="mt-1.5 text-[10px] text-gray-700 dark:text-gray-300 line-clamp-2">
-                  <template v-for="(item, idx) in receipt.items.slice(0, 2)" :key="idx">
-                    <span v-if="idx > 0">, </span>{{ item.itemName }}<span v-if="item.quantity > 1"> × {{ item.quantity }}</span>
-                  </template>
-                  <span v-if="receipt.items.length > 2" class="text-gray-500 dark:text-gray-400"> +{{ receipt.items.length - 2 }} more</span>
+                <div class="mt-2">
+                  <ReceiptTableLineItems
+                    :items="receipt.items"
+                    :items-count-fallback="receipt.itemsCount"
+                    compact
+                  />
                 </div>
-                <div v-else class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ receipt.itemsCount }} items</div>
                 <div class="mt-2 flex items-center justify-between gap-2">
                   <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
                   <span
@@ -480,7 +481,7 @@
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
                 <div class="flex items-center gap-1.5">
-                  Items
+                  Line items
                   <template v-if="isColumnSortable('itemsCount')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'itemsCount' && currentSort.order === 'asc'"
@@ -620,8 +621,18 @@
                 <div class="text-[11px] font-medium text-gray-900 dark:text-gray-50">
                   {{ receipt.customerName }}
                 </div>
-                <div class="text-[10px] text-gray-500 dark:text-gray-400">
+                <div v-if="receipt.customerEmail" class="text-[10px] text-gray-500 dark:text-gray-400">
                   {{ receipt.customerEmail }}
+                </div>
+                <div v-if="receipt.customerPhone" class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
+                  {{ receipt.customerPhone }}
+                </div>
+                <div
+                  v-if="receipt.customerAddress"
+                  class="text-[10px] leading-snug text-gray-500 dark:text-gray-400 line-clamp-2"
+                  :title="receipt.customerAddress"
+                >
+                  {{ receipt.customerAddress }}
                 </div>
               </td>
               <td class="px-3 py-2.5 align-middle sm:px-4">
@@ -629,24 +640,11 @@
                   {{ formatDate(receipt.date) }}
                 </div>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <div class="text-[11px] text-gray-900 dark:text-gray-100">
-                  <div v-if="receipt.items && receipt.items.length > 0" class="space-y-0.5">
-                    <div 
-                      v-for="(item, idx) in receipt.items.slice(0, 3)" 
-                      :key="idx"
-                      class="text-[10px]"
-                    >
-                      {{ item.itemName }}<span v-if="item.quantity > 1" class="text-gray-500 dark:text-gray-400"> × {{ item.quantity }}</span>
-                    </div>
-                    <div v-if="receipt.items.length > 3" class="text-[9px] text-gray-500 dark:text-gray-400 italic">
-                      and {{ receipt.items.length - 3 }} more product{{ receipt.items.length - 3 > 1 ? 's' : '' }}
-                    </div>
-                  </div>
-                  <span v-else class="text-[9px] text-gray-500 dark:text-gray-400">
-                  {{ receipt.itemsCount }} items
-                </span>
-                </div>
+              <td class="min-w-[12rem] px-3 py-2.5 align-top sm:min-w-[16rem] sm:px-4 lg:min-w-[22rem]">
+                <ReceiptTableLineItems
+                  :items="receipt.items"
+                  :items-count-fallback="receipt.itemsCount"
+                />
               </td>
               <td class="px-3 py-2.5 align-middle sm:px-4">
                 <span class="text-[11px] font-semibold tabular-nums text-gray-900 dark:text-gray-50">
@@ -988,29 +986,13 @@
                             </span>
                           </div>
                         </div>
-                        <ul class="mt-1 space-y-0.5">
-                          <li
-                            v-for="(item, index) in receipt.items"
-                            :key="index"
-                            class="flex items-baseline justify-between gap-2 text-[10px] leading-snug"
-                          >
-                            <span class="text-gray-700 dark:text-gray-300 min-w-0 truncate">
-                              {{ item.itemName }}
-                              <span class="font-normal text-gray-400 dark:text-gray-500">
-                                · {{ item.quantity }}× {{ formatCurrency(item.price) }}
-                                <template v-if="item.hasDiscount">
-                                  <span class="text-emerald-600 dark:text-emerald-400"> ({{ item.discountPercentage }}% off)</span>
-                                </template>
-                              </span>
-                            </span>
-                            <span
-                              v-if="receipt.items.length > 1"
-                              class="shrink-0 font-medium tabular-nums text-gray-900 dark:text-gray-100"
-                            >
-                              {{ formatCurrency(item.price * item.quantity) }}
-                            </span>
-                          </li>
-                        </ul>
+                        <div class="mt-1.5 pointer-events-none">
+                          <ReceiptTableLineItems
+                            :items="receipt.items"
+                            :items-count-fallback="receipt.itemsCount"
+                            compact
+                          />
+                        </div>
                       </button>
                     </div>
                   </td>
@@ -1151,6 +1133,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
+import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
