@@ -217,13 +217,13 @@
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[11px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                          class="group relative flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[13px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                         >
                           <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
                         </NuxtLink>
                       </template>
-                      <p v-else class="px-2.5 py-1 text-[11px] text-gray-400 dark:text-gray-500">No staff</p>
+                      <p v-else class="px-2.5 py-1 text-[13px] text-gray-400 dark:text-gray-500">No staff</p>
                     </div>
                   </template>
                   <NuxtLink

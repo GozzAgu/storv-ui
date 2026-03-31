@@ -500,8 +500,7 @@
                 :class="[ 'min-w-[10rem] max-w-[18rem] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
-                <div class="flex flex-col items-start gap-0.5">
-                  <div class="flex items-center gap-1.5">
+                <div class="flex items-center gap-1.5">
                   Items
                   <template v-if="isColumnSortable('itemsCount')">
                     <ChevronUpIcon
@@ -514,8 +513,6 @@
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
-                  </div>
-                  <span class="font-normal normal-case tracking-normal text-[9px] text-gray-400 dark:text-gray-500">Expand row for full line items</span>
                 </div>
               </th>
               <th
@@ -606,8 +603,8 @@
             <tr
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-              class="border-b border-gray-100/90 transition-colors duration-300 hover:bg-gray-50/95 dark:border-gray-800/70 dark:hover:bg-gray-900/70"
-              :class="flashReceiptId === receipt.id ? 'bg-primary-500/[0.07] dark:bg-primary-500/10' : 'even:bg-gray-50/40 dark:even:bg-gray-900/25'"
+              class="border-b border-gray-100/90 transition-colors duration-200 hover:bg-gray-50/80 dark:border-gray-800/70 dark:hover:bg-gray-900/60"
+              :class="flashReceiptId === receipt.id ? 'bg-primary-500/[0.07] dark:bg-primary-500/10' : ''"
             >
               <td v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center align-middle sm:px-4">
                 <Checkbox
@@ -643,11 +640,11 @@
                 <div class="text-[11px] font-medium text-gray-900 dark:text-gray-50">
                   {{ receipt.customerName }}
                 </div>
-                <div v-if="receipt.customerEmail" class="text-[10px] text-gray-500 dark:text-gray-400">
-                  {{ receipt.customerEmail }}
-                </div>
                 <div v-if="receipt.customerPhone" class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
                   {{ receipt.customerPhone }}
+                </div>
+                <div v-else-if="receipt.customerEmail" class="text-[10px] text-gray-500 dark:text-gray-400">
+                  {{ receipt.customerEmail }}
                 </div>
               </td>
               <td class="px-3 py-2.5 align-middle sm:px-4">
@@ -666,15 +663,10 @@
                   >
                     {{ getReceiptLineItemsPreview(receipt) }}
                   </p>
-                  <p
-                    v-else-if="getReceiptLineItemsCount(receipt) > 0"
-                    class="text-[10px] text-gray-500 dark:text-gray-500"
-                  >
-                    Names not stored — expand for structure
-                  </p>
+                  <p v-else-if="getReceiptLineItemsCount(receipt) > 0" class="text-[10px] text-gray-500 dark:text-gray-500">-</p>
                   <button
                     type="button"
-                    class="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                    class="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600/90 dark:text-primary-400/90 hover:text-primary-700 dark:hover:text-primary-300"
                     :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
                     @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
                   >
@@ -728,14 +720,14 @@
             </tr>
             <tr
               v-if="expandedReceiptLineItems[receipt.id]"
-              class="border-b border-gray-100/90 bg-gray-50/90 dark:border-gray-800/70 dark:bg-gray-900/55"
+              class="border-b border-gray-100/90 bg-gray-50/70 dark:border-gray-800/70 dark:bg-gray-900/45"
             >
               <td
                 :colspan="receiptLineItemsDetailColspan"
                 class="px-3 py-3 sm:px-4"
               >
                 <div class="rounded-sm border border-gray-200/80 bg-white/95 px-3 py-2.5 dark:border-gray-700/80 dark:!bg-dashboard-card/80">
-                  <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                  <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                     Line item details — {{ receipt.receiptNumber }}
                   </p>
                   <ReceiptTableLineItems
