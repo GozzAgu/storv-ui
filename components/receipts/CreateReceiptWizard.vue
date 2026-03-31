@@ -926,6 +926,10 @@ watch(() => swapInFolderId.value, (folderId) => {
       swapInItemForm.value[field.name] = ''
     }
   })
+  const folderTitle = folder?.name?.trim()
+  if (folderTitle && fields.some((f: { name: string }) => f.name === 'name')) {
+    swapInItemForm.value.name = folderTitle
+  }
 })
 
 // Watch for swap-in toggle to reset form when disabled

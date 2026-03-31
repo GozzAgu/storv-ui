@@ -2161,6 +2161,10 @@ const openAddItemModal = () => {
       itemForm[field.name] = ''
     }
   })
+  const folderTitle = folder.value?.name?.trim()
+  if (folder.value?.hasSerialNumbers && folderTitle && fields.some((f) => f.name === 'name')) {
+    itemForm.name = folderTitle
+  }
   showAddItemModal.value = true
 }
 
