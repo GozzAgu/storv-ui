@@ -344,7 +344,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:text-gray-400 md:flex"
+              class="group relative hidden h-9 w-full max-w-[11.5rem] items-center gap-2 rounded-sm border border-gray-200/90 bg-white/95 px-2 py-1.5 text-gray-600 shadow-sm transition-colors hover:border-gray-300/90 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 sm:max-w-[13rem] lg:max-w-[15rem] lg:pr-2.5 dark:border-gray-700/80 dark:bg-gray-900/65 dark:text-gray-400 dark:shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] dark:hover:border-gray-600/80 dark:hover:bg-gray-900/85 md:flex"
             >
               <MagnifyingGlassIcon
                 class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-500"
@@ -364,7 +364,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
+              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border-0 bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
               aria-label="Search"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />

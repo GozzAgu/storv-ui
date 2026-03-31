@@ -366,12 +366,32 @@
                   <span v-if="receipt.customerPhone" class="block text-[10px] text-gray-500 dark:text-gray-500 tabular-nums">{{ receipt.customerPhone }}</span>
                 </p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5">{{ formatDate(receipt.date) }}</p>
-                <div class="mt-2">
-                  <ReceiptTableLineItems
-                    :items="receipt.items"
-                    :items-count-fallback="receipt.itemsCount"
-                    compact
-                  />
+                <div class="mt-2 rounded-sm border border-gray-200/80 bg-gray-50/60 px-2 py-1.5 dark:border-gray-700/70 dark:bg-gray-900/40">
+                  <p class="text-[10px] font-medium text-gray-800 dark:text-gray-200">
+                    {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
+                  </p>
+                  <p v-if="getReceiptLineItemsPreview(receipt)" class="text-[10px] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">
+                    {{ getReceiptLineItemsPreview(receipt) }}
+                  </p>
+                  <button
+                    type="button"
+                    class="mt-1.5 inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400"
+                    @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
+                  >
+                    <ChevronDownIcon
+                      class="h-3.5 w-3.5 shrink-0 transition-transform duration-200"
+                      :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
+                      stroke-width="2"
+                    />
+                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} full details
+                  </button>
+                  <div v-if="expandedReceiptLineItems[receipt.id]" class="mt-2 border-t border-gray-200/70 pt-2 dark:border-gray-700/70">
+                    <ReceiptTableLineItems
+                      :items="receipt.items"
+                      :items-count-fallback="receipt.itemsCount"
+                      compact
+                    />
+                  </div>
                 </div>
                 <div class="mt-2 flex items-center justify-between gap-2">
                   <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
@@ -477,11 +497,12 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'min-w-[10rem] max-w-[18rem] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
-                <div class="flex items-center gap-1.5">
-                  Line items
+                <div class="flex flex-col items-start gap-0.5">
+                  <div class="flex items-center gap-1.5">
+                  Items
                   <template v-if="isColumnSortable('itemsCount')">
                     <ChevronUpIcon
                       v-if="currentSort.key === 'itemsCount' && currentSort.order === 'asc'"
@@ -493,6 +514,8 @@
                     />
                     <BarsArrowUpIcon v-else class="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-50" />
                   </template>
+                  </div>
+                  <span class="font-normal normal-case tracking-normal text-[9px] text-gray-400 dark:text-gray-500">Expand row for full line items</span>
                 </div>
               </th>
               <th
@@ -579,9 +602,8 @@
             </tr>
           </thead>
           <tbody class="bg-white dark:!bg-dashboard-card/35">
+            <template v-for="receipt in paginatedReceipts" :key="receipt.id">
             <tr
-              v-for="receipt in paginatedReceipts"
-              :key="receipt.id"
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
               class="border-b border-gray-100/90 transition-colors duration-300 hover:bg-gray-50/95 dark:border-gray-800/70 dark:hover:bg-gray-900/70"
@@ -627,24 +649,43 @@
                 <div v-if="receipt.customerPhone" class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
                   {{ receipt.customerPhone }}
                 </div>
-                <div
-                  v-if="receipt.customerAddress"
-                  class="text-[10px] leading-snug text-gray-500 dark:text-gray-400 line-clamp-2"
-                  :title="receipt.customerAddress"
-                >
-                  {{ receipt.customerAddress }}
-                </div>
               </td>
               <td class="px-3 py-2.5 align-middle sm:px-4">
                 <div class="text-[11px] tabular-nums text-gray-600 dark:text-gray-300">
                   {{ formatDate(receipt.date) }}
                 </div>
               </td>
-              <td class="min-w-[12rem] px-3 py-2.5 align-top sm:min-w-[16rem] sm:px-4 lg:min-w-[22rem]">
-                <ReceiptTableLineItems
-                  :items="receipt.items"
-                  :items-count-fallback="receipt.itemsCount"
-                />
+              <td class="min-w-[10rem] max-w-[20rem] px-3 py-2.5 align-top sm:px-4">
+                <div class="space-y-1">
+                  <p class="text-[11px] font-medium tabular-nums text-gray-900 dark:text-gray-50">
+                    {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
+                  </p>
+                  <p
+                    v-if="getReceiptLineItemsPreview(receipt)"
+                    class="text-[10px] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2"
+                  >
+                    {{ getReceiptLineItemsPreview(receipt) }}
+                  </p>
+                  <p
+                    v-else-if="getReceiptLineItemsCount(receipt) > 0"
+                    class="text-[10px] text-gray-500 dark:text-gray-500"
+                  >
+                    Names not stored — expand for structure
+                  </p>
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                    :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
+                    @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
+                  >
+                    <ChevronDownIcon
+                      class="h-3.5 w-3.5 shrink-0 transition-transform duration-200"
+                      :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
+                      stroke-width="2"
+                    />
+                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} line details
+                  </button>
+                </div>
               </td>
               <td class="px-3 py-2.5 align-middle sm:px-4">
                 <span class="text-[11px] font-semibold tabular-nums text-gray-900 dark:text-gray-50">
@@ -685,6 +726,26 @@
                 </div>
               </td>
             </tr>
+            <tr
+              v-if="expandedReceiptLineItems[receipt.id]"
+              class="border-b border-gray-100/90 bg-gray-50/90 dark:border-gray-800/70 dark:bg-gray-900/55"
+            >
+              <td
+                :colspan="receiptLineItemsDetailColspan"
+                class="px-3 py-3 sm:px-4"
+              >
+                <div class="rounded-sm border border-gray-200/80 bg-white/95 px-3 py-2.5 dark:border-gray-700/80 dark:!bg-dashboard-card/80">
+                  <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                    Line item details — {{ receipt.receiptNumber }}
+                  </p>
+                  <ReceiptTableLineItems
+                    :items="receipt.items"
+                    :items-count-fallback="receipt.itemsCount"
+                  />
+                </div>
+              </td>
+            </tr>
+            </template>
           </tbody>
         </table>
       </div>
@@ -986,13 +1047,25 @@
                             </span>
                           </div>
                         </div>
-                        <div class="mt-1.5 pointer-events-none">
-                          <ReceiptTableLineItems
-                            :items="receipt.items"
-                            :items-count-fallback="receipt.itemsCount"
-                            compact
-                          />
-                        </div>
+                        <ul
+                          v-if="receipt.items?.length"
+                          class="mt-1.5 space-y-0.5 border-t border-gray-200/70 pt-1.5 text-[10px] text-gray-600 dark:border-gray-700/70 dark:text-gray-400"
+                        >
+                          <li
+                            v-for="(item, itemIdx) in receipt.items"
+                            :key="itemIdx"
+                            class="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0"
+                          >
+                            <span class="min-w-0 truncate text-gray-800 dark:text-gray-200">{{ item.itemName }}</span>
+                            <span class="shrink-0 tabular-nums text-gray-600 dark:text-gray-400">
+                              {{ item.quantity }}× {{ formatCurrency(item.price) }}
+                              <span class="font-medium text-gray-900 dark:text-gray-100"> · {{ formatCurrency(item.price * item.quantity) }}</span>
+                            </span>
+                          </li>
+                        </ul>
+                        <p v-else class="mt-1 text-[10px] text-gray-500 dark:text-gray-500">
+                          {{ receipt.itemsCount }} item{{ receipt.itemsCount === 1 ? '' : 's' }} · open in Receipts for full details
+                        </p>
                       </button>
                     </div>
                   </td>
@@ -1306,6 +1379,28 @@ const getInitialPage = (): number => {
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(100)
 const sidebarCollapsed = ref(false)
+
+/** Expandable full line-item details (desktop secondary row + mobile accordion) */
+const expandedReceiptLineItems = ref<Record<string, boolean>>({})
+const receiptLineItemsDetailColspan = computed(() => (canDeleteReceipts.value ? 10 : 9))
+
+const getReceiptLineItemsCount = (receipt: Receipt) => receipt.items?.length ?? receipt.itemsCount ?? 0
+
+const getReceiptLineItemsPreview = (receipt: Receipt): string => {
+  if (!receipt.items?.length) return ''
+  const names = receipt.items.map((i) => i.itemName).filter(Boolean)
+  if (names.length === 0) return ''
+  const max = 3
+  if (names.length <= max) return names.join(', ')
+  return `${names.slice(0, max).join(', ')} · +${names.length - max} more`
+}
+
+const toggleReceiptLineItemsExpand = (receiptId: string) => {
+  expandedReceiptLineItems.value = {
+    ...expandedReceiptLineItems.value,
+    [receiptId]: !expandedReceiptLineItems.value[receiptId],
+  }
+}
 
 // Sorting state
 const currentSort = ref<{ key: string; order: 'asc' | 'desc' }>({ key: 'date', order: 'desc' })
@@ -1976,6 +2071,7 @@ const handlePageChange = (page: number) => {
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
   openReceiptMenuId.value = null
+  expandedReceiptLineItems.value = {}
   if (import.meta.client && activeTab.value === 'receipts') {
     try {
       localStorage.setItem('receipts-page', newPage.toString())
