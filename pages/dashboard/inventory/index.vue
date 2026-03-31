@@ -479,7 +479,14 @@
 
       <template #footer>
         <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-sm">Cancel</Button>
-        <Button variant="primary" size="sm" type="submit" @click="handleSaveFolder" extra-class="!rounded-sm">
+        <Button
+          variant="primary"
+          size="sm"
+          type="submit"
+          :disabled="!isFolderDrawerValid"
+          @click="handleSaveFolder"
+          extra-class="!rounded-sm"
+        >
           {{ editingFolder ? 'Update' : 'Create' }} folder
         </Button>
       </template>
@@ -1359,6 +1366,13 @@ const handleConfirmDeleteFolder = async (folder: InventoryFolder) => {
     selectedFolderForDelete.value = null
   }
 }
+
+const isFolderDrawerValid = computed(() => {
+  if (!folderForm.name.trim()) return false
+  if (!folderForm.type) return false
+  if (editableFields.value.length === 0) return false
+  return editableFields.value.every((field) => !!field.label?.trim())
+})
 
 const handleSaveFolder = async () => {
   if (!folderForm.name.trim()) {

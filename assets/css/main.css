@@ -581,3 +581,52 @@ html.theme-transitioning tr {
   position: absolute;
 }
 
+/* Global corner-radius polish (subtle, clean) */
+@layer base {
+  :root {
+    --app-radius-sm: 0.5rem;   /* 8px */
+    --app-radius-md: 0.625rem; /* 10px */
+  }
+
+  /* Most app surfaces use rounded-sm/rounded; bump both slightly for a cleaner feel */
+  .rounded-sm {
+    border-radius: var(--app-radius-sm) !important;
+  }
+
+  .rounded {
+    border-radius: var(--app-radius-md) !important;
+  }
+
+  /* Ensure common form/actions follow the same subtle radius */
+  :where(button, input, select, textarea):not(.rounded-full) {
+    border-radius: var(--app-radius-sm);
+  }
+
+  /* Table/card shells should align with the same shape language */
+  :where(.data-table-shell, .frosted-glass) {
+    border-radius: var(--app-radius-sm);
+  }
+
+  /* Tables: ensure visible rounded corners (inner header/body can otherwise look square) */
+  :where(.data-table-shell, .frosted-glass, .overflow-x-auto) {
+    overflow: hidden;
+  }
+
+  :where(table) {
+    border-radius: var(--app-radius-sm);
+  }
+
+  :where(table thead tr:first-child th:first-child) {
+    border-top-left-radius: var(--app-radius-sm);
+  }
+  :where(table thead tr:first-child th:last-child) {
+    border-top-right-radius: var(--app-radius-sm);
+  }
+  :where(table tbody tr:last-child td:first-child) {
+    border-bottom-left-radius: var(--app-radius-sm);
+  }
+  :where(table tbody tr:last-child td:last-child) {
+    border-bottom-right-radius: var(--app-radius-sm);
+  }
+}
+

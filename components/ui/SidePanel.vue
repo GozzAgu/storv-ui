@@ -39,7 +39,7 @@
           aria-modal="true"
           :aria-labelledby="labelledBy"
           :aria-describedby="describedBy"
-          :class="[ 'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'w-full min-w-0 rounded-none lg:rounded-l-sm', panelWidthClasses, ]"
+          :class="[ 'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'w-full min-w-0 rounded-none lg:rounded-l-md', panelWidthClasses, ]"
           @click.stop
         >
             <!-- Header -->
@@ -76,7 +76,7 @@
               <button
                 v-if="showClose"
                 type="button"
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
                 aria-label="Close panel"
                 @click="handleClose"
               >

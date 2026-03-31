@@ -974,7 +974,14 @@
 
       <template #footer>
         <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
-        <Button variant="primary" size="sm" type="submit" @click="handleSaveItem" class="w-full sm:w-auto !rounded-sm">
+        <Button
+          variant="primary"
+          size="sm"
+          type="submit"
+          :disabled="!isItemDrawerValid"
+          @click="handleSaveItem"
+          class="w-full sm:w-auto !rounded-sm"
+        >
           {{ editingItem ? 'Update Product' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Product') }}
         </Button>
       </template>
@@ -1446,6 +1453,44 @@ watch(isFullscreen, (fullscreen) => {
 
 const itemForm = reactive<Record<string, any>>({})
 const serialNumbers = ref<string[]>([])
+
+const isItemDrawerValid = computed(() => {
+  const fieldsToValidate =
+    effectiveTemplateFields.value.length > 0
+      ? effectiveTemplateFields.value
+      : folder.value?.template?.fields ?? []
+
+  // In serial-number bulk add, product model is required.
+  if (folder.value?.hasSerialNumbers && !editingItem.value) {
+    if (!itemForm.brand || String(itemForm.brand).trim() === '') return false
+  }
+
+  // Validate required template fields (same exclusions as submit handler).
+  if (fieldsToValidate.length) {
+    const requiredFields = fieldsToValidate.filter(
+      (f) =>
+        f.required &&
+        f.name !== 'serialNo' &&
+        f.name !== 'brand' &&
+        f.name !== 'model' &&
+        f.id !== SYNTH_STOCK_FIELD_ID,
+    )
+
+    for (const field of requiredFields) {
+      const value = itemForm[field.name]
+      if (value === undefined || value === null) return false
+      if (typeof value === 'string' && value.trim() === '') return false
+    }
+  }
+
+  // Serial-number bulk add requires at least one non-empty serial.
+  if (folder.value?.hasSerialNumbers && !editingItem.value) {
+    const validSerials = serialNumbers.value.filter((sn) => sn && sn.trim() !== '')
+    if (validSerials.length === 0) return false
+  }
+
+  return true
+})
 
 // Discount modal state
 const showDiscountModal = ref(false)

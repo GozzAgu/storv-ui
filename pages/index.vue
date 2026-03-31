@@ -59,13 +59,16 @@
         class="absolute inset-0 bg-center bg-cover will-change-transform"
         style="background-image: url('/hero-img.jpg');"
       />
-      <!-- Readability overlay (dark) -->
-      <div class="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/60 to-slate-950/80" />
-      <div class="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full bg-primary-400/10 blur-3xl" />
-      <div class="absolute -bottom-40 -left-32 w-[620px] h-[620px] rounded-full bg-primary-400/10 blur-3xl" />
+      <!-- Readability overlay + cinematic gradients -->
+      <div class="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/85" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.22),transparent_42%),radial-gradient(circle_at_82%_30%,rgba(56,189,248,0.16),transparent_40%)]" />
+      <div class="absolute -top-32 -right-32 h-[520px] w-[520px] animate-blob rounded-full bg-primary-400/15 blur-3xl" />
+      <div class="absolute -bottom-40 -left-32 h-[620px] w-[620px] animate-blob rounded-full bg-primary-400/12 blur-3xl animation-delay-2000" />
+      <div class="absolute right-[10%] top-[18%] h-3 w-3 animate-ping rounded-full bg-primary-300/70" />
+      <div class="absolute left-[22%] top-[38%] h-2 w-2 animate-ping rounded-full bg-cyan-300/60 animation-delay-2000" />
 
-      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-24 lg:pb-28">
-        <div class="max-w-3xl">
+      <div class="relative mx-auto grid max-w-6xl gap-10 px-4 pb-20 sm:px-6 sm:pb-24 lg:grid-cols-12 lg:items-end lg:gap-12 lg:px-8 lg:pb-28">
+        <div class="max-w-3xl lg:col-span-7">
           <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 backdrop-blur px-4 py-2 text-xs font-medium text-white/80">
               <SparklesIcon class="w-4 h-4 text-primary-300" />
             Built for fast-moving retail teams
@@ -85,7 +88,7 @@
             <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />Get insights early to prevent stockouts and overstock</li>
           </ul>
 
-          <div class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <button
                 @click="showContactFormModal = true"
               class="inline-flex items-center justify-center rounded-sm bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
@@ -100,7 +103,7 @@
               </button>
           </div>
           
-          <div class="mt-10 flex flex-col sm:flex-row sm:items-center gap-6">
+          <div class="mt-10 flex flex-col gap-6 sm:flex-row sm:items-center">
             <div class="flex items-center gap-3">
               <div class="flex gap-1">
                 <svg v-for="i in 5" :key="i" class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
@@ -124,6 +127,62 @@
                 <p class="text-xs text-white/70">team workflows</p>
             </div>
           </div>
+          </div>
+        </div>
+
+        <!-- Floating hero cards (desktop only) -->
+        <div class="relative hidden min-h-[27rem] lg:col-span-5 lg:block">
+          <div class="absolute top-0 right-0 w-64 rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
+            <div class="flex items-center justify-between">
+              <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Inventory folders</p>
+              <span class="inline-flex items-center gap-1 rounded-full bg-cyan-400/20 px-2 py-0.5 text-[11px] font-medium text-cyan-200">
+                <FolderIcon class="h-3 w-3" />
+                Structured
+              </span>
+            </div>
+            <p class="mt-2 text-sm font-semibold tracking-tight text-white">Track by folders and templates</p>
+            <p class="mt-1 text-xs text-white/70">Organize products, serial numbers, and custom fields per category.</p>
+          </div>
+
+          <div class="absolute top-32 right-8 w-72 rounded-2xl border border-white/15 bg-slate-900/65 p-4 shadow-2xl backdrop-blur-xl">
+            <div class="mb-3 flex items-center justify-between">
+              <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Sales & receipts</p>
+              <BellAlertIcon class="h-4 w-4 text-primary-300" />
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <ShoppingCartIcon class="h-4 w-4 text-cyan-300" />
+                  <span class="text-xs text-white">Create receipts in seconds</span>
+                </div>
+                <span class="text-xs font-semibold text-white">Fast</span>
+              </div>
+              <div class="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2">
+                <div class="flex items-center gap-2">
+                  <ArrowsRightLeftIcon class="h-4 w-4 text-primary-300" />
+                  <span class="text-xs text-white">Swap-ins and returns</span>
+                </div>
+                <span class="text-xs text-emerald-200">Built-in</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute top-[22.5rem] right-12 w-64 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
+            <p class="text-[11px] font-medium text-white/80">Multi-store operations</p>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+              <div class="min-w-0 rounded-md bg-white/10 px-1.5 py-2">
+                <p class="truncate text-xs font-semibold text-white">Roles</p>
+                <p class="whitespace-normal break-words text-[9px] leading-tight text-white/70">Permissions</p>
+              </div>
+              <div class="min-w-0 rounded-md bg-white/10 px-1.5 py-2">
+                <p class="truncate text-xs font-semibold text-white">Teams</p>
+                <p class="whitespace-normal break-words text-[9px] leading-tight text-white/70">Departments</p>
+              </div>
+              <div class="min-w-0 rounded-md bg-white/10 px-1.5 py-2">
+                <p class="truncate text-xs font-semibold text-white">Stores</p>
+                <p class="whitespace-normal break-words text-[9px] leading-tight text-white/70">Branches</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
