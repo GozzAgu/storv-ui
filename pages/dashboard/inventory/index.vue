@@ -189,7 +189,6 @@
           <div class="mt-auto w-full min-w-0">
             <h3
               class="max-w-full truncate px-0.5 text-center text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
-              :title="folder.name"
             >
               {{ folder.name }}
             </h3>
