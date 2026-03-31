@@ -103,27 +103,67 @@
  * Covers every route (dashboard, marketing, auth) — no layout-specific hook required.
  */
 html.theme-transitioning,
-html.theme-transitioning *,
-html.theme-transitioning *::before,
-html.theme-transitioning *::after {
-  /* One declaration so `!important` reliably wins over Tailwind transition-* utilities */
+body.theme-transitioning,
+html.theme-transitioning aside,
+html.theme-transitioning header,
+html.theme-transitioning main,
+html.theme-transitioning nav,
+html.theme-transitioning section,
+html.theme-transitioning article,
+html.theme-transitioning [data-dashboard-main],
+html.theme-transitioning [data-dashboard-teleport],
+html.theme-transitioning .data-table-shell,
+html.theme-transitioning .frosted-glass,
+html.theme-transitioning .dashboard-global-tooltip-bubble,
+html.theme-transitioning button,
+html.theme-transitioning a,
+html.theme-transitioning input,
+html.theme-transitioning select,
+html.theme-transitioning textarea,
+html.theme-transitioning th,
+html.theme-transitioning td,
+html.theme-transitioning tr {
+  /* Targeted list (instead of `*`) avoids stutter on very large tables. */
   transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
-    text-shadow, text-decoration-color, fill, stroke, opacity, filter, backdrop-filter, -webkit-backdrop-filter,
+    text-decoration-color, fill, stroke, opacity, filter, backdrop-filter, -webkit-backdrop-filter,
     accent-color, caret-color, column-rule-color !important;
-  /* Short + linear so cards/backgrounds move together (no ease “wave” across the screen) */
-  transition-duration: 0.15s !important;
-  transition-timing-function: linear !important;
+  transition-duration: 0.24s !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html.theme-transitioning,
-  html.theme-transitioning *,
-  html.theme-transitioning *::before,
-  html.theme-transitioning *::after {
-    transition-duration: 0.05s !important;
+  body.theme-transitioning,
+  html.theme-transitioning aside,
+  html.theme-transitioning header,
+  html.theme-transitioning main,
+  html.theme-transitioning nav,
+  html.theme-transitioning section,
+  html.theme-transitioning article,
+  html.theme-transitioning [data-dashboard-main],
+  html.theme-transitioning [data-dashboard-teleport],
+  html.theme-transitioning .data-table-shell,
+  html.theme-transitioning .frosted-glass,
+  html.theme-transitioning .dashboard-global-tooltip-bubble,
+  html.theme-transitioning button,
+  html.theme-transitioning a,
+  html.theme-transitioning input,
+  html.theme-transitioning select,
+  html.theme-transitioning textarea,
+  html.theme-transitioning th,
+  html.theme-transitioning td,
+  html.theme-transitioning tr {
+    transition-duration: 0.09s !important;
     transition-timing-function: ease-out !important;
   }
+}
+
+/* Chromium view-transition polish (no-op on unsupported browsers). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.24s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -456,5 +496,28 @@ html.theme-transitioning *::after {
   .glassmorphism-button:hover {
     background: rgba(59, 130, 246, 0.95);
   }
+}
+
+/* Global app tooltip style (body-level; never clipped by table/card overflow) */
+.dashboard-global-tooltip-bubble {
+  display: inline-flex;
+  min-width: max-content;
+  max-width: min(18rem, calc(100vw - 4rem));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 0.125rem;
+  border: 1px solid rgb(55 65 81 / 0.4);
+  background: rgb(17 24 39);
+  padding: 0.375rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.dashboard-global-tooltip-arrow {
+  position: absolute;
 }
 

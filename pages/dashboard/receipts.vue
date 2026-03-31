@@ -1050,6 +1050,7 @@
   <Teleport to="body">
     <div
       v-if="openReceiptMenuId && receiptForOpenMenu && receiptMenuFixedStyle"
+      ref="receiptMenuPanelRef"
       data-receipt-menu
       class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm border border-gray-200/90 py-1 text-left dark:border-gray-700/80"
       role="menu"
@@ -1098,6 +1099,7 @@
   <Teleport to="body">
     <div
       v-if="openCustomerMenuId && customerForOpenMenu && customerMenuFixedStyle"
+      ref="customerMenuPanelRef"
       data-customer-menu
       class="frosted-glass fixed z-[1000] min-w-[11rem] overflow-hidden rounded-sm border border-gray-200/90 py-1 text-left dark:border-gray-700/80"
       role="menu"
@@ -1738,6 +1740,8 @@ const receiptForOpenMenu = computed(() => {
 
 const receiptMenuFixedStyle = ref<Record<string, string> | null>(null)
 const customerMenuFixedStyle = ref<Record<string, string> | null>(null)
+const receiptMenuPanelRef = ref<HTMLElement | null>(null)
+const customerMenuPanelRef = ref<HTMLElement | null>(null)
 
 function updateReceiptMenuPosition() {
   const id = openReceiptMenuId.value
@@ -1751,9 +1755,11 @@ function updateReceiptMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
+  const menuWidth = receiptMenuPanelRef.value?.offsetWidth || 176
+  const estimatedMenuHeight = receiptMenuPanelRef.value?.offsetHeight || 240
   receiptMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 176,
-    estimatedMenuHeight: 240,
+    menuWidth,
+    estimatedMenuHeight,
     margin: 4,
     viewportPadding: 8,
   })
@@ -1771,9 +1777,11 @@ function updateCustomerMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
+  const menuWidth = customerMenuPanelRef.value?.offsetWidth || 176
+  const estimatedMenuHeight = customerMenuPanelRef.value?.offsetHeight || 52
   customerMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 176,
-    estimatedMenuHeight: 52,
+    menuWidth,
+    estimatedMenuHeight,
     margin: 4,
     viewportPadding: 8,
   })
@@ -1839,6 +1847,8 @@ watch(openReceiptMenuId, (id) => {
   }
 
   nextTick(() => {
+    // second pass after DOM paints so we position using real panel size
+    requestAnimationFrame(() => updateReceiptMenuPosition())
     setTimeout(() => {
       if (openReceiptMenuId.value && receiptMenuOutsideHandler) {
         document.addEventListener('click', receiptMenuOutsideHandler, true)
@@ -1866,6 +1876,7 @@ watch(openCustomerMenuId, (id) => {
   }
 
   nextTick(() => {
+    requestAnimationFrame(() => updateCustomerMenuPosition())
     setTimeout(() => {
       if (openCustomerMenuId.value && customerMenuOutsideHandler) {
         document.addEventListener('click', customerMenuOutsideHandler, true)

@@ -3,11 +3,15 @@ import { defineStore } from 'pinia'
 export type Theme = 'light' | 'dark' | 'system'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
-const THEME_TRANSITION_MS = 190
-const THEME_TRANSITION_MS_REDUCED = 72
+const THEME_TRANSITION_MS = 240
+const THEME_TRANSITION_MS_REDUCED = 90
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
 let themeTransitionTimer: number | null = null
+
+type MaybeDocumentWithViewTransition = Document & {
+  startViewTransition?: (callback: () => void) => { finished?: Promise<unknown> }
+}
 
 function syncThemeColorMeta(isDark: boolean) {
   if (!import.meta.client) return
@@ -60,6 +64,7 @@ export const useThemeStore = defineStore('theme', {
     applyTheme() {
       if (import.meta.client) {
         const html = document.documentElement
+        const body = document.body
         const isDark = this.actualTheme === 'dark'
         // First paint during initTheme: apply class immediately (no transition) to avoid a long flash
         const shouldAnimate = this.initialized
@@ -73,22 +78,42 @@ export const useThemeStore = defineStore('theme', {
           themeTransitionTimer = null
         }
 
-        // Avoid `void html.offsetHeight` here: on large list pages (inventory, receipts) it forces
-        // a full synchronous layout and feels like a pause. Class + `.dark` in one turn still transition.
+        const applyThemeClasses = () => {
+          if (isDark) {
+            html.classList.add('dark')
+          } else {
+            html.classList.remove('dark')
+          }
+          // Native scrollbars / form controls follow the palette immediately (pairs with global CSS transition)
+          html.style.colorScheme = isDark ? 'dark' : 'light'
+          syncThemeColorMeta(isDark)
+        }
+
         if (shouldAnimate) {
           html.classList.add('theme-transitioning')
+          body.classList.add('theme-transitioning')
         }
-        if (isDark) {
-          html.classList.add('dark')
+
+        // Progressive enhancement for Chromium browsers: View Transitions smooth out
+        // fixed/teleported surfaces that don't always interpolate cleanly otherwise.
+        const docWithVT = document as MaybeDocumentWithViewTransition
+        const canUseViewTransition =
+          shouldAnimate &&
+          !reducedMotion &&
+          typeof docWithVT.startViewTransition === 'function'
+
+        if (canUseViewTransition) {
+          docWithVT.startViewTransition?.(() => {
+            applyThemeClasses()
+          })
         } else {
-          html.classList.remove('dark')
+          applyThemeClasses()
         }
-        // Native scrollbars / form controls follow the palette immediately (pairs with global CSS transition)
-        html.style.colorScheme = isDark ? 'dark' : 'light'
-        syncThemeColorMeta(isDark)
+
         if (shouldAnimate) {
           themeTransitionTimer = window.setTimeout(() => {
             html.classList.remove('theme-transitioning')
+            body.classList.remove('theme-transitioning')
             themeTransitionTimer = null
           }, transitionMs)
         }
