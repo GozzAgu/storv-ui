@@ -270,6 +270,7 @@ export const useStoresStore = defineStore('stores', {
         
         inventoryStore.folders = []
         inventoryStore.items = {}
+        inventoryStore.itemsLoadedFully = {}
         inventoryStore.loading = false
         inventoryStore.error = null
         
@@ -322,6 +323,7 @@ export const useStoresStore = defineStore('stores', {
         staffStore.staff = []
         inventoryStore.folders = []
         inventoryStore.items = {} // Clear all inventory items
+        inventoryStore.itemsLoadedFully = {}
         receiptsStore.receipts = []
         customersStore.customers = []
         

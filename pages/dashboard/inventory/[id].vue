@@ -2679,6 +2679,12 @@ const handleExportToExcel = async () => {
 
   isExporting.value = true
   try {
+    if (folderId.value && inventoryStore.itemsLoadedFully[folderId.value] === false) {
+      toast.warning(
+        `Export only includes the first ${inventoryStore.items?.[folderId.value]?.length ?? 0} products loaded in this folder (capped for performance). Folder total may be higher.`,
+        7000
+      )
+    }
     const folderItems = items.value
     if (folderItems.length === 0) {
       toast.warning('No items to export.')

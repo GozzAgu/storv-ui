@@ -1,5 +1,30 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, writeBatch } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  serverTimestamp,
+  deleteField,
+  writeBatch,
+  getCountFromServer,
+} from 'firebase/firestore'
+
+/**
+ * Scalability notes (Firestore):
+ * - Tenant: items live under users/{ownerUid}/stores/{storeId}/inventoryItems (not one giant doc).
+ * - Reads: fetch uses getDocs (no real-time listeners) + optional per-query limit.
+ * - folder.itemCount: synced via aggregation count (not length of loaded rows).
+ * - Avoid unbounded growth: cap documents loaded into the client per fetch; count stays accurate.
+ */
+export const INVENTORY_MAX_ITEMS_PER_FETCH = 5000
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -71,6 +96,8 @@ export const useInventoryStore = defineStore('inventory', {
   state: () => ({ 
     folders: [] as InventoryFolder[],
     items: {} as Record<string, InventoryItem[]>, // Keyed by folderId
+    /** false = client may hold only the first INVENTORY_MAX_ITEMS_PER_FETCH rows (DB may have more). */
+    itemsLoadedFully: {} as Record<string, boolean>,
     loading: false,
     itemsLoading: {} as Record<string, boolean>, // Keyed by folderId
     error: null as string | null,
@@ -747,7 +774,8 @@ export const useInventoryStore = defineStore('inventory', {
         // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
         // Use queryUserId (superadmin's UID) for the hierarchical path
         const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
-        
+        const fetchCap = INVENTORY_MAX_ITEMS_PER_FETCH + 1
+
         // Query items by folderId
         // For staff: Get all items in folder (no createdBy filter) - they see items from anyone in their store
         // For superadmin: Filter by createdBy
@@ -758,7 +786,8 @@ export const useInventoryStore = defineStore('inventory', {
             q = query(
               itemsRef,
               where('folderId', '==', folderId),
-              orderBy('createdAt', 'desc')
+              orderBy('createdAt', 'desc'),
+              limit(fetchCap)
             )
             } else {
               // Superadmin sees only their items
@@ -766,7 +795,8 @@ export const useInventoryStore = defineStore('inventory', {
                 itemsRef,
                 where('folderId', '==', folderId),
                 where('createdBy', '==', queryUserId),
-                orderBy('createdAt', 'desc')
+                orderBy('createdAt', 'desc'),
+                limit(fetchCap)
               )
             }
         } catch (orderByError: any) {
@@ -776,14 +806,16 @@ export const useInventoryStore = defineStore('inventory', {
               // Staff sees all items in folder
               q = query(
                 itemsRef,
-                where('folderId', '==', folderId)
+                where('folderId', '==', folderId),
+                limit(fetchCap)
               )
             } else {
               // Superadmin sees only their items
               q = query(
                 itemsRef,
                 where('folderId', '==', folderId),
-                where('createdBy', '==', queryUserId)
+                where('createdBy', '==', queryUserId),
+                limit(fetchCap)
               )
             }
           } else {
@@ -792,8 +824,22 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const querySnapshot = await getDocs(q)
+        let docs = querySnapshot.docs
+        const hitLimit = docs.length > INVENTORY_MAX_ITEMS_PER_FETCH
+        if (hitLimit) docs = docs.slice(0, INVENTORY_MAX_ITEMS_PER_FETCH)
+        this.itemsLoadedFully[folderId] = !hitLimit
+        if (import.meta.client && hitLimit) {
+          import('~/composables/useToast')
+            .then(({ useToast }) => {
+              useToast().warning(
+                `This folder has many products. Showing the first ${INVENTORY_MAX_ITEMS_PER_FETCH}. Use search or filters where possible; export may need a future full sync for edge cases.`,
+                6500
+              )
+            })
+            .catch(() => {})
+        }
 
-        let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
+        let fetchedItems: InventoryItem[] = docs.map((doc) => {
           const data = doc.data()
           return {
             id: doc.id,
@@ -872,21 +918,39 @@ export const useInventoryStore = defineStore('inventory', {
             // For staff: Get all items (no createdBy filter)
             // For superadmin: Filter by createdBy
             let q
+            const fetchCapRetry = INVENTORY_MAX_ITEMS_PER_FETCH + 1
             if (userStore.userData?.role === 'staff') {
               q = query(
                 itemsRef,
-                where('folderId', '==', folderId)
+                where('folderId', '==', folderId),
+                limit(fetchCapRetry)
               )
             } else {
               q = query(
                 itemsRef,
                 where('folderId', '==', folderId),
-                where('createdBy', '==', queryUserId)
+                where('createdBy', '==', queryUserId),
+                limit(fetchCapRetry)
               )
             }
 
             const querySnapshot = await getDocs(q)
-            let fetchedItems: InventoryItem[] = querySnapshot.docs.map((doc) => {
+            let docsRetry = querySnapshot.docs
+            const hitRetry = docsRetry.length > INVENTORY_MAX_ITEMS_PER_FETCH
+            if (hitRetry) docsRetry = docsRetry.slice(0, INVENTORY_MAX_ITEMS_PER_FETCH)
+            this.itemsLoadedFully[folderId] = !hitRetry
+            if (import.meta.client && hitRetry) {
+              import('~/composables/useToast')
+                .then(({ useToast }) => {
+                  useToast().warning(
+                    `This folder has many products. Showing the first ${INVENTORY_MAX_ITEMS_PER_FETCH}.`,
+                    6000
+                  )
+                })
+                .catch(() => {})
+            }
+
+            let fetchedItems: InventoryItem[] = docsRetry.map((doc) => {
               const data = doc.data()
               return {
                 id: doc.id,
@@ -1078,6 +1142,9 @@ export const useInventoryStore = defineStore('inventory', {
           this.items[folderId] = []
         }
         this.items[folderId].unshift(itemForState)
+        if ((this.items[folderId]?.length ?? 0) > INVENTORY_MAX_ITEMS_PER_FETCH) {
+          this.itemsLoadedFully[folderId] = false
+        }
 
         // Update folder item count in background (non-blocking for better performance)
         // This updates folder stats (itemCount, lowStockCount) but doesn't affect item creation
@@ -1228,6 +1295,9 @@ export const useInventoryStore = defineStore('inventory', {
           this.items[folderId] = []
         }
         this.items[folderId].unshift(...createdItems)
+        if ((this.items[folderId]?.length ?? 0) > INVENTORY_MAX_ITEMS_PER_FETCH) {
+          this.itemsLoadedFully[folderId] = false
+        }
 
         // Update folder item count in background
         this.updateItemCount(folderId).catch((err) => {
@@ -1429,6 +1499,35 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
+    /** Exact item count in Firestore for this folder (same filters as fetchItems). Uses aggregation, not loaded rows. */
+    async getFolderItemCountFromServer(folderId: string): Promise<number> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('Not authenticated')
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      const queryUserId = await getQueryUserId()
+      if (!queryUserId) throw new Error('User ID not available')
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
+      const isStaff = userStore.userData?.role === 'staff'
+      const countQ = isStaff
+        ? query(itemsRef, where('folderId', '==', folderId))
+        : query(itemsRef, where('folderId', '==', folderId), where('createdBy', '==', queryUserId))
+
+      const agg = await getCountFromServer(countQ)
+      return agg.data().count
+    },
+
     // Update item count for a folder
     async updateItemCount(folderId: string) {
       const db = useFirestore().getFirestoreInstance()
@@ -1448,8 +1547,12 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       try {
-        // Get actual count from items
-        const actualCount = this.items[folderId]?.length || 0
+        let actualCount: number
+        try {
+          actualCount = await this.getFolderItemCountFromServer(folderId)
+        } catch {
+          actualCount = this.items[folderId]?.length || 0
+        }
 
         // Always sync local folder row (sidebar / UI)
         const index = this.folders.findIndex(f => f.id === folderId)
@@ -1589,6 +1692,11 @@ export const useInventoryStore = defineStore('inventory', {
 
         // Only super admins persist low-stock aggregates to Firestore
         if (userStore.userData?.role !== 'superAdmin') {
+          return
+        }
+
+        // Not all rows loaded (cap): persisted lowStockCount would under/over represent the folder
+        if (this.itemsLoadedFully[folderId] === false) {
           return
         }
 

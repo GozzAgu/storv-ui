@@ -407,11 +407,36 @@
                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
                 <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">Custom</span>
               </div>
-              <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-sm sm:ml-auto">
-                + Add field
-            </Button>
+              <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
+                <input
+                  ref="folderTemplateExcelInput"
+                  type="file"
+                  accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  class="sr-only"
+                  :disabled="importingFolderTemplate"
+                  @change="handleImportFolderTemplateExcel"
+                />
+                <Button
+                  v-if="selectedTemplate"
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  :icon="ArrowUpTrayIcon"
+                  :loading="importingFolderTemplate"
+                  :disabled="importingFolderTemplate"
+                  extra-class="!rounded-sm"
+                  @click="triggerFolderTemplateExcelPicker"
+                >
+                  Import from Excel
+                </Button>
+                <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-sm">
+                  + Add field
+                </Button>
+              </div>
           </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Define columns for this folder’s table.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              Define columns for this folder’s table, or import row 1 of a sheet as column headers—types are guessed from sample rows when possible.
+            </p>
             <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto px-1 py-1">
             <div
               v-for="(field, index) in editableFields"
@@ -594,6 +619,7 @@ import {
   EllipsisVerticalIcon,
   ExclamationTriangleIcon,
   Squares2X2Icon,
+  ArrowUpTrayIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
@@ -612,6 +638,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useToast } from '~/composables/useToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
 
 definePageMeta({
   layout: 'dashboard'
@@ -1480,6 +1507,41 @@ const handleCancelFolder = () => {
   folderForm.hasSerialNumbers = false
   folderForm.allowedDepartments = []
   editableFields.value = getDefaultFields()
+}
+
+const folderTemplateExcelInput = ref<HTMLInputElement | null>(null)
+const importingFolderTemplate = ref(false)
+
+const triggerFolderTemplateExcelPicker = () => {
+  folderTemplateExcelInput.value?.click()
+}
+
+const handleImportFolderTemplateExcel = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  importingFolderTemplate.value = true
+  try {
+    const buf = await file.arrayBuffer()
+    const fields = parseTemplateFieldsFromExcelArrayBuffer(buf, {
+      hasSerialNumbers: folderForm.hasSerialNumbers,
+    })
+    editableFields.value = fields
+    await nextTick()
+    editableFields.value.forEach((f) => {
+      if (!isLockedTemplateField(f)) {
+        syncTemplateFieldNameFromLabel(f)
+      }
+    })
+    toast.success(
+      `Imported ${fields.length} column${fields.length !== 1 ? 's' : ''} from "${file.name}".`
+    )
+  } catch (err: any) {
+    toast.error(err?.message || 'Could not read that Excel file.')
+  } finally {
+    importingFolderTemplate.value = false
+    input.value = ''
+  }
 }
 
 const handleAddField = () => {
