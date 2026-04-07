@@ -88,6 +88,19 @@
             <li class="flex items-start gap-2"><CheckIcon class="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />Get insights early to prevent stockouts and overstock</li>
           </ul>
 
+          <!-- Live sync visual (Uiverse-style loader + Storvv messaging) -->
+          <div
+            class="mt-8 flex flex-col items-stretch gap-4 rounded-sm border border-white/15 bg-white/5 p-4 backdrop-blur-sm sm:flex-row sm:items-center sm:gap-5"
+          >
+            <MarketingSyncLoader class="mx-auto shrink-0 sm:mx-0" :size="88" />
+            <div class="min-w-0 text-center sm:text-left">
+              <p class="text-sm font-semibold text-white">Inventory that stays live</p>
+              <p class="mt-1 text-xs leading-relaxed text-white/75 sm:max-w-sm">
+                Sales and receipts keep stock moving in the background, so your team always sees the current picture not yesterday’s export.
+              </p>
+            </div>
+          </div>
+
           <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <button
                 @click="showContactFormModal = true"
@@ -1312,6 +1325,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
 import {
   Bars3Icon,
   XMarkIcon,

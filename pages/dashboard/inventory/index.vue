@@ -114,18 +114,22 @@
     <!-- Loading skeleton -->
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="grid min-h-[96px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+      class="grid min-h-[78px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 dark:!bg-dashboard-card animate-pulse"
+        class="relative flex min-h-[78px] flex-col overflow-hidden rounded-sm bg-white px-2 pb-1 pt-5 shadow-[0_1px_2px_rgb(0_0_0_/_0.06)] animate-pulse sm:min-h-[82px] dark:!bg-dashboard-card"
       >
         <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
         <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
-        <div class="mb-1.5 mt-3 h-9 w-9 rounded-sm bg-gray-200 dark:bg-white/10 sm:h-10 sm:w-10" />
-        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-white/10" />
-        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-0.5 flex flex-1 items-center gap-1.5">
+          <div class="h-8 w-7 shrink-0 rounded-sm bg-gray-100 dark:bg-white/10" />
+          <div class="min-w-0 flex-1 space-y-2">
+            <div class="h-2.5 w-[70%] rounded bg-gray-200 dark:bg-white/15" />
+            <div class="h-2 w-12 rounded bg-gray-200/80 dark:bg-white/10" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -134,72 +138,43 @@
       v-if="paginatedFolders.length > 0"
       class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
-      <div
+      <InventoryFolderUiverseTile
         v-for="folder in paginatedFolders"
         :key="folder.id"
-        class="group relative flex min-h-[112px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white duration-300 ease-out active:scale-[0.99] dark:!bg-dashboard-card sm:min-h-[118px] hover:-translate-y-0.5"
+        :name="folder.name"
+        :item-count="folder.itemCount"
+        :tile-key="folder.id"
+        :has-overlays="canCreateInventoryFolders"
         @click="navigateToFolder(folder.id)"
       >
-        <div
-          class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-500/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:via-primary-400/35"
-        />
-        <!-- Checkbox -->
-        <div v-if="canCreateInventoryFolders" class="absolute left-1.5 top-1.5 z-10" @click.stop>
-          <Checkbox
-            :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
-            @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-            size="sm"
-            wrapper-class="justify-center"
-          />
-        </div>
-
-        <!-- Menu -->
-        <div
-          v-if="canCreateInventoryFolders"
-          class="absolute right-1 top-1 z-20"
-          data-inventory-folder-menu
-          @click.stop
-        >
-          <button
-            type="button"
-            :data-folder-actions-anchor="folder.id"
-            @click="toggleFolderMenu(folder.id)"
-            class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
-            aria-label="Folder options"
+        <template v-if="canCreateInventoryFolders" #checkbox>
+          <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
+            <Checkbox
+              :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
+              @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+              size="sm"
+              wrapper-class="justify-center"
+            />
+          </div>
+        </template>
+        <template v-if="canCreateInventoryFolders" #menu>
+          <div
+            class="absolute right-1 top-1 z-20"
+            data-inventory-folder-menu
+            @click.stop
           >
-            <EllipsisVerticalIcon class="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        <div
-          class="flex w-full flex-1 flex-col items-center justify-between px-2 pb-2 pt-1 text-center"
-          :class="canCreateInventoryFolders ? 'pt-7' : 'pt-3'"
-        >
-          <div class="mb-1 flex min-h-[48px] w-full flex-1 flex-col items-center justify-center sm:min-h-[52px]">
-            <div
-              class="flex h-11 w-11 items-center justify-center rounded-sm bg-gray-100/90 ring-1 ring-gray-200/80 transition-colors group-hover:bg-primary-50 group-hover:ring-primary-200/40 dark:bg-gray-800/80 dark:ring-gray-700/60 dark:group-hover:bg-primary-950/40 dark:group-hover:ring-primary-800/40 sm:h-12 sm:w-12"
+            <button
+              type="button"
+              :data-folder-actions-anchor="folder.id"
+              @click="toggleFolderMenu(folder.id)"
+              class="rounded-sm p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+              aria-label="Folder options"
             >
-              <FolderIcon
-                class="h-6 w-6 shrink-0 text-gray-500 transition-colors group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-400 sm:h-7 sm:w-7"
-                stroke-width="1.25"
-              />
-            </div>
+              <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+            </button>
           </div>
-
-          <div class="mt-auto w-full min-w-0">
-            <h3
-              class="max-w-full truncate px-0.5 text-center text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
-            >
-              {{ folder.name }}
-            </h3>
-            <p
-              class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[9px] font-semibold tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-300"
-            >
-              {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'product' : 'products' }}
-            </p>
-          </div>
-        </div>
-      </div>
+        </template>
+      </InventoryFolderUiverseTile>
     </div>
 
     <!-- Empty state -->
@@ -626,6 +601,7 @@ import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
+import InventoryFolderUiverseTile from '~/components/inventory/InventoryFolderUiverseTile.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
