@@ -224,13 +224,9 @@ export const useSearchStore = defineStore('search', {
             }
           })
 
-          // Search items in folders
+          // Search items in folders (chunked + TTL cache; not stored in Pinia)
           for (const folder of inventoryStore.folders) {
-            if (inventoryStore.items[folder.id] === undefined) {
-              await inventoryStore.fetchItems(folder.id, { force: true })
-            }
-
-            const items = inventoryStore.items[folder.id] || []
+            const items = await inventoryStore.fetchItemsAllChunked(folder.id)
             items.forEach(item => {
               const matchesQuery = !searchQuery ||
                 Object.values(item).some(value => {

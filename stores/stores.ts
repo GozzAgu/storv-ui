@@ -6,6 +6,7 @@ import { getStoresCollection, getStoreDocument, getQueryUserId } from '~/composa
 import { getPlanLimits, getEligibleStoresForPlan } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 import type { Store, StoreWithStats } from '~/composables/useStores'
+import { clearInventoryItemQueryCaches } from '~/utils/inventory-items-firestore'
 
 export const useStoresStore = defineStore('stores', {
   state: () => ({
@@ -270,9 +271,12 @@ export const useStoresStore = defineStore('stores', {
         
         inventoryStore.folders = []
         inventoryStore.items = {}
+        inventoryStore.itemsPagination = {}
         inventoryStore.itemsLoadedFully = {}
+        inventoryStore.selectedItemId = null
         inventoryStore.loading = false
         inventoryStore.error = null
+        clearInventoryItemQueryCaches()
         
         receiptsStore.receipts = []
         receiptsStore.loading = false
@@ -323,7 +327,10 @@ export const useStoresStore = defineStore('stores', {
         staffStore.staff = []
         inventoryStore.folders = []
         inventoryStore.items = {} // Clear all inventory items
+        inventoryStore.itemsPagination = {}
         inventoryStore.itemsLoadedFully = {}
+        inventoryStore.selectedItemId = null
+        clearInventoryItemQueryCaches()
         receiptsStore.receipts = []
         customersStore.customers = []
         

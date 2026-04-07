@@ -1410,22 +1410,20 @@ const loadAnalytics = async () => {
     ])
     receipts.value = receiptsStore.receipts
 
-    // Fetch items for all folders in parallel (was sequential before)
     const folders = inventoryStore.folders
+    const allItems: any[] = []
     if (folders.length > 0) {
       const results = await Promise.allSettled(
-        folders.map((folder) => inventoryStore.fetchItems(folder.id))
+        folders.map(async (folder) => {
+          const list = await inventoryStore.fetchItemsAllChunked(folder.id, { force: true })
+          allItems.push(...list)
+        })
       )
       results.forEach((result, i) => {
         if (result.status === 'rejected' && folders[i]) {
-          console.error(`Error loading items for folder ${folders[i].id}:`, result.reason)
+          console.error(`Error loading items for folder ${folders[i]!.id}:`, result.reason)
         }
       })
-    }
-    const allItems: any[] = []
-    for (const folder of folders) {
-      const folderItems = inventoryStore.items[folder.id] || []
-      allItems.push(...folderItems)
     }
     inventoryItems.value = allItems
   } catch (error) {

@@ -468,6 +468,9 @@ const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 
+/** Full per-folder item lists for dashboard KPIs only (not kept in Pinia). */
+const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
+
 const isLoading = ref(true)
 const chartView = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 
@@ -557,7 +560,7 @@ const lowStockCount = computed(() => inventoryStore.lowStockFolders.reduce((sum,
 const inStockCount = computed(() => {
   let count = 0
   inventoryStore.folders.forEach(folder => {
-    const items = inventoryStore.items[folder.id] || []
+    const items = dashboardFolderItems.value[folder.id] || []
     items.forEach(item => {
       // Item is in stock if it doesn't have dateOut set (not sold)
       // Check for null, undefined, and empty string to be safe
@@ -581,7 +584,7 @@ const lowStockItemsCount = computed(() => {
 const outOfStockCount = computed(() => {
   let count = 0
   inventoryStore.folders.forEach(folder => {
-    const items = inventoryStore.items[folder.id] || []
+    const items = dashboardFolderItems.value[folder.id] || []
     items.forEach(item => {
       // Item is out of stock if it has dateOut set (sold)
       // Check for null, undefined, and empty string to be safe
@@ -696,7 +699,7 @@ const lowStockItems = computed(() => {
   const lowStockThreshold = userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
 
   inventoryStore.folders.forEach(folder => {
-    const items = inventoryStore.items[folder.id] || []
+    const items = dashboardFolderItems.value[folder.id] || []
     
     // For serial number folders: check total available items
     if (folder.hasSerialNumbers) {
@@ -1200,11 +1203,16 @@ const loadDashboardData = async () => {
       departmentsStore.fetchDepartments(),
     ])
     
-    // Load items for each folder
     if (inventoryStore.folders.length > 0) {
+      const map: Record<string, InventoryItem[]> = {}
       await Promise.all(
-        inventoryStore.folders.map(folder => inventoryStore.fetchItems(folder.id))
+        inventoryStore.folders.map(async (folder) => {
+          map[folder.id] = await inventoryStore.fetchItemsAllChunked(folder.id)
+        })
       )
+      dashboardFolderItems.value = map
+    } else {
+      dashboardFolderItems.value = {}
     }
   } catch (error) {
     console.error('Error loading dashboard data:', error)

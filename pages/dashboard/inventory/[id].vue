@@ -49,7 +49,7 @@
             <span class="tabular-nums font-medium text-gray-700 dark:text-gray-300">{{ folder?.itemCount ?? 0 }} items</span>
             <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
             <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
-            <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+            <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
               <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
               <span>{{ sortedFilteredItems.length }} shown</span>
             </template>
@@ -108,7 +108,7 @@
             class="shrink-0 !rounded-sm !px-2.5 !py-2.5 sm:!px-3"
             :icon="ArrowUpTrayIcon"
             :loading="isExporting"
-            :disabled="isImporting || items.length === 0"
+            :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
             aria-label="Export to Excel"
             title="Export to Excel"
             @click="handleExportToExcel"
@@ -164,7 +164,7 @@
                     </h2>
                     <span class="text-xs tabular-nums text-gray-500 dark:text-gray-400">
                       {{ folder?.itemCount ?? 0 }} items · {{ formatCurrency(totalInventoryValue) }}
-                      <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+                      <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
                         · {{ sortedFilteredItems.length }} shown
                       </template>
                     </span>
@@ -260,7 +260,7 @@
                       size="sm"
                       :icon="ArrowUpTrayIcon"
                       :loading="isExporting"
-                      :disabled="isImporting || items.length === 0"
+                      :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
                       title="Export to Excel"
                       extra-class="!rounded-sm"
                       aria-label="Export to Excel"
@@ -310,7 +310,7 @@
                   <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ folder?.itemCount ?? 0 }} items</span>
                   <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
                   <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
-                  <template v-if="searchQuery.trim() && sortedFilteredItems.length !== items.length">
+                      <template v-if="isSearchActive && sortedFilteredItems.length !== baseItems.length">
                     <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
                     <span>{{ sortedFilteredItems.length }} shown</span>
                   </template>
@@ -399,7 +399,7 @@
               size="sm"
               :icon="ArrowUpTrayIcon"
               :loading="isExporting"
-              :disabled="isImporting || items.length === 0"
+              :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
               title="Export to Excel"
               extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
               aria-label="Export to Excel"
@@ -709,7 +709,7 @@
 
       <!-- Fullscreen: pagination pinned inside overlay -->
       <div
-        v-if="isFullscreen && sortedFilteredItems.length > 0"
+        v-if="isFullscreen && paginationTotal > 0"
         class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
         style="padding-bottom: env(safe-area-inset-bottom, 0px)"
       >
@@ -719,7 +719,7 @@
           <Pagination
             :current-page="currentPage"
             :items-per-page="itemsPerPage"
-            :total="sortedFilteredItems.length"
+            :total="paginationTotal"
             @page-change="handlePageChange"
           />
         </div>
@@ -729,11 +729,11 @@
       </Teleport>
     </template>
 
-    <DashboardFixedFooter v-if="sortedFilteredItems.length > 0 && !isFullscreen" :sidebar-collapsed="sidebarCollapsed">
+    <DashboardFixedFooter v-if="paginationTotal > 0 && !isFullscreen" :sidebar-collapsed="sidebarCollapsed">
       <Pagination
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
-        :total="sortedFilteredItems.length"
+        :total="paginationTotal"
         @page-change="handlePageChange"
       />
     </DashboardFixedFooter>
@@ -1219,7 +1219,7 @@ import Pagination from '~/components/ui/Pagination.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import { useInventoryStore, type InventoryFolder, type TemplateField } from '~/stores/inventory'
+import { useInventoryStore, type InventoryFolder, type TemplateField, INVENTORY_FIRESTORE_PAGE_SIZE } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -1313,6 +1313,16 @@ if (import.meta.client) {
   }, 100)
 }
 const searchQuery = ref('')
+/** Full folder list for search filter (client-side); not stored in Pinia. */
+const folderSearchItems = ref<InventoryItem[] | null>(null)
+const isSearchItemsLoading = ref(false)
+let searchItemsLoadToken = 0
+let searchLoadTimer: ReturnType<typeof setTimeout> | null = null
+/** Full folder list for serial duplicate UI checks when modals are open. */
+const fullItemsForSerialDup = ref<InventoryItem[] | null>(null)
+
+const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
+
 const sortBy = ref('name')
 const showAddItemModal = ref(false)
 const editingItem = ref<InventoryItem | null>(null)
@@ -1332,7 +1342,7 @@ const getInitialPage = (): number => {
   return 1
 }
 const currentPage = ref(getInitialPage())
-const itemsPerPage = ref(100)
+const itemsPerPage = ref(INVENTORY_FIRESTORE_PAGE_SIZE)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const isImporting = ref(false)
 const isExporting = ref(false)
@@ -1343,6 +1353,44 @@ const openItemMenuId = ref<string | null>(null)
 
 watch(currentPage, () => {
   openItemMenuId.value = null
+})
+
+watch(searchQuery, () => {
+  const trimmed = searchQuery.value.trim()
+  const fid = folderId.value
+
+  if (!trimmed) {
+    if (searchLoadTimer) {
+      clearTimeout(searchLoadTimer)
+      searchLoadTimer = null
+    }
+    folderSearchItems.value = null
+    isSearchItemsLoading.value = false
+    if (!isLoadingFolder.value && fid) {
+      inventoryStore.fetchItemsPage(fid, currentPage.value, itemsPerPage.value, { force: true }).catch((err) => {
+        console.warn('[inventory] Refetch page after clearing search failed:', err)
+      })
+    }
+    return
+  }
+
+  if (searchLoadTimer) clearTimeout(searchLoadTimer)
+  searchLoadTimer = setTimeout(async () => {
+    const t = searchQuery.value.trim()
+    const folderKey = folderId.value
+    if (!t || !folderKey) return
+    isSearchItemsLoading.value = true
+    const token = ++searchItemsLoadToken
+    try {
+      const list = await inventoryStore.fetchItemsAllChunked(folderKey)
+      if (token === searchItemsLoadToken) folderSearchItems.value = list
+    } catch (e) {
+      console.warn('[inventory] Search load failed:', e)
+      if (token === searchItemsLoadToken) folderSearchItems.value = []
+    } finally {
+      if (token === searchItemsLoadToken) isSearchItemsLoading.value = false
+    }
+  }, 350)
 })
 
 const toggleItemMenu = (itemId: string) => {
@@ -1508,6 +1556,23 @@ const showDuplicateModal = ref(false)
 const duplicateSourceItem = ref<InventoryItem | null>(null)
 const duplicateSerialNumbers = ref<string[]>([''])
 const isDuplicating = ref(false)
+
+watch([showAddItemModal, showDuplicateModal], async ([addOpen, dupOpen]) => {
+  const fid = folderId.value
+  if (!folder.value?.hasSerialNumbers || !fid) {
+    fullItemsForSerialDup.value = null
+    return
+  }
+  if (addOpen || dupOpen) {
+    try {
+      fullItemsForSerialDup.value = await inventoryStore.fetchItemsAllChunked(fid)
+    } catch {
+      fullItemsForSerialDup.value = null
+    }
+  } else {
+    fullItemsForSerialDup.value = null
+  }
+})
 
 // Inline edit state (large screens only)
 const editingCell = ref<{ itemId: string; columnKey: string } | null>(null)
@@ -1787,6 +1852,13 @@ const items = computed(() => {
   return inventoryStore.items[folderId.value] || []
 })
 
+const baseItems = computed(() => {
+  if (isSearchActive.value) {
+    return folderSearchItems.value ?? []
+  }
+  return items.value
+})
+
 const totalUnitsInFolder = computed(() => {
   const list = items.value
   if (!folder.value || list.length === 0) return 0
@@ -1810,7 +1882,7 @@ const getSerialProductKey = (serial: string, brand: string, model: string) =>
 /** Set of (serial + product model) keys that already exist in this folder. Used to block duplicate/add when same serial + product exists. */
 const existingSerialProductKeysInFolder = computed(() => {
   const set = new Set<string>()
-  const folderItems = items.value
+  const folderItems = fullItemsForSerialDup.value ?? items.value
   folderItems.forEach((item: InventoryItem) => {
     const serial = item.serialNo ?? item.serialNumber
     if (serial != null && String(serial).trim() !== '') {
@@ -1820,42 +1892,8 @@ const existingSerialProductKeysInFolder = computed(() => {
   return set
 })
 
-// Calculate total inventory value from all items
-const totalInventoryValue = computed(() => {
-  const folderItems = items.value
-  if (folderItems.length === 0) return 0
-  
-  // Find the price field name from template
-  const priceField = folder.value?.template?.fields?.find(f => 
-    f.name.toLowerCase() === 'price' || 
-    f.type === 'currency'
-  )?.name || 'price'
-  
-  const quantityField = quantityFieldKeyForFolder()
-  
-  let total = 0
-  folderItems.forEach(item => {
-    const price = typeof item[priceField] === 'number' 
-      ? item[priceField] 
-      : parseFloat(item[priceField]) || 0
-    
-    // For serial number items, quantity is always 1
-    let quantity = 1
-    if (!folder.value?.hasSerialNumbers && quantityField) {
-      const raw = item[quantityField]
-      const parsed =
-        typeof raw === 'number' ? raw : parseFloat(String(raw ?? ''))
-      quantity = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-    }
-    
-    // Only count available items (not sold) in the total value
-    if (!item.dateOut) {
-      total += price * quantity
-    }
-  })
-  
-  return total
-})
+// Folder aggregate from Firestore (correct across all pages; not just the loaded page).
+const totalInventoryValue = computed(() => folder.value?.totalValue ?? 0)
 
 // Check if an item has been sold
 const isItemSold = (item: InventoryItem) => {
@@ -1902,7 +1940,7 @@ const getItemAvailability = (item: InventoryItem) => {
 }
 
 const filteredItems = computed(() => {
-  let result = [...items.value]
+  let result = [...baseItems.value]
 
   // Filter by search query - search across all template fields
   if (searchQuery.value) {
@@ -1975,15 +2013,34 @@ const itemForOpenMenu = computed(() => {
   return sortedFilteredItems.value.find(i => i.id === id) ?? null
 })
 
-const paginatedItems = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-    return sortedFilteredItems.value.slice(start, end)
+/** Total rows for pagination (server count when not searching; filtered count when searching). */
+const paginationTotal = computed(() => {
+  if (isSearchActive.value) {
+    return sortedFilteredItems.value.length
+  }
+  const fid = folderId.value
+  const fromStore = fid ? inventoryStore.itemsPagination[fid]?.total : undefined
+  return fromStore ?? folder.value?.itemCount ?? 0
 })
 
-// Reset to first page when filters change
+const paginatedItems = computed(() => {
+  const list = sortedFilteredItems.value
+  if (isSearchActive.value) {
+    const start = (currentPage.value - 1) * itemsPerPage.value
+    return list.slice(start, start + itemsPerPage.value)
+  }
+  return list
+})
+
+// Reset to first page when filters change; resync server page when not in search mode
 watch([searchQuery, currentSort], () => {
   currentPage.value = 1
+  const fid = folderId.value
+  if (fid && !searchQuery.value.trim() && !isLoadingFolder.value) {
+    inventoryStore.fetchItemsPage(fid, 1, itemsPerPage.value, { force: true }).catch((err) => {
+      console.warn('[inventory] Refetch page 1 after sort/filter change failed:', err)
+    })
+  }
 })
 
 const toggleSort = (key: string) => {
@@ -2113,33 +2170,51 @@ const getItemDisplayValue = (value: any) => {
 }
 
 const resetFilters = () => {
+  const hadSearch = searchQuery.value.trim().length > 0
   searchQuery.value = ''
   sortBy.value = 'name'
   currentSort.value = { key: 'name', order: 'asc' }
   currentPage.value = 1
   if (import.meta.client) {
     try {
-      const folderId = route.params.id as string
-      if (folderId) {
-        localStorage.setItem(`inventory-page-${folderId}`, '1')
+      const lsId = route.params.id as string
+      if (lsId) {
+        localStorage.setItem(`inventory-page-${lsId}`, '1')
       }
     } catch (e) {
       // Ignore localStorage errors
     }
   }
+  const fid = folderId.value
+  if (!hadSearch && fid && !isLoadingFolder.value) {
+    inventoryStore.fetchItemsPage(fid, 1, itemsPerPage.value, { force: true }).catch((err) => {
+      console.warn('[inventory] Reset filters refetch failed:', err)
+    })
+  }
 }
 
-const handlePageChange = (page: number) => {
+const handlePageChange = async (page: number) => {
   currentPage.value = page
   // Save to localStorage with folder ID
   if (import.meta.client) {
     try {
-      const folderId = route.params.id as string
-      if (folderId) {
-        localStorage.setItem(`inventory-page-${folderId}`, page.toString())
+      const lsFolderId = route.params.id as string
+      if (lsFolderId) {
+        localStorage.setItem(`inventory-page-${lsFolderId}`, page.toString())
       }
     } catch (e) {
       // Ignore localStorage errors
+    }
+  }
+  const fid = folderId.value
+  if (fid && !searchQuery.value.trim()) {
+    isLoadingItems.value = true
+    try {
+      await inventoryStore.fetchItemsPage(fid, page, itemsPerPage.value, { force: true })
+    } catch (err) {
+      console.warn('[inventory] Page change fetch failed:', err)
+    } finally {
+      isLoadingItems.value = false
     }
   }
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -2161,6 +2236,11 @@ watch(currentPage, (newPage) => {
 
 // Watch for folder ID changes and restore pagination
 watch(() => route.params.id, (newFolderId) => {
+  folderSearchItems.value = null
+  if (searchLoadTimer) {
+    clearTimeout(searchLoadTimer)
+    searchLoadTimer = null
+  }
   if (import.meta.client && newFolderId) {
     try {
       const saved = localStorage.getItem(`inventory-page-${newFolderId}`)
@@ -2334,7 +2414,7 @@ const handleConfirmDuplicate = async () => {
     if (folder.value) {
       folder.value.itemCount = (folder.value.itemCount || 0) + serials.length
     }
-    inventoryStore.fetchItems(folderId.value, { force: true }).catch(() => {})
+    refreshCurrentItemsPage().catch(() => {})
     showDuplicateModal.value = false
     clearDuplicateModal()
     toast.success(`${serials.length} product${serials.length !== 1 ? 's' : ''} duplicated`)
@@ -2467,7 +2547,7 @@ const handleSaveItem = async () => {
       
       // Refresh items list in background (non-blocking) - only for UI sync
       // Item is already updated in local state, so this is just to ensure consistency
-      inventoryStore.fetchItems(currentFolderId, { force: true }).catch((err) => {
+      refreshCurrentItemsPage().catch((err) => {
         console.warn('Background items refresh failed (non-critical):', err)
         // Item is already updated in local state, so this is just a sync issue
       })
@@ -2529,7 +2609,7 @@ const handleSaveItem = async () => {
 
           // Refresh items list in background (non-blocking) - only for UI sync
           // Item is already in local state, so this is just to ensure consistency
-          inventoryStore.fetchItems(folderId.value, { force: true }).catch((err) => {
+          refreshCurrentItemsPage().catch((err) => {
             console.warn('Background items refresh failed (non-critical):', err)
             // Item is already created and in local state, so this is just a sync issue
           })
@@ -2550,7 +2630,7 @@ const handleSaveItem = async () => {
 
           // Refresh items list in background (non-blocking) - only for UI sync
           // Item is already in local state, so this is just to ensure consistency
-          inventoryStore.fetchItems(folderId.value, { force: true }).catch((err) => {
+          refreshCurrentItemsPage().catch((err) => {
             console.warn('Background items refresh failed (non-critical):', err)
             // Item is already created and in local state, so this is just a sync issue
           })
@@ -2591,7 +2671,7 @@ const handleRemoveDiscount = async (item: InventoryItem) => {
     try {
       await inventoryStore.removeDiscount(folderId.value, item.id)
       // Reload items to refresh the display
-      await inventoryStore.fetchItems(folderId.value, { force: true })
+      await refreshCurrentItemsPage()
       toast.success('Discount removed successfully!')
     } catch (error: any) {
       toast.error(error.message || 'Failed to remove discount')
@@ -2601,14 +2681,14 @@ const handleRemoveDiscount = async (item: InventoryItem) => {
 
 const handleDiscountApplied = async () => {
   // Reload items to refresh the display
-  await inventoryStore.fetchItems(folderId.value, { force: true })
+  await refreshCurrentItemsPage()
   showDiscountModal.value = false
   selectedItemForDiscount.value = null
 }
 
 const handleBulkDiscountApplied = async () => {
   // Reload items to refresh the display
-  await inventoryStore.fetchItems(folderId.value, { force: true })
+  await refreshCurrentItemsPage()
   showBulkDiscountModal.value = false
   selectedItemsForBulk.value = []
 }
@@ -2679,13 +2759,10 @@ const handleExportToExcel = async () => {
 
   isExporting.value = true
   try {
-    if (folderId.value && inventoryStore.itemsLoadedFully[folderId.value] === false) {
-      toast.warning(
-        `Export only includes the first ${inventoryStore.items?.[folderId.value]?.length ?? 0} products loaded in this folder (capped for performance). Folder total may be higher.`,
-        7000
-      )
-    }
-    const folderItems = items.value
+    const folderItems =
+      folderId.value != null
+        ? await inventoryStore.fetchItemsAllChunked(folderId.value, { force: true })
+        : []
     if (folderItems.length === 0) {
       toast.warning('No items to export.')
       isExporting.value = false
@@ -2978,7 +3055,7 @@ const handleFileImport = async (event: Event) => {
         console.log('[Import] Current folder ID:', currentFolderId)
         
         // Force fetch items for this folder (this ensures we get fresh data)
-        let existingItems = await inventoryStore.fetchItems(currentFolderId, { force: true })
+        let existingItems = await inventoryStore.fetchItemsAllChunked(currentFolderId, { force: true })
         
         // STEP 2: Filter to ONLY items from this folder (extra safety check)
         existingItems = existingItems.filter(item => {
@@ -3343,6 +3420,12 @@ const loadFolderData = async () => {
   }
 }
 
+const refreshCurrentItemsPage = () => {
+  const fid = folderId.value
+  if (!fid) return Promise.resolve()
+  return inventoryStore.fetchItemsPage(fid, currentPage.value, itemsPerPage.value, { force: true })
+}
+
 const loadItems = async () => {
   if (!folderId.value || typeof folderId.value !== 'string') {
     return
@@ -3352,7 +3435,9 @@ const loadItems = async () => {
   try {
     // Fetch items and receipts in parallel
     await Promise.all([
-      inventoryStore.fetchItems(folderId.value, { force: true }),
+      inventoryStore.fetchItemsPage(folderId.value, currentPage.value, itemsPerPage.value, {
+        force: true,
+      }),
       receiptsStore.fetchReceipts()
     ])
     // Refresh folder list to update item counts

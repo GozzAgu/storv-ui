@@ -1016,8 +1016,7 @@ const loadItems = async () => {
 
   loadingItems.value = true
   try {
-    await inventoryStore.fetchItems(selectedFolder.value.id, { force: true })
-    const items = inventoryStore.items[selectedFolder.value.id] || []
+    const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, { force: true })
     // Only show items that haven't been sold yet (no dateOut)
     availableItems.value = items.filter(item => !item.dateOut)
   } catch (error) {

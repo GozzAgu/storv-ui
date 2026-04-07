@@ -973,17 +973,6 @@ const loadStatsData = async () => {
         console.warn('Could not fetch customers, will use receipts-based count')
       })
     ])
-    
-    // Load items for each folder to get accurate product count
-    if (inventoryStore.folders.length > 0) {
-      await Promise.all(
-        inventoryStore.folders.map(folder => 
-          inventoryStore.fetchItems(folder.id).catch(() => {
-            // Ignore errors for individual folder item fetches
-          })
-        )
-      )
-    }
   } catch (error) {
     console.error('Error loading stats data:', error)
   } finally {

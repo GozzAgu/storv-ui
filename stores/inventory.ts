@@ -10,7 +10,6 @@ import {
   query,
   where,
   orderBy,
-  limit,
   serverTimestamp,
   deleteField,
   writeBatch,
@@ -18,13 +17,9 @@ import {
 } from 'firebase/firestore'
 
 /**
- * Scalability notes (Firestore):
- * - Tenant: items live under users/{ownerUid}/stores/{storeId}/inventoryItems (not one giant doc).
- * - Reads: fetch uses getDocs (no real-time listeners) + optional per-query limit.
- * - folder.itemCount: synced via aggregation count (not length of loaded rows).
- * - Avoid unbounded growth: cap documents loaded into the client per fetch; count stays accurate.
+ * Folder item lists: prefer limit + startAfter via fetchItemsPage (see utils/inventory-items-firestore.ts).
+ * Pinia holds one page at a time per folder; full lists use fetchItemsAllChunked (cached, not kept in state).
  */
-export const INVENTORY_MAX_ITEMS_PER_FETCH = 5000
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -33,9 +28,18 @@ import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventoryItemsCollection, getInventoryItemDocument, getQueryUserId } from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { duplicateSerialExistsViaApi } from '~/utils/inventory-serial-validation'
+import {
+  INVENTORY_FIRESTORE_PAGE_SIZE,
+  getInventoryItemsPage,
+  fetchAllInventoryItemsChunked,
+  clearInventoryItemQueryCaches,
+  invalidateFolderItemCaches,
+} from '~/utils/inventory-items-firestore'
 
-/** Coalesce concurrent fetchItems(folderId) calls; cleared when store switches (items reset). */
-const inventoryItemsInflight = new Map<string, Promise<InventoryItem[]>>()
+export { INVENTORY_FIRESTORE_PAGE_SIZE }
+
+const inventoryItemsPageInflight = new Map<string, Promise<InventoryItem[]>>()
+const inventoryItemsAllInflight = new Map<string, Promise<InventoryItem[]>>()
 
 export interface TemplateField {
   id: string
@@ -95,9 +99,12 @@ export interface InventoryItem {
 export const useInventoryStore = defineStore('inventory', {
   state: () => ({ 
     folders: [] as InventoryFolder[],
-    items: {} as Record<string, InventoryItem[]>, // Keyed by folderId
-    /** false = client may hold only the first INVENTORY_MAX_ITEMS_PER_FETCH rows (DB may have more). */
+    /** Current Firestore page only per folder (limit + startAfter). */
+    items: {} as Record<string, InventoryItem[]>,
+    itemsPagination: {} as Record<string, { page: number; pageSize: number; total: number }>,
+    /** false when items[] is only a page / partial relative to folder aggregates. */
     itemsLoadedFully: {} as Record<string, boolean>,
+    selectedItemId: null as string | null,
     loading: false,
     itemsLoading: {} as Record<string, boolean>, // Keyed by folderId
     error: null as string | null,
@@ -687,325 +694,151 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
-    // Get all items for a folder
-    async fetchItems(folderId: string, options?: { force?: boolean }) {
-      const force = options?.force === true
-      if (force) {
-        inventoryItemsInflight.delete(folderId)
-      }
-      if (!force) {
-        if (Object.prototype.hasOwnProperty.call(this.items, folderId)) {
-          return this.items[folderId]!
-        }
-        const existing = inventoryItemsInflight.get(folderId)
-        if (existing) return existing
-      }
-
-      const promise = (async (): Promise<InventoryItem[]> => {
+    /** Shared auth/path setup for inventory item queries. */
+    async _prepareItemsQueryContext(folderId: string) {
       const db = useFirestore().getFirestoreInstance()
-      if (!db) {
-        throw new Error('Firestore not initialized')
-      }
+      if (!db) throw new Error('Firestore not initialized')
 
       const authStore = useAuthStore()
-      if (!authStore.currentUser) {
-        throw new Error('User must be authenticated')
-      }
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
 
-      // Check if user is staff to determine which items to show
       const userStore = useUserStore()
       if (!userStore.userData) {
         await userStore.fetchUserData(authStore.currentUser.uid)
       }
 
-      // Use getQueryUserId to get the correct userId (superadmin's UID for staff)
       const queryUserId = await getQueryUserId()
-      if (!queryUserId) {
-        throw new Error('User ID not available')
-      }
-      
-      // Get staff departmentId if user is staff
-      let staffDepartmentId: string | undefined
+      if (!queryUserId) throw new Error('User ID not available')
+
       if (userStore.userData?.role === 'staff') {
+        let staffDepartmentId: string | undefined
         try {
           const { useStaffStore } = await import('./staff')
           const staffStore = useStaffStore()
           const staffMember = await staffStore.fetchCurrentStaffMember()
           staffDepartmentId = staffMember?.departmentId
-          console.log('[InventoryStore] Staff user detected, using super admin UID for fetchItems:', queryUserId, 'departmentId:', staffDepartmentId)
-          
-          // Verify department access to the folder
           if (staffDepartmentId) {
             const folder = this.getFolderById(folderId)
             if (folder) {
-              // If folder has allowedDepartments, verify staff's department has access
               if (folder.allowedDepartments && folder.allowedDepartments.length > 0) {
                 if (!folder.allowedDepartments.includes(staffDepartmentId)) {
                   throw new Error('Access denied: Your department does not have access to items in this folder')
                 }
               }
             } else {
-              // Folder not in store, fetch it to check access
-              try {
-                const folderData = await this.fetchFolder(folderId)
-                if (!folderData) {
-                  throw new Error('Folder not found')
-                }
-              } catch (error: any) {
-                throw new Error(error.message || 'Access denied: Cannot access items in this folder')
-              }
+              const folderData = await this.fetchFolder(folderId)
+              if (!folderData) throw new Error('Folder not found')
             }
           }
-        } catch (error: any) {
-          console.warn('[InventoryStore] Could not fetch staff member for items:', error.message)
+        } catch (e: any) {
+          if (e?.message?.includes('Access denied') || e?.message?.includes('Folder not found')) throw e
+          console.warn('[InventoryStore] Staff prefetch:', e?.message)
         }
       }
 
-      this.itemsLoading[folderId] = true
-
-      // Get storeId for hierarchical path
       const storeId = await getCurrentStoreId()
-      if (!storeId) {
-        this.itemsLoading[folderId] = false
-        throw new Error('No store selected')
+      if (!storeId) throw new Error('No store selected')
+
+      const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
+      const isStaff = userStore.userData?.role === 'staff'
+      return { db, userStore, queryUserId, storeId, itemsRef, isStaff }
+    },
+
+    /**
+     * Single Firestore "page" (limit + startAfter). Updates Pinia `items[folderId]` with that page only.
+     */
+    async fetchItemsPage(
+      folderId: string,
+      page: number,
+      pageSize: number = INVENTORY_FIRESTORE_PAGE_SIZE,
+      options?: { force?: boolean }
+    ) {
+      const force = options?.force === true
+      const inflightKey = `${folderId}:${page}:${pageSize}`
+      if (!force) {
+        const existing = inventoryItemsPageInflight.get(inflightKey)
+        if (existing) return existing
+      } else {
+        inventoryItemsPageInflight.delete(inflightKey)
+        invalidateFolderItemCaches(folderId)
       }
 
-      try {
-        // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
-        // Use queryUserId (superadmin's UID) for the hierarchical path
-        const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
-        const fetchCap = INVENTORY_MAX_ITEMS_PER_FETCH + 1
-
-        // Query items by folderId
-        // For staff: Get all items in folder (no createdBy filter) - they see items from anyone in their store
-        // For superadmin: Filter by createdBy
-        let q
+      const promise = (async (): Promise<InventoryItem[]> => {
+        const ctx = await this._prepareItemsQueryContext(folderId)
+        this.itemsLoading[folderId] = true
         try {
-          if (userStore.userData?.role === 'staff') {
-            // Staff sees all items in folder
-            q = query(
-              itemsRef,
-              where('folderId', '==', folderId),
-              orderBy('createdAt', 'desc'),
-              limit(fetchCap)
-            )
-            } else {
-              // Superadmin sees only their items
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                where('createdBy', '==', queryUserId),
-                orderBy('createdAt', 'desc'),
-                limit(fetchCap)
-              )
-            }
-        } catch (orderByError: any) {
-          // If orderBy fails, try without it
-          if (orderByError.code === 'failed-precondition' || orderByError.message?.includes('index')) {
-            if (userStore.userData?.role === 'staff') {
-              // Staff sees all items in folder
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                limit(fetchCap)
-              )
-            } else {
-              // Superadmin sees only their items
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                where('createdBy', '==', queryUserId),
-                limit(fetchCap)
-              )
-            }
-          } else {
-            throw orderByError
-          }
-        }
-
-        const querySnapshot = await getDocs(q)
-        let docs = querySnapshot.docs
-        const hitLimit = docs.length > INVENTORY_MAX_ITEMS_PER_FETCH
-        if (hitLimit) docs = docs.slice(0, INVENTORY_MAX_ITEMS_PER_FETCH)
-        this.itemsLoadedFully[folderId] = !hitLimit
-        if (import.meta.client && hitLimit) {
-          import('~/composables/useToast')
-            .then(({ useToast }) => {
-              useToast().warning(
-                `This folder has many products. Showing the first ${INVENTORY_MAX_ITEMS_PER_FETCH}. Use search or filters where possible; export may need a future full sync for edge cases.`,
-                6500
-              )
-            })
-            .catch(() => {})
-        }
-
-        let fetchedItems: InventoryItem[] = docs.map((doc) => {
-          const data = doc.data()
-          return {
-            id: doc.id,
-            folderId: data.folderId || folderId,
-            ...Object.fromEntries(
-              Object.entries(data).filter(([key]) => 
-                !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut'].includes(key)
-              )
-            ),
-            dateIn: data.dateIn?.toDate ? data.dateIn.toDate() : (data.dateIn ? new Date(data.dateIn) : (data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date())),
-            dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : (data.dateOut ? new Date(data.dateOut) : undefined),
-            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
-            updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
-            createdBy: data.createdBy || queryUserId,
-          } as InventoryItem
-        })
-
-        // Staff sees all items in folder (no filtering needed - query already returns all items for staff)
-        // Superadmin sees only their items (already filtered by createdBy in query)
-
-        // Sort by createdAt if orderBy failed
-        fetchedItems.sort((a, b) => {
-          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
-          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
-          return dateB.getTime() - dateA.getTime()
-        })
-
-        this.items[folderId] = fetchedItems
-        this.itemsLoading[folderId] = false
-
-        // Update folder item count based on actual items
-        await this.updateItemCount(folderId)
-
-        return fetchedItems
-      } catch (error: any) {
-        // Try without orderBy if index is missing
-        if (error.code === 'failed-precondition' || error.message?.includes('index')) {
-          // Check if warning was already shown for inventoryItems
-          let warned = typeof window !== 'undefined' ? (window as any).__firestoreIndexWarned : null
-          
-          // Convert to object if it's a boolean (from other stores)
-          if (warned && typeof warned !== 'object') {
-            (window as any).__firestoreIndexWarned = {}
-            warned = (window as any).__firestoreIndexWarned
-          }
-          
-          // Initialize as object if it doesn't exist
-          if (!warned) {
-            (window as any).__firestoreIndexWarned = {}
-            warned = (window as any).__firestoreIndexWarned
-          }
-          
-          // Only warn once
-          if (!warned.inventoryItems) {
-            const indexUrlMatch = error.message?.match(/https:\/\/[^\s]+/)
-            const indexUrl = indexUrlMatch ? indexUrlMatch[0] : null
-            console.warn('[InventoryStore] orderBy failed for items, retrying without orderBy. This is expected if indexes are not yet created.')
-            if (indexUrl) {
-              console.info('[InventoryStore] Create the index here:', indexUrl)
-            }
-            warned.inventoryItems = true
-          }
-          
+          const list = await getInventoryItemsPage(ctx.db, {
+            itemsRef: ctx.itemsRef,
+            folderId,
+            queryUserId: ctx.queryUserId,
+            isStaff: ctx.isStaff,
+            page,
+            pageSize,
+            force,
+          })
+          let total = this.itemsPagination[folderId]?.total ?? 0
           try {
-            // Get storeId for hierarchical path
-            const storeId = await getCurrentStoreId()
-            if (!storeId) {
-              throw new Error('No store selected')
-            }
-            
-            // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems
-            // Use queryUserId (superadmin's UID) for the hierarchical path
-            const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
-            
-            // Query items by folderId
-            // For staff: Get all items (no createdBy filter)
-            // For superadmin: Filter by createdBy
-            let q
-            const fetchCapRetry = INVENTORY_MAX_ITEMS_PER_FETCH + 1
-            if (userStore.userData?.role === 'staff') {
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                limit(fetchCapRetry)
-              )
-            } else {
-              q = query(
-                itemsRef,
-                where('folderId', '==', folderId),
-                where('createdBy', '==', queryUserId),
-                limit(fetchCapRetry)
-              )
-            }
-
-            const querySnapshot = await getDocs(q)
-            let docsRetry = querySnapshot.docs
-            const hitRetry = docsRetry.length > INVENTORY_MAX_ITEMS_PER_FETCH
-            if (hitRetry) docsRetry = docsRetry.slice(0, INVENTORY_MAX_ITEMS_PER_FETCH)
-            this.itemsLoadedFully[folderId] = !hitRetry
-            if (import.meta.client && hitRetry) {
-              import('~/composables/useToast')
-                .then(({ useToast }) => {
-                  useToast().warning(
-                    `This folder has many products. Showing the first ${INVENTORY_MAX_ITEMS_PER_FETCH}.`,
-                    6000
-                  )
-                })
-                .catch(() => {})
-            }
-
-            let fetchedItems: InventoryItem[] = docsRetry.map((doc) => {
-              const data = doc.data()
-              return {
-                id: doc.id,
-                folderId: data.folderId || folderId,
-                ...Object.fromEntries(
-                  Object.entries(data).filter(([key]) => 
-                    !['folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice'].includes(key)
-                  )
-                ),
-                dateIn: data.dateIn?.toDate ? data.dateIn.toDate() : (data.dateIn ? new Date(data.dateIn) : (data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date())),
-                dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : (data.dateOut ? new Date(data.dateOut) : undefined),
-                swapIn: data.swapIn || false,
-                swapInReceiptId: data.swapInReceiptId || undefined,
-                discountPercentage: data.discountPercentage || undefined,
-                discountAmount: data.discountAmount || undefined,
-                originalPrice: data.originalPrice || undefined,
-                discountedPrice: data.discountedPrice || undefined,
-                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
-                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
-                createdBy: data.createdBy || queryUserId,
-              } as InventoryItem
-            })
-
-            // Staff sees all items in folder (no filtering needed - query already returns all items for staff)
-            // Superadmin sees only their items (already filtered by createdBy in query)
-
-            fetchedItems.sort((a, b) => {
-              const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
-              const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
-              return dateB.getTime() - dateA.getTime()
-            })
-
-            this.items[folderId] = fetchedItems
-            this.itemsLoading[folderId] = false
-
-            // Update folder item count based on actual items
-            await this.updateItemCount(folderId)
-
-            return fetchedItems
-          } catch (retryError: any) {
-            this.itemsLoading[folderId] = false
-            throw new Error(retryError.message || 'Failed to fetch items')
+            total = await this.getFolderItemCountFromServer(folderId)
+          } catch {
+            /* keep previous */
           }
+          this.items[folderId] = list
+          this.itemsPagination[folderId] = { page, pageSize, total }
+          this.itemsLoadedFully[folderId] = false
+          this.itemsLoading[folderId] = false
+          await this.updateItemCount(folderId)
+          return list
+        } catch (err: any) {
+          this.itemsLoading[folderId] = false
+          throw err
         }
-
-        this.itemsLoading[folderId] = false
-        throw new Error(error.message || 'Failed to fetch items')
-      }
       })()
 
-      inventoryItemsInflight.set(folderId, promise)
+      inventoryItemsPageInflight.set(inflightKey, promise)
       promise.finally(() => {
-        inventoryItemsInflight.delete(folderId)
+        inventoryItemsPageInflight.delete(inflightKey)
       })
       return promise
+    },
+
+    /**
+     * Full folder scan via repeated limit + startAfter. Result is cached (TTL); not stored in Pinia.
+     * Use for receipts, export, analytics — not the folder table.
+     */
+    async fetchItemsAllChunked(folderId: string, options?: { force?: boolean }) {
+      const force = options?.force === true
+      if (!force) {
+        const ex = inventoryItemsAllInflight.get(folderId)
+        if (ex) return ex
+      } else {
+        inventoryItemsAllInflight.delete(folderId)
+      }
+
+      const promise = (async (): Promise<InventoryItem[]> => {
+        const ctx = await this._prepareItemsQueryContext(folderId)
+        return fetchAllInventoryItemsChunked(ctx.db, {
+          itemsRef: ctx.itemsRef,
+          folderId,
+          queryUserId: ctx.queryUserId,
+          isStaff: ctx.isStaff,
+          pageSize: INVENTORY_FIRESTORE_PAGE_SIZE,
+          force,
+        })
+      })()
+
+      inventoryItemsAllInflight.set(folderId, promise)
+      promise.finally(() => inventoryItemsAllInflight.delete(folderId))
+      return promise
+    },
+
+    /**
+     * @deprecated Prefer fetchItemsPage (UI) or fetchItemsAllChunked (full list, not in store).
+     * Loads page 1 only for minimal backward compat.
+     */
+    async fetchItems(folderId: string, options?: { force?: boolean }) {
+      return this.fetchItemsPage(folderId, 1, INVENTORY_FIRESTORE_PAGE_SIZE, {
+        force: options?.force === true,
+      })
     },
 
     // Check if a serial number already exists for the same brand and model
@@ -1142,9 +975,8 @@ export const useInventoryStore = defineStore('inventory', {
           this.items[folderId] = []
         }
         this.items[folderId].unshift(itemForState)
-        if ((this.items[folderId]?.length ?? 0) > INVENTORY_MAX_ITEMS_PER_FETCH) {
-          this.itemsLoadedFully[folderId] = false
-        }
+        invalidateFolderItemCaches(folderId)
+        this.itemsLoadedFully[folderId] = false
 
         // Update folder item count in background (non-blocking for better performance)
         // This updates folder stats (itemCount, lowStockCount) but doesn't affect item creation
@@ -1295,9 +1127,8 @@ export const useInventoryStore = defineStore('inventory', {
           this.items[folderId] = []
         }
         this.items[folderId].unshift(...createdItems)
-        if ((this.items[folderId]?.length ?? 0) > INVENTORY_MAX_ITEMS_PER_FETCH) {
-          this.itemsLoadedFully[folderId] = false
-        }
+        invalidateFolderItemCaches(folderId)
+        this.itemsLoadedFully[folderId] = false
 
         // Update folder item count in background
         this.updateItemCount(folderId).catch((err) => {

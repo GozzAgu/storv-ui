@@ -323,13 +323,13 @@ const onScanError = (errorMessage: string) => {
   // Ignore continuous scan errors
 }
 
-const loadFolderItems = async () => {
-  if (!selectedFolderId.value) return
-  
+const loadFolderItems = async (): Promise<InventoryItem[]> => {
+  if (!selectedFolderId.value) return []
   try {
-    await inventoryStore.fetchItems(selectedFolderId.value, { force: true })
+    return await inventoryStore.fetchItemsAllChunked(selectedFolderId.value, { force: true })
   } catch (error: any) {
     showErrorToast('Failed to load folder items')
+    return []
   }
 }
 
@@ -341,8 +341,7 @@ const searchByBarcode = async () => {
   
   isSearching.value = true
   try {
-    await loadFolderItems()
-    const items = inventoryStore.items[selectedFolderId.value] || []
+    const items = await loadFolderItems()
     
     // Search for item by barcode (assuming barcode is stored in a field)
     const barcodeField = 'barcode'
