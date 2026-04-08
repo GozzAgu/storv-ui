@@ -55,7 +55,12 @@ export default defineNuxtConfig({
         messagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
         appId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '',
         measurementId: process.env.NUXT_PUBLIC_FIREBASE_MEASUREMENT_ID || ''
-      }
+      },
+      /** Unsigned uploads: create an upload preset (e.g. storvv-logos) set to "Unsigned" in Cloudinary. */
+      cloudinaryCloudName:
+        process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME || '',
+      cloudinaryUploadPreset:
+        process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || process.env.CLOUDINARY_UPLOAD_PRESET || ''
     }
   },
   // Ensure proper base path for Capacitor

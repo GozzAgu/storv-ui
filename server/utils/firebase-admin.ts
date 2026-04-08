@@ -1,6 +1,8 @@
 import { initializeApp, cert, type App } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
+import { getStorage } from 'firebase-admin/storage'
+import { resolveFirebaseStorageBucket } from '~/utils/firebase-storage-bucket'
 import { readFileSync } from 'node:fs'
 import { isAbsolute, resolve } from 'node:path'
 
@@ -142,4 +144,25 @@ export function getAdminAuth() {
 
 export function getAdminFirestore() {
   return getFirestore(getAdminApp())
+}
+
+/**
+ * GCS bucket for Firebase Storage (same name as `storageBucket` in the web config).
+ */
+export function getAdminStorageBucket() {
+  const config = useRuntimeConfig()
+  const pub = config.public.firebase as {
+    projectId?: string
+    storageBucket?: string
+  }
+  const name = resolveFirebaseStorageBucket(
+    pub.projectId || '',
+    pub.storageBucket || ''
+  )
+  if (!name) {
+    throw new Error(
+      'Storage bucket unknown: set NUXT_PUBLIC_FIREBASE_PROJECT_ID and NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET (exact value from Firebase Console).'
+    )
+  }
+  return getStorage(getAdminApp()).bucket(name)
 }

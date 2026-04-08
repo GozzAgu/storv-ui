@@ -46,7 +46,7 @@
           <div class="flex items-center gap-5">
             <div class="relative shrink-0">
               <div class="w-16 h-16 rounded-sm flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
-                <img v-if="accountLogoUrl" :src="accountLogoUrl" alt="Account logo" class="w-full h-full object-cover" />
+                <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Account logo" class="w-full h-full object-cover" />
                 <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
               <button
@@ -197,7 +197,7 @@
               <div
                 class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-gray-100 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
               >
-                <img v-if="store.logoUrl || accountLogoUrl" :src="store.logoUrl || accountLogoUrl" :alt="store.name" class="h-full w-full object-cover" />
+                <img v-if="store.logoUrl || accountLogoUrl" :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)" :alt="store.name" class="h-full w-full object-cover" />
                 <BuildingStorefrontIcon v-else class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.75" />
               </div>
               <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
@@ -586,6 +586,12 @@ import {
   initializePaystackSubscription,
   type PaystackInitializeFetcher,
 } from '~/utils/paystack-upgrade'
+import {
+  BILLING_BLOCKED_USER_MESSAGE,
+  extractUploadFailureMessage,
+  isBillingDelinquentMessage,
+} from '~/utils/storage-billing-errors'
+import { isCloudinaryUrl, optimizeCloudinaryLogo } from '~/utils/cloudinary'
 
 definePageMeta({
   layout: 'dashboard'
@@ -710,6 +716,65 @@ const accountLogoInput = ref<HTMLInputElement | null>(null)
 const isUploadingAccountLogo = ref(false)
 
 const accountLogoUrl = computed(() => userStore.userData?.storeLogoUrl || '')
+const displayAccountLogoSrc = computed(() => optimizeCloudinaryLogo(accountLogoUrl.value))
+
+function isFirebaseStorageUnknown(err: unknown): boolean {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'code' in err &&
+    (err as { code: string }).code === 'storage/unknown'
+  )
+}
+
+/**
+ * When Cloudinary env is set, upload there (no Firebase Storage / billing required for logos).
+ * Otherwise: Firebase client → server Admin fallback.
+ */
+async function uploadAccountLogoWithFallback(
+  file: File,
+  userId: string
+): Promise<{ url: string; path: string }> {
+  const cloudinary = useCloudinary()
+  if (cloudinary.isConfigured.value) {
+    const { url } = await cloudinary.uploadImage(file)
+    if (import.meta.dev) console.info('[Account logo] Uploaded via Cloudinary')
+    return { url, path: '' }
+  }
+
+  const { uploadImage } = useFirebaseStorage()
+  try {
+    return await uploadImage(file, userId, { folder: 'account-logo' })
+  } catch (err) {
+    if (!isFirebaseStorageUnknown(err)) throw err
+    if (import.meta.dev) {
+      console.warn('[Account logo] Browser Storage upload failed; retrying via server…', err)
+    }
+    const token = await authStore.currentUser!.getIdToken()
+    const body = new FormData()
+    body.append('file', file)
+    try {
+      return await $fetch<{ url: string; path: string }>(
+        '/api/storage/upload-account-logo',
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body,
+        }
+      )
+    } catch (apiErr: unknown) {
+      const serverHint = extractUploadFailureMessage(apiErr)
+      if (isBillingDelinquentMessage(serverHint)) {
+        throw new Error(BILLING_BLOCKED_USER_MESSAGE)
+      }
+      throw new Error(
+        `Could not complete upload (${serverHint}). ` +
+          'If this is not a billing issue: for local dev set FIREBASE_SERVICE_ACCOUNT_PATH or FIREBASE_SERVICE_ACCOUNT_JSON in .env and restart. ' +
+          'Set NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET to the exact value from Firebase Console → Project settings.'
+      )
+    }
+  }
+}
 
 const handleAccountLogoUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
@@ -720,11 +785,8 @@ const handleAccountLogoUpload = async (event: Event) => {
   input.value = ''
 
   try {
-    const { uploadImage } = useFirebaseStorage()
     const userId = authStore.currentUser.uid
-    const { url } = await uploadImage(file, userId, {
-      folder: 'account-logo',
-    })
+    const { url } = await uploadAccountLogoWithFallback(file, userId)
 
     await updateUserDocument(userId, { storeLogoUrl: url })
     userStore.$patch((state) => {
@@ -732,8 +794,12 @@ const handleAccountLogoUpload = async (event: Event) => {
     })
     await storesStore.updateAllStoresLogo(url)
     toast.success('Logo updated for all stores')
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to upload logo')
+  } catch (err: unknown) {
+    if (import.meta.dev) console.error('[Account logo upload]', err)
+    const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
+    const msg =
+      err instanceof Error ? err.message : getFirebaseStorageErrorMessage(err)
+    toast.error(msg)
   } finally {
     isUploadingAccountLogo.value = false
   }
@@ -744,7 +810,7 @@ const removeAccountLogo = async () => {
 
   const currentLogoUrl = accountLogoUrl.value
   try {
-    if (currentLogoUrl) {
+    if (currentLogoUrl && !isCloudinaryUrl(currentLogoUrl)) {
       const { deleteImageByUrl } = useFirebaseStorage()
       await deleteImageByUrl(currentLogoUrl)
     }
@@ -754,8 +820,9 @@ const removeAccountLogo = async () => {
     })
     await storesStore.updateAllStoresLogo('')
     toast.success('Logo removed from all stores')
-  } catch (err: any) {
-    toast.error(err.message || 'Failed to remove logo')
+  } catch (err: unknown) {
+    const { getFirebaseStorageErrorMessage } = useFirebaseStorage()
+    toast.error(getFirebaseStorageErrorMessage(err))
   }
 }
 
