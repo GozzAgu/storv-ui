@@ -57,8 +57,12 @@
       >
         <!-- Store header -->
         <div class="text-center px-4 pt-3 pb-2">
-          <div v-if="storeLogoUrl" class="mb-1 flex justify-center">
-            <img :src="storeLogoUrl" alt="Store logo" class="receipt-logo h-8 w-8 rounded-sm object-contain" />
+          <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
+            <img
+              :src="storeLogoUrl"
+              alt="Store logo"
+              class="receipt-logo h-16 w-16 sm:h-20 sm:w-20 rounded-sm object-contain"
+            />
           </div>
           <h1 class="text-xs font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
           <p v-if="storeAddress" class="mt-0.5 text-[9px] leading-snug text-gray-500">{{ storeAddress }}</p>
@@ -94,12 +98,12 @@
         <div class="px-4 pb-2">
           <p class="mb-1 text-[9px] font-medium uppercase tracking-wider text-gray-500">Items</p>
           <table class="w-full">
-            <thead class="bg-gray-50 dark:!bg-dashboard-card/85">
-              <tr class="border-b border-gray-200 dark:border-gray-800/80">
-                <th class="py-1 text-left text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Product</th>
-                <th class="w-9 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Qty</th>
-                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Price</th>
-                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Total</th>
+            <thead class="bg-transparent dark:!bg-transparent">
+              <tr class="border-b border-gray-200 dark:!border-gray-200">
+                <th class="py-1 text-left text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Product</th>
+                <th class="w-9 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Qty</th>
+                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Price</th>
+                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -662,8 +666,8 @@ const handleSendEmail = async () => {
   padding-bottom: 2px !important;
 }
 .receipt-content.pdf-export .receipt-logo {
-  width: 28px !important;
-  height: 28px !important;
+  width: 56px !important;
+  height: 56px !important;
 }
 
 /* PDF capture: ensure clean print look */
