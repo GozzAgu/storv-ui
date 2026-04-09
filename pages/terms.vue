@@ -219,6 +219,7 @@ useHead({
 </script>
 
 <style scoped>
+@reference "../assets/css/main.css";
 .prose h2 {
   @apply border-b border-gray-200 pb-2 dark:border-gray-700;
 }

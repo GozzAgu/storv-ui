@@ -575,7 +575,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { useInventoryStore } from '~/stores/inventory'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import Button from '~/components/ui/Button.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
@@ -622,7 +622,7 @@ const userStore = useUserStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const inventoryStore = useInventoryStore()
-const toast = useToast()
+const toast = useAppToast()
 const { limits } = useSubscriptionFeatures()
 const { eligibleStores, hiddenStoreCount } = usePlanEligibleStores()
 const route = useRoute()

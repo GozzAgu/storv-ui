@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../../tailwind.config.js";
+@import "tailwindcss";
+@import "@nuxt/ui";
 
 /* Dropdowns, modals, command palette — solid frosted glass (not fully transparent) */
 @layer components {

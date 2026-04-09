@@ -1225,7 +1225,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
@@ -1258,7 +1258,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const { canManageInventoryItems } = usePermissions()
-const toast = useToast()
+const toast = useAppToast()
 
 // Duplicate items only on Storvv Medium and Enterprise
 const canDuplicateByPlan = computed(() => {

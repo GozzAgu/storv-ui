@@ -1,11 +1,13 @@
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
-  <!-- Toast Notifications - Global -->
-  <ClientOnly>
-    <ToastContainer />
-  </ClientOnly>
+  <UApp>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+    <!-- Toast Notifications - Global -->
+    <ClientOnly>
+      <ToastContainer />
+    </ClientOnly>
+  </UApp>
 </template>
 
 <script setup lang="ts">

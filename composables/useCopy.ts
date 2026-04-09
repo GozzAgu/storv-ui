@@ -1,7 +1,7 @@
-import { useToast } from './useToast'
+import { useAppToast } from './useAppToast'
 
 export const useCopy = () => {
-  const toast = useToast()
+  const toast = useAppToast()
 
   const copyToClipboard = async (text: string, label: string = 'Text') => {
     try {

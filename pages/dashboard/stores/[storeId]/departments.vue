@@ -462,7 +462,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
 // Get store instances - only accessible on client
@@ -471,7 +471,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const storesStore = useStoresStore()
-const toast = useToast()
+const toast = useAppToast()
 const sidebarCollapsed = ref(false)
 
 // Load sidebar state from localStorage

@@ -140,7 +140,7 @@ import { computed, onMounted, ref } from 'vue'
 import { BellIcon, EyeIcon } from '@heroicons/vue/24/outline'
 import { useNotificationsStore, type Notification } from '~/stores/notifications'
 import { useRouter } from 'vue-router'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 
 const props = withDefaults(
@@ -156,7 +156,7 @@ const emit = defineEmits<{
 
 const notificationsStore = useNotificationsStore()
 const router = useRouter()
-const toast = useToast()
+const toast = useAppToast()
 const { formatCurrency } = usePreferences()
 
 const activeTab = ref<'inbox' | 'read'>('inbox')

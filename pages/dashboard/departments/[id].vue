@@ -456,7 +456,7 @@ import { useUserStore } from '~/stores/user'
 import type { Department } from '~/composables/useDepartments'
 import type { Staff } from '~/composables/useStaff'
 import { usePermissions } from '~/composables/usePermissions'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 
 definePageMeta({
   layout: 'dashboard',
@@ -504,7 +504,7 @@ const selectedStaffForBulk = ref<Staff[]>([])
 const showBulkDeleteStaffModal = ref(false)
 const bulkDeleteStaffConfirmed = ref(false)
 const isBulkDeletingStaff = ref(false)
-const toast = useToast()
+const toast = useAppToast()
 
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
@@ -742,8 +742,8 @@ function getNextRoleLabel(current: 'intern' | 'staff' | 'manager'): string {
 }
 
 const handleToggleStaffRole = async (staffMember: Staff) => {
-  const { useToast } = await import('~/composables/useToast')
-  const toast = useToast()
+  const { useAppToast } = await import('~/composables/useAppToast')
+  const toast = useAppToast()
   
   const newRole = getNextRole(staffMember.role)
   const roleLabel = getNextRoleLabel(staffMember.role)

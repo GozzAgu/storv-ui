@@ -123,7 +123,7 @@ import { MagnifyingGlassIcon, ArrowRightIcon, TrashIcon } from '@heroicons/vue/2
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useSearchStore } from '~/stores/search'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 
 const props = defineProps<{
   modelValue: boolean
@@ -135,7 +135,7 @@ const emit = defineEmits<{
 }>()
 
 const searchStore = useSearchStore()
-const toast = useToast()
+const toast = useAppToast()
 const showCreateModal = ref(false)
 const searchName = ref('')
 

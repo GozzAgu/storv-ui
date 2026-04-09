@@ -2,7 +2,10 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt'],
+  modules: ['@nuxt/ui', '@pinia/nuxt'],
+  ui: {
+    fonts: false,
+  },
   css: ['~/assets/css/main.css'],
   // Optimize CSS loading to prevent FOUC
   experimental: {

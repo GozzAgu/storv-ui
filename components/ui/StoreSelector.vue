@@ -189,7 +189,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 
 interface StoreLike {
   id?: string
@@ -198,7 +198,7 @@ interface StoreLike {
 
 const storesStore = useStoresStore()
 const userStore = useUserStore()
-const toast = useToast()
+const toast = useAppToast()
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)

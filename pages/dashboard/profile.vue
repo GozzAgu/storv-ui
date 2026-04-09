@@ -786,7 +786,7 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useCustomersStore } from '~/stores/customers'
@@ -1073,7 +1073,7 @@ const { theme, setTheme, actualTheme } = useTheme()
 
 // Preferences integration
 const { preferences, updatePreferences, initialize: initPreferences } = usePreferences()
-const toast = useToast()
+const toast = useAppToast()
 
 // Account settings
 const accountSettings = reactive({

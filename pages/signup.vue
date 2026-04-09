@@ -446,8 +446,8 @@ const handleSignUp = async () => {
       })
       
       // Show success message about email verification
-      const { useToast } = await import('~/composables/useToast')
-      const toast = useToast()
+      const { useAppToast } = await import('~/composables/useAppToast')
+      const toast = useAppToast()
       toast.success('Account created! Please check your email to verify your account.')
       
       // Redirect to onboarding (first-time setup)

@@ -216,7 +216,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
 
 interface Props {
@@ -236,7 +236,7 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency } = usePreferences()
-const { success: showSuccessToast, error: showErrorToast, warning: showWarningToast } = useToast()
+const { success: showSuccessToast, error: showErrorToast, warning: showWarningToast } = useAppToast()
 
 const folders = computed(() => inventoryStore.folders)
 const selectedFolderId = ref<string>('')

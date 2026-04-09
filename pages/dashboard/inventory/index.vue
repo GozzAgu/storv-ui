@@ -612,7 +612,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 import { parseTemplateFieldsFromExcelArrayBuffer } from '~/utils/inventory-template-from-excel'
 
@@ -795,7 +795,7 @@ const userStore = useUserStore()
 const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
-const toast = useToast()
+const toast = useAppToast()
 const { canCreateInventoryFolders } = usePermissions()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')

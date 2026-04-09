@@ -508,7 +508,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import Card from '~/components/ui/Card.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -523,7 +523,7 @@ useHead({
 })
 
 const { formatCurrency } = usePreferences()
-const toast = useToast()
+const toast = useAppToast()
 
 function formatReturnDate(date: Date): string {
   return date.toLocaleDateString('en-US', {

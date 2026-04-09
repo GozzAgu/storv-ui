@@ -15,20 +15,15 @@ export interface Toast {
   action?: ToastAction
 }
 
-// Shared state - singleton pattern to ensure all instances use the same toasts array
 const toasts = ref<Toast[]>([])
 
 let toastIdCounter = 0
 
-// Store timeout IDs to allow cleanup
 const toastTimeouts = new Map<string, NodeJS.Timeout>()
-
-// Store pending commit callbacks for undo toasts
 const pendingCommits = new Map<string, NodeJS.Timeout>()
 
-export const useToast = () => {
+export const useAppToast = () => {
   const addToast = (message: string, type: ToastType = 'info', duration: number = 5000) => {
-    // Only add toast on client side
     if (import.meta.server) {
       console.log(`[Toast ${type}]: ${message}`)
       return ''
@@ -39,12 +34,11 @@ export const useToast = () => {
       id,
       message,
       type,
-      duration
+      duration,
     }
-    
+
     toasts.value.push(toast)
-    
-    // Auto remove after duration
+
     if (duration > 0) {
       const timeoutId = setTimeout(() => {
         removeToast(id)
@@ -52,44 +46,39 @@ export const useToast = () => {
       }, duration)
       toastTimeouts.set(id, timeoutId)
     }
-    
+
     return id
   }
-  
+
   const removeToast = (id: string) => {
-    // Clear timeout if exists
     const timeoutId = toastTimeouts.get(id)
     if (timeoutId) {
       clearTimeout(timeoutId)
       toastTimeouts.delete(id)
     }
 
-    const index = toasts.value.findIndex(t => t.id === id)
+    const index = toasts.value.findIndex((t) => t.id === id)
     if (index > -1) {
       toasts.value.splice(index, 1)
     }
   }
-  
+
   const success = (message: string, duration?: number) => {
     return addToast(message, 'success', duration || 5000)
   }
-  
+
   const error = (message: string, duration?: number) => {
-    return addToast(message, 'error', duration || 7000) // Errors stay longer
+    return addToast(message, 'error', duration || 7000)
   }
-  
+
   const warning = (message: string, duration?: number) => {
     return addToast(message, 'warning', duration || 5000)
   }
-  
+
   const info = (message: string, duration?: number) => {
     return addToast(message, 'info', duration || 5000)
   }
 
-  /**
-   * Show a "deleted" toast with an Undo button.
-   * onUndo is called if user clicks Undo; onCommit runs after duration if not undone.
-   */
   const deletedWithUndo = (
     message: string,
     onUndo: () => void,
@@ -136,12 +125,11 @@ export const useToast = () => {
     toasts.value.push(toast)
     return id
   }
-  
+
   const clearAll = () => {
-    // Clear all timeouts
-    toastTimeouts.forEach(timeoutId => clearTimeout(timeoutId))
+    toastTimeouts.forEach((timeoutId) => clearTimeout(timeoutId))
     toastTimeouts.clear()
-    pendingCommits.forEach(timeoutId => clearTimeout(timeoutId))
+    pendingCommits.forEach((timeoutId) => clearTimeout(timeoutId))
     pendingCommits.clear()
 
     toasts.value = []
@@ -159,4 +147,3 @@ export const useToast = () => {
     clearAll,
   }
 }
-

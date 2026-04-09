@@ -487,7 +487,7 @@ import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { useFirestore } from '~/composables/useFirestore'
 
 definePageMeta({
@@ -499,7 +499,7 @@ useHead({
 })
 
 const { formatCurrency } = usePreferences()
-const toast = useToast()
+const toast = useAppToast()
 const storesStore = useStoresStore()
 const inventoryStore = useInventoryStore()
 const userStore = useUserStore()

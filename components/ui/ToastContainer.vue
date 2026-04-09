@@ -45,9 +45,9 @@
 
 <script setup lang="ts">
 import { XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
-import { useToast, type ToastType } from '~/composables/useToast'
+import { useAppToast, type ToastType } from '~/composables/useAppToast'
 
-const { toasts, removeToast } = useToast()
+const { toasts, removeToast } = useAppToast()
 
 const getAccentBorder = (type: ToastType) => {
   switch (type) {

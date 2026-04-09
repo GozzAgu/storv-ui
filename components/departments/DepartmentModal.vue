@@ -80,7 +80,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { CORE_DEPARTMENTS } from '~/composables/useDepartments'
 import type { Department } from '~/composables/useDepartments'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 
 interface Props {
   modelValue: boolean
@@ -101,7 +101,7 @@ const emit = defineEmits<{
 
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
-const toast = useToast()
+const toast = useAppToast()
 
 const coreDepartments = CORE_DEPARTMENTS
 

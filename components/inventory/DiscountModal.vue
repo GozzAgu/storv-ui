@@ -125,7 +125,7 @@ import { TagIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 
 interface Props {
@@ -141,7 +141,7 @@ const emit = defineEmits<{
 }>()
 
 const inventoryStore = useInventoryStore()
-const toast = useToast()
+const toast = useAppToast()
 const { preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol ?? '$')
 

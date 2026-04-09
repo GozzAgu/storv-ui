@@ -1216,7 +1216,7 @@ import { useStaffStore } from '~/stores/staff'
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore'
 import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
 definePageMeta({
@@ -1230,7 +1230,7 @@ useHead({
 
 const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const { canManage, canCreate, canEditReceipts, canDeleteReceipts } = usePermissions()
 const { getUserDocument } = useUser()

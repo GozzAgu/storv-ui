@@ -139,7 +139,7 @@ import { ref, computed } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
-import { useToast } from '~/composables/useToast'
+import { useAppToast } from '~/composables/useAppToast'
 
 interface Props {
   modelValue: boolean
@@ -154,7 +154,7 @@ const emit = defineEmits<{
 }>()
 
 const inventoryStore = useInventoryStore()
-const toast = useToast()
+const toast = useAppToast()
 
 const discountType = ref<'percentage' | 'amount'>('percentage')
 const discountValue = ref<number>(0)
