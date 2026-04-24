@@ -32,6 +32,8 @@
             <span>{{ isSendingEmail ? 'Sending...' : 'Email' }}</span>
           </button>
           <button
+            type="button"
+            data-print-pdf
             @click="handlePrintPDF"
             :disabled="isPrinting || !receipt"
             class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
@@ -430,15 +432,35 @@ const formatReceiptTime = (date: string | Date) => {
   })
 }
 
-/** Convert external images in the receipt to data URLs so html2canvas can draw them (avoids CORS tainting). */
+/**
+ * Convert remote images to data URLs so html2canvas does not taint the canvas
+ * (tainted canvas → SecurityError on toDataURL, PDF generation fails).
+ */
+function resolveImgHttpUrl(src: string): string | null {
+  const trimmed = src.trim()
+  if (!trimmed || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+    return null
+  }
+  if (trimmed.startsWith('//')) {
+    if (import.meta.client && typeof window !== 'undefined') {
+      return `${window.location.protocol}${trimmed}`
+    }
+    return `https:${trimmed}`
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+  return null
+}
+
 async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
-  const images = el.querySelectorAll<HTMLImageElement>('img[src^="http"]')
+  const images = el.querySelectorAll<HTMLImageElement>('img')
   await Promise.all(
     Array.from(images).map(async (img) => {
-      const url = img.getAttribute('src')
-      if (!url || url.startsWith('data:')) return
+      const attr = img.getAttribute('src')
+      const url = resolveImgHttpUrl(attr || img.currentSrc || img.src)
+      if (!url) return
       try {
-        // Proxy via our API so we avoid CORS; server fetches the image and returns it
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
         const res = await fetch(proxyUrl)
         if (!res.ok) return
@@ -452,7 +474,7 @@ async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
         img.src = dataUrl
         await img.decode()
       } catch {
-        // Leave src as-is if proxy or decode fails
+        // Leave src as-is if proxy or decode fails (may still taint; proxy fixes are primary)
       }
     })
   )
