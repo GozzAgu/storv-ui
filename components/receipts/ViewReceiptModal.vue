@@ -277,6 +277,7 @@ import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
 import { getProductDetailLines } from '~/composables/useReceiptProductDetails'
+import { useAppToast } from '~/composables/useAppToast'
 
 interface Props {
   modelValue: boolean
@@ -296,6 +297,7 @@ const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
 const emailToSend = ref('')
 const { copyToClipboard } = useCopy()
+const toast = useAppToast()
 
 const copyReceiptNumber = (receiptNumber: string) => {
   copyToClipboard(receiptNumber, 'Receipt number')
@@ -432,6 +434,15 @@ const formatReceiptTime = (date: string | Date) => {
   })
 }
 
+/** 1×1 transparent GIF — use when proxy fails so html2canvas never taints the canvas */
+const TRANSPARENT_1X1_GIF =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+const RECEIPT_PDF_JPEG_QUALITY = 0.88
+/** Long signed URLs (e.g. Firebase) can exceed max GET length; use POST instead */
+const PROXY_MAX_GET_STRING_CHARS = 1800
+const H2C_SCALES: readonly [number, number, number] = [2, 1.5, 1]
+
 /**
  * Convert remote images to data URLs so html2canvas does not taint the canvas
  * (tainted canvas → SecurityError on toDataURL, PDF generation fails).
@@ -453,6 +464,55 @@ function resolveImgHttpUrl(src: string): string | null {
   return null
 }
 
+/** html2canvas does not support some modern CSS color functions (e.g. oklch in Tailwind v4). */
+function sanitizeUnsupportedColorFunctions(cssText: string): string {
+  return cssText.replace(/oklch\([^)]+\)/gi, '#000')
+}
+
+function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement) {
+  // Last-ditch: replace any still-remote <img> in the clone to avoid tainting.
+  cloneRoot.querySelectorAll('img').forEach((img) => {
+    const s = (img.getAttribute('src') || '').trim()
+    if (!s || s.startsWith('data:') || s.startsWith('blob:')) return
+    if (s.startsWith('http://') || s.startsWith('https://') || s.startsWith('//')) {
+      img.setAttribute('src', TRANSPARENT_1X1_GIF)
+    }
+  })
+
+  // Prevent parser crash: strip unsupported color functions from inline styles and style tags.
+  cloneRoot.querySelectorAll<HTMLElement>('[style]').forEach((node) => {
+    const style = node.getAttribute('style')
+    if (!style || !/oklch\(/i.test(style)) return
+    node.setAttribute('style', sanitizeUnsupportedColorFunctions(style))
+  })
+
+  cloneDocument.querySelectorAll<HTMLStyleElement>('style').forEach((styleEl) => {
+    if (!styleEl.textContent || !/oklch\(/i.test(styleEl.textContent)) return
+    styleEl.textContent = sanitizeUnsupportedColorFunctions(styleEl.textContent)
+  })
+}
+
+async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
+  const usePost = absoluteUrl.length > PROXY_MAX_GET_STRING_CHARS
+  const res = usePost
+    ? await fetch('/api/proxy-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: absoluteUrl }),
+      })
+    : await fetch(`/api/proxy-image?url=${encodeURIComponent(absoluteUrl)}`)
+  if (!res.ok) {
+    throw new Error(`Image proxy ${res.status}`)
+  }
+  const blob = await res.blob()
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
 async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   const images = el.querySelectorAll<HTMLImageElement>('img')
   await Promise.all(
@@ -461,23 +521,85 @@ async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
       const url = resolveImgHttpUrl(attr || img.currentSrc || img.src)
       if (!url) return
       try {
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
-        const res = await fetch(proxyUrl)
-        if (!res.ok) return
-        const blob = await res.blob()
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(blob)
-        })
+        const dataUrl = await fetchProxyImageDataUrl(url)
         img.src = dataUrl
-        await img.decode()
+        try {
+          await img.decode()
+        } catch {
+          // Invalid/corrupt decode; still use dataUrl for render
+        }
       } catch {
-        // Leave src as-is if proxy or decode fails (may still taint; proxy fixes are primary)
+        img.setAttribute('src', TRANSPARENT_1X1_GIF)
       }
     })
   )
+}
+
+async function html2CanvasReceipt(
+  el: HTMLElement,
+  scale: number
+): Promise<HTMLCanvasElement> {
+  if (import.meta.client && document.fonts?.ready) {
+    await document.fonts.ready
+  }
+  const { default: html2canvas } = await import('html2canvas')
+  const baseOptions = {
+    scale,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    backgroundColor: '#ffffff',
+    onclone: prepareHtml2CanvasClone,
+  } as const
+
+  try {
+    // Prefer browser-native rendering path first to avoid css parser limitations.
+    return await html2canvas(el, {
+      ...baseOptions,
+      foreignObjectRendering: true,
+    })
+  } catch {
+    // Fallback to classic renderer after clone sanitization.
+    return html2canvas(el, {
+      ...baseOptions,
+      foreignObjectRendering: false,
+    })
+  }
+}
+
+/**
+ * Renders the receipt to jsPDF, retrying with lower scale if canvas is too large
+ * (browser limits) or the pipeline throws.
+ */
+async function receiptElementToJsPdf(el: HTMLElement) {
+  await nextTick()
+  await injectDataUrlsForImages(el)
+  const { default: jsPDF } = await import('jspdf')
+  const imgWidth = 210
+  const pageHeight = 297
+  let lastError: unknown
+  for (const scale of H2C_SCALES) {
+    try {
+      const canvas = await html2CanvasReceipt(el, scale)
+      const imgData = canvas.toDataURL('image/jpeg', RECEIPT_PDF_JPEG_QUALITY)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      let heightLeft = imgHeight
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      let position = 0
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+      return pdf
+    } catch (e) {
+      lastError = e
+    }
+  }
+  throw lastError
 }
 
 const handlePrintPDF = async () => {
@@ -487,51 +609,15 @@ const handlePrintPDF = async () => {
 
   try {
     isCapturingPdf.value = true
-    await nextTick()
-    await injectDataUrlsForImages(receiptContent.value!)
-
-    // Dynamically import jsPDF and html2canvas
-    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-      import('jspdf'),
-      import('html2canvas')
-    ])
-
-    // Create canvas from receipt content (pdf-export class keeps text at ~12px on A4)
-    const canvas = await html2canvas(receiptContent.value, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-    })
-
-    // Calculate PDF dimensions (A4: 210 x 297 mm)
-    const imgWidth = 210
-    const pageHeight = 297
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
-
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    let position = 0
-
-    // Add image to PDF
-    const imgData = canvas.toDataURL('image/png')
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
-
-    // Add additional pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-    }
-
-    // Save PDF
+    const pdf = await receiptElementToJsPdf(receiptContent.value)
     pdf.save(`receipt-${props.receipt.receiptNumber}.pdf`)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating PDF:', error)
-    alert('Failed to generate PDF. Please try again.')
+    const msg = error instanceof Error ? error.message : String(error)
+    toast.error(
+      `Could not create the PDF. ${msg && msg.length < 180 ? `(${msg})` : 'Check the console for details.'}`,
+      8000
+    )
   } finally {
     isCapturingPdf.value = false
     isPrinting.value = false
@@ -550,49 +636,9 @@ const generateReceiptPDF = async (): Promise<string> => {
 
   isCapturingPdf.value = true
   try {
-    await nextTick()
-    await injectDataUrlsForImages(receiptContent.value)
-
-    // Dynamically import jsPDF and html2canvas
-    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
-      import('jspdf'),
-      import('html2canvas')
-    ])
-
-    // Create canvas from receipt content (pdf-export class keeps text at ~12px on A4)
-    const canvas = await html2canvas(receiptContent.value, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-    })
-
-    // Calculate PDF dimensions (A4: 210 x 297 mm)
-    const imgWidth = 210
-    const pageHeight = 297
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
-
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    let position = 0
-
-    // Add image to PDF
-    const imgData = canvas.toDataURL('image/png')
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
-
-    // Add additional pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-    }
-
-    // Convert PDF to base64 string
+    const pdf = await receiptElementToJsPdf(receiptContent.value)
     const dataUri = pdf.output('datauristring')
-    const base64 = dataUri.split(',')[1] // Remove data:application/pdf;base64, prefix
+    const base64 = dataUri.split(',')[1]
     if (!base64) {
       throw new Error('Failed to generate PDF base64')
     }
