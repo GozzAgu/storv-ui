@@ -767,34 +767,35 @@ const handleSendEmail = async () => {
   width: 760px !important;
   max-width: 760px !important;
   margin: 0 auto !important;
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 9.5px;
+  line-height: 1.5;
   overflow: visible !important;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 .receipt-content.pdf-export h1 {
-  font-size: 14px !important;
+  font-size: 12px !important;
   line-height: 1.35 !important;
 }
 .receipt-content.pdf-export .text-xs,
 .receipt-content.pdf-export .text-sm,
 .receipt-content.pdf-export .text-\[11px\],
 .receipt-content.pdf-export p {
-  font-size: 11px !important;
-  line-height: 1.45 !important;
+  font-size: 9.5px !important;
+  line-height: 1.5 !important;
 }
 .receipt-content.pdf-export .text-\[10px\],
 .receipt-content.pdf-export .text-\[9px\] {
-  font-size: 10px !important;
-  line-height: 1.4 !important;
+  font-size: 8.75px !important;
+  line-height: 1.45 !important;
 }
 .receipt-content.pdf-export th,
 .receipt-content.pdf-export td {
-  font-size: 11px !important;
-  line-height: 1.45 !important;
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+  font-size: 9.25px !important;
+  line-height: 1.5 !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  vertical-align: top;
 }
 
 /* Prevent clipped glyph descenders and long unbroken strings in PDF capture */
@@ -810,8 +811,8 @@ const handleSendEmail = async () => {
   text-rendering: optimizeLegibility;
 }
 .receipt-content.pdf-export .receipt-logo {
-  width: 84px !important;
-  height: 84px !important;
+  width: 72px !important;
+  height: 72px !important;
 }
 
 /* PDF capture: ensure clean print look */
