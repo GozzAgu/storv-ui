@@ -438,10 +438,11 @@ const formatReceiptTime = (date: string | Date) => {
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
-const RECEIPT_PDF_JPEG_QUALITY = 0.88
+const RECEIPT_PDF_IMAGE_FORMAT: 'PNG' | 'JPEG' = 'PNG'
+const RECEIPT_PDF_JPEG_QUALITY = 0.96
 /** Long signed URLs (e.g. Firebase) can exceed max GET length; use POST instead */
 const PROXY_MAX_GET_STRING_CHARS = 1800
-const H2C_SCALES: readonly [number, number, number] = [2, 1.5, 1]
+const H2C_SCALES: readonly [number, number, number] = [1.75, 1.5, 1.25]
 
 /**
  * Convert remote images to data URLs so html2canvas does not taint the canvas
@@ -635,17 +636,19 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   for (const scale of H2C_SCALES) {
     try {
       const canvas = await html2CanvasReceipt(el, scale)
-      const imgData = canvas.toDataURL('image/jpeg', RECEIPT_PDF_JPEG_QUALITY)
+      const imgData = RECEIPT_PDF_IMAGE_FORMAT === 'PNG'
+        ? canvas.toDataURL('image/png')
+        : canvas.toDataURL('image/jpeg', RECEIPT_PDF_JPEG_QUALITY)
       const imgHeight = (canvas.height * imgWidth) / canvas.width
       let heightLeft = imgHeight
       const pdf = new jsPDF('p', 'mm', 'a4')
       let position = 0
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+      pdf.addImage(imgData, RECEIPT_PDF_IMAGE_FORMAT, 0, position, imgWidth, imgHeight)
       heightLeft -= pageHeight
       while (heightLeft > 0) {
         position = heightLeft - imgHeight
         pdf.addPage()
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight)
+        pdf.addImage(imgData, RECEIPT_PDF_IMAGE_FORMAT, 0, position, imgWidth, imgHeight)
         heightLeft -= pageHeight
       }
       return pdf
@@ -761,31 +764,45 @@ const handleSendEmail = async () => {
 
 /* PDF export: extra-compact type (html2canvas scale 2 → full A4 width) */
 .receipt-content.pdf-export {
-  font-size: 7px;
-  line-height: 1.2;
+  font-size: 8px;
+  line-height: 1.35;
+  overflow: visible !important;
 }
 .receipt-content.pdf-export h1 {
-  font-size: 8px !important;
-  line-height: 1.2 !important;
+  font-size: 9px !important;
+  line-height: 1.3 !important;
 }
 .receipt-content.pdf-export .text-xs,
 .receipt-content.pdf-export .text-sm,
 .receipt-content.pdf-export .text-\[11px\],
 .receipt-content.pdf-export p {
-  font-size: 7px !important;
-  line-height: 1.25 !important;
+  font-size: 8px !important;
+  line-height: 1.35 !important;
 }
 .receipt-content.pdf-export .text-\[10px\],
 .receipt-content.pdf-export .text-\[9px\] {
-  font-size: 6px !important;
-  line-height: 1.2 !important;
+  font-size: 7px !important;
+  line-height: 1.3 !important;
 }
 .receipt-content.pdf-export th,
 .receipt-content.pdf-export td {
-  font-size: 6.5px !important;
-  line-height: 1.2 !important;
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
+  font-size: 7px !important;
+  line-height: 1.3 !important;
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+
+/* Prevent clipped glyph descenders and long unbroken strings in PDF capture */
+.receipt-content.pdf-export p,
+.receipt-content.pdf-export span,
+.receipt-content.pdf-export td,
+.receipt-content.pdf-export th,
+.receipt-content.pdf-export h1 {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  hyphens: auto;
+  white-space: normal !important;
+  text-rendering: geometricPrecision;
 }
 .receipt-content.pdf-export .receipt-logo {
   width: 56px !important;
