@@ -762,34 +762,39 @@ const handleSendEmail = async () => {
   object-position: center;
 }
 
-/* PDF export: extra-compact type (html2canvas scale 2 → full A4 width) */
+/* PDF export: use a fixed, larger canvas layout for clean text rendering */
 .receipt-content.pdf-export {
-  font-size: 8px;
-  line-height: 1.35;
+  width: 760px !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  font-size: 11px;
+  line-height: 1.45;
   overflow: visible !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 .receipt-content.pdf-export h1 {
-  font-size: 9px !important;
-  line-height: 1.3 !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
 }
 .receipt-content.pdf-export .text-xs,
 .receipt-content.pdf-export .text-sm,
 .receipt-content.pdf-export .text-\[11px\],
 .receipt-content.pdf-export p {
-  font-size: 8px !important;
-  line-height: 1.35 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
 }
 .receipt-content.pdf-export .text-\[10px\],
 .receipt-content.pdf-export .text-\[9px\] {
-  font-size: 7px !important;
-  line-height: 1.3 !important;
+  font-size: 10px !important;
+  line-height: 1.4 !important;
 }
 .receipt-content.pdf-export th,
 .receipt-content.pdf-export td {
-  font-size: 7px !important;
-  line-height: 1.3 !important;
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
 }
 
 /* Prevent clipped glyph descenders and long unbroken strings in PDF capture */
@@ -802,11 +807,11 @@ const handleSendEmail = async () => {
   word-break: break-word !important;
   hyphens: auto;
   white-space: normal !important;
-  text-rendering: geometricPrecision;
+  text-rendering: optimizeLegibility;
 }
 .receipt-content.pdf-export .receipt-logo {
-  width: 56px !important;
-  height: 56px !important;
+  width: 84px !important;
+  height: 84px !important;
 }
 
 /* PDF capture: ensure clean print look */
