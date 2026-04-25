@@ -469,6 +469,24 @@ function sanitizeUnsupportedColorFunctions(cssText: string): string {
   return cssText.replace(/oklch\([^)]+\)/gi, '#000')
 }
 
+function forcePrintThemeOnClone(cloneRoot: HTMLElement) {
+  // Ensure captured receipt is always white with dark text, regardless of app theme.
+  cloneRoot.style.backgroundColor = '#ffffff'
+  cloneRoot.style.color = '#111827'
+  cloneRoot.style.borderColor = '#e5e7eb'
+  cloneRoot.querySelectorAll<HTMLElement>('*').forEach((node) => {
+    // Keep explicit transparent backgrounds; otherwise force white to avoid dark-mode bleed.
+    const bg = node.style.backgroundColor?.trim().toLowerCase()
+    if (!bg || bg === 'transparent') {
+      node.style.backgroundColor = '#ffffff'
+    }
+    const color = node.style.color?.trim().toLowerCase()
+    if (!color) {
+      node.style.color = '#111827'
+    }
+  })
+}
+
 function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement) {
   // Last-ditch: replace any still-remote <img> in the clone to avoid tainting.
   cloneRoot.querySelectorAll('img').forEach((img) => {
@@ -490,6 +508,8 @@ function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement
     if (!styleEl.textContent || !/oklch\(/i.test(styleEl.textContent)) return
     styleEl.textContent = sanitizeUnsupportedColorFunctions(styleEl.textContent)
   })
+
+  forcePrintThemeOnClone(cloneRoot)
 }
 
 async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
@@ -554,17 +574,51 @@ async function html2CanvasReceipt(
 
   try {
     // Prefer browser-native rendering path first to avoid css parser limitations.
-    return await html2canvas(el, {
+    const canvas = await html2canvas(el, {
       ...baseOptions,
       foreignObjectRendering: true,
     })
+    if (!isCanvasEffectivelyBlank(canvas)) {
+      return canvas
+    }
   } catch {
-    // Fallback to classic renderer after clone sanitization.
-    return html2canvas(el, {
-      ...baseOptions,
-      foreignObjectRendering: false,
-    })
+    // Continue to classic fallback below.
   }
+
+  // Fallback to classic renderer after clone sanitization.
+  const fallbackCanvas = await html2canvas(el, {
+    ...baseOptions,
+    foreignObjectRendering: false,
+  })
+  if (isCanvasEffectivelyBlank(fallbackCanvas)) {
+    throw new Error('Rendered canvas is blank')
+  }
+  return fallbackCanvas
+}
+
+function isCanvasEffectivelyBlank(canvas: HTMLCanvasElement): boolean {
+  const ctx = canvas.getContext('2d')
+  if (!ctx || canvas.width === 0 || canvas.height === 0) return true
+  // Sample a coarse grid: if every sampled pixel is near-white/transparent, treat as blank.
+  const cols = 12
+  const rows = 16
+  const stepX = Math.max(1, Math.floor(canvas.width / cols))
+  const stepY = Math.max(1, Math.floor(canvas.height / rows))
+  for (let y = 0; y < canvas.height; y += stepY) {
+    for (let x = 0; x < canvas.width; x += stepX) {
+      const { data } = ctx.getImageData(x, y, 1, 1)
+      const r = data[0] ?? 255
+      const g = data[1] ?? 255
+      const b = data[2] ?? 255
+      const a = data[3] ?? 255
+      const nearWhite = r > 245 && g > 245 && b > 245
+      const transparent = a < 8
+      if (!nearWhite && !transparent) {
+        return false
+      }
+    }
+  }
+  return true
 }
 
 /**

@@ -18,7 +18,7 @@
 
     <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-3">
       <!-- Profile card -->
-      <div class="w-full shrink-0 lg:col-span-1">
+      <div class="w-full shrink-0 lg:col-span-1 lg:sticky lg:top-14 lg:z-10 lg:self-start">
         <div
           class="relative overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card"
         >
