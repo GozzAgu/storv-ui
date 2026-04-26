@@ -1,10 +1,10 @@
 <template>
   <div
-    :class="[ 'frosted-glass rounded-sm border border-gray-200/90 dark:border-gray-700/80 overflow-hidden flex flex-col', variant === 'dropdown' ? 'max-h-[min(85vh,22rem)] w-full min-w-0' : '' ]"
+    :class="[ 'rounded-sm border border-gray-200/90 bg-white shadow-[0_12px_30px_-18px_rgba(15,23,42,0.3)] dark:border-gray-700/80 dark:bg-dashboard-card dark:shadow-[0_12px_28px_-16px_rgba(0,0,0,0.55)] overflow-hidden flex flex-col', variant === 'dropdown' ? 'max-h-[min(85vh,24rem)] w-full min-w-0' : '' ]"
   >
     <!-- Header: title + Mark all as read -->
-    <div class="flex items-center justify-between px-2.5 sm:px-3 pt-2 pb-1.5 border-b border-gray-100 dark:border-gray-700/80 shrink-0">
-      <h2 class="text-[11px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+    <div class="flex items-center justify-between px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-gray-700/80 shrink-0 bg-gray-50/60 dark:bg-white/[0.02]">
+      <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
         Notifications
       </h2>
       <button
@@ -12,17 +12,17 @@
         type="button"
         :disabled="notificationsStore.loading"
         @click="handleMarkAllAsRead"
-        class="text-[10px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
+        class="text-[11px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
       >
         Mark all as read
       </button>
     </div>
 
     <!-- Tabs: Inbox (with badge) / Read + eye -->
-    <div class="flex items-center gap-0.5 border-b border-gray-100 dark:border-gray-700/80 px-2.5 sm:px-3 shrink-0">
+    <div class="flex items-center gap-0.5 border-b border-gray-100 dark:border-gray-700/80 px-3.5 shrink-0 bg-white/70 dark:bg-dashboard-card">
       <button
         type="button"
-        :class="[ 'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'inbox' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300' ]"
+        :class="[ 'relative flex items-center gap-1 rounded-t-sm px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'inbox' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
         @click="activeTab = 'inbox'"
       >
         Inbox
@@ -35,7 +35,7 @@
       </button>
       <button
         type="button"
-        :class="[ 'relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'read' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300' ]"
+        :class="[ 'relative flex items-center gap-1 rounded-t-sm px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'read' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
         @click="activeTab = 'read'"
       >
         Read
@@ -93,25 +93,30 @@
           :key="notification.id"
           type="button"
           @click="handleNotificationClick(notification)"
-          class="w-full flex items-start gap-2 px-2.5 sm:px-3 py-2 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/40"
+          :class="[
+            'w-full flex items-start gap-2.5 px-3.5 py-2.5 text-left transition-colors',
+            notification.read
+              ? 'hover:bg-gray-50/80 dark:hover:bg-gray-700/35'
+              : 'bg-primary-50/[0.35] dark:bg-primary-500/[0.08] hover:bg-primary-50/70 dark:hover:bg-primary-500/[0.14]'
+          ]"
         >
           <div
-            :class="[ 'relative shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white leading-none', getAvatarBgClass(notification) ]"
+            :class="[ 'relative shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white leading-none', getAvatarBgClass(notification) ]"
           >
             {{ getAvatarInitial(notification) }}
           </div>
-          <div class="flex-1 min-w-0 pr-1">
-            <p class="text-[10px] text-gray-900 dark:text-gray-100 leading-tight">
+          <div class="flex-1 min-w-0 pr-1.5">
+            <p class="text-[11px] text-gray-900 dark:text-gray-100 leading-snug">
               <span class="font-semibold">{{ notification.title }}</span>
-              <span class="font-normal text-gray-600 dark:text-gray-400"> · {{ formatMessageWithAccountCurrency(notification.message) }}</span>
+              <span class="font-normal text-gray-600 dark:text-gray-400"> - {{ formatMessageWithAccountCurrency(notification.message) }}</span>
             </p>
-            <p class="text-[9px] text-gray-500 dark:text-gray-400 mt-0.5">
+            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">
               {{ formatTime(notification.createdAt) }}
             </p>
           </div>
           <span
             v-if="!notification.read"
-            class="shrink-0 w-1 h-1 rounded-full bg-violet-500 dark:bg-violet-400 mt-1"
+            class="shrink-0 w-1.5 h-1.5 rounded-full bg-primary-500 dark:bg-primary-400 mt-1.5"
             aria-hidden="true"
           />
         </button>
@@ -120,13 +125,13 @@
       <!-- Load More -->
       <div
         v-if="notificationsStore.hasMore && filteredNotifications.length > 0"
-        class="border-t border-gray-100 dark:border-gray-700/80 px-2.5 sm:px-3 py-1.5 flex justify-center shrink-0"
+        class="border-t border-gray-100 dark:border-gray-700/80 px-3.5 py-2 flex justify-center shrink-0 bg-gray-50/50 dark:bg-white/[0.02]"
       >
         <button
           type="button"
           @click="loadMoreNotifications"
           :disabled="notificationsStore.loading"
-          class="text-[10px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
+          class="text-[11px] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 transition-colors"
         >
           {{ notificationsStore.loading ? 'Loading…' : 'Load more' }}
         </button>

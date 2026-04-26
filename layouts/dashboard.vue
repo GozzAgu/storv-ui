@@ -384,13 +384,13 @@
             <div class="relative shrink-0" ref="notificationsRef">
               <button
                 type="button"
-                @click="notificationsOpen = !notificationsOpen"
-                class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400"
+                @click.stop="toggleNotifications"
+                class="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
               >
-                <BellIcon class="h-4 w-4" stroke-width="1.75" />
+                <BellIcon class="block h-4 w-4 text-gray-700 dark:text-gray-200" stroke-width="2" />
                 <span
                   v-if="unreadNotificationCount > 0"
                   class="absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950"
@@ -398,26 +398,23 @@
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
               </button>
-              <Teleport to="body">
-                <Transition
-                  enter-active-class="transition ease-out duration-150"
-                  enter-from-class="opacity-0 scale-95"
-                  enter-to-class="opacity-100 scale-100"
-                  leave-active-class="transition ease-in duration-100"
-                  leave-from-class="opacity-100 scale-100"
-                  leave-to-class="opacity-0 scale-95"
+              <Transition
+                enter-active-class="transition ease-out duration-150"
+                enter-from-class="opacity-0 scale-95"
+                enter-to-class="opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-100"
+                leave-from-class="opacity-100 scale-100"
+                leave-to-class="opacity-0 scale-95"
+              >
+                <div
+                  v-if="notificationsOpen"
+                  ref="notificationsPanelRef"
+                  class="absolute right-0 top-[calc(100%+0.375rem)] z-[120] w-[min(20rem,calc(100vw-1.5rem))] origin-top-right"
+                  @click.stop
                 >
-                  <div
-                    v-if="notificationsOpen"
-                    ref="notificationsPanelRef"
-                    class="fixed z-[100] w-[min(18rem,calc(100vw-2rem))] origin-top-right top-[calc(3rem+0.25rem)] sm:top-[calc(3.25rem+0.25rem)]"
-                    style="right: max(1rem, env(safe-area-inset-right, 0px)); left: auto;"
-                    @click.stop
-                  >
-                    <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
-                  </div>
-                </Transition>
-              </Teleport>
+                  <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
+                </div>
+              </Transition>
             </div>
 
             <!-- Profile -->
@@ -686,6 +683,10 @@ const notificationsOpen = ref(false)
 const notificationsRef = ref<HTMLElement | null>(null)
 const notificationsPanelRef = ref<HTMLElement | null>(null)
 const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
+
+const toggleNotifications = () => {
+  notificationsOpen.value = !notificationsOpen.value
+}
 
 // Track store switching state
 const switchingStore = ref(false)
@@ -1389,15 +1390,20 @@ const handleSignOut = async () => {
 // Close dropdowns on outside click
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as Node
+  const eventPath = typeof event.composedPath === 'function' ? event.composedPath() : []
   const inProfile =
     profileMenuRef.value?.contains(target) ||
-    profileMenuPanelRef.value?.contains(target)
+    profileMenuPanelRef.value?.contains(target) ||
+    eventPath.includes(profileMenuRef.value as EventTarget) ||
+    eventPath.includes(profileMenuPanelRef.value as EventTarget)
   if (profileMenuOpen.value && !inProfile) {
     profileMenuOpen.value = false
   }
   const inNotifications =
     notificationsRef.value?.contains(target) ||
-    notificationsPanelRef.value?.contains(target)
+    notificationsPanelRef.value?.contains(target) ||
+    eventPath.includes(notificationsRef.value as EventTarget) ||
+    eventPath.includes(notificationsPanelRef.value as EventTarget)
   if (notificationsOpen.value && !inNotifications) {
     notificationsOpen.value = false
   }
