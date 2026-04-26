@@ -303,10 +303,10 @@
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
-        :class="[ 'fixed top-0 left-0 right-0 z-[54] isolate border-b border-gray-200/25 bg-gray-100/95 backdrop-blur-sm transition-[left] duration-300 dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
+        :class="[ 'fixed top-0 left-0 right-0 z-[54] isolate border-b border-gray-200/40 bg-gray-100/90 backdrop-blur-md transition-[left] duration-300 dark:border-white/[0.06] dark:bg-[#07080c]/90', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
       >
         <div
-          class="flex h-12 w-full items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-6"
+          class="flex h-12 w-full items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-5"
         >
           <div class="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
             <button
@@ -338,7 +338,7 @@
           </div>
 
           <div
-            class="relative z-10 ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5 md:gap-2"
+            class="relative z-10 ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2"
           >
             <!-- Global search (width-capped wrapper avoids w-full flex growth overlapping sibling controls) -->
             <div
@@ -347,7 +347,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-full min-w-0 max-w-full items-center gap-2 rounded-sm border border-gray-200/90 bg-white/95 px-2 py-1.5 text-gray-600 shadow-sm transition-colors hover:border-gray-300/90 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 lg:pr-2.5 dark:border-gray-700/80 dark:bg-gray-900/65 dark:text-gray-400 dark:shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] dark:hover:border-gray-600/80 dark:hover:bg-gray-900/85"
+              class="group relative flex h-9 w-full min-w-0 max-w-full items-center gap-2 rounded-sm border border-gray-200/90 bg-white px-2.5 py-1.5 text-gray-600 shadow-sm transition-colors hover:border-gray-300/90 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 lg:pr-2.5 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-400 dark:shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] dark:hover:border-gray-600/80 dark:hover:bg-gray-900"
             >
               <MagnifyingGlassIcon
                 class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-500"
@@ -368,7 +368,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border-0 bg-transparent text-gray-600 dark:text-gray-400 md:hidden"
+              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-400 md:hidden"
               aria-label="Search"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
@@ -376,17 +376,26 @@
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
 
-            <div class="group relative flex h-9 items-center justify-center rounded-sm bg-transparent px-1">
+            <div class="group relative flex h-9 w-9 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-300">
               <ThemeToggle />
             </div>
 
             <!-- Notifications dropdown -->
-            <div class="relative z-[130] h-9 w-9 shrink-0 pointer-events-auto" ref="notificationsRef">
+            <div
+              class="relative z-[130] h-9 w-9 shrink-0 cursor-pointer pointer-events-auto"
+              ref="notificationsRef"
+              role="button"
+              tabindex="0"
+              aria-label="Notifications"
+              @click.stop.prevent="toggleNotifications"
+              @keydown.enter.stop.prevent="toggleNotifications"
+              @keydown.space.stop.prevent="toggleNotifications"
+            >
               <button
                 type="button"
-                @click.stop.prevent="toggleNotifications"
-                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 pointer-events-auto transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
-                aria-label="Notifications"
+                class="group absolute inset-0 inline-flex h-full w-full items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 pointer-events-none transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
+                aria-hidden="true"
+                tabindex="-1"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
               >
@@ -422,7 +431,7 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="group relative flex min-w-0 items-center gap-2 rounded-sm border-0 bg-transparent py-1 pl-1 pr-2 font-medium text-gray-700 dark:text-gray-200 sm:pr-2.5"
+                class="group relative flex min-w-0 items-center gap-2 rounded-sm border border-gray-200/90 bg-white py-1 pl-1 pr-2 font-medium text-gray-700 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 sm:pr-2.5"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
