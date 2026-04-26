@@ -22,7 +22,7 @@
     <div class="flex items-center gap-0.5 border-b border-gray-100 dark:border-gray-700/80 px-3.5 shrink-0 bg-white/70 dark:bg-dashboard-card">
       <button
         type="button"
-        :class="[ 'relative flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'inbox' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
+        :class="[ 'relative flex items-center gap-1 rounded-[2px] px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'inbox' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
         @click="activeTab = 'inbox'"
       >
         Inbox
@@ -35,7 +35,7 @@
       </button>
       <button
         type="button"
-        :class="[ 'relative flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'read' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
+        :class="[ 'relative flex items-center gap-1 rounded-[2px] px-2.5 py-2 text-[11px] font-medium transition-colors border-b-2 -mb-px', activeTab === 'read' ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-500/10' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.03]' ]"
         @click="activeTab = 'read'"
       >
         Read
