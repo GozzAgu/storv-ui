@@ -376,30 +376,21 @@
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
 
-            <div class="group relative flex h-9 w-9 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-300">
+            <div class="group relative flex h-9 w-9 items-center justify-center text-gray-700 dark:text-gray-300">
               <ThemeToggle />
             </div>
 
             <!-- Notifications dropdown -->
-            <div
-              class="relative z-[130] h-9 w-9 shrink-0 cursor-pointer pointer-events-auto"
-              ref="notificationsRef"
-              role="button"
-              tabindex="0"
-              aria-label="Notifications"
-              @click.stop.prevent="toggleNotifications"
-              @keydown.enter.stop.prevent="toggleNotifications"
-              @keydown.space.stop.prevent="toggleNotifications"
-            >
+            <div class="relative z-[130] h-9 w-9 shrink-0" ref="notificationsRef">
               <button
                 type="button"
-                class="group absolute inset-0 inline-flex h-full w-full items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 pointer-events-none transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
-                aria-hidden="true"
-                tabindex="-1"
+                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-sm text-gray-700 transition-colors dark:text-gray-200"
+                aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
+                @click.stop.prevent="toggleNotifications"
               >
-                <BellIcon class="pointer-events-none block h-4 w-4 text-gray-700 dark:text-gray-200" stroke-width="2" />
+                <BellIcon class="pointer-events-none block h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100" stroke-width="2" />
                 <span
                   v-if="unreadNotificationCount > 0"
                   class="pointer-events-none absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950"
