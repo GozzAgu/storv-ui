@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { collection, doc, setDoc, getDocs, query, where, orderBy, serverTimestamp, updateDoc, limit, startAfter, writeBatch, type QueryDocumentSnapshot } from 'firebase/firestore'
+import { doc, setDoc, getDocs, query, where, orderBy, serverTimestamp, updateDoc, limit, startAfter, writeBatch, type QueryDocumentSnapshot } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
@@ -65,6 +65,45 @@ export const useNotificationsStore = defineStore('notifications', {
   },
 
   actions: {
+    isWithinRetentionWindow(createdAt: Date | unknown): boolean {
+      const createdTime =
+        createdAt instanceof Date
+          ? createdAt.getTime()
+          : createdAt
+            ? new Date(createdAt as string | number).getTime()
+            : 0
+      if (!Number.isFinite(createdTime) || createdTime <= 0) return false
+      const cutoff = Date.now() - (24 * 60 * 60 * 1000)
+      return createdTime >= cutoff
+    },
+
+    async clearExpiredNotifications(userId: string, storeId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) return
+
+      const notificationsRef = getNotificationsCollection(db, userId, storeId)
+      const cutoffDate = new Date(Date.now() - (24 * 60 * 60 * 1000))
+
+      // Delete in chunks to keep batch sizes safe.
+      while (true) {
+        const expiredQuery = query(
+          notificationsRef,
+          where('createdAt', '<=', cutoffDate),
+          limit(200)
+        )
+        const snapshot = await getDocs(expiredQuery)
+        if (snapshot.empty) break
+
+        const batch = writeBatch(db)
+        snapshot.docs.forEach((notificationDoc) => {
+          batch.delete(notificationDoc.ref)
+        })
+        await batch.commit()
+
+        if (snapshot.size < 200) break
+      }
+    },
+
     // Create a notification
     async createNotification(
       type: NotificationType,
@@ -170,6 +209,8 @@ export const useNotificationsStore = defineStore('notifications', {
       this.error = null
 
       try {
+        await this.clearExpiredNotifications(userId, storeId)
+
         // Use hierarchical path: users/{userId}/stores/{storeId}/notifications
         const notificationsRef = getNotificationsCollection(db, userId, storeId)
         let notificationsQuery = query(
@@ -253,10 +294,14 @@ export const useNotificationsStore = defineStore('notifications', {
           }
         }
 
+        const freshNotifications = notifications.filter((notification) =>
+          this.isWithinRetentionWindow(notification.createdAt)
+        )
+
         if (loadMore) {
-          this.notifications.push(...notifications)
+          this.notifications.push(...freshNotifications)
         } else {
-          this.notifications = notifications
+          this.notifications = freshNotifications
         }
 
         this.lastDoc = snapshot.docs[snapshot.docs.length - 1] || null
