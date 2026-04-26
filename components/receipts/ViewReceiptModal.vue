@@ -54,11 +54,10 @@
       <!-- Receipt Content (used for PDF) -->
       <div
         ref="receiptContent"
-        class="receipt-content bg-white text-gray-900 rounded-sm overflow-hidden max-w-lg mx-auto"
-        :class="{ 'pdf-export': isCapturingPdf }"
+        class="receipt-content bg-white text-gray-900 rounded-sm overflow-hidden max-w-2xl mx-auto border border-gray-200/90 shadow-sm"
       >
         <!-- Store header -->
-        <div class="text-center px-4 pt-3 pb-2">
+        <div class="receipt-header text-center px-6 pt-6 pb-4 border-b border-gray-200/90">
           <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
             <img
               :src="storeLogoUrl"
@@ -66,56 +65,56 @@
               class="receipt-logo h-16 w-16 sm:h-20 sm:w-20 rounded-sm object-contain"
             />
           </div>
-          <h1 class="text-xs font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
-          <p v-if="storeAddress" class="mt-0.5 text-[9px] leading-snug text-gray-500">{{ storeAddress }}</p>
-          <p v-if="storePhone || storeEmail" class="mt-0.5 text-[9px] leading-snug text-gray-500">
+          <h1 class="text-sm font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
+          <p v-if="storeAddress" class="mt-1 text-[10px] leading-snug text-gray-500">{{ storeAddress }}</p>
+          <p v-if="storePhone || storeEmail" class="mt-1 text-[10px] leading-snug text-gray-500">
             <span v-if="storePhone">{{ storePhone }}</span><span v-if="storePhone && storeEmail"> · </span><span v-if="storeEmail">{{ storeEmail }}</span>
           </p>
         </div>
 
         <!-- Meta block -->
-        <div class="px-4 pb-2">
+        <div class="receipt-section px-6 py-4 border-b border-gray-100">
           <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
             <div>
-              <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Receipt</p>
-              <p class="mt-0.5 text-[11px] font-medium leading-tight text-gray-900">
+              <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</p>
+              <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">
                 {{ receipt.receiptNumber }}
                 <span v-if="receipt.isSwapIn" class="font-normal text-gray-500"> · Swap-in</span>
               </p>
             </div>
             <div class="text-right">
-              <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Date & time</p>
-              <p class="mt-0.5 text-[11px] leading-tight text-gray-900">{{ formatReceiptDate(receipt.date) }}</p>
-              <p class="text-[9px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
+              <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Date & time</p>
+              <p class="mt-1 text-[12px] leading-tight text-gray-900">{{ formatReceiptDate(receipt.date) }}</p>
+              <p class="text-[10px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
             </div>
           </div>
-          <div class="mt-2 border-t border-gray-100 pt-2">
-            <p class="text-[9px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
-            <p class="mt-0.5 text-[11px] font-medium leading-tight text-gray-900">{{ receipt.customerName }}</p>
-            <p v-if="receipt.customerEmail" class="mt-0.5 text-[9px] leading-snug text-gray-500">{{ receipt.customerEmail }}</p>
+          <div class="mt-3 border-t border-gray-100 pt-3">
+            <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
+            <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">{{ receipt.customerName }}</p>
+            <p v-if="receipt.customerEmail" class="mt-1 text-[10px] leading-snug text-gray-500">{{ receipt.customerEmail }}</p>
           </div>
         </div>
 
         <!-- Items -->
-        <div class="px-4 pb-2">
-          <p class="mb-1 text-[9px] font-medium uppercase tracking-wider text-gray-500">Items</p>
+        <div class="receipt-section px-6 py-4 border-b border-gray-100">
+          <p class="mb-2 text-[10px] font-medium uppercase tracking-wider text-gray-500">Items</p>
           <table class="w-full">
-            <thead class="bg-transparent dark:!bg-transparent">
-              <tr class="border-b border-gray-200 dark:!border-gray-200">
-                <th class="py-1 text-left text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Product</th>
-                <th class="w-9 py-1 text-center text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Qty</th>
-                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Price</th>
-                <th class="py-1 text-right text-[9px] font-semibold uppercase tracking-wider text-gray-600 dark:!text-gray-600">Total</th>
+            <thead class="bg-gray-50">
+              <tr class="border-b border-gray-200">
+                <th class="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600">Product</th>
+                <th class="w-12 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-600">Qty</th>
+                <th class="py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-600">Price</th>
+                <th class="py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-600">Total</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="(item, index) in receipt.items"
                 :key="index"
-                class="border-b border-gray-100"
+                class="border-b border-gray-100/90"
               >
-                <td class="py-1 align-top">
-                  <p class="text-[11px] font-medium leading-tight text-gray-900">{{ item.itemName }}</p>
+                <td class="py-2 align-top">
+                  <p class="text-[12px] font-medium leading-tight text-gray-900">{{ item.itemName }}</p>
                   <div
                     v-if="getProductDetailLines(item).length > 0"
                     class="mt-0.5 space-y-px"
@@ -123,26 +122,26 @@
                     <p
                       v-for="(line, detailIndex) in getProductDetailLines(item)"
                       :key="`${index}-detail-${detailIndex}`"
-                      class="text-[9px] leading-snug text-gray-500"
+                      class="text-[10px] leading-snug text-gray-500"
                     >
                       {{ line }}
                     </p>
                   </div>
-                  <p v-if="item.hasDiscount" class="mt-0.5 text-[9px] text-gray-500">
+                  <p v-if="item.hasDiscount" class="mt-1 text-[10px] text-gray-500">
                     {{ item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}` }}
                   </p>
                 </td>
-                <td class="py-1 text-center text-[11px] text-gray-700">{{ item.quantity }}</td>
-                <td class="py-1 text-right text-[11px] text-gray-700">
+                <td class="py-2 text-center text-[12px] text-gray-700">{{ item.quantity }}</td>
+                <td class="py-2 text-right text-[12px] text-gray-700">
                   <template v-if="item.hasDiscount && item.originalPrice">
-                    <span class="block text-[9px] leading-tight text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
+                    <span class="block text-[10px] leading-tight text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
                     <span class="leading-tight">{{ formatCurrency(item.price) }}</span>
                   </template>
                   <span v-else>{{ formatCurrency(item.price) }}</span>
                 </td>
-                <td class="py-1 text-right text-[11px] font-medium text-gray-900">
+                <td class="py-2 text-right text-[12px] font-medium text-gray-900">
                   <template v-if="item.hasDiscount && item.originalPrice">
-                    <span class="block text-[9px] font-normal leading-tight text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
+                    <span class="block text-[10px] font-normal leading-tight text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
                     <span class="leading-tight">{{ formatCurrency(item.price * item.quantity) }}</span>
                   </template>
                   <span v-else>{{ formatCurrency(item.price * item.quantity) }}</span>
@@ -153,36 +152,36 @@
         </div>
 
         <!-- Totals -->
-        <div class="px-4 pb-2">
+        <div class="receipt-section px-6 py-4 border-b border-gray-100">
           <div class="flex justify-end">
-            <div class="w-40 space-y-0.5">
+            <div class="w-56 space-y-1">
               <template v-if="hasAnyDiscount">
-                <div class="flex justify-between text-[11px] leading-tight">
+                <div class="flex justify-between text-[12px] leading-tight">
                   <span class="text-gray-500">Subtotal</span>
                   <span>{{ formatCurrency(calculateSubtotalBeforeDiscount) }}</span>
                 </div>
-                <div class="flex justify-between text-[11px] leading-tight">
+                <div class="flex justify-between text-[12px] leading-tight">
                   <span class="text-gray-500">Discount</span>
                   <span class="text-gray-600">-{{ formatCurrency(calculateTotalDiscount) }}</span>
                 </div>
               </template>
               <template v-else>
-                <div class="flex justify-between text-[11px] leading-tight">
+                <div class="flex justify-between text-[12px] leading-tight">
                   <span class="text-gray-500">Subtotal</span>
                   <span>{{ formatCurrency(lineItemsNetTotal) }}</span>
                 </div>
               </template>
               <template v-if="showSwapCreditLine">
-                <div class="flex justify-between text-[11px] leading-tight">
+                <div class="flex justify-between text-[12px] leading-tight">
                   <span class="text-gray-500">Swap credit (trade-in)</span>
                   <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
                 </div>
               </template>
-              <div class="flex justify-between border-t border-gray-200 pt-1 text-[11px] leading-tight">
+              <div class="flex justify-between border-t border-gray-200 pt-2 text-[12px] leading-tight">
                 <span class="text-gray-500">Payment</span>
                 <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
               </div>
-              <div class="flex justify-between border-t border-gray-200 pt-1 text-[11px] font-semibold leading-tight">
+              <div class="flex justify-between border-t border-gray-200 pt-2 text-[13px] font-semibold leading-tight">
                 <span>{{ receiptTotalLabel }}</span>
                 <span>{{ formatCurrency(receipt.total) }}</span>
               </div>
@@ -191,34 +190,34 @@
         </div>
 
         <!-- Status -->
-        <div class="px-4 pb-2">
-          <span class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-medium bg-gray-100 text-gray-700">
+        <div class="px-6 py-3">
+          <span class="inline-flex items-center rounded px-2 py-1 text-[10px] font-medium bg-gray-100 text-gray-700">
             {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
           </span>
         </div>
 
         <!-- Notes -->
-        <div v-if="receipt.notes" class="px-4 pb-2">
-          <p class="mb-0.5 text-[9px] font-medium uppercase tracking-wider text-gray-500">Notes</p>
-          <p class="whitespace-pre-wrap text-[11px] leading-snug text-gray-700">{{ receipt.notes }}</p>
+        <div v-if="receipt.notes" class="px-6 pb-3">
+          <p class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-500">Notes</p>
+          <p class="whitespace-pre-wrap text-[12px] leading-snug text-gray-700">{{ receipt.notes }}</p>
         </div>
 
         <!-- Swap-in -->
-        <div v-if="receipt.isSwapIn && swapInFolderName" class="px-4 pb-2">
-          <p class="mb-0.5 text-[9px] font-medium uppercase tracking-wider text-gray-500">Swap-in</p>
-          <p class="text-[11px] leading-snug text-gray-700">Device added to {{ swapInFolderName }}</p>
+        <div v-if="receipt.isSwapIn && swapInFolderName" class="px-6 pb-3">
+          <p class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-500">Swap-in</p>
+          <p class="text-[12px] leading-snug text-gray-700">Device added to {{ swapInFolderName }}</p>
         </div>
 
         <!-- Branch & generated by -->
-        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="flex flex-wrap justify-between gap-2 px-4 pb-2 text-[9px] leading-snug text-gray-500">
+        <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="flex flex-wrap justify-between gap-2 border-t border-gray-100 px-6 py-3 text-[10px] leading-snug text-gray-500">
           <span v-if="receipt.storeBranchName">Branch: {{ receipt.storeBranchName }}</span>
           <span v-if="receipt.createdByUserName">Generated by {{ receipt.createdByUserName }}</span>
         </div>
 
         <!-- Footer -->
-        <div class="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center">
-          <p class="text-[11px] leading-tight text-gray-600">Thank you for your business</p>
-          <p class="mt-0.5 text-[9px] text-gray-500">Computer-generated receipt</p>
+        <div class="border-t border-gray-100 bg-gray-50 px-6 py-3 text-center">
+          <p class="text-[12px] leading-tight text-gray-700">Thank you for your business</p>
+          <p class="mt-1 text-[10px] text-gray-500">Computer-generated receipt</p>
         </div>
       </div>
     </div>
@@ -434,6 +433,11 @@ const formatReceiptTime = (date: string | Date) => {
   })
 }
 
+// PDF uses built-in Helvetica; replace unsupported currency glyphs for clean output.
+const formatPdfCurrency = (value: number) => {
+  return formatCurrency(value).replace(/₦/g, 'NGN ')
+}
+
 /** 1×1 transparent GIF — use when proxy fails so html2canvas never taints the canvas */
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
@@ -442,7 +446,7 @@ const RECEIPT_PDF_IMAGE_FORMAT: 'PNG' | 'JPEG' = 'PNG'
 const RECEIPT_PDF_JPEG_QUALITY = 0.96
 /** Long signed URLs (e.g. Firebase) can exceed max GET length; use POST instead */
 const PROXY_MAX_GET_STRING_CHARS = 1800
-const H2C_SCALES: readonly [number, number, number] = [1.75, 1.5, 1.25]
+const H2C_SCALES: readonly [number, number, number] = [2, 1.75, 1.5]
 
 /**
  * Convert remote images to data URLs so html2canvas does not taint the canvas
@@ -470,8 +474,15 @@ function sanitizeUnsupportedColorFunctions(cssText: string): string {
   return cssText.replace(/oklch\([^)]+\)/gi, '#000')
 }
 
-function forcePrintThemeOnClone(cloneRoot: HTMLElement) {
+function forcePrintThemeOnClone(cloneDocument: Document, cloneRoot: HTMLElement) {
+  // Disable dark mode inheritance inside the cloned document.
+  cloneDocument.documentElement.classList.remove('dark')
+  cloneDocument.body.classList.remove('dark')
+  cloneDocument.documentElement.style.colorScheme = 'light'
+  cloneDocument.body.style.colorScheme = 'light'
+
   // Ensure captured receipt is always white with dark text, regardless of app theme.
+  cloneRoot.classList.add('pdf-export')
   cloneRoot.style.backgroundColor = '#ffffff'
   cloneRoot.style.color = '#111827'
   cloneRoot.style.borderColor = '#e5e7eb'
@@ -510,7 +521,7 @@ function prepareHtml2CanvasClone(cloneDocument: Document, cloneRoot: HTMLElement
     styleEl.textContent = sanitizeUnsupportedColorFunctions(styleEl.textContent)
   })
 
-  forcePrintThemeOnClone(cloneRoot)
+  forcePrintThemeOnClone(cloneDocument, cloneRoot)
 }
 
 async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
@@ -564,29 +575,26 @@ async function html2CanvasReceipt(
     await document.fonts.ready
   }
   const { default: html2canvas } = await import('html2canvas')
+  const captureWidth = Math.max(1, Math.ceil(el.scrollWidth || el.clientWidth))
+  const captureHeight = Math.max(1, Math.ceil(el.scrollHeight || el.clientHeight))
   const baseOptions = {
     scale,
     useCORS: true,
     allowTaint: false,
     logging: false,
     backgroundColor: '#ffffff',
+    width: captureWidth,
+    height: captureHeight,
+    x: 0,
+    y: 0,
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: captureWidth + 32,
+    windowHeight: captureHeight + 32,
     onclone: prepareHtml2CanvasClone,
   } as const
 
-  try {
-    // Prefer browser-native rendering path first to avoid css parser limitations.
-    const canvas = await html2canvas(el, {
-      ...baseOptions,
-      foreignObjectRendering: true,
-    })
-    if (!isCanvasEffectivelyBlank(canvas)) {
-      return canvas
-    }
-  } catch {
-    // Continue to classic fallback below.
-  }
-
-  // Fallback to classic renderer after clone sanitization.
+  // Use the classic renderer only; foreignObject mode can clip left glyph edges in PDFs.
   const fallbackCanvas = await html2canvas(el, {
     ...baseOptions,
     foreignObjectRendering: false,
@@ -595,6 +603,42 @@ async function html2CanvasReceipt(
     throw new Error('Rendered canvas is blank')
   }
   return fallbackCanvas
+}
+
+function createDetachedPdfCaptureNode(el: HTMLElement): { target: HTMLElement; cleanup: () => void } {
+  if (!import.meta.client || typeof document === 'undefined') {
+    return { target: el, cleanup: () => {} }
+  }
+
+  const wrapper = document.createElement('div')
+  wrapper.style.position = 'fixed'
+  wrapper.style.left = '0'
+  wrapper.style.top = '0'
+  wrapper.style.margin = '0'
+  wrapper.style.padding = '0'
+  wrapper.style.background = '#ffffff'
+  wrapper.style.pointerEvents = 'none'
+  wrapper.style.zIndex = '-1'
+  wrapper.style.overflow = 'visible'
+
+  const clone = el.cloneNode(true) as HTMLElement
+  clone.classList.add('pdf-export')
+  clone.style.margin = '0'
+  clone.style.transform = 'none'
+  clone.style.position = 'static'
+  clone.style.left = '0'
+  clone.style.top = '0'
+  clone.style.overflow = 'visible'
+
+  wrapper.appendChild(clone)
+  document.body.appendChild(wrapper)
+
+  return {
+    target: clone,
+    cleanup: () => {
+      wrapper.remove()
+    },
+  }
 }
 
 function isCanvasEffectivelyBlank(canvas: HTMLCanvasElement): boolean {
@@ -622,6 +666,21 @@ function isCanvasEffectivelyBlank(canvas: HTMLCanvasElement): boolean {
   return true
 }
 
+function addCanvasLeftGutter(canvas: HTMLCanvasElement, gutterPx = 24): HTMLCanvasElement {
+  if (!import.meta.client || typeof document === 'undefined' || gutterPx <= 0) {
+    return canvas
+  }
+  const padded = document.createElement('canvas')
+  padded.width = canvas.width + gutterPx
+  padded.height = canvas.height
+  const ctx = padded.getContext('2d')
+  if (!ctx) return canvas
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, padded.width, padded.height)
+  ctx.drawImage(canvas, gutterPx, 0)
+  return padded
+}
+
 /**
  * Renders the receipt to jsPDF, retrying with lower scale if canvas is too large
  * (browser limits) or the pipeline throws.
@@ -630,33 +689,216 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   await nextTick()
   await injectDataUrlsForImages(el)
   const { default: jsPDF } = await import('jspdf')
-  const imgWidth = 210
-  const pageHeight = 297
-  let lastError: unknown
-  for (const scale of H2C_SCALES) {
-    try {
-      const canvas = await html2CanvasReceipt(el, scale)
-      const imgData = RECEIPT_PDF_IMAGE_FORMAT === 'PNG'
-        ? canvas.toDataURL('image/png')
-        : canvas.toDataURL('image/jpeg', RECEIPT_PDF_JPEG_QUALITY)
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      let position = 0
-      pdf.addImage(imgData, RECEIPT_PDF_IMAGE_FORMAT, 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, RECEIPT_PDF_IMAGE_FORMAT, 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-      }
-      return pdf
-    } catch (e) {
-      lastError = e
+  if (!props.receipt) {
+    throw new Error('Receipt data missing')
+  }
+
+  const receipt = props.receipt
+  const pdf = new jsPDF('p', 'mm', 'a4')
+  const pageWidth = pdf.internal.pageSize.getWidth()
+  const pageHeight = pdf.internal.pageSize.getHeight()
+  const margin = 14
+  const contentWidth = pageWidth - (margin * 2)
+  const rightEdge = pageWidth - margin
+  const rowGap = 4.6
+  let y = 16
+
+  const ensureSpace = (required = 8) => {
+    if (y + required > pageHeight - margin) {
+      pdf.addPage()
+      y = margin
     }
   }
-  throw lastError
+
+  const writeLabel = (label: string) => {
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(8)
+    pdf.setTextColor(107, 114, 128)
+    pdf.text(label.toUpperCase(), margin, y)
+    y += rowGap
+  }
+
+  const writeTextLines = (text: string, maxWidth = contentWidth, opts?: { bold?: boolean; align?: 'left' | 'right'; x?: number }) => {
+    const clean = String(text || '').trim()
+    if (!clean) return
+    const lines = pdf.splitTextToSize(clean, maxWidth) as string[]
+    pdf.setFont('helvetica', opts?.bold ? 'bold' : 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(31, 41, 55)
+    for (const line of lines) {
+      ensureSpace(6)
+      if (opts?.align === 'right') {
+        pdf.text(line, opts?.x ?? rightEdge, y, { align: 'right' })
+      } else {
+        pdf.text(line, opts?.x ?? margin, y)
+      }
+      y += rowGap
+    }
+  }
+
+  // Header
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(11)
+  pdf.setTextColor(17, 24, 39)
+  pdf.text(storeName.value || 'Store', pageWidth / 2, y, { align: 'center' })
+  y += 6
+  if (storeAddress.value) {
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9)
+    pdf.setTextColor(75, 85, 99)
+    const addr = pdf.splitTextToSize(storeAddress.value, contentWidth - 24) as string[]
+    addr.forEach((line) => {
+      ensureSpace(5)
+      pdf.text(line, pageWidth / 2, y, { align: 'center' })
+      y += rowGap
+    })
+  }
+  const contact = [storePhone.value, storeEmail.value].filter(Boolean).join(' · ')
+  if (contact) {
+    pdf.setFontSize(9)
+    pdf.text(contact, pageWidth / 2, y, { align: 'center' })
+    y += rowGap
+  }
+  y += 2
+
+  // Receipt/date row
+  ensureSpace(16)
+  writeLabel('Receipt')
+  writeTextLines(`${receipt.receiptNumber}${receipt.isSwapIn ? ' · Swap-in' : ''}`, 90, { bold: true })
+  y -= rowGap * 2
+  const rightColX = rightEdge
+  const dateY = y
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(8)
+  pdf.setTextColor(107, 114, 128)
+  pdf.text('DATE & TIME', rightColX, dateY, { align: 'right' })
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(10)
+  pdf.setTextColor(31, 41, 55)
+  pdf.text(formatReceiptDate(receipt.date), rightColX, dateY + rowGap, { align: 'right' })
+  pdf.setFontSize(9)
+  pdf.setTextColor(75, 85, 99)
+  pdf.text(formatReceiptTime(receipt.date), rightColX, dateY + (rowGap * 2), { align: 'right' })
+  y = dateY + (rowGap * 3) + 2
+
+  // Customer
+  ensureSpace(14)
+  writeLabel('Customer')
+  writeTextLines(receipt.customerName, contentWidth, { bold: true })
+  if (receipt.customerEmail) writeTextLines(receipt.customerEmail, contentWidth)
+  y += 2
+
+  // Items table header
+  ensureSpace(16)
+  writeLabel('Items')
+  const productX = margin
+  const qtyX = margin + 92
+  const priceX = margin + 134
+  const totalX = rightEdge
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(9)
+  pdf.setTextColor(55, 65, 81)
+  pdf.text('PRODUCT', productX, y)
+  pdf.text('QTY', qtyX, y, { align: 'right' })
+  pdf.text('PRICE', priceX, y, { align: 'right' })
+  pdf.text('TOTAL', totalX, y, { align: 'right' })
+  y += 2
+  pdf.setDrawColor(229, 231, 235)
+  pdf.line(margin, y, rightEdge, y)
+  y += 5
+
+  // Items rows
+  for (const item of receipt.items) {
+    const detailLines = getProductDetailLines(item)
+    const productLinesRaw = [item.itemName, ...detailLines]
+    if (item.hasDiscount) {
+      productLinesRaw.push(item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}`)
+    }
+    const productLines = productLinesRaw.flatMap(line => pdf.splitTextToSize(String(line), 78) as string[])
+    const itemBlockHeight = Math.max(6, productLines.length * rowGap)
+    ensureSpace(itemBlockHeight + 8)
+
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(31, 41, 55)
+    productLines.forEach((line, index) => {
+      pdf.text(line, productX, y + (index * rowGap))
+    })
+
+    pdf.setTextColor(17, 24, 39)
+    pdf.text(String(item.quantity), qtyX, y, { align: 'right' })
+    pdf.text(formatPdfCurrency(item.price), priceX, y, { align: 'right' })
+    pdf.setFont('helvetica', 'bold')
+    pdf.text(formatPdfCurrency(item.price * item.quantity), totalX, y, { align: 'right' })
+
+    y += itemBlockHeight + 2
+    pdf.setDrawColor(243, 244, 246)
+    pdf.line(margin, y, rightEdge, y)
+    y += 4
+  }
+
+  // Totals
+  const totalsLeft = margin + 108
+  const writeTotalRow = (label: string, value: string, bold = false) => {
+    ensureSpace(7)
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
+    pdf.setTextColor(75, 85, 99)
+    pdf.text(label, totalsLeft, y)
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal')
+    pdf.setTextColor(17, 24, 39)
+    pdf.text(value, rightEdge, y, { align: 'right' })
+    y += rowGap + 0.5
+  }
+
+  if (hasAnyDiscount.value) {
+    writeTotalRow('Subtotal', formatPdfCurrency(calculateSubtotalBeforeDiscount.value))
+    writeTotalRow('Discount', `-${formatPdfCurrency(calculateTotalDiscount.value)}`)
+  } else {
+    writeTotalRow('Subtotal', formatPdfCurrency(lineItemsNetTotal.value))
+  }
+  if (showSwapCreditLine.value) {
+    writeTotalRow('Swap credit (trade-in)', `-${formatPdfCurrency(swapCreditAmount.value)}`)
+  }
+  writeTotalRow('Payment', receipt.paymentMethod)
+  writeTotalRow(receiptTotalLabel.value, formatPdfCurrency(receipt.total), true)
+
+  y += 3
+  ensureSpace(26)
+  writeLabel('Status')
+  writeTextLines(receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1))
+  if (receipt.notes) {
+    y += 1
+    writeLabel('Notes')
+    writeTextLines(receipt.notes, contentWidth)
+  }
+  if (receipt.isSwapIn && swapInFolderName.value) {
+    y += 1
+    writeLabel('Swap-in')
+    writeTextLines(`Device added to ${swapInFolderName.value}`, contentWidth)
+  }
+  if (receipt.storeBranchName || receipt.createdByUserName) {
+    y += 1
+    const meta = [
+      receipt.storeBranchName ? `Branch: ${receipt.storeBranchName}` : '',
+      receipt.createdByUserName ? `Generated by ${receipt.createdByUserName}` : '',
+    ].filter(Boolean).join('    ')
+    writeTextLines(meta, contentWidth)
+  }
+
+  y += 5
+  ensureSpace(10)
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(10)
+  pdf.setTextColor(31, 41, 55)
+  pdf.text('Thank you for your business', pageWidth / 2, y, { align: 'center' })
+  y += rowGap
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(8)
+  pdf.setTextColor(107, 114, 128)
+  pdf.text('Computer-generated receipt', pageWidth / 2, y, { align: 'center' })
+
+  return pdf
 }
 
 const handlePrintPDF = async () => {
@@ -752,8 +994,27 @@ const handleSendEmail = async () => {
 
 <style scoped>
 .receipt-content {
-  font-family: inherit;
-  line-height: 1.35;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+  color-scheme: light;
+}
+
+/* Keep on-screen receipt text readable and prevent clipping artifacts */
+.receipt-content p,
+.receipt-content span,
+.receipt-content td,
+.receipt-content th {
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.receipt-content .leading-tight {
+  line-height: 1.45 !important;
+}
+
+.receipt-content .leading-snug {
+  line-height: 1.4 !important;
 }
 
 /* Logo: preserve aspect ratio (no stretch) in PDF and on screen */
@@ -762,40 +1023,46 @@ const handleSendEmail = async () => {
   object-position: center;
 }
 
-/* PDF export: use a fixed, larger canvas layout for clean text rendering */
+/* PDF export: mirror on-screen layout, keep text crisp and avoid clipping */
 .receipt-content.pdf-export {
-  width: 760px !important;
-  max-width: 760px !important;
+  width: 640px !important;
+  max-width: 640px !important;
   margin: 0 auto !important;
-  font-size: 9.5px;
-  line-height: 1.5;
+  font-size: 10px;
+  line-height: 1.55;
   overflow: visible !important;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  padding-left: 12px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  -webkit-font-smoothing: auto;
+  text-rendering: auto;
+  font-kerning: none;
 }
 .receipt-content.pdf-export h1 {
-  font-size: 12px !important;
+  font-size: 13px !important;
   line-height: 1.35 !important;
 }
 .receipt-content.pdf-export .text-xs,
 .receipt-content.pdf-export .text-sm,
 .receipt-content.pdf-export .text-\[11px\],
 .receipt-content.pdf-export p {
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   line-height: 1.5 !important;
 }
 .receipt-content.pdf-export .text-\[10px\],
 .receipt-content.pdf-export .text-\[9px\] {
-  font-size: 8.75px !important;
-  line-height: 1.45 !important;
+  font-size: 9px !important;
+  line-height: 1.5 !important;
 }
 .receipt-content.pdf-export th,
 .receipt-content.pdf-export td {
-  font-size: 9.25px !important;
-  line-height: 1.5 !important;
-  padding-top: 5px !important;
-  padding-bottom: 5px !important;
+  font-size: 10px !important;
+  line-height: 1.6 !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
   vertical-align: top;
+  overflow: visible !important;
 }
 
 /* Prevent clipped glyph descenders and long unbroken strings in PDF capture */
@@ -808,11 +1075,26 @@ const handleSendEmail = async () => {
   word-break: break-word !important;
   hyphens: auto;
   white-space: normal !important;
-  text-rendering: optimizeLegibility;
+  line-height: 1.6 !important;
+  overflow: visible !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-kerning: none;
+  letter-spacing: 0.01em;
+  text-rendering: auto;
+}
+
+.receipt-content.pdf-export table {
+  width: 100% !important;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.receipt-content.pdf-export tr {
+  overflow: visible !important;
 }
 .receipt-content.pdf-export .receipt-logo {
-  width: 72px !important;
-  height: 72px !important;
+  width: 64px !important;
+  height: 64px !important;
 }
 
 /* PDF capture: ensure clean print look */
