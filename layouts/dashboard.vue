@@ -381,19 +381,19 @@
             </div>
 
             <!-- Notifications dropdown -->
-            <div class="relative shrink-0" ref="notificationsRef">
+            <div class="relative z-[130] h-9 w-9 shrink-0 pointer-events-auto" ref="notificationsRef">
               <button
                 type="button"
-                @click.stop="toggleNotifications"
-                class="group relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
+                @click.stop.prevent="toggleNotifications"
+                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-700 shadow-sm ring-1 ring-gray-100/80 pointer-events-auto transition-colors hover:border-gray-300/90 hover:bg-white hover:text-gray-900 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/5 dark:hover:border-gray-600/80 dark:hover:bg-gray-900 dark:hover:text-white"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
               >
-                <BellIcon class="block h-4 w-4 text-gray-700 dark:text-gray-200" stroke-width="2" />
+                <BellIcon class="pointer-events-none block h-4 w-4 text-gray-700 dark:text-gray-200" stroke-width="2" />
                 <span
                   v-if="unreadNotificationCount > 0"
-                  class="absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950"
+                  class="pointer-events-none absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950"
                 >
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
@@ -409,7 +409,7 @@
                 <div
                   v-if="notificationsOpen"
                   ref="notificationsPanelRef"
-                  class="absolute right-0 top-[calc(100%+0.375rem)] z-[120] w-[min(20rem,calc(100vw-1.5rem))] origin-top-right"
+                  class="absolute right-0 top-[calc(100%+0.375rem)] z-[140] w-80 max-w-[calc(100vw-1.5rem)] origin-top-right pointer-events-auto"
                   @click.stop
                 >
                   <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />

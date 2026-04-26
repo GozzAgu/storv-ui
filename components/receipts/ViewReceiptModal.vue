@@ -545,6 +545,24 @@ async function fetchProxyImageDataUrl(absoluteUrl: string): Promise<string> {
   })
 }
 
+async function getReceiptLogoDataUrl(src: string): Promise<string | null> {
+  const trimmed = src.trim()
+  if (!trimmed) return null
+  if (trimmed.startsWith('data:image/')) return trimmed
+  const url = resolveImgHttpUrl(trimmed)
+  if (!url) return null
+  try {
+    return await fetchProxyImageDataUrl(url)
+  } catch {
+    return null
+  }
+}
+
+function detectPdfImageFormatFromDataUrl(dataUrl: string): 'PNG' | 'JPEG' {
+  if (/^data:image\/jpe?g/i.test(dataUrl)) return 'JPEG'
+  return 'PNG'
+}
+
 async function injectDataUrlsForImages(el: HTMLElement): Promise<void> {
   const images = el.querySelectorAll<HTMLImageElement>('img')
   await Promise.all(
@@ -737,6 +755,19 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   }
 
   // Header
+  const logoDataUrl = storeLogoUrl.value ? await getReceiptLogoDataUrl(storeLogoUrl.value) : null
+  if (logoDataUrl) {
+    try {
+      const logoSize = 13
+      const logoX = (pageWidth - logoSize) / 2
+      const logoFormat = detectPdfImageFormatFromDataUrl(logoDataUrl)
+      pdf.addImage(logoDataUrl, logoFormat, logoX, y, logoSize, logoSize, undefined, 'FAST')
+      y += logoSize + 3
+    } catch {
+      // Continue without logo if image decode/add fails.
+    }
+  }
+
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(11)
   pdf.setTextColor(17, 24, 39)

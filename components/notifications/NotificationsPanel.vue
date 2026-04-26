@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="[ 'rounded-sm border border-gray-200/90 bg-white shadow-[0_12px_30px_-18px_rgba(15,23,42,0.3)] dark:border-gray-700/80 dark:bg-dashboard-card dark:shadow-[0_12px_28px_-16px_rgba(0,0,0,0.55)] overflow-hidden flex flex-col', variant === 'dropdown' ? 'max-h-[min(85vh,24rem)] w-full min-w-0' : '' ]"
+    :class="[ 'rounded-sm border border-gray-200/90 bg-white shadow-[0_12px_30px_-18px_rgba(15,23,42,0.3)] dark:border-gray-700/80 dark:bg-dashboard-card dark:shadow-[0_12px_28px_-16px_rgba(0,0,0,0.55)] overflow-hidden flex flex-col', variant === 'dropdown' ? 'max-h-[min(85vh,24rem)] w-full min-w-[18rem]' : '' ]"
   >
     <!-- Header: title + Mark all as read -->
     <div class="flex items-center justify-between px-3.5 pt-3 pb-2 border-b border-gray-100 dark:border-gray-700/80 shrink-0 bg-gray-50/60 dark:bg-white/[0.02]">
