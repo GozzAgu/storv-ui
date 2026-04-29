@@ -27,23 +27,31 @@ function lineSubtotalBeforeDiscount(item: ReceiptItem) {
 </script>
 
 <template>
-  <div v-if="items && items.length > 0" :class="compact ? 'space-y-2' : 'space-y-2.5'">
+  <div v-if="items && items.length > 0" :class="compact ? 'space-y-1.5' : 'space-y-2'">
     <div
       v-for="(item, idx) in items"
       :key="idx"
       :class="[
-        'rounded-sm border border-gray-200/90 bg-gray-50/50 dark:border-gray-700/70 dark:bg-gray-900/40',
-        compact ? 'px-2 py-1.5' : 'px-2.5 py-2',
+        'rounded-sm bg-white/85 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:bg-gray-900/55 dark:shadow-none',
+        compact ? 'px-2 py-1.5' : 'px-2.5 py-2.5',
       ]"
     >
-      <p
-        :class="[
-          'font-medium leading-snug text-gray-900 dark:text-gray-50',
-          compact ? 'text-[10px]' : 'text-[11px]',
-        ]"
-      >
-        {{ item.itemName }}
-      </p>
+      <div class="flex items-start justify-between gap-2">
+        <p
+          :class="[
+            'font-medium leading-snug text-gray-900 dark:text-gray-50',
+            compact ? 'text-[10px]' : 'text-[11px]',
+          ]"
+        >
+          {{ item.itemName }}
+        </p>
+        <span
+          class="shrink-0 rounded-sm bg-gray-100 px-1.5 py-0.5 tabular-nums text-gray-700 dark:bg-gray-800/90 dark:text-gray-300"
+          :class="compact ? 'text-[9px]' : 'text-[10px]'"
+        >
+          Qty {{ item.quantity }}
+        </span>
+      </div>
 
       <ul
         v-if="getProductDetailLines(item).length > 0"
@@ -70,13 +78,9 @@ function lineSubtotalBeforeDiscount(item: ReceiptItem) {
       </p>
 
       <div
-        class="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 tabular-nums text-gray-700 dark:text-gray-300"
+        class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 tabular-nums text-gray-700 dark:text-gray-300"
         :class="compact ? 'text-[9px]' : 'text-[10px]'"
       >
-        <span>
-          <span class="text-gray-500 dark:text-gray-500">Qty</span>
-          {{ item.quantity }}
-        </span>
         <span>
           <span class="text-gray-500 dark:text-gray-500">Unit</span>
           <template v-if="item.hasDiscount && item.originalPrice != null">
@@ -89,8 +93,8 @@ function lineSubtotalBeforeDiscount(item: ReceiptItem) {
             <span class="ml-0.5">{{ formatCurrency(item.price) }}</span>
           </template>
         </span>
-        <span class="ml-auto font-semibold text-gray-900 dark:text-gray-50">
-          <span class="font-normal text-gray-500 dark:text-gray-500">Line </span>
+        <span class="ml-auto rounded-sm bg-gray-100 px-1.5 py-0.5 font-semibold text-gray-900 dark:bg-gray-800/90 dark:text-gray-50">
+          <span class="font-normal text-gray-500 dark:text-gray-400">Line</span>
           <template v-if="item.hasDiscount && item.originalPrice != null">
             <span class="text-gray-400 line-through dark:text-gray-500 font-normal">
               {{ formatCurrency(lineSubtotalBeforeDiscount(item)) }}

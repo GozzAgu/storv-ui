@@ -1228,7 +1228,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
-import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
@@ -1422,14 +1422,32 @@ function updateItemMenuPosition() {
     return
   }
   const r = el.getBoundingClientRect()
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const viewportPadding = 8
+  const sideGap = 6
+  const menuWidth = 176
   /** Enough for History + discount + edit + optional Duplicate + delete */
   const estimatedMenuHeight = canDuplicateByPlan.value ? 300 : 260
-  itemMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
-    menuWidth: 176,
-    estimatedMenuHeight,
-    margin: 4,
-    viewportPadding: 8,
-  })
+
+  // Prefer opening beside the clicked action button (to the left on desktop right-edge tables).
+  let left = r.left - menuWidth - sideGap
+  // If not enough space on the left, open to the right.
+  if (left < viewportPadding) {
+    left = r.right + sideGap
+  }
+  // Keep inside viewport horizontally.
+  left = Math.max(viewportPadding, Math.min(left, vw - menuWidth - viewportPadding))
+
+  // Vertically anchor around the clicked row/button.
+  let top = r.top - 4
+  const maxTop = vh - viewportPadding - estimatedMenuHeight
+  top = Math.max(viewportPadding, Math.min(top, maxTop))
+
+  itemMenuFixedStyle.value = {
+    top: `${Math.round(top)}px`,
+    left: `${Math.round(left)}px`,
+  }
 }
 
 function addItemMenuPositionListeners() {

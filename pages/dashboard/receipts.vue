@@ -375,7 +375,7 @@
                   </p>
                   <button
                     type="button"
-                    class="mt-1.5 inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400"
+                    class="mt-1.5 inline-flex items-center gap-0.5 rounded-sm px-1.5 py-0.5 text-[10px] font-medium text-primary-600 transition-colors hover:bg-primary-50/80 dark:text-primary-400 dark:hover:bg-primary-500/10"
                     @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
                   >
                     <ChevronDownIcon
@@ -383,7 +383,7 @@
                       :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
                       stroke-width="2"
                     />
-                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} full details
+                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} item details
                   </button>
                   <div v-if="expandedReceiptLineItems[receipt.id]" class="mt-2 border-t border-gray-200/70 pt-2 dark:border-gray-700/70">
                     <ReceiptTableLineItems
@@ -726,10 +726,15 @@
                 :colspan="receiptLineItemsDetailColspan"
                 class="px-3 py-3 sm:px-4"
               >
-                <div class="rounded-sm border border-gray-200/80 bg-white/95 px-3 py-2.5 dark:border-gray-700/80 dark:!bg-dashboard-card/80">
-                  <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                    Line item details — {{ receipt.receiptNumber }}
-                  </p>
+                <div class="rounded-sm bg-gray-50/55 px-3 py-3 dark:bg-gray-900/35">
+                  <div class="mb-2 flex items-center justify-between gap-2">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                      Line item details
+                    </p>
+                    <span class="rounded-sm bg-white/85 px-1.5 py-0.5 text-[9px] font-medium text-gray-600 dark:bg-gray-800/80 dark:text-gray-300">
+                      {{ receipt.receiptNumber }}
+                    </span>
+                  </div>
                   <ReceiptTableLineItems
                     :items="receipt.items"
                     :items-count-fallback="receipt.itemsCount"

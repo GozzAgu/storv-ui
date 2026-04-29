@@ -67,6 +67,20 @@
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
                 Inventory changes for the current store
               </p>
+              <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  {{ logs.length }} events
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  {{ createdCount }} created
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
+                  {{ updatedCount }} updated
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
+                  {{ deletedCount }} deleted
+                </span>
+              </div>
             </div>
           </template>
         </DataTableToolbar>
@@ -121,13 +135,13 @@
                   scope="col"
                   class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
                 >
-                  Action
+                  Activity
                 </th>
                 <th
                   scope="col"
                   class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
                 >
-                  Item
+                  Target
                 </th>
                 <th
                   scope="col"
@@ -141,26 +155,42 @@
               <tr
                 v-for="log in logs"
                 :key="log.id"
-                class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/80"
+                class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/70"
               >
-                <td class="whitespace-nowrap px-3 py-2.5 text-[11px] font-medium text-gray-900 dark:text-gray-100 sm:px-4">
-                  {{ log.userDisplayName }}
+                <td class="px-3 py-2.5 sm:px-4">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-gray-100 text-[10px] font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                      {{ getInitials(log.userDisplayName) }}
+                    </span>
+                    <div class="min-w-0">
+                      <p class="truncate text-[11px] font-medium text-gray-900 dark:text-gray-100">
+                        {{ log.userDisplayName }}
+                      </p>
+                      <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                        {{ relativeTime(log.createdAt) }}
+                      </p>
+                    </div>
+                  </div>
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 sm:px-4">
+                <td class="px-3 py-2.5 sm:px-4">
                   <span
-                    :class="[ 'inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize', log.action === 'created' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : log.action === 'deleted' ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300', ]"
+                    :class="[ 'inline-flex rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide', actionClass(log.action) ]"
                   >
-                    {{ log.action }}
+                    {{ actionLabel(log.action) }}
                   </span>
                 </td>
-                <td
-                  class="max-w-[200px] truncate px-3 py-2.5 text-[11px] text-gray-700 dark:text-gray-300 sm:px-4"
-                  :title="log.entityName"
-                >
-                  {{ log.entityName }}
+                <td class="max-w-[260px] px-3 py-2.5 sm:px-4">
+                  <p class="truncate text-[11px] font-medium text-gray-800 dark:text-gray-200" :title="log.entityName">
+                    {{ log.entityName }}
+                  </p>
+                  <p class="mt-0.5 truncate text-[10px] text-gray-500 dark:text-gray-400">
+                    {{ entityTypeLabel(log.entityType) }} · ID {{ log.entityId || '-' }}
+                  </p>
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-[11px] text-gray-500 dark:text-gray-400 sm:px-4">
-                  {{ formatDate(log.createdAt) }}
+                <td class="whitespace-nowrap px-3 py-2.5 sm:px-4">
+                  <p class="text-[11px] text-gray-700 dark:text-gray-300">
+                    {{ formatDate(log.createdAt) }}
+                  </p>
                 </td>
               </tr>
             </tbody>
@@ -193,6 +223,9 @@ const storeId = ref<string | null>(null)
 const logs = ref<ActivityLog[]>([])
 const loading = ref(true)
 const fetchError = ref<string | null>(null)
+const createdCount = computed(() => logs.value.filter(log => log.action === 'created').length)
+const updatedCount = computed(() => logs.value.filter(log => log.action === 'updated').length)
+const deletedCount = computed(() => logs.value.filter(log => log.action === 'deleted').length)
 
 function formatDate(d: Date | unknown): string {
   if (!d) return '-'
@@ -202,6 +235,52 @@ function formatDate(d: Date | unknown): string {
     dateStyle: 'short',
     timeStyle: 'short',
   })
+}
+
+function relativeTime(d: Date | unknown): string {
+  if (!d) return '-'
+  const date = d instanceof Date ? d : new Date(d as string | number)
+  if (Number.isNaN(date.getTime())) return '-'
+  const diffMs = Date.now() - date.getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago`
+}
+
+function actionLabel(action: ActivityLog['action']): string {
+  if (action === 'created') return 'Created'
+  if (action === 'deleted') return 'Deleted'
+  return 'Updated'
+}
+
+function actionClass(action: ActivityLog['action']): string {
+  if (action === 'created') {
+    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
+  }
+  if (action === 'deleted') {
+    return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'
+  }
+  return 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300'
+}
+
+function entityTypeLabel(type: ActivityLog['entityType']): string {
+  if (type === 'items_batch') return 'Batch items'
+  if (type === 'folder') return 'Folder'
+  return 'Item'
+}
+
+function getInitials(name: string): string {
+  const value = String(name || '').trim()
+  if (!value) return 'U'
+  const parts = value.split(/\s+/).filter(Boolean)
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase()
+  }
+  return `${parts[0]![0] || ''}${parts[parts.length - 1]![0] || ''}`.toUpperCase()
 }
 
 async function loadLogs() {
