@@ -9,11 +9,25 @@
     >
       <span
         v-if="!switchingStore"
-        class="store-switch-avatar flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold uppercase leading-none tracking-tight text-white shadow-sm"
-        :style="currentStore ? avatarStyleFor(currentStore) : undefined"
+        class="store-switch-icon-wrap flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] text-white shadow-sm"
+        :class="
+          currentStore
+            ? 'ring-1 ring-white/20 dark:ring-white/10'
+            : 'bg-gray-100 ring-1 ring-gray-200/90 dark:bg-white/[0.08] dark:ring-white/[0.08]'
+        "
+        :style="currentStore ? iconSurfaceStyleFor(currentStore) : undefined"
         aria-hidden="true"
       >
-        {{ currentStore ? initialsFor(currentStore) : '?' }}
+        <BuildingStorefrontIcon
+          v-if="currentStore"
+          class="h-4 w-4 shrink-0 text-white/95 drop-shadow-[0_1px_1px_rgb(0_0_0/0.12)]"
+          stroke-width="1.6"
+        />
+        <BuildingStorefrontIcon
+          v-else
+          class="h-4 w-4 shrink-0 text-gray-600 dark:text-gray-300"
+          stroke-width="1.6"
+        />
       </span>
       <span
         v-else
@@ -115,11 +129,14 @@
                 "
               >
                 <span
-                  class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold uppercase leading-none tracking-tight text-white shadow-sm"
-                  :style="avatarStyleFor(store)"
+                  class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-white shadow-sm ring-1 ring-white/20 dark:ring-white/10"
+                  :style="iconSurfaceStyleFor(store)"
                   aria-hidden="true"
                 >
-                  {{ initialsFor(store) }}
+                  <BuildingStorefrontIcon
+                    class="h-[17px] w-[17px] shrink-0 text-white/95 drop-shadow-[0_1px_1px_rgb(0_0_0/0.12)]"
+                    stroke-width="1.6"
+                  />
                 </span>
                 <div class="min-w-0 flex-1">
                   <p
@@ -187,14 +204,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import { iconSurfaceStyleFor } from '~/utils/storeIconBadge'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import { useAppToast } from '~/composables/useAppToast'
-
-interface StoreLike {
-  id?: string
-  name?: string | null
-}
 
 const storesStore = useStoresStore()
 const userStore = useUserStore()
@@ -211,36 +225,6 @@ const stores = computed(() =>
 )
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
-
-function initialsFor(store: StoreLike): string {
-  const raw = (store.name || 'Store').trim()
-  if (!raw) return 'S'
-  const parts = raw.split(/\s+/).filter(Boolean)
-  if (parts.length >= 2) {
-    return (parts[0]![0]! + parts[1]![0]!).toUpperCase()
-  }
-  if (raw.length >= 2) return raw.slice(0, 2).toUpperCase()
-  const ch = raw[0]!.toUpperCase()
-  return ch + ch
-}
-
-function hueFromString(s: string): number {
-  let h = 0
-  for (let i = 0; i < s.length; i++) {
-    h = Math.imul(31, h) + s.charCodeAt(i)!
-    h |= 0
-  }
-  return ((h % 360) + 360) % 360
-}
-
-function avatarStyleFor(store: StoreLike): Record<string, string> {
-  const key = store.id || store.name || 'default'
-  const hue = hueFromString(key)
-  return {
-    background: `hsl(${hue} 62% 46%)`,
-    boxShadow: 'inset 0 1px 0 rgb(255 255 255 / 0.14)',
-  }
-}
 
 const handleClickOutside = (event: MouseEvent) => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {

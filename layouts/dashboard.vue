@@ -156,20 +156,16 @@
                     :class="{ 'pointer-events-none cursor-not-allowed': switchingStore || (store.id !== storesStore.currentStoreId) }"
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
-                    <svg
-                      class="w-4 h-4 shrink-0"
+                    <BuildingStorefrontIcon
+                      class="h-4 w-4 shrink-0"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'text-primary-600 dark:text-primary-300' : currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
                       :stroke-width="
                         route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
                           ? 2.25
                           : 1.75
                       "
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                      aria-hidden="true"
+                    />
                     <span
                       class="truncate text-[13px]"
                       :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'font-bold text-primary-800 dark:text-primary-200' : currentStore?.id === store.id ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-medium text-gray-700 group-hover:font-semibold group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100'"
@@ -584,6 +580,7 @@ import {
   ArrowsRightLeftIcon,
   ShieldCheckIcon,
   BookOpenIcon,
+  BuildingStorefrontIcon,
 } from '@heroicons/vue/24/outline'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'

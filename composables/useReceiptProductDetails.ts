@@ -75,6 +75,12 @@ export function getReceiptProductDetails(item: InventoryItem): Record<string, st
   return details
 }
 
+/** Omit inventory/system fields echoed into product snapshots (not helpful on printed receipts). */
+const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>([
+  'swapIn',
+  'swapInReceiptId',
+])
+
 export function getProductDetailLines(item: ReceiptItem): string[] {
   const raw: Record<string, unknown> = {
     ...(item.productDetails || {}),
@@ -87,6 +93,7 @@ export function getProductDetailLines(item: ReceiptItem): string[] {
   const seen = new Set<string>()
   const lines: string[] = []
   for (const key of DETAIL_ORDER) {
+    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
     const value = raw[key]
     if (value === undefined || value === null) continue
     const text = String(value).trim()
@@ -100,6 +107,7 @@ export function getProductDetailLines(item: ReceiptItem): string[] {
 
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
+    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue

@@ -33,7 +33,6 @@
           </button>
           <button
             type="button"
-            data-print-pdf
             @click="handlePrintPDF"
             :disabled="isPrinting || !receipt"
             class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"

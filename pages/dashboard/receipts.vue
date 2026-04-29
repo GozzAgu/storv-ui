@@ -2163,7 +2163,7 @@ const handleViewReceiptTimeline = (receipt: Receipt) => {
 const handlePrintReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
   showViewReceiptModal.value = true
-  
+
   // Track as recent item
   addRecentItem({
     id: receipt.id,
@@ -2174,14 +2174,6 @@ const handlePrintReceipt = (receipt: Receipt) => {
       receiptNumber: receipt.receiptNumber,
     },
   })
-  
-  // Small delay to allow modal to open, then trigger print
-  setTimeout(() => {
-    const printBtn = document.querySelector('[data-print-pdf]') as HTMLButtonElement
-    if (printBtn) {
-      printBtn.click()
-    }
-  }, 300)
 }
 
 const handleRefundReceipt = (receipt: Receipt) => {
