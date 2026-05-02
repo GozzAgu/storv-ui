@@ -38,6 +38,15 @@ import {
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
+/** Firestore rejects `undefined` field values on set()/batch writes. */
+function stripUndefinedFirestoreValues<T extends Record<string, unknown>>(data: T): T {
+  const out = { ...data }
+  for (const key of Object.keys(out)) {
+    if (out[key] === undefined) delete out[key]
+  }
+  return out as T
+}
+
 const inventoryItemsPageInflight = new Map<string, Promise<InventoryItem[]>>()
 const inventoryItemsAllInflight = new Map<string, Promise<InventoryItem[]>>()
 
@@ -947,8 +956,12 @@ export const useInventoryStore = defineStore('inventory', {
         const newItemRef = doc(itemsRef)
 
         const now = new Date()
+        const payloadBase = stripUndefinedFirestoreValues(itemData as Record<string, unknown>) as Omit<
+          InventoryItem,
+          'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'
+        >
         const newItem: Omit<InventoryItem, 'id'> = {
-          ...itemData,
+          ...payloadBase,
           folderId,
           storeId, // Add storeId from folder
           dateIn: now, // Set dateIn from createdAt
@@ -962,7 +975,7 @@ export const useInventoryStore = defineStore('inventory', {
         // Add to local state
         const itemForState: InventoryItem = {
           id: newItemRef.id,
-          ...itemData,
+          ...payloadBase,
           folderId,
           storeId, // Add storeId to local state
           dateIn: now, // Set dateIn from createdAt
@@ -1095,8 +1108,12 @@ export const useInventoryStore = defineStore('inventory', {
         // Add all items to batch
         itemsData.forEach(itemData => {
           const newItemRef = doc(itemsRef)
+          const payloadBase = stripUndefinedFirestoreValues(itemData as Record<string, unknown>) as Omit<
+            InventoryItem,
+            'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'
+          >
           const newItem: Omit<InventoryItem, 'id'> = {
-            ...itemData,
+            ...payloadBase,
             folderId,
             storeId,
             dateIn: now,
@@ -1109,7 +1126,7 @@ export const useInventoryStore = defineStore('inventory', {
           // Prepare for local state
           createdItems.push({
             id: newItemRef.id,
-            ...itemData,
+            ...payloadBase,
             folderId,
             storeId,
             dateIn: now,
