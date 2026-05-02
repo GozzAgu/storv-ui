@@ -26,16 +26,30 @@
               Search, filter, and open folders: a calm grid built for speed.
             </p>
           </div>
-          <Button
+          <div
             v-if="canCreateInventoryFolders"
-            variant="primary"
-            size="sm"
-            :icon="PlusIcon"
-            extra-class="!rounded-sm shrink-0"
-            @click="openCreateFolderModal"
+            class="flex flex-wrap items-center gap-2 shrink-0"
           >
-            New folder
-          </Button>
+            <Button
+              v-if="canShowCopyFolderTemplatesFromBranch"
+              variant="outline"
+              size="sm"
+              :icon="ArrowsRightLeftIcon"
+              extra-class="!rounded-sm shrink-0"
+              @click="openCopyFolderTemplatesFromBranchModal"
+            >
+              Copy from branch
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              :icon="PlusIcon"
+              extra-class="!rounded-sm shrink-0"
+              @click="openCreateFolderModal"
+            >
+              New folder
+            </Button>
+          </div>
         </div>
 
         <!-- Filters + select-all -->
@@ -542,6 +556,144 @@
       </template>
     </Modal>
 
+    <!-- Copy selected folder templates from another branch -->
+    <Modal
+      v-model="showCopyFolderTemplatesModal"
+      title="Copy folder templates from another branch"
+      subtitle="The checklist is always for the branch you choose in Source branch — not the branch shown in your inventory grid behind this window."
+      size="md"
+    >
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Source branch</label>
+          <select
+            v-model="copyTemplatesSourceStoreId"
+            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:!bg-dashboard-card dark:text-gray-100 dark:focus:border-primary-500/40"
+          >
+            <option value="" disabled>Select a branch…</option>
+            <option
+              v-for="s in otherBranchesForTemplateCopy"
+              :key="s.id"
+              :value="s.id"
+            >
+              {{ branchDisplayLabel(s) }}
+            </option>
+          </select>
+        </div>
+        <div v-if="copyTemplatesSourceStoreId" class="space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Folders to copy</label>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
+                {{ copyTemplatesSelectedCount }} selected
+              </span>
+              <button
+                type="button"
+                class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-40"
+                :disabled="copyTemplatesSourceFoldersList.length === 0 || loadingCopyTemplatesSourceFolders"
+                @click="selectAllCopyTemplatesFolders"
+              >
+                All
+              </button>
+              <span class="text-gray-300 dark:text-gray-600">|</span>
+              <button
+                type="button"
+                class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-40"
+                :disabled="loadingCopyTemplatesSourceFolders"
+                @click="clearCopyTemplatesFolderSelection"
+              >
+                None
+              </button>
+            </div>
+          </div>
+          <div
+            class="max-h-[min(240px,calc(100vh-20rem))] overflow-y-auto overscroll-contain rounded-sm border border-gray-200/90 dark:border-gray-600"
+          >
+            <div v-if="loadingCopyTemplatesSourceFolders" class="px-3 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+              Loading folders…
+            </div>
+            <div
+              v-else-if="copyTemplatesSourceFoldersList.length === 0"
+              class="space-y-2 px-3 py-5 text-left text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+            >
+              <p>
+                No folder templates were found under
+                <strong class="font-medium text-gray-700 dark:text-gray-300">{{ copyTemplatesSourceBranchLabel }}</strong>
+                (<span class="whitespace-normal">your &ldquo;Source branch&rdquo;</span> above).
+              </p>
+              <p v-if="storesStore.currentStoreId && copyTemplatesSourceStoreId && copyTemplatesSourceStoreId !== storesStore.currentStoreId && inventoryViewBranchLabel">
+                The folder tiles behind this modal are from
+                <strong class="font-medium text-gray-700 dark:text-gray-300">{{ inventoryViewBranchLabel }}</strong>
+                — switch &ldquo;Source branch&rdquo; to that branch if those are the folders you want to copy, or create folders first on {{ copyTemplatesSourceBranchLabel }}.
+              </p>
+            </div>
+            <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/90">
+              <li
+                v-for="f in copyTemplatesSourceFoldersList"
+                :key="f.id"
+                class="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-gray-900/35"
+              >
+                <Checkbox
+                  :model-value="copyTemplatesSelectedFolderIds.includes(f.id)"
+                  @update:model-value="(checked) => setCopyTemplatesFolderChecked(f.id, !!checked)"
+                  size="sm"
+                  wrapper-class="min-w-0 flex-1"
+                  label-class="!ml-2.5 min-w-0"
+                >
+                  <span class="block truncate text-sm text-gray-900 dark:text-gray-100">{{ f.name || 'Untitled' }}</span>
+                </Checkbox>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <fieldset class="space-y-2">
+          <legend class="text-xs font-medium text-gray-700 dark:text-gray-300">When a folder name already exists here</legend>
+          <label class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <input v-model="copyTemplatesNameCollision" type="radio" value="skip" class="mt-0.5" />
+            <span>Skip that folder</span>
+          </label>
+          <label class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <input v-model="copyTemplatesNameCollision" type="radio" value="suffix" class="mt-0.5" />
+            <span>Create with suffix &ldquo;(copy)&rdquo;, then &ldquo;(copy 2)&rdquo; if needed</span>
+          </label>
+        </fieldset>
+        <p class="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+          Department restrictions are not copied; set them again on this branch if you use them.
+        </p>
+      </div>
+      <template #footer>
+        <Button
+          variant="outline"
+          size="sm"
+          type="button"
+          extra-class="!rounded-sm"
+          @click="showCopyFolderTemplatesModal = false"
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          type="button"
+          extra-class="!rounded-sm"
+          :disabled="
+            isCopyingFolderTemplates
+              || !copyTemplatesSourceStoreId
+              || !storesStore.currentStoreId
+              || copyTemplatesSelectedCount === 0
+              || loadingCopyTemplatesSourceFolders
+          "
+          @click="handleConfirmCopyFolderTemplates"
+        >
+          {{
+            isCopyingFolderTemplates
+              ? 'Copying…'
+              : `Copy ${copyTemplatesSelectedCount || 0} folder${copyTemplatesSelectedCount === 1 ? '' : 's'}`
+          }}
+        </Button>
+      </template>
+    </Modal>
+
     <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
     <Teleport to="body">
       <div
@@ -583,6 +735,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import type { Store } from '~/composables/useStores'
 import {
   FolderIcon,
   PlusIcon,
@@ -595,6 +748,7 @@ import {
   ExclamationTriangleIcon,
   Squares2X2Icon,
   ArrowUpTrayIcon,
+  ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
@@ -805,6 +959,173 @@ const canDuplicateByPlan = computed(() => {
   const sub = userStore.userData?.subscription
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
+
+const otherBranchesForTemplateCopy = computed(() => {
+  const id = storesStore.currentStoreId
+  if (!id) return [] as Store[]
+  return [...storesStore.stores]
+    .filter(s => s.isActive && s.id !== id)
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }))
+})
+
+const canShowCopyFolderTemplatesFromBranch = computed(
+  () =>
+    userStore.userData?.role === 'superAdmin'
+    && canDuplicateByPlan.value
+    && canCreateInventoryFolders.value
+    && storesStore.activeStores.length > 1
+)
+
+function branchDisplayLabel(s: Store) {
+  return (s.name && s.name.trim()) || s.description?.trim?.() || s.id
+}
+
+/** Branch selected in modal "Source branch" dropdown (for copy checklist). */
+const copyTemplatesSourceBranchLabel = computed(() => {
+  const id = copyTemplatesSourceStoreId.value
+  if (!id) return 'that branch'
+  const s = storesStore.getStoreById(id)
+  return s ? branchDisplayLabel(s) : id
+})
+
+/** Active app branch — matches inventory grid behind the modal. */
+const inventoryViewBranchLabel = computed(() => {
+  const id = storesStore.currentStoreId
+  if (!id) return ''
+  const s = storesStore.getStoreById(id)
+  return s ? branchDisplayLabel(s) : id
+})
+
+const showCopyFolderTemplatesModal = ref(false)
+const copyTemplatesSourceStoreId = ref('')
+const copyTemplatesNameCollision = ref<'skip' | 'suffix'>('skip')
+const isCopyingFolderTemplates = ref(false)
+const copyTemplatesSourceFoldersList = ref<InventoryFolder[]>([])
+const copyTemplatesSelectedFolderIds = ref<string[]>([])
+const loadingCopyTemplatesSourceFolders = ref(false)
+
+const copyTemplatesSelectedCount = computed(() => copyTemplatesSelectedFolderIds.value.length)
+
+async function refreshCopyTemplatesFolderList() {
+  const storeId = copyTemplatesSourceStoreId.value
+  if (!storeId) {
+    copyTemplatesSourceFoldersList.value = []
+    copyTemplatesSelectedFolderIds.value = []
+    return
+  }
+  loadingCopyTemplatesSourceFolders.value = true
+  copyTemplatesSelectedFolderIds.value = []
+  try {
+    const list = await inventoryStore.fetchFolderTemplatesForStore(storeId)
+    copyTemplatesSourceFoldersList.value = list
+    copyTemplatesSelectedFolderIds.value = list.map((folder) => folder.id)
+  } catch (error: unknown) {
+    copyTemplatesSourceFoldersList.value = []
+    copyTemplatesSelectedFolderIds.value = []
+    const msg = error instanceof Error ? error.message : 'Failed to load folders from branch'
+    toast.error(msg)
+  } finally {
+    loadingCopyTemplatesSourceFolders.value = false
+  }
+}
+
+function setCopyTemplatesFolderChecked(folderId: string, checked: boolean) {
+  const ids = copyTemplatesSelectedFolderIds.value
+  const has = ids.includes(folderId)
+  if (checked && !has) {
+    copyTemplatesSelectedFolderIds.value = [...ids, folderId]
+  } else if (!checked && has) {
+    copyTemplatesSelectedFolderIds.value = ids.filter((id) => id !== folderId)
+  }
+}
+
+function selectAllCopyTemplatesFolders() {
+  copyTemplatesSelectedFolderIds.value = copyTemplatesSourceFoldersList.value.map((f) => f.id)
+}
+
+function clearCopyTemplatesFolderSelection() {
+  copyTemplatesSelectedFolderIds.value = []
+}
+
+watch(showCopyFolderTemplatesModal, async (open) => {
+  if (!open || import.meta.server) return
+  try {
+    await storesStore.fetchStores()
+    if (!copyTemplatesSourceStoreId.value && otherBranchesForTemplateCopy.value.length > 0) {
+      copyTemplatesSourceStoreId.value = otherBranchesForTemplateCopy.value[0]!.id
+    }
+  } catch {
+    // ignore prefetch errors; user can retry
+  }
+})
+
+watch([showCopyFolderTemplatesModal, copyTemplatesSourceStoreId], async ([open, storeId]) => {
+  if (import.meta.server) return
+  if (!open) {
+    copyTemplatesSourceFoldersList.value = []
+    copyTemplatesSelectedFolderIds.value = []
+    return
+  }
+  if (!storeId) return
+  await refreshCopyTemplatesFolderList()
+})
+
+function openCopyFolderTemplatesFromBranchModal() {
+  if (!canDuplicateByPlan.value) {
+    toast.error('Copying folder templates between branches requires Storvv Medium or Enterprise.')
+    return
+  }
+  if (userStore.userData?.role !== 'superAdmin') {
+    toast.error('Only the account owner can copy folder templates between branches.')
+    return
+  }
+  if (storesStore.activeStores.length < 2) {
+    toast.warning('You need at least two active branches to copy folder templates.')
+    return
+  }
+  copyTemplatesNameCollision.value = 'skip'
+  copyTemplatesSourceStoreId.value = otherBranchesForTemplateCopy.value[0]?.id ?? ''
+  if (!copyTemplatesSourceStoreId.value) {
+    toast.warning('Could not find another branch to copy from.')
+    return
+  }
+  showCopyFolderTemplatesModal.value = true
+}
+
+async function handleConfirmCopyFolderTemplates() {
+  const targetStoreId = storesStore.currentStoreId
+  const sourceStoreId = copyTemplatesSourceStoreId.value
+  const selectedIds = [...copyTemplatesSelectedFolderIds.value]
+  if (!targetStoreId || !sourceStoreId || selectedIds.length === 0) return
+  isCopyingFolderTemplates.value = true
+  try {
+    const { createdCount, skippedCount } = await inventoryStore.duplicateFolderTemplatesBetweenStores(
+      sourceStoreId,
+      targetStoreId,
+      {
+        onExistingName: copyTemplatesNameCollision.value,
+        folderIds: selectedIds,
+      },
+    )
+    if (createdCount === 0) {
+      if (skippedCount > 0) {
+        toast.warning(`No new folders added. Skipped ${skippedCount} duplicate name(s), or nothing to copy from the selected branch.`)
+      } else {
+        toast.warning('The source branch has no folders to copy.')
+      }
+    } else {
+      toast.success(
+        `Copied ${createdCount} folder template(s) into this branch.${skippedCount ? ` Skipped ${skippedCount} duplicate name(s).` : ''}`,
+      )
+    }
+    showCopyFolderTemplatesModal.value = false
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    toast.error(msg || 'Failed to copy folder templates')
+  } finally {
+    isCopyingFolderTemplates.value = false
+  }
+}
 
 // Get current store ID for filtering
 const currentStoreId = computed(() => storesStore.currentStoreId)

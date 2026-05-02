@@ -14,6 +14,7 @@ import {
   deleteField,
   writeBatch,
   getCountFromServer,
+  type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 
 /**
@@ -45,6 +46,65 @@ function stripUndefinedFirestoreValues<T extends Record<string, unknown>>(data: 
     if (out[key] === undefined) delete out[key]
   }
   return out as T
+}
+
+/** Remove undefined recursively (Firestore disallows nested undefined). */
+function stripUndefinedDeep(value: unknown): unknown {
+  if (value === undefined) return undefined
+  if (value === null || value instanceof Date || typeof value !== 'object') {
+    return value
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => stripUndefinedDeep(item))
+      .filter((item) => item !== undefined)
+  }
+  const out: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (v === undefined) continue
+    const nv = stripUndefinedDeep(v)
+    if (nv === undefined) continue
+    out[k] = nv
+  }
+  return out
+}
+
+function clonePlain<T>(value: T): T {
+  if (import.meta.server) {
+    return JSON.parse(JSON.stringify(value)) as T
+  }
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value)
+  }
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
+function mapFirestoreDocToInventoryFolder(snapshot: QueryDocumentSnapshot, fallbackUserId: string): InventoryFolder {
+  const data = snapshot.data()
+  return {
+    id: snapshot.id,
+    name: data.name || '',
+    description: data.description || '',
+    type: data.type || '',
+    color: data.color || '#3B82F6',
+    hasSerialNumbers: data.hasSerialNumbers || false,
+    template: data.template || undefined,
+    itemCount: data.itemCount || 0,
+    totalValue: data.totalValue || 0,
+    lowStockCount: data.lowStockCount || 0,
+    storeId: data.storeId || '',
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt) || new Date(),
+    updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt) || undefined,
+    createdBy: data.createdBy || fallbackUserId,
+    allowedDepartments: data.allowedDepartments || undefined,
+  } as InventoryFolder
+}
+
+export interface DuplicateFolderTemplatesBetweenStoresResult {
+  /** New folder documents committed on target store */
+  createdCount: number
+  /** Skipped due to duplicate name when onExistingName is 'skip' */
+  skippedCount: number
 }
 
 const inventoryItemsPageInflight = new Map<string, Promise<InventoryItem[]>>()
@@ -354,6 +414,196 @@ export const useInventoryStore = defineStore('inventory', {
         this.loading = false
         throw new Error(error.message || 'Failed to fetch inventory folders')
       }
+    },
+
+    /**
+     * Load folder definitions for a branch without overwriting Pinia `folders`.
+     * Super admin only. Lists every document under `users/{owner}/stores/{storeId}/inventoryFolders`
+     * (same store subcollection shown in Inventory for that branch). No `createdBy` filter so older
+     * folders missing that field — or synced/migrated folders — still appear for copying.
+     */
+    async fetchFolderTemplatesForStore(storeId: string): Promise<InventoryFolder[]> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('You must be signed in.')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      if (userStore.userData?.role !== 'superAdmin') {
+        throw new Error('Only super admins can load folder templates across branches.')
+      }
+      const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
+      const foldersRef = getInventoryFoldersCollection(db, ownerUid, storeId)
+      let qs
+      try {
+        qs = await getDocs(query(foldersRef, orderBy('createdAt', 'desc')))
+      } catch (e: any) {
+        if (e?.code === 'failed-precondition' || e?.message?.includes('index')) {
+          qs = await getDocs(query(foldersRef))
+        } else {
+          throw e
+        }
+      }
+      const list = qs.docs.map((d) => mapFirestoreDocToInventoryFolder(d, ownerUid))
+      list.sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt)
+        const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt)
+        return dateB.getTime() - dateA.getTime()
+      })
+      return list
+    },
+
+    /**
+     * Copy folder templates (name, template fields, inventory settings) from one branch into another.
+     * Does not copy inventory items or department ACLs (`allowedDepartments` is cleared — IDs differ per branch).
+     */
+    async duplicateFolderTemplatesBetweenStores(
+      sourceStoreId: string,
+      targetStoreId: string,
+      options?: { onExistingName?: 'skip' | 'suffix'; folderIds?: string[] }
+    ): Promise<DuplicateFolderTemplatesBetweenStoresResult> {
+      const onExistingName = options?.onExistingName ?? 'skip'
+      if (sourceStoreId === targetStoreId) {
+        throw new Error('Choose a branch other than the current one.')
+      }
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('You must be signed in.')
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+      if (userStore.userData?.role !== 'superAdmin') {
+        throw new Error('Only super admins can copy folder templates between branches.')
+      }
+      const plan = userStore.userData?.subscription as string | undefined
+      if (plan !== 'storvv_medium' && plan !== 'storvv_enterprise') {
+        throw new Error('Copying folder templates between branches is available on Storvv Medium and Enterprise plans.')
+      }
+
+      const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
+
+      const [sourceFolders, targetFolders] = await Promise.all([
+        this.fetchFolderTemplatesForStore(sourceStoreId),
+        this.fetchFolderTemplatesForStore(targetStoreId),
+      ])
+
+      let foldersToCopy = sourceFolders
+      if (options?.folderIds !== undefined) {
+        const requestedUnique = [...new Set(options.folderIds.filter(Boolean))]
+        if (requestedUnique.length === 0) {
+          throw new Error('Select at least one folder to copy.')
+        }
+        const requestedSet = new Set(requestedUnique)
+        foldersToCopy = sourceFolders.filter((f) => requestedSet.has(f.id))
+        if (foldersToCopy.length !== requestedSet.size) {
+          throw new Error('Some selected folders are no longer on the source branch. Refresh the list and try again.')
+        }
+      }
+
+      const existingNamesLower = new Set(
+        targetFolders.map((f) => f.name.trim().toLowerCase()).filter(Boolean)
+      )
+
+      const foldersRefTarget = getInventoryFoldersCollection(db, ownerUid, targetStoreId)
+
+      /** Next unused display name starting from base (handles repeated collisions). */
+      const takeUniqueName = (baseRaw: string) => {
+        const base = (baseRaw || '').trim() || 'Folder'
+        let name = base
+        let n = 0
+        while (existingNamesLower.has(name.toLowerCase())) {
+          n += 1
+          name = n === 1 ? `${base} (copy)` : `${base} (copy ${n})`
+        }
+        existingNamesLower.add(name.toLowerCase())
+        return name
+      }
+
+      let skippedCount = 0
+      const payloads: Array<{ ref: ReturnType<typeof doc>; data: Record<string, unknown> }> = []
+
+      for (const src of foldersToCopy) {
+        const candidate = (src.name || '').trim() || 'Folder'
+        const candLower = candidate.toLowerCase()
+        let finalName = candidate
+
+        if (existingNamesLower.has(candLower)) {
+          if (onExistingName === 'skip') {
+            skippedCount += 1
+            continue
+          }
+          finalName = takeUniqueName(candidate)
+        } else {
+          existingNamesLower.add(candLower)
+        }
+
+        const tpl = src.template
+          ? stripUndefinedDeep(clonePlain(src.template))
+          : undefined
+
+        const basePayload: Record<string, unknown> = {
+          name: finalName,
+          description: src.description ?? '',
+          type: src.type ?? '',
+          color: src.color ?? '#3B82F6',
+          hasSerialNumbers: src.hasSerialNumbers ?? false,
+          storeId: targetStoreId,
+          itemCount: 0,
+          totalValue: 0,
+          lowStockCount: 0,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          createdBy: ownerUid,
+          allowedDepartments: [],
+        }
+        if (tpl !== undefined) {
+          basePayload.template = tpl
+        }
+
+        payloads.push({
+          ref: doc(foldersRefTarget),
+          data: stripUndefinedFirestoreValues(basePayload),
+        })
+      }
+
+      if (payloads.length === 0) {
+        return { createdCount: 0, skippedCount }
+      }
+
+      const batchSize = 400
+      for (let i = 0; i < payloads.length; i += batchSize) {
+        const batch = writeBatch(db)
+        for (const chunk of payloads.slice(i, i + batchSize)) {
+          batch.set(chunk.ref, chunk.data)
+        }
+        await batch.commit()
+      }
+
+      const createdCount = payloads.length
+      const resolvedTarget = await getCurrentStoreId()
+      if (resolvedTarget === targetStoreId) {
+        await this.fetchFolders()
+      }
+
+      if (createdCount > 0) {
+        const userDisplayNameForLog = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'created',
+          entityType: 'folder',
+          entityId: targetStoreId,
+          entityName: `Copied ${createdCount} folder template(s) from another branch (${skippedCount} skipped)`,
+          storeId: targetStoreId,
+          userId: ownerUid,
+          userDisplayName: userDisplayNameForLog,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+      }
+
+      return { createdCount, skippedCount }
     },
 
     // Get a single folder
