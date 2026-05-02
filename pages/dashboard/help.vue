@@ -299,6 +299,17 @@ const categories: Category[] = [
           'Quantities typically move when receipts complete or refunds process; use those flows plus super-admin corrections rather than informal workarounds.',
         ],
       },
+      {
+        title: 'Copy from branch (Enterprise)',
+        body: [
+          'On the Folders page (/dashboard/inventory), super admins on Storvv Enterprise see a “Copy from branch” action next to “New folder” when you have more than one active branch.',
+          'It opens a dialog where you pick a source branch, then select which folder templates to copy into the branch you are currently viewing in the app (header / sidebar store switcher). Only folder definitions are copied: names, custom field templates, serial vs bulk mode, and colors. Products, quantities, and department restrictions are not copied (those IDs are per branch; re-apply access on the destination if you use them).',
+          'If a folder name already exists on the destination, you can skip that folder or create a copy with an automatic “(copy)” suffix. Medium plan includes duplicating a single folder within one branch; copying selected templates across branches is Enterprise only.',
+        ],
+        bullets: [
+          'The checklist always reflects the source branch in the dialog, not the folder grid behind the window. Match “Source branch” to where your templates live.',
+        ],
+      },
     ],
   },
   {
@@ -448,7 +459,7 @@ const categories: Category[] = [
         body: [
           'Storvv Micro: core dashboard, inventory, Sales (receipts + customers + refunds), notifications, Help center, Profile.',
           'Storvv Medium adds Analytics, Activity Logs, Departments, and higher caps for stores, departments, and staff.',
-          'Storvv Enterprise adds Multi-Store Sync with unlimited-scale positioning for stores/departments/staff per marketing copy inside Settings.',
+          'Storvv Enterprise adds Multi-Store Sync with unlimited-scale positioning for stores/departments/staff per marketing copy inside Settings, plus Copy from branch on Inventory Folders to duplicate selected folder templates across branches.',
         ],
       },
     ],
@@ -491,6 +502,7 @@ const popularTopics = [
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Receipts & refunds', query: 'receipt' },
   { label: 'Inventory & folders', query: 'inventory' },
+  { label: 'Copy from branch', query: 'copy from branch' },
   { label: 'Plans & billing', query: 'plan' },
   { label: 'Departments', query: 'department' },
 ] as const

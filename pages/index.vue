@@ -376,7 +376,7 @@
               </div>
               <div>
                 <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable.</p>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable. On Enterprise, use <span class="font-medium text-white">Copy from branch</span> on the Folders screen to bring selected folder layouts into a new location without rebuilding every template by hand.</p>
               </div>
             </div>
             <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
@@ -486,7 +486,7 @@
               </div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Multi-Store Support</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Manage multiple store locations from one account (Medium: up to 5; Enterprise: unlimited). Each store has its own inventory, receipts, and staff.
+              Manage multiple store locations from one account (Medium: up to 5; Enterprise: unlimited). Each store has its own inventory, receipts, and staff. Enterprise also includes <span class="font-medium text-gray-800 dark:text-gray-200">Copy from branch</span> to duplicate folder templates across stores when you expand.
             </p>
           </div>
           <div class="text-center group relative">
@@ -590,7 +590,7 @@
           Plans that fit your size
           </h2>
         <p class="mt-4 text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto">
-          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale and stock transfers between stores.
+          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale, stock transfers between stores, and copying folder templates across branches.
         </p>
         <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-500">
           Showing prices in {{ pricing.currency }} based on your region.
@@ -664,6 +664,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited departments & staff</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Copy from branch: folder templates across stores</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
                 </ul>
             <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get started</button>
@@ -995,7 +996,7 @@
                     <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
                       <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard and notifications. No analytics, no multiple departments, no multi-store sync.<br><br>
                       <strong>Medium:</strong> Everything in Micro plus up to 5 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
-                      <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); and priority support.
+                      <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); <strong>Copy from branch</strong> to copy selected inventory folder templates between branches without recreating fields; and priority support.
                     </p>
                   </div>
                 </div>
@@ -1575,6 +1576,10 @@ const features = [
   {
     title: 'Multi-Store Sync (Enterprise)',
     description: 'Transfer stock between stores, view consolidated reports, and keep a full transfer history. Built for chains and central warehouses.'
+  },
+  {
+    title: 'Copy from branch (Enterprise)',
+    description: 'On the Inventory Folders page, pick a source branch and select which folder templates to copy into your current branch. Brings layouts and field definitions only (not product stock), so new locations stay consistent.'
   },
   {
     title: 'In-App Notifications',

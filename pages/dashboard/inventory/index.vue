@@ -424,7 +424,7 @@
               </div>
           </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Define columns for this folder’s table, or import row 1 of a sheet as column headers—types are guessed from sample rows when possible.
+              Define columns for this folder’s table, or import row 1 of a sheet as column headers. Types are guessed from sample rows when possible.
             </p>
             <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto px-1 py-1">
             <div
@@ -560,7 +560,7 @@
     <Modal
       v-model="showCopyFolderTemplatesModal"
       title="Copy folder templates from another branch"
-      subtitle="The checklist is always for the branch you choose in Source branch — not the branch shown in your inventory grid behind this window."
+      subtitle="The checklist is always for the branch you choose in Source branch, not the branch shown in your inventory grid behind this window."
       size="md"
     >
       <div class="space-y-4 text-left">
@@ -624,7 +624,7 @@
               <p v-if="storesStore.currentStoreId && copyTemplatesSourceStoreId && copyTemplatesSourceStoreId !== storesStore.currentStoreId && inventoryViewBranchLabel">
                 The folder tiles behind this modal are from
                 <strong class="font-medium text-gray-700 dark:text-gray-300">{{ inventoryViewBranchLabel }}</strong>
-                — switch &ldquo;Source branch&rdquo; to that branch if those are the folders you want to copy, or create folders first on {{ copyTemplatesSourceBranchLabel }}.
+                Switch &ldquo;Source branch&rdquo; to that branch if those are the folders you want to copy, or create folders first on {{ copyTemplatesSourceBranchLabel }}.
               </p>
             </div>
             <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/90">
@@ -993,7 +993,7 @@ const copyTemplatesSourceBranchLabel = computed(() => {
   return s ? branchDisplayLabel(s) : id
 })
 
-/** Active app branch — matches inventory grid behind the modal. */
+/** Active app branch; matches inventory grid behind the modal. */
 const inventoryViewBranchLabel = computed(() => {
   const id = storesStore.currentStoreId
   if (!id) return ''
