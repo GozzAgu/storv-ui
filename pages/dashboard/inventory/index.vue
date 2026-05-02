@@ -960,6 +960,11 @@ const canDuplicateByPlan = computed(() => {
   return sub === 'storvv_medium' || sub === 'storvv_enterprise'
 })
 
+// Copy folder templates between branches: Enterprise only
+const canCopyFolderTemplatesFromBranchByPlan = computed(
+  () => userStore.userData?.subscription === 'storvv_enterprise',
+)
+
 const otherBranchesForTemplateCopy = computed(() => {
   const id = storesStore.currentStoreId
   if (!id) return [] as Store[]
@@ -971,7 +976,7 @@ const otherBranchesForTemplateCopy = computed(() => {
 const canShowCopyFolderTemplatesFromBranch = computed(
   () =>
     userStore.userData?.role === 'superAdmin'
-    && canDuplicateByPlan.value
+    && canCopyFolderTemplatesFromBranchByPlan.value
     && canCreateInventoryFolders.value
     && storesStore.activeStores.length > 1
 )
@@ -1071,8 +1076,8 @@ watch([showCopyFolderTemplatesModal, copyTemplatesSourceStoreId], async ([open, 
 })
 
 function openCopyFolderTemplatesFromBranchModal() {
-  if (!canDuplicateByPlan.value) {
-    toast.error('Copying folder templates between branches requires Storvv Medium or Enterprise.')
+  if (!canCopyFolderTemplatesFromBranchByPlan.value) {
+    toast.error('Copying folder templates between branches requires the Storvv Enterprise plan.')
     return
   }
   if (userStore.userData?.role !== 'superAdmin') {

@@ -434,6 +434,10 @@ export const useInventoryStore = defineStore('inventory', {
       if (userStore.userData?.role !== 'superAdmin') {
         throw new Error('Only super admins can load folder templates across branches.')
       }
+      const plan = userStore.userData?.subscription as string | undefined
+      if (plan !== 'storvv_enterprise') {
+        throw new Error('Loading folder templates for another branch is available on the Storvv Enterprise plan.')
+      }
       const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
       const foldersRef = getInventoryFoldersCollection(db, ownerUid, storeId)
       let qs
@@ -481,8 +485,8 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('Only super admins can copy folder templates between branches.')
       }
       const plan = userStore.userData?.subscription as string | undefined
-      if (plan !== 'storvv_medium' && plan !== 'storvv_enterprise') {
-        throw new Error('Copying folder templates between branches is available on Storvv Medium and Enterprise plans.')
+      if (plan !== 'storvv_enterprise') {
+        throw new Error('Copying folder templates between branches is available on the Storvv Enterprise plan.')
       }
 
       const ownerUid = (await getQueryUserId()) ?? authStore.currentUser.uid
