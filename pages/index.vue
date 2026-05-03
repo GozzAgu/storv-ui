@@ -2378,13 +2378,6 @@ useHead({
 .landing-nav-link:focus-visible::after {
   transform: scaleX(1);
 }
-.landing-nav-link--stacked {
-  color: rgb(55 65 81);
-}
-.landing-nav-link--stacked:hover,
-.landing-nav-link--stacked:focus-visible {
-  color: rgb(17 24 39);
-}
 
 /* Full-screen mobile menu: block links (desktop .landing-nav-link is inline-block) */
 .landing-mobile-nav-link {
