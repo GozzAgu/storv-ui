@@ -23,13 +23,14 @@
             </button>
           </div>
           <div class="flex items-center gap-1.5 md:hidden">
-            <button 
+            <button
+              type="button"
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="p-2 -m-2 text-gray-600 rounded-sm hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-white/10"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-300/90 bg-white/95 text-gray-900 shadow-sm ring-1 ring-gray-900/6 outline-none transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out hover:border-gray-400/90 hover:bg-gray-50 hover:shadow active:scale-[0.96] dark:border-white/20 dark:bg-white/10 dark:text-white dark:ring-white/10 dark:hover:bg-white/15"
               aria-label="Toggle menu"
             >
-              <Bars3Icon v-if="!mobileMenuOpen" class="w-6 h-6" />
-              <XMarkIcon v-else class="w-6 h-6" />
+              <Bars3Icon v-if="!mobileMenuOpen" class="h-7 w-7" stroke-width="2" />
+              <XMarkIcon v-else class="h-7 w-7" stroke-width="2" />
             </button>
           </div>
         </div>
@@ -1191,62 +1192,120 @@
       </div>
     </section>
 
-    <!-- About -->
+    <!-- About: same grid language as app-flow -->
     <section
       id="about"
       data-section-id="about"
-      class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-t border-gray-100/80 bg-[#fafafb] py-20 dark:border-gray-800/60 dark:bg-slate-900 sm:py-24 lg:scroll-mt-28 lg:py-28"
+      class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
     >
-      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
-          <div class="max-w-xl lg:max-w-sm lg:shrink-0">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
-              About Storvv
-            </p>
-            <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
-              Store software that respects how retail really runs
-            </h2>
-            <p class="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
-            </p>
-          </div>
-          <div class="min-w-0 flex-1 space-y-8 border-t border-gray-100 pt-10 dark:border-gray-800 lg:border-t-0 lg:border-l lg:pl-16 lg:pt-0">
-            <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-              Storvv helps independent and growing retailers keep inventory, checkout, and customer notes in one place. Whether you sell phones, fashion, beauty, or mixed goods, you get folders you can shape to your categories, receipts that stay tidy, and a calm dashboard when the shop floor is busy.
-            </p>
-            <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-              We believe good tools should feel obvious: owners see the full picture, managers get guardrails, and staff can sell without fighting the software. When you are ready for more locations or deeper reporting, Storvv grows with plans that match real store sizes, not generic enterprise bundles.
-            </p>
-            <div
-              class="grid gap-6 border-t border-gray-100 pt-8 dark:border-gray-800 sm:grid-cols-3 sm:gap-8"
-            >
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
-                  Focus
-                </p>
-                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  Stock, sales, and customers linked the way your books expect.
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
+        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
+
+        <div class="relative mx-auto max-w-3xl text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+            About Storvv
+          </p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
+            Store software that respects how retail really runs
+          </h2>
+          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
+            We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
+          </p>
+        </div>
+
+        <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
+          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
+            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
+              <div
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '32ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    01
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <CubeIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  One calm system for the floor
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Storvv helps independent and growing retailers keep inventory, checkout, and customer notes in one place. Whether you sell phones, fashion, beauty, or mixed goods, you get folders you can shape to your categories, receipts that stay tidy, and a calm dashboard when the shop floor is busy.
                 </p>
               </div>
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
-                  Team
-                </p>
-                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  Roles and permissions that match how shops delegate day to day.
+
+              <div
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '84ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    02
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <SparklesIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  Tools that feel obvious
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  We believe good tools should feel obvious: owners see the full picture, managers get guardrails, and staff can sell without fighting the software. When you are ready for more locations or deeper reporting, Storvv grows with plans that match real store sizes, not generic enterprise bundles.
                 </p>
               </div>
-              <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
-                  Scale
-                </p>
-                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                  From one branch to several, without starting your setup from zero.
-                </p>
+
+              <div
+                class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-100/65 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.05]"
+              >
+                <div
+                  v-for="(pillar, idx) in aboutPillars"
+                  :key="pillar.title"
+                  class="landing-about-cell group flex min-h-[12rem] flex-col bg-white px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                  :style="{ transitionDelay: `${136 + idx * 52}ms` }"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+                      {{ pillar.title }}
+                    </span>
+                    <div
+                      class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                    >
+                      <component :is="pillar.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                    </div>
+                  </div>
+                  <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    {{ pillar.body }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <p class="relative mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400 sm:text-sm">
+          See the same story in steps in
+          <a
+            href="#app-flow"
+            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+            @click.prevent="scrollToSection('app-flow')"
+            >the app flow</a>, or
+          <a
+            href="#contact"
+            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+            @click.prevent="scrollToSection('contact')"
+            >talk to us</a>.
+        </p>
       </div>
     </section>
 
@@ -1817,6 +1876,24 @@ const landingFlowSteps: LandingCapability[] = [
   },
 ]
 
+const aboutPillars = [
+  {
+    title: 'Focus',
+    body: 'Stock, sales, and customers linked the way your books expect.',
+    icon: Square2StackIcon,
+  },
+  {
+    title: 'Team',
+    body: 'Roles and permissions that match how shops delegate day to day.',
+    icon: UserGroupIcon,
+  },
+  {
+    title: 'Scale',
+    body: 'From one branch to several, without starting your setup from zero.',
+    icon: BuildingOfficeIcon,
+  },
+] as const
+
 const features = [
   {
     title: 'Custom Inventory Folders',
@@ -2057,6 +2134,30 @@ useHead({
 
 @media (prefers-reduced-motion: reduce) {
   .landing-flow-chart .landing-flow-step {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* About grid: staggered reveal when scroll-animate adds .visible */
+.landing-about-chart .landing-about-cell {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+}
+
+.landing-about-chart.visible .landing-about-cell {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-about-chart .landing-about-cell {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
