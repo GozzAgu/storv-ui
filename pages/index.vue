@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-[#fafafa] text-gray-900 antialiased dark:bg-slate-950 dark:text-gray-100">
+  <div class="min-h-screen bg-gradient-to-b from-[#fafafa] via-[#fafafa] to-[#f5f6f8] text-gray-900 antialiased dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:text-gray-100">
     <!-- Nav: glass, minimal -->
     <header
-      class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl duration-300 border-b border-gray-200/70 dark:border-gray-800/80 dark:bg-slate-950/90"
+      class="fixed top-0 left-0 right-0 z-50 border-b border-gray-200/45 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75 dark:border-gray-800/55 dark:bg-slate-950/85 supports-[backdrop-filter]:dark:bg-slate-950/75 transition-[border-color,background-color] duration-300 ease-out"
     >
       <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-18 gap-3">
@@ -10,13 +10,13 @@
             <img :src="marketingLogoSrc" alt="Storvv" class="h-6 sm:h-8 w-auto object-contain" />
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
-            <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">Features</a>
-            <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">Plans</a>
-            <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">About</a>
-            <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-300 dark:hover:text-white">Contact</a>
+            <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Features</a>
+            <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Plans</a>
+            <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">About</a>
+            <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Contact</a>
             <button
               @click="showContactFormModal = true"
-              class="rounded-sm bg-gray-900 text-white text-sm font-medium px-5 py-2.5 hover:bg-gray-800 transition-colors dark:bg-primary-600 dark:hover:bg-primary-500"
+              class="rounded-lg bg-gray-900 text-white text-sm font-medium px-5 py-2.5 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-gray-800 hover:shadow active:scale-[0.98] dark:bg-primary-600 dark:hover:bg-primary-500"
             >
               Start free trial
             </button>
@@ -60,12 +60,12 @@
         style="background-image: url('/hero-img.jpg');"
       />
       <!-- Readability overlay + cinematic gradients -->
-      <div class="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/55 to-slate-950/85" />
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.22),transparent_42%),radial-gradient(circle_at_82%_30%,rgba(56,189,248,0.16),transparent_40%)]" />
-      <div class="absolute -top-32 -right-32 h-[520px] w-[520px] animate-blob rounded-full bg-primary-400/15 blur-3xl" />
-      <div class="absolute -bottom-40 -left-32 h-[620px] w-[620px] animate-blob rounded-full bg-primary-400/12 blur-3xl animation-delay-2000" />
-      <div class="absolute right-[10%] top-[18%] h-3 w-3 animate-ping rounded-full bg-primary-300/70" />
-      <div class="absolute left-[22%] top-[38%] h-2 w-2 animate-ping rounded-full bg-cyan-300/60 animation-delay-2000" />
+      <div class="absolute inset-0 bg-gradient-to-b from-slate-950/62 via-slate-950/48 to-slate-950/80" />
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(59,130,246,0.16),transparent_44%),radial-gradient(circle_at_82%_30%,rgba(56,189,248,0.11),transparent_42%)]" />
+      <div class="absolute -top-32 -right-32 h-[520px] w-[520px] animate-blob rounded-full bg-primary-400/11 blur-3xl" />
+      <div class="absolute -bottom-40 -left-32 h-[620px] w-[620px] animate-blob rounded-full bg-primary-400/9 blur-3xl animation-delay-2000" />
+      <div class="absolute right-[10%] top-[18%] h-3 w-3 rounded-full bg-primary-300/25 blur-[1px]" />
+      <div class="absolute left-[22%] top-[38%] h-2 w-2 rounded-full bg-cyan-300/20 blur-[1px]" />
 
       <div class="relative mx-auto grid max-w-6xl gap-10 px-4 pb-20 sm:px-6 sm:pb-24 lg:grid-cols-12 lg:items-end lg:gap-12 lg:px-8 lg:pb-28">
         <div class="max-w-3xl lg:col-span-7">
@@ -90,7 +90,7 @@
 
           <!-- Live sync visual (Uiverse-style loader + Storvv messaging) -->
           <div
-            class="mt-8 flex flex-col items-stretch gap-4 rounded-sm border border-white/15 bg-white/5 p-4 backdrop-blur-sm sm:flex-row sm:items-center sm:gap-5"
+            class="mt-8 flex flex-col items-stretch gap-4 rounded-xl border border-white/12 bg-white/[0.06] p-4 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:gap-5"
           >
             <MarketingSyncLoader class="mx-auto shrink-0 sm:mx-0" :size="88" />
             <div class="min-w-0 text-center sm:text-left">
@@ -104,13 +104,13 @@
           <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <button
                 @click="showContactFormModal = true"
-              class="inline-flex items-center justify-center rounded-sm bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
+              class="inline-flex items-center justify-center rounded-lg bg-white text-slate-950 font-medium px-7 py-3.5 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/95 hover:shadow-md active:scale-[0.98]"
               >
               Start free trial
               </button>
               <button
                 @click="scrollToSection('features')"
-              class="inline-flex items-center justify-center rounded-sm border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
+              class="inline-flex items-center justify-center rounded-lg border border-white/18 bg-white/[0.08] text-white font-medium px-7 py-3.5 backdrop-blur-sm outline-none transition-all duration-300 ease-out hover:border-white/25 hover:bg-white/14 active:scale-[0.98]"
               >
               See it in action
               </button>
@@ -145,7 +145,7 @@
 
         <!-- Floating hero cards (desktop only) -->
         <div class="relative hidden min-h-[27rem] lg:col-span-5 lg:block">
-          <div class="absolute top-0 right-0 w-64 rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl">
+          <div class="absolute top-0 right-0 w-64 rounded-2xl border border-white/14 bg-white/[0.07] p-4 shadow-lg shadow-black/10 backdrop-blur-xl transition-[transform,border-color,background-color] duration-500 ease-out hover:-translate-y-0.5">
             <div class="flex items-center justify-between">
               <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Inventory folders</p>
               <span class="inline-flex items-center gap-1 rounded-full bg-cyan-400/20 px-2 py-0.5 text-[11px] font-medium text-cyan-200">
@@ -157,7 +157,7 @@
             <p class="mt-1 text-xs text-white/70">Organize products, serial numbers, and custom fields per category.</p>
           </div>
 
-          <div class="absolute top-32 right-8 w-72 rounded-2xl border border-white/15 bg-slate-900/65 p-4 shadow-2xl backdrop-blur-xl">
+          <div class="absolute top-32 right-8 w-72 rounded-2xl border border-white/12 bg-slate-900/55 p-4 shadow-xl shadow-black/25 backdrop-blur-xl transition-[transform,border-color,background-color] duration-500 ease-out hover:-translate-y-0.5">
             <div class="mb-3 flex items-center justify-between">
               <p class="text-xs font-semibold uppercase tracking-wide text-white/70">Sales & receipts</p>
               <BellAlertIcon class="h-4 w-4 text-primary-300" />
@@ -180,7 +180,7 @@
             </div>
           </div>
 
-          <div class="absolute top-[22.5rem] right-12 w-64 rounded-2xl border border-white/20 bg-white/10 p-3 backdrop-blur-xl">
+          <div class="absolute top-[22.5rem] right-12 w-64 rounded-2xl border border-white/14 bg-white/[0.07] p-3 shadow-lg shadow-black/10 backdrop-blur-xl transition-[transform,border-color,background-color] duration-500 ease-out hover:-translate-y-0.5">
             <p class="text-[11px] font-medium text-white/80">Multi-store operations</p>
             <div class="mt-2 grid grid-cols-3 gap-2 text-center">
               <div class="min-w-0 rounded-md bg-white/10 px-1.5 py-2">
@@ -202,7 +202,7 @@
     </section>
 
     <!-- Clarity block: editorial layout -->
-    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up bg-white py-16 sm:py-20 border-b border-gray-100 dark:border-gray-800 dark:bg-slate-950">
+    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up border-b border-gray-100/70 bg-white py-20 dark:border-gray-800/70 dark:bg-slate-950 sm:py-24">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-12 gap-8 lg:gap-10 items-end">
           <div class="lg:col-span-7">
@@ -243,7 +243,7 @@
     </section>
 
     <!-- Why Storvv (premium split layout) -->
-    <section data-section-id="problem" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white dark:bg-slate-950">
+    <section data-section-id="problem" class="scroll-animate scroll-animate-up bg-white py-20 dark:bg-slate-950 lg:py-28 sm:py-24">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-14">
           <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-gray-500 dark:text-gray-400">Why teams choose Storvv</p>
@@ -342,7 +342,7 @@
     </section>
 
     <!-- How it works: dark left + primary right (reverted, cleaner) -->
-    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up grid lg:grid-cols-2 min-h-[560px]">
+    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] grid min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28">
       <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 lg:py-24 flex flex-col justify-center">
           <div class="max-w-xl mx-auto lg:mx-0">
             <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
@@ -410,7 +410,7 @@
     </section>
 
     <!-- Everything you need -->
-    <section data-section-id="features-list" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white dark:bg-slate-950">
+    <section data-section-id="features-list" class="scroll-animate scroll-animate-up bg-white py-20 dark:bg-slate-950 sm:py-24 lg:py-28">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
           <div>
@@ -421,7 +421,7 @@
               One system to run inventory, sales, customers, and team operations without tool sprawl.
             </p>
         </div>
-          <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm shrink-0">
+          <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-primary-500 outline-none transition-colors duration-300 ease-out hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
             Explore features
             <ArrowRightIcon class="w-4 h-4" />
             </a>
@@ -430,7 +430,7 @@
           <button
             @click="previousFeature"
             :disabled="currentFeatureIndex === 0"
-            :class="['absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center transition-all -translate-x-1 dark:bg-slate-900', currentFeatureIndex === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
+            :class="['absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-x-1 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200/60 bg-white shadow-sm outline-none transition-all duration-300 ease-out dark:border-white/10 dark:bg-slate-900', currentFeatureIndex === 0 ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300/70 hover:bg-gray-50/90 hover:shadow dark:hover:bg-slate-800/90']"
             aria-label="Previous"
           >
             <ChevronLeftIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
@@ -438,19 +438,24 @@
           <button
             @click="nextFeature"
             :disabled="currentFeatureIndex >= features.length - visibleFeatures"
-            :class="['absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white flex items-center justify-center transition-all translate-x-1 dark:bg-slate-900', currentFeatureIndex >= features.length - visibleFeatures ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-slate-800']"
+            :class="['absolute right-0 top-1/2 z-10 flex h-10 w-10 translate-x-1 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200/60 bg-white shadow-sm outline-none transition-all duration-300 ease-out dark:border-white/10 dark:bg-slate-900', currentFeatureIndex >= features.length - visibleFeatures ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300/70 hover:bg-gray-50/90 hover:shadow dark:hover:bg-slate-800/90']"
             aria-label="Next"
           >
             <ChevronRightIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
           <div class="overflow-hidden px-12">
-            <div class="flex transition-transform duration-300 ease-out" :style="{ transform: `translateX(-${currentFeatureIndex * (100 / visibleFeatures)}%)` }">
+            <div
+              class="flex transition-[transform] duration-[480ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
+              :style="{ transform: `translate3d(-${currentFeatureIndex * (100 / visibleFeatures)}%,0,0)` }"
+            >
               <div v-for="(feature, index) in features" :key="index" class="flex-shrink-0 px-3" :style="{ width: `${100 / visibleFeatures}%` }">
-                <div class="h-full rounded-sm bg-white p-6 transition-colors flex flex-col hover:bg-gray-50/90 dark:bg-slate-900 dark:hover:bg-slate-800/80">
+                <div
+                  class="flex h-full flex-col rounded-xl border border-gray-100/80 bg-white p-6 shadow-sm outline-none ring-1 ring-black/[0.02] transition-[background-color,border-color,box-shadow] duration-300 ease-out hover:border-gray-200/90 hover:bg-gray-50/80 hover:shadow-md dark:border-white/[0.06] dark:bg-slate-900 dark:ring-white/[0.04] dark:hover:border-white/10 dark:hover:bg-slate-800/85"
+                >
                   <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ feature.title }}</h3>
-                  <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed flex-1">{{ feature.description }}</p>
-                  <span class="mt-4 inline-flex items-center gap-1.5 text-primary-500 text-sm font-medium">Explore <ArrowRightIcon class="w-4 h-4" /></span>
-              </div>
+                  <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ feature.description }}</p>
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-500">Explore <ArrowRightIcon class="w-4 h-4" /></span>
+                </div>
               </div>
             </div>
           </div>
@@ -459,7 +464,7 @@
               v-for="(dot, index) in totalDots"
               :key="index"
               @click="goToFeature(index * visibleFeatures)"
-              :class="['h-1.5 rounded-full transition-all', Math.floor(currentFeatureIndex / visibleFeatures) === index ? 'bg-primary-500 w-6' : 'bg-gray-300 w-1.5 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500']"
+              :class="['h-1.5 rounded-full transition-[width,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]', Math.floor(currentFeatureIndex / visibleFeatures) === index ? 'w-6 bg-primary-500' : 'w-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500']"
               :aria-label="`Slide ${index + 1}`"
             />
               </div>
@@ -467,54 +472,37 @@
             </div>
     </section>
 
-    <!-- Advanced Features Section (original: grid bg, large icons, hover-reveal description) -->
-    <section class="py-16 sm:py-20 lg:py-24 relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900" />
-      <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 40px 40px;" />
-      <div class="absolute top-0 right-0 w-96 h-96 bg-primary-100/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary-100/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+    <!-- Advanced capabilities -->
+    <section data-section-id="capabilities-grid" class="scroll-animate scroll-animate-up relative overflow-hidden py-20 sm:py-24 lg:py-28">
+      <div class="absolute inset-0 bg-gradient-to-br from-neutral-50/90 via-white to-neutral-50/80 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900" />
+      <div class="absolute inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 48px 48px;" />
+      <div class="absolute top-0 right-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary-100/15 blur-3xl dark:bg-primary-500/8" />
+      <div class="absolute bottom-0 left-0 h-96 w-96 translate-y-1/2 -translate-x-1/2 rounded-full bg-primary-100/12 blur-3xl dark:bg-primary-500/6" />
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-16">
+        <div class="mb-12 sm:mb-16">
           <h2 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 leading-tight max-w-5xl">
-            Advanced capabilities that grow with you, from single locations to multi-store operations
+            Capabilities that mirror how Storvv actually runs inventory, checkout, teams, and multi-store chains
           </h2>
-          </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl">
-          <div class="text-center group relative">
-            <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center transition-transform group-hover:scale-110">
-              <BuildingOfficeIcon class="w-20 h-20 text-gray-900 dark:text-gray-100 stroke-1" stroke-width="1.5" />
+        </div>
+        <div
+          class="mx-auto max-w-[92rem] overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]"
+        >
+          <div class="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div
+              v-for="(cap, idx) in landingCapabilities"
+              :key="idx"
+              class="group relative bg-white px-6 py-9 text-center transition-colors duration-300 ease-out hover:bg-neutral-50/90 sm:px-7 sm:py-10 dark:bg-slate-950 dark:hover:bg-slate-900/95"
+            >
+              <div class="mx-auto mb-5 flex h-[4.75rem] w-[4.75rem] items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]">
+                <component :is="cap.icon" class="h-[4.5rem] w-[4.5rem] shrink-0 text-gray-900 dark:text-gray-100" stroke-width="1.35" />
               </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Multi-Store Support</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Manage multiple store locations from one account (Medium: up to 5; Enterprise: unlimited). Each store has its own inventory, receipts, and staff. Enterprise also includes <span class="font-medium text-gray-800 dark:text-gray-200">Copy from branch</span> to duplicate folder templates across stores when you expand.
-            </p>
-          </div>
-          <div class="text-center group relative">
-            <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center transition-transform group-hover:scale-110">
-              <BellAlertIcon class="w-20 h-20 text-gray-900 dark:text-gray-100 stroke-1" stroke-width="1.5" />
-              </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Low Stock Alerts</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Automatically track low stock items. Get alerts when inventory falls below your threshold for both serial numbers and bulk items.
-            </p>
-          </div>
-          <div class="text-center group relative">
-            <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center transition-transform group-hover:scale-110">
-              <DocumentTextIcon class="w-20 h-20 text-gray-900 dark:text-gray-100 stroke-1" stroke-width="1.5" />
-              </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Excel Import/Export</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Bulk import products from Excel spreadsheets or export your inventory data. Smart duplicate detection included.
-            </p>
-          </div>
-          <div class="text-center group relative">
-            <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center transition-transform group-hover:scale-110">
-              <ChartBarIcon class="w-20 h-20 text-gray-900 dark:text-gray-100 stroke-1" stroke-width="1.5" />
-              </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">Real-Time Analytics</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 max-w-xs mx-auto">
-              Available on Medium and Enterprise. Revenue charts, sales trends, busiest times, and exportable reports so you can make data-driven decisions.
-            </p>
+              <h3 class="mb-2.5 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {{ cap.title }}
+              </h3>
+              <p class="mx-auto max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:max-w-none">
+                {{ cap.description }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -584,7 +572,7 @@
     </section>
 
     <!-- Pricing -->
-    <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-gradient-to-b from-white to-slate-50/60 dark:from-slate-950 dark:to-slate-900/80">
+    <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-gradient-to-b from-white to-slate-50/65 py-20 dark:from-slate-950 dark:to-slate-900/80 lg:scroll-mt-28 lg:py-28 sm:py-24">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">
           Plans that fit your size
@@ -701,7 +689,7 @@
     </section>
 
     <!-- FAQ -->
-    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-[#f7f8fa] dark:bg-slate-900/60">
+    <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-20 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-28 sm:py-24">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <p class="text-[11px] uppercase tracking-[0.12em] font-semibold text-gray-500 dark:text-gray-400 text-center">Frequently asked questions</p>
         <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Common questions</h2>
@@ -1038,7 +1026,7 @@
             Store owners choose Storvv because it gives them:
           </p>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
+            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1049,7 +1037,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
+            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1060,7 +1048,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
+            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1071,7 +1059,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out">
+            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1082,7 +1070,7 @@
               </div>
             </div>
             
-            <div class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-5 hover:bg-white/10 hover:border-white/20 transition duration-200 ease-out sm:col-span-2 lg:col-span-1">
+            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5 sm:col-span-2 lg:col-span-1">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1103,14 +1091,14 @@
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <button
               @click="showContactFormModal = true"
-              class="group inline-flex items-center justify-center gap-2 rounded-sm bg-white text-slate-950 font-medium px-7 py-3.5 hover:bg-white/90 transition-colors"
+              class="group inline-flex items-center justify-center gap-2 rounded-lg bg-white px-7 py-3.5 font-medium text-slate-950 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/92 hover:shadow-md active:scale-[0.98]"
             >
               Start Free Trial
-              <ArrowRightIcon class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              <ArrowRightIcon class="h-4 w-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-1 sm:h-5 sm:w-5" />
             </button>
             <button
               @click="scrollToSection('features')"
-              class="inline-flex items-center justify-center gap-2 rounded-sm border border-white/20 bg-white/10 text-white font-medium px-7 py-3.5 hover:bg-white/15 transition-colors"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/18 bg-white/[0.08] px-7 py-3.5 font-medium text-white outline-none backdrop-blur-sm transition-all duration-300 ease-out hover:border-white/24 hover:bg-white/14 active:scale-[0.98]"
             >
               See it in action
             </button>
@@ -1120,16 +1108,16 @@
     </section>
 
     <!-- Contact -->
-    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up py-20 lg:py-28 bg-white dark:bg-slate-950">
+    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-white py-20 dark:bg-slate-950 lg:scroll-mt-28 lg:py-28 sm:py-24">
       <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="w-14 h-14 rounded-sm bg-primary-100 dark:bg-primary-950/50 flex items-center justify-center mx-auto mb-6">
           <EnvelopeIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
         </div>
         <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Get in touch</h2>
-        <p class="mt-4 text-gray-600 dark:text-gray-400">Questions, feedback, or partnership we’d love to hear from you.</p>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Questions, feedback, or partnership we'd love to hear from you.</p>
           <button
             @click="showContactFormModal = true"
-          class="mt-8 inline-flex items-center gap-2 rounded-sm bg-primary-600 text-white font-medium px-6 py-3 hover:bg-primary-700 transition-colors"
+          class="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white shadow-sm outline-none transition-all duration-300 ease-out hover:bg-primary-700 hover:shadow-md active:scale-[0.98]"
           >
           Contact us
           <ArrowRightIcon class="w-5 h-5" />
@@ -1138,7 +1126,7 @@
     </section>
 
     <!-- Footer -->
-    <footer id="about" class="bg-slate-50 border-t border-gray-200/80 dark:bg-slate-900 dark:border-gray-800">
+    <footer id="about" class="scroll-mt-[4.75rem] border-t border-gray-200/65 bg-gradient-to-b from-slate-50 to-slate-50/95 dark:border-gray-800/70 dark:from-slate-900 dark:to-slate-900 lg:scroll-mt-28">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
         <div class="grid lg:grid-cols-12 gap-10 pb-10 border-b border-gray-200/80 dark:border-gray-800">
           <!-- Brand -->
@@ -1336,7 +1324,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, type Component } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
 import {
@@ -1350,6 +1338,7 @@ import {
   ChartBarIcon,
   BuildingOfficeIcon,
   ArrowPathIcon,
+  Square2StackIcon,
   ShieldCheckIcon,
   LockClosedIcon,
   DocumentTextIcon,
@@ -1360,6 +1349,8 @@ import {
   ShoppingCartIcon,
   UserGroupIcon,
   BellAlertIcon,
+  BellIcon,
+  MagnifyingGlassIcon,
   SparklesIcon,
   ServerIcon,
   GlobeAltIcon,
@@ -1536,6 +1527,112 @@ const visibleFeatures = computed(() => {
   return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
 })
 
+interface LandingCapability {
+  icon: Component
+  title: string
+  description: string
+}
+
+/** Advanced grid on the homepage: aligns with sidebar modules and subscription gates. */
+const landingCapabilities: LandingCapability[] = [
+  {
+    icon: FolderIcon,
+    title: 'Inventory folders',
+    description:
+      'Templates with rich custom fields (text, numbers, currency, dates, choices, booleans). Each folder chooses serial-number lines or bulk quantity so gadgets, apparel, or consumables can follow different rules.',
+  },
+  {
+    icon: CubeIcon,
+    title: 'Serial & bulk stock',
+    description:
+      'Track individual IMEI-grade units one by one or keep pooled counts for fast movers, with thresholds that respect how each folder is configured.',
+  },
+  {
+    icon: ReceiptPercentIcon,
+    title: 'Receipts & checkout',
+    description:
+      'Line-level discounts, multiple payments, polished layouts, printable or PDF-ready output, and receipts that stay wired to folders and inventory.',
+  },
+  {
+    icon: ArrowsRightLeftIcon,
+    title: 'Returns, refunds & swap-ins',
+    description:
+      'Undo sales, reopen stock correctly, log swap-ins and trade-ins inside the receipt flow so finance and warehouse stay aligned.',
+  },
+  {
+    icon: UsersIcon,
+    title: 'Customer CRM',
+    description:
+      'Customers form automatically from receipts. Review purchase counts, totals, notes, or contact hints without juggling a separate spreadsheet CRM.',
+  },
+  {
+    icon: BellAlertIcon,
+    title: 'Low-stock alerts',
+    description:
+      'Set folder-level thresholds and hear when serialized or pooled counts fall below comfortable levels.',
+  },
+  {
+    icon: DocumentTextIcon,
+    title: 'Excel import & export',
+    description:
+      'Bulk bring products in from spreadsheets or export catalogs for auditors and planners with duplicate-aware imports.',
+  },
+  {
+    icon: MagnifyingGlassIcon,
+    title: 'Unified search',
+    description:
+      'Search receipts, inventory, customers, and (for admins) departments and staff from the header, with filters that fit each role.',
+  },
+  {
+    icon: ChartBarIcon,
+    title: 'Analytics & exports',
+    description:
+      'Medium and Enterprise add revenue pacing, bestselling items, busiest times, and summaries you can export for deeper analysis.',
+  },
+  {
+    icon: UserGroupIcon,
+    title: 'Departments & roles',
+    description:
+      'Medium and Enterprise add departments plus Super Admin, Manager, and Staff roles with granular access to folders and workflows.',
+  },
+  {
+    icon: ShieldCheckIcon,
+    title: 'Activity logs',
+    description:
+      'Medium and Enterprise give managers and super admins dated trails for notable inventory and configuration changes.',
+  },
+  {
+    icon: BellIcon,
+    title: 'In-app notifications',
+    description:
+      'Operational alerts arrive in-product so approvals, anomalies, onboarding nudges, and receipt milestones surface next to everyday work.',
+  },
+  {
+    icon: BuildingOfficeIcon,
+    title: 'Multi-store workspaces',
+    description:
+      'Micro stays on one flagship store; Medium expands to five separate ledgers tied to one account; Enterprise lifts store limits entirely.',
+  },
+  {
+    icon: Square2StackIcon,
+    title: 'Copy from branch',
+    description:
+      'Enterprise tooling duplicates folder scaffolding between branches selectively, bringing structure definitions without overwriting live quantities.',
+  },
+  {
+    icon: ArrowPathIcon,
+    title: 'Multi-store sync',
+    description:
+      'Enterprise-only transfers route unsold serialized or pooled stock across branches with history tracking and consolidated reporting.',
+  },
+  {
+    icon: GlobeAltIcon,
+    title: 'Regional & preferences',
+    description:
+      'Currency formatting, locales, onboarding, receipts, subscriptions, integrations, notifications, profile details, themes, sessions, two-factor authentication, and billing from Settings and Profile.',
+  },
+]
+
 const features = [
   {
     title: 'Custom Inventory Folders',
@@ -1614,14 +1711,10 @@ const goToFeature = (index: number) => {
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
-  if (element) {
-    const navHeight = 80
-    const elementPosition = element.getBoundingClientRect().top
-    const offsetPosition = elementPosition + window.pageYOffset - navHeight
-
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
+  if (element && import.meta.client) {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
     })
   }
 }
@@ -1654,14 +1747,14 @@ const handleScroll = () => {
 
     // Only apply parallax when scrolling within hero section
     if (heroHeight > 0 && scrolled < heroHeight) {
-      const parallaxSpeed = 0.18
+      const parallaxSpeed = 0.12
       const translateY = scrolled * parallaxSpeed
       heroBackground.value.style.transform = `translate3d(0, ${translateY}px, 0) scale(1.06)`
       return
     }
 
     // Lock position when past hero section
-    const maxTranslate = heroHeight * 0.18
+    const maxTranslate = heroHeight * 0.12
     heroBackground.value.style.transform = `translate3d(0, ${maxTranslate}px, 0) scale(1.06)`
   })
 }
@@ -1684,7 +1777,7 @@ const setupScrollAnimations = () => {
     },
     {
       threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px',
+      rootMargin: '0px 0px -52px 0px',
     }
   )
   
@@ -1763,8 +1856,3 @@ useHead({
 })
 </script>
 
-<style scoped>
-html {
-  scroll-behavior: smooth;
-}
-</style>
