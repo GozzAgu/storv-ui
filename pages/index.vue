@@ -467,6 +467,74 @@
       </div>
     </section>
 
+    <!-- How it works: dark left + primary right (reverted, cleaner) -->
+    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] grid min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28">
+      <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 lg:py-24 flex flex-col justify-center">
+          <div class="max-w-xl mx-auto lg:mx-0">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+              How Storvv works
+            </h2>
+          <p class="mt-4 text-lg text-slate-300">
+            Five steps to get your store running smoothly.
+          </p>
+          <div class="mt-10 space-y-6">
+            <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4">
+              <div class="flex-shrink-0 pt-0.5">
+                <Cog6ToothSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">Set up your store</h3>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Set your store name, currency, timezone, and receipt preferences so totals, dates, and taxes appear correctly from day one. Add payment methods your team actually uses (cash, transfer, POS) and keep business settings consistent across staff accounts.</p>
+              </div>
+            </div>
+            <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4">
+              <div class="flex-shrink-0 pt-0.5">
+                <UsersSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">Departments & staff</h3>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Create departments for how you already work (shop floor, warehouse, online orders) and invite team members with the right role. Control who can view, sell, edit, or delete items using folder-level permissions so managers and staff only access what they need.</p>
+              </div>
+            </div>
+            <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4">
+              <div class="flex-shrink-0 pt-0.5">
+                <RectangleStackSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable. On Enterprise, use <span class="font-medium text-white">Copy from branch</span> on the Folders screen to bring selected folder layouts into a new location without rebuilding every template by hand.</p>
+              </div>
+            </div>
+            <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
+              <div class="flex-shrink-0 pt-0.5">
+                <ReceiptPercentSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">Sales & receipts</h3>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Process sales quickly with clean, professional receipts, apply discounts when needed, and handle returns or exchanges without losing inventory accuracy. Each transaction can capture customer details automatically, helping you build a customer database as you sell.</p>
+              </div>
+            </div>
+            <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4">
+              <div class="flex-shrink-0 pt-0.5">
+                <PresentationChartLineSolidIcon class="w-7 h-7 text-primary-300" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-white">Monitor & analyze</h3>
+                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Use real-time dashboards to understand revenue trends, top-selling products, low-stock alerts, and overall inventory health. Spot what is moving fast, what is tying up cash, and where to restock so you can make better decisions with confidence.</p>
+                </div>
+              </div>
+            </div>
+                </div>
+                </div>
+      <div class="bg-primary-400 flex items-center justify-center p-8 lg:p-12">
+        <div class="w-full max-w-2xl">
+          <div class="rounded-sm overflow-hidden bg-white/5 backdrop-blur-sm">
+            <img :src="storvvDashboardImg" alt="Storvv Dashboard" class="w-full h-auto object-contain" width="2940" height="1686" />
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- App flow: simple journey (plain language) -->
     <section
       id="app-flow"
@@ -549,135 +617,103 @@
       </div>
     </section>
 
-    <!-- How it works: dark left + primary right (reverted, cleaner) -->
-    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] grid min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28">
-      <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 lg:py-24 flex flex-col justify-center">
-          <div class="max-w-xl mx-auto lg:mx-0">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              How Storvv works
-            </h2>
-          <p class="mt-4 text-lg text-slate-300">
-            Five steps to get your store running smoothly.
-          </p>
-          <div class="mt-10 space-y-6">
-            <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <Cog6ToothSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Set up your store</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Set your store name, currency, timezone, and receipt preferences so totals, dates, and taxes appear correctly from day one. Add payment methods your team actually uses (cash, transfer, POS) and keep business settings consistent across staff accounts.</p>
-              </div>
-            </div>
-            <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <UsersSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Departments & staff</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Create departments for how you already work (shop floor, warehouse, online orders) and invite team members with the right role. Control who can view, sell, edit, or delete items using folder-level permissions so managers and staff only access what they need.</p>
-              </div>
-            </div>
-            <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <RectangleStackSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable. On Enterprise, use <span class="font-medium text-white">Copy from branch</span> on the Folders screen to bring selected folder layouts into a new location without rebuilding every template by hand.</p>
-              </div>
-            </div>
-            <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <ReceiptPercentSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Sales & receipts</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Process sales quickly with clean, professional receipts, apply discounts when needed, and handle returns or exchanges without losing inventory accuracy. Each transaction can capture customer details automatically, helping you build a customer database as you sell.</p>
-              </div>
-            </div>
-            <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <PresentationChartLineSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Monitor & analyze</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Use real-time dashboards to understand revenue trends, top-selling products, low-stock alerts, and overall inventory health. Spot what is moving fast, what is tying up cash, and where to restock so you can make better decisions with confidence.</p>
-                </div>
-              </div>
-            </div>
-                </div>
-                </div>
-      <div class="bg-primary-400 flex items-center justify-center p-8 lg:p-12">
-        <div class="w-full max-w-2xl">
-          <div class="rounded-sm overflow-hidden bg-white/5 backdrop-blur-sm">
-            <img src="/dash.png" alt="Storvv Dashboard" class="w-full h-auto object-contain" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Everything you need -->
-    <section data-section-id="features-list" class="scroll-animate scroll-animate-up bg-white py-20 dark:bg-slate-950 sm:py-24 lg:py-28">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
+    <!-- Everything you need (flat grid chrome: no card shadows / rounded corners) -->
+    <section
+      data-section-id="features-list"
+      class="scroll-animate scroll-animate-up border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-16 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-20 lg:py-24"
+    >
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mb-8 flex flex-col justify-between gap-6 sm:mb-10 sm:flex-row sm:items-end">
           <div>
-            <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
               Everything you need, nothing you don't
             </h2>
-            <p class="mt-3 text-gray-600 dark:text-gray-400 max-w-2xl">
+            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:text-base">
               One system to run inventory, sales, customers, and team operations without tool sprawl.
             </p>
-        </div>
-          <a href="#features" @click.prevent="scrollToSection('features')" class="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-primary-500 outline-none transition-colors duration-300 ease-out hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">
+          </div>
+          <a
+            href="#features"
+            class="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-primary-600 outline-none transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+            @click.prevent="scrollToSection('features')"
+          >
             Explore features
-            <ArrowRightIcon class="w-4 h-4" />
-            </a>
-            </div>
+            <ArrowRightIcon class="h-4 w-4 shrink-0" />
+          </a>
+        </div>
+
         <div class="relative">
           <button
+            type="button"
             @click="previousFeature"
             :disabled="currentFeatureIndex === 0"
-            :class="['absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-x-1 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200/60 bg-white shadow-sm outline-none transition-all duration-300 ease-out dark:border-white/10 dark:bg-slate-900', currentFeatureIndex === 0 ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300/70 hover:bg-gray-50/90 hover:shadow dark:hover:bg-slate-800/90']"
+            :class="[
+              'absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-x-1 -translate-y-1/2 items-center justify-center border border-gray-300/90 bg-white text-gray-800 outline-none transition-colors duration-200 ease-out dark:border-white/15 dark:bg-slate-950 dark:text-gray-200',
+              currentFeatureIndex === 0
+                ? 'cursor-not-allowed opacity-40'
+                : 'hover:border-gray-400 hover:bg-neutral-50 dark:hover:border-white/25 dark:hover:bg-slate-900',
+            ]"
             aria-label="Previous"
           >
-            <ChevronLeftIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <ChevronLeftIcon class="h-5 w-5" />
           </button>
           <button
+            type="button"
             @click="nextFeature"
             :disabled="currentFeatureIndex >= features.length - visibleFeatures"
-            :class="['absolute right-0 top-1/2 z-10 flex h-10 w-10 translate-x-1 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200/60 bg-white shadow-sm outline-none transition-all duration-300 ease-out dark:border-white/10 dark:bg-slate-900', currentFeatureIndex >= features.length - visibleFeatures ? 'cursor-not-allowed opacity-40' : 'hover:border-gray-300/70 hover:bg-gray-50/90 hover:shadow dark:hover:bg-slate-800/90']"
+            :class="[
+              'absolute right-0 top-1/2 z-10 flex h-10 w-10 translate-x-1 -translate-y-1/2 items-center justify-center border border-gray-300/90 bg-white text-gray-800 outline-none transition-colors duration-200 ease-out dark:border-white/15 dark:bg-slate-950 dark:text-gray-200',
+              currentFeatureIndex >= features.length - visibleFeatures
+                ? 'cursor-not-allowed opacity-40'
+                : 'hover:border-gray-400 hover:bg-neutral-50 dark:hover:border-white/25 dark:hover:bg-slate-900',
+            ]"
             aria-label="Next"
           >
-            <ChevronRightIcon class="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <ChevronRightIcon class="h-5 w-5" />
           </button>
-          <div class="overflow-hidden px-12">
+
+          <div class="overflow-hidden border border-gray-200/80 bg-white px-10 dark:border-gray-800/80 dark:bg-slate-950 sm:px-12">
             <div
-              class="flex transition-[transform] duration-[480ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
+              class="flex divide-x divide-gray-200/90 transition-[transform] duration-[480ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform dark:divide-gray-800"
               :style="{ transform: `translate3d(-${currentFeatureIndex * (100 / visibleFeatures)}%,0,0)` }"
             >
-              <div v-for="(feature, index) in features" :key="index" class="flex-shrink-0 px-3" :style="{ width: `${100 / visibleFeatures}%` }">
+              <div
+                v-for="(feature, index) in features"
+                :key="index"
+                class="min-w-0 flex-shrink-0 px-0"
+                :style="{ width: `${100 / visibleFeatures}%` }"
+              >
                 <div
-                  class="flex h-full flex-col rounded-xl border border-gray-100/80 bg-white p-6 shadow-sm outline-none ring-1 ring-black/[0.02] transition-[background-color,border-color,box-shadow] duration-300 ease-out hover:border-gray-200/90 hover:bg-gray-50/80 hover:shadow-md dark:border-white/[0.06] dark:bg-slate-900 dark:ring-white/[0.04] dark:hover:border-white/10 dark:hover:bg-slate-800/85"
+                  class="flex h-full min-h-[12rem] flex-col bg-white p-6 transition-colors duration-200 ease-out hover:bg-neutral-50/90 sm:min-h-[13rem] sm:p-7 dark:bg-slate-950 dark:hover:bg-slate-900/95"
                 >
-                  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ feature.title }}</h3>
+                  <h3 class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">{{ feature.title }}</h3>
                   <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ feature.description }}</p>
-                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-500">Explore <ArrowRightIcon class="w-4 h-4" /></span>
+                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400">
+                    Explore
+                    <ArrowRightIcon class="h-4 w-4 shrink-0" />
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-          <div class="flex justify-center gap-2 mt-6">
+
+          <div class="mt-6 flex justify-center gap-1.5">
             <button
               v-for="(dot, index) in totalDots"
               :key="index"
-              @click="goToFeature(index * visibleFeatures)"
-              :class="['h-1.5 rounded-full transition-[width,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]', Math.floor(currentFeatureIndex / visibleFeatures) === index ? 'w-6 bg-primary-500' : 'w-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500']"
+              type="button"
+              :class="[
+                'h-1 rounded-sm transition-[width,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
+                Math.floor(currentFeatureIndex / visibleFeatures) === index
+                  ? 'w-6 bg-primary-600 dark:bg-primary-500'
+                  : 'w-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500',
+              ]"
               :aria-label="`Slide ${index + 1}`"
-            />
-              </div>
-              </div>
-            </div>
+              @click="goToFeature(index * visibleFeatures)"
+            ></button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Advanced capabilities -->
@@ -1315,21 +1351,121 @@
       </div>
     </section>
 
-    <!-- Contact -->
-    <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-white py-20 dark:bg-slate-950 lg:scroll-mt-28 lg:py-28 sm:py-24">
-      <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="w-14 h-14 rounded-sm bg-primary-100 dark:bg-primary-950/50 flex items-center justify-center mx-auto mb-6">
-          <EnvelopeIcon class="w-7 h-7 text-primary-500 dark:text-primary-400" />
+    <!-- Contact: grid language (matches flow / about) -->
+    <section
+      id="contact"
+      data-section-id="contact"
+      class="landing-contact-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] pt-20 pb-10 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:pt-24 sm:pb-12 lg:scroll-mt-28 lg:pt-24 lg:pb-10"
+    >
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="pointer-events-none absolute left-[6%] top-0 h-44 w-44 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
+        <div class="pointer-events-none absolute bottom-0 right-[8%] h-36 w-36 rounded-full bg-slate-300/20 blur-3xl dark:bg-slate-600/12" />
+
+        <div class="relative mx-auto max-w-3xl text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+            Contact
+          </p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
+            Get in touch
+          </h2>
+          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
+            Questions, feedback, or partnership ideas. We read every message and reply as soon as we can.
+          </p>
         </div>
-        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Get in touch</h2>
-        <p class="mt-4 text-gray-600 dark:text-gray-400">Questions, feedback, or partnership we'd love to hear from you.</p>
-          <button
-            @click="showContactFormModal = true"
-          class="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white shadow-sm outline-none transition-all duration-300 ease-out hover:bg-primary-700 hover:shadow-md active:scale-[0.98]"
-          >
-          Contact us
-          <ArrowRightIcon class="w-5 h-5" />
-          </button>
+
+        <div class="relative mx-auto mt-12 max-w-[92rem] lg:mt-16">
+          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
+            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
+              <div
+                class="landing-contact-cell group flex min-h-[12rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[13rem] sm:px-7 sm:py-9 lg:min-h-[14.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '28ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    01
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <EnvelopeIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  Say hello
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Tell us what you are trying to solve, what store type you run, or what would make Storvv a better fit. We use it to prioritize what we build next.
+                </p>
+              </div>
+
+              <div
+                class="landing-contact-cell group flex min-h-[12rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[13rem] sm:px-7 sm:py-9 lg:min-h-[14.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '80ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    02
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <GlobeAltIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  Email us directly
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  For anything quick or informal, you can skip the form.
+                </p>
+                <a
+                  href="mailto:hello@storvv.com"
+                  class="mt-4 inline-flex w-fit text-sm font-semibold text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+                >
+                  hello@storvv.com
+                </a>
+              </div>
+
+              <div
+                class="landing-contact-cell group flex min-h-[12rem] flex-col justify-between bg-white px-6 py-8 text-left transition-[background-color,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[13rem] sm:px-7 sm:py-9 lg:min-h-[14.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '132ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    03
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <DocumentTextIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <div>
+                  <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                    Structured form
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                    Share details in one place. Best for demos, partnerships, or longer questions.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white outline-none transition-all duration-300 ease-out hover:bg-primary-700 active:scale-[0.98] sm:w-auto"
+                  @click="showContactFormModal = true"
+                >
+                  Contact us
+                  <ArrowRightIcon class="h-5 w-5 shrink-0" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1354,7 +1490,7 @@
                 aria-label="X"
               >
                 <svg class="h-7 w-7 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </a>
               <a
@@ -1380,25 +1516,25 @@
                   />
                 </svg>
               </a>
+            </div>
           </div>
-        </div>
 
           <!-- Links -->
           <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
             <div>
               <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Product</h4>
               <ul class="space-y-2.5">
-                <li><a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Features</a></li>
-                <li><a href="#app-flow" @click.prevent="scrollToSection('app-flow')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">App flow</a></li>
-                <li><a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Plans</a></li>
-                <li><a href="#faq" @click.prevent="scrollToSection('faq')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">FAQs</a></li>
+                <li><a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('features')">Features</a></li>
+                <li><a href="#app-flow" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('app-flow')">App flow</a></li>
+                <li><a href="#pricing" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('pricing')">Plans</a></li>
+                <li><a href="#faq" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('faq')">FAQs</a></li>
               </ul>
             </div>
             <div>
               <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Company</h4>
               <ul class="space-y-2.5">
-                <li><a href="#about" @click.prevent="scrollToSection('about')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">About</a></li>
-                <li><a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Contact</a></li>
+                <li><a href="#about" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('about')">About</a></li>
+                <li><a href="#contact" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('contact')">Contact</a></li>
               </ul>
             </div>
             <div>
@@ -1581,6 +1717,7 @@ import {
   PresentationChartLineIcon as PresentationChartLineSolidIcon,
 } from '@heroicons/vue/24/solid'
 import { useThemeStore } from '~/stores/theme'
+import storvvDashboardImg from '~/assets/images/storvv-dashboard.png'
 
 /** Marketing site is light-only; logo asset for light backgrounds. */
 const marketingLogoSrc = '/storvv logo 2.png'
@@ -2221,6 +2358,30 @@ useHead({
 
 @media (prefers-reduced-motion: reduce) {
   .landing-about-chart .landing-about-cell {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Contact grid: staggered reveal when scroll-animate adds .visible */
+.landing-contact-chart .landing-contact-cell {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s ease-out,
+    box-shadow 0.3s ease-out;
+}
+
+.landing-contact-chart.visible .landing-contact-cell {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-contact-chart .landing-contact-cell {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;

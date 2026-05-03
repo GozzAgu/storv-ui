@@ -3,7 +3,7 @@
     <!--
       Two sibling Transitions (no outer v-if): closing used to unmount the shell instantly,
       so leave animations never ran. Backdrop fades; panel slides on transform only (cleaner on frosted glass).
-      z: backdrop 1100, panel 1110 — above DashboardFixedFooter (50) and folder menus (1000).
+      z: backdrop 1100, panel 1110, above DashboardFixedFooter (50) and folder menus (1000).
     -->
     <Transition
       enter-active-class="transition-opacity duration-[400ms] ease-out"

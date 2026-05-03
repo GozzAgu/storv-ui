@@ -3,14 +3,14 @@
     data-testid="pagination"
     class="flex w-full min-w-0 max-w-full flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
   >
-    <!-- Results summary — may shrink/truncate so page controls stay in view -->
+    <!-- Results summary: may shrink/truncate so page controls stay in view -->
     <p
       data-testid="pagination-summary"
       class="min-w-0 max-w-full truncate text-[10px] tabular-nums leading-none tracking-tight text-gray-500 dark:text-gray-400 sm:min-w-0 sm:flex-1 sm:text-[11px]"
     >
       <span class="font-medium text-gray-600 dark:text-gray-300">Results:</span>
       <span class="mx-1 font-semibold text-gray-900 dark:text-gray-100">{{ displayStart }}</span>
-      <span class="text-gray-400 dark:text-gray-500">–</span>
+      <span class="text-gray-400 dark:text-gray-500">-</span>
       <span class="mx-1 font-semibold text-gray-900 dark:text-gray-100">{{ displayEnd }}</span>
       <span class="text-gray-400 dark:text-gray-500">of</span>
       <span class="ml-1 font-semibold text-gray-900 dark:text-gray-100">{{ total }}</span>

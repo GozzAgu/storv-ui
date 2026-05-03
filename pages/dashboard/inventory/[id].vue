@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <!-- Enhanced Items Table (teleport to body in expanded view — same pattern as receipts) -->
+    <!-- Enhanced Items Table (teleport to body in expanded view; same pattern as receipts) -->
     <template v-if="!isLoadingFolder">
       <Teleport to="body" :disabled="!isFullscreen">
         <div

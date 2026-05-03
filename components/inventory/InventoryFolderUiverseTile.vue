@@ -133,7 +133,7 @@ const gid = computed(() => {
 
 <style scoped>
 /**
- * SVG gradient stops — primary scale + neutrals from tailwind.config.js
+ * SVG gradient stops: primary scale + neutrals from tailwind.config.js
  * (Plus Jakarta / Storvv blue: primary-100 → primary-600)
  */
 .inv-folder-uisverse {

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-/* Dropdowns, modals, command palette — solid frosted glass (not fully transparent) */
+/* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
 @layer components {
   /**
    * Dashboard dark mode: `bg-white` can still win over `dark:!bg-dashboard-card` depending on
@@ -62,14 +62,14 @@
   }
 
   /**
-   * With `border-separate`, `thead` background often does not paint `th` cells — they stay default
+   * With `border-separate`, `thead` background often does not paint `th` cells; they stay default
    * (white). Force header cells dark anywhere the app uses tables in dark mode.
    */
   html.dark table thead th {
     background-color: #12141c !important;
   }
 
-  /** Card wrapper for dashboard tables — same corner radius as cards/buttons (`rounded-sm`) */
+  /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
     @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
   }
@@ -98,9 +98,9 @@
 }
 
 /**
- * Theme cross-fade (light ↔ dark) — only while `theme-transitioning` is on <html>
+ * Theme cross-fade (light ↔ dark): only while `theme-transitioning` is on <html>
  * (see `stores/theme.ts`). Durations stay aligned with `THEME_TRANSITION_MS` there.
- * Covers every route (dashboard, marketing, auth) — no layout-specific hook required.
+ * Covers every route (dashboard, marketing, auth): no layout-specific hook required.
  */
 html.theme-transitioning,
 body.theme-transitioning,

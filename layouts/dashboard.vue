@@ -313,7 +313,7 @@
             >
               <Squares2X2Icon class="h-5 w-5" stroke-width="1.75" />
             </button>
-            <!-- Current page (neutral — no primary “active” treatment) -->
+            <!-- Current page (neutral; no primary “active” treatment) -->
             <div class="hidden min-w-0 items-center md:flex">
               <div class="flex min-w-0 items-center gap-3 py-0.5">
                 <component
@@ -797,7 +797,7 @@ const isInventoryRoute = computed(() => {
   return route.path.startsWith('/dashboard/inventory')
 })
 
-// Expanded state for Inventory folders — open on inventory routes; closed elsewhere (see watch below)
+// Expanded state for Inventory folders: open on inventory routes; closed elsewhere (see watch below)
 const inventoryExpanded = ref(false)
 
 // Expanded state for Stores - manage which stores are expanded
@@ -844,7 +844,7 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
         console.warn('[Dashboard] Error fetching staff:', err)
       }),
     ])
-    // Inventory item lists are loaded on-demand (folder page, dashboard home, search) — avoids N queries on every route.
+    // Inventory item lists are loaded on-demand (folder page, dashboard home, search), avoiding N queries on every route.
     await Promise.all([
       inventoryStore.fetchFolders(),
       receiptsStore.fetchReceipts(),

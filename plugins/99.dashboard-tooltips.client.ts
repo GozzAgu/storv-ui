@@ -35,7 +35,7 @@ export default defineNuxtPlugin(() => {
     return el
   }
 
-  /** After show we strip `title`, so `closest('[title]')` no longer finds the host — walk up for an active entry. */
+  /** After show we strip `title`, so `closest('[title]')` no longer finds the host; walk up for an active entry. */
   const findActiveTooltipHost = (target: EventTarget | null): HTMLElement | null => {
     if (!(target instanceof Element)) return null
     let el: Element | null = target
@@ -120,7 +120,7 @@ export default defineNuxtPlugin(() => {
 
   /**
    * Bubble phase: whenever the pointer enters *any* node, hide if we left the active host.
-   * (Title was removed from the host, so mouseout + closest('[title]') never matched — tooltips stuck open.)
+   * (Title was removed from the host, so mouseout + closest('[title]') never matched; tooltips stuck open.)
    */
   const onMouseOver = (event: MouseEvent) => {
     const target = event.target

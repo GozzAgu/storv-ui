@@ -111,7 +111,7 @@ function getAdminApp(): App {
       serviceAccount = fromFile as typeof serviceAccount
     } else {
       throw new Error(
-        'Firebase Admin not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON (full JSON of your Firebase service account) in your server environment — e.g. Vercel: Project → Settings → Environment Variables. For very large keys, use FIREBASE_SERVICE_ACCOUNT_JSON_B64 (base64 of the JSON). Locally you can use FIREBASE_SERVICE_ACCOUNT_PATH or GOOGLE_APPLICATION_CREDENTIALS. See .env.example.'
+        'Firebase Admin not configured. Set FIREBASE_SERVICE_ACCOUNT_JSON (full JSON of your Firebase service account) in your server environment. For example, Vercel: Project → Settings → Environment Variables. For very large keys, use FIREBASE_SERVICE_ACCOUNT_JSON_B64 (base64 of the JSON). Locally you can use FIREBASE_SERVICE_ACCOUNT_PATH or GOOGLE_APPLICATION_CREDENTIALS. See .env.example.'
       )
     }
     normalizeServiceAccountForCert(serviceAccount)

@@ -437,7 +437,7 @@ const formatPdfCurrency = (value: number) => {
   return formatCurrency(value).replace(/₦/g, 'NGN ')
 }
 
-/** 1×1 transparent GIF — use when proxy fails so html2canvas never taints the canvas */
+/** 1×1 transparent GIF: use when proxy fails so html2canvas never taints the canvas */
 const TRANSPARENT_1X1_GIF =
   'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 

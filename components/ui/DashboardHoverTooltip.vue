@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
  * Dark flyout matching collapsed sidebar nav / profile / sign-out hovers.
- * — Default: parent has `group relative`.
- * — For nested hovers: set `namedGroup="remove"` and use `group/remove relative` on the immediate parent.
+ * Default: parent has `group relative`.
+ * Nested hovers: set `namedGroup="remove"` and use `group/remove relative` on the immediate parent.
  */
 withDefaults(
   defineProps<{

@@ -420,7 +420,7 @@ export const useInventoryStore = defineStore('inventory', {
      * Load folder definitions for a branch without overwriting Pinia `folders`.
      * Super admin only. Lists every document under `users/{owner}/stores/{storeId}/inventoryFolders`
      * (same store subcollection shown in Inventory for that branch). No `createdBy` filter so older
-     * folders missing that field — or synced/migrated folders — still appear for copying.
+     * folders missing that field, or synced/migrated folders, still appear for copying.
      */
     async fetchFolderTemplatesForStore(storeId: string): Promise<InventoryFolder[]> {
       const db = useFirestore().getFirestoreInstance()
@@ -461,7 +461,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     /**
      * Copy folder templates (name, template fields, inventory settings) from one branch into another.
-     * Does not copy inventory items or department ACLs (`allowedDepartments` is cleared — IDs differ per branch).
+     * Does not copy inventory items or department ACLs (`allowedDepartments` is cleared; IDs differ per branch).
      */
     async duplicateFolderTemplatesBetweenStores(
       sourceStoreId: string,
@@ -1066,7 +1066,7 @@ export const useInventoryStore = defineStore('inventory', {
 
     /**
      * Full folder scan via repeated limit + startAfter. Result is cached (TTL); not stored in Pinia.
-     * Use for receipts, export, analytics — not the folder table.
+     * Use for receipts, export, analytics, not the folder table.
      */
     async fetchItemsAllChunked(folderId: string, options?: { force?: boolean }) {
       const force = options?.force === true
