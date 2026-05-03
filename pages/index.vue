@@ -27,6 +27,8 @@
               type="button"
               @click="mobileMenuOpen = !mobileMenuOpen"
               class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-transparent text-gray-900 outline-none transition-[color,transform] duration-200 ease-out hover:text-gray-700 active:scale-[0.96] dark:text-white dark:hover:text-white/85"
+              :aria-expanded="mobileMenuOpen"
+              aria-controls="landing-mobile-nav"
               aria-label="Toggle menu"
             >
               <Bars3Icon v-if="!mobileMenuOpen" class="h-7 w-7" stroke-width="2" />
@@ -34,31 +36,87 @@
             </button>
           </div>
         </div>
-        <Transition
-          enter-active-class="transition ease-out duration-200"
-          enter-from-class="opacity-0"
-          enter-to-class="opacity-100"
-          leave-active-class="transition ease-in duration-150"
-          leave-from-class="opacity-100"
-          leave-to-class="opacity-0"
+    </nav>
+    </header>
+
+    <!-- Mobile: full-screen menu (vertical list, Buckhill-style) -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition ease-out duration-200"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition ease-in duration-150"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="mobileMenuOpen"
+          id="landing-mobile-nav"
+          class="fixed inset-0 z-[100] flex max-h-[100dvh] flex-col bg-white md:hidden dark:bg-slate-950"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
         >
-          <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200/80 dark:border-gray-800 space-y-1">
-            <a href="#features" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('features'); mobileMenuOpen = false">Features</a>
-            <a href="#app-flow" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false">Flow</a>
-            <a href="#pricing" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false">Plans</a>
-            <a href="#about" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('about'); mobileMenuOpen = false">About</a>
-            <a href="#contact" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false">Contact</a>
+          <div
+            class="flex shrink-0 items-center justify-between border-b border-gray-200/90 px-4 py-4 sm:px-6 dark:border-gray-800"
+          >
+            <NuxtLink
+              to="/"
+              class="flex items-center gap-2 transition-opacity hover:opacity-90"
+              @click="mobileMenuOpen = false"
+            >
+              <img :src="marketingLogoSrc" alt="Storvv" class="h-7 w-auto object-contain sm:h-8" />
+            </NuxtLink>
+            <button
+              type="button"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-900 outline-none transition-[color,transform] duration-200 ease-out hover:bg-gray-100 active:scale-[0.96] dark:text-white dark:hover:bg-white/10"
+              aria-label="Close menu"
+              @click="mobileMenuOpen = false"
+            >
+              <XMarkIcon class="h-7 w-7" stroke-width="2" />
+            </button>
+          </div>
+
+          <nav class="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6" aria-label="Primary">
+            <a
+              href="#features"
+              class="landing-mobile-nav-link"
+              @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
+            >Features</a>
+            <a
+              href="#app-flow"
+              class="landing-mobile-nav-link"
+              @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false"
+            >Flow</a>
+            <a
+              href="#pricing"
+              class="landing-mobile-nav-link"
+              @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false"
+            >Plans</a>
+            <a
+              href="#about"
+              class="landing-mobile-nav-link"
+              @click.prevent="scrollToSection('about'); mobileMenuOpen = false"
+            >About</a>
+            <a
+              href="#contact"
+              class="landing-mobile-nav-link landing-mobile-nav-link--last"
+              @click.prevent="scrollToSection('contact'); mobileMenuOpen = false"
+            >Contact</a>
+          </nav>
+
+          <div class="shrink-0 border-t border-gray-200/90 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 dark:border-gray-800 dark:bg-slate-950">
             <a
               :href="appOriginUrl"
-              class="mt-4 flex w-full items-center justify-center rounded-sm bg-gray-900 py-3 text-center text-sm font-medium text-white dark:bg-primary-600"
+              class="flex w-full items-center justify-center rounded-full bg-gray-900 py-3.5 text-center text-sm font-semibold text-white shadow-sm outline-none transition-colors hover:bg-gray-800 active:scale-[0.98] dark:bg-primary-600 dark:hover:bg-primary-500"
               @click="mobileMenuOpen = false"
             >
               Get Started
             </a>
           </div>
-        </Transition>
-    </nav>
-    </header>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Hero: professional background image -->
     <section class="relative overflow-hidden pt-24 sm:pt-28">
@@ -1669,7 +1727,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, type Component } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, type Component } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
 import {
@@ -1734,6 +1792,16 @@ function applyLandingLightDocument() {
 }
 
 const mobileMenuOpen = ref(false)
+
+let mobileMenuMql: MediaQueryList | null = null
+function closeMobileMenuIfDesktop() {
+  if (mobileMenuMql?.matches) mobileMenuOpen.value = false
+}
+
+watch(mobileMenuOpen, (open) => {
+  if (!import.meta.client) return
+  document.body.style.overflow = open ? 'hidden' : ''
+})
 const showBackToTop = ref(false)
 const isYearly = ref(false)
 const locale = ref('en-NG')
@@ -2207,6 +2275,8 @@ onMounted(() => {
   if (import.meta.client) {
     applyLandingLightDocument()
     detectPricingRegion()
+    mobileMenuMql = window.matchMedia('(min-width: 768px)')
+    mobileMenuMql.addEventListener('change', closeMobileMenuIfDesktop)
   }
 
   if (import.meta.client && !localStorage.getItem('storvv-cookies-accepted')) {
@@ -2242,6 +2312,9 @@ onMounted(() => {
 onUnmounted(() => {
   // Clean up scroll event listener
   if (import.meta.client) {
+    document.body.style.overflow = ''
+    mobileMenuMql?.removeEventListener('change', closeMobileMenuIfDesktop)
+    mobileMenuMql = null
     themeStore.applyTheme()
     window.removeEventListener('scroll', handleScroll)
     if (rafId !== null) {
@@ -2312,6 +2385,37 @@ useHead({
 .landing-nav-link--stacked:focus-visible {
   color: rgb(17 24 39);
 }
+
+/* Full-screen mobile menu: block links (desktop .landing-nav-link is inline-block) */
+.landing-mobile-nav-link {
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid rgb(243 244 246);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: rgb(17 24 39);
+  outline: none;
+  transition: color 0.2s ease-out, background-color 0.2s ease-out;
+}
+.landing-mobile-nav-link:hover,
+.landing-mobile-nav-link:focus-visible {
+  color: rgb(59 130 246);
+}
+.landing-mobile-nav-link--last {
+  border-bottom-width: 0;
+}
+.dark .landing-mobile-nav-link {
+  border-bottom-color: rgb(31 41 55);
+  color: rgb(243 244 246);
+}
+.dark .landing-mobile-nav-link:hover,
+.dark .landing-mobile-nav-link:focus-visible {
+  color: rgb(96 165 250);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-nav-link::after {
     transition: none;
