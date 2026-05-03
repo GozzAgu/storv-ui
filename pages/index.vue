@@ -11,6 +11,7 @@
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
             <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Features</a>
+            <a href="#app-flow" @click.prevent="scrollToSection('app-flow')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Flow</a>
             <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">About</a>
             <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Contact</a>
@@ -42,6 +43,7 @@
         >
           <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200/80 dark:border-gray-800 space-y-1">
             <a href="#features" @click.prevent="scrollToSection('features'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Features</a>
+            <a href="#app-flow" @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Flow</a>
             <a href="#pricing" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Plans</a>
             <a href="#about" @click.prevent="scrollToSection('about'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">About</a>
             <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Contact</a>
@@ -338,6 +340,88 @@
               </div>
             </div>
         </div>
+      </div>
+    </section>
+
+    <!-- App flow: simple journey (plain language) -->
+    <section
+      id="app-flow"
+      data-section-id="app-flow"
+      class="landing-flow-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
+    >
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
+        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
+
+        <div class="relative mx-auto max-w-3xl text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+            Your path in the app
+          </p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
+            From sign-in to a calmer workday
+          </h2>
+          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
+            Storvv walks your team through the same simple story every day: get in, pick the store you are working in, keep products organized, sell with confidence, look after shoppers, then see what matters at a glance.
+          </p>
+        </div>
+
+        <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
+          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
+            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
+              <div
+                v-for="(step, idx) in landingFlowSteps"
+                :key="step.title"
+                class="landing-flow-step group flex h-full min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-colors duration-300 ease-out hover:bg-neutral-50/90 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: `${32 + idx * 52}ms` }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    {{ idx + 1 }}
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <component :is="step.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  {{ step.title }}
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  {{ step.description }}
+                </p>
+                <div
+                  v-if="idx < landingFlowSteps.length - 1"
+                  class="mt-6 flex flex-col items-center gap-2 border-t border-gray-100/90 pt-5 dark:border-white/[0.06]"
+                >
+                  <span class="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary-600/90 dark:text-primary-400/90">
+                    Next
+                  </span>
+                  <ChevronDownIcon
+                    class="h-8 w-8 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-y-0.5 lg:hidden dark:text-primary-400"
+                    stroke-width="2.25"
+                  />
+                  <ChevronRightIcon
+                    v-if="idx !== 2"
+                    class="hidden h-9 w-9 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-x-0.5 lg:block dark:text-primary-400"
+                    stroke-width="2.25"
+                  />
+                  <ChevronDownIcon
+                    v-else
+                    class="hidden h-9 w-9 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-y-0.5 lg:block dark:text-primary-400"
+                    stroke-width="2.25"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="relative mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400 sm:text-sm">
+          You group products in folders, then add the items you count or track by serial. When you sell, Storvv updates stock for you. If someone brings something back, you handle it from the original sale so your records stay tidy.
+        </p>
       </div>
     </section>
 
@@ -1181,6 +1265,7 @@
               <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Product</h4>
               <ul class="space-y-2.5">
                 <li><a href="#features" @click.prevent="scrollToSection('features')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Features</a></li>
+                <li><a href="#app-flow" @click.prevent="scrollToSection('app-flow')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">App flow</a></li>
                 <li><a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Plans</a></li>
                 <li><a href="#faq" @click.prevent="scrollToSection('faq')" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">FAQs</a></li>
               </ul>
@@ -1633,6 +1718,46 @@ const landingCapabilities: LandingCapability[] = [
   },
 ]
 
+/** Homepage journey grid: plain-language version of docs/STORVV_APP_FLOW.md. */
+const landingFlowSteps: LandingCapability[] = [
+  {
+    icon: KeyIcon,
+    title: 'Sign in',
+    description:
+      'Open Storvv and sign in. We load your name, your role, and which stores you are allowed to work in before anything else appears.',
+  },
+  {
+    icon: BuildingOfficeIcon,
+    title: 'Pick your store',
+    description:
+      'Store owners switch branches from the menu at the top. Everyone else stays on the store they were invited to. What you see always matches that location.',
+  },
+  {
+    icon: FolderIcon,
+    title: 'Organize products',
+    description:
+      'Sort products into folders the way you already think about your shop. Add items one at a time or in a batch so shelves and counts stay easy to read.',
+  },
+  {
+    icon: ReceiptPercentIcon,
+    title: 'Record a sale',
+    description:
+      'When you sell, create a receipt with the products, any discounts, and how the customer paid. Stock updates from the sale so your team is not guessing.',
+  },
+  {
+    icon: UsersIcon,
+    title: 'Look after customers',
+    description:
+      'Save a name or phone when it helps. If someone brings something back, start from the same receipt so returns feel quick and your books stay clear.',
+  },
+  {
+    icon: ChartBarIcon,
+    title: 'See how you are doing',
+    description:
+      'Check the dashboard, alerts, and charts on the plans that include them. Running more than one branch? Larger plans add extra tools for moving stock between stores.',
+  },
+]
+
 const features = [
   {
     title: 'Custom Inventory Folders',
@@ -1856,3 +1981,26 @@ useHead({
 })
 </script>
 
+<style scoped>
+/* Staggered reveal when scroll-animate adds .visible */
+.landing-flow-chart .landing-flow-step {
+  opacity: 0;
+  transform: translate3d(0, 0.75rem, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-flow-chart.visible .landing-flow-step {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-flow-chart .landing-flow-step {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+</style>
