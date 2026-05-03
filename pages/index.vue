@@ -1191,6 +1191,65 @@
       </div>
     </section>
 
+    <!-- About -->
+    <section
+      id="about"
+      data-section-id="about"
+      class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-t border-gray-100/80 bg-[#fafafb] py-20 dark:border-gray-800/60 dark:bg-slate-900 sm:py-24 lg:scroll-mt-28 lg:py-28"
+    >
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
+          <div class="max-w-xl lg:max-w-sm lg:shrink-0">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+              About Storvv
+            </p>
+            <h2 class="mt-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
+              Store software that respects how retail really runs
+            </h2>
+            <p class="mt-4 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+              We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
+            </p>
+          </div>
+          <div class="min-w-0 flex-1 space-y-8 border-t border-gray-100 pt-10 dark:border-gray-800 lg:border-t-0 lg:border-l lg:pl-16 lg:pt-0">
+            <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+              Storvv helps independent and growing retailers keep inventory, checkout, and customer notes in one place. Whether you sell phones, fashion, beauty, or mixed goods, you get folders you can shape to your categories, receipts that stay tidy, and a calm dashboard when the shop floor is busy.
+            </p>
+            <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+              We believe good tools should feel obvious: owners see the full picture, managers get guardrails, and staff can sell without fighting the software. When you are ready for more locations or deeper reporting, Storvv grows with plans that match real store sizes, not generic enterprise bundles.
+            </p>
+            <div
+              class="grid gap-6 border-t border-gray-100 pt-8 dark:border-gray-800 sm:grid-cols-3 sm:gap-8"
+            >
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
+                  Focus
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  Stock, sales, and customers linked the way your books expect.
+                </p>
+              </div>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
+                  Team
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  Roles and permissions that match how shops delegate day to day.
+                </p>
+              </div>
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
+                  Scale
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                  From one branch to several, without starting your setup from zero.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Contact -->
     <section id="contact" data-section-id="contact" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-white py-20 dark:bg-slate-950 lg:scroll-mt-28 lg:py-28 sm:py-24">
       <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -1210,7 +1269,7 @@
     </section>
 
     <!-- Footer -->
-    <footer id="about" class="scroll-mt-[4.75rem] border-t border-gray-200/65 bg-gradient-to-b from-slate-50 to-slate-50/95 dark:border-gray-800/70 dark:from-slate-900 dark:to-slate-900 lg:scroll-mt-28">
+    <footer class="border-t border-gray-200/65 bg-gradient-to-b from-slate-50 to-slate-50/95 dark:border-gray-800/70 dark:from-slate-900 dark:to-slate-900">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
         <div class="grid lg:grid-cols-12 gap-10 pb-10 border-b border-gray-200/80 dark:border-gray-800">
           <!-- Brand -->
