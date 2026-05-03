@@ -10,23 +10,23 @@
             <img :src="marketingLogoSrc" alt="Storvv" class="h-6 sm:h-8 w-auto object-contain" />
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
-            <a href="#features" @click.prevent="scrollToSection('features')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Features</a>
-            <a href="#app-flow" @click.prevent="scrollToSection('app-flow')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Flow</a>
-            <a href="#pricing" @click.prevent="scrollToSection('pricing')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Plans</a>
-            <a href="#about" @click.prevent="scrollToSection('about')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">About</a>
-            <a href="#contact" @click.prevent="scrollToSection('contact')" class="text-sm font-medium text-gray-600 outline-none transition-colors duration-300 ease-out hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Contact</a>
-            <button
-              @click="showContactFormModal = true"
+            <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
+            <a href="#app-flow" class="landing-nav-link" @click.prevent="scrollToSection('app-flow')">Flow</a>
+            <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
+            <a href="#about" class="landing-nav-link" @click.prevent="scrollToSection('about')">About</a>
+            <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
+            <a
+              :href="appOriginUrl"
               class="rounded-lg bg-gray-900 text-white text-sm font-medium px-5 py-2.5 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-gray-800 hover:shadow active:scale-[0.98] dark:bg-primary-600 dark:hover:bg-primary-500"
             >
               Get Started
-            </button>
+            </a>
           </div>
           <div class="flex items-center gap-1.5 md:hidden">
             <button
               type="button"
               @click="mobileMenuOpen = !mobileMenuOpen"
-              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gray-300/90 bg-white/95 text-gray-900 shadow-sm ring-1 ring-gray-900/6 outline-none transition-[color,background-color,border-color,box-shadow,transform] duration-200 ease-out hover:border-gray-400/90 hover:bg-gray-50 hover:shadow active:scale-[0.96] dark:border-white/20 dark:bg-white/10 dark:text-white dark:ring-white/10 dark:hover:bg-white/15"
+              class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-transparent text-gray-900 outline-none transition-[color,transform] duration-200 ease-out hover:text-gray-700 active:scale-[0.96] dark:text-white dark:hover:text-white/85"
               aria-label="Toggle menu"
             >
               <Bars3Icon v-if="!mobileMenuOpen" class="h-7 w-7" stroke-width="2" />
@@ -43,12 +43,18 @@
           leave-to-class="opacity-0"
         >
           <div v-if="mobileMenuOpen" class="md:hidden py-4 border-t border-gray-200/80 dark:border-gray-800 space-y-1">
-            <a href="#features" @click.prevent="scrollToSection('features'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Features</a>
-            <a href="#app-flow" @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Flow</a>
-            <a href="#pricing" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Plans</a>
-            <a href="#about" @click.prevent="scrollToSection('about'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">About</a>
-            <a href="#contact" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false" class="block py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">Contact</a>
-            <button @click="showContactFormModal = true; mobileMenuOpen = false" class="w-full mt-4 rounded-sm bg-gray-900 text-white text-sm font-medium py-3 dark:bg-primary-600">Get Started</button>
+            <a href="#features" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('features'); mobileMenuOpen = false">Features</a>
+            <a href="#app-flow" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false">Flow</a>
+            <a href="#pricing" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false">Plans</a>
+            <a href="#about" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('about'); mobileMenuOpen = false">About</a>
+            <a href="#contact" class="landing-nav-link landing-nav-link--stacked block w-fit py-2.5" @click.prevent="scrollToSection('contact'); mobileMenuOpen = false">Contact</a>
+            <a
+              :href="appOriginUrl"
+              class="mt-4 flex w-full items-center justify-center rounded-sm bg-gray-900 py-3 text-center text-sm font-medium text-white dark:bg-primary-600"
+              @click="mobileMenuOpen = false"
+            >
+              Get Started
+            </a>
           </div>
         </Transition>
     </nav>
@@ -105,12 +111,12 @@
           </div>
 
           <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
-              <button
-                @click="showContactFormModal = true"
-              class="inline-flex items-center justify-center rounded-lg bg-white text-slate-950 font-medium px-7 py-3.5 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/95 hover:shadow-md active:scale-[0.98]"
+              <a
+                :href="appOriginUrl"
+                class="inline-flex items-center justify-center rounded-lg bg-white px-7 py-3.5 font-medium text-slate-950 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/95 hover:shadow-md active:scale-[0.98]"
               >
               Get Started
-              </button>
+              </a>
               <button
                 @click="scrollToSection('features')"
               class="inline-flex items-center justify-center rounded-lg border border-white/18 bg-white/[0.08] text-white font-medium px-7 py-3.5 backdrop-blur-sm outline-none transition-all duration-300 ease-out hover:border-white/25 hover:bg-white/14 active:scale-[0.98]"
@@ -330,17 +336,134 @@
                   </div>
 
                   <div class="pt-1">
-                    <button
-                      @click="showContactFormModal = true"
-                      class="rounded-sm bg-primary-500 text-white font-medium px-6 py-3 hover:bg-primary-600 transition-colors"
+                    <a
+                      :href="appOriginUrl"
+                      class="inline-flex rounded-sm bg-primary-500 px-6 py-3 font-medium text-white transition-colors hover:bg-primary-600"
                     >
-                      Get started
-                    </button>
+                      Get Started
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
         </div>
+      </div>
+    </section>
+
+    <!-- About: same grid language as app-flow -->
+    <section
+      id="about"
+      data-section-id="about"
+      class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
+    >
+      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
+        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
+
+        <div class="relative mx-auto max-w-3xl text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+            About Storvv
+          </p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
+            Store software that respects how retail really runs
+          </h2>
+          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
+            We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
+          </p>
+        </div>
+
+        <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
+          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
+            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
+              <div
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '32ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    01
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <CubeIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  One calm system for the floor
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  Storvv helps independent and growing retailers keep inventory, checkout, and customer notes in one place. Whether you sell phones, fashion, beauty, or mixed goods, you get folders you can shape to your categories, receipts that stay tidy, and a calm dashboard when the shop floor is busy.
+                </p>
+              </div>
+
+              <div
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                :style="{ transitionDelay: '84ms' }"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <span
+                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+                  >
+                    02
+                  </span>
+                  <div
+                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                  >
+                    <SparklesIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                  </div>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+                  Tools that feel obvious
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                  We believe good tools should feel obvious: owners see the full picture, managers get guardrails, and staff can sell without fighting the software. When you are ready for more locations or deeper reporting, Storvv grows with plans that match real store sizes, not generic enterprise bundles.
+                </p>
+              </div>
+
+              <div
+                class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-100/65 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.05]"
+              >
+                <div
+                  v-for="(pillar, idx) in aboutPillars"
+                  :key="pillar.title"
+                  class="landing-about-cell group flex min-h-[12rem] flex-col bg-white px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                  :style="{ transitionDelay: `${136 + idx * 52}ms` }"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
+                      {{ pillar.title }}
+                    </span>
+                    <div
+                      class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
+                    >
+                      <component :is="pillar.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
+                    </div>
+                  </div>
+                  <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    {{ pillar.body }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="relative mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400 sm:text-sm">
+          See the same story in steps in
+          <a
+            href="#app-flow"
+            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+            @click.prevent="scrollToSection('app-flow')"
+            >the app flow</a>, or
+          <a
+            href="#contact"
+            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
+            @click.prevent="scrollToSection('contact')"
+            >talk to us</a>.
+        </p>
       </div>
     </section>
 
@@ -699,7 +822,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No analytics; no multiple departments; no multi-store sync</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get Started</button>
+            <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
               </div>
           <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-primary-50/35 p-6 flex flex-col dark:bg-slate-900">
@@ -721,7 +844,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No stock transfers between stores (Enterprise only)</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-primary-500 text-white py-2.5 text-sm font-medium hover:bg-primary-600 transition-colors">Get Started</button>
+            <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-primary-500 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-primary-600">Get Started</a>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
@@ -740,7 +863,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Copy from branch: folder templates across stores</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
                 </ul>
-            <button @click="showContactFormModal = true" class="mt-6 w-full rounded-sm bg-gray-900 text-white py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors">Get Started</button>
+            <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
               </div>
               </div>
             </div>
@@ -1174,13 +1297,13 @@
             Experience the difference a truly flexible system makes.
           </p>
           <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <button
-              @click="showContactFormModal = true"
+            <a
+              :href="appOriginUrl"
               class="group inline-flex items-center justify-center gap-2 rounded-lg bg-white px-7 py-3.5 font-medium text-slate-950 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/92 hover:shadow-md active:scale-[0.98]"
             >
               Get Started
               <ArrowRightIcon class="h-4 w-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-1 sm:h-5 sm:w-5" />
-            </button>
+            </a>
             <button
               @click="scrollToSection('features')"
               class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/18 bg-white/[0.08] px-7 py-3.5 font-medium text-white outline-none backdrop-blur-sm transition-all duration-300 ease-out hover:border-white/24 hover:bg-white/14 active:scale-[0.98]"
@@ -1189,123 +1312,6 @@
             </button>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- About: same grid language as app-flow -->
-    <section
-      id="about"
-      data-section-id="about"
-      class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
-    >
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
-        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
-
-        <div class="relative mx-auto max-w-3xl text-center">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
-            About Storvv
-          </p>
-          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
-            Store software that respects how retail really runs
-          </h2>
-          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
-            We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
-          </p>
-        </div>
-
-        <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
-          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
-            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
-              <div
-                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
-                :style="{ transitionDelay: '32ms' }"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <span
-                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
-                  >
-                    01
-                  </span>
-                  <div
-                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
-                  >
-                    <CubeIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
-                  </div>
-                </div>
-                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-                  One calm system for the floor
-                </h3>
-                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                  Storvv helps independent and growing retailers keep inventory, checkout, and customer notes in one place. Whether you sell phones, fashion, beauty, or mixed goods, you get folders you can shape to your categories, receipts that stay tidy, and a calm dashboard when the shop floor is busy.
-                </p>
-              </div>
-
-              <div
-                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
-                :style="{ transitionDelay: '84ms' }"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <span
-                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-xs font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
-                  >
-                    02
-                  </span>
-                  <div
-                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
-                  >
-                    <SparklesIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
-                  </div>
-                </div>
-                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-                  Tools that feel obvious
-                </h3>
-                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                  We believe good tools should feel obvious: owners see the full picture, managers get guardrails, and staff can sell without fighting the software. When you are ready for more locations or deeper reporting, Storvv grows with plans that match real store sizes, not generic enterprise bundles.
-                </p>
-              </div>
-
-              <div
-                class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-100/65 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.05]"
-              >
-                <div
-                  v-for="(pillar, idx) in aboutPillars"
-                  :key="pillar.title"
-                  class="landing-about-cell group flex min-h-[12rem] flex-col bg-white px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:bg-slate-950 dark:hover:bg-slate-900/95"
-                  :style="{ transitionDelay: `${136 + idx * 52}ms` }"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
-                      {{ pillar.title }}
-                    </span>
-                    <div
-                      class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
-                    >
-                      <component :is="pillar.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
-                    </div>
-                  </div>
-                  <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                    {{ pillar.body }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p class="relative mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400 sm:text-sm">
-          See the same story in steps in
-          <a
-            href="#app-flow"
-            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
-            @click.prevent="scrollToSection('app-flow')"
-            >the app flow</a>, or
-          <a
-            href="#contact"
-            class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
-            @click.prevent="scrollToSection('contact')"
-            >talk to us</a>.
-        </p>
       </div>
     </section>
 
@@ -1597,6 +1603,11 @@ const locale = ref('en-NG')
 const pricingRegion = ref<'NG' | 'US' | 'GB' | 'EU'>('NG')
 const showLaunchModal = ref(false)
 const showContactFormModal = ref(false)
+const runtimeConfig = useRuntimeConfig()
+const appOriginUrl = computed(() => {
+  const o = runtimeConfig.public.appOrigin
+  return typeof o === 'string' && o.length > 0 ? o : 'https://app.storvv.com'
+})
 const cookiesAccepted = ref(true)
 const whyActiveStep = ref(0)
 let whyActiveStepInterval: number | null = null
@@ -2118,6 +2129,58 @@ useHead({
 </script>
 
 <style scoped>
+/* Top nav in-page links: primary underline draws in from the left */
+.landing-nav-link {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  color: rgb(75 85 99);
+  outline: none;
+  transition: color 0.25s ease-out;
+}
+.landing-nav-link:hover,
+.landing-nav-link:focus-visible {
+  color: rgb(17 24 39);
+}
+.landing-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgb(59 130 246);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.9;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .landing-nav-link:hover::after {
+    transform: scaleX(1);
+  }
+}
+.landing-nav-link:focus-visible::after {
+  transform: scaleX(1);
+}
+.landing-nav-link--stacked {
+  color: rgb(55 65 81);
+}
+.landing-nav-link--stacked:hover,
+.landing-nav-link--stacked:focus-visible {
+  color: rgb(17 24 39);
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-nav-link::after {
+    transition: none;
+  }
+}
+
 /* Staggered reveal when scroll-animate adds .visible */
 .landing-flow-chart .landing-flow-step {
   opacity: 0;
