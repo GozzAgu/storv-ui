@@ -616,7 +616,7 @@ watch(currentPage, (newPage) => {
 })
 
 const handleRetryFetch = async () => {
-  console.log('[DepartmentsPage] Retrying fetch...')
+  // console.log('[DepartmentsPage] Retrying fetch...')
   try {
     await departmentsStore.fetchDepartments()
   } catch (error: any) {
@@ -638,15 +638,15 @@ onMounted(async () => {
   
   // Check if user is staff/intern and redirect
   if (userStore.userData?.role === 'staff') {
-    console.log('[DepartmentsPage] Staff user detected - redirecting to dashboard')
+    // console.log('[DepartmentsPage] Staff user detected - redirecting to dashboard')
     await navigateTo('/dashboard')
     return
   }
   
-  console.log('[DepartmentsPage] onMounted - Starting load process')
+  // console.log('[DepartmentsPage] onMounted - Starting load process')
   
   const loadData = async () => {
-    console.log('[DepartmentsPage] loadData - Checking auth state')
+    // console.log('[DepartmentsPage] loadData - Checking auth state')
     
     // Wait for auth to finish loading with timeout
     let attempts = 0
@@ -654,7 +654,7 @@ onMounted(async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       attempts++
       if (attempts % 10 === 0) {
-        console.log('[DepartmentsPage] Still waiting for auth...', attempts)
+        // console.log('[DepartmentsPage] Still waiting for auth...', attempts)
       }
     }
     
@@ -665,22 +665,22 @@ onMounted(async () => {
     // Check if user is authenticated
     if (!authStore.currentUser) {
       console.error('[DepartmentsPage] No authenticated user found')
-      console.log('[DepartmentsPage] Auth store state:', {
+      /* console.log('[DepartmentsPage] Auth store state:', {
         loading: authStore.loading,
         currentUser: authStore.currentUser,
         isAuthenticated: authStore.isAuthenticated
-      })
+      }) */
       return
     }
     
-    console.log('[DepartmentsPage] User authenticated:', authStore.currentUser.uid)
+    // console.log('[DepartmentsPage] User authenticated:', authStore.currentUser.uid)
     
     // Fetch user data if not already loaded
     if (!userStore.userData) {
-      console.log('[DepartmentsPage] Fetching user data...')
+      // console.log('[DepartmentsPage] Fetching user data...')
       try {
         await userStore.fetchUserData(authStore.currentUser.uid)
-        console.log('[DepartmentsPage] User data fetched:', userStore.userData)
+        // console.log('[DepartmentsPage] User data fetched:', userStore.userData)
       } catch (error) {
         console.error('[DepartmentsPage] Error fetching user data:', error)
       }
@@ -688,20 +688,20 @@ onMounted(async () => {
 
     // If user is staff, fetch their staff member data
     if (userStore.userData?.role === 'staff') {
-      console.log('[DepartmentsPage] User is staff, fetching staff member data...')
+      // console.log('[DepartmentsPage] User is staff, fetching staff member data...')
       try {
         currentStaffMember.value = await staffStore.fetchCurrentStaffMember()
-        console.log('[DepartmentsPage] Staff member data:', currentStaffMember.value)
+        // console.log('[DepartmentsPage] Staff member data:', currentStaffMember.value)
       } catch (error) {
         console.error('[DepartmentsPage] Error fetching current staff member:', error)
       }
     }
     
     // Load departments
-    console.log('[DepartmentsPage] Fetching departments...')
+    // console.log('[DepartmentsPage] Fetching departments...')
     try {
       await departmentsStore.fetchDepartments()
-      console.log('[DepartmentsPage] Departments fetched:', departmentsStore.departments.length)
+      // console.log('[DepartmentsPage] Departments fetched:', departmentsStore.departments.length)
       if (departmentsStore.error) {
         console.error('[DepartmentsPage] Departments store error:', departmentsStore.error)
       }
@@ -717,13 +717,13 @@ onMounted(async () => {
 // Watch for auth state changes
 watch(() => authStore.currentUser, async (newUser, oldUser) => {
   if (import.meta.server) return
-  console.log('[DepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
+  // console.log('[DepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
   
   if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
-    console.log('[DepartmentsPage] Auth changed and no departments, fetching...')
+    // console.log('[DepartmentsPage] Auth changed and no departments, fetching...')
     try {
       await departmentsStore.fetchDepartments()
-      console.log('[DepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
+      // console.log('[DepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
     } catch (error: any) {
       console.error('[DepartmentsPage] Error in watch fetch:', error.message || error)
     }
@@ -734,7 +734,7 @@ watch(() => authStore.currentUser, async (newUser, oldUser) => {
 watch(() => authStore.loading, async (loading) => {
   if (import.meta.server) return
   if (!loading && authStore.currentUser && departmentsStore.departments.length === 0 && !departmentsStore.loading) {
-    console.log('[DepartmentsPage] Auth loading completed, fetching departments...')
+    // console.log('[DepartmentsPage] Auth loading completed, fetching departments...')
     try {
       await departmentsStore.fetchDepartments()
     } catch (error: any) {

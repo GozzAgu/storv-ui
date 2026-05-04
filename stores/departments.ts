@@ -34,7 +34,7 @@ export const useDepartmentsStore = defineStore('departments', {
       this.loading = true
       this.error = null
 
-      console.log('[DepartmentsStore] Starting fetchDepartments')
+      // console.log('[DepartmentsStore] Starting fetchDepartments')
 
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
@@ -85,7 +85,7 @@ export const useDepartmentsStore = defineStore('departments', {
               // Use the super admin's UID who created this staff member
               if (staffData.createdBy) {
                 userId = staffData.createdBy
-                console.log('[DepartmentsStore] Staff user detected, using super admin UID:', userId)
+                // console.log('[DepartmentsStore] Staff user detected, using super admin UID:', userId)
               }
             }
           }

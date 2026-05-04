@@ -299,7 +299,7 @@ export const useCustomersStore = defineStore('customers', {
       const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
       const storeId = await getCurrentStoreId()
       
-      console.log('[CustomersStore] fetchCustomers - userId (store owner):', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
+      // console.log('[CustomersStore] fetchCustomers - userId (store owner):', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
 
       if (!storeId) {
         this.error = 'No store selected. Please select a store first.'
@@ -353,7 +353,7 @@ export const useCustomersStore = defineStore('customers', {
         }
 
         const allCustomers = querySnapshot.docs
-        console.log('[CustomersStore] Found', allCustomers.length, 'customers in store (userId:', userId, 'storeId:', storeId + ')')
+        // console.log('[CustomersStore] Found', allCustomers.length, 'customers in store (userId:', userId, 'storeId:', storeId + ')')
 
         // Process and filter customers
         let customers = allCustomers.map((doc) => {

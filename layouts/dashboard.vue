@@ -20,18 +20,18 @@
     >
       <!-- Logo / Brand -->
       <div
-        class="flex h-12 min-h-[3rem] shrink-0 items-center justify-between border-b border-gray-200/25 px-3 dark:border-white/[0.05]"
+        :class="sidebarLogoBarClass"
       >
         <NuxtLink
           to="/dashboard"
-          :class="['flex items-center transition-all duration-300', effectiveSidebarCollapsed ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0']"
+          :class="['flex items-center transition-all duration-300', sidebarUseMobileMark ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0 flex-1']"
         >
           <img
-            :src="logoSource"
+            :src="sidebarLogoSrc"
             alt="Storvv"
-            :class="['shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out', effectiveSidebarCollapsed ? 'h-4 w-auto max-w-[46px]' : 'h-5 max-w-[100px]']"
+            :class="sidebarLogoImgClass"
           />
-          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
+          <DashboardHoverTooltip v-if="sidebarUseMobileMark">
             Dashboard home
           </DashboardHoverTooltip>
         </NuxtLink>
@@ -604,11 +604,6 @@ import { useSearchStore } from '~/stores/search'
 
 const { actualTheme } = useTheme()
 
-const logoSource = computed(() => {
-  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-})
-
-
 const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '1.0'
 const authStore = useAuthStore()
 const userStore = useUserStore()
@@ -717,6 +712,46 @@ const toggleSidebar = () => {
 const isLgUp = useMinWidthQuery(1024)
 const effectiveSidebarCollapsed = computed(() => sidebarCollapsed.value && isLgUp.value)
 
+/** Mobile/tablet (<lg) or desktop collapsed rail: show compact mark asset. */
+const sidebarUseMobileMark = computed(() => !isLgUp.value || effectiveSidebarCollapsed.value)
+
+const sidebarLogoSrc = computed(() => {
+  if (sidebarUseMobileMark.value) return '/storvv logo mobile.png'
+  return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+})
+
+const sidebarLogoBarClass = computed(() => {
+  /** Fixed height: logo uses scale inside this strip so the row never grows. */
+  const bar =
+    'flex h-12 min-h-[3rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/25 px-3 dark:border-white/[0.05]'
+  return [bar]
+})
+
+const sidebarLogoImgClass = computed(() => {
+  const base =
+    'shrink-0 object-contain transition-[height,width,max-width,transform] duration-300 ease-in-out will-change-transform'
+  if (sidebarUseMobileMark.value) {
+    if (effectiveSidebarCollapsed.value) {
+      return [
+        base,
+        'mx-auto object-center',
+        'h-8 w-8 max-h-8 max-w-8 origin-center scale-110 sm:scale-125',
+      ]
+    }
+    return [
+      base,
+      'mx-auto object-center',
+      'h-9 w-9 max-h-9 max-w-9 origin-center scale-125 sm:scale-[1.35]',
+    ]
+  }
+  return [
+    base,
+    'object-left origin-left',
+    'h-8 w-auto max-h-8 max-w-[calc(100%-0.5rem)] sm:h-9 sm:max-h-9',
+    'scale-110 sm:scale-125 lg:scale-[1.32]',
+  ]
+})
+
 const navigation: Array<{
   name: string
   href: string
@@ -818,7 +853,7 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
   
   // During staff creation, don't fetch or update userData to preserve super admin's data
   if (isStaffCreationInProgress) {
-    console.log('[Dashboard] Staff creation in progress - skipping userData fetch to preserve super admin data')
+    // console.log('[Dashboard] Staff creation in progress - skipping userData fetch to preserve super admin data')
     return
   }
   
@@ -827,7 +862,7 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
   if (!userData && user && !isStaffCreationInProgress && !loading) {
     try {
     await userStore.fetchUserData(user.uid)
-      console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
+      // console.log('[Dashboard] User data fetched in stores watch:', userStore.userData)
     } catch (err) {
       console.error('[Dashboard] Error fetching user data in stores watch:', err)
     }
@@ -873,7 +908,7 @@ watch([() => authStore.currentUser, () => userStore.userData, () => authStore.lo
           console.error('[Dashboard] Error fetching all staff:', fetchErr)
         }
       } else {
-        console.log('[Dashboard] Staff member found:', staffMember.storeId)
+        // console.log('[Dashboard] Staff member found:', staffMember.storeId)
       }
     } catch (err) {
       console.error('[Dashboard] Error fetching staff member:', err)
@@ -1532,7 +1567,7 @@ onMounted(async () => {
       if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
         try {
           await userStore.fetchUserData(authStore.currentUser.uid)
-          console.log('[Dashboard] User data fetched successfully:', userStore.userData)
+          // console.log('[Dashboard] User data fetched successfully:', userStore.userData)
         } catch (err) {
           console.error('[Dashboard] Error fetching user data:', err)
         }
@@ -1588,7 +1623,7 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
   
   // During staff creation, don't fetch or update userData to preserve super admin's profile info
   if (isStaffCreationInProgress) {
-    console.log('[Dashboard] Staff creation in progress - preserving super admin userData')
+    // console.log('[Dashboard] Staff creation in progress - preserving super admin userData')
     return
   }
   
@@ -1625,7 +1660,7 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
     if ((!hasUserData || userChanged) && !isStaffCreationInProgress) {
       try {
         await userStore.fetchUserData(user.uid)
-        console.log('[Dashboard] User data fetched in watch:', userStore.userData)
+        // console.log('[Dashboard] User data fetched in watch:', userStore.userData)
       } catch (err) {
         console.error('[Dashboard] Error fetching user data in watch:', err)
       }

@@ -5,9 +5,13 @@
       class="fixed top-0 left-0 right-0 z-50 border-b border-gray-200/45 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75 dark:border-gray-800/55 dark:bg-slate-950/85 supports-[backdrop-filter]:dark:bg-slate-950/75 transition-[border-color,background-color] duration-300 ease-out"
     >
       <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16 lg:h-18 gap-3">
-          <NuxtLink to="/" class="flex items-center gap-2 transition-opacity hover:opacity-90">
-            <img :src="marketingLogoSrc" alt="Storvv" class="h-6 sm:h-8 w-auto object-contain" />
+        <div class="flex h-16 items-center justify-between gap-3 overflow-visible">
+          <NuxtLink to="/" class="flex items-center overflow-visible transition-opacity hover:opacity-90">
+            <img
+              :src="marketingLogoSrc"
+              alt="Storvv"
+              class="h-9 w-auto max-h-9 origin-left object-contain will-change-transform sm:h-10 sm:max-h-10 lg:scale-110 lg:origin-left xl:scale-[1.18]"
+            />
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
             <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
@@ -58,14 +62,18 @@
           aria-label="Site menu"
         >
           <div
-            class="flex shrink-0 items-center justify-between border-b border-gray-200/90 px-4 py-4 sm:px-6 dark:border-gray-800"
+            class="flex h-14 min-h-[3.5rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/90 px-4 sm:px-6 dark:border-gray-800"
           >
             <NuxtLink
               to="/"
-              class="flex items-center gap-2 transition-opacity hover:opacity-90"
+              class="flex items-center overflow-visible transition-opacity hover:opacity-90"
               @click="mobileMenuOpen = false"
             >
-              <img :src="marketingLogoSrc" alt="Storvv" class="h-7 w-auto object-contain sm:h-8" />
+              <img
+                :src="marketingLogoSrc"
+                alt="Storvv"
+                class="h-9 w-auto max-h-9 origin-left object-contain will-change-transform scale-110 sm:h-10 sm:max-h-10 sm:scale-125"
+              />
             </NuxtLink>
             <button
               type="button"
@@ -1534,7 +1542,11 @@
           <!-- Brand -->
           <div class="lg:col-span-4 space-y-4">
             <NuxtLink to="/" class="inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <img :src="marketingLogoSrc" alt="Storvv" class="h-7 w-auto object-contain" />
+              <img
+                :src="marketingLogoSrc"
+                alt="Storvv"
+                class="h-10 w-auto max-h-10 origin-left object-contain will-change-transform sm:h-11 sm:max-h-11 lg:scale-105"
+              />
             </NuxtLink>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-sm">
               Store management software for modern retailers, inventory, receipts, customers, and teams in one fast system.

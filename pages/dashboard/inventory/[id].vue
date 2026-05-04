@@ -3069,8 +3069,8 @@ const handleFileImport = async (event: Event) => {
       if (serialNoField || hasSerialNumberData) {
         // STEP 1: Fetch items ONLY from the current folder
         const currentFolderId = folderId.value
-        console.log('[Import] ========== DUPLICATE CHECK START ==========')
-        console.log('[Import] Current folder ID:', currentFolderId)
+        // console.log('[Import] ========== DUPLICATE CHECK START ==========')
+        // console.log('[Import] Current folder ID:', currentFolderId)
         
         // Force fetch items for this folder (this ensures we get fresh data)
         let existingItems = await inventoryStore.fetchItemsAllChunked(currentFolderId, { force: true })
@@ -3088,7 +3088,7 @@ const handleFileImport = async (event: Event) => {
           return matches
         })
         
-        console.log('[Import] Existing items in THIS folder only:', existingItems.length)
+        // console.log('[Import] Existing items in THIS folder only:', existingItems.length)
         
         // STEP 3: Extract serial numbers from items in THIS folder only
         const existingSerialNumbers = new Set<string>()
@@ -3115,15 +3115,15 @@ const handleFileImport = async (event: Event) => {
           if (serialNo) {
             const serialNoNormalized = serialNo.toString().trim().toLowerCase()
             existingSerialNumbers.add(serialNoNormalized)
-            console.log(`[Import] Found existing serial in folder ${currentFolderId}: "${serialNo.toString().trim()}"`)
+            // console.log(`[Import] Found existing serial in folder ${currentFolderId}: "${serialNo.toString().trim()}"`)
           }
         })
         
-        console.log('[Import] Total unique serial numbers already in folder:', existingSerialNumbers.size)
-        console.log('[Import] Existing serial numbers:', Array.from(existingSerialNumbers))
+        // console.log('[Import] Total unique serial numbers already in folder:', existingSerialNumbers.size)
+        // console.log('[Import] Existing serial numbers:', Array.from(existingSerialNumbers))
         
         const totalItemsFromExcel = itemsToImport.length
-        console.log('[Import] Items from Excel to check:', totalItemsFromExcel)
+        // console.log('[Import] Items from Excel to check:', totalItemsFromExcel)
         
         // Filter out items with duplicate serial numbers
         const itemsToImportFiltered: Array<{ data: any; rowNumber: number }> = []
@@ -3147,12 +3147,12 @@ const handleFileImport = async (event: Event) => {
             // Only add to errors if serial number was required (folder has serial numbers enabled)
             if (folder.value?.hasSerialNumbers) {
               errors.push(`Row ${rowNumber}: Serial number is required but missing`)
-              console.log(`[Import] Row ${rowNumber}: Missing serial number - will skip as validation error`)
+              // console.log(`[Import] Row ${rowNumber}: Missing serial number - will skip as validation error`)
               return // Skip this item due to validation error
             }
             // If serial numbers are not required, add item without checking duplicates
             itemsToImportFiltered.push(itemEntry)
-            console.log(`[Import] Row ${rowNumber}: No serial number - adding without duplicate check`)
+            // console.log(`[Import] Row ${rowNumber}: No serial number - adding without duplicate check`)
             return
           }
           
@@ -3166,7 +3166,7 @@ const handleFileImport = async (event: Event) => {
             // This serial number already exists in THIS folder - SKIP it
             duplicateSerialNumbers.push(serialNoTrimmed)
             skippedDuplicates++
-            console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" already exists in folder ${folderId.value}`)
+            // console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" already exists in folder ${folderId.value}`)
             return // Skip this duplicate
           }
           
@@ -3175,23 +3175,23 @@ const handleFileImport = async (event: Event) => {
             // Duplicate within the same import file - SKIP it (keep first occurrence)
             duplicateSerialNumbers.push(serialNoTrimmed)
             skippedDuplicates++
-            console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" is duplicated in import file (first seen at row ${importBatchSerialNumbers.get(serialNoLower)})`)
+            // console.log(`[Import] Row ${rowNumber}: SKIPPING - Serial "${serialNoTrimmed}" is duplicated in import file (first seen at row ${importBatchSerialNumbers.get(serialNoLower)})`)
             return // Skip this duplicate
           }
           
           // Serial number is UNIQUE - ADD to import list
           itemsToImportFiltered.push(itemEntry)
           importBatchSerialNumbers.set(serialNoLower, rowNumber)
-          console.log(`[Import] Row ${rowNumber}: ✓ ADDING - Serial "${serialNoTrimmed}" is unique and will be imported`)
+          // console.log(`[Import] Row ${rowNumber}: ✓ ADDING - Serial "${serialNoTrimmed}" is unique and will be imported`)
         })
         
-        console.log('[Import] ========== DUPLICATE CHECK SUMMARY ==========')
-        console.log('[Import] Folder:', currentFolderId)
-        console.log('[Import] Total items from Excel:', totalItemsFromExcel)
-        console.log('[Import] Items skipped (duplicates in folder):', skippedDuplicates)
-        console.log('[Import] Items that will be IMPORTED (unique):', itemsToImportFiltered.length)
-        console.log('[Import] Items with validation errors:', errors.length)
-        console.log('[Import] ===========================================')
+        // console.log('[Import] ========== DUPLICATE CHECK SUMMARY ==========')
+        // console.log('[Import] Folder:', currentFolderId)
+        // console.log('[Import] Total items from Excel:', totalItemsFromExcel)
+        // console.log('[Import] Items skipped (duplicates in folder):', skippedDuplicates)
+        // console.log('[Import] Items that will be IMPORTED (unique):', itemsToImportFiltered.length)
+        // console.log('[Import] Items with validation errors:', errors.length)
+        // console.log('[Import] ===========================================')
         
         // Replace itemsToImport with filtered list (only unique items that will be imported)
         itemsToImport.length = 0
@@ -3206,7 +3206,7 @@ const handleFileImport = async (event: Event) => {
         }
       } else {
         // No serial number field or data found - import all items without duplicate check
-        console.log('[Import] No serial number field or data detected - importing all items without duplicate check')
+        // console.log('[Import] No serial number field or data detected - importing all items without duplicate check')
       }
     }
 
@@ -3260,9 +3260,9 @@ const handleFileImport = async (event: Event) => {
     
     toast.info(summaryMessage, 4000)
     
-    console.log('[Import] Items to import:', itemsToImport.length)
-    console.log('[Import] Skipped duplicates:', skippedDuplicates)
-    console.log('[Import] Validation errors:', errors.length)
+    // console.log('[Import] Items to import:', itemsToImport.length)
+    // console.log('[Import] Skipped duplicates:', skippedDuplicates)
+    // console.log('[Import] Validation errors:', errors.length)
 
     // Import items
     let successCount = 0

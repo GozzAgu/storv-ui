@@ -826,7 +826,7 @@ const handleStaffSuccess = async () => {
       }
     }),
   ]).then(() => {
-    console.log('[Department Page] Staff list refreshed after creation')
+    // console.log('[Department Page] Staff list refreshed after creation')
   }).catch((error: any) => {
     console.error('Error refreshing staff after creation:', error)
   }).finally(() => {
@@ -923,7 +923,7 @@ onMounted(async () => {
   
   // Check if user is staff/intern and redirect
   if (userStore.userData?.role === 'staff') {
-    console.log('[DepartmentDetailPage] Staff user detected - redirecting to dashboard')
+    // console.log('[DepartmentDetailPage] Staff user detected - redirecting to dashboard')
     await navigateTo('/dashboard')
     return
   }

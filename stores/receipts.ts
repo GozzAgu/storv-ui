@@ -136,13 +136,13 @@ export const useReceiptsStore = defineStore('receipts', {
         return
       }
       
-      console.log('[ReceiptsStore] Using userId (superadmin UID for staff):', userId, 'isStaff:', userStore.userData?.role === 'staff')
+      // console.log('[ReceiptsStore] Using userId (superadmin UID for staff):', userId, 'isStaff:', userStore.userData?.role === 'staff')
 
       // Get current store ID to filter receipts
       const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
       const storeId = await getCurrentStoreId()
       
-      console.log('[ReceiptsStore] fetchReceipts - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
+      // console.log('[ReceiptsStore] fetchReceipts - userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff')
       
       if (!storeId) {
         this.error = 'No store selected. Please select a store first.'
@@ -200,7 +200,7 @@ export const useReceiptsStore = defineStore('receipts', {
         }
 
         const allReceipts = querySnapshot.docs
-        console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
+        // console.log('[ReceiptsStore] Found', allReceipts.length, 'receipts in store (userId:', userId, 'storeId:', storeId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
         // Process and filter receipts by storeId client-side
         let receipts = allReceipts.map((doc) => {
@@ -355,7 +355,7 @@ export const useReceiptsStore = defineStore('receipts', {
       }
 
       if (userStore.userData?.role === 'staff') {
-        console.log('[ReceiptsStore] Staff user detected, using super admin UID for receipt creation:', createdByUid)
+        // console.log('[ReceiptsStore] Staff user detected, using super admin UID for receipt creation:', createdByUid)
       }
 
       try {

@@ -608,7 +608,7 @@ watch(() => route.params.storeId, (newStoreId) => {
 })
 
 const handleRetryFetch = async () => {
-  console.log('[StoreDepartmentsPage] Retrying fetch...')
+  // console.log('[StoreDepartmentsPage] Retrying fetch...')
   try {
     await departmentsStore.fetchDepartments()
   } catch (error: any) {
@@ -630,15 +630,15 @@ onMounted(async () => {
   
   // Check if user is staff/intern and redirect
   if (userStore.userData?.role === 'staff') {
-    console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
+    // console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
     await navigateTo('/dashboard')
     return
   }
   
-  console.log('[StoreDepartmentsPage] onMounted - Starting load process')
+  // console.log('[StoreDepartmentsPage] onMounted - Starting load process')
   
   const loadData = async () => {
-    console.log('[StoreDepartmentsPage] loadData - Checking auth state')
+    // console.log('[StoreDepartmentsPage] loadData - Checking auth state')
     
     // Wait for auth to finish loading with timeout
     let attempts = 0
@@ -646,7 +646,7 @@ onMounted(async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       attempts++
       if (attempts % 10 === 0) {
-        console.log('[StoreDepartmentsPage] Still waiting for auth...', attempts)
+        // console.log('[StoreDepartmentsPage] Still waiting for auth...', attempts)
       }
     }
     
@@ -660,21 +660,21 @@ onMounted(async () => {
       return
     }
     
-    console.log('[StoreDepartmentsPage] User authenticated:', authStore.currentUser.uid)
+    // console.log('[StoreDepartmentsPage] User authenticated:', authStore.currentUser.uid)
     
     // Fetch user data if not already loaded
     if (!userStore.userData) {
-      console.log('[StoreDepartmentsPage] Fetching user data...')
+      // console.log('[StoreDepartmentsPage] Fetching user data...')
       try {
         await userStore.fetchUserData(authStore.currentUser.uid)
-        console.log('[StoreDepartmentsPage] User data fetched:', userStore.userData)
+        // console.log('[StoreDepartmentsPage] User data fetched:', userStore.userData)
       } catch (error) {
         console.error('[StoreDepartmentsPage] Error fetching user data:', error)
       }
     }
 
     if (!store.value) {
-      console.log('[StoreDepartmentsPage] Fetching stores...')
+      // console.log('[StoreDepartmentsPage] Fetching stores...')
       try {
         await storesStore.fetchStores()
       } catch (error) {
@@ -699,10 +699,10 @@ onMounted(async () => {
     }
 
     // Load departments
-    console.log('[StoreDepartmentsPage] Fetching departments...')
+    // console.log('[StoreDepartmentsPage] Fetching departments...')
     try {
       await departmentsStore.fetchDepartments()
-      console.log('[StoreDepartmentsPage] Departments fetched:', departmentsStore.departments.length)
+      // console.log('[StoreDepartmentsPage] Departments fetched:', departmentsStore.departments.length)
       if (departmentsStore.error) {
         console.error('[StoreDepartmentsPage] Departments store error:', departmentsStore.error)
       }
@@ -718,13 +718,13 @@ onMounted(async () => {
 // Watch for auth state changes
 watch(() => authStore.currentUser, async (newUser, oldUser) => {
   if (import.meta.server) return
-  console.log('[StoreDepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
+  // console.log('[StoreDepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
   
   if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
-    console.log('[StoreDepartmentsPage] Auth changed and no departments, fetching...')
+    // console.log('[StoreDepartmentsPage] Auth changed and no departments, fetching...')
     try {
       await departmentsStore.fetchDepartments()
-      console.log('[StoreDepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
+      // console.log('[StoreDepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
     } catch (error: any) {
       console.error('[StoreDepartmentsPage] Error in watch fetch:', error.message || error)
     }

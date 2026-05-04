@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', {
       // If staff creation is in progress and we already have super admin data, preserve it
       // Don't fetch staff data during creation process
       if (isStaffCreationInProgress && this.userData?.role === 'superAdmin') {
-        console.log('[UserStore] Staff creation in progress - preserving super admin userData, skipping fetch for:', userId)
+        // console.log('[UserStore] Staff creation in progress - preserving super admin userData, skipping fetch for:', userId)
         return
       }
       
@@ -64,7 +64,7 @@ export const useUserStore = defineStore('user', {
               this.userData = fetchedData
             } else {
               // Don't overwrite super admin data with staff data during creation
-              console.log('[UserStore] Ignoring staff data fetch during staff creation - preserving super admin data')
+              // console.log('[UserStore] Ignoring staff data fetch during staff creation - preserving super admin data')
             }
           } else {
             this.userData = fetchedData
@@ -94,14 +94,14 @@ export const useUserStore = defineStore('user', {
                 updatedAt: cachedStaff.updatedAt || null,
               }
               this.userData = staffUserData
-              console.log('[UserStore] Found staff member in cache')
+              // console.log('[UserStore] Found staff member in cache')
               return
             }
             
             // Check if we're already fetching to avoid circular dependency
             const isFetchingStaff = (staffStore as any).__fetchingStaffMember
             if (isFetchingStaff) {
-              console.log('[UserStore] Staff member fetch already in progress, skipping to avoid circular dependency')
+              // console.log('[UserStore] Staff member fetch already in progress, skipping to avoid circular dependency')
               // Set a basic staff userData to prevent errors
               const authStore = useAuthStore()
               this.userData = {
@@ -142,7 +142,7 @@ export const useUserStore = defineStore('user', {
                 }
                 
                 this.userData = staffUserData
-                console.log('[UserStore] Found staff member via fetchCurrentStaffMember')
+                // console.log('[UserStore] Found staff member via fetchCurrentStaffMember')
               } else {
                 // Staff member not found - this might be normal if staff hasn't been created yet
                 // or if there's a permission issue. Don't clear userData immediately.

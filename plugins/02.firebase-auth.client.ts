@@ -48,7 +48,7 @@ export default defineNuxtPlugin(() => {
       // if authDomain is configured correctly in Firebase Console
       try {
         await setPersistence(auth, browserLocalPersistence)
-        console.log('[Firebase Auth] Persistence set to LOCAL')
+        // console.log('[Firebase Auth] Persistence set to LOCAL')
       } catch (error) {
         console.warn('[Firebase Auth] Error setting persistence:', error)
         // Continue anyway - default is usually LOCAL
@@ -73,7 +73,7 @@ export default defineNuxtPlugin(() => {
 
     onAuthStateChanged(auth, (user) => {
       // Update both useState (for backward compatibility) and Pinia store
-      console.log('[Firebase Auth] Auth state changed:', user ? `User: ${user.uid}` : 'No user')
+      // console.log('[Firebase Auth] Auth state changed:', user ? `User: ${user.uid}` : 'No user')
       currentUser.value = user
       authStore.currentUser = user
       loading.value = false

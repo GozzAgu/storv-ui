@@ -262,7 +262,7 @@ export const useSearchStore = defineStore('search', {
           }
           
           // Debug logging
-          console.log('[SearchStore] Searching customers - isStaff:', isStaff, 'customers count:', customersStore.customers.length, 'error:', customersStore.error, 'entityTypes:', entityTypes, 'searchQuery:', searchQuery)
+          // console.log('[SearchStore] Searching customers - isStaff:', isStaff, 'customers count:', customersStore.customers.length, 'error:', customersStore.error, 'entityTypes:', entityTypes, 'searchQuery:', searchQuery)
           
           // If there was an error fetching customers, log it but continue
           if (customersStore.error) {

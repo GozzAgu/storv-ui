@@ -92,8 +92,8 @@ export default defineEventHandler(async (event) => {
 
     // For now, return success (implement actual email sending above)
     // NOTE: You must implement one of the email services above to actually send emails
-    console.log('Email would be sent to:', customerEmail)
-    console.log('PDF attachment size:', pdfBuffer.length, 'bytes')
+    // console.log('Email would be sent to:', customerEmail)
+    // console.log('PDF attachment size:', pdfBuffer.length, 'bytes')
 
     return {
       success: true,

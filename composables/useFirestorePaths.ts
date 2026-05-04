@@ -164,7 +164,7 @@ export async function getQueryUserId(): Promise<string | null> {
           const staffData = staffSnapshot.docs[0].data()
           if (staffData.createdBy) {
             userId = staffData.createdBy
-            console.log('[useFirestorePaths] Staff detected in legacy collection, using superadmin UID:', userId)
+            // console.log('[useFirestorePaths] Staff detected in legacy collection, using superadmin UID:', userId)
             return userId
           }
         }
@@ -179,7 +179,7 @@ export async function getQueryUserId(): Promise<string | null> {
         const cachedStaff = staffStore.getCurrentStaffMember
         if (cachedStaff?.createdBy) {
           userId = cachedStaff.createdBy
-          console.log('[useFirestorePaths] Staff found in cache, using superadmin UID:', userId)
+          // console.log('[useFirestorePaths] Staff found in cache, using superadmin UID:', userId)
           return userId
         }
         
@@ -192,7 +192,7 @@ export async function getQueryUserId(): Promise<string | null> {
             const fetchedStaff = await staffStore.fetchCurrentStaffMember()
             if (fetchedStaff?.createdBy) {
               userId = fetchedStaff.createdBy
-              console.log('[useFirestorePaths] Staff fetched and found, using superadmin UID:', userId)
+              // console.log('[useFirestorePaths] Staff fetched and found, using superadmin UID:', userId)
               ;(staffStore as any).__fetchingStaffMember = false
               return userId
             }
@@ -212,7 +212,7 @@ export async function getQueryUserId(): Promise<string | null> {
             const retryCachedStaff = staffStore.getCurrentStaffMember
             if (retryCachedStaff?.createdBy) {
               userId = retryCachedStaff.createdBy
-              console.log('[useFirestorePaths] Staff found in cache after wait, using superadmin UID:', userId)
+              // console.log('[useFirestorePaths] Staff found in cache after wait, using superadmin UID:', userId)
               return userId
             }
             // Check if fetch completed
@@ -245,7 +245,7 @@ export async function getQueryUserId(): Promise<string | null> {
             const retryCachedStaff = staffStore.getCurrentStaffMember
             if (retryCachedStaff?.createdBy) {
               userId = retryCachedStaff.createdBy
-              console.log('[useFirestorePaths] Staff found after fetching all staff, using superadmin UID:', userId)
+              // console.log('[useFirestorePaths] Staff found after fetching all staff, using superadmin UID:', userId)
               return userId
             }
           } catch (fetchAllError: any) {

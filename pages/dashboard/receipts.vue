@@ -2436,10 +2436,10 @@ watch(() => authStore.currentUser, async (user) => {
 // Watch for store changes and refetch receipts
 watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
   if (newStoreId && newStoreId !== oldStoreId && authStore.currentUser) {
-    console.log('[ReceiptsPage] Store changed, refetching receipts...')
+    // console.log('[ReceiptsPage] Store changed, refetching receipts...')
     try {
       await receiptsStore.fetchReceipts()
-      console.log('[ReceiptsPage] Receipts refetched after store change:', receiptsStore.receipts.length)
+      // console.log('[ReceiptsPage] Receipts refetched after store change:', receiptsStore.receipts.length)
     } catch (error: any) {
       console.error('[ReceiptsPage] Error refetching receipts after store change:', error.message || error)
     }

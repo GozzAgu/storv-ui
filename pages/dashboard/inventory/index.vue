@@ -1885,10 +1885,10 @@ onMounted(async () => {
   // Only run on client
   if (import.meta.server) return
   
-  console.log('[InventoryPage] onMounted - Starting load process')
+  // console.log('[InventoryPage] onMounted - Starting load process')
   
   const loadData = async () => {
-    console.log('[InventoryPage] loadData - Checking auth state')
+    // console.log('[InventoryPage] loadData - Checking auth state')
     
     // Wait for auth to finish loading with timeout
     let attempts = 0
@@ -1896,7 +1896,7 @@ onMounted(async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       attempts++
       if (attempts % 10 === 0) {
-        console.log('[InventoryPage] Still waiting for auth...', attempts)
+        // console.log('[InventoryPage] Still waiting for auth...', attempts)
       }
     }
     
@@ -1906,19 +1906,19 @@ onMounted(async () => {
     
     // Check if user is authenticated
     if (!authStore.currentUser) {
-      console.log('[InventoryPage] No authenticated user, skipping fetch')
+      // console.log('[InventoryPage] No authenticated user, skipping fetch')
       return
     }
     
-    console.log('[InventoryPage] User authenticated:', authStore.currentUser.uid)
+    // console.log('[InventoryPage] User authenticated:', authStore.currentUser.uid)
     
     // Fetch user data first (needed to determine if staff)
     try {
       if (!userStore.userData) {
-        console.log('[InventoryPage] Fetching user data...')
+        // console.log('[InventoryPage] Fetching user data...')
         await userStore.fetchUserData(authStore.currentUser.uid)
         const userData = userStore.userData
-        console.log('[InventoryPage] User data fetched:', userData ? (userData as any).role : 'unknown')
+        // console.log('[InventoryPage] User data fetched:', userData ? (userData as any).role : 'unknown')
       } else {
         const userData = userStore.userData
       
@@ -1934,13 +1934,13 @@ onMounted(async () => {
           console.warn('[InventoryPage] Error fetching stores/departments:', error.message || error)
         }
       }
-        console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
+        // console.log('[InventoryPage] User data already loaded:', userData ? (userData as any).role : 'unknown')
       }
       
       // Now fetch folders
-      console.log('[InventoryPage] Fetching folders...')
+      // console.log('[InventoryPage] Fetching folders...')
       await inventoryStore.fetchFolders()
-      console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
+      // console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error loading data:', error.message || error)
     }
@@ -1955,10 +1955,10 @@ onMounted(async () => {
 // Watch for user data changes and fetch folders when it becomes available
 watch(() => userStore.userData, async (userData) => {
   if (userData && authStore.currentUser && inventoryStore.folders.length === 0) {
-    console.log('[InventoryPage] User data changed, fetching folders...')
+    // console.log('[InventoryPage] User data changed, fetching folders...')
     try {
       await inventoryStore.fetchFolders()
-      console.log('[InventoryPage] Folders fetched after user data change:', inventoryStore.folders.length)
+      // console.log('[InventoryPage] Folders fetched after user data change:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error fetching folders:', error.message || error)
     }
@@ -1968,7 +1968,7 @@ watch(() => userStore.userData, async (userData) => {
 // Watch for auth state changes
 watch(() => authStore.currentUser, async (user) => {
   if (user && inventoryStore.folders.length === 0) {
-    console.log('[InventoryPage] Auth user changed, fetching user data and folders...')
+    // console.log('[InventoryPage] Auth user changed, fetching user data and folders...')
     try {
       // Fetch user data first
       if (!userStore.userData) {
@@ -1976,7 +1976,7 @@ watch(() => authStore.currentUser, async (user) => {
       }
       // Then fetch folders
       await inventoryStore.fetchFolders()
-      console.log('[InventoryPage] Folders fetched after auth change:', inventoryStore.folders.length)
+      // console.log('[InventoryPage] Folders fetched after auth change:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error fetching folders:', error.message || error)
     }
@@ -1986,7 +1986,7 @@ watch(() => authStore.currentUser, async (user) => {
 // Watch for store changes and refetch folders
 watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
   if (newStoreId && newStoreId !== oldStoreId && authStore.currentUser) {
-    console.log('[InventoryPage] Store changed, refetching folders...')
+    // console.log('[InventoryPage] Store changed, refetching folders...')
     try {
       // Reset department filter when store changes
       selectedDepartmentId.value = ''
@@ -1996,7 +1996,7 @@ watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
       if (authStore.currentUser) {
         await departmentsStore.fetchDepartments()
       }
-      console.log('[InventoryPage] Folders refetched after store change:', inventoryStore.folders.length)
+      // console.log('[InventoryPage] Folders refetched after store change:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error refetching folders after store change:', error.message || error)
     }

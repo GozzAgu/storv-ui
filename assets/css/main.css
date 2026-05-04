@@ -69,6 +69,18 @@
     background-color: #12141c !important;
   }
 
+  /**
+   * ApexCharts may inject a small attribution link at the bottom of the chart SVG.
+   * Hide it so the dashboard shows intentional Storvv branding only.
+   */
+  main[data-dashboard-main] .apexcharts-canvas a[href*='apexcharts.com'],
+  main[data-dashboard-main] .apexcharts-inner a[href*='apexcharts.com'],
+  main[data-dashboard-main] .apexcharts-svg a[href*='apexcharts.com'] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
   /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
     @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;

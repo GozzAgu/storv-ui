@@ -749,7 +749,7 @@ export const useStaffStore = defineStore('staff', {
         // First check if staff member is already in local state (from fetchStaff)
         const cachedStaff = this.getCurrentStaffMember
         if (cachedStaff && cachedStaff.storeId) {
-          console.log('[StaffStore] Found staff member in cache:', cachedStaff.storeId)
+          // console.log('[StaffStore] Found staff member in cache:', cachedStaff.storeId)
           return cachedStaff
         }
 
@@ -761,7 +761,7 @@ export const useStaffStore = defineStore('staff', {
           : false
         
         if (isStaffCreationInProgress) {
-          console.log('[StaffStore] Staff creation in progress - skipping fetchCurrentStaffMember to avoid lookup during creation')
+          // console.log('[StaffStore] Staff creation in progress - skipping fetchCurrentStaffMember to avoid lookup during creation')
           return null
         }
 
@@ -778,7 +778,7 @@ export const useStaffStore = defineStore('staff', {
             const staffData = staffSnapshot.docs[0].data()
             if (staffData.createdBy) {
               superadminUserId = staffData.createdBy
-              console.log('[StaffStore] Found superadmin UID from legacy collection:', superadminUserId)
+              // console.log('[StaffStore] Found superadmin UID from legacy collection:', superadminUserId)
             }
           }
         } catch (error: any) {
@@ -791,13 +791,13 @@ export const useStaffStore = defineStore('staff', {
           const cachedStaff = this.getCurrentStaffMember
           if (cachedStaff?.createdBy) {
             superadminUserId = cachedStaff.createdBy
-            console.log('[StaffStore] Found superadmin UID from getCurrentStaffMember cache:', superadminUserId)
+            // console.log('[StaffStore] Found superadmin UID from getCurrentStaffMember cache:', superadminUserId)
           } else {
             // If not found, search all staff in local state
             const foundStaff = this.staff.find(s => s.authUid === authStore.currentUser?.uid)
             if (foundStaff?.createdBy) {
               superadminUserId = foundStaff.createdBy
-              console.log('[StaffStore] Found superadmin UID from staff array cache:', superadminUserId)
+              // console.log('[StaffStore] Found superadmin UID from staff array cache:', superadminUserId)
             }
           }
         }
@@ -805,7 +805,7 @@ export const useStaffStore = defineStore('staff', {
         // If still not found, use collection group query to search ALL staff collections
         // This is more efficient and avoids permission issues with hierarchical paths
         if (!superadminUserId) {
-          console.log('[StaffStore] Superadmin UID not found in cache/legacy - using collection group query...')
+          // console.log('[StaffStore] Superadmin UID not found in cache/legacy - using collection group query...')
           try {
             // Use collectionGroup to search across ALL staff collections regardless of path
             // This avoids permission issues when querying other superadmins' collections
@@ -830,7 +830,7 @@ export const useStaffStore = defineStore('staff', {
               
               if (staffData.createdBy) {
                 superadminUserId = staffData.createdBy
-                console.log('[StaffStore] Found staff member via collection group query, superadmin UID:', superadminUserId)
+                // console.log('[StaffStore] Found staff member via collection group query, superadmin UID:', superadminUserId)
                 
                 // Extract path information from the document reference
                 // Path format: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
@@ -843,11 +843,11 @@ export const useStaffStore = defineStore('staff', {
                   extractedStoreId = pathParts[3] // stores/{storeId}
                   extractedDepartmentId = pathParts[5] // departments/{departmentId}
                   
-                  console.log('[StaffStore] Extracted from path - superadmin:', extractedSuperadminId, 'store:', extractedStoreId, 'dept:', extractedDepartmentId)
+                  // console.log('[StaffStore] Extracted from path - superadmin:', extractedSuperadminId, 'store:', extractedStoreId, 'dept:', extractedDepartmentId)
                   
                   // Verify the extracted superadmin matches createdBy
                   if (extractedSuperadminId === superadminUserId) {
-                    console.log('[StaffStore] Path verification successful')
+                    // console.log('[StaffStore] Path verification successful')
                   } else {
                     console.warn('[StaffStore] Path superadmin ID does not match createdBy, using createdBy:', superadminUserId)
                   }
@@ -892,7 +892,7 @@ export const useStaffStore = defineStore('staff', {
                   this.staff[existingIndex] = foundStaff
                 }
                 
-                console.log('[StaffStore] Staff member loaded and cached:', foundStaff.storeId)
+                // console.log('[StaffStore] Staff member loaded and cached:', foundStaff.storeId)
                 return foundStaff
               } else {
                 console.warn('[StaffStore] Staff document found but missing createdBy field')

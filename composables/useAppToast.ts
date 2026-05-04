@@ -25,7 +25,7 @@ const pendingCommits = new Map<string, NodeJS.Timeout>()
 export const useAppToast = () => {
   const addToast = (message: string, type: ToastType = 'info', duration: number = 5000) => {
     if (import.meta.server) {
-      console.log(`[Toast ${type}]: ${message}`)
+      // console.log(`[Toast ${type}]: ${message}`)
       return ''
     }
 

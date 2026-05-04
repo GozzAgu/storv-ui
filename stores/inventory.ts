@@ -230,7 +230,7 @@ export const useInventoryStore = defineStore('inventory', {
         return
       }
       
-      console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
+      // console.log('[InventoryStore] fetchFolders - userId:', userId, 'currentStoreId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff')
 
       // If staff, also log their staff document info for debugging
       if (userStore.userData?.role === 'staff') {
@@ -242,7 +242,7 @@ export const useInventoryStore = defineStore('inventory', {
             const staffDoc = staffSnapshot.docs[0]
             if (staffDoc) {
               const staffData = staffDoc.data()
-              console.log('[InventoryStore] Staff document - storeId:', staffData.storeId, 'createdBy:', staffData.createdBy)
+              // console.log('[InventoryStore] Staff document - storeId:', staffData.storeId, 'createdBy:', staffData.createdBy)
             }
           }
         } catch (e) {
@@ -258,7 +258,7 @@ export const useInventoryStore = defineStore('inventory', {
           const staffStore = useStaffStore()
           const staffMember = await staffStore.fetchCurrentStaffMember()
           staffDepartmentId = staffMember?.departmentId
-          console.log('[InventoryStore] Staff departmentId:', staffDepartmentId)
+          // console.log('[InventoryStore] Staff departmentId:', staffDepartmentId)
         } catch (e) {
           console.warn('[InventoryStore] Could not fetch staff member:', e)
         }
@@ -309,7 +309,7 @@ export const useInventoryStore = defineStore('inventory', {
         }
 
         const allFolders = querySnapshot.docs
-        console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
+        // console.log('[InventoryStore] Found', allFolders.length, 'folders in store (userId:', userId, 'storeId:', currentStoreId, 'isStaff:', userStore.userData?.role === 'staff' + ')')
 
         // Process the results
         let folders = allFolders.map((doc) => {
@@ -343,7 +343,7 @@ export const useInventoryStore = defineStore('inventory', {
             // If no allowedDepartments specified, staff can see it (folder is accessible to all departments)
             return true
           })
-          console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
+          // console.log('[InventoryStore] Filtered folders by department access:', folders.length, 'folders visible to staff')
         }
 
         // No need to filter by storeId since we're already querying from the store's subcollection

@@ -1016,7 +1016,7 @@ const loadTransferHistory = async () => {
     const userId = authStore.currentUser?.uid
     
     if (!userId) {
-      console.log('[TransferHistory] No user ID')
+      // console.log('[TransferHistory] No user ID')
       return
     }
 
@@ -1027,7 +1027,7 @@ const loadTransferHistory = async () => {
 
     // Verify user is super admin
     if (userStore.userData?.role !== 'superAdmin') {
-      console.log('[TransferHistory] User is not super admin, role:', userStore.userData?.role)
+      // console.log('[TransferHistory] User is not super admin, role:', userStore.userData?.role)
       return
     }
 
@@ -1042,7 +1042,7 @@ const loadTransferHistory = async () => {
     const { collection, query, orderBy, getDocs, getDoc, where: firestoreWhere } = await import('firebase/firestore')
     const pathUserId = userId
 
-    console.log('[TransferHistory] Loading transfer history for userId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid)
+    // console.log('[TransferHistory] Loading transfer history for userId:', pathUserId, 'auth.uid:', authStore.currentUser?.uid)
 
     // Fetch transfer history from Firestore
     // The path must match: users/{userId}/storeTransfers where userId == request.auth.uid
@@ -1061,7 +1061,7 @@ const loadTransferHistory = async () => {
       
       const transfersSnap = await getDocs(transfersQuery)
 
-      console.log('[TransferHistory] Successfully loaded', transfersSnap.docs.length, 'transfers')
+      // console.log('[TransferHistory] Successfully loaded', transfersSnap.docs.length, 'transfers')
 
       // Sort manually if orderBy didn't work
       const transfers = transfersSnap.docs.map(doc => {
@@ -1196,7 +1196,7 @@ const loadTransferHistory = async () => {
       }
       // If it's an index error, try without orderBy
       if (queryError.code === 'failed-precondition' || queryError.message?.includes('index')) {
-        console.log('[TransferHistory] Index error, trying without orderBy')
+        // console.log('[TransferHistory] Index error, trying without orderBy')
         const transfersQuery = query(transfersRef)
         const transfersSnap = await getDocs(transfersQuery)
         transferHistory.value = transfersSnap.docs.map(doc => ({

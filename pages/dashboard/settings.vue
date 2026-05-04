@@ -984,7 +984,7 @@ const getTargetUserId = async (): Promise<string | null> => {
           // Use the super admin's UID who created this staff member
           if (staffData.createdBy) {
             userId = staffData.createdBy
-            console.log('[Settings] Staff user detected, using super admin UID:', userId)
+            // console.log('[Settings] Staff user detected, using super admin UID:', userId)
           }
         }
       }

@@ -50,7 +50,7 @@ export const useStoresStore = defineStore('stores', {
           : false
         
         if (isStaffCreationInProgress) {
-          console.log('[StoresStore] Staff creation in progress - skipping initializeCurrentStore for staff')
+          // console.log('[StoresStore] Staff creation in progress - skipping initializeCurrentStore for staff')
           return
         }
         
@@ -92,7 +92,7 @@ export const useStoresStore = defineStore('stores', {
                     } as Store
                   }
                 }
-                console.log('[StoresStore] Staff store loaded:', storeData.name || storeData.branchName || staffMember.storeId)
+                // console.log('[StoresStore] Staff store loaded:', storeData.name || storeData.branchName || staffMember.storeId)
                 } else {
                   console.warn('[StoresStore] Staff store document not found:', staffMember.storeId)
                 }
@@ -236,7 +236,7 @@ export const useStoresStore = defineStore('stores', {
     async clearStoreData() {
       if (import.meta.server) return
 
-      console.log('[StoresStore] Clearing all store data')
+      // console.log('[StoresStore] Clearing all store data')
 
       try {
         // Import stores dynamically to avoid circular dependencies
@@ -286,7 +286,7 @@ export const useStoresStore = defineStore('stores', {
         customersStore.loading = false
         customersStore.error = null
 
-        console.log('[StoresStore] All store data cleared')
+        // console.log('[StoresStore] All store data cleared')
       } catch (error: any) {
         console.warn('[StoresStore] Error clearing store data:', error)
         // Don't throw - clearing is best effort
@@ -298,7 +298,7 @@ export const useStoresStore = defineStore('stores', {
       if (import.meta.server) return
       if (!this.currentStoreId) return
 
-      console.log('[StoresStore] Refreshing all data for store:', this.currentStoreId)
+      // console.log('[StoresStore] Refreshing all data for store:', this.currentStoreId)
 
       try {
         // Import stores dynamically to avoid circular dependencies
@@ -352,7 +352,7 @@ export const useStoresStore = defineStore('stores', {
           customersStore.fetchCustomers().catch(err => console.warn('[StoresStore] Failed to fetch customers:', err)),
         ])
 
-        console.log('[StoresStore] Successfully refreshed all data for store:', this.currentStoreId)
+        // console.log('[StoresStore] Successfully refreshed all data for store:', this.currentStoreId)
       } catch (error) {
         console.error('[StoresStore] Error refreshing store data:', error)
       }

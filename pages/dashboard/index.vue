@@ -389,6 +389,23 @@
         </div>
       </Card>
     </div>
+
+      <div class="flex justify-center pt-6 pb-1 sm:pt-8">
+        <img
+          :src="dashboardFooterLogoSrc"
+          alt="Storvv"
+          :class="[
+            'object-center opacity-90 dark:opacity-95',
+            dashboardFooterIsLgUp
+              ? 'h-9 w-auto max-h-9 max-w-[15rem] origin-center object-contain scale-110 sm:h-10 sm:max-h-10 sm:max-w-[17rem] sm:scale-[1.15] lg:scale-125'
+              : 'h-11 w-11 max-h-11 max-w-11 origin-center object-contain scale-125 sm:h-12 sm:w-12 sm:max-h-12 sm:max-w-12 sm:scale-[1.28]',
+          ]"
+          width="180"
+          height="48"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
     </template>
   </div>
 </template>
@@ -421,6 +438,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
+import { useMinWidthQuery } from '~/composables/useMinWidthQuery'
 import type { Receipt } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 
@@ -975,6 +993,12 @@ const chartSeries = computed(() => {
 })
 
 const themeStore = useThemeStore()
+const dashboardFooterIsLgUp = useMinWidthQuery(1024)
+
+const dashboardFooterLogoSrc = computed(() => {
+  if (!dashboardFooterIsLgUp.value) return '/storvv logo mobile.png'
+  return themeStore.actualTheme === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+})
 
 // Responsive chart height - use ref for reactive updates
 const isMobile = ref(false)
@@ -1185,15 +1209,15 @@ const loadDashboardData = async () => {
       return
     }
     
-    console.log('[Dashboard] Auth ready, user:', authStore.currentUser.uid)
+    // console.log('[Dashboard] Auth ready, user:', authStore.currentUser.uid)
     
     // Fetch user data if not loaded
     if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
-      console.log('[Dashboard] Fetching user data for:', authStore.currentUser.uid)
+      // console.log('[Dashboard] Fetching user data for:', authStore.currentUser.uid)
       await userStore.fetchUserData(authStore.currentUser.uid)
-      console.log('[Dashboard] User data fetched:', userStore.userData)
+      // console.log('[Dashboard] User data fetched:', userStore.userData)
     } else {
-      console.log('[Dashboard] User data already loaded:', userStore.userData)
+      // console.log('[Dashboard] User data already loaded:', userStore.userData)
     }
     
     // Fetch all stores in parallel

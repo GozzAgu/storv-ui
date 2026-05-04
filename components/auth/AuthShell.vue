@@ -39,7 +39,7 @@
           <img
             src="/storvv logo.png"
             alt="Storvv"
-            class="h-7 w-auto max-w-[140px] object-contain opacity-95 lg:h-9 lg:max-w-[180px] xl:h-10 xl:max-w-[200px]"
+            class="h-10 w-auto max-h-10 max-w-[200px] origin-left object-contain opacity-95 will-change-transform sm:h-11 sm:max-h-11 sm:max-w-[240px] sm:scale-110 lg:scale-125 lg:max-w-[280px]"
           />
         </a>
 
