@@ -24,14 +24,17 @@
       >
         <NuxtLink
           to="/dashboard"
-          :class="['flex items-center transition-all duration-300', sidebarUseMobileMark ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0 flex-1']"
+          :class="[
+            'flex items-center transition-all duration-300',
+            effectiveSidebarCollapsed ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0 flex-1',
+          ]"
         >
           <img
             :src="sidebarLogoSrc"
             alt="Storvv"
             :class="sidebarLogoImgClass"
           />
-          <DashboardHoverTooltip v-if="sidebarUseMobileMark">
+          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
             Dashboard home
           </DashboardHoverTooltip>
         </NuxtLink>
@@ -712,11 +715,11 @@ const toggleSidebar = () => {
 const isLgUp = useMinWidthQuery(1024)
 const effectiveSidebarCollapsed = computed(() => sidebarCollapsed.value && isLgUp.value)
 
-/** Mobile/tablet (<lg) or desktop collapsed rail: show compact mark asset. */
-const sidebarUseMobileMark = computed(() => !isLgUp.value || effectiveSidebarCollapsed.value)
+/** Compact PNG only on lg+ when the sidebar is collapsed to the icon rail (not on phone/tablet drawer). */
+const sidebarUsesMobileLogoAsset = computed(() => effectiveSidebarCollapsed.value)
 
 const sidebarLogoSrc = computed(() => {
-  if (sidebarUseMobileMark.value) return '/storvv logo mobile.png'
+  if (sidebarUsesMobileLogoAsset.value) return '/storvv logo mobile.png'
   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 })
 
@@ -730,18 +733,11 @@ const sidebarLogoBarClass = computed(() => {
 const sidebarLogoImgClass = computed(() => {
   const base =
     'shrink-0 object-contain transition-[height,width,max-width,transform] duration-300 ease-in-out will-change-transform'
-  if (sidebarUseMobileMark.value) {
-    if (effectiveSidebarCollapsed.value) {
-      return [
-        base,
-        'mx-auto object-center',
-        'h-8 w-8 max-h-8 max-w-8 origin-center scale-110 sm:scale-125',
-      ]
-    }
+  if (effectiveSidebarCollapsed.value) {
     return [
       base,
       'mx-auto object-center',
-      'h-9 w-9 max-h-9 max-w-9 origin-center scale-125 sm:scale-[1.35]',
+      'h-8 w-8 max-h-8 max-w-8 origin-center scale-110 sm:scale-125',
     ]
   }
   return [
