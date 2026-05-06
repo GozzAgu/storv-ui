@@ -172,21 +172,21 @@
             <button
               type="button"
               @click="chartView = 'daily'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'daily' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'daily' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Daily
             </button>
             <button
               type="button"
               @click="chartView = 'weekly'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'weekly' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'weekly' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Weekly
             </button>
             <button
               type="button"
               @click="chartView = 'monthly'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'monthly' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'monthly' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Monthly
             </button>

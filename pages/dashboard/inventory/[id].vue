@@ -74,7 +74,7 @@
               variant="outline"
               size="sm"
               :icon="TagIcon"
-              class="shrink-0 !rounded-sm !px-2.5 !py-2.5 !text-xs sm:!px-3"
+              class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 !text-xs sm:!px-3"
               @click="openBulkDiscountModal"
             >
               <span class="hidden sm:inline">Discount</span>
@@ -83,7 +83,7 @@
               variant="outline"
               size="sm"
               :icon="TrashIcon"
-              class="shrink-0 !rounded-sm !border-red-200/80 !px-2.5 !py-2.5 !text-xs dark:!border-red-800/40 sm:!px-3"
+              class="shrink-0 !rounded-2xl !border-red-200/80 !px-2.5 !py-2.5 !text-xs dark:!border-red-800/40 sm:!px-3"
               @click="openBulkDeleteModal"
             >
               <span class="hidden sm:inline">Delete</span>
@@ -93,7 +93,7 @@
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
-            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 sm:!px-3"
+            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 sm:!px-3"
             :icon="ArrowDownTrayIcon"
             :loading="isImporting"
             :disabled="isExporting"
@@ -105,7 +105,7 @@
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
-            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 sm:!px-3"
+            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 sm:!px-3"
             :icon="ArrowUpTrayIcon"
             :loading="isExporting"
             :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
@@ -116,7 +116,7 @@
           <Button
             v-if="canManageInventoryItems"
             variant="primary"
-            class="shrink-0 !rounded-sm !px-2.5 !py-2.5 text-sm sm:!px-3"
+            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 text-sm sm:!px-3"
             :icon="PlusIcon"
             aria-label="Add product"
             @click="openAddItemModal"
@@ -134,7 +134,7 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-          <Button variant="outline" class="shrink-0 !rounded-sm" :icon="ArrowPathIcon" @click="resetFilters" />
+          <Button variant="outline" class="shrink-0 !rounded-2xl" :icon="ArrowPathIcon" @click="resetFilters" />
         </div>
       </div>
     </div>
@@ -227,7 +227,7 @@
                         variant="outline"
                         size="sm"
                         :icon="TagIcon"
-                        extra-class="!rounded-sm"
+                        extra-class="!rounded-2xl"
                         @click="openBulkDiscountModal"
                       >
                         Discount
@@ -236,7 +236,7 @@
                         variant="outline"
                         size="sm"
                         :icon="TrashIcon"
-                        extra-class="!rounded-sm !border-red-200/80 dark:!border-red-800/40"
+                        extra-class="!rounded-2xl !border-red-200/80 dark:!border-red-800/40"
                         @click="openBulkDeleteModal"
                       >
                         Delete
@@ -249,7 +249,7 @@
                       :loading="isImporting"
                       :disabled="isExporting"
                       title="Import from Excel"
-                      extra-class="!rounded-sm"
+                      extra-class="!rounded-2xl"
                       aria-label="Import from Excel"
                       @click="fileInputRef?.click()"
                     >
@@ -262,7 +262,7 @@
                       :loading="isExporting"
                       :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
                       title="Export to Excel"
-                      extra-class="!rounded-sm"
+                      extra-class="!rounded-2xl"
                       aria-label="Export to Excel"
                       @click="handleExportToExcel"
                     >
@@ -272,7 +272,7 @@
                       variant="primary"
                       size="sm"
                       :icon="PlusIcon"
-                      extra-class="!rounded-sm"
+                      extra-class="!rounded-2xl"
                       aria-label="Add product"
                       @click="openAddItemModal"
                     >
@@ -364,7 +364,7 @@
                 variant="outline"
                 size="sm"
                 :icon="TagIcon"
-                extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+                extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
                 @click="openBulkDiscountModal"
               >
                 <span class="hidden sm:inline">Discount</span>
@@ -373,7 +373,7 @@
                 variant="outline"
                 size="sm"
                 :icon="TrashIcon"
-                extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5 !border-red-200/80 dark:!border-red-800/40"
+                extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5 !border-red-200/80 dark:!border-red-800/40"
                 @click="openBulkDeleteModal"
               >
                 <span class="hidden sm:inline">Delete</span>
@@ -387,7 +387,7 @@
               :loading="isImporting"
               :disabled="isExporting"
               title="Import from Excel"
-              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
               aria-label="Import from Excel"
               @click="fileInputRef?.click()"
             >
@@ -401,7 +401,7 @@
               :loading="isExporting"
               :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
               title="Export to Excel"
-              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
               aria-label="Export to Excel"
               @click="handleExportToExcel"
             >
@@ -413,7 +413,7 @@
               size="sm"
               :icon="PlusIcon"
               aria-label="Add product"
-              extra-class="!rounded-sm max-sm:!px-2 max-sm:!py-1.5"
+              extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
               @click="openAddItemModal"
             >
               <span class="hidden sm:inline">Add product</span>
@@ -450,7 +450,7 @@
           variant="primary"
           size="sm"
           :icon="PlusIcon"
-          extra-class="!rounded-sm mt-5"
+          extra-class="!rounded-2xl mt-5"
           @click="openAddItemModal"
         >
           Add product
@@ -503,7 +503,7 @@
                 :data-item-actions-anchor="item.id"
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
-                :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                 title="Actions"
                 aria-label="Item actions"
                 aria-haspopup="menu"
@@ -690,7 +690,7 @@
                     :data-item-actions-anchor="item.id"
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
-                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-sm transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                     title="Actions"
                     aria-label="Item actions"
                     aria-haspopup="menu"
@@ -973,14 +973,14 @@
       </form>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="handleCancelItem" class="w-full sm:w-auto !rounded-2xl">Cancel</Button>
         <Button
           variant="primary"
           size="sm"
           type="submit"
           :disabled="!isItemDrawerValid"
           @click="handleSaveItem"
-          class="w-full sm:w-auto !rounded-sm"
+          class="w-full sm:w-auto !rounded-2xl"
         >
           {{ editingItem ? 'Update Product' : (folder?.hasSerialNumbers && !editingItem ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}` : 'Add Product') }}
         </Button>
@@ -1043,13 +1043,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteModal = false; bulkDeleteConfirmed = false" class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteModal = false; bulkDeleteConfirmed = false" class="!rounded-2xl">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteConfirmed || isBulkDeleting"
           :icon="TrashIcon"
-          class="!rounded-sm"
+          class="!rounded-2xl"
           @click="handleConfirmBulkDelete"
         >
           {{ isBulkDeleting ? 'Deleting...' : `Delete ${selectedItemsForBulk.length} product${selectedItemsForBulk.length !== 1 ? 's' : ''}` }}
@@ -1075,7 +1075,7 @@
               type="button"
               :icon="PlusIcon"
               @click="addDuplicateSerialNumber"
-              class="!rounded-sm"
+              class="!rounded-2xl"
             >
               Add
             </Button>
@@ -1107,8 +1107,8 @@
           </div>
         </div>
         <div class="flex justify-end gap-2">
-          <Button variant="outline" size="sm" type="button" @click="showDuplicateModal = false; clearDuplicateModal()" class="!rounded-sm">Cancel</Button>
-          <Button variant="primary" size="sm" type="submit" :disabled="isDuplicating || !hasValidDuplicateSerials" class="!rounded-sm">
+          <Button variant="outline" size="sm" type="button" @click="showDuplicateModal = false; clearDuplicateModal()" class="!rounded-2xl">Cancel</Button>
+          <Button variant="primary" size="sm" type="submit" :disabled="isDuplicating || !hasValidDuplicateSerials" class="!rounded-2xl">
             {{ isDuplicating ? 'Duplicating...' : `Duplicate ${validDuplicateSerialsCount} product${validDuplicateSerialsCount !== 1 ? 's' : ''}` }}
           </Button>
         </div>

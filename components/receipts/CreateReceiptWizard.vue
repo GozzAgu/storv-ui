@@ -590,7 +590,7 @@
           variant="outline"
           size="sm"
           @click="previousStep"
-          class="w-full sm:w-auto order-2 sm:order-1 !rounded-sm"
+          class="w-full sm:w-auto order-2 sm:order-1 !rounded-2xl"
         >
           Previous
         </Button>
@@ -600,7 +600,7 @@
             variant="outline"
             size="sm"
             @click="handleCancel"
-            class="w-full sm:w-auto !rounded-sm"
+            class="w-full sm:w-auto !rounded-2xl"
           >
             Cancel
           </Button>
@@ -608,7 +608,7 @@
             v-if="currentStep < 2"
             variant="primary"
             size="sm"
-            class="w-full sm:w-auto !rounded-sm"
+            class="w-full sm:w-auto !rounded-2xl"
             @click="nextStep"
             :disabled="!canProceed"
           >
@@ -620,7 +620,7 @@
             size="sm"
             @click="handleCreateReceipt"
             :disabled="!isFormValid || isCreating"
-            class="w-full sm:w-auto !rounded-sm"
+            class="w-full sm:w-auto !rounded-2xl"
           >
             <span v-if="isCreating">Creating...</span>
             <span v-else>Create Receipt</span>

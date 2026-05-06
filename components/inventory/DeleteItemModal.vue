@@ -74,14 +74,14 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-2xl">Cancel</Button>
       <Button
         variant="danger"
         size="sm"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmDelete"
         :icon="TrashIcon"
-        class="w-full sm:w-auto !rounded-sm"
+        class="w-full sm:w-auto !rounded-2xl"
       >
         {{ isProcessing ? 'Deleting...' : 'Delete Product' }}
       </Button>

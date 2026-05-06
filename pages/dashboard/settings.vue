@@ -102,7 +102,7 @@
               <Button
                 variant="primary"
                 size="sm"
-                extra-class="!rounded-sm"
+                extra-class="!rounded-2xl"
                 :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
                 @click="handleUpgradeSubscription"
               >
@@ -143,7 +143,7 @@
             v-if="!isStaff"
             @click="openCreateStoreModal"
             size="sm"
-            extra-class="!rounded-sm !px-2"
+            extra-class="!rounded-2xl !px-2"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             aria-label="Create branch"
             :disabled="!canAddStore"
@@ -184,7 +184,7 @@
             </div>
             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Create your first store to get started.</p>
-            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-sm mt-5">Create branch</Button>
+            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl mt-5">Create branch</Button>
           </div>
 
           <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
@@ -295,7 +295,7 @@
             @click="saveInventorySettings"
             variant="primary"
             size="sm"
-            extra-class="!rounded-sm !px-2"
+            extra-class="!rounded-2xl !px-2"
             title="Done"
             aria-label="Done"
           >
@@ -359,7 +359,7 @@
             @click="saveReceiptSettings"
             variant="primary"
             size="sm"
-            extra-class="!rounded-sm !px-2"
+            extra-class="!rounded-2xl !px-2"
             title="Done"
             aria-label="Done"
           >
@@ -494,8 +494,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-sm">Cancel</Button>
-        <Button size="sm" @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore" extra-class="!rounded-sm">
+        <Button variant="outline" size="sm" @click="closeStoreModal" extra-class="!rounded-2xl">Cancel</Button>
+        <Button size="sm" @click="handleStoreSubmit" :disabled="!storeForm.name || isSubmittingStore" extra-class="!rounded-2xl">
           {{ isSubmittingStore ? 'Saving...' : editingStore ? 'Update' : 'Create' }}
         </Button>
       </template>
@@ -518,8 +518,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="showDeleteModal = false" extra-class="!rounded-sm">Cancel</Button>
-        <Button variant="danger" size="sm" @click="handleStoreDelete" :disabled="isDeletingStore" extra-class="!rounded-sm">
+        <Button variant="outline" size="sm" @click="showDeleteModal = false" extra-class="!rounded-2xl">Cancel</Button>
+        <Button variant="danger" size="sm" @click="handleStoreDelete" :disabled="isDeletingStore" extra-class="!rounded-2xl">
           {{ isDeletingStore ? 'Deleting...' : 'Delete' }}
         </Button>
       </template>

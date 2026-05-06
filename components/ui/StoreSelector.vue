@@ -128,7 +128,7 @@
                 class="store-switch-row group/row flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150"
                 :class="
                   currentStore?.id === store.id
-                    ? 'store-switch-row--active bg-primary-500/8 ring-1 ring-primary-500/15 dark:bg-white/6 dark:ring-white/10'
+                    ? 'store-switch-row--active bg-primary-500/8 dark:bg-white/6'
                     : 'hover:bg-black/3 dark:hover:bg-white/4'
                 "
               >

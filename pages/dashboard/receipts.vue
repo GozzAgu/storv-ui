@@ -34,7 +34,7 @@
         <div class="flex w-full min-h-0 flex-1 flex-col gap-5 sm:gap-6">
         <!-- Tabs -->
         <nav
-          class="flex gap-8 border-b border-gray-200/80 dark:border-gray-800"
+          class="flex gap-8"
           aria-label="Sales views"
         >
       <button
@@ -164,7 +164,7 @@
                 size="sm"
                 :icon="PlusIcon"
                 aria-label="New receipt"
-                extra-class="!rounded-sm ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
+                extra-class="!rounded-2xl ml-auto shrink-0 max-sm:!px-2 max-sm:!py-1.5"
                 @click="openCreateReceiptModal"
               >
                 <span class="hidden sm:inline">New receipt</span>
@@ -254,7 +254,7 @@
               size="sm"
               :icon="PlusIcon"
               aria-label="New receipt"
-              extra-class="!rounded-sm shrink-0 max-sm:!px-2 max-sm:!py-1.5"
+              extra-class="!rounded-2xl shrink-0 max-sm:!px-2 max-sm:!py-1.5"
               @click="openCreateReceiptModal"
             >
               <span class="hidden sm:inline">New receipt</span>
@@ -271,7 +271,7 @@
             variant="outline"
             size="sm"
             :icon="TrashIcon"
-            class="!rounded-sm !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+            class="!rounded-2xl !px-2.5 !py-1.5 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
             @click="openBulkDeleteReceiptsModal"
           >
             Delete
@@ -408,7 +408,7 @@
                 type="button"
                 :data-receipt-actions-anchor="receipt.id"
                 @click="toggleReceiptMenu(receipt.id)"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-sm text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                 title="Actions"
                 aria-label="Receipt actions"
                 aria-haspopup="menu"
@@ -707,7 +707,7 @@
                     type="button"
                     :data-receipt-actions-anchor="receipt.id"
                     @click="toggleReceiptMenu(receipt.id)"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-sm text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                     title="Actions"
                     aria-label="Receipt actions"
                     aria-haspopup="menu"
@@ -834,13 +834,13 @@
           </div>
         </div>
         <template #footer>
-          <Button variant="outline" size="sm" @click="showBulkDeleteReceiptsModal = false; bulkDeleteReceiptsConfirmed = false" class="!rounded-sm">Cancel</Button>
+          <Button variant="outline" size="sm" @click="showBulkDeleteReceiptsModal = false; bulkDeleteReceiptsConfirmed = false" class="!rounded-2xl">Cancel</Button>
           <Button
             variant="danger"
             size="sm"
             :disabled="!bulkDeleteReceiptsConfirmed || isBulkDeletingReceipts"
             :icon="TrashIcon"
-            class="!rounded-sm"
+            class="!rounded-2xl"
             @click="handleConfirmBulkDeleteReceipts"
           >
             {{ isBulkDeletingReceipts ? 'Deleting...' : `Delete ${selectedReceiptsForBulk.length} receipt${selectedReceiptsForBulk.length !== 1 ? 's' : ''}` }}
@@ -1000,7 +1000,7 @@
                         type="button"
                         :data-customer-actions-anchor="customer.id"
                         @click="toggleCustomerMenu(customer.id)"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-sm text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                         title="Actions"
                         aria-label="Customer actions"
                         aria-haspopup="menu"

@@ -15,7 +15,7 @@
         :icon="PlusIcon"
         :disabled="!canAddDepartmentForCurrentStore"
         :title="canAddDepartmentForCurrentStore ? 'Create new department' : departmentLimitMessage"
-        extra-class="!rounded-sm w-full shrink-0 sm:w-auto"
+        extra-class="!rounded-2xl w-full shrink-0 sm:w-auto"
         @click="openCreateDepartmentModal"
       >
         New department
@@ -211,7 +211,7 @@
       <Button
         variant="outline"
         size="sm"
-        class="!rounded-sm"
+        class="!rounded-2xl"
         @click="toggleSelectAllDepartments"
       >
         {{ allDepartmentsOnPageSelected ? 'Deselect all' : 'Select all' }}
@@ -222,7 +222,7 @@
           variant="outline"
           size="sm"
           :icon="TrashIcon"
-          class="!rounded-sm !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+          class="!rounded-2xl !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
           @click="openBulkDeleteDepartmentsModal"
         >
           Delete ({{ selectedDepartmentsForBulk.length }})
@@ -365,14 +365,14 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-2xl">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
           :loading="isBulkDeletingDepartments"
           :icon="TrashIcon"
-          class="!rounded-sm"
+          class="!rounded-2xl"
           @click="handleConfirmBulkDeleteDepartments"
         >
           {{ isBulkDeletingDepartments ? 'Deleting...' : `Delete ${selectedDepartmentsForBulk.length} department${selectedDepartmentsForBulk.length !== 1 ? 's' : ''}` }}

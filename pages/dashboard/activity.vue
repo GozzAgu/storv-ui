@@ -66,10 +66,19 @@
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
                 Inventory changes for the current store
+                <template v-if="reachedFetchCap">
+                  <span class="text-gray-400 dark:text-gray-500"> · </span>
+                  <span class="text-[10px] text-gray-500 dark:text-gray-400">Up to {{ fetchLimit }} newest loaded; refine with search</span>
+                </template>
               </p>
               <div class="mt-2 flex flex-wrap items-center gap-1.5">
                 <span class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                  {{ logs.length }} events
+                  <template v-if="searchQuery.trim() && allLogs.length">
+                    {{ filteredLogs.length }} of {{ allLogs.length }} events
+                  </template>
+                  <template v-else>
+                    {{ filteredLogs.length }} events
+                  </template>
                 </span>
                 <span class="inline-flex items-center rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
                   {{ createdCount }} created
@@ -81,6 +90,20 @@
                   {{ deletedCount }} deleted
                 </span>
               </div>
+            </div>
+          </template>
+          <template #filters>
+            <div class="relative min-w-0 sm:min-w-0">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                v-model="searchQuery"
+                type="search"
+                autocomplete="off"
+                placeholder="Search logs…"
+                class="w-full min-w-[9rem] rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 sm:w-56"
+              />
             </div>
           </template>
         </DataTableToolbar>
@@ -109,7 +132,7 @@
           </button>
         </div>
 
-        <div v-else-if="logs.length === 0" class="px-4 py-14 text-center sm:px-6">
+        <div v-else-if="allLogs.length === 0" class="px-4 py-14 text-center sm:px-6">
           <div
             class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
           >
@@ -121,8 +144,28 @@
           </p>
         </div>
 
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
+        <div v-else-if="filteredLogs.length === 0" class="px-4 py-14 text-center sm:px-6">
+          <div
+            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
+          >
+            <MagnifyingGlassIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
+          </div>
+          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No matching activity</p>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Try another name, item, action, or ID — or clear the search.
+          </p>
+          <button
+            type="button"
+            class="mt-4 text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-600 dark:hover:text-primary-300"
+            @click="searchQuery = ''"
+          >
+            Clear search
+          </button>
+        </div>
+
+        <div v-else class="flex flex-col">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
             <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
               <tr>
                 <th
@@ -153,7 +196,7 @@
             </thead>
             <tbody class="divide-y divide-gray-200/80 bg-white/90 dark:divide-gray-700/80 dark:!bg-dashboard-card">
               <tr
-                v-for="log in logs"
+                v-for="log in paginatedLogs"
                 :key="log.id"
                 class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/70"
               >
@@ -195,6 +238,17 @@
               </tr>
             </tbody>
           </table>
+          </div>
+          <div
+            class="shrink-0 border-t border-gray-200/80 bg-gray-50/90 px-3 py-2 dark:border-gray-700/80 dark:bg-white/[0.03] sm:px-5 sm:py-2.5"
+          >
+            <Pagination
+              :current-page="currentPage"
+              :items-per-page="itemsPerPage"
+              :total="filteredLogs.length"
+              @page-change="handlePageChange"
+            />
+          </div>
         </div>
       </div>
     </template>
@@ -204,11 +258,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
-import { BuildingStorefrontIcon, ClipboardDocumentListIcon } from '@heroicons/vue/24/outline'
+import { BuildingStorefrontIcon, ClipboardDocumentListIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import type { ActivityLog } from '~/composables/useActivityLog'
-import { fetchActivityLogs } from '~/composables/useActivityLog'
+import { ACTIVITY_LOGS_FETCH_LIMIT, fetchActivityLogs } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
+import Pagination from '~/components/ui/Pagination.vue'
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()
@@ -220,12 +275,58 @@ const canAccess = computed(() => (userStore.isSuperAdmin || isManager.value) && 
 const accessDeniedByRole = computed(() => !userStore.isSuperAdmin && !isManager.value)
 
 const storeId = ref<string | null>(null)
-const logs = ref<ActivityLog[]>([])
+const allLogs = ref<ActivityLog[]>([])
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 25
+const fetchLimit = ACTIVITY_LOGS_FETCH_LIMIT
 const loading = ref(true)
 const fetchError = ref<string | null>(null)
-const createdCount = computed(() => logs.value.filter(log => log.action === 'created').length)
-const updatedCount = computed(() => logs.value.filter(log => log.action === 'updated').length)
-const deletedCount = computed(() => logs.value.filter(log => log.action === 'deleted').length)
+
+const reachedFetchCap = computed(() => allLogs.value.length >= fetchLimit)
+
+const filteredLogs = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return allLogs.value
+  return allLogs.value.filter((log) => {
+    const dateStr = formatDate(log.createdAt).toLowerCase()
+    const haystack = [
+      log.userDisplayName,
+      log.entityName,
+      log.entityId,
+      log.action,
+      actionLabel(log.action),
+      entityTypeLabel(log.entityType),
+      dateStr,
+    ]
+      .join(' ')
+      .toLowerCase()
+    return haystack.includes(q)
+  })
+})
+
+const paginatedLogs = computed(() => {
+  const list = filteredLogs.value
+  const start = (currentPage.value - 1) * itemsPerPage
+  return list.slice(start, start + itemsPerPage)
+})
+
+const createdCount = computed(() => filteredLogs.value.filter(log => log.action === 'created').length)
+const updatedCount = computed(() => filteredLogs.value.filter(log => log.action === 'updated').length)
+const deletedCount = computed(() => filteredLogs.value.filter(log => log.action === 'deleted').length)
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+watch(allLogs, () => {
+  currentPage.value = 1
+})
 
 function formatDate(d: Date | unknown): string {
   if (!d) return '-'
@@ -293,11 +394,11 @@ async function loadLogs() {
     return
   }
   try {
-    logs.value = await fetchActivityLogs(200)
+    allLogs.value = await fetchActivityLogs(fetchLimit)
   } catch (e: any) {
     console.error('[Activity] Failed to fetch logs:', e)
     fetchError.value = e?.message || 'Permission or network error. Check the console for details.'
-    logs.value = []
+    allLogs.value = []
   } finally {
     loading.value = false
   }

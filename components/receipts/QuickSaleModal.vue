@@ -267,13 +267,13 @@
 
     <template #footer>
       <div class="flex gap-2 justify-end">
-        <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-2xl">Cancel</Button>
         <Button
           size="sm"
           @click="completeSale"
           :loading="isProcessing"
           :disabled="!canCompleteQuickSale"
-          extra-class="!rounded-sm"
+          extra-class="!rounded-2xl"
         >
           Complete Sale ({{ currencySymbol }}{{ formatCurrency(cartTotal) }})
         </Button>

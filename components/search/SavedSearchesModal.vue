@@ -110,8 +110,8 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="showCreateModal = false" extra-class="!rounded-sm">Cancel</Button>
-        <Button variant="primary" size="sm" @click="handleSave" :disabled="!searchName.trim()" extra-class="!rounded-sm">Save</Button>
+        <Button variant="outline" size="sm" @click="showCreateModal = false" extra-class="!rounded-2xl">Cancel</Button>
+        <Button variant="primary" size="sm" @click="handleSave" :disabled="!searchName.trim()" extra-class="!rounded-2xl">Save</Button>
       </template>
     </Modal>
   </Modal>

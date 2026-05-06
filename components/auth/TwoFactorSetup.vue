@@ -195,7 +195,7 @@
           size="sm"
           @click="previousStep"
           :disabled="isVerifying"
-          extra-class="!rounded-sm"
+          extra-class="!rounded-2xl"
         >
           Back
         </Button>
@@ -208,7 +208,7 @@
             size="sm"
             @click="$emit('update:modelValue', false)"
             :disabled="isVerifying"
-            extra-class="!rounded-sm"
+            extra-class="!rounded-2xl"
           >
             Cancel
           </Button>
@@ -217,7 +217,7 @@
             size="sm"
             @click="nextStep"
             :disabled="!selectedMethod"
-            extra-class="!rounded-sm"
+            extra-class="!rounded-2xl"
           >
             Continue
           </Button>
@@ -226,7 +226,7 @@
             size="sm"
             @click="initiateSetup"
             :disabled="isLoading || (selectedMethod === 'phone' && !phoneNumber)"
-            extra-class="!rounded-sm"
+            extra-class="!rounded-2xl"
           >
             <span v-if="isLoading" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -242,7 +242,7 @@
             size="sm"
             @click="verifyCode"
             :disabled="isVerifying || !verificationCode || verificationCode.length !== 6"
-            extra-class="!rounded-sm"
+            extra-class="!rounded-2xl"
           >
             <span v-if="isVerifying" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -257,7 +257,7 @@
             v-if="step === 4"
             size="sm"
             @click="completeSetup"
-            extra-class="!rounded-sm"
+            extra-class="!rounded-2xl"
           >
             Done
           </Button>

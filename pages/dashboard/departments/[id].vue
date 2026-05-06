@@ -53,7 +53,7 @@
                 variant="primary"
                 size="sm"
                 :icon="PlusIcon"
-                extra-class="!rounded-sm"
+                extra-class="!rounded-2xl"
                 @click="openCreateStaffModal"
               >
                 Add staff
@@ -85,7 +85,7 @@
             variant="outline"
             size="sm"
             :icon="TrashIcon"
-            class="!rounded-sm !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
+            class="!rounded-2xl !border-red-200 dark:!border-red-800 !text-red-600 dark:!text-red-400 hover:!bg-red-50 dark:hover:!bg-red-900/20"
             @click="openBulkDeleteStaffModal"
           >
             Delete ({{ selectedStaffForBulk.length }})
@@ -98,7 +98,7 @@
             <div class="flex min-w-0 flex-1 items-start gap-2">
               <button
                 type="button"
-                class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
                 title="Back to departments"
                 @click="navigateTo('/dashboard/departments')"
               >
@@ -128,7 +128,7 @@
               variant="primary"
               size="sm"
               :icon="PlusIcon"
-              extra-class="!rounded-sm"
+              extra-class="!rounded-2xl"
               @click="openCreateStaffModal"
             >
               Add staff
@@ -185,7 +185,7 @@
               variant="primary"
               size="sm"
               :icon="PlusIcon"
-              extra-class="!rounded-sm mt-6"
+              extra-class="!rounded-2xl mt-6"
               @click="openCreateStaffModal"
             >
               Add staff
@@ -398,13 +398,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-2xl">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteStaffConfirmed || isBulkDeletingStaff"
           :icon="TrashIcon"
-          class="!rounded-sm"
+          class="!rounded-2xl"
           @click="handleConfirmBulkDeleteStaff"
         >
           {{ isBulkDeletingStaff ? 'Deleting...' : `Delete ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}

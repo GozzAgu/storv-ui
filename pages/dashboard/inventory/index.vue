@@ -35,7 +35,7 @@
               variant="outline"
               size="sm"
               :icon="ArrowsRightLeftIcon"
-              extra-class="!rounded-sm shrink-0"
+              extra-class="!rounded-2xl shrink-0"
               @click="openCopyFolderTemplatesFromBranchModal"
             >
               Copy from branch
@@ -44,7 +44,7 @@
               variant="primary"
               size="sm"
               :icon="PlusIcon"
-              extra-class="!rounded-sm shrink-0"
+              extra-class="!rounded-2xl shrink-0"
               @click="openCreateFolderModal"
             >
               New folder
@@ -147,7 +147,7 @@
                 variant="outline"
                 size="sm"
                 :icon="TrashIcon"
-                class="!rounded-sm !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
+                class="!rounded-2xl !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
                 @click="openBulkDeleteFoldersModal"
               >
                 Delete
@@ -329,7 +329,7 @@
                   <button
                     type="button"
                     :data-folder-actions-anchor="folder.id"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                     aria-label="Folder options"
                     title="Actions"
                     @click="toggleFolderMenu(folder.id)"
@@ -415,13 +415,13 @@
         </div>
       </div>
       <template #footer>
-        <Button variant="outline" size="sm" @click="showBulkDeleteFoldersModal = false; bulkDeleteFoldersConfirmed = false" class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="showBulkDeleteFoldersModal = false; bulkDeleteFoldersConfirmed = false" class="!rounded-2xl">Cancel</Button>
         <Button
           variant="danger"
           size="sm"
           :disabled="!bulkDeleteFoldersConfirmed || isBulkDeletingFolders"
           :icon="TrashIcon"
-          class="!rounded-sm"
+          class="!rounded-2xl"
           @click="handleConfirmBulkDeleteFolders"
         >
           {{ isBulkDeletingFolders ? 'Deleting...' : `Delete ${selectedFoldersForBulk.length} folder${selectedFoldersForBulk.length !== 1 ? 's' : ''}` }}
@@ -566,12 +566,12 @@
                   :icon="ArrowUpTrayIcon"
                   :loading="importingFolderTemplate"
                   :disabled="importingFolderTemplate"
-                  extra-class="!rounded-sm"
+                  extra-class="!rounded-2xl"
                   @click="triggerFolderTemplateExcelPicker"
                 >
                   Import from Excel
                 </Button>
-                <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-sm">
+                <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-2xl">
                   + Add field
                 </Button>
               </div>
@@ -645,14 +645,14 @@
       </div>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-sm">Cancel</Button>
+        <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-2xl">Cancel</Button>
         <Button
           variant="primary"
           size="sm"
           type="submit"
           :disabled="!isFolderDrawerValid"
           @click="handleSaveFolder"
-          extra-class="!rounded-sm"
+          extra-class="!rounded-2xl"
         >
           {{ editingFolder ? 'Update' : 'Create' }} folder
         </Button>
@@ -670,7 +670,7 @@
       <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
         <div class="flex items-center justify-between">
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Folder name(s)</label>
-          <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-sm">
+          <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-2xl">
             + Add name
           </Button>
         </div>
@@ -702,8 +702,8 @@
         <p v-if="duplicateFolderNamesError" class="text-xs text-red-600 dark:text-red-400">{{ duplicateFolderNamesError }}</p>
       </form>
       <template #footer>
-        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-sm">Cancel</Button>
-        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-sm">
+        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-2xl">Cancel</Button>
+        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-2xl">
           {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} folder${validDuplicateFolderNamesCount !== 1 ? 's' : ''}` }}
         </Button>
       </template>
@@ -819,7 +819,7 @@
           variant="outline"
           size="sm"
           type="button"
-          extra-class="!rounded-sm"
+          extra-class="!rounded-2xl"
           @click="showCopyFolderTemplatesModal = false"
         >
           Cancel
@@ -828,7 +828,7 @@
           variant="primary"
           size="sm"
           type="button"
-          extra-class="!rounded-sm"
+          extra-class="!rounded-2xl"
           :disabled="
             isCopyingFolderTemplates
               || !copyTemplatesSourceStoreId

@@ -13,7 +13,7 @@
     <aside
       :class="[
         /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
-        'fixed inset-y-0 left-0 z-[55] flex flex-col bg-white shadow-[2px_0_10px_-4px_rgba(15,23,42,0.07)] transition-[transform,width] duration-300 ease-in-out dark:!bg-dashboard-card dark:shadow-[2px_0_14px_-4px_rgba(0,0,0,0.45)] lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-[55] flex flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
       ]"
@@ -42,7 +42,7 @@
           v-if="!effectiveSidebarCollapsed"
           type="button"
           @click="sidebarOpen = false"
-          class="group relative rounded-sm p-1.5 text-gray-400 transition-colors hover:bg-white/80 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-900/60 dark:hover:text-gray-200 lg:hidden"
+          class="group relative rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100 lg:hidden"
           aria-label="Close menu"
         >
           <XMarkIcon class="w-4 h-4" stroke-width="2" />
@@ -53,7 +53,7 @@
       <button
         type="button"
         @click="toggleSidebar"
-        class="group absolute top-10 -right-3 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200/70 transition-colors hover:bg-gray-50 hover:text-gray-800 dark:bg-[#161922] dark:text-gray-400 dark:ring-white/10 dark:hover:bg-[#1c2030] dark:hover:text-gray-100 lg:flex"
+        class="group absolute top-10 -right-3 z-10 hidden h-8 w-8 items-center justify-center rounded-full border-0 bg-white/95 text-gray-600 ring-1 ring-inset ring-gray-200/60 backdrop-blur-md transition-all duration-200 hover:bg-white hover:text-gray-900 dark:bg-white/[0.08] dark:text-gray-300 dark:ring-white/12 dark:hover:bg-white/[0.12] dark:hover:text-white lg:flex"
         aria-label="Toggle sidebar"
       >
         <ChevronRightIcon v-if="effectiveSidebarCollapsed" class="w-3.5 h-3.5" stroke-width="2.5" />
@@ -62,35 +62,35 @@
 
       <!-- Navigation -->
       <nav
-        class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-1.5"
-        :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2.5'"
+        class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-2"
+        :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2'"
       >
         <div class="min-h-0 space-y-0.5">
           <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Inventory (expandable) -->
-            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
+            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-1">
               <div
-                :class="[ 'group relative flex w-full items-center justify-between rounded-l-[1px] transition-all duration-200', effectiveSidebarCollapsed ? 'px-1.5 py-1' : 'px-2.5 py-1.5', isActive(item.href) ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold dark:hover:border-primary-400/50' ]"
+                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-2.5 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
               >
                 <NuxtLink
                   :to="item.href"
-                  class="flex items-center flex-1 min-w-0"
+                  class="flex min-w-0 flex-1 items-center gap-2.5"
                   :class="{ 'pointer-events-none opacity-50': switchingStore }"
                 >
                   <component
-                    :is="item.icon"
-                    :class="[ 'w-4 h-4 shrink-0 transition-colors', effectiveSidebarCollapsed ? '' : 'mr-2.5', isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100' ]"
-                    :stroke-width="isActive(item.href) ? 2.25 : 1.5"
+                    :is="isActive(item.href) ? item.iconSolid : item.icon"
+                    :class="[ 'w-4 h-4 shrink-0 transition-colors', isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100' ]"
+                    :stroke-width="isActive(item.href) ? undefined : 1.5"
                   />
-                  <span class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
+                  <span class="truncate text-[13px] leading-snug" :class="isActive(item.href) ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'">
                     {{ item.name }}
                   </span>
                 </NuxtLink>
                 <button
                   type="button"
                   @click.stop="inventoryExpanded = !inventoryExpanded"
-                  class="shrink-0 rounded-full p-1 transition-colors hover:text-gray-700 dark:hover:text-gray-200"
-                  :class="isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
+                  class="shrink-0 rounded-lg p-1.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                  :class="isActive(item.href) ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'"
                   :aria-expanded="inventoryExpanded"
                   aria-label="Toggle inventory folders"
                 >
@@ -99,16 +99,20 @@
                   </span>
                 </button>
               </div>
-              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1.5 dark:border-white/[0.06]">
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="ml-1.5 space-y-0.5 border-l border-gray-200/50 py-0.5 pl-3 dark:border-white/[0.08]">
                 <NuxtLink
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
-                  :class="[ 'group relative flex items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors', route.params.id === folder.id ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+                  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
                 >
-                  <FolderIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === folder.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === folder.id ? 2.25 : 1.75" />
-                  <span class="truncate flex-1" :class="route.params.id === folder.id ? 'font-bold' : 'group-hover:font-semibold'">{{ folder.name }}</span>
-                  <ArrowRightIcon v-if="route.params.id === folder.id" class="w-3.5 h-3.5 shrink-0 text-primary-500 dark:text-primary-400" stroke-width="2" />
+                  <FolderIcon
+                    v-if="route.params.id !== folder.id"
+                    class="w-3.5 h-3.5 shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-500 dark:group-hover:text-gray-200"
+                    :stroke-width="1.75"
+                  />
+                  <FolderIconSolid v-else class="w-3.5 h-3.5 shrink-0 text-gray-900 dark:text-gray-100" />
+                  <span class="flex-1 truncate leading-snug" :class="route.params.id === folder.id ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-normal group-hover:text-gray-800 dark:group-hover:text-gray-100'">{{ folder.name }}</span>
                 </NuxtLink>
               </div>
             </div>
@@ -118,14 +122,14 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[ 'group relative flex items-center rounded-l-[1px] transition-[background-color,box-shadow,transform,color] duration-200 ease-out', effectiveSidebarCollapsed ? 'w-full justify-center py-2 active:scale-[0.97]' : 'gap-2.5 px-2.5 py-1.5', isActive(item.href) ? effectiveSidebarCollapsed ? 'mx-0.5 overflow-visible rounded-xl bg-linear-to-br from-primary-500/12 via-primary-500/7 to-primary-700/11 text-primary-700 shadow-sm shadow-primary-900/5 ring-1 ring-inset ring-white/80 dark:from-primary-400/16 dark:via-primary-500/10 dark:to-primary-950/55 dark:text-primary-100 dark:shadow-none dark:ring-white/14' : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : effectiveSidebarCollapsed ? 'mx-0.5 overflow-visible rounded-xl text-gray-600 hover:bg-gray-100/95 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/7 dark:hover:text-gray-100' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2.5 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-2.5', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
             >
               <component
-                :is="item.icon"
-                :class="[ 'w-4 h-4 shrink-0 transition-colors', effectiveSidebarCollapsed ? '' : 'mr-0', isActive(item.href) ? 'text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100' ]"
-                :stroke-width="isActive(item.href) ? 2.25 : 1.75"
+                :is="isActive(item.href) ? item.iconSolid : item.icon"
+                :class="[ 'w-4 h-4 shrink-0 transition-colors', effectiveSidebarCollapsed ? '' : 'mr-0', isActive(item.href) ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100' ]"
+                :stroke-width="isActive(item.href) ? undefined : 1.75"
               />
-              <span v-if="!effectiveSidebarCollapsed" class="truncate text-[13px]" :class="isActive(item.href) ? 'font-bold text-primary-800 dark:text-primary-200' : 'font-medium text-gray-700 group-hover:font-semibold dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100'">
+              <span v-if="!effectiveSidebarCollapsed" class="truncate text-[13px] leading-snug" :class="isActive(item.href) ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'">
                 {{ item.name }}
               </span>
               <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
@@ -134,24 +138,24 @@
             </NuxtLink>
           </template>
           
-          <!-- Stores (super admins) - Fathom-style section -->
+          <!-- Stores (super admins) -->
           <div
             v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
-            class="mt-2 rounded-sm bg-gray-100/90 p-1 dark:bg-black/25"
+            class="mt-2 rounded-xl bg-gray-50/95 p-1.5 ring-1 ring-inset ring-gray-200/50 dark:bg-white/[0.04] dark:ring-white/[0.08]"
           >
             <button
               type="button"
               @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="group relative flex w-full items-center justify-between rounded-sm px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
+              class="group relative flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200"
               :aria-expanded="!storesSectionCollapsed"
             >
               <span>Branches</span>
-              <ChevronDownIcon class="w-3 h-3 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
+              <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="storesSectionCollapsed ? '' : 'rotate-180'" stroke-width="2" />
             </button>
-            <div v-if="!storesSectionCollapsed" class="mt-0.5 space-y-0.5 pl-0">
+            <div v-if="!storesSectionCollapsed" class="mt-1 space-y-0.5 pl-0">
               <template v-for="store in storesList" :key="store.id">
                 <div
-                  :class="[ 'flex items-center justify-between rounded-l-[1px] px-2 py-1 transition-all duration-200', route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : currentStore?.id === store.id ? 'border-l-[5px] border-transparent pl-2 font-medium text-gray-900 dark:text-gray-100' : store.id !== storesStore.currentStoreId ? 'opacity-50' : 'group border-l-[5px] border-transparent pl-2 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:hover:border-primary-400/50 dark:hover:text-gray-100' ]"
+                  :class="[ 'flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-200', store.id !== storesStore.currentStoreId ? 'opacity-40' : '', store.id === storesStore.currentStoreId && !(route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
                 >
                   <NuxtLink
                     :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
@@ -160,77 +164,84 @@
                     @click.prevent="store.id !== storesStore.currentStoreId ? null : null"
                   >
                     <BuildingStorefrontIcon
+                      v-if="!(route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments'))"
                       class="h-4 w-4 shrink-0"
-                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'text-primary-600 dark:text-primary-300' : currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'"
-                      :stroke-width="
-                        route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
-                          ? 2.25
-                          : 1.75
-                      "
+                      :class="currentStore?.id === store.id ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-800 dark:group-hover:text-gray-200'"
+                      :stroke-width="1.75"
+                      aria-hidden="true"
+                    />
+                    <BuildingStorefrontIconSolid
+                      v-else
+                      class="h-4 w-4 shrink-0 text-gray-900 dark:text-gray-100"
                       aria-hidden="true"
                     />
                     <span
-                      class="truncate text-[13px]"
-                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'font-bold text-primary-800 dark:text-primary-200' : currentStore?.id === store.id ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-medium text-gray-700 group-hover:font-semibold group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100'"
+                      class="truncate text-[13px] leading-snug"
+                      :class="route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments') ? 'font-bold text-gray-900 dark:text-gray-100' : currentStore?.id === store.id ? 'font-medium text-gray-900 dark:text-gray-100' : 'font-normal text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-100'"
                     >
                       {{ store.name }}
                     </span>
-                    <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" title="Active store"></span>
+                    <span v-if="currentStore?.id === store.id || store.id === storesStore.currentStoreId" class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-emerald-500/25" title="Active store"></span>
                     <span v-if="store.id !== storesStore.currentStoreId" class="text-[9px] text-gray-400 dark:text-gray-500 italic shrink-0">Inactive</span>
                   </NuxtLink>
                   <button
                     v-if="store.id === storesStore.currentStoreId"
                     type="button"
                     @click.stop="toggleStoreExpanded(store.id)"
-                    class="group relative shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    class="group relative shrink-0 rounded-lg p-1 text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-gray-800 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
                     :aria-expanded="!!expandedStores[store.id]"
                     aria-label="Toggle departments"
                   >
                     <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedStores[store.id] ? 'rotate-180' : ''" stroke-width="2" />
                   </button>
                 </div>
-                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="space-y-0.5 border-l border-gray-200/40 py-0.5 pl-3 pr-1 dark:border-white/[0.06]">
+                <div v-if="expandedStores[store.id] && store.id === storesStore.currentStoreId" class="ml-0.5 space-y-0.5 border-l border-gray-200/50 py-0.5 pl-2.5 pr-0.5 dark:border-white/[0.08]">
                   <template v-for="department in getDepartmentsForStore(store.id)" :key="department.id">
-                    <div class="group flex items-center justify-between gap-1 rounded-l-[1px]">
+                    <div class="group flex items-center justify-between gap-1 rounded-lg">
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
-                        class="group relative flex min-w-0 flex-1 items-center gap-2 rounded-l-[1px] px-2 py-1 text-[13px] transition-colors"
-                        :class="[ route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+                        class="group relative flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors"
+                        :class="[ route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? '' : 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                       >
-                        <BuildingOfficeIcon class="w-3.5 h-3.5 shrink-0" :class="route.params.id === department.id ? 'text-primary-600 dark:text-primary-300' : 'text-gray-500 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-200'" :stroke-width="route.params.id === department.id ? 2.25 : 1.75" />
-                        <span class="truncate flex-1" :class="route.params.id === department.id ? 'font-bold' : 'group-hover:font-semibold'">{{ department.name }}</span>
+                        <BuildingOfficeIcon
+                          v-if="!(route.params.id === department.id && route.path.startsWith('/dashboard/departments'))"
+                          class="w-3.5 h-3.5 shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-500 dark:group-hover:text-gray-200"
+                          :stroke-width="1.75"
+                        />
+                        <BuildingOfficeIconSolid v-else class="w-3.5 h-3.5 shrink-0 text-gray-900 dark:text-gray-100" />
+                        <span class="flex-1 truncate leading-snug" :class="route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-normal group-hover:text-gray-800 dark:group-hover:text-gray-100'">{{ department.name }}</span>
                       </NuxtLink>
                       <button
                         type="button"
                         @click.stop="toggleDepartmentExpanded(department.id)"
-                        class="group relative shrink-0 rounded-full p-1 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        class="group relative shrink-0 rounded-lg p-1 text-gray-500 transition-colors hover:bg-black/[0.04] hover:text-gray-800 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
                         :aria-expanded="expandedDepartments[department.id]"
                         aria-label="Toggle staff list"
                       >
                         <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="expandedDepartments[department.id] ? 'rotate-180' : ''" stroke-width="2" />
                       </button>
                     </div>
-                    <div v-if="expandedDepartments[department.id]" class="pl-5 pr-1.5 pb-0.5 space-y-0.5">
+                    <div v-if="expandedDepartments[department.id]" class="space-y-0.5 pb-0.5 pl-4 pr-0.5">
                       <template v-if="getStaffForDepartment(department.id).length > 0">
                         <NuxtLink
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center gap-1.5 rounded-l-[1px] px-2 py-0.5 text-[13px] text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                          class="group relative flex items-center gap-2 rounded-md px-2 py-1 text-[12px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
                         >
-                          <span class="w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0"></span>
+                          <span class="h-1 w-1 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
                         </NuxtLink>
                       </template>
-                      <p v-else class="px-2.5 py-1 text-[13px] text-gray-400 dark:text-gray-500">No staff</p>
+                      <p v-else class="rounded-md px-2 py-1 text-[12px] text-gray-400 dark:text-gray-500">No staff</p>
                     </div>
                   </template>
                   <NuxtLink
                     v-if="getDepartmentsForStore(store.id).length === 0"
                     :to="`/dashboard/stores/${store.id}/departments`"
-                    class="block px-2.5 py-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                    class="mt-0.5 block rounded-lg px-2.5 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-500/10 dark:text-primary-400 dark:hover:bg-primary-500/10"
                   >
-                    View departments →
+                    View departments
                   </NuxtLink>
                 </div>
               </template>
@@ -247,22 +258,23 @@
 
       <!-- Bottom: user + sign out -->
       <div
-        class="shrink-0 border-t border-gray-200/25 dark:border-white/[0.05]"
-        :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2 pt-2' : 'px-2.5 pb-2.5 pt-2'"
+        class="shrink-0 border-t border-gray-200/35 bg-white/30 backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.02]"
+        :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2.5 pt-2.5' : 'px-2.5 pb-3 pt-2.5'"
       >
         <div
-          class="rounded-sm bg-gray-50/95 p-2 dark:bg-white/[0.04]"
+          class="rounded-xl bg-gray-50/95 p-2.5 ring-1 ring-inset ring-gray-200/50 dark:bg-white/[0.05] dark:ring-white/10"
           :class="effectiveSidebarCollapsed ? 'px-1.5' : ''"
         >
           <div class="flex items-center gap-2.5" :class="effectiveSidebarCollapsed ? 'relative justify-center group' : ''">
             <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-100"
+              class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-[11px] font-bold text-white ring-1 ring-inset ring-white/25 dark:ring-white/15"
             >
-              {{ userInitials }}
+              <span class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 to-transparent" aria-hidden="true" />
+              <span class="relative">{{ userInitials }}</span>
             </div>
             <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
-              <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ userName }}</p>
-              <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
+              <p class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100">{{ userName }}</p>
+              <p class="mt-0.5 truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400">{{ userEmail }}</p>
             </div>
             <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
               {{ userName }}
@@ -271,16 +283,16 @@
           </div>
           <button
             @click="handleSignOut"
-            :class="[ 'mt-2 flex w-full items-center justify-center gap-1.5 rounded-sm py-2 text-xs font-medium transition-colors', effectiveSidebarCollapsed ? 'relative group py-2' : 'px-2', 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100' ]"
+            :class="[ 'mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium transition-colors', effectiveSidebarCollapsed ? 'relative group' : 'px-1', 'text-gray-700 hover:bg-gray-100/95 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.07] dark:hover:text-white' ]"
             :title="effectiveSidebarCollapsed ? undefined : 'Sign out'"
           >
-            <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
+            <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 opacity-80" stroke-width="1.75" />
             <span v-if="!effectiveSidebarCollapsed">Sign out</span>
             <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
               Sign out
             </DashboardHoverTooltip>
           </button>
-          <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'">
+          <p class="mt-2 text-[9px] tabular-nums tracking-wide text-gray-400 dark:text-gray-500" :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'">
             V{{ appVersion }}
           </p>
         </div>
@@ -607,13 +619,26 @@ import {
   ChevronRightIcon,
   ArrowRightOnRectangleIcon,
   FolderIcon,
-  ArrowRightIcon,
   ChartBarIcon,
   ArrowsRightLeftIcon,
   ShieldCheckIcon,
   BookOpenIcon,
   BuildingStorefrontIcon,
 } from '@heroicons/vue/24/outline'
+import {
+  HomeIcon as HomeIconSolid,
+  CubeIcon as CubeIconSolid,
+  ReceiptPercentIcon as ReceiptPercentIconSolid,
+  ChartBarIcon as ChartBarIconSolid,
+  ShieldCheckIcon as ShieldCheckIconSolid,
+  ArrowsRightLeftIcon as ArrowsRightLeftIconSolid,
+  BookOpenIcon as BookOpenIconSolid,
+  Cog6ToothIcon as Cog6ToothIconSolid,
+  UserCircleIcon as UserCircleIconSolid,
+  FolderIcon as FolderIconSolid,
+  BuildingStorefrontIcon as BuildingStorefrontIconSolid,
+  BuildingOfficeIcon as BuildingOfficeIconSolid,
+} from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
@@ -754,8 +779,8 @@ const sidebarLogoSrc = computed(() => {
 
 const sidebarLogoBarClass = computed(() => {
   /** Fixed height: logo uses scale inside this strip so the row never grows. */
-  const bar =
-    'flex h-12 min-h-[3rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/25 px-3 dark:border-white/[0.05]'
+    const bar =
+    'flex h-12 min-h-[3rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/40 bg-gray-50/90 px-3 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]'
   return [bar]
 })
 
@@ -781,19 +806,20 @@ const navigation: Array<{
   name: string
   href: string
   icon: any
+  iconSolid: any
   requiresSuperAdmin?: boolean
   requiresManagerOrSuperAdmin?: boolean
   subscriptionFeature?: SubscriptionFeature
 }> = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, subscriptionFeature: 'dashboard' },
-  { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, subscriptionFeature: 'inventory' },
-  { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, subscriptionFeature: 'receipts' },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, subscriptionFeature: 'analytics' },
-  { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
-  { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
-  { name: 'Help center', href: '/dashboard/help', icon: BookOpenIcon },
-  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, subscriptionFeature: 'settings' },
-  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, subscriptionFeature: 'profile' },
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
+  { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
+  { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
+  { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
+  { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, iconSolid: ShieldCheckIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
+  { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, iconSolid: ArrowsRightLeftIconSolid, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
+  { name: 'Help center', href: '/dashboard/help', icon: BookOpenIcon, iconSolid: BookOpenIconSolid },
+  { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, iconSolid: Cog6ToothIconSolid, subscriptionFeature: 'settings' },
+  { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, iconSolid: UserCircleIconSolid, subscriptionFeature: 'profile' },
 ]
 
 // Filter navigation based on user role and subscription plan

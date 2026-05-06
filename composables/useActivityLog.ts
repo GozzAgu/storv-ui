@@ -67,8 +67,11 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
   }
 }
 
+/** Default max documents to load; client-side search/pagination slice this set. */
+export const ACTIVITY_LOGS_FETCH_LIMIT = 500
+
 /** Fetch recent activity logs for the current store. */
-export async function fetchActivityLogs(limitCount: number = 100): Promise<ActivityLog[]> {
+export async function fetchActivityLogs(limitCount: number = ACTIVITY_LOGS_FETCH_LIMIT): Promise<ActivityLog[]> {
   const db = useFirestore().getFirestoreInstance()
   if (!db) return []
   let userId = await getQueryUserId()

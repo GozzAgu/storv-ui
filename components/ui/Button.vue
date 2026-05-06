@@ -3,7 +3,7 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'group relative inline-flex items-center justify-center overflow-hidden rounded-xl border-0 font-semibold tracking-tight cursor-pointer transition-all duration-200 ease-out',
+      'group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border-0 font-semibold tracking-tight cursor-pointer transition-all duration-200 ease-out',
       'focus:outline-none disabled:opacity-45 disabled:cursor-not-allowed',
       'active:scale-[0.98] motion-reduce:active:scale-100',
       sizeClasses,

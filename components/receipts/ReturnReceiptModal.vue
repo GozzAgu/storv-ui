@@ -135,11 +135,11 @@
     </div>
 
     <template #footer>
-      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-sm">Cancel</Button>
+      <Button variant="outline" size="sm" @click="handleCancel" class="w-full sm:w-auto !rounded-2xl">Cancel</Button>
       <Button
         variant="primary"
         size="sm"
-        extra-class="!rounded-sm"
+        extra-class="!rounded-2xl"
         :disabled="!confirmed || isProcessing"
         @click="handleConfirmReturn"
         :icon="ArrowPathIcon"

@@ -44,7 +44,7 @@
 
       <!-- Tabs -->
       <nav
-        class="flex flex-wrap gap-8 border-b border-gray-200/80 dark:border-gray-800"
+        class="flex flex-wrap gap-8"
         aria-label="Multi-store sync views"
       >
         <button
@@ -220,7 +220,7 @@
               variant="primary"
               size="sm"
               :icon="ArrowsRightLeftIcon"
-              extra-class="!rounded-sm font-medium"
+              extra-class="!rounded-2xl font-medium"
             >
               {{ isTransferring ? 'Creating...' : 'Request transfer' }}
             </Button>
@@ -278,7 +278,7 @@
               variant="success"
               size="sm"
               :icon="ArrowDownTrayIcon"
-              extra-class="!rounded-sm font-medium"
+              extra-class="!rounded-2xl font-medium"
             >
               Export report
             </Button>
@@ -417,13 +417,13 @@
               </span>
                   <div v-if="isTransferActionable(transfer)" class="flex flex-wrap gap-1.5 justify-end">
                     <template v-if="transfer.status === 'pending_approval'">
-                      <Button variant="primary" size="sm" extra-class="!rounded-sm font-medium" @click="approveTransfer(transfer)">Approve</Button>
-                      <Button variant="outline" size="sm" extra-class="!rounded-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
+                      <Button variant="primary" size="sm" extra-class="!rounded-2xl font-medium" @click="approveTransfer(transfer)">Approve</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
                     </template>
                     <template v-else-if="transfer.status === 'in_transit'">
-                      <Button variant="outline" size="sm" extra-class="!rounded-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" :icon="TruckIcon" @click="openTrackingModal(transfer)">Tracking</Button>
-                      <Button variant="primary" size="sm" extra-class="!rounded-sm font-medium" @click="completeTransfer(transfer)">Complete</Button>
-                      <Button variant="outline" size="sm" extra-class="!rounded-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" :icon="TruckIcon" @click="openTrackingModal(transfer)">Tracking</Button>
+                      <Button variant="primary" size="sm" extra-class="!rounded-2xl font-medium" @click="completeTransfer(transfer)">Complete</Button>
+                      <Button variant="outline" size="sm" extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="cancelTransfer(transfer)">Cancel</Button>
                     </template>
             </div>
           </div>
@@ -460,8 +460,8 @@
           </div>
         </div>
         <template #footer>
-          <Button variant="outline" size="sm" extra-class="!rounded-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="showTrackingModal = false">Cancel</Button>
-          <Button variant="primary" size="sm" extra-class="!rounded-sm font-medium" @click="saveTracking">Save</Button>
+          <Button variant="outline" size="sm" extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100" @click="showTrackingModal = false">Cancel</Button>
+          <Button variant="primary" size="sm" extra-class="!rounded-2xl font-medium" @click="saveTracking">Save</Button>
         </template>
       </Modal>
     </template>
