@@ -108,6 +108,14 @@ export default defineEventHandler(async (event) => {
   }
 })
 
+function escapeHtml(text: string): string {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 function generateReceiptEmailHTML(receiptData: any): string {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -200,7 +208,26 @@ function generateReceiptEmailHTML(receiptData: any): string {
         ${receiptData.notes ? `
           <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
             <p style="margin: 0; font-size: 12px; color: #666;">Notes</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">${receiptData.notes}</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">${escapeHtml(String(receiptData.notes))}</p>
+          </div>
+        ` : ''}
+
+        ${receiptData.salesTerms ? `
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 0.05em;">Terms & conditions (sales)</p>
+            <p style="margin: 0; font-size: 11px; color: #555; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(String(receiptData.salesTerms))}</p>
+          </div>
+        ` : ''}
+        ${receiptData.refundPolicy ? `
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 0.05em;">Refund policy</p>
+            <p style="margin: 0; font-size: 11px; color: #555; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(String(receiptData.refundPolicy))}</p>
+          </div>
+        ` : ''}
+        ${receiptData.warrantyPolicy ? `
+          <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0 0 8px 0; font-size: 11px; font-weight: bold; color: #444; text-transform: uppercase; letter-spacing: 0.05em;">Warranty policy</p>
+            <p style="margin: 0; font-size: 11px; color: #555; white-space: pre-wrap; line-height: 1.5;">${escapeHtml(String(receiptData.warrantyPolicy))}</p>
           </div>
         ` : ''}
 

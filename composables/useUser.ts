@@ -13,6 +13,10 @@ export interface StoreSettings {
     prefix?: string
     nextNumber?: number
     autoPrint?: boolean
+    /** Printed / emailed receipts; set from Profile (super admin). */
+    salesTerms?: string
+    refundPolicy?: string
+    warrantyPolicy?: string
   }
   payment?: {
     paymentMethods?: string[]

@@ -136,6 +136,75 @@
         </div>
         </div>
 
+        <!-- Super admin: receipt legal / policy text (shown on all receipts) -->
+        <div v-if="!isStaff" class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
+            <div>
+              <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Receipt terms & policies</h2>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Sales, refunds, and warranty, shown on printed and PDF receipts for your store
+              </p>
+            </div>
+            <div v-if="!isEditingReceiptPolicies">
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                @click="startEditingReceiptPolicies"
+              >
+                Edit
+              </button>
+            </div>
+            <div v-else class="flex gap-1.5">
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                @click="cancelEditingReceiptPolicies"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors"
+                @click="saveReceiptPolicies"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+          <div class="p-3 sm:p-4 space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Sales terms & conditions</label>
+              <textarea
+                v-model="receiptPoliciesForm.salesTerms"
+                rows="4"
+                :disabled="!isEditingReceiptPolicies"
+                :class="policyTextareaClass"
+                placeholder="e.g. All sales are final unless otherwise stated; prices include/exclude VAT…"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Refund policy</label>
+              <textarea
+                v-model="receiptPoliciesForm.refundPolicy"
+                rows="4"
+                :disabled="!isEditingReceiptPolicies"
+                :class="policyTextareaClass"
+                placeholder="e.g. Refunds within 7 days with receipt; opened items may be excluded…"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Warranty policy</label>
+              <textarea
+                v-model="receiptPoliciesForm.warrantyPolicy"
+                rows="4"
+                :disabled="!isEditingReceiptPolicies"
+                :class="policyTextareaClass"
+                placeholder="e.g. Manufacturer warranty applies; service warranty terms…"
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
           <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
             <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
@@ -300,7 +369,7 @@
                 <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
               </div>
               <div class="pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings →</NuxtLink>
+                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings</NuxtLink>
               </div>
             </div>
             <div v-else class="text-center py-8">
@@ -783,7 +852,7 @@ import {
   CurrencyDollarIcon,
 } from '@heroicons/vue/24/outline'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
-import { useUser } from '~/composables/useUser'
+import { useUser, type StoreDetails } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
 import { usePreferences, currencies, regions } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
@@ -794,6 +863,7 @@ import { useAuthStore } from '~/stores/auth'
 import { usePermissions } from '~/composables/usePermissions'
 import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
+import { useUserStore } from '~/stores/user'
 import type { Staff } from '~/composables/useStaff'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
@@ -836,6 +906,26 @@ const storeInfo = reactive({
 // Backup for cancel
 const backupData = reactive({ ...profileData })
 
+/** Receipt policy text (Firestore: storeDetails.settings.receipt). Super admin only. */
+const receiptPoliciesForm = reactive({
+  salesTerms: '',
+  refundPolicy: '',
+  warrantyPolicy: '',
+})
+const backupReceiptPolicies = reactive({
+  salesTerms: '',
+  refundPolicy: '',
+  warrantyPolicy: '',
+})
+const isEditingReceiptPolicies = ref(false)
+
+const policyTextareaClass = computed(() => [
+  'w-full px-3 py-2 text-xs rounded-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-h-[5rem]',
+  isEditingReceiptPolicies.value
+    ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400'
+    : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed',
+])
+
 // Edit state
 const isEditingPersonalInfo = ref(false)
 const isLoadingProfile = ref(true)
@@ -850,6 +940,7 @@ const inventoryStore = useInventoryStore()
 const customersStore = useCustomersStore()
 const staffStore = useStaffStore()
 const storesStore = useStoresStore()
+const userStore = useUserStore()
 
 /** Resolved staff record for signed-in staff (department, store, etc.) */
 const currentStaffMember = ref<Staff | null>(null)
@@ -898,6 +989,14 @@ const loadProfileData = async () => {
         storeInfo.storePhone = userData.storeDetails.storePhone || ''
         storeInfo.storeEmail = userData.storeDetails.storeEmail || ''
         storeInfo.storeDescription = userData.storeDetails.storeDescription || ''
+      }
+
+      if (userData.role !== 'staff') {
+        const r = userData.storeDetails?.settings?.receipt
+        receiptPoliciesForm.salesTerms = r?.salesTerms || ''
+        receiptPoliciesForm.refundPolicy = r?.refundPolicy || ''
+        receiptPoliciesForm.warrantyPolicy = r?.warrantyPolicy || ''
+        Object.assign(backupReceiptPolicies, { ...receiptPoliciesForm })
       }
 
       if (userData.role === 'staff' && !storeInfo.storeName && storesStore.currentStore?.name) {
@@ -1295,6 +1394,51 @@ const cancelEditing = (section: string) => {
     isEditingPersonalInfo.value = false
     // Restore backup
     Object.assign(profileData, { ...backupData })
+  }
+}
+
+const startEditingReceiptPolicies = () => {
+  Object.assign(backupReceiptPolicies, { ...receiptPoliciesForm })
+  isEditingReceiptPolicies.value = true
+}
+
+const cancelEditingReceiptPolicies = () => {
+  Object.assign(receiptPoliciesForm, { ...backupReceiptPolicies })
+  isEditingReceiptPolicies.value = false
+}
+
+const saveReceiptPolicies = async () => {
+  if (!currentUser.value || isStaff.value) {
+    toast.error('Only the account owner can update receipt policies')
+    return
+  }
+  try {
+    const userData = await getUserDocument(currentUser.value.uid)
+    const prevDetails: StoreDetails = userData?.storeDetails || {
+      storeName: profileData.businessName.trim() || userData?.name || 'Store',
+    }
+    await updateUserDocument(currentUser.value.uid, {
+      storeDetails: {
+        ...prevDetails,
+        settings: {
+          ...prevDetails.settings,
+          receipt: {
+            ...prevDetails.settings?.receipt,
+            salesTerms: receiptPoliciesForm.salesTerms.trim(),
+            refundPolicy: receiptPoliciesForm.refundPolicy.trim(),
+            warrantyPolicy: receiptPoliciesForm.warrantyPolicy.trim(),
+          },
+        },
+      },
+    })
+    await userStore.fetchUserData(currentUser.value.uid)
+    Object.assign(backupReceiptPolicies, { ...receiptPoliciesForm })
+    isEditingReceiptPolicies.value = false
+    toast.success('Receipt policies saved. They will appear on new receipts when viewed or printed.')
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to save receipt policies'
+    console.error('Error saving receipt policies:', error)
+    toast.error(msg)
   }
 }
 
