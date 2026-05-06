@@ -35,6 +35,8 @@
           </div>
         </div>
 
+        <SellScreenNoteBanner v-if="currentStep >= 1" />
+
         <!-- Step 1: Select Folder -->
         <div v-if="currentStep === 0" class="flex min-h-0 flex-1 flex-col gap-3">
           <div class="shrink-0 space-y-3">
@@ -377,16 +379,35 @@
                 >
                   + Add Payment Method
                 </button>
-                <div class="flex justify-between items-center p-2.5 bg-gray-50 dark:bg-gray-700/50 rounded-sm">
-                  <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Total:</span>
-                  <div class="text-right">
-                    <span class="text-xs font-semibold" :class="splitPaymentsTotal === receiptTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                      {{ formatCurrency(splitPaymentsTotal) }} / {{ formatCurrency(receiptTotal) }}
-                    </span>
-                    <p v-if="splitPaymentsTotal !== receiptTotal" class="text-[10px] text-red-600 dark:text-red-400 mt-0.5">
-                      Amount must equal total
-                    </p>
+                <div
+                  class="rounded-sm border p-2.5 space-y-1.5"
+                  :class="{
+                    'border-emerald-200/80 bg-emerald-50/90 dark:border-emerald-800/50 dark:bg-emerald-950/25': splitPaymentBalanceUi.tone === 'ok',
+                    'border-amber-200/80 bg-amber-50/90 dark:border-amber-800/50 dark:bg-amber-950/20': splitPaymentBalanceUi.tone === 'short',
+                    'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/20': splitPaymentBalanceUi.tone === 'over',
+                  }"
+                >
+                  <div class="flex justify-between items-start gap-2">
+                    <span class="text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Balance</span>
+                    <div class="text-right">
+                      <p
+                        class="text-xs font-semibold tabular-nums"
+                        :class="{
+                          'text-emerald-700 dark:text-emerald-300': splitPaymentBalanceUi.tone === 'ok',
+                          'text-amber-800 dark:text-amber-200': splitPaymentBalanceUi.tone === 'short',
+                          'text-red-700 dark:text-red-300': splitPaymentBalanceUi.tone === 'over',
+                        }"
+                      >
+                        {{ splitPaymentBalanceUi.headline }}
+                      </p>
+                      <p class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 max-w-[14rem] ml-auto leading-snug">
+                        {{ splitPaymentBalanceUi.sub }}
+                      </p>
+                    </div>
                   </div>
+                  <p class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums pt-1 border-t border-gray-200/80 dark:border-gray-600/60">
+                    Allocated {{ formatCurrency(splitPaymentsTotal) }} of {{ formatCurrency(receiptTotal) }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -662,6 +683,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
+import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
@@ -1130,6 +1152,32 @@ const receiptTotal = computed(() => calculateTotal())
 
 const splitPaymentsTotal = computed(() => {
   return splitPayments.value.reduce((sum, payment) => sum + (payment.amount || 0), 0)
+})
+
+const SPLIT_PAY_EPS = 0.01
+/** Positive = still to allocate, negative = over, ~0 = balanced */
+const splitPaymentRemaining = computed(() => {
+  const left = receiptTotal.value - splitPaymentsTotal.value
+  return Math.round(left * 100) / 100
+})
+
+const splitPaymentBalanceUi = computed(() => {
+  const rem = splitPaymentRemaining.value
+  if (Math.abs(rem) < SPLIT_PAY_EPS) {
+    return { tone: 'ok' as const, headline: 'Balanced', sub: 'Payment lines match the receipt total.' }
+  }
+  if (rem > 0) {
+    return {
+      tone: 'short' as const,
+      headline: `${formatCurrency(rem)} left`,
+      sub: `Allocate the rest so the sum equals ${formatCurrency(receiptTotal.value)}.`,
+    }
+  }
+  return {
+    tone: 'over' as const,
+    headline: `Over by ${formatCurrency(Math.abs(rem))}`,
+    sub: 'Reduce an amount or remove a line so the total matches the receipt.',
+  }
 })
 
 const addSplitPayment = () => {

@@ -3,7 +3,7 @@
     <button
       type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="store-switch-trigger group relative flex h-9 max-w-[11rem] items-center gap-2 rounded-md border-0 bg-transparent py-1 pl-1 pr-1.5 text-left outline-none transition-colors hover:bg-gray-100/90 focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:hover:bg-white/[0.06] sm:max-w-[14rem] lg:max-w-[17.5rem]"
+      class="store-switch-trigger group relative flex h-9 max-w-44 items-center gap-2 rounded-md border-0 bg-transparent py-1 pl-1 pr-1.5 text-left outline-none transition-colors hover:bg-gray-100/90 focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:hover:bg-white/6 sm:max-w-56 lg:max-w-70"
       :aria-expanded="dropdownOpen"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
@@ -13,7 +13,7 @@
         :class="
           currentStore
             ? 'ring-1 ring-white/20 dark:ring-white/10'
-            : 'bg-gray-100 ring-1 ring-gray-200/90 dark:bg-white/[0.08] dark:ring-white/[0.08]'
+            : 'bg-gray-100 ring-1 ring-gray-200/90 dark:bg-white/8 dark:ring-white/8'
         "
         :style="currentStore ? iconSurfaceStyleFor(currentStore) : undefined"
         aria-hidden="true"
@@ -74,31 +74,35 @@
     </button>
 
     <Transition
-      enter-active-class="transition ease-out duration-200"
-      enter-from-class="transform opacity-0 scale-[0.98] translate-y-1"
-      enter-to-class="transform opacity-100 scale-100 translate-y-0"
-      leave-active-class="transition ease-in duration-150"
-      leave-from-class="transform opacity-100 scale-100 translate-y-0"
-      leave-to-class="transform opacity-0 scale-[0.98] translate-y-1"
+      enter-active-class="transition duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      enter-from-class="translate-y-1 scale-[0.98] opacity-0"
+      enter-to-class="translate-y-0 scale-100 opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="translate-y-0 scale-100 opacity-100"
+      leave-to-class="translate-y-1 scale-[0.98] opacity-0"
     >
       <div
         v-if="dropdownOpen"
-        class="store-switch-panel fixed left-4 right-4 top-20 z-[50] flex max-h-[calc(100vh-7rem)] w-auto max-w-none flex-col overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-1.5 sm:max-h-[min(24rem,calc(100vh-8rem))] sm:w-[min(17rem,calc(100vw-1.5rem))] sm:max-w-none"
+        class="store-switch-panel fixed left-1/2 top-18 z-50 flex max-h-[calc(100vh-6rem)] w-[min(calc(100vw-1.5rem),14rem)] max-w-[min(calc(100vw-1.5rem),14rem)] -translate-x-1/2 flex-col overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:h-auto sm:w-[min(13.25rem,calc(100vw-1rem))] sm:max-w-[min(13.25rem,calc(100vw-1rem))] sm:translate-x-0"
         @click.stop
       >
-        <div class="store-switch-panel__surface flex max-h-full min-h-0 flex-col overflow-hidden py-1.5">
-          <div class="store-switch-panel__header px-3 pb-2 pt-0.5">
-            <p class="text-[11px] font-medium uppercase tracking-wide text-gray-500 dark:text-gray-500">
+        <div
+          class="store-switch-panel__surface relative flex max-h-full min-h-0 flex-col overflow-hidden rounded-xl border border-gray-200/95 bg-white py-1 shadow-md shadow-zinc-900/8 ring-1 ring-black/5 dark:border-gray-700/90 dark:bg-zinc-900 dark:shadow-lg dark:shadow-black/45 dark:ring-white/8"
+        >
+          <div class="store-switch-panel__header px-2.5 pb-1.5 pt-2">
+            <p
+              class="text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500"
+            >
               {{ isStaff ? 'Your store' : 'Stores' }}
             </p>
           </div>
 
           <div
-            class="store-switch-panel__scroll flex-1 overflow-y-auto px-1.5 min-h-0 overscroll-contain"
-            :class="{ 'max-h-[10rem]': !loading && stores.length > 3 }"
+            class="store-switch-panel__scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-1.5 pb-0.5"
+            :class="{ 'max-h-36': !loading && stores.length > 3 }"
           >
-            <div v-if="loading" class="px-2 py-4 text-center">
-              <div class="inline-flex items-center gap-2 text-[13px] text-gray-500 dark:text-gray-400">
+            <div v-if="loading" class="px-2 py-3 text-center">
+              <div class="inline-flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                 <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                   <path
@@ -111,54 +115,54 @@
               </div>
             </div>
 
-            <div v-else-if="stores.length === 0" class="px-2 py-4 text-center text-[13px] text-gray-500 dark:text-gray-400">
+            <div v-else-if="stores.length === 0" class="px-2 py-3 text-center text-xs text-zinc-500 dark:text-zinc-400">
               No stores available
             </div>
 
-            <div v-else class="space-y-0.5 pb-1">
+            <div v-else class="space-y-0.5 pb-0.5">
               <button
                 v-for="store in stores"
                 :key="store.id"
                 type="button"
                 @click="switchStore(store.id)"
-                class="store-switch-row group/row flex w-full items-center gap-2.5 rounded-md px-2 py-2.5 text-left transition-colors duration-150"
+                class="store-switch-row group/row flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150"
                 :class="
                   currentStore?.id === store.id
-                    ? 'store-switch-row--active bg-gray-100/95 dark:bg-white/[0.07]'
-                    : 'hover:bg-gray-50/95 dark:hover:bg-white/[0.04]'
+                    ? 'store-switch-row--active bg-primary-500/8 ring-1 ring-primary-500/15 dark:bg-white/6 dark:ring-white/10'
+                    : 'hover:bg-black/3 dark:hover:bg-white/4'
                 "
               >
                 <span
-                  class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-white shadow-sm ring-1 ring-white/20 dark:ring-white/10"
+                  class="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white shadow-sm ring-1 ring-white/25 dark:ring-white/10"
                   :style="iconSurfaceStyleFor(store)"
                   aria-hidden="true"
                 >
                   <BuildingStorefrontIcon
-                    class="h-[17px] w-[17px] shrink-0 text-white/95 drop-shadow-[0_1px_1px_rgb(0_0_0/0.12)]"
+                    class="h-3.5 w-3.5 shrink-0 text-white/95 drop-shadow-[0_1px_1px_rgb(0_0_0/0.12)]"
                     stroke-width="1.6"
                   />
                 </span>
                 <div class="min-w-0 flex-1">
                   <p
-                    class="truncate text-[13px] font-medium leading-snug text-gray-900 dark:text-gray-100"
-                    :class="currentStore?.id === store.id ? 'font-semibold' : ''"
+                    class="truncate text-xs font-medium leading-snug tracking-tight text-zinc-800 dark:text-zinc-100"
+                    :class="currentStore?.id === store.id ? 'font-semibold text-zinc-900 dark:text-white' : ''"
                   >
                     {{ store.name || 'Unnamed store' }}
                   </p>
                   <div
                     v-if="currentStore?.id === store.id || store.isActive === false"
-                    class="mt-0.5 flex items-center gap-1.5"
+                    class="mt-0.5 flex items-center gap-1"
                   >
                     <span
                       v-if="currentStore?.id === store.id"
-                      class="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-600 dark:text-gray-400"
+                      class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600/85 dark:text-emerald-400/90"
                     >
                       <span class="store-switch-row-dot store-switch-row-dot--active" />
                       Active
                     </span>
                     <span
                       v-else
-                      class="inline-flex items-center gap-1.5 text-[11px] font-medium text-amber-700/90 dark:text-amber-400/95"
+                      class="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700/85 dark:text-amber-400/90"
                     >
                       <span class="store-switch-row-dot store-switch-row-dot--inactive" />
                       Inactive
@@ -171,15 +175,15 @@
 
           <div
             v-if="!isStaff"
-            class="store-switch-panel__footer mt-1 border-t border-gray-200/90 px-1.5 pt-1.5 dark:border-white/[0.08]"
+            class="store-switch-panel__footer mt-0.5 border-t border-black/6 px-1.5 pb-1 pt-1.5 dark:border-white/7"
           >
             <NuxtLink
               to="/dashboard/settings"
-              class="store-switch-footer-link flex items-center gap-2.5 rounded-md px-2 py-2.5 text-[13px] font-medium text-gray-600 transition-colors duration-150 hover:bg-gray-50/95 dark:text-gray-400 dark:hover:bg-white/[0.04]"
+              class="store-switch-footer-link flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-zinc-500 transition-colors duration-150 hover:bg-black/4 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-zinc-300"
               @click="dropdownOpen = false"
             >
               <svg
-                class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+                class="h-3.5 w-3.5 shrink-0 text-zinc-400 dark:text-zinc-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -300,45 +304,28 @@ const switchStore = async (storeId: string) => {
 
 <style scoped>
 .store-switch-status-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 9999px;
-  background: rgb(52 211 153);
-  box-shadow: 0 0 0 2px rgb(255 255 255);
+  background: rgb(16 185 129 / 0.95);
+  box-shadow: 0 0 0 1.5px rgb(255 255 255);
 }
 .dark .store-switch-status-dot {
-  box-shadow: 0 0 0 2px rgb(15 23 42);
-}
-
-.store-switch-panel__surface {
-  border-radius: 6px;
-  border: 1px solid rgb(229 231 235 / 0.95);
-  background: rgb(255 255 255);
-  box-shadow:
-    0 10px 40px -12px rgb(0 0 0 / 0.22),
-    0 4px 16px -4px rgb(0 0 0 / 0.1);
-}
-
-.dark .store-switch-panel__surface {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(22 23 29);
-  box-shadow:
-    0 12px 48px -10px rgb(0 0 0 / 0.65),
-    0 0 0 1px rgb(0 0 0 / 0.35);
+  box-shadow: 0 0 0 1.5px rgb(9 12 20);
 }
 
 .store-switch-row-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 9999px;
   flex-shrink: 0;
 }
 
 .store-switch-row-dot--active {
-  background: rgb(52 211 153);
+  background: rgb(16 185 129 / 0.9);
 }
 
 .store-switch-row-dot--inactive {
-  background: rgb(251 146 60);
+  background: rgb(251 146 60 / 0.95);
 }
 </style>

@@ -57,6 +57,8 @@ export interface Receipt {
   swapInItemId?: string // Inventory item ID of the swapped-in device
   /** Credit value of the trade-in (sum of currency fields on swap-in item); amount due = items total − this */
   swapInCredit?: number
+  /** When payment is split across methods; amounts should sum to `total` */
+  splitPayments?: Array<{ method: string; amount: number }>
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string // Super admin UID (for fetching/ownership)

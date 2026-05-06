@@ -1,6 +1,6 @@
 <template>
   <div
-    class="inv-folder-uisverse group relative flex h-full min-h-[78px] w-full cursor-pointer flex-col overflow-hidden rounded-sm bg-white shadow-[0_1px_2px_rgb(0_0_0_/_0.06)] transition-all duration-300 ease-out hover:-translate-y-0.5 active:scale-[0.98] dark:!bg-dashboard-card dark:shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] sm:min-h-[82px]"
+    class="inv-folder-uisverse group relative flex h-full min-h-[78px] w-full cursor-pointer flex-col overflow-hidden rounded-sm bg-white shadow-[0_1px_2px_rgb(0_0_0/0.06)] transition-all duration-300 ease-out hover:-translate-y-0.5 active:scale-[0.98] dark:bg-dashboard-card! dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] sm:min-h-[82px]"
     @click="$emit('click')"
   >
     <slot name="checkbox" />

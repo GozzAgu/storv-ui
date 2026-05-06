@@ -14,6 +14,7 @@
 
     <template #body>
       <div class="space-y-4">
+        <SellScreenNoteBanner />
         <!-- Barcode Scanner Toggle -->
         <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-sm border border-blue-200 dark:border-blue-800">
           <div class="flex items-center gap-3">
@@ -99,7 +100,7 @@
               <div class="flex-1">
                 <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
                 <p class="text-xs text-gray-600 dark:text-gray-400">
-                  Qty: {{ item.quantity }} × ${{ formatCurrency(item.price) }}
+                  Qty: {{ item.quantity }} × {{ currencySymbol }}{{ formatCurrency(item.price) }}
                 </p>
               </div>
               <div class="flex items-center gap-3">
@@ -158,18 +159,97 @@
 
         <!-- Payment -->
         <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</span>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Payment</span>
+            <Checkbox v-model="useSplitPayment" label="Split payment" size="sm" />
           </div>
-          <div class="grid grid-cols-2 gap-2">
+
+          <div v-if="!useSplitPayment" class="grid grid-cols-2 gap-2">
             <button
-              v-for="method in ['Cash', 'Card', 'Mobile Money']"
+              v-for="method in ['Cash', 'Card', 'Mobile Money', 'Bank Transfer']"
               :key="method"
+              type="button"
               @click="paymentMethod = method"
               :class="[ 'px-4 py-2 rounded-sm text-sm font-medium transition-colors', paymentMethod === method ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600' ]"
             >
               {{ method }}
             </button>
+          </div>
+
+          <div v-else class="space-y-2">
+            <div
+              v-for="(payment, index) in splitPayments"
+              :key="index"
+              class="flex items-center gap-2 flex-wrap"
+            >
+              <select
+                v-model="payment.method"
+                class="flex-1 min-w-[8rem] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Method</option>
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+              </select>
+              <div class="relative w-32">
+                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">{{ currencySymbol }}</span>
+                <input
+                  v-model.number="payment.amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  :max="cartTotal - splitPaymentsTotal + payment.amount"
+                  class="w-full pl-6 pr-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
+                  placeholder="0.00"
+                />
+              </div>
+              <button
+                v-if="splitPayments.length > 1"
+                type="button"
+                class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm"
+                @click="removeSplitPayment(index)"
+              >
+                <XMarkIcon class="w-4 h-4" />
+              </button>
+            </div>
+            <button
+              type="button"
+              class="w-full px-3 py-1.5 text-xs text-primary-500 dark:text-primary-400 border border-primary-300 dark:border-primary-600 rounded-sm"
+              @click="addSplitPayment"
+            >
+              + Add payment line
+            </button>
+            <div
+              class="rounded-sm border p-2.5 space-y-1.5"
+              :class="{
+                'border-emerald-200/80 bg-emerald-50/90 dark:border-emerald-800/50 dark:bg-emerald-950/25': splitPaymentBalanceUi.tone === 'ok',
+                'border-amber-200/80 bg-amber-50/90 dark:border-amber-800/50 dark:bg-amber-950/20': splitPaymentBalanceUi.tone === 'short',
+                'border-red-200/80 bg-red-50/90 dark:border-red-800/50 dark:bg-red-950/20': splitPaymentBalanceUi.tone === 'over',
+              }"
+            >
+              <div class="flex justify-between items-start gap-2">
+                <span class="text-[10px] font-medium uppercase tracking-wide text-gray-500">Balance</span>
+                <div class="text-right">
+                  <p
+                    class="text-sm font-semibold tabular-nums"
+                    :class="{
+                      'text-emerald-700 dark:text-emerald-300': splitPaymentBalanceUi.tone === 'ok',
+                      'text-amber-800 dark:text-amber-200': splitPaymentBalanceUi.tone === 'short',
+                      'text-red-700 dark:text-red-300': splitPaymentBalanceUi.tone === 'over',
+                    }"
+                  >
+                    {{ splitPaymentBalanceUi.headline }}
+                  </p>
+                  <p class="text-[10px] text-gray-600 dark:text-gray-400 mt-0.5 max-w-[16rem] ml-auto leading-snug">
+                    {{ splitPaymentBalanceUi.sub }}
+                  </p>
+                </div>
+              </div>
+              <p class="text-[10px] text-gray-500 tabular-nums pt-1 border-t border-gray-200/80 dark:border-gray-600/60">
+                Allocated {{ formatCurrency(splitPaymentsTotal) }} of {{ formatCurrency(cartTotal) }}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -178,7 +258,7 @@
           <div class="flex items-center justify-between">
             <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Total</span>
             <span class="text-2xl font-bold text-primary-500 dark:text-primary-400">
-              ${{ formatCurrency(cartTotal) }}
+              {{ currencySymbol }}{{ formatCurrency(cartTotal) }}
             </span>
           </div>
         </div>
@@ -188,8 +268,14 @@
     <template #footer>
       <div class="flex gap-2 justify-end">
         <Button variant="outline" size="sm" @click="$emit('update:modelValue', false)" extra-class="!rounded-sm">Cancel</Button>
-        <Button size="sm" @click="completeSale" :loading="isProcessing" :disabled="cartItems.length === 0 || !paymentMethod || !selectedFolderId" extra-class="!rounded-sm">
-          Complete Sale (${{ formatCurrency(cartTotal) }})
+        <Button
+          size="sm"
+          @click="completeSale"
+          :loading="isProcessing"
+          :disabled="!canCompleteQuickSale"
+          extra-class="!rounded-sm"
+        >
+          Complete Sale ({{ currencySymbol }}{{ formatCurrency(cartTotal) }})
         </Button>
       </div>
     </template>
@@ -208,7 +294,9 @@ import {
   ChevronDownIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
+import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useStoresStore } from '~/stores/stores'
@@ -236,7 +324,9 @@ const storesStore = useStoresStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences } = usePreferences()
+
+const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const { success: showSuccessToast, error: showErrorToast, warning: showWarningToast } = useAppToast()
 
 const folders = computed(() => inventoryStore.folders)
@@ -253,13 +343,65 @@ const cartItems = ref<Array<{ id: string; name: string; price: number; quantity:
 const showCustomerInfo = ref(false)
 const customerName = ref('')
 const customerPhone = ref('')
-const paymentMethod = ref<'Cash' | 'Card' | 'Mobile Money' | string>('Cash')
+const paymentMethod = ref<'Cash' | 'Card' | 'Mobile Money' | 'Bank Transfer' | string>('Cash')
+const useSplitPayment = ref(false)
+const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 const isProcessing = ref(false)
 
 let html5QrCode: any = null
 
 const cartTotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+})
+
+const splitPaymentsTotal = computed(() =>
+  splitPayments.value.reduce((sum, p) => sum + (p.amount || 0), 0),
+)
+
+const SPLIT_PAY_EPS = 0.01
+const splitPaymentRemaining = computed(() => {
+  const left = cartTotal.value - splitPaymentsTotal.value
+  return Math.round(left * 100) / 100
+})
+
+const splitPaymentBalanceUi = computed(() => {
+  const rem = splitPaymentRemaining.value
+  if (Math.abs(rem) < SPLIT_PAY_EPS) {
+    return { tone: 'ok' as const, headline: 'Balanced', sub: 'Payment lines match the sale total.' }
+  }
+  if (rem > 0) {
+    return {
+      tone: 'short' as const,
+      headline: `${formatCurrency(rem)} left`,
+      sub: `Enter the rest so the sum equals ${formatCurrency(cartTotal.value)}.`,
+    }
+  }
+  return {
+    tone: 'over' as const,
+    headline: `Over by ${formatCurrency(Math.abs(rem))}`,
+    sub: 'Adjust amounts so the split total matches the sale.',
+  }
+})
+
+const addSplitPayment = () => {
+  splitPayments.value.push({ method: '', amount: 0 })
+}
+
+const removeSplitPayment = (index: number) => {
+  splitPayments.value.splice(index, 1)
+  if (splitPayments.value.length === 0) {
+    splitPayments.value.push({ method: '', amount: 0 })
+  }
+}
+
+const canCompleteQuickSale = computed(() => {
+  if (cartItems.value.length === 0 || !selectedFolderId.value) return false
+  if (useSplitPayment.value) {
+    if (splitPayments.value.length === 0) return false
+    if (splitPayments.value.some((p) => !p.method || p.amount <= 0)) return false
+    return Math.abs(splitPaymentRemaining.value) < SPLIT_PAY_EPS
+  }
+  return !!paymentMethod.value
 })
 
 const toggleScanner = async () => {
@@ -437,8 +579,8 @@ const removeItem = (index: number) => {
 }
 
 const completeSale = async () => {
-  if (cartItems.value.length === 0 || !paymentMethod.value) return
-  
+  if (!canCompleteQuickSale.value) return
+
   isProcessing.value = true
   try {
     const receiptNumber = `REC-${Date.now().toString().slice(-6)}`
@@ -496,12 +638,13 @@ const completeSale = async () => {
       const receiptData: any = {
         receiptNumber,
         customerName: customerName.value || 'Walk-in Customer',
+        customerEmail: '',
         customerPhone: customerPhone.value || '',
         date: new Date(),
         items: receiptItems,
         itemsCount: cartItems.value.reduce((sum, ci) => sum + ci.quantity, 0),
         total: cartTotal.value,
-        paymentMethod: paymentMethod.value || 'Cash',
+        paymentMethod: useSplitPayment.value ? 'Split Payment' : (paymentMethod.value || 'Cash'),
         status: 'completed' as const,
         notes: 'Quick Sale',
         folderId: selectedFolderId.value || '',
@@ -511,7 +654,14 @@ const completeSale = async () => {
         storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
         createdByUserName, // User who created the receipt
       }
-      
+
+      if (useSplitPayment.value && splitPayments.value.length > 0) {
+        receiptData.splitPayments = splitPayments.value.map((p) => ({
+          method: p.method,
+          amount: p.amount,
+        }))
+      }
+
       await receiptsStore.createReceipt(receiptData)
     
     showSuccessToast('Sale completed successfully!')
@@ -530,6 +680,8 @@ const resetForm = () => {
   customerName.value = ''
   customerPhone.value = ''
   paymentMethod.value = 'Cash'
+  useSplitPayment.value = false
+  splitPayments.value = [{ method: '', amount: 0 }]
   manualBarcode.value = ''
   showCustomerInfo.value = false
   stopScanner()

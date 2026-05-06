@@ -436,6 +436,21 @@
         </div>
 
         <div>
+          <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+            Sell screen note
+          </label>
+          <p class="mb-1.5 text-[10px] text-gray-500 dark:text-gray-400">
+            Shown on Quick Sale and when adding line items / checkout for this branch (e.g. today’s promo, price list).
+          </p>
+          <textarea
+            v-model="storeForm.sellScreenNote"
+            rows="3"
+            class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500/30 outline-none resize-y"
+            placeholder="e.g. Promo: 10% off accessories today"
+          />
+        </div>
+
+        <div>
           <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
           <input
             v-model="storeForm.address"
@@ -707,6 +722,7 @@ const newlyCreatedStoreId = ref<string | null>(null)
 const storeForm = ref({
   name: '',
   description: '',
+  sellScreenNote: '',
   address: '',
   phone: '',
   email: '',
@@ -857,6 +873,7 @@ const closeStoreModal = () => {
   storeForm.value = {
     name: '',
     description: '',
+    sellScreenNote: '',
     address: '',
     phone: '',
     email: '',
@@ -869,6 +886,7 @@ const editStore = (store: Store) => {
   storeForm.value = {
     name: store.name,
     description: store.description || '',
+    sellScreenNote: store.sellScreenNote || '',
     address: store.address || '',
     phone: store.phone || '',
     email: store.email || '',
@@ -894,14 +912,23 @@ const handleStoreSubmit = async () => {
 
   isSubmittingStore.value = true
   try {
+    const storePayload = {
+      name: storeForm.value.name,
+      description: storeForm.value.description,
+      sellScreenNote: storeForm.value.sellScreenNote.trim(),
+      address: storeForm.value.address,
+      phone: storeForm.value.phone,
+      email: storeForm.value.email,
+      isActive: storeForm.value.isActive,
+    }
     if (editingStore.value) {
-      await storesStore.updateStore(editingStore.value.id, storeForm.value)
+      await storesStore.updateStore(editingStore.value.id, storePayload)
       toast.success('Store updated successfully')
       closeStoreModal()
     } else {
       const wasFirstStore = storesStore.stores.length === 0
       const logoUrl = userStore.userData?.storeLogoUrl || ''
-      const newStoreId = await storesStore.createStore({ ...storeForm.value, logoUrl })
+      const newStoreId = await storesStore.createStore({ ...storePayload, logoUrl })
       toast.success('Store created successfully')
       closeStoreModal()
       await storesStore.fetchStores()

@@ -176,7 +176,18 @@
                   <span class="text-gray-600">-{{ formatCurrency(swapCreditAmount) }}</span>
                 </div>
               </template>
-              <div class="flex justify-between border-t border-gray-200 pt-2 text-[12px] leading-tight">
+              <div v-if="receipt.splitPayments?.length" class="space-y-1 border-t border-gray-200 pt-2 text-[12px] leading-tight">
+                <span class="text-gray-500">Payment</span>
+                <div
+                  v-for="(sp, spIdx) in receipt.splitPayments"
+                  :key="spIdx"
+                  class="flex justify-between gap-2"
+                >
+                  <span class="capitalize text-gray-600">{{ sp.method }}</span>
+                  <span class="tabular-nums text-gray-900">{{ formatCurrency(sp.amount) }}</span>
+                </div>
+              </div>
+              <div v-else class="flex justify-between border-t border-gray-200 pt-2 text-[12px] leading-tight">
                 <span class="text-gray-500">Payment</span>
                 <span class="capitalize text-gray-900">{{ receipt.paymentMethod }}</span>
               </div>
@@ -944,7 +955,13 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   if (showSwapCreditLine.value) {
     writeTotalRow('Swap credit (trade-in)', `-${formatPdfCurrency(swapCreditAmount.value)}`)
   }
-  writeTotalRow('Payment', receipt.paymentMethod)
+  if (receipt.splitPayments?.length) {
+    receipt.splitPayments.forEach((sp) => {
+      writeTotalRow(`Payment (${sp.method})`, formatPdfCurrency(sp.amount))
+    })
+  } else {
+    writeTotalRow('Payment', receipt.paymentMethod)
+  }
   writeTotalRow(receiptTotalLabel.value, formatPdfCurrency(receipt.total), true)
 
   y += 3
