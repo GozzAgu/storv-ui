@@ -342,7 +342,7 @@
             <div class="flex-1">
                 <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Use serial numbers for products</span>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
-                  One serial per product (quantity fixed at 1). Turn off to allow editable quantity for bulk products.
+                  When on: one row per unit with a serial; no quantity field. When off: quantity on each row counts stock for that product.
               </p>
             </div>
           </Checkbox>
@@ -1172,7 +1172,32 @@ const LOCKED_TEMPLATE_FIELD_NAMES = new Set([
   'serialNumber',
   'brand',
   'model',
+  'quantity',
+  'stock',
+  'qty',
 ])
+
+const STOCK_LIKE_FIELD_NAMES = new Set(['stock', 'quantity', 'qty'])
+
+function templateFieldIsStockLike(f: TemplateField): boolean {
+  return STOCK_LIKE_FIELD_NAMES.has(f.name.toLowerCase())
+}
+
+/** Bulk folders: one quantity field drives availability (counts units in this row). */
+function ensureBulkQuantityTemplateField(fields: TemplateField[]): void {
+  if (fields.some(templateFieldIsStockLike)) return
+  fields.push({
+    id: `field-quantity-${Date.now()}`,
+    name: 'quantity',
+    label: 'Quantity',
+    type: 'number',
+    required: true,
+  })
+}
+
+function stripStockLikeTemplateFields(fields: TemplateField[]): TemplateField[] {
+  return fields.filter((f) => !templateFieldIsStockLike(f))
+}
 
 function isLockedTemplateField(field: TemplateField): boolean {
   return LOCKED_TEMPLATE_FIELD_NAMES.has(field.name)
@@ -1228,11 +1253,11 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
     editableFields.value = getDefaultFields()
     selectedTemplateId.value = 'custom'
     
-    // If serial numbers is already checked, add serialNo and product model (brand) fields
     if (folderForm.hasSerialNumbers) {
+      editableFields.value = stripStockLikeTemplateFields(editableFields.value)
       const brandFieldExists = editableFields.value.some(f => f.name === 'brand')
       const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
-      
+
       if (!serialNoFieldExists) {
         editableFields.value.push({
           id: `field-serialNo-${Date.now()}`,
@@ -1242,7 +1267,7 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
           required: true,
         })
       }
-      
+
       if (!brandFieldExists) {
         editableFields.value.push({
           id: `field-brand-${Date.now()}`,
@@ -1252,13 +1277,16 @@ watch(() => showCreateFolderModal.value, (isOpen) => {
           required: true,
         })
       }
+    } else {
+      ensureBulkQuantityTemplateField(editableFields.value)
     }
   }
 })
 
-// Watch hasSerialNumbers to auto-add/remove serialNo and product model (brand) fields
+// Watch hasSerialNumbers: serial mode → serial + product model, no quantity; bulk → quantity, no serial columns
 watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
   if (hasSerial) {
+    editableFields.value = stripStockLikeTemplateFields(editableFields.value)
     const serialNoFieldExists = editableFields.value.some(f => f.name === 'serialNo' || f.name === 'serialNumber')
     if (!serialNoFieldExists) {
       const serialNoField: TemplateField = {
@@ -1270,7 +1298,7 @@ watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
       }
       editableFields.value.push(serialNoField)
     }
-    
+
     const brandFieldExists = editableFields.value.some(f => f.name === 'brand')
     if (!brandFieldExists) {
       const brandField: TemplateField = {
@@ -1283,13 +1311,13 @@ watch(() => folderForm.hasSerialNumbers, (hasSerial) => {
       editableFields.value.push(brandField)
     }
   } else {
-    // Remove serialNo, brand, and model fields when unchecked
-    editableFields.value = editableFields.value.filter(f => 
-      f.name !== 'serialNo' && 
-      f.name !== 'serialNumber' && 
-      f.name !== 'brand' && 
+    editableFields.value = editableFields.value.filter(f =>
+      f.name !== 'serialNo' &&
+      f.name !== 'serialNumber' &&
+      f.name !== 'brand' &&
       f.name !== 'model'
     )
+    ensureBulkQuantityTemplateField(editableFields.value)
   }
 })
 
@@ -1579,7 +1607,13 @@ const handleEditFolder = (folder: InventoryFolder) => {
   } else {
     editableFields.value = getDefaultFields()
   }
-  
+
+  if (folderForm.hasSerialNumbers) {
+    editableFields.value = stripStockLikeTemplateFields(editableFields.value)
+  } else {
+    ensureBulkQuantityTemplateField(editableFields.value)
+  }
+
   // Ensure default fields are always included when editing
   const defaultFieldNames = ['name', 'price']
   const existingFieldNames = editableFields.value.map(f => f.name)
@@ -1829,6 +1863,11 @@ const handleImportFolderTemplateExcel = async (e: Event) => {
       hasSerialNumbers: folderForm.hasSerialNumbers,
     })
     editableFields.value = fields
+    if (folderForm.hasSerialNumbers) {
+      editableFields.value = stripStockLikeTemplateFields(editableFields.value)
+    } else {
+      ensureBulkQuantityTemplateField(editableFields.value)
+    }
     await nextTick()
     editableFields.value.forEach((f) => {
       if (!isLockedTemplateField(f)) {

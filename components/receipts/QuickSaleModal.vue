@@ -218,6 +218,7 @@ import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
+import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 
 interface Props {
   modelValue: boolean
@@ -240,6 +241,9 @@ const { success: showSuccessToast, error: showErrorToast, warning: showWarningTo
 
 const folders = computed(() => inventoryStore.folders)
 const selectedFolderId = ref<string>('')
+const selectedFolder = computed(() =>
+  selectedFolderId.value ? inventoryStore.getFolderById(selectedFolderId.value) : undefined
+)
 const isScanning = ref(false)
 const scannerReady = ref(false)
 const scannerContainer = ref<HTMLElement | null>(null)
@@ -361,13 +365,33 @@ const searchByBarcode = async () => {
     // Check if item is already in cart
     const existingIndex = cartItems.value.findIndex(ci => ci.id === foundItem.id)
     if (existingIndex >= 0 && cartItems.value[existingIndex]) {
+      const usesSerial = selectedFolder.value?.hasSerialNumbers
+      if (!usesSerial) {
+        const stock = resolveBulkStockFieldAndValue(foundItem as Record<string, unknown>, selectedFolder.value)
+        const maxQty = stock?.value ?? 0
+        if (cartItems.value[existingIndex].quantity + 1 > maxQty) {
+          showWarningToast('Not enough stock')
+          manualBarcode.value = ''
+          return
+        }
+      }
       cartItems.value[existingIndex].quantity++
     } else {
-      // Check if item is sold
-      if (foundItem.dateOut) {
-        showErrorToast('This product has already been sold')
-        manualBarcode.value = ''
-        return
+      const usesSerial = selectedFolder.value?.hasSerialNumbers
+      if (usesSerial) {
+        if (foundItem.dateOut) {
+          showErrorToast('This product has already been sold')
+          manualBarcode.value = ''
+          return
+        }
+      } else {
+        const stock = resolveBulkStockFieldAndValue(foundItem as Record<string, unknown>, selectedFolder.value)
+        const onHand = stock?.value ?? 0
+        if (onHand <= 0) {
+          showErrorToast('This product is out of stock')
+          manualBarcode.value = ''
+          return
+        }
       }
       
       // Get item price
@@ -432,10 +456,16 @@ const completeSale = async () => {
     }))
     
       const itemIds = cartItems.value.map(ci => ci.id)
-      
-      // Update dateOut for sold items
+      const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers ?? false
+
       if (selectedFolderId.value && itemIds.length > 0) {
-        await inventoryStore.updateItemsDateOut(selectedFolderId.value, itemIds)
+        const saleLines = cartItems.value.map((ci) => ({
+          itemId: ci.id,
+          quantitySold: hasSerialNumbers ? 1 : ci.quantity,
+        }))
+        await inventoryStore.applyReceiptSaleToInventory(selectedFolderId.value, saleLines, {
+          hasSerialNumbers,
+        })
       }
       
       // Get current store and user information

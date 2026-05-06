@@ -1228,10 +1228,15 @@ const handleCreateReceipt = async () => {
       }
     })
     
-    // Update dateOut for selected items
     const itemIds = selectedItems.value.map(si => si.id)
     if (itemIds.length > 0 && selectedFolder.value) {
-      await inventoryStore.updateItemsDateOut(selectedFolder.value.id, itemIds)
+      const saleLines = selectedItems.value.map(si => ({
+        itemId: si.id,
+        quantitySold: hasSerialNumbers ? 1 : si.quantity,
+      }))
+      await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
+        hasSerialNumbers,
+      })
     }
     
     // Handle swap-in: Create inventory item for swapped-in device

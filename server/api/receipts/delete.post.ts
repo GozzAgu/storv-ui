@@ -3,6 +3,7 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
 import { requireAuth, requireStoreManageAccess } from '~/server/utils/store-auth'
 import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete'
+import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 
 interface DeleteReceiptBody {
   ownerUserId?: string
@@ -45,6 +46,8 @@ export default defineEventHandler(async (event) => {
 
     const receipt = receiptSnap.data() as {
       itemIds?: string[]
+      items?: Array<{ itemId?: string; quantity?: number }>
+      folderId?: string
       total?: number
       createdBy?: string
       storeId?: string
@@ -55,20 +58,63 @@ export default defineEventHandler(async (event) => {
     }
 
     const itemIds = Array.isArray(receipt.itemIds) ? receipt.itemIds : []
-    for (const itemId of itemIds) {
-      const itemRef = adminDb
+
+    let folderData: Record<string, unknown> | undefined
+    if (receipt.folderId) {
+      const folderRef = adminDb
         .collection('users')
         .doc(ownerUserId)
         .collection('stores')
         .doc(storeId)
-        .collection('inventoryItems')
-        .doc(itemId)
-      const itemSnap = await tx.get(itemRef)
-      if (!itemSnap.exists) continue
-      tx.update(itemRef, {
-        dateOut: FieldValue.delete(),
-        updatedAt: FieldValue.serverTimestamp(),
-      })
+        .collection('inventoryFolders')
+        .doc(receipt.folderId)
+      const folderSnap = await tx.get(folderRef)
+      if (folderSnap.exists) {
+        folderData = folderSnap.data() as Record<string, unknown>
+      }
+    }
+
+    const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)?.hasSerialNumbers
+
+    const receiptLines = Array.isArray(receipt.items) ? receipt.items : []
+    const qtyRestoreByItem = new Map<string, number>()
+    for (const line of receiptLines) {
+      if (!line?.itemId) continue
+      const q = Number(line.quantity ?? 0)
+      if (q <= 0) continue
+      qtyRestoreByItem.set(line.itemId, (qtyRestoreByItem.get(line.itemId) ?? 0) + q)
+    }
+
+    const inventoryItemsCol = () =>
+      adminDb.collection('users').doc(ownerUserId).collection('stores').doc(storeId).collection('inventoryItems')
+
+    const templateFields = (folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined)?.template
+      ?.fields
+
+    if (!usesSerialNumbers && qtyRestoreByItem.size > 0) {
+      for (const [invItemId, addQty] of qtyRestoreByItem) {
+        const itemRef = inventoryItemsCol().doc(invItemId)
+        const itemSnap = await tx.get(itemRef)
+        if (!itemSnap.exists) continue
+        const raw = itemSnap.data() as Record<string, unknown>
+        const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
+        if (!resolved) continue
+        tx.update(itemRef, {
+          [resolved.fieldKey]: resolved.value + addQty,
+          dateOut: FieldValue.delete(),
+          updatedAt: FieldValue.serverTimestamp(),
+        })
+      }
+    } else {
+      for (const itemId of itemIds) {
+        const itemRef = inventoryItemsCol().doc(itemId)
+        const itemSnap = await tx.get(itemRef)
+        if (!itemSnap.exists) continue
+        tx.update(itemRef, {
+          dateOut: FieldValue.delete(),
+          updatedAt: FieldValue.serverTimestamp(),
+        })
+      }
     }
 
     const customersQuery = adminDb

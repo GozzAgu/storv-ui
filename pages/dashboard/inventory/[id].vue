@@ -1758,12 +1758,20 @@ function templateFieldsHaveStockLike(fields: TemplateField[] | undefined): boole
 
 const SYNTH_STOCK_FIELD_ID = 'storvv-synthetic-stock'
 
-/** Template fields shown in forms/table, plus auto Quantity (stock) when folder is bulk (no serials). */
+/** Template fields shown in forms/table. Serial folders: no quantity/stock fields. Bulk: quantity drives availability. */
 const effectiveTemplateFields = computed((): TemplateField[] => {
   const raw = folder.value?.template?.fields
   if (!raw?.length) return []
-  const fields = raw.map((f) => ({ ...f }))
-  if (folder.value?.hasSerialNumbers || templateFieldsHaveStockLike(fields)) {
+  let fields = raw.map((f) => ({ ...f }))
+
+  if (folder.value?.hasSerialNumbers) {
+    return fields.filter(
+      (f) =>
+        !STOCK_LIKE_NAMES.includes(f.name.toLowerCase() as (typeof STOCK_LIKE_NAMES)[number]),
+    )
+  }
+
+  if (templateFieldsHaveStockLike(fields)) {
     return fields
   }
   const synthetic: TemplateField = {

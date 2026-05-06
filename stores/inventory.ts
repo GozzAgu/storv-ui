@@ -36,6 +36,7 @@ import {
   clearInventoryItemQueryCaches,
   invalidateFolderItemCaches,
 } from '~/utils/inventory-items-firestore'
+import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -1821,6 +1822,108 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
+    /**
+     * After a sale: serial folders mark each row sold (dateOut).
+     * Non-serial folders decrement the quantity/stock field and never set dateOut when stock remains.
+     */
+    async applyReceiptSaleToInventory(
+      folderId: string,
+      lines: { itemId: string; quantitySold: number }[],
+      options: { hasSerialNumbers: boolean }
+    ) {
+      if (options.hasSerialNumbers) {
+        const itemIds = lines.map((l) => l.itemId)
+        await this.updateItemsDateOut(folderId, itemIds)
+        return
+      }
+
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
+      let folder = this.getFolderById(folderId)
+      if (!folder) {
+        folder = (await this.fetchFolder(folderId)) ?? undefined
+      }
+      if (!folder) {
+        throw new Error('Folder not found')
+      }
+
+      const merged = new Map<string, number>()
+      for (const line of lines) {
+        merged.set(line.itemId, (merged.get(line.itemId) ?? 0) + line.quantitySold)
+      }
+
+      try {
+        for (const [itemId, qtySold] of merged) {
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+          const snap = await getDoc(itemRef)
+          if (!snap.exists()) {
+            throw new Error(`Inventory item not found: ${itemId}`)
+          }
+          const data = { id: itemId, ...(snap.data() as Record<string, unknown>) }
+          const resolved = resolveBulkStockFieldAndValue(data, folder)
+          if (!resolved) {
+            throw new Error(
+              `No quantity or stock field on item "${itemId}". Add a quantity, qty, or stock field.`
+            )
+          }
+          const newQty = resolved.value - qtySold
+          if (newQty < 0) {
+            throw new Error('Insufficient stock for one or more products.')
+          }
+          await updateDoc(itemRef, {
+            [resolved.fieldKey]: newQty,
+            dateOut: deleteField(),
+            updatedAt: serverTimestamp(),
+          })
+
+          const folderItems = this.items[folderId]
+          if (folderItems) {
+            const index = folderItems.findIndex((item) => item.id === itemId)
+            if (index > -1 && folderItems[index]) {
+              const row = folderItems[index] as Record<string, unknown>
+              row[resolved.fieldKey] = newQty
+              delete folderItems[index].dateOut
+              folderItems[index].updatedAt = new Date()
+            }
+          }
+        }
+
+        await this.updateLowStockCount(folderId)
+
+        const userDisplayNameBulk = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'items_batch',
+          entityId: folderId,
+          entityName: `Stock reduced for ${merged.size} product line(s)`,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameBulk,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+      } catch (error: any) {
+        console.error('Error applying bulk sale to inventory:', error)
+        throw new Error(error.message || 'Failed to update stock')
+      }
+    },
+
     // Update dateOut for items when receipt is generated
     async updateItemsDateOut(folderId: string, itemIds: string[]) {
       const db = useFirestore().getFirestoreInstance()
@@ -1885,8 +1988,19 @@ export const useInventoryStore = defineStore('inventory', {
       }
     },
 
-    // Remove dateOut from items (return to stock) when receipt is deleted
-    async returnItemsToStock(itemIds: string[]) {
+    /**
+     * Restore inventory after refund/delete: serial folders clear dateOut.
+     * Non-serial folders add back sold quantities (and clear dateOut if present).
+     */
+    async returnItemsToStock(
+      itemIds: string[],
+      options?: {
+        folderId?: string
+        hasSerialNumbers?: boolean
+        /** Per inventory row, units to add back (quantity-based folders only) */
+        restoreQuantities?: Record<string, number>
+      }
+    ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -1897,20 +2011,76 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User must be authenticated')
       }
 
-      // Get userId for hierarchical path (superadmin's UID for staff)
       const userId = await getQueryUserId()
       if (!userId) {
         throw new Error('User ID not available')
       }
-      
+
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
       }
 
+      const useBulkRestore =
+        options?.folderId &&
+        options?.hasSerialNumbers === false &&
+        options?.restoreQuantities &&
+        Object.keys(options.restoreQuantities).length > 0
+
       try {
-        const batch = itemIds.map(itemId => {
-          // Use hierarchical path: users/{userId}/stores/{storeId}/inventoryItems/{itemId}
+        if (useBulkRestore && options.folderId && options.restoreQuantities) {
+          const bulkFolderId = options.folderId
+          let folder = this.getFolderById(bulkFolderId)
+          if (!folder) {
+            folder = (await this.fetchFolder(bulkFolderId)) ?? undefined
+          }
+          if (!folder) {
+            throw new Error('Folder not found')
+          }
+
+          for (const [itemId, qtyAdd] of Object.entries(options.restoreQuantities)) {
+            if (qtyAdd <= 0) continue
+            const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+            const snap = await getDoc(itemRef)
+            if (!snap.exists()) continue
+            const data = { id: itemId, ...(snap.data() as Record<string, unknown>) }
+            const resolved = resolveBulkStockFieldAndValue(data, folder)
+            if (!resolved) continue
+            const newQty = resolved.value + qtyAdd
+            await updateDoc(itemRef, {
+              [resolved.fieldKey]: newQty,
+              dateOut: deleteField(),
+              updatedAt: serverTimestamp(),
+            })
+
+            const localFolderItems = this.items[bulkFolderId]
+            if (localFolderItems) {
+              const index = localFolderItems.findIndex((item: InventoryItem) => item.id === itemId)
+              if (index > -1 && localFolderItems[index]) {
+                const row = localFolderItems[index] as Record<string, unknown>
+                row[resolved.fieldKey] = newQty
+                delete localFolderItems[index].dateOut
+                localFolderItems[index].updatedAt = new Date()
+              }
+            }
+          }
+
+          await this.updateLowStockCount(bulkFolderId)
+
+          const userDisplayNameBulkReturn = await getCurrentUserDisplayName().catch(() => 'Unknown')
+          await logActivity({
+            action: 'updated',
+            entityType: 'items_batch',
+            entityId: bulkFolderId,
+            entityName: `Stock restored for ${Object.keys(options.restoreQuantities).length} product line(s)`,
+            storeId,
+            userId: authStore.currentUser!.uid,
+            userDisplayName: userDisplayNameBulkReturn,
+          }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+          return
+        }
+
+        const batch = itemIds.map((itemId) => {
           const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             dateOut: null,
@@ -1920,12 +2090,11 @@ export const useInventoryStore = defineStore('inventory', {
 
         await Promise.all(batch)
 
-        // Update local state
-        Object.keys(this.items).forEach(fid => {
+        Object.keys(this.items).forEach((fid) => {
           const folderItems = this.items[fid]
           if (folderItems) {
-            itemIds.forEach(itemId => {
-              const index = folderItems.findIndex(item => item.id === itemId)
+            itemIds.forEach((itemId) => {
+              const index = folderItems.findIndex((item) => item.id === itemId)
               if (index > -1 && folderItems[index]) {
                 folderItems[index].dateOut = undefined
                 folderItems[index].updatedAt = new Date()

@@ -215,11 +215,33 @@ const handleConfirmReturn = async () => {
   try {
     const receipt = props.receipt
     const itemIds = receipt.itemIds || []
+    let folder = receipt.folderId ? inventoryStore.getFolderById(receipt.folderId) : undefined
+    if (receipt.folderId && !folder) {
+      try {
+        folder = (await inventoryStore.fetchFolder(receipt.folderId)) ?? undefined
+      } catch {
+        folder = undefined
+      }
+    }
+    const hasSerialNumbers = folder?.hasSerialNumbers ?? true
 
-    // 1. Return items to inventory (remove dateOut)
     if (itemIds.length > 0) {
       try {
-        await inventoryStore.returnItemsToStock(itemIds)
+        if (!hasSerialNumbers && receipt.items?.length) {
+          const restoreQuantities: Record<string, number> = {}
+          for (const line of receipt.items) {
+            if (!line.itemId) continue
+            restoreQuantities[line.itemId] =
+              (restoreQuantities[line.itemId] ?? 0) + (line.quantity ?? 0)
+          }
+          await inventoryStore.returnItemsToStock(itemIds, {
+            folderId: receipt.folderId,
+            hasSerialNumbers: false,
+            restoreQuantities,
+          })
+        } else {
+          await inventoryStore.returnItemsToStock(itemIds)
+        }
       } catch (error: any) {
         console.error('[ReturnReceiptModal] Error returning items to stock:', error)
         throw new Error('Failed to return items to inventory. Please try again.')
