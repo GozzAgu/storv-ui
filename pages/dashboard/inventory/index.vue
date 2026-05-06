@@ -23,7 +23,7 @@
               />
             </div>
             <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Search, filter, and open folders: a calm grid built for speed.
+              Search, filter, and open folders. Switch between grid and table view.
             </p>
           </div>
           <div
@@ -91,6 +91,40 @@
             >
               {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
             </span>
+            <div
+              class="inline-flex items-center rounded-sm border border-gray-200/90 p-0.5 dark:border-gray-700/80"
+              role="group"
+              aria-label="Folder layout"
+            >
+              <button
+                type="button"
+                class="rounded-sm px-1.5 py-1 transition-colors"
+                :class="
+                  foldersViewMode === 'grid'
+                    ? 'bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white'
+                    : 'text-gray-500 hover:bg-gray-50/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+                "
+                title="Grid view"
+                :aria-pressed="foldersViewMode === 'grid'"
+                @click="foldersViewMode = 'grid'"
+              >
+                <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="rounded-sm px-1.5 py-1 transition-colors"
+                :class="
+                  foldersViewMode === 'table'
+                    ? 'bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white'
+                    : 'text-gray-500 hover:bg-gray-50/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
+                "
+                title="Table view"
+                :aria-pressed="foldersViewMode === 'table'"
+                @click="foldersViewMode = 'table'"
+              >
+                <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
           </div>
 
           <!-- Select all: same row on sm+ -->
@@ -147,49 +181,168 @@
       </div>
     </div>
 
-    <!-- Folders grid -->
-    <div
-      v-if="paginatedFolders.length > 0"
-      class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
-    >
-      <InventoryFolderUiverseTile
-        v-for="folder in paginatedFolders"
-        :key="folder.id"
-        :name="folder.name"
-        :item-count="folder.itemCount"
-        :tile-key="folder.id"
-        :has-overlays="canCreateInventoryFolders"
-        @click="navigateToFolder(folder.id)"
+    <Transition name="folders-view" mode="out-in">
+      <!-- Folders grid -->
+      <div
+        v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
+        key="grid"
+        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
       >
-        <template v-if="canCreateInventoryFolders" #checkbox>
-          <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
-            <Checkbox
-              :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
-              @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-              size="sm"
-              wrapper-class="justify-center"
-            />
-          </div>
-        </template>
-        <template v-if="canCreateInventoryFolders" #menu>
-          <div
-            class="absolute right-1 top-1 z-20"
-            data-inventory-folder-menu
-            @click.stop
-          >
-            <button
-              type="button"
-              :data-folder-actions-anchor="folder.id"
-              @click="toggleFolderMenu(folder.id)"
-              class="rounded-sm p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
-              aria-label="Folder options"
+        <InventoryFolderUiverseTile
+          v-for="folder in paginatedFolders"
+          :key="folder.id"
+          :name="folder.name"
+          :item-count="folder.itemCount"
+          :tile-key="folder.id"
+          :has-overlays="canCreateInventoryFolders"
+          @click="navigateToFolder(folder.id)"
+        >
+          <template v-if="canCreateInventoryFolders" #checkbox>
+            <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
+              <Checkbox
+                :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
+                @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+                size="sm"
+                wrapper-class="justify-center"
+              />
+            </div>
+          </template>
+          <template v-if="canCreateInventoryFolders" #menu>
+            <div
+              class="absolute right-1 top-1 z-20"
+              data-inventory-folder-menu
+              @click.stop
             >
-              <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
-            </button>
-          </div>
-        </template>
-      </InventoryFolderUiverseTile>
-    </div>
+              <button
+                type="button"
+                :data-folder-actions-anchor="folder.id"
+                @click="toggleFolderMenu(folder.id)"
+                class="rounded-sm p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+                aria-label="Folder options"
+              >
+                <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+              </button>
+            </div>
+          </template>
+        </InventoryFolderUiverseTile>
+      </div>
+
+      <!-- Folders table (styling aligned with folder item table on /inventory/[id]) -->
+      <div
+        v-else-if="paginatedFolders.length > 0 && foldersViewMode === 'table'"
+        key="table"
+        class="overflow-x-auto"
+      >
+        <table class="min-w-full border-separate border-spacing-0">
+          <thead
+            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-dashboard-card/90!"
+          >
+            <tr>
+              <th
+                v-if="canCreateInventoryFolders"
+                scope="col"
+                class="px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+              >
+                <Checkbox
+                  :model-value="allFoldersOnPageSelected"
+                  @update:model-value="toggleSelectAllFolders"
+                  size="sm"
+                  wrapper-class="justify-center"
+                />
+              </th>
+              <th
+                scope="col"
+                class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+              >
+                Folder
+              </th>
+              <th
+                scope="col"
+                class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:table-cell sm:px-4"
+              >
+                Type
+              </th>
+              <th
+                scope="col"
+                class="px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4 tabular-nums"
+              >
+                Products
+              </th>
+              <th
+                scope="col"
+                class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 md:table-cell md:px-4"
+              >
+                Tracking
+              </th>
+              <th
+                scope="col"
+                class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 lg:table-cell lg:px-4"
+              >
+                Departments
+              </th>
+              <th
+                v-if="canCreateInventoryFolders"
+                scope="col"
+                class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-dashboard-card/35!">
+            <tr
+              v-for="folder in paginatedFolders"
+              :key="folder.id"
+              class="cursor-pointer border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
+              @click="navigateToFolder(folder.id)"
+            >
+              <td v-if="canCreateInventoryFolders" class="px-3 py-2.5 text-center sm:px-4" @click.stop>
+                <Checkbox
+                  :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
+                  @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+                  size="sm"
+                  wrapper-class="justify-center"
+                />
+              </td>
+              <td class="px-3 py-2.5 sm:px-4 align-top">
+                <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">{{ folder.name }}</span>
+              </td>
+              <td class="hidden px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 sm:table-cell sm:px-4">
+                {{ formatFolderTypeLabel(folder.type) }}
+              </td>
+              <td
+                class="px-3 py-2.5 text-right align-top text-[10px] tabular-nums text-gray-600 dark:text-gray-300 sm:px-4"
+              >
+                {{ folder.itemCount }}
+              </td>
+              <td class="hidden px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 md:table-cell md:px-4">
+                {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
+              </td>
+              <td
+                class="hidden max-w-[11rem] truncate px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 lg:table-cell lg:px-4"
+                :title="folderDepartmentsSummary(folder)"
+              >
+                {{ folderDepartmentsSummary(folder) }}
+              </td>
+              <td v-if="canCreateInventoryFolders" class="px-3 py-2.5 text-right sm:px-4" @click.stop>
+                <div class="relative inline-flex justify-end" data-inventory-folder-menu>
+                  <button
+                    type="button"
+                    :data-folder-actions-anchor="folder.id"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                    aria-label="Folder options"
+                    title="Actions"
+                    @click="toggleFolderMenu(folder.id)"
+                  >
+                    <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Transition>
 
     <!-- Empty state -->
     <div
@@ -747,6 +900,7 @@ import {
   EllipsisVerticalIcon,
   ExclamationTriangleIcon,
   Squares2X2Icon,
+  TableCellsIcon,
   ArrowUpTrayIcon,
   ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
@@ -893,6 +1047,28 @@ const getInitialDepartment = (): string => {
   return ''
 }
 const selectedDepartmentId = ref(getInitialDepartment())
+
+const getInitialFoldersView = (): 'grid' | 'table' => {
+  if (import.meta.client) {
+    try {
+      const v = localStorage.getItem('inventory-folders-view')
+      if (v === 'table' || v === 'grid') return v
+    } catch {
+      /* ignore */
+    }
+  }
+  return 'grid'
+}
+const foldersViewMode = ref<'grid' | 'table'>(getInitialFoldersView())
+watch(foldersViewMode, (m) => {
+  openFolderMenuId.value = null
+  if (!import.meta.client) return
+  try {
+    localStorage.setItem('inventory-folders-view', m)
+  } catch {
+    /* ignore */
+  }
+})
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
   if (import.meta.client) {
@@ -1458,6 +1634,22 @@ const getFolderGradient = (color: string) => {
 const getDepartmentName = (deptId: string) => {
   const dept = departmentsStore.getDepartmentById(deptId)
   return dept?.name || deptId
+}
+
+const formatFolderTypeLabel = (type: string | undefined) => {
+  if (!type || !String(type).trim()) {
+    return '-'
+  }
+  const t = String(type).replace(/_/g, ' ')
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+const folderDepartmentsSummary = (folder: InventoryFolder) => {
+  const allowed = folder.allowedDepartments
+  if (!allowed || allowed.length === 0) return 'All departments'
+  const names = allowed.map((id) => getDepartmentName(id))
+  if (names.length <= 2) return names.join(', ')
+  return `${names[0]}, +${names.length - 1} more`
 }
 
 const formatFolderDate = (date: any) => {
@@ -2042,3 +2234,31 @@ watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
   }
 }, { immediate: false })
 </script>
+
+<style scoped>
+/* Grid / table view switch */
+.folders-view-enter-active,
+.folders-view-leave-active {
+  transition:
+    opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.folders-view-enter-from,
+.folders-view-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folders-view-enter-active,
+  .folders-view-leave-active {
+    transition-duration: 0.01ms;
+  }
+
+  .folders-view-enter-from,
+  .folders-view-leave-to {
+    transform: none;
+  }
+}
+</style>

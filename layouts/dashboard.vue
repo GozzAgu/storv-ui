@@ -118,7 +118,7 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[ 'group relative flex items-center rounded-l-[1px] transition-all duration-200', effectiveSidebarCollapsed ? 'w-full justify-center py-1.5' : 'gap-2.5 px-2.5 py-1.5', isActive(item.href) ? effectiveSidebarCollapsed ? 'overflow-visible rounded-lg bg-primary-500/[0.11] text-primary-600 before:pointer-events-none before:absolute before:left-0 before:top-1/2 before:h-7 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-500 dark:bg-primary-400/15 dark:text-primary-300 dark:before:bg-primary-400' : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : effectiveSidebarCollapsed ? 'overflow-visible rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+              :class="[ 'group relative flex items-center rounded-l-[1px] transition-[background-color,box-shadow,transform,color] duration-200 ease-out', effectiveSidebarCollapsed ? 'w-full justify-center py-2 active:scale-[0.97]' : 'gap-2.5 px-2.5 py-1.5', isActive(item.href) ? effectiveSidebarCollapsed ? 'mx-0.5 overflow-visible rounded-xl bg-linear-to-br from-primary-500/12 via-primary-500/7 to-primary-700/11 text-primary-700 shadow-sm shadow-primary-900/5 ring-1 ring-inset ring-white/80 dark:from-primary-400/16 dark:via-primary-500/10 dark:to-primary-950/55 dark:text-primary-100 dark:shadow-none dark:ring-white/14' : 'border-l-[5px] border-primary-500 pl-2 font-bold text-primary-800 dark:border-primary-400 dark:text-primary-200' : effectiveSidebarCollapsed ? 'mx-0.5 overflow-visible rounded-xl text-gray-600 hover:bg-gray-100/95 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/7 dark:hover:text-gray-100' : 'border-l-[5px] border-transparent pl-2 text-gray-600 hover:border-primary-500/55 hover:font-semibold hover:text-gray-900 dark:text-gray-400 dark:hover:border-primary-400/50 dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
             >
               <component
                 :is="item.icon"
@@ -281,7 +281,7 @@
             </DashboardHoverTooltip>
           </button>
           <p class="mt-1.5 text-[9px] text-gray-400 dark:text-gray-500" :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'">
-            v{{ appVersion }}
+            V{{ appVersion }}
           </p>
         </div>
       </div>
@@ -607,7 +607,7 @@ import { useSearchStore } from '~/stores/search'
 
 const { actualTheme } = useTheme()
 
-const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '1.0'
+const appVersion = (useRuntimeConfig().public.appVersion as string) ?? '0.1'
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()

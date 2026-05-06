@@ -37,7 +37,7 @@ export default defineNuxtConfig({
     firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
     // Public keys (exposed to client-side)
     public: {
-      appVersion: '1.0',
+      appVersion: '0.1',
       /** Comma-separated extra hostnames treated like www (marketing-only), e.g. preview domains */
       marketingHosts: (process.env.NUXT_PUBLIC_MARKETING_HOSTS || '')
         .split(',')

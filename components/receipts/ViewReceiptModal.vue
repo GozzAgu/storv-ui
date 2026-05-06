@@ -776,7 +776,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   }
 
   const receipt = props.receipt
-  const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdf = new jsPDF('p', 'mm', 'a4')
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const margin = 14
@@ -787,7 +787,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
 
   const ensureSpace = (required = 8) => {
     if (y + required > pageHeight - margin) {
-      pdf.addPage()
+        pdf.addPage()
       y = margin
     }
   }
