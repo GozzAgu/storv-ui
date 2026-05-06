@@ -2,14 +2,28 @@
   <button
     :type="type"
     :disabled="disabled || loading"
-    :class="[ 'relative inline-flex items-center justify-center rounded-sm border-0 font-semibold cursor-pointer transition duration-200 ease-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed', sizeClasses, variantBgClasses, variantFocusRingClasses, variantTextClasses, extraClass ]"
+    :class="[
+      'group relative inline-flex items-center justify-center overflow-hidden rounded-xl border-0 font-semibold tracking-tight cursor-pointer transition-all duration-200 ease-out',
+      'focus:outline-none disabled:opacity-45 disabled:cursor-not-allowed',
+      'active:scale-[0.98] motion-reduce:active:scale-100',
+      sizeClasses,
+      variantSurfaceClasses,
+      variantFocusRingClasses,
+      variantTextClasses,
+      extraClass,
+    ]"
     @click="handleClick"
   >
-    <span class="relative z-10 inline-flex items-center gap-1.5 sm:gap-2 text-inherit">
+    <!-- Specular highlight (glass) -->
+    <span
+      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/45 via-transparent to-transparent opacity-50 dark:from-white/10 dark:opacity-80"
+      aria-hidden="true"
+    />
+    <span class="relative z-10 inline-flex items-center gap-1.5 text-inherit sm:gap-2">
       <component
         v-if="loading"
         :is="loadingIcon"
-        class="w-5 h-5 animate-spin shrink-0"
+        class="h-5 w-5 shrink-0 animate-spin"
       />
       <component
         v-else-if="icon && !iconRight"
@@ -67,52 +81,50 @@ const sizeClasses = computed(() => {
 
 const iconSize = computed(() => {
   const sizeMap = {
-    sm: 'w-4 h-4',
-    md: 'w-5 h-5',
-    lg: 'w-5 h-5',
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-5 w-5',
   }
   return sizeMap[props.size]
 })
 
-// Solid background for filled variants (fixes “half blue” / transparent default)
-const variantBgClasses = computed(() => {
+/** Glass-forward surfaces: blur + translucent fills + inset/edge light */
+const variantSurfaceClasses = computed(() => {
   const map = {
     primary:
-      'bg-primary-400 dark:bg-primary-500 text-white hover:bg-primary-500 dark:hover:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-700',
+      'bg-linear-to-b from-primary-400/95 to-primary-700/98 text-white backdrop-blur-md backdrop-saturate-125 ring-1 ring-inset ring-white/35 hover:from-primary-400 hover:to-primary-800 dark:from-primary-500/90 dark:to-primary-900/95 dark:ring-white/15 dark:hover:to-primary-950',
     secondary:
-      'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-500 active:bg-gray-400 dark:active:bg-gray-400',
+      'bg-linear-to-b from-white/80 to-gray-100/90 text-gray-900 backdrop-blur-xl ring-1 ring-inset ring-white/80 hover:from-white hover:to-gray-100 dark:from-gray-800/75 dark:to-gray-900/85 dark:text-gray-50 dark:ring-white/8 dark:hover:from-gray-800 dark:hover:to-gray-900',
     danger:
-      'bg-red-500 dark:bg-red-500 text-white hover:bg-red-600 active:bg-red-700',
+      'bg-linear-to-b from-red-500/92 to-red-800/98 text-white backdrop-blur-md ring-1 ring-inset ring-white/30 hover:from-red-500 hover:to-red-900',
     success:
-      'bg-green-500 dark:bg-green-500 text-white hover:bg-green-600 active:bg-green-700',
+      'bg-linear-to-b from-emerald-500/92 to-emerald-800/98 text-white backdrop-blur-md ring-1 ring-inset ring-white/30 hover:from-emerald-500 hover:to-emerald-900',
     outline:
-      'bg-gray-50 dark:bg-gray-800/60 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-900',
+      'bg-white/55 text-gray-800 backdrop-blur-xl ring-1 ring-inset ring-white/70 hover:bg-white/75 dark:bg-white/6 dark:text-gray-100 dark:ring-white/10 dark:hover:bg-white/12',
     ghost:
-      'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700',
+      'bg-transparent text-gray-700 backdrop-blur-sm hover:bg-white/40 dark:text-gray-200 dark:hover:bg-white/8',
   }
   return map[props.variant]
 })
 
-// Keyboard focus only; no ring/border at rest or on hover
 const variantFocusRingClasses = computed(() => {
   const map = {
     primary:
-      'focus-visible:ring-2 focus-visible:ring-primary-500/50 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400/60',
+      'focus-visible:ring-2 focus-visible:ring-primary-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white/80 dark:focus-visible:ring-primary-300/60 dark:focus-visible:ring-offset-[#0c0e14]',
     secondary:
-      'focus-visible:ring-2 focus-visible:ring-gray-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
+      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/45 dark:focus-visible:ring-offset-[#0c0e14]',
     danger:
-      'focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-2',
+      'focus-visible:ring-2 focus-visible:ring-red-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
     success:
-      'focus-visible:ring-2 focus-visible:ring-green-500/50 focus-visible:ring-offset-2',
+      'focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0c0e14]',
     outline:
-      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
+      'focus-visible:ring-2 focus-visible:ring-primary-500/45 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400/40 dark:focus-visible:ring-offset-[#0c0e14]',
     ghost:
-      'focus-visible:ring-2 focus-visible:ring-gray-400/60 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/50',
+      'focus-visible:ring-2 focus-visible:ring-gray-400/50 focus-visible:ring-offset-2 dark:focus-visible:ring-gray-500/40 dark:focus-visible:ring-offset-[#0c0e14]',
   }
   return map[props.variant]
 })
 
-// Extra text tweaks for outline/ghost (filled variants already set text on bg)
 const variantTextClasses = computed(() => {
   const map = {
     primary: '',
@@ -120,7 +132,7 @@ const variantTextClasses = computed(() => {
     danger: '',
     success: '',
     outline: 'hover:text-gray-900 dark:hover:text-white',
-    ghost: 'hover:text-gray-900 dark:hover:text-gray-100',
+    ghost: 'hover:text-gray-900 dark:hover:text-gray-50',
   }
   return map[props.variant]
 })

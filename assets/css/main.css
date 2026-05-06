@@ -63,10 +63,23 @@
 
   /**
    * With `border-separate`, `thead` background often does not paint `th` cells; they stay default
-   * (white). Force header cells dark anywhere the app uses tables in dark mode.
+   * (white). Scope fixes to dashboard main / teleported dashboard shell only — not body modals
+   * (e.g. paper receipt preview must stay light).
    */
-  html.dark table thead th {
+  html.dark main[data-dashboard-main] table thead th,
+  html.dark [data-dashboard-teleport] table thead th {
     background-color: #12141c !important;
+  }
+
+  html:not(.dark) main[data-dashboard-main] table thead th,
+  html:not(.dark) [data-dashboard-teleport] table thead th {
+    background-color: rgb(249 250 251 / 0.95) !important;
+  }
+
+  /** Printable receipt block: always light table header (modal may sit under `html.dark`). */
+  .receipt-content table thead th {
+    background-color: rgb(249 250 251) !important;
+    color: rgb(75 85 99) !important;
   }
 
   /**

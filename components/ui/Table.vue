@@ -7,7 +7,7 @@
           <th
             v-for="column in columns"
             :key="column.key"
-            :class="[ 'px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide', column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '', column.class || '', headerClass ]"
+            :class="[ 'bg-gray-50/95 px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase tracking-wide', column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '', column.class || '', headerClass ]"
             @click="column.sortable ? handleSort(column.key) : null"
           >
             <div class="flex items-center gap-1.5">
@@ -27,7 +27,7 @@
           </th>
           <th
             v-if="showActions"
-            class="px-3 py-2.5 text-right text-[11px] !font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide"
+            class="bg-gray-50/95 px-3 py-2.5 text-right text-[11px] !font-semibold text-gray-600 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase tracking-wide"
           >
             Actions
           </th>

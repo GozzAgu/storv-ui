@@ -246,14 +246,25 @@ const categories: Category[] = [
   {
     id: 'navigation-search',
     title: 'Navigation & search',
-    blurb: 'Sidebar, store switcher, global search, and theme.',
+    blurb: 'Sidebar, collapse state, store switcher, global search, toasts, theme.',
     icon: Squares2X2Icon,
     articles: [
       {
-        title: 'Sidebar and header',
+        title: 'Sidebar, header, and version',
         body: [
-          'The sidebar collapses on desktop to an icon rail or expands to show labels. On mobile, open it with the grid button in the top bar.',
-          'The header shows the active page name (on medium screens and up), opens Global Search, shows the store selector for super admins only, theme toggle, notifications, and your profile menu (Profile, Settings, Sign out).',
+          'The sidebar collapses on desktop to a narrow icon rail or expands to show full labels. On mobile, open it with the menu control in the top bar.',
+          'When the sidebar is collapsed on a large screen, the active page is highlighted on its icon (a clear “pill” state) so you can see where you are at a glance.',
+          'The header shows the active page name (on medium screens and up), opens Global Search, shows the store / branch switcher for super admins, theme toggle, notifications, and your profile menu (Profile, Settings, Sign out).',
+          'At the bottom of the sidebar, a small version label (for example V0.1) reflects the current app build; it is informational only.',
+        ],
+      },
+      {
+        title: 'Store switcher (branches)',
+        body: [
+          'Super admins switch the active branch from the store control in the header. The menu lists your branches; the current one is marked active. Choose “Manage stores” to jump to Settings and edit branch details.',
+          'Managers and staff work in the store they were assigned; they do not change branch from this control.',
+          'Always confirm the correct branch is selected before editing inventory, recording sales, or reading analytics, because most screens use the active branch only.',
+          'If Analytics prompts you to pick a store, use the header switcher (super admins) or ask an admin to confirm your assigned branch.',
         ],
       },
       {
@@ -264,10 +275,9 @@ const categories: Category[] = [
         ],
       },
       {
-        title: 'Working in the correct store',
+        title: 'Notifications and toasts',
         body: [
-          'Super admins must pick the right store in the header before editing inventory, recording sales, or reading Analytics; each screen reads the active store’s data only.',
-          'If Analytics says to select a store, use the header selector (super admins) or ask an admin to confirm you have an assigned store.',
+          'Short status messages (saved, deleted, errors) appear as lightweight toasts in the corner so you get feedback without leaving your flow.',
         ],
       },
     ],
@@ -275,14 +285,16 @@ const categories: Category[] = [
   {
     id: 'inventory',
     title: 'Inventory',
-    blurb: 'Folders page, folder detail, items, and Storvv permissions.',
+    blurb: 'Folders page (grid or table), folder detail, items, and permissions.',
     icon: CubeIcon,
     articles: [
       {
         title: 'Folders list (/dashboard/inventory)',
         body: [
-          'The Inventory entry opens Folders with the subtitle “Organize products into folders and manage stock in one place”. Search, sort, and paginate folders; super admins can create, rename, delete, and bulk-delete folders where the UI provides those actions.',
-          'Storvv Micro may show DuplicateFeatureUpsellBanner messaging next to the title when folder limits apply; upgrade paths point toward Settings and higher plans.',
+          'The Inventory entry opens Folders: search folders, filter by department, sort by name / products / date, and paginate through the list. Super admins can create, rename, delete, and bulk-delete folders where the UI provides those actions.',
+          'Use the grid / table toggle next to the filters to switch layout. Grid shows folder cards; table matches the same styling as the product table inside a folder (striped rows, column alignment). Your choice is remembered on this browser.',
+          'In table view, columns include folder name, type, product count, serial vs quantity tracking, and department access summary; open a folder by clicking a row. Actions stay in the row menu where available.',
+          'Storvv Micro may show upsell messaging next to the title when folder limits apply; upgrade paths point toward Settings and higher plans.',
         ],
       },
       {
@@ -330,7 +342,15 @@ const categories: Category[] = [
         title: 'Create New Receipt (three steps)',
         body: [
           'The modal title is “Create New Receipt” with subtitle “Select folder, items, then enter receipt details.” Step 1: Select Folder (search folders; empty state tells you to create folders in Inventory first). Step 2: Select Items and quantities from that folder. Step 3: Receipt Details; customer fields, payment method, Completed or Pending status, and notes.',
+          'After step 1, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
+        ],
+      },
+      {
+        title: 'Quick Sale, split payment, and sell screen notes',
+        body: [
+          'Quick Sale is a streamlined checkout view for scanning or adding products quickly in the active branch. When split payment is enabled, you can allocate amounts across multiple methods; the screen shows how much is assigned versus the total so you can balance the sale before completing.',
+          'Sell screen notes are short messages set per branch in Settings (Create / Edit Branch). They appear on Quick Sale and on Create New Receipt after you choose a folder, so cashiers see branch-specific reminders without opening Settings.',
         ],
       },
       {
@@ -452,6 +472,7 @@ const categories: Category[] = [
         body: [
           'Only super admins can edit Settings. Others see a View only banner while fields stay disabled.',
           'Super admins manage account logo, Paystack subscription upgrades between Storvv Micro, Medium, and Enterprise, store profile data (branch name, business type, contact fields), inventory defaults (low stock threshold, default category), and receipt numbering (prefix + next number).',
+          'When creating or editing a branch (Create Branch / Edit Branch), you can add an optional Sell screen note for that location. It is shown to people selling on Quick Sale and during Create New Receipt (items and receipt-details steps) for that branch only.',
         ],
       },
       {
@@ -474,6 +495,7 @@ const categories: Category[] = [
         title: 'Profile & 2FA',
         body: [
           'Profile (/dashboard/profile) is where you manage your name, contact info, and security; Two-Factor Authentication can be turned on or off using the prompts on that page.',
+          'Super admins can edit Receipt terms & policies (sales terms, refund policy) on Profile; that text can surface on printed / viewed receipts and related customer communications where the product uses it.',
           'Password changes use the Change password screen (/dashboard/change-password), linked from Profile.',
         ],
       },
@@ -502,6 +524,8 @@ const popularTopics = [
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Receipts & refunds', query: 'receipt' },
   { label: 'Inventory & folders', query: 'inventory' },
+  { label: 'Table view', query: 'table' },
+  { label: 'Sell screen note', query: 'sell' },
   { label: 'Copy from branch', query: 'copy from branch' },
   { label: 'Plans & billing', query: 'plan' },
   { label: 'Departments', query: 'department' },
