@@ -302,42 +302,47 @@
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
-        :class="[ 'fixed top-0 left-0 right-0 z-[54] isolate border-b border-gray-200/40 bg-gray-100/90 backdrop-blur-md transition-[left] duration-300 dark:border-white/[0.06] dark:bg-[#07080c]/90', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
+        :class="[ 'fixed top-0 left-0 right-0 z-[54] isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 dark:border-white/[0.07] dark:bg-[#07080c]/70', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
       >
         <div
-          class="flex h-12 w-full items-center justify-between gap-3 px-3 sm:h-[3.25rem] sm:px-4 lg:px-5"
+          class="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/50 to-transparent dark:via-white/10"
+          aria-hidden="true"
+        />
+        <div
+          class="relative flex h-12 w-full items-center justify-between gap-2 px-3 sm:h-14 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6"
         >
-          <div class="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
+          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <button
               type="button"
               @click="sidebarOpen = true"
-              class="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-transparent text-gray-600 dark:text-gray-400 lg:hidden"
+              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
               aria-label="Open menu"
             >
-              <Squares2X2Icon class="h-5 w-5" stroke-width="1.75" />
+              <Squares2X2Icon class="h-[1.15rem] w-[1.15rem]" stroke-width="1.75" />
             </button>
-            <!-- Current page (neutral; no primary “active” treatment) -->
+            <!-- Page title -->
             <div class="hidden min-w-0 items-center md:flex">
-              <div class="flex min-w-0 items-center gap-3 py-0.5">
-                <component
-                  :is="currentPageIcon"
-                  class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400"
-                  stroke-width="1.75"
-                />
-                <div class="min-w-0">
-                  <p class="text-[9px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
-                    Current page
-                  </p>
-                  <h1 class="truncate text-sm font-medium tracking-tight text-gray-900 dark:text-gray-100">
-                    {{ currentPageName }}
-                  </h1>
+              <div
+                class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
+              >
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/90 ring-1 ring-inset ring-gray-200/55 dark:bg-white/[0.06] dark:ring-white/10"
+                >
+                  <component
+                    :is="currentPageIcon"
+                    class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
+                    stroke-width="1.75"
+                  />
                 </div>
+                <h1 class="min-w-0 truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
+                  {{ currentPageName }}
+                </h1>
               </div>
             </div>
           </div>
 
           <div
-            class="relative z-10 ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-2"
+            class="relative z-10 ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5"
           >
             <!-- Global search (width-capped wrapper avoids w-full flex growth overlapping sibling controls) -->
             <div
@@ -346,17 +351,17 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-full min-w-0 max-w-full items-center gap-2 rounded-sm border border-gray-200/90 bg-white px-2.5 py-1.5 text-gray-600 shadow-sm transition-colors hover:border-gray-300/90 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 lg:pr-2.5 dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-400 dark:shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] dark:hover:border-gray-600/80 dark:hover:bg-gray-900"
+              class="group relative flex h-9 w-full min-w-0 max-w-full items-center gap-2 rounded-full border-0 bg-white/90 py-1.5 pl-3 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:pr-2.5"
             >
               <MagnifyingGlassIcon
-                class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-500"
+                class="h-4 w-4 shrink-0 text-gray-500 opacity-80 dark:text-gray-400"
                 stroke-width="1.75"
               />
-              <span class="flex-1 truncate text-left text-xs font-medium text-gray-600 dark:text-gray-400">
-                Search workspace…
+              <span class="flex-1 truncate text-left text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                Search workspace
               </span>
               <kbd
-                class="hidden items-center gap-0.5 rounded-sm border border-gray-200/90 bg-gray-50/95 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-500 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 lg:inline-flex"
+                class="hidden items-center gap-0.5 rounded-md bg-gray-100/95 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-500 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.08] dark:text-gray-400 dark:ring-white/10 lg:inline-flex"
               >
                 ⌘K
               </kbd>
@@ -367,7 +372,7 @@
             <button
               type="button"
               @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-400 md:hidden"
+              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-white/90 text-gray-600 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] md:hidden"
               aria-label="Search"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
@@ -375,7 +380,9 @@
 
             <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
 
-            <div class="group relative flex h-9 w-9 items-center justify-center text-gray-700 dark:text-gray-300">
+            <div
+              class="group relative flex h-9 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
+            >
               <ThemeToggle />
             </div>
 
@@ -383,16 +390,16 @@
             <div class="relative z-[130] h-9 w-9 shrink-0" ref="notificationsRef">
               <button
                 type="button"
-                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-sm text-gray-700 transition-colors dark:text-gray-200"
+                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-white/90 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white dark:bg-white/[0.06] dark:ring-white/10 dark:hover:bg-white/[0.1]"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
                 @click.stop.prevent="toggleNotifications"
               >
-                <BellIcon class="pointer-events-none block h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100" stroke-width="2" />
+                <BellIcon class="pointer-events-none block h-[0.95rem] w-[0.95rem] text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100" stroke-width="2" />
                 <span
                   v-if="unreadNotificationCount > 0"
-                  class="pointer-events-none absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950"
+                  class="pointer-events-none absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#0a0c12]"
                 >
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
@@ -421,25 +428,29 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="group relative flex min-w-0 items-center gap-2 rounded-sm border border-gray-200/90 bg-white py-1 pl-1 pr-2 font-medium text-gray-700 shadow-sm dark:border-gray-700/80 dark:bg-gray-900/80 dark:text-gray-200 sm:pr-2.5"
+                class="group relative flex min-w-0 max-w-[11rem] items-center gap-2 rounded-xl border-0 bg-white/90 py-1 pl-1 pr-1.5 font-medium text-gray-800 ring-1 ring-inset ring-gray-200/55 backdrop-blur-md transition-colors hover:bg-white sm:max-w-[14rem] sm:pr-2 dark:bg-white/[0.07] dark:text-gray-100 dark:ring-white/12 dark:hover:bg-white/[0.11] md:max-w-[17rem] md:pr-2.5"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
                 <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-[11px] font-bold text-white ring-2 ring-white/25 dark:ring-primary-900/40 sm:h-8 sm:w-8"
+                  class="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-[11px] font-bold text-white ring-1 ring-inset ring-white/25 dark:ring-white/15 sm:h-8 sm:w-8"
                 >
-                  {{ userInitials }}
+                  <span
+                    class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 to-transparent"
+                    aria-hidden="true"
+                  />
+                  <span class="relative">{{ userInitials }}</span>
                 </div>
-                <div class="hidden min-w-0 text-left md:block">
-                  <p class="truncate text-xs font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                <div class="hidden min-w-0 flex-1 text-left md:block">
+                  <p class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50">
                     {{ userName }}
                   </p>
-                  <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">
+                  <p class="truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400">
                     {{ userEmail }}
                   </p>
                 </div>
                 <ChevronDownIcon
-                  class="hidden h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform dark:text-gray-500 md:block"
+                  class="hidden h-3.5 w-3.5 shrink-0 text-gray-400 opacity-80 transition-transform duration-200 dark:text-gray-500 md:block"
                   :class="profileMenuOpen ? 'rotate-180' : ''"
                   stroke-width="2"
                 />
@@ -457,71 +468,89 @@
              <div
                   v-if="profileMenuOpen"
                   ref="profileMenuPanelRef"
-                  class="overflow-hidden rounded-sm bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)] dark:bg-slate-950 dark:shadow-[0_1px_4px_rgba(0,0,0,0.35)]"
+                  class="overflow-hidden rounded-2xl border-0 bg-white/95 ring-1 ring-gray-200/50 backdrop-blur-xl dark:bg-dashboard-card/95 dark:ring-white/12"
                   :style="profileMenuPanelStyle"
                   @click.stop
                 >
                   <!-- User -->
                   <div
-                    class="border-b border-gray-200/25 px-3 py-3.5 dark:border-white/[0.06]"
+                    class="relative border-b border-gray-100/90 bg-linear-to-br from-primary-500/[0.08] via-white/40 to-transparent px-4 py-4 dark:border-white/[0.07] dark:from-primary-500/15 dark:via-dashboard-card/80 dark:to-dashboard-card/95"
                   >
-                    <div class="flex min-w-0 items-center gap-2.5">
+                    <span
+                      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/40 to-transparent opacity-50 dark:from-white/[0.03]"
+                      aria-hidden="true"
+                    />
+                    <div class="relative flex min-w-0 items-center gap-3">
                       <div
-                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-gradient-to-br from-primary-400 via-primary-500 to-primary-600 text-xs font-bold text-white ring-2 ring-primary-400/20"
+                        class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-sm font-bold text-white ring-1 ring-inset ring-white/30 dark:ring-white/20"
                       >
-                        {{ userInitials }}
+                        <span
+                          class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 to-transparent"
+                          aria-hidden="true"
+                        />
+                        <span class="relative">{{ userInitials }}</span>
                       </div>
                       <div class="min-w-0 flex-1">
-                        <p
-                          class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50"
-                        >
+                        <p class="truncate text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
                           {{ userName }}
                         </p>
-                        <p class="mt-0.5 truncate text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+                        <p class="mt-0.5 truncate text-[11px] leading-snug text-gray-600 dark:text-gray-400">
                           {{ userEmail }}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <nav class="p-1.5" aria-label="Account menu">
+                  <nav class="space-y-0.5 p-2" aria-label="Account menu">
                     <NuxtLink
                       to="/dashboard/profile"
-                      class="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50/95 active:bg-gray-100/80 dark:text-gray-200 dark:hover:bg-white/[0.06] dark:active:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                       @click="profileMenuOpen = false"
                     >
-                      <UserCircleIcon
-                        class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-                        stroke-width="1.75"
-                        aria-hidden="true"
-                      />
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10"
+                      >
+                        <UserCircleIcon
+                          class="h-4 w-4"
+                          stroke-width="1.75"
+                          aria-hidden="true"
+                        />
+                      </span>
                       Profile
                     </NuxtLink>
                     <NuxtLink
                       to="/dashboard/settings"
-                      class="flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/25 focus-visible:ring-inset"
+                      class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50/95 active:bg-gray-100/80 dark:text-gray-200 dark:hover:bg-white/[0.06] dark:active:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                       @click="profileMenuOpen = false"
                     >
-                      <Cog6ToothIcon
-                        class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-                        stroke-width="1.75"
-                        aria-hidden="true"
-                      />
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10"
+                      >
+                        <Cog6ToothIcon
+                          class="h-4 w-4"
+                          stroke-width="1.75"
+                          aria-hidden="true"
+                        />
+                      </span>
                       Settings
                     </NuxtLink>
                   </nav>
 
-                  <div class="border-t border-gray-100/90 p-1.5 dark:border-gray-800/80">
+                  <div class="border-t border-gray-100/90 p-2 dark:border-white/[0.07]">
                     <button
                       type="button"
                       @click="handleSignOut"
-                      class="flex w-full items-center gap-2.5 rounded-sm px-2.5 py-2 text-left text-xs font-medium text-red-600 dark:text-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/20 focus-visible:ring-inset"
+                      class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-red-600 transition-colors hover:bg-red-50/90 dark:text-red-400 dark:hover:bg-red-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
                     >
-                      <ArrowRightOnRectangleIcon
-                        class="h-4 w-4 shrink-0 opacity-90"
-                        stroke-width="1.75"
-                        aria-hidden="true"
-                      />
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 ring-1 ring-inset ring-red-200/70 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
+                      >
+                        <ArrowRightOnRectangleIcon
+                          class="h-4 w-4"
+                          stroke-width="1.75"
+                          aria-hidden="true"
+                        />
+                      </span>
                       Sign out
                     </button>
                   </div>
@@ -534,7 +563,7 @@
       </header>
 
       <!-- Spacer so fixed nav never overlaps page content -->
-      <div class="h-12 shrink-0 sm:h-[3.25rem]" aria-hidden="true" />
+      <div class="h-12 shrink-0 sm:h-14" aria-hidden="true" />
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main

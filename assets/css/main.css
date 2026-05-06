@@ -63,8 +63,8 @@
 
   /**
    * With `border-separate`, `thead` background often does not paint `th` cells; they stay default
-   * (white). Scope fixes to dashboard main / teleported dashboard shell only — not body modals
-   * (e.g. paper receipt preview must stay light).
+   * (white). Scope fixes to dashboard main / teleported dashboard shell only, not body modals
+   * (e.g. paper receipt preview must stay light.)
    */
   html.dark main[data-dashboard-main] table thead th,
   html.dark [data-dashboard-teleport] table thead th {

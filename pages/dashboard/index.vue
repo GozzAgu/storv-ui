@@ -1,14 +1,18 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
+  <div class="w-full max-w-none space-y-4 pb-6 sm:space-y-5 sm:pb-8">
     <!-- Tutorial Component -->
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
     <!-- Hero -->
     <header
-      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
+      class="relative overflow-hidden rounded-xl bg-white/80 px-4 py-4 ring-1 ring-inset ring-gray-200/50 backdrop-blur-md dark:bg-dashboard-card/72 dark:ring-white/[0.07] sm:px-5 sm:py-4"
       data-tutorial="dashboard"
     >
+      <span
+        class="pointer-events-none absolute inset-0 bg-linear-to-br from-primary-500/[0.04] via-transparent to-transparent dark:from-primary-400/[0.06]"
+        aria-hidden="true"
+      />
       <div class="relative">
-        <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+        <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
           Overview
         </p>
         <h1
@@ -16,8 +20,8 @@
         >
           Welcome back, {{ userName }}
         </h1>
-        <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          Live snapshot of revenue, stock, and activity minimal noise, maximum clarity.
+        <p class="mt-1.5 max-w-xl text-xs leading-relaxed text-gray-600 dark:text-gray-400 sm:text-[13px]">
+          Revenue, inventory, and activity at a glance. Clear metrics, minimal clutter.
         </p>
       </div>
     </header>
@@ -25,15 +29,15 @@
     <!-- Loading State -->
     <template v-if="isLoading">
       <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-        <div v-for="i in 4" :key="i" class="rounded-sm bg-white p-3 ring-1 ring-gray-200/80 dark:!bg-dashboard-card dark:ring-gray-800/60 sm:p-3.5">
-          <div class="flex items-start justify-between gap-4">
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-3.5">
+        <div v-for="i in 4" :key="i" class="rounded-xl bg-white/80 p-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-dashboard-card/75 dark:ring-white/[0.06] sm:p-3.5">
+          <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
-              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-2/3 mb-2 animate-pulse"></div>
-              <div class="h-7 sm:h-8 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-1.5 animate-pulse"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-2/3 mb-1.5 animate-pulse"></div>
+              <div class="h-6 sm:h-7 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-1 animate-pulse"></div>
               <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2 animate-pulse"></div>
             </div>
-            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse shrink-0"></div>
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse shrink-0"></div>
           </div>
         </div>
       </div>
@@ -42,23 +46,23 @@
       <div class="grid grid-cols-1 gap-3 sm:gap-4">
         <!-- Revenue Chart Skeleton -->
         <Card>
-          <div class="flex items-center justify-between mb-3 sm:mb-4">
+          <div class="mb-2 flex items-center justify-between sm:mb-3">
             <div>
               <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-32 mb-2 animate-pulse"></div>
               <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-24 animate-pulse"></div>
             </div>
-            <div class="flex gap-1 rounded-sm bg-gray-100 p-1 dark:!bg-white/[0.06]">
+            <div class="flex gap-0.5 rounded-full bg-gray-100/90 p-1 dark:bg-white/[0.05]">
               <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
               <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
               <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
             </div>
           </div>
-          <div class="h-48 animate-pulse rounded-sm bg-gray-100 dark:!bg-white/[0.06] sm:h-64 lg:h-72"></div>
+          <div class="h-40 animate-pulse rounded-sm bg-gray-100 dark:!bg-white/[0.06] sm:h-52 lg:h-56"></div>
         </Card>
       </div>
 
       <!-- Bottom Row Skeleton -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div class="grid grid-cols-1 gap-3 lg:grid-cols-3 sm:gap-4">
         <!-- Recent Transactions Skeleton -->
         <Card>
           <div class="flex items-center justify-between mb-4">
@@ -113,8 +117,8 @@
 
     <!-- Actual Content (shown when not loading) -->
     <template v-else>
-    <!-- Key Metrics Cards - Shopify style -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+    <!-- Key metrics -->
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-3.5">
       <StatCard
         label="Total revenue"
         :value="formatCurrency(totalRevenue)"
@@ -144,56 +148,56 @@
       />
     </div>
 
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 gap-3">
+    <!-- Revenue chart -->
+    <div class="grid grid-cols-1 gap-3 sm:gap-4">
       <!-- Revenue Chart -->
       <Card
         padding="sm"
-        extra-class="!p-0 overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-0 overflow-hidden rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/80 dark:ring-white/[0.06]"
       >
         <div
-          class="flex flex-col gap-2.5 border-b border-gray-100/90 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
+          class="flex flex-col gap-2 border-b border-gray-100/70 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3 dark:border-white/[0.06]"
         >
           <div>
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
               Revenue
             </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ chartSubtitle }}</p>
+            <p class="mt-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400 sm:text-xs">{{ chartSubtitle }}</p>
           </div>
           <div
-            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:!bg-dashboard-card/60"
+            class="inline-flex w-fit shrink-0 rounded-full bg-gray-100/85 p-0.5 dark:bg-white/[0.05]"
             role="group"
             aria-label="Chart period"
           >
             <button
               type="button"
               @click="chartView = 'daily'"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'daily' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'daily' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Daily
             </button>
             <button
               type="button"
               @click="chartView = 'weekly'"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'weekly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'weekly' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Weekly
             </button>
             <button
               type="button"
               @click="chartView = 'monthly'"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', chartView === 'monthly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
+              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'monthly' ? 'bg-white text-primary-800 ring-1 ring-gray-200/70 dark:bg-primary-500/20 dark:text-primary-100 dark:ring-primary-400/25' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
             >
               Monthly
             </button>
           </div>
         </div>
-        <div class="relative h-40 px-2 pb-4 sm:h-52 sm:px-3 lg:h-60">
-          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+        <div class="relative h-[11rem] px-2 pb-3 pt-0.5 sm:h-[13.5rem] sm:px-3 lg:h-[15rem]">
+          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-6 text-center">
             <div
-              class="mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+              class="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100/90 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:ring-white/[0.08]"
             >
-              <ChartBarIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
+              <ChartBarIcon class="h-6 w-6 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
             </div>
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start making sales to see your revenue chart</p>
@@ -218,34 +222,34 @@
 
     <!-- Bento: secondary panels -->
     <div
-      class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6 xl:grid-rows-[auto_auto]"
+      class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-6 xl:grid-rows-[auto_auto]"
     >
       <!-- Orders & departments -->
       <Card
         padding="sm"
-        extra-class="!p-3 xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-3 xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
       >
         <p
-          class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          class="mb-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
         >
           Orders & departments
         </p>
-        <div class="space-y-2.5">
-          <div class="flex justify-between items-baseline">
-            <span class="text-[11px] text-gray-500 dark:text-gray-400">Completed</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</span>
+        <div class="space-y-2">
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="text-xs text-gray-600 dark:text-gray-400">Completed</span>
+            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</span>
           </div>
-          <div class="flex justify-between items-baseline">
-            <span class="text-[11px] text-gray-500 dark:text-gray-400">Pending</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</span>
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="text-xs text-gray-600 dark:text-gray-400">Pending</span>
+            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</span>
           </div>
-          <div class="flex justify-between items-baseline">
-            <span class="text-[11px] text-gray-500 dark:text-gray-400">Refunded</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</span>
+          <div class="flex items-baseline justify-between gap-3">
+            <span class="text-xs text-gray-600 dark:text-gray-400">Refunded</span>
+            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</span>
           </div>
-          <div class="flex justify-between items-baseline pt-1 border-t border-gray-200/80 dark:border-gray-700/80">
-            <span class="text-[11px] text-gray-500 dark:text-gray-400">Departments</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalDepartments }}</span>
+          <div class="flex items-baseline justify-between gap-3 border-t border-gray-100/90 pt-2 dark:border-white/[0.06]">
+            <span class="text-xs text-gray-600 dark:text-gray-400">Departments</span>
+            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalDepartments }}</span>
           </div>
         </div>
       </Card>
@@ -253,32 +257,36 @@
       <!-- Recent transactions -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-3 flex min-h-[124px] flex-col xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
-            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
           >
             Recent
           </p>
           <NuxtLink
             to="/dashboard/receipts"
-            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            View all →
+            View all
           </NuxtLink>
         </div>
-        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+        <div class="min-h-0 flex-1 space-y-1 overflow-y-auto">
           <template v-if="recentTransactions.length === 0">
-            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">No transactions</p>
+            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">No transactions</p>
           </template>
           <template v-else>
-            <div v-for="tx in recentTransactions" :key="tx.id" class="flex justify-between items-start gap-2 py-0.5">
+            <div
+              v-for="tx in recentTransactions"
+              :key="tx.id"
+              class="flex items-start justify-between gap-3 rounded-xl px-1 py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]"
+            >
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">{{ tx.description }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">{{ tx.time }}</p>
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ tx.description }}</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-500">{{ tx.time }}</p>
               </div>
-              <p :class="['text-xs font-semibold flex-shrink-0', tx.amountClass]">{{ tx.amount }}</p>
+              <p :class="['shrink-0 text-xs font-semibold tabular-nums', tx.amountClass]">{{ tx.amount }}</p>
             </div>
           </template>
         </div>
@@ -287,43 +295,43 @@
       <!-- Top products -->
       <Card
         padding="sm"
-        extra-class="!p-3 flex flex-col min-h-[150px] xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-3 flex min-h-[124px] flex-col xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
       >
         <div class="mb-2 flex items-center justify-between">
           <p
-            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
           >
             Top products
           </p>
           <NuxtLink
             to="/dashboard/inventory"
-            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            View all →
+            View all
           </NuxtLink>
         </div>
-        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+        <div class="min-h-0 flex-1 divide-y divide-gray-100/90 overflow-y-auto dark:divide-white/[0.06]">
           <template v-if="topSellingItems.length === 0">
-            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">No sales yet</p>
+            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">No sales yet</p>
           </template>
           <template v-else>
             <div
               v-for="(item, i) in topSellingItems.slice(0, 5)"
               :key="item.id"
-              class="flex items-start justify-between gap-3 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/80"
+              class="flex items-start justify-between gap-3 py-1.5 first:pt-0 last:pb-0"
             >
-              <div class="flex min-w-0 flex-1 items-center gap-2">
+              <div class="flex min-w-0 flex-1 items-center gap-2.5">
                 <span
-                  class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-[10px] font-semibold text-gray-600 dark:bg-white/[0.06] dark:text-gray-400"
                   >{{ i + 1 }}</span
                 >
                 <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
               </div>
-              <div class="flex-shrink-0 text-right">
+              <div class="shrink-0 text-right">
                 <p class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
                   {{ formatCurrency(item.sales > 0 ? item.revenue / item.sales : 0) }}
                 </p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">avg / unit · {{ item.sales }} sold</p>
+                <p class="text-[10px] text-gray-500 dark:text-gray-500">avg/unit, {{ item.sales }} sold</p>
               </div>
             </div>
           </template>
@@ -333,29 +341,33 @@
       <!-- Low stock -->
       <Card
         padding="sm"
-        extra-class="!p-4 flex flex-col min-h-[200px] sm:col-span-1 xl:col-span-2 rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-3 flex min-h-[156px] flex-col sm:col-span-1 xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
       >
-        <div class="mb-3 flex items-center justify-between">
+        <div class="mb-2 flex items-center justify-between">
           <p
-            class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
           >
             Low stock
           </p>
           <NuxtLink
             to="/dashboard/inventory"
-            class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            View all →
+            View all
           </NuxtLink>
         </div>
-        <div class="flex-1 min-h-0 overflow-y-auto space-y-2">
+        <div class="min-h-0 flex-1 space-y-1 overflow-y-auto">
           <template v-if="lowStockItems.length === 0">
-            <p class="text-xs text-gray-500 dark:text-gray-400 py-2">All stocked</p>
+            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">All stocked</p>
           </template>
           <template v-else>
-            <div v-for="item in lowStockItems.slice(0, 5)" :key="item.id" class="flex justify-between items-baseline gap-2 py-0.5">
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate min-w-0">{{ item.name }}</p>
-              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">
+            <div
+              v-for="item in lowStockItems.slice(0, 5)"
+              :key="item.id"
+              class="flex items-baseline justify-between gap-2 rounded-xl px-1 py-2 transition-colors hover:bg-amber-500/[0.06] dark:hover:bg-amber-500/10"
+            >
+              <p class="min-w-0 truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+              <span class="shrink-0 text-xs font-semibold tabular-nums text-amber-700 dark:text-amber-400">
                 {{ item.quantity }}<span v-if="!item.isSerialNumber">/{{ item.threshold }}</span>
               </span>
             </div>
@@ -366,31 +378,31 @@
       <!-- Inventory status -->
       <Card
         padding="sm"
-        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-sm bg-white dark:!bg-dashboard-card"
+        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
       >
         <p
-          class="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
+          class="mb-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
         >
           Inventory
         </p>
-        <div class="flex gap-0.5 h-2 rounded-full overflow-hidden bg-gray-200 dark:bg-white/10">
-          <div class="bg-green-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
+        <div class="flex h-2 gap-px overflow-hidden rounded-full bg-gray-200/90 dark:bg-white/[0.08]">
+          <div class="bg-emerald-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
           <div class="bg-amber-500 transition-all" :style="`width: ${lowStockPercentage}%`" title="Low stock" />
           <div class="bg-red-500 transition-all" :style="`width: ${outOfStockPercentage}%`" title="Out of stock" />
         </div>
-        <div class="flex justify-between mt-2 text-[10px] text-gray-500 dark:text-gray-400">
+        <div class="mt-2 flex justify-between text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
           <span>{{ inStockCount }} in stock</span>
           <span>{{ lowStockCount }} low</span>
           <span>{{ outOfStockCount }} out</span>
         </div>
-        <div class="flex justify-between items-baseline mt-2 pt-2 border-t border-gray-200/80 dark:border-gray-700/80">
-          <span class="text-[11px] text-gray-500 dark:text-gray-400">Total</span>
-          <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
+        <div class="mt-2 flex items-baseline justify-between border-t border-gray-100/90 pt-2 dark:border-white/[0.06]">
+          <span class="text-xs text-gray-600 dark:text-gray-400">Total SKUs</span>
+          <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
         </div>
       </Card>
     </div>
 
-      <div class="flex justify-center pt-6 pb-1 sm:pt-8">
+      <div class="flex justify-center pt-4 pb-1 sm:pt-6">
         <img
           :src="dashboardFooterLogoSrc"
           alt="Storvv"
@@ -1008,14 +1020,14 @@ if (import.meta.client) {
     isMobile.value = window.innerWidth < 640
   })
 }
-const chartHeight = computed(() => (isMobile.value ? 220 : 280))
+const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
   // Light: neutral slate line (clean, not brand-blue); dark: soft blue for contrast on charcoal
-  const lineColor = isDark ? '#93C5FD' : '#64748B'
-  const gridColor = isDark ? 'rgba(75, 85, 99, 0.28)' : 'rgba(148, 163, 184, 0.35)'
-  const labelColor = isDark ? '#A1A1AA' : '#52525B'
+  const lineColor = isDark ? '#93C5FD' : '#4876c7'
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.05)'
+  const labelColor = isDark ? '#A1A1AA' : '#64748B'
 
   return {
     chart: {

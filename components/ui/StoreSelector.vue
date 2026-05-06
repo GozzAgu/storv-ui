@@ -3,13 +3,13 @@
     <button
       type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="store-switch-trigger group relative flex h-9 max-w-44 items-center gap-2 rounded-md border-0 bg-transparent py-1 pl-1 pr-1.5 text-left outline-none transition-colors hover:bg-gray-100/90 focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:hover:bg-white/6 sm:max-w-56 lg:max-w-70"
+      class="store-switch-trigger group relative flex h-9 max-w-44 items-center gap-2 rounded-full border-0 bg-white/90 py-1 pl-1 pr-1.5 text-left ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm outline-none transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:bg-white/[0.06] dark:ring-white/10 dark:hover:bg-white/[0.11] sm:max-w-56 lg:max-w-70"
       :aria-expanded="dropdownOpen"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
       <span
         v-if="!switchingStore"
-        class="store-switch-icon-wrap flex h-7 w-7 shrink-0 items-center justify-center rounded-[9px] text-white shadow-sm"
+        class="store-switch-icon-wrap flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white ring-1 ring-inset ring-white/20"
         :class="
           currentStore
             ? 'ring-1 ring-white/20 dark:ring-white/10'
