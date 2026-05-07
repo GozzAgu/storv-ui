@@ -4,7 +4,7 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border-0 font-semibold tracking-tight cursor-pointer transition-all duration-200 ease-out',
+      'group relative inline-flex items-center justify-center overflow-hidden rounded-sm border-0 font-semibold tracking-tight cursor-pointer transition-[background-color,color,box-shadow,transform,opacity,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
       'focus:outline-none disabled:opacity-45 disabled:cursor-not-allowed',
       'active:scale-[0.98] motion-reduce:active:scale-100',
       sizeClasses,
@@ -17,7 +17,7 @@
   >
     <!-- Specular highlight (glass) -->
     <span
-      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/45 via-transparent to-transparent opacity-50 dark:from-white/10 dark:opacity-80"
+      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/45 via-transparent to-transparent opacity-45 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-55 dark:from-white/10 dark:opacity-75 dark:group-hover:opacity-85"
       aria-hidden="true"
     />
     <span class="relative z-10 inline-flex items-center gap-1.5 text-inherit sm:gap-2">
@@ -104,17 +104,17 @@ const iconSize = computed(() => {
 const variantSurfaceClasses = computed(() => {
   const map = {
     primary:
-      'bg-linear-to-b from-primary-400/95 to-primary-700/98 text-white backdrop-blur-md backdrop-saturate-125 ring-1 ring-inset ring-white/35 hover:from-primary-400 hover:to-primary-800 dark:from-primary-500/90 dark:to-primary-900/95 dark:ring-white/15 dark:hover:to-primary-950',
+      'bg-linear-to-b from-primary-500/88 to-primary-700/90 text-white backdrop-blur-xl backdrop-saturate-140 ring-1 ring-inset ring-white/28 hover:from-primary-500/92 hover:to-primary-800/92 dark:from-primary-500/82 dark:to-primary-900/86 dark:ring-white/14 dark:hover:to-primary-950/90',
     secondary:
-      'bg-linear-to-b from-white/80 to-gray-100/90 text-gray-900 backdrop-blur-xl ring-1 ring-inset ring-white/80 hover:from-white hover:to-gray-100 dark:from-gray-800/75 dark:to-gray-900/85 dark:text-gray-50 dark:ring-white/8 dark:hover:from-gray-800 dark:hover:to-gray-900',
+      'bg-linear-to-b from-white/62 to-gray-100/74 text-gray-900 backdrop-blur-xl backdrop-saturate-135 ring-1 ring-inset ring-white/60 hover:from-white/72 hover:to-gray-100/82 dark:from-gray-800/58 dark:to-gray-900/72 dark:text-gray-50 dark:ring-white/9 dark:hover:from-gray-800/66 dark:hover:to-gray-900/78',
     danger:
-      'bg-linear-to-b from-red-500/92 to-red-800/98 text-white backdrop-blur-md ring-1 ring-inset ring-white/30 hover:from-red-500 hover:to-red-900',
+      'bg-linear-to-b from-red-500/84 to-red-800/90 text-white backdrop-blur-xl backdrop-saturate-135 ring-1 ring-inset ring-white/24 hover:from-red-500/90 hover:to-red-900/94',
     success:
-      'bg-linear-to-b from-emerald-500/92 to-emerald-800/98 text-white backdrop-blur-md ring-1 ring-inset ring-white/30 hover:from-emerald-500 hover:to-emerald-900',
+      'bg-linear-to-b from-emerald-500/84 to-emerald-800/90 text-white backdrop-blur-xl backdrop-saturate-135 ring-1 ring-inset ring-white/24 hover:from-emerald-500/90 hover:to-emerald-900/94',
     outline:
-      'bg-white/55 text-gray-800 backdrop-blur-xl ring-1 ring-inset ring-white/70 hover:bg-white/75 dark:bg-white/6 dark:text-gray-100 dark:ring-white/10 dark:hover:bg-white/12',
+      'bg-white/46 text-gray-800 backdrop-blur-xl backdrop-saturate-130 ring-1 ring-inset ring-white/62 hover:bg-white/62 dark:bg-white/5 dark:text-gray-100 dark:ring-white/11 dark:hover:bg-white/9',
     ghost:
-      'bg-transparent text-gray-700 backdrop-blur-sm hover:bg-white/40 dark:text-gray-200 dark:hover:bg-white/8',
+      'bg-white/18 text-gray-700 backdrop-blur-lg ring-1 ring-inset ring-white/45 hover:bg-white/34 dark:bg-white/2 dark:text-gray-200 dark:ring-white/8 dark:hover:bg-white/6',
   }
   return map[props.variant]
 })

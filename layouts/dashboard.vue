@@ -500,21 +500,21 @@
              <div
                   v-if="profileMenuOpen"
                   ref="profileMenuPanelRef"
-                  class="overflow-hidden rounded-2xl border-0 bg-white/95 ring-1 ring-gray-200/50 backdrop-blur-xl dark:bg-dashboard-card/95 dark:ring-white/12"
+                  class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-[0_10px_28px_rgb(2_6_23/0.10)] ring-1 ring-gray-200/60 backdrop-blur-2xl dark:border-white/10 dark:bg-[#11131a]/92 dark:ring-white/12 dark:shadow-[0_12px_30px_rgb(0_0_0/0.35)]"
                   :style="profileMenuPanelStyle"
                   @click.stop
                 >
                   <!-- User -->
                   <div
-                    class="relative border-b border-gray-100/90 bg-linear-to-br from-primary-500/[0.08] via-white/40 to-transparent px-4 py-4 dark:border-white/[0.07] dark:from-primary-500/15 dark:via-dashboard-card/80 dark:to-dashboard-card/95"
+                    class="relative border-b border-gray-100/90 bg-linear-to-br from-primary-500/15 via-white/60 to-transparent px-3 py-3 dark:border-white/10 dark:from-primary-500/20 dark:via-[#171b25]/90 dark:to-[#11131a]/95"
                   >
                     <span
-                      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/40 to-transparent opacity-50 dark:from-white/[0.03]"
+                      class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/50 via-transparent to-transparent opacity-65 dark:from-white/5"
                       aria-hidden="true"
                     />
-                    <div class="relative flex min-w-0 items-center gap-3">
+                    <div class="relative flex min-w-0 items-center gap-2.5">
                       <div
-                        class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-sm font-bold text-white ring-1 ring-inset ring-white/30 dark:ring-white/20"
+                        class="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-primary-300 via-primary-500 to-primary-800 text-xs font-bold text-white shadow-[0_3px_10px_rgb(20_63_141/0.22)] ring-1 ring-inset ring-white/35 dark:ring-white/20"
                       >
                         <span
                           class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 to-transparent"
@@ -533,14 +533,14 @@
                     </div>
                   </div>
 
-                  <nav class="space-y-0.5 p-2" aria-label="Account menu">
+                  <nav class="space-y-1 p-1.5" aria-label="Account menu">
                     <NuxtLink
                       to="/dashboard/profile"
-                      class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50/95 active:bg-gray-100/80 dark:text-gray-200 dark:hover:bg-white/[0.06] dark:active:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                      class="group flex items-center gap-2.5 rounded-2xl border border-transparent bg-white/50 px-2.5 py-2 text-xs font-medium text-gray-800 transition-[background-color,border-color,transform,color] duration-200 hover:-translate-y-px hover:border-gray-200/80 hover:bg-white/95 hover:text-gray-900 active:bg-gray-100/90 dark:bg-white/3 dark:text-gray-200 dark:hover:border-white/10 dark:hover:bg-white/7 dark:hover:text-white dark:active:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                       @click="profileMenuOpen = false"
                     >
                       <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gray-100/95 text-gray-600 ring-1 ring-inset ring-gray-200/70 transition-colors group-hover:bg-primary-50 group-hover:text-primary-700 dark:bg-white/6 dark:text-gray-300 dark:ring-white/10 dark:group-hover:bg-primary-500/20 dark:group-hover:text-primary-300"
                       >
                         <UserCircleIcon
                           class="h-4 w-4"
@@ -552,11 +552,11 @@
                     </NuxtLink>
                     <NuxtLink
                       to="/dashboard/settings"
-                      class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium text-gray-800 transition-colors hover:bg-gray-50/95 active:bg-gray-100/80 dark:text-gray-200 dark:hover:bg-white/[0.06] dark:active:bg-white/[0.09] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
+                      class="group flex items-center gap-2.5 rounded-2xl border border-transparent bg-white/50 px-2.5 py-2 text-xs font-medium text-gray-800 transition-[background-color,border-color,transform,color] duration-200 hover:-translate-y-px hover:border-gray-200/80 hover:bg-white/95 hover:text-gray-900 active:bg-gray-100/90 dark:bg-white/3 dark:text-gray-200 dark:hover:border-white/10 dark:hover:bg-white/7 dark:hover:text-white dark:active:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30"
                       @click="profileMenuOpen = false"
                     >
                       <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gray-100/95 text-gray-600 ring-1 ring-inset ring-gray-200/70 transition-colors group-hover:bg-primary-50 group-hover:text-primary-700 dark:bg-white/6 dark:text-gray-300 dark:ring-white/10 dark:group-hover:bg-primary-500/20 dark:group-hover:text-primary-300"
                       >
                         <Cog6ToothIcon
                           class="h-4 w-4"
@@ -568,14 +568,14 @@
                     </NuxtLink>
                   </nav>
 
-                  <div class="border-t border-gray-100/90 p-2 dark:border-white/[0.07]">
+                  <div class="border-t border-gray-100/90 p-1.5 dark:border-white/10">
                     <button
                       type="button"
                       @click="handleSignOut"
-                      class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs font-medium text-red-600 transition-colors hover:bg-red-50/90 dark:text-red-400 dark:hover:bg-red-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
+                      class="group flex w-full items-center gap-2.5 rounded-2xl border border-red-100/80 bg-red-50/45 px-2.5 py-2 text-left text-xs font-medium text-red-600 transition-[background-color,border-color,transform] duration-200 hover:-translate-y-px hover:border-red-200/80 hover:bg-red-50/95 dark:border-red-500/20 dark:bg-red-500/8 dark:text-red-400 dark:hover:border-red-500/35 dark:hover:bg-red-500/14 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
                     >
                       <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 ring-1 ring-inset ring-red-200/70 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-red-50/95 text-red-600 ring-1 ring-inset ring-red-200/75 transition-colors group-hover:bg-red-100 dark:bg-red-500/15 dark:text-red-400 dark:ring-red-500/25 dark:group-hover:bg-red-500/22"
                       >
                         <ArrowRightOnRectangleIcon
                           class="h-4 w-4"
