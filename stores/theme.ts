@@ -3,15 +3,11 @@ import { defineStore } from 'pinia'
 export type Theme = 'light' | 'dark' | 'system'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
-const THEME_TRANSITION_MS = 240
-const THEME_TRANSITION_MS_REDUCED = 90
+const THEME_TRANSITION_MS = 400
+const THEME_TRANSITION_MS_REDUCED = 110
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */
 let themeTransitionTimer: number | null = null
-
-type MaybeDocumentWithViewTransition = Document & {
-  startViewTransition?: (callback: () => void) => { finished?: Promise<unknown> }
-}
 
 function syncThemeColorMeta(isDark: boolean) {
   if (!import.meta.client) return
@@ -89,33 +85,26 @@ export const useThemeStore = defineStore('theme', {
           syncThemeColorMeta(isDark)
         }
 
+        const endThemeTransition = () => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              html.classList.remove('theme-transitioning')
+              body.classList.remove('theme-transitioning')
+              themeTransitionTimer = null
+            })
+          })
+        }
+
         if (shouldAnimate) {
           html.classList.add('theme-transitioning')
           body.classList.add('theme-transitioning')
         }
 
-        // Progressive enhancement for Chromium browsers: View Transitions smooth out
-        // fixed/teleported surfaces that don't always interpolate cleanly otherwise.
-        const docWithVT = document as MaybeDocumentWithViewTransition
-        const canUseViewTransition =
-          shouldAnimate &&
-          !reducedMotion &&
-          typeof docWithVT.startViewTransition === 'function'
-
-        if (canUseViewTransition) {
-          docWithVT.startViewTransition?.(() => {
-            applyThemeClasses()
-          })
-        } else {
-          applyThemeClasses()
-        }
-
+        // Intentionally avoid `document.startViewTransition` for theme: a root snapshot cross-fade
+        // composites badly with large scroll regions and zebra-striped tables (horizontal banding).
+        applyThemeClasses()
         if (shouldAnimate) {
-          themeTransitionTimer = window.setTimeout(() => {
-            html.classList.remove('theme-transitioning')
-            body.classList.remove('theme-transitioning')
-            themeTransitionTimer = null
-          }, transitionMs)
+          themeTransitionTimer = window.setTimeout(endThemeTransition, transitionMs)
         }
       }
     },

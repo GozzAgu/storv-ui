@@ -144,15 +144,31 @@ html.theme-transitioning button,
 html.theme-transitioning a,
 html.theme-transitioning input,
 html.theme-transitioning select,
-html.theme-transitioning textarea,
-html.theme-transitioning th,
-html.theme-transitioning td,
-html.theme-transitioning tr {
+html.theme-transitioning textarea {
   /* Targeted list (instead of `*`) avoids stutter on very large tables. */
+  /* Omit filter/backdrop on bulk nodes (tables); see `.frosted-glass` block below. */
+  /* Do not include tr/td/th — see `.data-table-shell` row rule below (zebra + scroll). */
+  transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
+    text-decoration-color, fill, stroke, opacity, accent-color, caret-color, column-rule-color !important;
+  transition-duration: 0.4s !important;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition-delay: 0s !important;
+}
+
+/* Large striped tables: animating every cell causes crawl and “banding”; snap rows on theme toggle. */
+html.theme-transitioning .data-table-shell tr,
+html.theme-transitioning .data-table-shell td,
+html.theme-transitioning .data-table-shell th {
+  transition: none !important;
+}
+
+/* Blur panels only: animating backdrop-filter on every <tr>/<td> is a major source of theme-toggle jank. */
+html.theme-transitioning .frosted-glass,
+html.theme-transitioning .dashboard-global-tooltip-bubble {
   transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
     text-decoration-color, fill, stroke, opacity, filter, backdrop-filter, -webkit-backdrop-filter,
     accent-color, caret-color, column-rule-color !important;
-  transition-duration: 0.24s !important;
+  transition-duration: 0.4s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
 }
@@ -175,20 +191,10 @@ html.theme-transitioning tr {
   html.theme-transitioning a,
   html.theme-transitioning input,
   html.theme-transitioning select,
-  html.theme-transitioning textarea,
-  html.theme-transitioning th,
-  html.theme-transitioning td,
-  html.theme-transitioning tr {
-    transition-duration: 0.09s !important;
+  html.theme-transitioning textarea {
+    transition-duration: 0.11s !important;
     transition-timing-function: ease-out !important;
   }
-}
-
-/* Chromium view-transition polish (no-op on unsupported browsers). */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.24s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {

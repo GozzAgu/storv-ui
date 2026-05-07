@@ -62,15 +62,15 @@
 
       <!-- Navigation -->
       <nav
-        class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-2"
+        class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-1"
         :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2'"
       >
-        <div class="min-h-0 space-y-0.5">
+        <div class="min-h-0 space-y-0">
           <template v-for="item in filteredNavigation" :key="item.name">
             <!-- Inventory (expandable) -->
-            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-1">
+            <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
-                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-2.5 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
+                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-1.5 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
               >
                 <NuxtLink
                   :to="item.href"
@@ -99,12 +99,12 @@
                   </span>
                 </button>
               </div>
-              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="ml-1.5 space-y-0.5 border-l border-gray-200/50 py-0.5 pl-3 dark:border-white/[0.08]">
+              <div v-if="inventoryExpanded && inventoryFolders.length > 0" class="ml-1.5 space-y-0 border-l border-gray-200/50 py-0.5 pl-3 dark:border-white/[0.08]">
                 <NuxtLink
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
-                  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
+                  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-1 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
                 >
                   <FolderIcon
                     v-if="route.params.id !== folder.id"
@@ -122,7 +122,7 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2.5 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-2.5', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-1.5', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
             >
               <component
                 :is="isActive(item.href) ? item.iconSolid : item.icon"
@@ -141,7 +141,7 @@
           <!-- Stores (super admins) -->
           <div
             v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
-            class="mt-2 rounded-xl bg-gray-50/95 p-1.5 ring-1 ring-inset ring-gray-200/50 dark:bg-white/[0.04] dark:ring-white/[0.08]"
+            class="mt-1.5 rounded-xl bg-gray-50/95 p-1.5 ring-1 ring-inset ring-gray-200/50 dark:bg-white/[0.04] dark:ring-white/[0.08]"
           >
             <button
               type="button"
@@ -251,7 +251,7 @@
         </div>
 
         <!-- Recent Items -->
-        <div v-if="!effectiveSidebarCollapsed" class="mt-auto pt-2">
+        <div v-if="!effectiveSidebarCollapsed" class="mt-auto pt-1.5">
           <RecentItemsWidget />
         </div>
       </nav>
