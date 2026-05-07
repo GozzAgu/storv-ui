@@ -1,9 +1,9 @@
 <template>
-  <div class="relative" ref="dropdownRef">
+  <div class="relative min-w-0 shrink" ref="dropdownRef">
     <button
       type="button"
       @click="dropdownOpen = !dropdownOpen"
-      class="store-switch-trigger group relative flex h-9 max-w-44 items-center gap-2 rounded-full border-0 bg-white/90 py-1 pl-1 pr-1.5 text-left ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm outline-none transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:bg-white/[0.06] dark:ring-white/10 dark:hover:bg-white/[0.11] sm:max-w-56 lg:max-w-70"
+      class="store-switch-trigger group relative flex h-9 w-full max-w-28 min-w-0 items-center gap-1.5 rounded-full border-0 bg-white/90 py-1 pl-1 pr-1.5 text-left ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm outline-none transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:bg-white/[0.06] dark:ring-white/10 dark:hover:bg-white/[0.11] sm:max-w-56 sm:gap-2 lg:max-w-70"
       :aria-expanded="dropdownOpen"
       :aria-label="switchingStore ? 'Switching store...' : (currentStore?.name || 'Select store')"
     >
