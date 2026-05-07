@@ -162,6 +162,11 @@ html.theme-transitioning .data-table-shell th {
   transition: none !important;
 }
 
+/* Inventory /dashboard/inventory folder tiles: `transition-all` on dozens of cards melts the main thread on theme change. */
+html.theme-transitioning .inv-folder-uisverse {
+  transition: none !important;
+}
+
 /* Blur panels only: animating backdrop-filter on every <tr>/<td> is a major source of theme-toggle jank. */
 html.theme-transitioning .frosted-glass,
 html.theme-transitioning .dashboard-global-tooltip-bubble {

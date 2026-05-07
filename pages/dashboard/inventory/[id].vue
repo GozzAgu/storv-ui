@@ -1297,7 +1297,7 @@ if (import.meta.client) {
       sidebarCollapsed.value = e.newValue === 'true'
     }
   })
-  // Also check periodically for changes (since storage event doesn't fire on same window)
+  // Same-tab sidebar toggles don’t fire `storage`; poll lightly (100ms was needlessly hot on heavy pages).
   setInterval(() => {
     try {
       const savedState = localStorage.getItem('sidebarCollapsed')
@@ -1310,7 +1310,7 @@ if (import.meta.client) {
     } catch (e) {
       // Ignore
     }
-  }, 100)
+  }, 1000)
 }
 const searchQuery = ref('')
 /** Full folder list for search filter (client-side); not stored in Pinia. */

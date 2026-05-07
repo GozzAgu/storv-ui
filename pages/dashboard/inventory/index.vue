@@ -228,11 +228,13 @@
       </div>
 
       <!-- Folders table (styling aligned with folder item table on /inventory/[id]) -->
+      <!-- `data-table-shell`: pairs with main.css so theme toggle doesn’t animate hundreds of row backgrounds (folders page-only lag). -->
       <div
         v-else-if="paginatedFolders.length > 0 && foldersViewMode === 'table'"
         key="table"
-        class="overflow-x-auto"
+        class="data-table-shell"
       >
+        <div class="overflow-x-auto">
         <table class="min-w-full border-separate border-spacing-0">
           <thead
             class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:bg-dashboard-card/90!"
@@ -341,6 +343,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </Transition>
 
@@ -1104,7 +1107,7 @@ if (import.meta.client) {
       sidebarCollapsed.value = e.newValue === 'true'
     }
   })
-  // Also check periodically for changes (since storage event doesn't fire on same window)
+  // Same-tab sidebar toggles don’t fire `storage`; poll lightly (100ms was needlessly hot on heavy pages).
   setInterval(() => {
     try {
       const savedState = localStorage.getItem('sidebarCollapsed')
@@ -1117,7 +1120,7 @@ if (import.meta.client) {
     } catch (e) {
       // Ignore
     }
-  }, 100)
+  }, 1000)
 }
 
 const authStore = useAuthStore()
