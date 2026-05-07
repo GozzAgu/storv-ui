@@ -10,7 +10,6 @@
       class="flex h-7 shrink-0 cursor-grab items-center justify-center rounded-full border border-gray-200/90 bg-white/95 text-gray-400 backdrop-blur-sm active:cursor-grabbing dark:border-gray-600 dark:bg-gray-800/95 dark:text-gray-500"
       :class="layout === 'column' ? 'w-10' : 'w-9'"
       aria-label="Drag to reposition"
-      title="Drag to move"
       @pointerdown="onHandlePointerDown"
     >
       <span class="flex flex-col gap-0.5" aria-hidden="true">

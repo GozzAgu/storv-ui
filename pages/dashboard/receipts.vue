@@ -103,7 +103,6 @@
             <button
               type="button"
               class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
-              title="Exit expanded view"
               aria-label="Exit expanded view"
               @click="isReceiptsFullscreen = false"
             >
@@ -144,7 +143,6 @@
               <button
                 type="button"
                 class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-                title="Reset filters"
                 @click="resetFilters"
               >
                 <ArrowPathIcon class="h-5 w-5" />
@@ -152,7 +150,6 @@
               <button
                 type="button"
                 class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
-                title="Exit expanded view"
                 aria-label="Exit expanded view"
                 @click="isReceiptsFullscreen = false"
               >
@@ -232,7 +229,6 @@
             <button
               type="button"
               class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
-              title="Reset filters"
               @click="resetFilters"
             >
               <ArrowPathIcon class="h-4 w-4" />
@@ -240,7 +236,6 @@
             <button
               type="button"
               class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
-              :title="isReceiptsFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'"
               @click="isReceiptsFullscreen = !isReceiptsFullscreen"
             >
               <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="h-4 w-4" />
@@ -348,7 +343,6 @@
                   <button
                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
                     class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
-                    title="Copy"
                     aria-label="Copy receipt number"
                   >
                     <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
@@ -409,7 +403,6 @@
                 :data-receipt-actions-anchor="receipt.id"
                 @click="toggleReceiptMenu(receipt.id)"
                 class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                title="Actions"
                 aria-label="Receipt actions"
                 aria-haspopup="menu"
                 :aria-expanded="openReceiptMenuId === receipt.id"
@@ -623,7 +616,6 @@
                   <button
                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
                     class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    title="Copy receipt number"
                   >
                     <ClipboardDocumentIcon class="w-3 h-3 stroke-1" stroke-width="1.5" />
                   </button>
@@ -708,7 +700,6 @@
                     :data-receipt-actions-anchor="receipt.id"
                     @click="toggleReceiptMenu(receipt.id)"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                    title="Actions"
                     aria-label="Receipt actions"
                     aria-haspopup="menu"
                     :aria-expanded="openReceiptMenuId === receipt.id"
@@ -964,7 +955,6 @@
                     <button
                       @click="toggleCustomerExpanded(customer.id)"
                       type="button"
-                      :title="expandedCustomers[customer.id] ? 'Collapse receipts' : 'Expand to view receipts'"
                       :class="[ 'group inline-flex items-center gap-1 rounded-sm px-1 py-0.5 text-[11px] font-medium transition-colors', 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900', expandedCustomers[customer.id] ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100', ]"
                     >
                       <ChevronRightIcon
@@ -1001,7 +991,6 @@
                         :data-customer-actions-anchor="customer.id"
                         @click="toggleCustomerMenu(customer.id)"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                        title="Actions"
                         aria-label="Customer actions"
                         aria-haspopup="menu"
                         :aria-expanded="openCustomerMenuId === customer.id"

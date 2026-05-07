@@ -1,5 +1,6 @@
 <template>
   <label
+    v-bind="delegatedAttrs"
     :class="[ 'relative inline-flex items-center cursor-pointer group', disabled && 'opacity-50 cursor-not-allowed', wrapperClass ]"
   >
     <input
@@ -65,6 +66,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed, useAttrs } from 'vue'
+
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
+
+const delegatedAttrs = computed(() => {
+  const raw = { ...(attrs as Record<string, unknown>) }
+  delete raw.title
+  return raw
+})
+
 interface Props {
   modelValue: boolean
   label?: string

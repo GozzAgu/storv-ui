@@ -40,7 +40,6 @@
               <button
                 type="button"
                 class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
-                title="Exit expanded view"
                 aria-label="Exit expanded view"
                 @click="isStaffFullscreen = false"
               >
@@ -61,7 +60,6 @@
               <button
                 type="button"
                 class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
-                title="Exit expanded view"
                 aria-label="Exit expanded view"
                 @click="isStaffFullscreen = false"
               >
@@ -99,7 +97,6 @@
               <button
                 type="button"
                 class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-                title="Back to departments"
                 @click="navigateTo('/dashboard/departments')"
               >
                 <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
@@ -136,7 +133,6 @@
             <button
               type="button"
               class="hidden rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800 lg:inline-flex"
-              title="Expanded table"
               @click="isStaffFullscreen = true"
             >
               <ArrowsPointingOutIcon class="h-4 w-4" />
@@ -269,7 +265,6 @@
                   <button
                     type="button"
                     class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-blue-400"
-                    :title="`Change role to ${getNextRoleLabel(member.role)}`"
                     @click="handleToggleStaffRole(member)"
                   >
                     <UserGroupIcon class="h-3.5 w-3.5 shrink-0" />
@@ -277,7 +272,6 @@
                   <button
                     type="button"
                     class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-gray-100"
-                    title="Edit"
                     @click="handleEditStaff(member)"
                   >
                     <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
@@ -285,7 +279,6 @@
                   <button
                     type="button"
                     class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-red-200/80 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:border-red-800/50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                    title="Delete"
                     @click="handleDeleteStaff(member)"
                   >
                     <TrashIcon class="h-3.5 w-3.5 shrink-0" />
@@ -295,7 +288,6 @@
                   <button
                     type="button"
                     class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60"
-                    title="Actions"
                     @click="toggleStaffMenu(member.id)"
                   >
                     <EllipsisVerticalIcon class="h-4 w-4 shrink-0" />
@@ -307,7 +299,6 @@
                     <button
                       type="button"
                       class="flex w-full items-center justify-center px-3 py-2.5 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
-                      :title="`Change role to ${getNextRoleLabel(member.role)}`"
                       @click="handleToggleStaffRole(member); openStaffMenuId = null"
                     >
                       <UserGroupIcon class="h-5 w-5" />
@@ -315,7 +306,6 @@
                     <button
                       type="button"
                       class="flex w-full items-center justify-center px-3 py-2.5 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
-                      title="Edit"
                       @click="handleEditStaff(member); openStaffMenuId = null"
                     >
                       <PencilSquareIcon class="h-5 w-5" />
@@ -323,7 +313,6 @@
                     <button
                       type="button"
                       class="flex w-full items-center justify-center px-3 py-2.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
-                      title="Delete"
                       @click="handleDeleteStaff(member); openStaffMenuId = null"
                     >
                       <TrashIcon class="h-5 w-5" />

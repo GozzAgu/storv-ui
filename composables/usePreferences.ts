@@ -63,6 +63,32 @@ export const regions = [
 const PREFERENCES_KEY = 'userPreferences'
 const BASE_CURRENCY_KEY = 'baseCurrency'
 
+/** From this magnitude up, use compact currency (e.g. ₦1B) so long amounts fit in UI. */
+const CURRENCY_COMPACT_THRESHOLD = 1_000_000_000
+
+function formatCurrencyIntl(amount: number, locale: string, currency: string): string {
+  const full: Intl.NumberFormatOptions = {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }
+  if (!Number.isFinite(amount)) {
+    return new Intl.NumberFormat(locale, full).format(amount)
+  }
+  if (Math.abs(amount) < CURRENCY_COMPACT_THRESHOLD) {
+    return new Intl.NumberFormat(locale, full).format(amount)
+  }
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    notation: 'compact',
+    compactDisplay: 'short',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
 // Reactive preferences (initialized from localStorage or defaults)
 const preferences = ref<UserPreferences>({ ...defaultPreferences })
 const baseCurrency = ref<string>('USD') // Default base currency
@@ -256,12 +282,7 @@ export const usePreferences = () => {
         preferences.value.region === 'GB' ? 'en-GB' : 
         preferences.value.region === 'EU' ? 'de-DE' : 'en-US'
       
-      return new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: preferences.value.currency,
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }).format(value)
+      return formatCurrencyIntl(value, locale, preferences.value.currency)
     }
     
     const { showSymbol = true, fromCurrency } = options || {}
@@ -292,14 +313,7 @@ export const usePreferences = () => {
       preferences.value.region === 'GB' ? 'en-GB' : 
       preferences.value.region === 'EU' ? 'de-DE' : 'en-US'
     
-    const formatted = new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: targetCurrency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(convertedValue)
-
-    return formatted
+    return formatCurrencyIntl(convertedValue, locale, targetCurrency)
   }
 
   // Format date

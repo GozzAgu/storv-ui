@@ -2,7 +2,7 @@
   <div
     class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-2 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-2.5 sm:pb-32"
   >
-    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-0" />
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-4 sm:!mb-5" />
 
     <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
     <header
@@ -76,7 +76,6 @@
               v-if="searchQuery"
               type="button"
               class="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-              title="Clear search"
               aria-label="Clear search"
               @click="searchQuery = ''"
             >
@@ -87,7 +86,6 @@
             <button
               type="button"
               class="inline-flex items-center justify-center rounded-sm border border-gray-200/90 bg-white p-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-              title="Reset filters"
               aria-label="Reset filters"
               @click="resetFilters"
             >

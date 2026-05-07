@@ -104,7 +104,6 @@
                     ? 'bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white'
                     : 'text-gray-500 hover:bg-gray-50/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
                 "
-                title="Grid view"
                 :aria-pressed="foldersViewMode === 'grid'"
                 @click="foldersViewMode = 'grid'"
               >
@@ -118,7 +117,6 @@
                     ? 'bg-gray-100 text-gray-900 dark:bg-white/10 dark:text-white'
                     : 'text-gray-500 hover:bg-gray-50/90 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-200'
                 "
-                title="Table view"
                 :aria-pressed="foldersViewMode === 'table'"
                 @click="foldersViewMode = 'table'"
               >
@@ -333,7 +331,6 @@
                     :data-folder-actions-anchor="folder.id"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
                     aria-label="Folder options"
-                    title="Actions"
                     @click="toggleFolderMenu(folder.id)"
                   >
                     <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
@@ -629,7 +626,6 @@
                     type="button"
                     @click="handleRemoveField(index)"
                         class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
-                    title="Remove field"
                   >
                     <TrashIcon class="w-4 h-4" />
                   </button>

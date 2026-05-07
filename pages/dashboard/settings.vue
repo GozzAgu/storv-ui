@@ -54,7 +54,6 @@
                 @click="accountLogoInput?.click()"
                 :disabled="isUploadingAccountLogo"
                 class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-400 hover:bg-primary-500 text-white rounded-full flex items-center justify-center disabled:opacity-50 transition-all"
-                title="Upload logo"
                 aria-label="Upload logo"
               >
                 <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3.5 h-3.5 animate-spin" />
@@ -210,7 +209,6 @@
                 <button
                   @click.stop="editStore(store)"
                   class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
-                  title="Edit store"
                   aria-label="Edit store"
                 >
                   <PencilSquareIcon class="w-3.5 h-3.5" />
@@ -219,7 +217,6 @@
                   @click.stop="confirmDelete(store)"
                   :disabled="currentStore?.id === store.id"
                   class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Delete store"
                   aria-label="Delete store"
                 >
                   <TrashIcon class="w-3.5 h-3.5" />
@@ -249,7 +246,6 @@
             <button
               @click="saveStoreInfo"
               class="inline-flex items-center justify-center w-9 h-8 rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors"
-              title="Done"
               aria-label="Done"
             >
               <CheckIcon class="w-4 h-4" />

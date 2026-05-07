@@ -1,5 +1,6 @@
 <template>
   <button
+    v-bind="delegatedAttrs"
     :type="type"
     :disabled="disabled || loading"
     :class="[
@@ -41,8 +42,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import { ArrowPathIcon } from '@heroicons/vue/24/outline'
+
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
+
+/** Native `title` shows browser tooltips; we strip it from the shared Button. */
+const delegatedAttrs = computed(() => {
+  const raw = { ...(attrs as Record<string, unknown>) }
+  delete raw.title
+  return raw
+})
 
 interface Props {
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline' | 'ghost'

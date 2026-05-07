@@ -126,7 +126,7 @@
         :subtext-class="revenueChangeClass"
         :change="revenueChangePercent"
         :change-positive="revenueChangePositive"
-        :sparkline-data="statCardRevenueSparkline"
+        :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
       />
       <StatCard
         label="Active customers"
@@ -426,7 +426,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import {
   CubeIcon,
-  CurrencyDollarIcon,
   UsersIcon,
   ShoppingCartIcon,
   ArrowPathIcon,
@@ -498,6 +497,9 @@ const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 
+const { formatCurrency: formatCurrencyFromPrefs, preferences } = usePreferences()
+const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
+const formatCurrency = formatCurrencyFromPrefs
 /** Full per-folder item lists for dashboard KPIs only (not kept in Pinia). */
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
 
@@ -1166,21 +1168,6 @@ const chartOptions = computed(() => {
     }
   }
 })
-
-// Get currency formatting from preferences
-const { formatCurrency: formatCurrencyFromPrefs, preferences } = usePreferences()
-const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
-
-// Use the formatCurrency from preferences (which already includes the symbol)
-const formatCurrency = formatCurrencyFromPrefs
-
-const formatCurrencyShort = (value: number) => {
-  const symbol = currencySymbol.value
-  if (value >= 1000) {
-    return `${symbol}${(value / 1000).toFixed(1)}k`
-  }
-  return `${symbol}${Math.round(value)}`
-}
 
 const getTimeAgo = (date: Date) => {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)

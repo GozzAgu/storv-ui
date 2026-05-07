@@ -42,7 +42,6 @@
             <button
               type="button"
               class="p-1.5 rounded-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-              title="Copy password"
               @click="copyPassword(entry)"
             >
               <ClipboardDocumentIcon v-if="copyId !== entry.id" class="w-4 h-4" />
@@ -51,7 +50,6 @@
             <button
               type="button"
               class="p-1.5 rounded-sm text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-              title="Remove from list"
               @click="removeInvite(entry.id)"
             >
               <TrashIcon class="w-4 h-4" />

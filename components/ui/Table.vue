@@ -71,7 +71,6 @@
                   v-if="onEdit"
                   @click="handleEdit(row, index)"
                   class="text-primary-500 dark:text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
-                  title="Edit"
                 >
                   <PencilSquareIcon class="w-4 h-4" />
                 </button>
@@ -79,7 +78,6 @@
                   v-if="onDelete"
                   @click="handleDelete(row, index)"
                   class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                  title="Delete"
                 >
                   <TrashIcon class="w-4 h-4" />
                 </button>

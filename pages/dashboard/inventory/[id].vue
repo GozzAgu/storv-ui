@@ -33,7 +33,6 @@
         <button
           type="button"
           class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-          title="Back to folders"
           @click="navigateTo('/dashboard/inventory')"
         >
           <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
@@ -173,7 +172,6 @@
                 <button
                   type="button"
                   class="shrink-0 rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:hidden"
-                  title="Exit expanded view"
                   aria-label="Exit expanded view"
                   @click="isFullscreen = false"
                 >
@@ -207,7 +205,6 @@
                   <button
                     type="button"
                     class="rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-                    title="Reset filters"
                     @click="resetFilters"
                   >
                     <ArrowPathIcon class="h-5 w-5" />
@@ -215,7 +212,6 @@
                   <button
                     type="button"
                     class="hidden rounded-sm border border-transparent p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-100 lg:inline-flex"
-                    title="Exit expanded view"
                     aria-label="Exit expanded view"
                     @click="isFullscreen = false"
                   >
@@ -294,7 +290,6 @@
               <button
                 type="button"
                 class="mt-0.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white lg:inline-flex"
-                title="Back to folders"
                 @click="navigateTo('/dashboard/inventory')"
               >
                 <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
@@ -344,7 +339,6 @@
             <button
               type="button"
               class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
-              title="Reset filters"
               @click="resetFilters"
             >
               <ArrowPathIcon class="h-4 w-4" />
@@ -352,7 +346,6 @@
             <button
               type="button"
               class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
-              :title="isFullscreen ? 'Exit expanded view' : 'Expanded table'"
               @click="isFullscreen = !isFullscreen"
             >
               <ArrowsPointingOutIcon class="h-4 w-4" />
@@ -504,7 +497,6 @@
                 @click="toggleItemMenu(item.id)"
                 :disabled="isItemSold(item)"
                 :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
-                title="Actions"
                 aria-label="Item actions"
                 aria-haspopup="menu"
                 :aria-expanded="openItemMenuId === item.id"
@@ -582,7 +574,6 @@
                   :disabled="isItemSold(item)"
                   size="sm"
                   wrapper-class="justify-center"
-                  :title="isItemSold(item) ? 'Cannot select sold products for bulk operations' : ''"
                 />
               </td>
               <td
@@ -691,7 +682,6 @@
                     @click="toggleItemMenu(item.id)"
                     :disabled="isItemSold(item)"
                     :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
-                    title="Actions"
                     aria-label="Item actions"
                     aria-haspopup="menu"
                     :aria-expanded="openItemMenuId === item.id"
@@ -881,7 +871,6 @@
                   type="button"
                   @click="removeSerialNumber(index)"
                   class="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                  title="Remove serial number"
                 >
                   <TrashIcon class="w-3.5 h-3.5" />
                 </button>
@@ -1099,7 +1088,6 @@
                 type="button"
                 @click="removeDuplicateSerialNumber(index)"
                 class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
-                title="Remove"
               >
                 <TrashIcon class="w-4 h-4" />
               </button>

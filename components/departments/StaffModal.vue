@@ -91,7 +91,6 @@
             type="button"
             @click="regeneratePassword"
             class="p-2 rounded-sm text-gray-500 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors shrink-0"
-            title="Generate new password"
           >
             <ArrowPathIcon class="w-4 h-4" stroke-width="1.75" />
           </button>

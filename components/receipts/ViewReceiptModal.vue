@@ -17,7 +17,6 @@
             v-if="receipt"
             @click="copyReceiptNumber(receipt.receiptNumber)"
             class="p-1.5 rounded-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
-            title="Copy receipt number"
           >
             <ClipboardDocumentIcon class="w-4 h-4" stroke-width="1.5" />
           </button>

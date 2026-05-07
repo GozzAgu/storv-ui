@@ -67,14 +67,12 @@
               <button
                 @click="$emit('load', saved.id)"
                 class="p-1.5 text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-sm transition-colors"
-                title="Load search"
               >
                 <ArrowRightIcon class="w-4 h-4" />
               </button>
               <button
                 @click="handleDelete(saved.id)"
                 class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors opacity-0 group-hover:opacity-100"
-                title="Delete search"
               >
                 <TrashIcon class="w-4 h-4" />
               </button>

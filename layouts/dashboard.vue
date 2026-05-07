@@ -13,7 +13,7 @@
     <aside
       :class="[
         /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
-        'fixed inset-y-0 left-0 z-[55] flex flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
       ]"
@@ -284,7 +284,6 @@
           <button
             @click="handleSignOut"
             :class="[ 'mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium transition-colors', effectiveSidebarCollapsed ? 'relative group' : 'px-1', 'text-gray-700 hover:bg-gray-100/95 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.07] dark:hover:text-white' ]"
-            :title="effectiveSidebarCollapsed ? undefined : 'Sign out'"
           >
             <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 opacity-80" stroke-width="1.75" />
             <span v-if="!effectiveSidebarCollapsed">Sign out</span>
@@ -299,57 +298,78 @@
       </div>
     </aside>
 
-    <!-- Sidebar Overlay (Mobile) -->
+    <!-- Mobile scrim: opacity + backdrop-filter easing/duration match drawer slide; stays mounted so blur eases in/out -->
     <div
-      v-if="sidebarOpen"
-      @click="sidebarOpen = false"
-      class="fixed inset-0 z-30 bg-gray-900 bg-opacity-50 dark:bg-opacity-70 lg:hidden"
-    ></div>
+      class="fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
+      :class="[
+        sidebarOpen
+          ? 'pointer-events-auto bg-black/[0.05] opacity-100 backdrop-blur-md backdrop-saturate-110 dark:bg-[#07080c]/30'
+          : 'pointer-events-none opacity-0 backdrop-blur-none backdrop-saturate-100 dark:bg-transparent',
+      ]"
+      :aria-hidden="!sidebarOpen"
+      @click="closeMobileSidebarOverlay"
+    />
 
     <!-- Main Content -->
     <div 
-      :class="['min-h-screen transition-[padding-left] duration-300 ease-in-out', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
+      :class="['min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
       class="w-full"
       style="min-width: 0; max-width: 100vw;"
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
-        :class="[ 'fixed top-0 left-0 right-0 z-[54] isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 dark:border-white/[0.07] dark:bg-[#07080c]/70', sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64' ]"
+        :class="[
+          'fixed top-0 left-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.07] dark:bg-[#07080c]/70',
+          sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
+          sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
+        ]"
       >
         <div
           class="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/50 to-transparent dark:via-white/10"
           aria-hidden="true"
         />
         <div
-          class="relative flex h-12 w-full items-center justify-between gap-2 px-3 sm:h-14 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6"
+          class="relative flex h-12 w-full items-center gap-2 px-3 sm:h-14 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6"
         >
-          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              @click="sidebarOpen = true"
-              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/90 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
-              aria-label="Open menu"
+          <!-- Mobile nav trigger: own column so flex-1 page title never squeezes the logo -->
+          <button
+            type="button"
+            class="group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
+            aria-label="Open menu"
+            @click="sidebarOpen = true"
+          >
+            <img
+              src="/storvv logo mobile.png"
+              alt=""
+              class="h-7 w-7 shrink-0 object-contain"
+              width="28"
+              height="28"
+              decoding="async"
+            />
+            <ChevronRightIcon
+              class="h-3 w-3 shrink-0 text-gray-400 transition-transform duration-200 group-hover:translate-x-px dark:text-gray-500"
+              stroke-width="2.5"
+              aria-hidden="true"
+            />
+          </button>
+
+          <!-- Page title (shrinks / truncates; not coupled to logo) -->
+          <div class="hidden min-w-0 flex-1 items-center md:flex">
+            <div
+              class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
             >
-              <Squares2X2Icon class="h-[1.15rem] w-[1.15rem]" stroke-width="1.75" />
-            </button>
-            <!-- Page title -->
-            <div class="hidden min-w-0 items-center md:flex">
               <div
-                class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/90 ring-1 ring-inset ring-gray-200/55 dark:bg-white/[0.06] dark:ring-white/10"
               >
-                <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/90 ring-1 ring-inset ring-gray-200/55 dark:bg-white/[0.06] dark:ring-white/10"
-                >
-                  <component
-                    :is="currentPageIcon"
-                    class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
-                    stroke-width="1.75"
-                  />
-                </div>
-                <h1 class="min-w-0 truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
-                  {{ currentPageName }}
-                </h1>
+                <component
+                  :is="currentPageIcon"
+                  class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
+                  stroke-width="1.75"
+                />
               </div>
+              <h1 class="min-w-0 truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
+                {{ currentPageName }}
+              </h1>
             </div>
           </div>
 
@@ -602,7 +622,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import {
-  Squares2X2Icon,
   XMarkIcon,
   HomeIcon,
   CubeIcon,
@@ -691,6 +710,10 @@ watch(() => authStore.currentUser, (newUser) => {
 // Computed unread count
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
 const sidebarOpen = ref(false)
+
+function closeMobileSidebarOverlay() {
+  if (sidebarOpen.value) sidebarOpen.value = false
+}
 const profileMenuOpen = ref(false)
 const profileMenuRef = ref<HTMLElement | null>(null)
 const profileMenuPanelRef = ref<HTMLElement | null>(null)
