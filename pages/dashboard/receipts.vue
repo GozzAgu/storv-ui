@@ -172,7 +172,7 @@
       </div>
 
       <div
-        :class="[ isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell flex flex-1 flex-col min-h-[calc(100svh-20rem)]', ]"
+        :class="[ isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell flex flex-1 flex-col min-h-[calc(100svh-20rem)] !rounded-2xl border border-gray-200/60 shadow-sm shadow-gray-950/[0.04] dark:border-gray-700/55 dark:shadow-black/30', ]"
       >
         <!-- Toolbar: search + filters (left), primary action (right) -->
         <DataTableToolbar v-if="!receiptsStore.loading && !isReceiptsFullscreen">
@@ -324,8 +324,8 @@
           :key="receipt.id"
           :data-receipt-row="receipt.id"
           :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-          class="rounded-sm bg-white p-3.5 duration-300 dark:!bg-dashboard-card"
-          :class="flashReceiptId === receipt.id ? 'bg-gray-50 ring-1 ring-gray-200/90 dark:bg-gray-800/80 dark:ring-gray-600/50' : ''"
+          class="rounded-2xl border border-gray-200/55 bg-white p-3 shadow-sm shadow-gray-950/[0.03] duration-300 dark:border-gray-700/60 dark:!bg-dashboard-card dark:shadow-black/25"
+          :class="flashReceiptId === receipt.id ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900' : ''"
         >
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
@@ -349,7 +349,7 @@
                   </button>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-sky-500/12 text-sky-800 ring-1 ring-inset ring-sky-500/18 dark:bg-sky-400/12 dark:text-sky-300 dark:ring-sky-400/25"
                   >
                     Swap
                   </span>
@@ -360,7 +360,7 @@
                   <span v-if="receipt.customerPhone" class="block text-[10px] text-gray-500 dark:text-gray-500 tabular-nums">{{ receipt.customerPhone }}</span>
                 </p>
                 <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5">{{ formatDate(receipt.date) }}</p>
-                <div class="mt-2 rounded-sm border border-gray-200/80 bg-gray-50/60 px-2 py-1.5 dark:border-gray-700/70 dark:bg-gray-900/40">
+                <div class="mt-2 rounded-xl border border-gray-200/65 bg-gray-50/85 px-2.5 py-1.5 shadow-sm shadow-gray-950/3 dark:border-gray-700/65 dark:bg-gray-900/45 dark:shadow-black/25">
                   <p class="text-[10px] font-medium text-gray-800 dark:text-gray-200">
                     {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
                   </p>
@@ -369,7 +369,7 @@
                   </p>
                   <button
                     type="button"
-                    class="mt-1.5 inline-flex items-center gap-0.5 rounded-sm px-1.5 py-0.5 text-[10px] font-medium text-primary-600 transition-colors hover:bg-primary-50/80 dark:text-primary-400 dark:hover:bg-primary-500/10"
+                    class="mt-1 inline-flex items-center gap-1 rounded-lg border border-transparent bg-gray-100/95 px-2 py-0.5 text-[11px] font-medium text-primary-700 transition-colors hover:border-primary-200/80 hover:bg-primary-50/90 dark:bg-gray-800/70 dark:text-primary-300 dark:hover:border-primary-500/35 dark:hover:bg-primary-500/10"
                     @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
                   >
                     <ChevronDownIcon
@@ -390,7 +390,7 @@
                 <div class="mt-2 flex items-center justify-between gap-2">
                   <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
                   <span
-                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset', receipt.status === 'completed' ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25' : receipt.status === 'pending' ? 'bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25' : 'bg-rose-500/10 text-rose-800 ring-rose-500/20 dark:bg-rose-400/10 dark:text-rose-300 dark:ring-rose-400/25', ]"
+                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-sm shadow-gray-950/3 ring-1 ring-inset dark:shadow-transparent', receipt.status === 'completed' ? 'bg-emerald-500/12 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/14 text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/12 text-rose-950 ring-rose-500/22 dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
                   >
                     {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                   </span>
@@ -402,7 +402,7 @@
                 type="button"
                 :data-receipt-actions-anchor="receipt.id"
                 @click="toggleReceiptMenu(receipt.id)"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
                 aria-label="Receipt actions"
                 aria-haspopup="menu"
                 :aria-expanded="openReceiptMenuId === receipt.id"
@@ -416,15 +416,15 @@
       <!-- Desktop: table -->
       <div
         class="hidden sm:block"
-        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto'"
+        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto px-0.5 pb-px'"
       >
         <table class="w-full min-w-full border-separate border-spacing-0">
           <thead
-            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
-            :class="isReceiptsFullscreen ? 'sticky top-0 z-10' : ''"
+            class="border-b border-gray-200/45 bg-gray-50/80 backdrop-blur-[6px] dark:border-gray-800/50 dark:!bg-dashboard-card/75 supports-[backdrop-filter]:bg-gray-50/65 dark:supports-[backdrop-filter]:!bg-dashboard-card/65"
+            :class="isReceiptsFullscreen ? 'sticky top-0 z-10 backdrop-blur-md bg-white/90 dark:!bg-dashboard-card/92 supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:!bg-dashboard-card/80' : ''"
           >
             <tr>
-              <th v-if="canDeleteReceipts" class="w-10 px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">
+              <th v-if="canDeleteReceipts" class="w-10 rounded-tl-2xl px-4 py-2 text-center text-[11px] font-medium text-gray-500 dark:text-gray-400 sm:px-5">
                 <Checkbox
                   :model-value="paginatedReceipts.length > 0 && selectedReceiptsForBulk.length === paginatedReceipts.length"
                   @update:model-value="toggleSelectAllReceipts"
@@ -433,7 +433,7 @@
                 />
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', !canDeleteReceipts && 'rounded-tl-2xl', isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
               >
                 <div class="flex items-center gap-1.5">
@@ -452,7 +452,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('customerName') && toggleSort('customerName')"
               >
                 <div class="flex items-center gap-1.5">
@@ -471,7 +471,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('date') && toggleSort('date')"
               >
                 <div class="flex items-center gap-1.5">
@@ -490,7 +490,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'min-w-[10rem] max-w-[18rem] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'min-w-[10rem] max-w-[18rem] px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
                 <div class="flex items-center gap-1.5">
@@ -509,7 +509,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('total') && toggleSort('total')"
               >
                 <div class="flex items-center gap-1.5">
@@ -528,7 +528,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('paymentMethod') && toggleSort('paymentMethod')"
               >
                 <div class="flex items-center gap-1.5">
@@ -547,7 +547,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('status') && toggleSort('status')"
               >
                 <div class="flex items-center gap-1.5">
@@ -566,7 +566,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
               >
                 <div class="flex items-center gap-1.5">
@@ -585,21 +585,21 @@
                 </div>
               </th>
               <th
-                class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+                class="w-12 rounded-tr-2xl px-4 py-2 text-right text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-5"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:!bg-dashboard-card/35">
+          <tbody class="divide-y divide-gray-100/80 bg-white dark:divide-gray-800/55 dark:!bg-dashboard-card/40">
             <template v-for="receipt in paginatedReceipts" :key="receipt.id">
             <tr
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-              class="border-b border-gray-100/90 transition-colors duration-200 hover:bg-gray-50/80 dark:border-gray-800/70 dark:hover:bg-gray-900/60"
-              :class="flashReceiptId === receipt.id ? 'bg-primary-500/[0.07] dark:bg-primary-500/10' : ''"
+              class="transition-colors duration-200 ease-out hover:bg-gray-50/90 dark:hover:bg-gray-800/35"
+              :class="flashReceiptId === receipt.id ? '!bg-primary-500/[0.08] hover:!bg-primary-500/[0.1] dark:!bg-primary-500/15 dark:hover:!bg-primary-500/[0.18]' : ''"
             >
-              <td v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center align-middle sm:px-4">
+              <td v-if="canDeleteReceipts" class="w-10 px-4 py-2 text-center align-middle sm:px-5">
                 <Checkbox
                   :model-value="selectedReceiptsForBulk.some(r => r.id === receipt.id)"
                   @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
@@ -608,57 +608,58 @@
                   @click.stop
                 />
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <div class="flex items-center gap-1.5">
-                  <div class="text-[11px] font-medium tabular-nums text-gray-900 dark:text-gray-50">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <div class="text-sm font-medium tabular-nums tracking-tight text-gray-900 dark:text-gray-50">
                     {{ receipt.receiptNumber }}
                   </div>
                   <button
+                    type="button"
                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                    class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800/90 dark:hover:text-primary-400"
                   >
-                    <ClipboardDocumentIcon class="w-3 h-3 stroke-1" stroke-width="1.5" />
+                    <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
                   </button>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-sky-500/12 text-sky-800 ring-1 ring-inset ring-sky-500/18 dark:bg-sky-400/12 dark:text-sky-300 dark:ring-sky-400/25"
                     title="Swap-in transaction"
                   >
                     Swap
                   </span>
                 </div>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <div class="text-[11px] font-medium text-gray-900 dark:text-gray-50">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <div class="text-sm font-medium leading-snug text-gray-900 dark:text-gray-50">
                   {{ receipt.customerName }}
                 </div>
-                <div v-if="receipt.customerPhone" class="text-[10px] text-gray-500 dark:text-gray-400 tabular-nums">
+                <div v-if="receipt.customerPhone" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 tabular-nums">
                   {{ receipt.customerPhone }}
                 </div>
-                <div v-else-if="receipt.customerEmail" class="text-[10px] text-gray-500 dark:text-gray-400">
+                <div v-else-if="receipt.customerEmail" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ receipt.customerEmail }}
                 </div>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <div class="text-[11px] tabular-nums text-gray-600 dark:text-gray-300">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <div class="text-sm tabular-nums text-gray-600 dark:text-gray-300">
                   {{ formatDate(receipt.date) }}
                 </div>
               </td>
-              <td class="min-w-[10rem] max-w-[20rem] px-3 py-2.5 align-top sm:px-4">
+              <td class="min-w-[10rem] max-w-[20rem] px-4 py-2 align-top sm:px-5">
                 <div class="space-y-1">
-                  <p class="text-[11px] font-medium tabular-nums text-gray-900 dark:text-gray-50">
+                  <p class="text-sm font-medium tabular-nums text-gray-900 dark:text-gray-50">
                     {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
                   </p>
                   <p
                     v-if="getReceiptLineItemsPreview(receipt)"
-                    class="text-[10px] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2"
+                    class="text-xs leading-relaxed text-gray-600 dark:text-gray-400 line-clamp-2"
                   >
                     {{ getReceiptLineItemsPreview(receipt) }}
                   </p>
-                  <p v-else-if="getReceiptLineItemsCount(receipt) > 0" class="text-[10px] text-gray-500 dark:text-gray-500">-</p>
+                  <p v-else-if="getReceiptLineItemsCount(receipt) > 0" class="text-xs text-gray-500 dark:text-gray-500">-</p>
                   <button
                     type="button"
-                    class="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary-600/90 dark:text-primary-400/90 hover:text-primary-700 dark:hover:text-primary-300"
+                    class="inline-flex items-center gap-1 rounded-lg border border-transparent bg-gray-100/95 px-2 py-0.5 text-xs font-medium text-primary-700 transition-colors hover:border-primary-200/80 hover:bg-primary-50/90 dark:bg-gray-800/70 dark:text-primary-300 dark:hover:border-primary-500/35 dark:hover:bg-primary-500/10"
                     :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
                     @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
                   >
@@ -671,35 +672,35 @@
                   </button>
                 </div>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <span class="text-[11px] font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <span class="text-sm font-semibold tabular-nums tracking-tight text-gray-900 dark:text-gray-50">
                   {{ formatCurrency(receipt.total) }}
                 </span>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <span class="text-[11px] text-gray-600 dark:text-gray-300">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <span class="text-sm text-gray-700 dark:text-gray-300">
                   {{ receipt.paymentMethod }}
                 </span>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
+              <td class="px-4 py-2 align-middle sm:px-5">
                 <span
-                  :class="[ 'inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset', receipt.status === 'completed' ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25' : receipt.status === 'pending' ? 'bg-amber-500/10 text-amber-900 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/25' : 'bg-rose-500/10 text-rose-800 ring-rose-500/20 dark:bg-rose-400/10 dark:text-rose-300 dark:ring-rose-400/25', ]"
+                  :class="[ 'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-sm shadow-gray-950/[0.03] ring-1 ring-inset dark:shadow-transparent', receipt.status === 'completed' ? 'bg-emerald-500/[0.12] text-emerald-900 ring-emerald-500/[0.2] dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/[0.14] text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/[0.12] text-rose-950 ring-rose-500/[0.22] dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
                 >
                   {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                 </span>
               </td>
-              <td class="px-3 py-2.5 align-middle sm:px-4">
-                <div class="text-[11px] text-gray-600 dark:text-gray-300">
+              <td class="px-4 py-2 align-middle sm:px-5">
+                <div class="text-sm text-gray-600 dark:text-gray-300">
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
                 </div>
               </td>
-              <td class="px-3 py-2.5 text-right align-middle sm:px-4">
+              <td class="px-4 py-2 text-right align-middle sm:px-5">
                 <div class="relative inline-flex justify-end" data-receipt-menu @click.stop>
                   <button
                     type="button"
                     :data-receipt-actions-anchor="receipt.id"
                     @click="toggleReceiptMenu(receipt.id)"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
                     aria-label="Receipt actions"
                     aria-haspopup="menu"
                     :aria-expanded="openReceiptMenuId === receipt.id"
@@ -711,18 +712,18 @@
             </tr>
             <tr
               v-if="expandedReceiptLineItems[receipt.id]"
-              class="border-b border-gray-100/90 bg-gray-50/70 dark:border-gray-800/70 dark:bg-gray-900/45"
+              class="bg-gradient-to-b from-gray-50/90 to-gray-50/35 dark:from-gray-950/55 dark:to-gray-950/20"
             >
               <td
                 :colspan="receiptLineItemsDetailColspan"
-                class="px-3 py-3 sm:px-4"
+                class="px-4 py-2 sm:px-5"
               >
-                <div class="rounded-sm bg-gray-50/55 px-3 py-3 dark:bg-gray-900/35">
+                <div class="rounded-xl border border-gray-200/70 bg-white/95 px-3 py-2 shadow-sm shadow-gray-950/[0.03] backdrop-blur-[2px] dark:border-gray-700/65 dark:bg-gray-900/50 dark:shadow-black/35">
                   <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <p class="text-[11px] font-semibold tracking-wide text-gray-600 dark:text-gray-400">
                       Line item details
                     </p>
-                    <span class="rounded-sm bg-white/85 px-1.5 py-0.5 text-[9px] font-medium text-gray-600 dark:bg-gray-800/80 dark:text-gray-300">
+                    <span class="rounded-lg bg-gray-100/95 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-700 ring-1 ring-gray-200/80 dark:bg-gray-800/90 dark:text-gray-200 dark:ring-gray-600/65">
                       {{ receipt.receiptNumber }}
                     </span>
                   </div>
