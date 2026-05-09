@@ -522,8 +522,13 @@ useHead({
   title: 'Analytics & Reports - Storvv',
 })
 
-const { formatCurrency } = usePreferences()
+const { formatCurrency, preferences, baseCurrency, initialize: initPreferences } = usePreferences()
 const toast = useAppToast()
+
+/** ApexCharts stores formatters built in computed runs; read prefs during eval so options refresh when profile currency/base changes */
+const displayCurrencyDeps = computed(
+  () => `${preferences.value.currency}|${preferences.value.region}|${baseCurrency.value}`
+)
 
 function formatReturnDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
@@ -951,6 +956,7 @@ const peakHoursChartSeries = computed(() => [{
   data: salesByHour.value.map(s => s.revenue)
 }])
 const peakHoursChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
@@ -998,6 +1004,7 @@ const salesByDayChartSeries = computed(() => [{
   data: salesByDayOfWeek.value.map(s => s.revenue)
 }])
 const salesByDayChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
@@ -1019,6 +1026,7 @@ const salesByDayChartOptions = computed(() => {
 })
 
 const heatmapChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
   const textColor = isDark ? '#E5E7EB' : '#1F2937'
   const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
@@ -1157,8 +1165,9 @@ const revenueChartSeries = computed(() => {
 })
 
 const revenueChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
-  
+
   return {
     chart: {
       type: 'line',
@@ -1230,6 +1239,7 @@ const topProductsChartSeries = computed(() => {
 })
 
 const topProductsChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
   
   return {
@@ -1348,6 +1358,7 @@ const customerChartSeries = computed(() => {
 })
 
 const customerChartOptions = computed(() => {
+  void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
 
   return {
@@ -1639,6 +1650,7 @@ onMounted(() => {
     if (!userStore.userData) {
       await userStore.fetchUserData(uid)
     }
+    await initPreferences()
     if (!canUseSubscriptionFeature('analytics')) {
       navigateTo('/dashboard/settings?upgrade=1')
       return
