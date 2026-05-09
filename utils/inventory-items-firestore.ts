@@ -35,11 +35,16 @@ export function docToInventoryItem(
   const data = d.data()
   const exclude = [
     'folderId',
+    'storeId',
     'createdAt',
     'updatedAt',
     'createdBy',
     'dateIn',
     'dateOut',
+    'sellerLoanOutId',
+    'sellerLoanPartyName',
+    'sellerLoanPartyPhone',
+    'sellerLoanOutAt',
     'swapIn',
     'swapInReceiptId',
     'discountPercentage',
@@ -50,6 +55,7 @@ export function docToInventoryItem(
   return {
     id: d.id,
     folderId: data.folderId || folderId,
+    storeId: typeof data.storeId === 'string' ? data.storeId : '',
     ...Object.fromEntries(Object.entries(data).filter(([key]) => !exclude.includes(key))),
     dateIn: data.dateIn?.toDate
       ? data.dateIn.toDate()
@@ -59,6 +65,15 @@ export function docToInventoryItem(
           ? data.createdAt.toDate()
           : new Date(data.createdAt) || new Date(),
     dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : data.dateOut ? new Date(data.dateOut) : undefined,
+    sellerLoanOutId: data.sellerLoanOutId ?? undefined,
+    sellerLoanPartyName: data.sellerLoanPartyName ?? undefined,
+    sellerLoanPartyPhone:
+      typeof data.sellerLoanPartyPhone === 'string' ? data.sellerLoanPartyPhone : undefined,
+    sellerLoanOutAt: data.sellerLoanOutAt?.toDate
+      ? data.sellerLoanOutAt.toDate()
+      : data.sellerLoanOutAt
+        ? new Date(data.sellerLoanOutAt as string | number)
+        : undefined,
     swapIn: data.swapIn || false,
     swapInReceiptId: data.swapInReceiptId || undefined,
     discountPercentage: data.discountPercentage || undefined,

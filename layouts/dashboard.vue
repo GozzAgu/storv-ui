@@ -70,7 +70,7 @@
             <!-- Inventory (expandable) -->
             <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
-                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-1.5 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
+                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-2 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
               >
                 <NuxtLink
                   :to="item.href"
@@ -104,7 +104,7 @@
                   v-for="folder in recentFolders.slice(0, 5)"
                   :key="folder.id"
                   :to="`/dashboard/inventory/${folder.id}`"
-                  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-1 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
+                  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
                 >
                   <FolderIcon
                     v-if="route.params.id !== folder.id"
@@ -122,7 +122,7 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-1.5', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-2', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
             >
               <component
                 :is="isActive(item.href) ? item.iconSolid : item.icon"
@@ -146,7 +146,7 @@
             <button
               type="button"
               @click="storesSectionCollapsed = !storesSectionCollapsed"
-              class="group relative flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200"
+              class="group relative flex w-full items-center justify-between rounded-lg px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-200"
               :aria-expanded="!storesSectionCollapsed"
             >
               <span>Branches</span>
@@ -155,7 +155,7 @@
             <div v-if="!storesSectionCollapsed" class="mt-1 space-y-0.5 pl-0">
               <template v-for="store in storesList" :key="store.id">
                 <div
-                  :class="[ 'flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-200', store.id !== storesStore.currentStoreId ? 'opacity-40' : '', store.id === storesStore.currentStoreId && !(route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
+                  :class="[ 'flex items-center justify-between rounded-lg px-2 py-2 transition-colors duration-200', store.id !== storesStore.currentStoreId ? 'opacity-40' : '', store.id === storesStore.currentStoreId && !(route.params.storeId === store.id && route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
                 >
                   <NuxtLink
                     :to="store.id === storesStore.currentStoreId ? `/dashboard/stores/${store.id}/departments` : '#'"
@@ -200,7 +200,7 @@
                     <div class="group flex items-center justify-between gap-1 rounded-lg">
                       <NuxtLink
                         :to="`/dashboard/departments/${department.id}`"
-                        class="group relative flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-[13px] transition-colors"
+                        class="group relative flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-colors"
                         :class="[ route.params.id === department.id && route.path.startsWith('/dashboard/departments') ? '' : 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
                       >
                         <BuildingOfficeIcon
@@ -227,13 +227,13 @@
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center gap-2 rounded-md px-2 py-1 text-[12px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
+                          class="group relative flex items-center gap-2 rounded-md px-2 py-2 text-[12px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
                         >
                           <span class="h-1 w-1 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
                         </NuxtLink>
                       </template>
-                      <p v-else class="rounded-md px-2 py-1 text-[12px] text-gray-400 dark:text-gray-500">No staff</p>
+                      <p v-else class="rounded-md px-2 py-2 text-[12px] text-gray-400 dark:text-gray-500">No staff</p>
                     </div>
                   </template>
                   <NuxtLink
@@ -245,7 +245,7 @@
                   </NuxtLink>
                 </div>
               </template>
-              <div v-if="storesList.length === 0" class="px-2.5 py-1 text-xs text-gray-500 dark:text-gray-400">No stores</div>
+              <div v-if="storesList.length === 0" class="px-2.5 py-2 text-xs text-gray-500 dark:text-gray-400">No stores</div>
             </div>
           </div>
         </div>
@@ -643,6 +643,7 @@ import {
   ShieldCheckIcon,
   BookOpenIcon,
   BuildingStorefrontIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline'
 import {
   HomeIcon as HomeIconSolid,
@@ -657,6 +658,7 @@ import {
   FolderIcon as FolderIconSolid,
   BuildingStorefrontIcon as BuildingStorefrontIconSolid,
   BuildingOfficeIcon as BuildingOfficeIconSolid,
+  ArrowTopRightOnSquareIcon as ArrowTopRightOnSquareIconSolid,
 } from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
@@ -836,6 +838,7 @@ const navigation: Array<{
 }> = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
+  { name: 'Seller loans', href: '/dashboard/seller-loans', icon: ArrowTopRightOnSquareIcon, iconSolid: ArrowTopRightOnSquareIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
   { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, iconSolid: ShieldCheckIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },

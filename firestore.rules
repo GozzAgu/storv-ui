@@ -98,8 +98,12 @@ service cloud.firestore {
     }
 
     // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
+    // Seller-loan handshake: optionally set/clear sellerLoan* + updatedAt, or combine with sale (dateOut + clear loan).
     function inventoryItemOnlySaleOrReturnFieldChange() {
-      return request.resource.data.diff(resource.data).changedKeys().hasOnly(['dateOut', 'updatedAt']);
+      let changed = request.resource.data.diff(resource.data).changedKeys();
+      return changed.hasOnly(['dateOut', 'updatedAt'])
+             || changed.hasOnly(['sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt'])
+             || changed.hasOnly(['dateOut', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
     }
 
     // Legacy name kept for a few rules; prefer the helpers above.
@@ -316,6 +320,25 @@ service cloud.firestore {
         }
         
         // Customers subcollection: users/{userId}/stores/{storeId}/customers/{customerId}
+        // Loan inventory to external seller / retailer (tracked; not marked sold until receipt).
+        match /sellerLoanOuts/{loanId} {
+          allow read: if canAccessStoreData(userId, storeId) &&
+                         resourceMatchesStore(storeId);
+
+          allow create: if canManageNonInventoryOps(userId, storeId) &&
+                           request.resource.data.storeId == storeId &&
+                           request.resource.data.createdBy == request.auth.uid &&
+                           request.resource.data.status == 'active' &&
+                           request.resource.data.lines is list &&
+                           request.resource.data.lines.size() > 0;
+
+          allow update: if canManageNonInventoryOps(userId, storeId) &&
+                           resourceMatchesStore(storeId) &&
+                           requestMatchesStore(storeId);
+
+          allow delete: if false;
+        }
+
         match /customers/{customerId} {
           allow read: if canAccessStoreData(userId, storeId);
           

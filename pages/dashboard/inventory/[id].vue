@@ -88,6 +88,20 @@
               <span class="hidden sm:inline">Delete</span>
             </Button>
           </template>
+          <template v-if="canLoanToSellerUi">
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="ArrowTopRightOnSquareIcon"
+              class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 !text-xs sm:!px-3"
+              :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+              :title="sellerLoanButtonTitle"
+              :aria-label="sellerLoanButtonTitle"
+              @click="openCreateSellerLoanModal"
+            >
+              <span class="hidden sm:inline">Loan to seller</span>
+            </Button>
+          </template>
           <Button
             v-if="canManageInventoryItems"
             variant="outline"
@@ -217,6 +231,20 @@
                   >
                     <XMarkIcon class="h-5 w-5" />
                   </button>
+                  <template v-if="canLoanToSellerUi">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      :icon="ArrowTopRightOnSquareIcon"
+                      extra-class="!rounded-2xl"
+                      :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+                      :title="sellerLoanButtonTitle"
+                      :aria-label="sellerLoanButtonTitle"
+                      @click="openCreateSellerLoanModal"
+                    >
+                      Loan to seller
+                    </Button>
+                  </template>
                   <template v-if="canManageInventoryItems">
                     <template v-if="selectedItemsForBulk.length > 0">
                       <Button
@@ -372,6 +400,20 @@
                 <span class="hidden sm:inline">Delete</span>
               </Button>
             </template>
+            <template v-if="canLoanToSellerUi">
+              <Button
+                variant="outline"
+                size="sm"
+                :icon="ArrowTopRightOnSquareIcon"
+                extra-class="!rounded-2xl max-sm:!px-2 max-sm:!py-1.5"
+                :disabled="selectedItemsEligibleForSellerLoan.length === 0"
+                :title="sellerLoanButtonTitle"
+                :aria-label="sellerLoanButtonTitle"
+                @click="openCreateSellerLoanModal"
+              >
+                <span class="hidden sm:inline">Loan to seller</span>
+              </Button>
+            </template>
             <Button
               v-if="canManageInventoryItems"
               variant="outline"
@@ -464,7 +506,7 @@
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0 flex-1 flex items-start gap-2">
               <Checkbox
-                v-if="canManageInventoryItems && !isItemSold(item)"
+                v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
                 :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                 @update:model-value="(checked) => toggleItemSelection(item, checked)"
                 size="sm"
@@ -519,12 +561,12 @@
           >
               <tr>
               <th
-                v-if="canManageInventoryItems"
+                v-if="showBulkRowSelection"
                 class="px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
               >
                 <Checkbox
                   :model-value="(() => {
-                    const availableItems = filteredItems.filter(item => !isItemSold(item))
+                    const availableItems = filteredItems.filter(item => !isInventoryItemLocked(item))
                     return selectedItemsForBulk.length === availableItems.length && availableItems.length > 0
                   })()"
                   @update:model-value="(checked) => toggleSelectAll(checked)"
@@ -567,11 +609,11 @@
                 :key="item.id"
                 class="border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
               >
-              <td v-if="canManageInventoryItems" class="px-3 py-2.5 sm:px-4 text-center">
+              <td v-if="showBulkRowSelection" class="px-3 py-2.5 sm:px-4 text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                  :disabled="isItemSold(item)"
+                  :disabled="isInventoryItemLocked(item)"
                   size="sm"
                   wrapper-class="justify-center"
                 />
@@ -583,7 +625,7 @@
               >
                 <!-- Inline edit mode (large screens only); click outside saves -->
                 <div
-                  v-if="isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && isEditingCell(item, column.key)"
+                  v-if="isLargeScreen && canManageInventoryItems && !isInventoryItemLocked(item) && isColumnEditable(column) && isEditingCell(item, column.key)"
                   ref="inlineEditCellRef"
                   class="min-w-[80px]"
                 >
@@ -602,7 +644,7 @@
                 <!-- Display mode -->
                 <div
                   v-else
-                  :class="[ 'flex items-center gap-1.5 min-h-[22px]', isLargeScreen && canManageInventoryItems && !isItemSold(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors' ]"
+                  :class="[ 'flex items-center gap-1.5 min-h-[22px]', isLargeScreen && canManageInventoryItems && !isInventoryItemLocked(item) && isColumnEditable(column) && 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded px-1 -mx-1 transition-colors' ]"
                   @click="startInlineEdit(item, column)"
                 >
                   <template v-if="colIndex === 0">
@@ -992,6 +1034,13 @@
       @discount-applied="handleBulkDiscountApplied"
     />
 
+    <CreateSellerLoanModal
+      v-model="showCreateSellerLoanModal"
+      :items="createSellerLoanModalItems"
+      :folder-id="folderId"
+      @success="handleSellerLoanSuccess"
+    />
+
     <!-- Delete Item Modal -->
     <DeleteItemModal
       v-model="showDeleteItemModal"
@@ -1132,7 +1181,7 @@
           type="button"
           role="menuitem"
           @click="handleApplyDiscount(itemForOpenMenu); openItemMenuId = null"
-          :disabled="isItemSold(itemForOpenMenu)"
+          :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-950/30 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <TagIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
@@ -1142,18 +1191,29 @@
           type="button"
           role="menuitem"
           @click="handleEditItem(itemForOpenMenu); openItemMenuId = null"
-          :disabled="isItemSold(itemForOpenMenu)"
+          :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <PencilSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
           <span>Edit</span>
         </button>
         <button
+          v-if="canLoanToSellerUi"
+          type="button"
+          role="menuitem"
+          @click="handleLoanToSellerFromMenu(itemForOpenMenu)"
+          :disabled="isInventoryItemLocked(itemForOpenMenu)"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <ArrowTopRightOnSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+          <span>Loan to seller</span>
+        </button>
+        <button
           v-if="canDuplicateByPlan"
           type="button"
           role="menuitem"
           @click="handleDuplicateItem(itemForOpenMenu); openItemMenuId = null"
-          :disabled="isItemSold(itemForOpenMenu)"
+          :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <DocumentDuplicateIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
@@ -1163,7 +1223,7 @@
           type="button"
           role="menuitem"
           @click="handleDeleteItem(itemForOpenMenu); openItemMenuId = null"
-          :disabled="isItemSold(itemForOpenMenu)"
+          :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/45 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <TrashIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
@@ -1198,6 +1258,7 @@ import {
   EllipsisVerticalIcon,
   ClockIcon,
   DocumentDuplicateIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
@@ -1213,6 +1274,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
+import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
@@ -1224,6 +1286,7 @@ import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
 import DeleteItemModal from '~/components/inventory/DeleteItemModal.vue'
 import ItemTimelineModal from '~/components/inventory/ItemTimelineModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
+import CreateSellerLoanModal from '~/components/seller-loans/CreateSellerLoanModal.vue'
 
 definePageMeta({
   layout: 'dashboard'
@@ -1245,7 +1308,8 @@ const receiptsStore = useReceiptsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
-const { canManageInventoryItems } = usePermissions()
+const { canManageInventoryItems, canManage } = usePermissions()
+const subscriptionFeaturesUi = useSubscriptionFeatures()
 const toast = useAppToast()
 
 // Duplicate items only on Storvv Medium and Enterprise
@@ -1558,6 +1622,9 @@ const bulkDeleteConfirmed = ref(false)
 const isBulkDeleting = ref(false)
 const showTimelineModal = ref(false)
 const selectedItemForTimeline = ref<InventoryItem | null>(null)
+const showCreateSellerLoanModal = ref(false)
+/** When non-null (e.g. row menu), modal uses these items instead of bulk checkbox selection */
+const sellerLoanModalItemsOverride = ref<InventoryItem[] | null>(null)
 const showDuplicateModal = ref(false)
 const duplicateSourceItem = ref<InventoryItem | null>(null)
 const duplicateSerialNumbers = ref<string[]>([''])
@@ -1635,7 +1702,7 @@ function getEditInputEl(): HTMLInputElement | null {
 }
 
 const startInlineEdit = async (item: InventoryItem, column: { key: string; type?: string }) => {
-  if (!canManageInventoryItems.value || isItemSold(item) || !isColumnEditable(column)) return
+  if (!canManageInventoryItems.value || isInventoryItemLocked(item) || !isColumnEditable(column)) return
   if (!isLargeScreen.value) return
   let val = item[column.key]
   // For price columns with discount, show the effective (discounted) price
@@ -1666,7 +1733,7 @@ const saveInlineEdit = async () => {
   if (!editingCell.value || isSavingInline.value) return
   const { itemId, columnKey } = editingCell.value
   const item = items.value.find((i) => i.id === itemId)
-  if (!item || isItemSold(item)) {
+  if (!item || isInventoryItemLocked(item)) {
     cancelInlineEdit()
     return
   }
@@ -1920,6 +1987,47 @@ const isItemSold = (item: InventoryItem) => {
   return false
 }
 
+const isItemOutOnSellerLoan = (item: InventoryItem) => {
+  const id = item.sellerLoanOutId
+  return id != null && String(id).trim() !== ''
+}
+
+/** Sold or lent to external seller — block edits, discounts, deletion, bulk select. */
+const isInventoryItemLocked = (item: InventoryItem) => isItemSold(item) || isItemOutOnSellerLoan(item)
+
+const selectedItemsEligibleForSellerLoan = computed(() =>
+  selectedItemsForBulk.value.filter((item) => !isInventoryItemLocked(item))
+)
+
+/** Row menu sends one-item override; toolbar uses checkbox selection instead */
+const createSellerLoanModalItems = computed(
+  (): InventoryItem[] => sellerLoanModalItemsOverride.value ?? selectedItemsEligibleForSellerLoan.value,
+)
+
+const sellerLoansEnterpriseUnlocked = computed(() => subscriptionFeaturesUi.canUse('seller_loans'))
+
+/** Super admin / manager + Enterprise + serial-number folder — same gate as Loan to seller toolbar and row menu */
+const canLoanToSellerUi = computed(
+  () =>
+    !!(
+      canManage.value &&
+      sellerLoansEnterpriseUnlocked.value &&
+      folder.value?.hasSerialNumbers
+    ),
+)
+
+/** Checkboxes so managers/super admins can select rows for Loan to seller where that feature is unlocked */
+const showBulkRowSelection = computed(
+  () => canManageInventoryItems.value || canLoanToSellerUi.value,
+)
+
+const sellerLoanButtonTitle = computed(() => {
+  if (!folder.value?.hasSerialNumbers || !canManage.value) return ''
+  return selectedItemsEligibleForSellerLoan.value.length === 0
+    ? 'Select one or more available products using the checkboxes'
+    : 'Loan selected products to an external seller'
+})
+
 // Determine item availability status
 const getItemAvailability = (item: InventoryItem) => {
   // Check if item is in a refunded receipt (highest priority - returned takes precedence)
@@ -1933,6 +2041,15 @@ const getItemAvailability = (item: InventoryItem) => {
       label: 'Returned',
       class:
         'ring-1 ring-inset ring-amber-500/25 bg-amber-500/10 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/30',
+    }
+  }
+
+  if (isItemOutOnSellerLoan(item)) {
+    return {
+      status: 'with_seller',
+      label: 'With seller',
+      class:
+        'ring-1 ring-inset ring-indigo-500/25 bg-indigo-500/10 text-indigo-900 dark:bg-indigo-400/12 dark:text-indigo-100 dark:ring-indigo-400/35',
     }
   }
 
@@ -1982,7 +2099,7 @@ const doSort = (list: InventoryItem[]) => {
     if (currentSort.value.key === 'availability') {
       const aAvail = getItemAvailability(a).status
       const bAvail = getItemAvailability(b).status
-      const order = ['available', 'sold', 'returned']
+      const order = ['available', 'with_seller', 'sold', 'returned']
       const aIndex = order.indexOf(aAvail)
       const bIndex = order.indexOf(bAvail)
       return currentSort.value.order === 'asc' ? aIndex - bIndex : bIndex - aIndex
@@ -2308,11 +2425,15 @@ const openAddItemModal = () => {
 }
 
 const handleEditItem = (item: InventoryItem) => {
+  if (isInventoryItemLocked(item)) {
+    toast.error('Cannot edit a product while it is sold or on a seller loan')
+    return
+  }
   cancelInlineEdit()
   editingItem.value = item
   serialNumbers.value = []
   // Copy all item data to form; dates (dateIn, dateOut) are not editable
-  const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateOut', 'dateIn', 'swapIn', 'swapInReceiptId', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice']
+  const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateOut', 'dateIn', 'swapIn', 'swapInReceiptId', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'discountPercentage', 'discountAmount', 'originalPrice', 'discountedPrice']
   Object.keys(itemForm).forEach(key => delete itemForm[key])
   Object.keys(item).forEach(key => {
     if (!systemFields.includes(key)) {
@@ -2335,11 +2456,19 @@ const getItemDisplayName = (item: InventoryItem) => {
 }
 
 const handleDeleteItem = (item: InventoryItem) => {
+  if (isInventoryItemLocked(item)) {
+    toast.error('Cannot delete while the product is sold or with an external seller')
+    return
+  }
   selectedItemForDelete.value = item
   showDeleteItemModal.value = true
 }
 
 const handleDuplicateItem = (item: InventoryItem) => {
+  if (isInventoryItemLocked(item)) {
+    toast.error('Cannot duplicate while the product is sold or with an external seller')
+    return
+  }
   if (!canDuplicateByPlan.value) {
     toast.error('Duplicating products is available on Storvv Medium and Enterprise plans.')
     return
@@ -2355,7 +2484,7 @@ const handleDuplicateItem = (item: InventoryItem) => {
     editingItem.value = null
     serialNumbers.value = []
     Object.keys(itemForm).forEach(key => delete itemForm[key])
-    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId']
+    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt']
     Object.keys(item).forEach(key => {
       if (!systemFields.includes(key)) {
         itemForm[key] = item[key]
@@ -2415,7 +2544,7 @@ const handleConfirmDuplicate = async () => {
   }
   isDuplicating.value = true
   try {
-    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId']
+    const systemFields = ['id', 'folderId', 'createdAt', 'updatedAt', 'createdBy', 'dateIn', 'dateOut', 'swapIn', 'swapInReceiptId', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt']
     const baseData: Record<string, any> = {}
     Object.keys(source).forEach(key => {
       if (!systemFields.includes(key)) {
@@ -2666,9 +2795,8 @@ const handleCancelItem = () => {
 
 // Discount handlers
 const handleApplyDiscount = (item: InventoryItem) => {
-  // Prevent applying discount to sold items
-  if (isItemSold(item)) {
-    toast.error('Cannot apply discount to sold products')
+  if (isInventoryItemLocked(item)) {
+    toast.error('Cannot apply discount while the product is sold or with an external seller')
     return
   }
   selectedItemForDiscount.value = item
@@ -2676,9 +2804,8 @@ const handleApplyDiscount = (item: InventoryItem) => {
 }
 
 const handleRemoveDiscount = async (item: InventoryItem) => {
-  // Prevent removing discount from sold items
-  if (isItemSold(item)) {
-    toast.error('Cannot modify discount on sold products')
+  if (isInventoryItemLocked(item)) {
+    toast.error('Cannot modify discount while the product is sold or with an external seller')
     return
   }
   if (confirm(`Remove discount from this product?`)) {
@@ -2708,8 +2835,8 @@ const handleBulkDiscountApplied = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
-  // Prevent selecting sold items
-  if (isItemSold(item)) {
+  // Prevent selecting sold or seller-loaned items
+  if (isInventoryItemLocked(item)) {
     // Remove if already selected
     const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
     if (index > -1) {
@@ -2741,8 +2868,8 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
 }
 
 const toggleSelectAll = (checked?: boolean) => {
-  // Filter out sold items when selecting all
-  const availableItems = filteredItems.value.filter(item => !isItemSold(item))
+  // Items that aren't sold / on seller loan can't be bulk-edited together
+  const availableItems = filteredItems.value.filter(item => !isInventoryItemLocked(item))
   
   // If called from checkbox component, use the checked value; otherwise toggle
   if (checked !== undefined) {
@@ -2763,6 +2890,54 @@ const openBulkDiscountModal = () => {
   }
   showBulkDiscountModal.value = true
 }
+
+const openCreateSellerLoanModal = () => {
+  if (!subscriptionFeaturesUi.canUse('seller_loans')) {
+    toast.error('Loan to seller is included on Storvv Enterprise. Upgrade in Settings.')
+    return
+  }
+  if (!folder.value?.hasSerialNumbers) {
+    toast.error('Loan to seller is only available for folders that track serial numbers.')
+    return
+  }
+  if (selectedItemsEligibleForSellerLoan.value.length === 0) {
+    toast.warning('Select available items that are not sold or already with a seller.')
+    return
+  }
+  sellerLoanModalItemsOverride.value = null
+  showCreateSellerLoanModal.value = true
+}
+
+const handleLoanToSellerFromMenu = (item: InventoryItem) => {
+  openItemMenuId.value = null
+  if (!canManage.value) return
+  if (!subscriptionFeaturesUi.canUse('seller_loans')) {
+    toast.error('Loan to seller is included on Storvv Enterprise. Upgrade in Settings.')
+    return
+  }
+  if (!folder.value?.hasSerialNumbers) {
+    toast.error('Loan to seller is only available for folders that track serial numbers.')
+    return
+  }
+  if (isInventoryItemLocked(item)) {
+    toast.warning('This product is sold or already with a seller.')
+    return
+  }
+  sellerLoanModalItemsOverride.value = [item]
+  showCreateSellerLoanModal.value = true
+}
+
+const handleSellerLoanSuccess = async () => {
+  sellerLoanModalItemsOverride.value = null
+  selectedItemsForBulk.value = []
+  await refreshCurrentItemsPage()
+}
+
+watch(showCreateSellerLoanModal, (open) => {
+  if (!open) {
+    sellerLoanModalItemsOverride.value = null
+  }
+})
 
 // Export inventory items to Excel
 const handleExportToExcel = async () => {

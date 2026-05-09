@@ -114,11 +114,11 @@
                 <td class="py-2 align-top">
                   <p class="text-[12px] font-medium leading-tight text-gray-900">{{ item.itemName }}</p>
                   <div
-                    v-if="getProductDetailLines(item).length > 0"
+                    v-if="receiptItemDetailLines(item).length > 0"
                     class="mt-0.5 space-y-px"
                   >
                     <p
-                      v-for="(line, detailIndex) in getProductDetailLines(item)"
+                      v-for="(line, detailIndex) in receiptItemDetailLines(item)"
                       :key="`${index}-detail-${detailIndex}`"
                       class="text-[10px] leading-snug text-gray-500"
                     >
@@ -322,7 +322,7 @@
 import { ref, reactive, computed, watch, onMounted, nextTick, shallowRef } from 'vue'
 import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
-import type { Receipt } from '~/stores/receipts'
+import type { Receipt, ReceiptItem } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
@@ -330,11 +330,8 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
-import {
-  getProductDetailLines,
-  getInventoryItemDetailLines,
-  getInventoryItemDisplayName,
-} from '~/composables/useReceiptProductDetails'
+import { getProductDetailLines, getInventoryItemDetailLines } from '~/composables/useReceiptProductDetails'
+import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import { useAppToast } from '~/composables/useAppToast'
 import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
@@ -396,6 +393,10 @@ const inventoryStore = useInventoryStore()
 const storesStore = useStoresStore()
 const { formatCurrency } = usePreferences()
 
+function receiptItemDetailLines(item: ReceiptItem) {
+  return getProductDetailLines(item, { formatMoney: (n) => formatCurrency(n) })
+}
+
 // Store information (receipt.storeBranchName takes precedence for receipts created in a specific branch)
 const storeName = computed(() => props.receipt?.storeBranchName || userStore.userData?.storeDetails?.storeName || '')
 const storeAddress = computed(() => userStore.userData?.storeDetails?.storeAddress || '')
@@ -455,7 +456,9 @@ const swapInPrimaryLabel = computed(() => {
 
 const swapInDetailLines = computed(() => {
   if (!swapInInventoryItem.value) return []
-  return getInventoryItemDetailLines(swapInInventoryItem.value)
+  return getInventoryItemDetailLines(swapInInventoryItem.value, {
+    formatMoney: (n) => formatCurrency(n),
+  })
 })
 
 const authStore = useAuthStore()
@@ -845,18 +848,18 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   }
 
   const receipt = props.receipt
-      const pdf = new jsPDF('p', 'mm', 'a4')
+  const pdf = new jsPDF('p', 'mm', 'a4')
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const margin = 14
-  const contentWidth = pageWidth - (margin * 2)
+  const contentWidth = pageWidth - margin * 2
   const rightEdge = pageWidth - margin
   const rowGap = 4.6
   let y = 16
 
   const ensureSpace = (required = 8) => {
     if (y + required > pageHeight - margin) {
-        pdf.addPage()
+      pdf.addPage()
       y = margin
     }
   }
@@ -942,8 +945,8 @@ async function receiptElementToJsPdf(el: HTMLElement) {
   pdf.text(formatReceiptDate(receipt.date), rightColX, dateY + rowGap, { align: 'right' })
   pdf.setFontSize(9)
   pdf.setTextColor(75, 85, 99)
-  pdf.text(formatReceiptTime(receipt.date), rightColX, dateY + (rowGap * 2), { align: 'right' })
-  y = dateY + (rowGap * 3) + 2
+  pdf.text(formatReceiptTime(receipt.date), rightColX, dateY + rowGap * 2, { align: 'right' })
+  y = dateY + rowGap * 3 + 2
 
   // Customer
   ensureSpace(14)
@@ -973,12 +976,14 @@ async function receiptElementToJsPdf(el: HTMLElement) {
 
   // Items rows
   for (const item of receipt.items) {
-    const detailLines = getProductDetailLines(item)
+    const detailLines = getProductDetailLines(item, { formatMoney: (n) => formatPdfCurrency(n) })
     const productLinesRaw = [item.itemName, ...detailLines]
     if (item.hasDiscount) {
-      productLinesRaw.push(item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}`)
+      productLinesRaw.push(
+        item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatPdfCurrency(item.discountAmount || 0)}`,
+      )
     }
-    const productLines = productLinesRaw.flatMap(line => pdf.splitTextToSize(String(line), 78) as string[])
+    const productLines = productLinesRaw.flatMap((line) => pdf.splitTextToSize(String(line), 78) as string[])
     const itemBlockHeight = Math.max(6, productLines.length * rowGap)
     ensureSpace(itemBlockHeight + 8)
 
@@ -986,7 +991,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
     pdf.setFontSize(10)
     pdf.setTextColor(31, 41, 55)
     productLines.forEach((line, index) => {
-      pdf.text(line, productX, y + (index * rowGap))
+      pdf.text(line, productX, y + index * rowGap)
     })
 
     pdf.setTextColor(17, 24, 39)

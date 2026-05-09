@@ -84,7 +84,31 @@ const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>([
 /** Shown as the swap-in headline; omit from repeated detail rows. */
 const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
 
-export function getProductDetailLines(item: ReceiptItem): string[] {
+export interface ReceiptDetailLinesOptions {
+  /** Format numeric product-detail fields whose keys look like prices (matches column totals). */
+  formatMoney?: (amount: number) => string
+}
+
+function normalizeMoneyDetailKey(key: string): string {
+  return key.toLowerCase().replace(/[\s_-]/g, '')
+}
+
+function keyLooksLikeMoneyField(key: string): boolean {
+  const k = normalizeMoneyDetailKey(key)
+  if (k === 'price' || k === 'cost' || k === 'msrp') return true
+  if (k.endsWith('price') && k.length <= 28) return true
+  if (k.endsWith('amount') && k.length <= 24 && !k.includes('qty') && !k.includes('quantity')) return true
+  return false
+}
+
+function formatMoneyDetailSegment(key: string, rawText: string, opts?: ReceiptDetailLinesOptions): string {
+  if (!opts?.formatMoney || !keyLooksLikeMoneyField(key)) return rawText
+  const n = Number(String(rawText).replace(/,/g, '').trim())
+  if (!Number.isFinite(n)) return rawText
+  return opts.formatMoney(n)
+}
+
+export function getProductDetailLines(item: ReceiptItem, opts?: ReceiptDetailLinesOptions): string[] {
   const raw: Record<string, unknown> = {
     ...(item.productDetails || {}),
     serialNo: item.serialNo,
@@ -105,7 +129,7 @@ export function getProductDetailLines(item: ReceiptItem): string[] {
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)
-    lines.push(`${label}: ${text}`)
+    lines.push(`${label}: ${formatMoneyDetailSegment(key, text, opts)}`)
   }
 
   for (const [key, value] of Object.entries(raw)) {
@@ -118,29 +142,13 @@ export function getProductDetailLines(item: ReceiptItem): string[] {
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)
-    lines.push(`${label}: ${text}`)
+    lines.push(`${label}: ${formatMoneyDetailSegment(key, text, opts)}`)
   }
 
   return lines
 }
 
-export function getInventoryItemDisplayName(item: InventoryItem): string {
-  const raw = item as Record<string, unknown>
-  for (const k of ['name', 'title', 'productName', 'itemName'] as const) {
-    const v = raw[k]
-    if (v === undefined || v === null) continue
-    const text = String(v).trim()
-    if (text) return text
-  }
-  const brand = String(raw.brand ?? '').trim()
-  const model = String(raw.model ?? '').trim()
-  if (brand && model) return `${brand} ${model}`
-  if (brand) return brand
-  if (model) return model
-  return 'Trade-in device'
-}
-
-export function getInventoryItemDetailLines(item: InventoryItem): string[] {
+export function getInventoryItemDetailLines(item: InventoryItem, opts?: ReceiptDetailLinesOptions): string[] {
   const raw: Record<string, unknown> = getReceiptProductDetails(item) as Record<string, unknown>
   const seen = new Set<string>()
   const lines: string[] = []
@@ -154,7 +162,7 @@ export function getInventoryItemDetailLines(item: InventoryItem): string[] {
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)
-    lines.push(`${label}: ${text}`)
+    lines.push(`${label}: ${formatMoneyDetailSegment(key, text, opts)}`)
   }
 
   for (const [key, value] of Object.entries(raw)) {
@@ -167,7 +175,7 @@ export function getInventoryItemDetailLines(item: InventoryItem): string[] {
     const normalized = `${label}:${text.toLowerCase()}`
     if (seen.has(normalized)) continue
     seen.add(normalized)
-    lines.push(`${label}: ${text}`)
+    lines.push(`${label}: ${formatMoneyDetailSegment(key, text, opts)}`)
   }
 
   return lines

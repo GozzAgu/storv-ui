@@ -1982,6 +1982,10 @@ export const useInventoryStore = defineStore('inventory', {
           const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           return updateDoc(itemRef, {
             dateOut: now,
+            sellerLoanOutId: deleteField(),
+            sellerLoanPartyName: deleteField(),
+            sellerLoanPartyPhone: deleteField(),
+            sellerLoanOutAt: deleteField(),
             updatedAt: serverTimestamp(),
           })
         })
@@ -1996,6 +2000,10 @@ export const useInventoryStore = defineStore('inventory', {
             if (index > -1 && folderItems[index]) {
               folderItems[index].dateOut = now
               folderItems[index].updatedAt = now
+              delete folderItems[index].sellerLoanOutId
+              delete folderItems[index].sellerLoanPartyName
+              delete folderItems[index].sellerLoanPartyPhone
+              delete folderItems[index].sellerLoanOutAt
             }
           })
         }

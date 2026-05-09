@@ -664,6 +664,10 @@ const loadFolderItems = async () => {
         const dateOut = item.dateOut
         const isSold = dateOut && dateOut !== null && dateOut !== ''
         if (isSold) return false
+
+        const loanId = item.sellerLoanOutId
+        const onLoan = loanId != null && loanId !== undefined && String(loanId).trim() !== ''
+        if (onLoan) return false
         
         // Filter out items that have been transferred
         const isTransferred = item.isTransferred || item.transferredTo
@@ -677,6 +681,10 @@ const loadFolderItems = async () => {
         const dateOut = item.dateOut
         const isSold = dateOut && dateOut !== null && dateOut !== ''
         if (isSold) return false
+
+        const loanId = item.sellerLoanOutId
+        const onLoan = loanId != null && loanId !== undefined && String(loanId).trim() !== ''
+        if (onLoan) return false
         
         // Filter out items that have been transferred
         const isTransferred = item.isTransferred || item.transferredTo
@@ -711,6 +719,11 @@ const getAvailableQuantity = (item: any) => {
   const dateOut = item.dateOut
   if (dateOut && dateOut !== null && dateOut !== '') {
     return 0 // Item is sold
+  }
+
+  const loanId = item.sellerLoanOutId
+  if (loanId != null && loanId !== undefined && String(loanId).trim() !== '') {
+    return 0
   }
   
   return item.quantity || item.Quantity || 0
@@ -831,6 +844,12 @@ const executeTransfer = async (transfer: any) => {
         // Check if item is sold
         if (sourceItem.dateOut) {
           errors.push(`Item ${itemId} has already been sold`)
+          continue
+        }
+
+        const rawLoanId = sourceItem.sellerLoanOutId
+        if (rawLoanId !== undefined && rawLoanId !== null && String(rawLoanId).trim() !== '') {
+          errors.push(`Item ${itemId} is on an external seller loan — return or sell it before transferring`)
           continue
         }
 

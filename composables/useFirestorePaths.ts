@@ -77,6 +77,18 @@ export function getInventoryItemDocument(db: Firestore, userId: string, storeId:
 }
 
 /**
+ * Seller loan outs: phones held by external reseller/seller until sale or return.
+ * users/{userId}/stores/{storeId}/sellerLoanOuts/{loanId}
+ */
+export function getSellerLoanOutsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'sellerLoanOuts')
+}
+
+export function getSellerLoanOutDocument(db: Firestore, userId: string, storeId: string, loanId: string): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'sellerLoanOuts', loanId)
+}
+
+/**
  * Get receipts collection path: users/{userId}/stores/{storeId}/receipts
  */
 export function getReceiptsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {
