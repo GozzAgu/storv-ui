@@ -503,6 +503,13 @@ const searchByBarcode = async () => {
       manualBarcode.value = ''
       return
     }
+
+    const loanOut = foundItem.sellerLoanOutId as unknown
+    if (loanOut !== undefined && loanOut !== null && `${loanOut}`.trim() !== '') {
+      showWarningToast('This item is with a seller. Return it from the seller loan before selling.')
+      manualBarcode.value = ''
+      return
+    }
     
     // Check if item is already in cart
     const existingIndex = cartItems.value.findIndex(ci => ci.id === foundItem.id)

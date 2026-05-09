@@ -150,28 +150,48 @@
               <div
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
-                :class="[ 'p-3 border rounded-sm transition-all cursor-pointer', selectedItems.find(si => si.id === item.id) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600' ]"
-                @click="toggleItemSelection(item)"
+                :class="[
+                  'p-3 border rounded-sm transition-all',
+                  itemIsOutOnSellerLoan(item)
+                    ? 'cursor-not-allowed border-primary-200/95 bg-primary-50 shadow-sm shadow-primary-900/8 ring-1 ring-primary-400/35 dark:border-primary-700/65 dark:bg-primary-900/40 dark:shadow-black/35 dark:ring-primary-500/30'
+                    : [
+                        'cursor-pointer',
+                        selectedItems.find(si => si.id === item.id)
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+                      ]
+                ]"
+                @click="onReceiptItemRowClick(item)"
               >
                 <div class="flex items-center justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-2.5">
                       <Checkbox
                         :model-value="selectedItems.find(si => si.id === item.id) !== undefined"
+                        :disabled="itemIsOutOnSellerLoan(item)"
                         @update:model-value="(checked) => toggleItemSelection(item, checked)"
                         @click.stop
                         size="sm"
                       />
                       <div class="flex-1">
-                        <h4 class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                        <h4
+                          class="text-xs font-medium text-gray-900 dark:text-gray-100"
+                          :class="itemIsOutOnSellerLoan(item) && 'font-semibold text-primary-900 dark:text-primary-50'"
+                        >
                           {{ getItemDisplayName(item) }}
                         </h4>
                         <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
+                          <span
+                            v-if="itemIsOutOnSellerLoan(item)"
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-900 bg-white/95 shadow-sm shadow-primary-900/10 ring-1 ring-primary-400/45 dark:bg-primary-800/90 dark:text-primary-50 dark:ring-primary-400/55 dark:shadow-md dark:shadow-black/40"
+                          >
+                            With seller<span v-if="item.sellerLoanPartyName">&nbsp;· {{ item.sellerLoanPartyName }}</span>
+                          </span>
                           <span v-if="(selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) && (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))" class="text-gray-500 dark:text-gray-400">
                             Serial: {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
                           </span>
                           <span v-if="getItemField(item, 'sku')" class="text-gray-500 dark:text-gray-400">SKU: {{ getItemField(item, 'sku') }}</span>
-                          <span v-if="getItemField(item, 'price')">
+                          <span v-if="!itemIsOutOnSellerLoan(item) && getItemField(item, 'price')">
                             <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
                               <span class="text-gray-400 dark:text-gray-500 line-through">
                                 {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
@@ -187,7 +207,7 @@
                               Price: {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                             </span>
                           </span>
-                          <span v-if="!selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate && getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
+                          <span v-if="!itemIsOutOnSellerLoan(item) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate && getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
                             Stock: {{ getItemField(item, 'stock') }}
                           </span>
                         </div>
@@ -813,31 +833,44 @@ const hasSerialNumberInTemplate = computed(() => {
   )
 })
 
+/** Inventory lent to external seller — not sellable until the loan is returned. */
+function itemIsOutOnSellerLoan(item: InventoryItem): boolean {
+  const loan = item.sellerLoanOutId as unknown
+  if (loan === undefined || loan === null) return false
+  return `${loan}`.trim().length > 0
+}
+
 const filteredAvailableItems = computed(() => {
+  let list: InventoryItem[]
   if (!itemSearchQuery.value.trim()) {
-    return availableItems.value
+    list = [...availableItems.value]
+  } else {
+    const query = itemSearchQuery.value.toLowerCase()
+    list = availableItems.value.filter(item => {
+      const itemName = getItemDisplayName(item).toLowerCase()
+      if (itemName.includes(query)) return true
+
+      if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
+        const serialNo = getItemField(item, 'serialNo') ||
+          getItemField(item, 'serialNumber') ||
+          getItemField(item, 'serial')
+        if (serialNo && serialNo.toLowerCase().includes(query)) return true
+      }
+
+      const sku = getItemField(item, 'sku')
+      if (sku && sku.toLowerCase().includes(query)) return true
+
+      return false
+    })
   }
-  const query = itemSearchQuery.value.toLowerCase()
-  return availableItems.value.filter(item => {
-    // Search by item name
-    const itemName = getItemDisplayName(item).toLowerCase()
-    if (itemName.includes(query)) return true
-    
-    // Search by serial number if folder has serial numbers
-    if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
-      const serialNo = getItemField(item, 'serialNo') || 
-                       getItemField(item, 'serialNumber') ||
-                       getItemField(item, 'serial')
-      if (serialNo && serialNo.toLowerCase().includes(query)) return true
-    }
-    
-    // Search by SKU
-    const sku = getItemField(item, 'sku')
-    if (sku && sku.toLowerCase().includes(query)) return true
-    
-    return false
-  })
+  list.sort((a, b) => Number(itemIsOutOnSellerLoan(a)) - Number(itemIsOutOnSellerLoan(b)))
+  return list
 })
+
+function onReceiptItemRowClick(item: InventoryItem) {
+  if (itemIsOutOnSellerLoan(item)) return
+  toggleItemSelection(item)
+}
 
 // Swap-in folder
 const swapInFolder = computed(() => {
@@ -886,8 +919,10 @@ const canProceed = computed(() => {
 })
 
 const isFormValid = computed(() => {
+  const selectionHasSellerLoan = selectedItems.value.some(si => itemIsOutOnSellerLoan(si.item))
   const baseValid = receiptForm.value.customerName.trim() !== '' &&
-    selectedItems.value.length > 0
+    selectedItems.value.length > 0 &&
+    !selectionHasSellerLoan
   
   // Payment validation
   if (useSplitPayment.value) {
@@ -1041,6 +1076,11 @@ const loadItems = async () => {
     const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, { force: true })
     // Only show items that haven't been sold yet (no dateOut)
     availableItems.value = items.filter(item => !item.dateOut)
+
+    selectedItems.value = selectedItems.value.filter(si => {
+      const row = availableItems.value.find(i => i.id === si.id)
+      return row !== undefined && !itemIsOutOnSellerLoan(row)
+    })
   } catch (error) {
     console.error('Error loading items:', error)
   } finally {
@@ -1049,6 +1089,8 @@ const loadItems = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
+  if (itemIsOutOnSellerLoan(item)) return
+
   // Determine if quantity should be available (not for serial number items)
   const hasSerialNumbers = selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value
   const defaultQuantity = hasSerialNumbers ? 1 : 1
@@ -1240,6 +1282,11 @@ const handleCancel = () => {
 
 const handleCreateReceipt = async () => {
   if (!isFormValid.value || !selectedFolder.value) return
+
+  if (selectedItems.value.some(si => itemIsOutOnSellerLoan(si.item))) {
+    alert('Remove items that are with a seller before creating this receipt.')
+    return
+  }
 
   isCreating.value = true
   try {

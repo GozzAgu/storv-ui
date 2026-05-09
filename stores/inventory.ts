@@ -1859,12 +1859,6 @@ export const useInventoryStore = defineStore('inventory', {
       lines: { itemId: string; quantitySold: number }[],
       options: { hasSerialNumbers: boolean }
     ) {
-      if (options.hasSerialNumbers) {
-        const itemIds = lines.map((l) => l.itemId)
-        await this.updateItemsDateOut(folderId, itemIds)
-        return
-      }
-
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -1883,6 +1877,27 @@ export const useInventoryStore = defineStore('inventory', {
       const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
+      }
+
+      const itemIdsUnique = [...new Set(lines.map((l) => l.itemId))]
+      for (const itemId of itemIdsUnique) {
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+        const snap = await getDoc(itemRef)
+        if (!snap.exists()) {
+          throw new Error(`Inventory item not found: ${itemId}`)
+        }
+        const loan = (snap.data() as Record<string, unknown> | undefined)?.sellerLoanOutId
+        if (loan !== undefined && loan !== null && `${loan}`.trim() !== '') {
+          throw new Error(
+            'One or more items are with a seller. Return the seller loan before selling them on a receipt.'
+          )
+        }
+      }
+
+      if (options.hasSerialNumbers) {
+        const itemIds = lines.map((l) => l.itemId)
+        await this.updateItemsDateOut(folderId, itemIds)
+        return
       }
 
       let folder = this.getFolderById(folderId)
