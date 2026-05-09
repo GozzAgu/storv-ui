@@ -81,6 +81,9 @@ const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>([
   'swapInReceiptId',
 ])
 
+/** Shown as the swap-in headline; omit from repeated detail rows. */
+const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
+
 export function getProductDetailLines(item: ReceiptItem): string[] {
   const raw: Record<string, unknown> = {
     ...(item.productDetails || {}),
@@ -108,6 +111,55 @@ export function getProductDetailLines(item: ReceiptItem): string[] {
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
     if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
+    if (value === undefined || value === null) continue
+    const text = String(value).trim()
+    if (!text) continue
+    const label = DETAIL_LABELS[key] || key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())
+    const normalized = `${label}:${text.toLowerCase()}`
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    lines.push(`${label}: ${text}`)
+  }
+
+  return lines
+}
+
+export function getInventoryItemDisplayName(item: InventoryItem): string {
+  const raw = item as Record<string, unknown>
+  for (const k of ['name', 'title', 'productName', 'itemName'] as const) {
+    const v = raw[k]
+    if (v === undefined || v === null) continue
+    const text = String(v).trim()
+    if (text) return text
+  }
+  const brand = String(raw.brand ?? '').trim()
+  const model = String(raw.model ?? '').trim()
+  if (brand && model) return `${brand} ${model}`
+  if (brand) return brand
+  if (model) return model
+  return 'Trade-in device'
+}
+
+export function getInventoryItemDetailLines(item: InventoryItem): string[] {
+  const raw: Record<string, unknown> = getReceiptProductDetails(item) as Record<string, unknown>
+  const seen = new Set<string>()
+  const lines: string[] = []
+  for (const key of DETAIL_ORDER) {
+    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
+    const value = raw[key]
+    if (value === undefined || value === null) continue
+    const text = String(value).trim()
+    if (!text) continue
+    const label = DETAIL_LABELS[key] || key
+    const normalized = `${label}:${text.toLowerCase()}`
+    if (seen.has(normalized)) continue
+    seen.add(normalized)
+    lines.push(`${label}: ${text}`)
+  }
+
+  for (const [key, value] of Object.entries(raw)) {
+    if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
+    if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key) || INVENTORY_PRIMARY_NAME_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue

@@ -35,6 +35,7 @@ import {
   fetchAllInventoryItemsChunked,
   clearInventoryItemQueryCaches,
   invalidateFolderItemCaches,
+  docToInventoryItem,
 } from '~/utils/inventory-items-firestore'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 
@@ -712,6 +713,33 @@ export const useInventoryStore = defineStore('inventory', {
       } catch (error: any) {
         console.error('Error fetching folder:', error)
         throw new Error(error.message || 'Failed to fetch folder')
+      }
+    },
+
+    /** Single-item fetch (e.g. swap-in trade-in row on receipts). Uses receipt.storeId when provided. */
+    async fetchInventoryItemById(itemId: string, options?: { storeId?: string }): Promise<InventoryItem | null> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) return null
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return null
+
+      const userId = await getQueryUserId()
+      if (!userId) return null
+
+      const storeId = options?.storeId ?? (await getCurrentStoreId())
+      if (!storeId) return null
+
+      try {
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+        const snap = await getDoc(itemRef)
+        if (!snap.exists()) return null
+        const data = snap.data() as Record<string, unknown>
+        const folderId = (data.folderId as string) || ''
+        return docToInventoryItem(snap as QueryDocumentSnapshot, folderId, userId)
+      } catch (e) {
+        console.warn('[inventory] fetchInventoryItemById failed:', e)
+        return null
       }
     },
 
