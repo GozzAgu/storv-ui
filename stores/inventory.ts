@@ -2053,7 +2053,7 @@ export const useInventoryStore = defineStore('inventory', {
 
         for (const [loanId, soldIds] of soldByLoan) {
           const data = loanSnapshots.get(loanId)
-          if (!data || data.status === 'returned') continue
+          if (!data || data.status === 'returned' || data.status === 'sold') continue
           const rawLines = Array.isArray(data.lines) ? (data.lines as Array<{ inventoryItemId: string }>) : []
           const newLines = rawLines.filter((l) => !soldIds.has(l.inventoryItemId))
           if (newLines.length === rawLines.length) continue
@@ -2129,7 +2129,7 @@ export const useInventoryStore = defineStore('inventory', {
       let writes = 0
       for (const [loanId, soldIds] of soldByLoan) {
         const data = loanSnapshots.get(loanId)
-        if (!data || data.status === 'returned') continue
+        if (!data || data.status === 'returned' || data.status === 'sold') continue
         const rawLines = Array.isArray(data.lines) ? (data.lines as Array<{ inventoryItemId: string }>) : []
         const newLines = rawLines.filter((l) => !soldIds.has(l.inventoryItemId))
         if (newLines.length === rawLines.length) continue

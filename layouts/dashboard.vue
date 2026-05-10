@@ -643,7 +643,7 @@ import {
   ShieldCheckIcon,
   BookOpenIcon,
   BuildingStorefrontIcon,
-  ArrowTopRightOnSquareIcon,
+  BanknotesIcon,
 } from '@heroicons/vue/24/outline'
 import {
   HomeIcon as HomeIconSolid,
@@ -658,7 +658,7 @@ import {
   FolderIcon as FolderIconSolid,
   BuildingStorefrontIcon as BuildingStorefrontIconSolid,
   BuildingOfficeIcon as BuildingOfficeIconSolid,
-  ArrowTopRightOnSquareIcon as ArrowTopRightOnSquareIconSolid,
+  BanknotesIcon as BanknotesIconSolid,
 } from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
@@ -838,7 +838,7 @@ const navigation: Array<{
 }> = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
-  { name: 'Stock loans', href: '/dashboard/seller-loans', icon: ArrowTopRightOnSquareIcon, iconSolid: ArrowTopRightOnSquareIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
+  { name: 'Stock loans', href: '/dashboard/seller-loans', icon: BanknotesIcon, iconSolid: BanknotesIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
   { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, iconSolid: ShieldCheckIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
@@ -865,12 +865,12 @@ const route = useRoute()
 const isActive = (href: string) => {
   const currentPath = route.path
   
-  // Check if any other navigation item has a longer matching path
-  // This prevents parent routes from being active when on child routes
-  const hasLongerMatch = navigation.some(item => {
-    if (item.href === href) return false
-    if (item.href.length <= href.length) return false
-    return currentPath.startsWith(item.href)
+  // Only consider nav items the user actually sees (same list as the sidebar).
+  const hasLongerMatch = filteredNavigation.value.some(item => {
+    const otherHref = item.href
+    if (otherHref === href) return false
+    if (otherHref.length <= href.length) return false
+    return currentPath.startsWith(otherHref)
   })
   
   // If there's a longer match, this route shouldn't be active

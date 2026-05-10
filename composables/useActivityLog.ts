@@ -34,6 +34,13 @@ export interface LogActivityParams {
   userDisplayName: string
 }
 
+/** Normalize typographic dashes in log summaries (em/en dash → comma or ASCII hyphen) for clearer Activity Logs UI. */
+export function normalizeActivityLogText(value: string): string {
+  return String(value ?? '')
+    .replace(/\s*\u2014\s*/g, ', ')
+    .replace(/\s*\u2013\s*/g, ' - ')
+}
+
 /** Write an activity log (fire-and-forget; does not throw). */
 export async function logActivity(params: LogActivityParams): Promise<void> {
   if (import.meta.server) return
@@ -58,7 +65,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,
-      entityName: params.entityName,
+      entityName: normalizeActivityLogText(params.entityName),
       storeId: params.storeId,
       createdAt: serverTimestamp(),
     })
@@ -95,7 +102,7 @@ export async function fetchActivityLogs(limitCount: number = ACTIVITY_LOGS_FETCH
       action: data.action ?? 'updated',
       entityType: data.entityType ?? 'item',
       entityId: data.entityId ?? '',
-      entityName: data.entityName ?? '-',
+      entityName: normalizeActivityLogText((data.entityName as string | undefined) ?? '-'),
       storeId: data.storeId ?? storeId,
       createdAt: data.createdAt?.toDate?.() ?? new Date(data.createdAt),
     } as ActivityLog

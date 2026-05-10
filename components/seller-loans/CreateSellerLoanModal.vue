@@ -2,7 +2,7 @@
   <Modal
     :model-value="modelValue"
     title="Stock loan"
-    subtitle="Items stay in your inventory until a receipt sells them or you mark them returned here."
+    subtitle="Items stay in inventory until sold on a receipt, marked sold from Stock loans when the borrower sells, or returned here."
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -12,7 +12,7 @@
           class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
         >
           <strong>Not a sale:</strong>
-          Selected serial items are marked as on a stock loan to the borrower below. Selling one on a receipt marks it sold and removes it from this stock loan automatically.
+          Selected serial items are marked as on a stock loan to the borrower below. Selling on a receipt or choosing Mark sold on Stock loans marks units sold and updates this loan.
         </div>
 
         <div>

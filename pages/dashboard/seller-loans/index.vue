@@ -8,7 +8,7 @@
         Stock loans
       </h1>
       <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Track phones or serial items out on stock loans until they appear on a receipt (sold) or you return units to your shelf.
+        Track serial items lent to a borrower. Mark sold when they sell outside your POS (inventory shows sold), use a receipt to sell through the till, or return units to stock.
       </p>
     </header>
 
@@ -60,6 +60,18 @@
                 @click="statusFilter = 'returned'"
               >
                 Returned
+              </button>
+              <button
+                type="button"
+                :class="[
+                  'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
+                  statusFilter === 'sold'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
+                ]"
+                @click="statusFilter = 'sold'"
+              >
+                Sold (borrower)
               </button>
               <button
                 type="button"
@@ -147,25 +159,44 @@
                       'inline-flex rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset',
                       loan.status === 'active'
                         ? 'bg-indigo-500/10 text-indigo-900 ring-indigo-500/20 dark:bg-indigo-400/10 dark:text-indigo-100 dark:ring-indigo-400/30'
-                        : 'bg-gray-500/10 text-gray-700 ring-gray-400/25 dark:bg-gray-500/15 dark:text-gray-300',
+                        : loan.status === 'sold'
+                          ? 'bg-emerald-500/10 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/12 dark:text-emerald-100 dark:ring-emerald-400/30'
+                          : 'bg-gray-500/10 text-gray-700 ring-gray-400/25 dark:bg-gray-500/15 dark:text-gray-300',
                     ]"
                   >
-                    {{ loan.status === 'active' ? 'On loan' : 'Returned' }}
+                    {{
+                      loan.status === 'active' ? 'On loan' : loan.status === 'sold' ? 'Sold' : 'Returned'
+                    }}
                   </span>
                 </td>
                 <td class="px-3 py-2.5 text-right sm:px-4">
-                  <button
-                    v-if="loan.status === 'active'"
-                    type="button"
-                    class="text-[11px] font-semibold text-primary-700 underline underline-offset-2 hover:text-primary-900 disabled:opacity-50 dark:text-primary-400 dark:hover:text-primary-300"
-                    :disabled="returningId === loan.id"
-                    @click="openReturnModal(loan)"
-                  >
-                    {{ returningId === loan.id ? 'Returning…' : 'Return to store' }}
-                  </button>
+                  <template v-if="loan.status === 'active'">
+                    <div
+                      class="relative inline-flex justify-end"
+                      data-stock-loan-actions-menu
+                      @click.stop
+                    >
+                      <button
+                        type="button"
+                        :data-stock-loan-actions-anchor="loan.id"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
+                        :disabled="loanActionBusyId === loan.id"
+                        :aria-expanded="openLoanMenuId === loan.id"
+                        aria-haspopup="menu"
+                        aria-label="Stock loan actions"
+                        @click="toggleLoanMenu(loan.id)"
+                      >
+                        <EllipsisVerticalIcon class="h-4 w-4 shrink-0" stroke-width="2" />
+                      </button>
+                    </div>
+                  </template>
+                  <span v-else-if="loan.status === 'sold' && loan.soldAt" class="text-[10px] text-gray-500 dark:text-gray-400">
+                    Sold {{ formatWhen(loan.soldAt) }}
+                  </span>
                   <span v-else-if="loan.returnedAt" class="text-[10px] text-gray-500 dark:text-gray-400">
                     {{ formatWhen(loan.returnedAt) }}
                   </span>
+                  <span v-else class="text-[10px] text-gray-400">—</span>
                 </td>
               </tr>
             </tbody>
@@ -226,12 +257,79 @@
         </Button>
       </template>
     </Modal>
+
+    <Modal
+      v-model="showSoldModal"
+      title="Mark sold (borrower)"
+      subtitle="Each listed unit will be marked sold in inventory (same as a receipt sale outside the POS). Stock loan borrowing flags are cleared. This cannot be undone from here."
+      size="md"
+      :close-on-backdrop="!confirmSoldLoading"
+      :show-close="!confirmSoldLoading"
+    >
+      <template #default>
+        <p v-if="loanPendingSold" class="text-sm text-gray-700 dark:text-gray-300">
+          Mark all
+          <span class="font-semibold tabular-nums">{{ loanPendingSold.lines.length }}</span>
+          item{{ loanPendingSold.lines.length !== 1 ? 's' : '' }}
+          from
+          <span class="font-semibold">{{ loanPendingSold.partyName }}</span>
+          as sold by the borrower?
+        </p>
+        <p v-if="loanPendingSold?.partyNotes" class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+          Notes on file: {{ loanPendingSold.partyNotes }}
+        </p>
+      </template>
+      <template #footer>
+        <Button variant="outline" size="sm" extra-class="!rounded-2xl" :disabled="confirmSoldLoading" @click="closeSoldModal">
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          extra-class="!rounded-2xl"
+          :loading="confirmSoldLoading"
+          :disabled="!loanPendingSold"
+          @click="confirmMarkSold"
+        >
+          Mark sold
+        </Button>
+      </template>
+    </Modal>
+
+    <!-- Row actions: not clipped by table overflow -->
+    <Teleport to="body">
+      <div
+        v-if="openLoanMenuId && loanForOpenMenu && loanMenuFixedStyle"
+        data-stock-loan-actions-menu
+        class="frosted-glass fixed z-[1000] min-w-[11rem] rounded-sm border border-gray-200/90 py-0.5 shadow-sm dark:border-gray-700/80"
+        :style="loanMenuFixedStyle"
+        role="menu"
+        @click.stop
+      >
+        <button
+          type="button"
+          role="menuitem"
+          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
+          @click="handleLoanMenuMarkSold"
+        >
+          Mark sold (borrower)
+        </button>
+        <button
+          type="button"
+          role="menuitem"
+          class="flex w-full items-center gap-1.5 px-2.5 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800/85"
+          @click="handleLoanMenuReturnToStore"
+        >
+          Return to store
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
-import { BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
+import { computed, ref, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
+import { BuildingStorefrontIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
@@ -239,6 +337,7 @@ import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 
 definePageMeta({
   layout: 'dashboard',
@@ -253,12 +352,13 @@ const toast = useAppToast()
 const canAccessByRole = computed(() => canManage.value)
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
 
-const statusFilter = ref<'active' | 'returned' | 'all'>('active')
+const statusFilter = ref<'active' | 'returned' | 'sold' | 'all'>('active')
 
 const filteredLoans = computed(() => {
   const rows = sellerLoansStore.loans
   if (statusFilter.value === 'all') return rows
   if (statusFilter.value === 'active') return rows.filter((l) => l.status === 'active')
+  if (statusFilter.value === 'sold') return rows.filter((l) => l.status === 'sold')
   return rows.filter((l) => l.status === 'returned')
 })
 
@@ -291,14 +391,133 @@ onMounted(() => {
   }
 })
 
-const returningId = ref<string | null>(null)
+const openLoanMenuId = ref<string | null>(null)
+const toggleLoanMenu = (loanId: string) => {
+  openLoanMenuId.value = openLoanMenuId.value === loanId ? null : loanId
+}
+
+const loanForOpenMenu = computed(() => {
+  const id = openLoanMenuId.value
+  if (!id) return null
+  return sellerLoansStore.loans.find((l) => l.id === id && l.status === 'active') ?? null
+})
+
+const loanMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+let loanMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeLoanMenuOutsideListener() {
+  if (loanMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', loanMenuOutsideHandler, true)
+    loanMenuOutsideHandler = null
+  }
+}
+
+function updateLoanMenuPosition() {
+  const id = openLoanMenuId.value
+  if (!id || !import.meta.client) {
+    loanMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-stock-loan-actions-anchor', id)
+  if (!el) {
+    loanMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  loanMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 176,
+    estimatedMenuHeight: 88,
+    margin: 4,
+    viewportPadding: 8,
+  })
+}
+
+function addLoanMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateLoanMenuPosition, true)
+  window.addEventListener('resize', updateLoanMenuPosition)
+}
+
+function removeLoanMenuPositionListeners() {
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateLoanMenuPosition, true)
+  window.removeEventListener('resize', updateLoanMenuPosition)
+}
+
+watch(openLoanMenuId, (id) => {
+  removeLoanMenuOutsideListener()
+  removeLoanMenuPositionListeners()
+  loanMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
+
+  nextTick(() => {
+    updateLoanMenuPosition()
+    addLoanMenuPositionListeners()
+  })
+
+  loanMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-stock-loan-actions-menu]')) return
+    openLoanMenuId.value = null
+    removeLoanMenuOutsideListener()
+  }
+
+  nextTick(() => {
+    setTimeout(() => {
+      if (openLoanMenuId.value && loanMenuOutsideHandler) {
+        document.addEventListener('click', loanMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
+})
+
+onBeforeUnmount(() => {
+  removeLoanMenuOutsideListener()
+  removeLoanMenuPositionListeners()
+})
+
+function handleLoanMenuMarkSold() {
+  const loan = loanForOpenMenu.value
+  if (!loan) {
+    openLoanMenuId.value = null
+    return
+  }
+  openLoanMenuId.value = null
+  openSoldModal(loan)
+}
+
+function handleLoanMenuReturnToStore() {
+  const loan = loanForOpenMenu.value
+  if (!loan) {
+    openLoanMenuId.value = null
+    return
+  }
+  openLoanMenuId.value = null
+  openReturnModal(loan)
+}
+
+const returningLoanId = ref<string | null>(null)
+const markingSoldLoanId = ref<string | null>(null)
+const loanActionBusyId = computed(() => returningLoanId.value ?? markingSoldLoanId.value)
+
 const showReturnModal = ref(false)
 const loanPendingReturn = ref<SellerLoanOut | null>(null)
 const confirmReturnLoading = ref(false)
 
+const showSoldModal = ref(false)
+const loanPendingSold = ref<SellerLoanOut | null>(null)
+const confirmSoldLoading = ref(false)
+
 watch(showReturnModal, (open) => {
   if (!open && !confirmReturnLoading.value) {
     loanPendingReturn.value = null
+  }
+})
+
+watch(showSoldModal, (open) => {
+  if (!open && !confirmSoldLoading.value) {
+    loanPendingSold.value = null
   }
 })
 
@@ -317,7 +536,7 @@ function closeReturnModal() {
 async function confirmReturn() {
   const loan = loanPendingReturn.value
   if (!loan) return
-  returningId.value = loan.id
+  returningLoanId.value = loan.id
   confirmReturnLoading.value = true
   try {
     await sellerLoansStore.returnSellerLoanOut(loan.id)
@@ -328,7 +547,37 @@ async function confirmReturn() {
     toast.error(e instanceof Error ? e.message : 'Return failed')
   } finally {
     confirmReturnLoading.value = false
-    returningId.value = null
+    returningLoanId.value = null
+  }
+}
+
+function openSoldModal(loan: SellerLoanOut) {
+  loanPendingSold.value = loan
+  showSoldModal.value = true
+}
+
+function closeSoldModal() {
+  showSoldModal.value = false
+  if (!confirmSoldLoading.value) {
+    loanPendingSold.value = null
+  }
+}
+
+async function confirmMarkSold() {
+  const loan = loanPendingSold.value
+  if (!loan) return
+  markingSoldLoanId.value = loan.id
+  confirmSoldLoading.value = true
+  try {
+    await sellerLoansStore.markSellerLoanOutSold(loan.id)
+    toast.success('Items marked sold — they now show as sold in inventory.')
+    showSoldModal.value = false
+    loanPendingSold.value = null
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Could not mark sold')
+  } finally {
+    confirmSoldLoading.value = false
+    markingSoldLoanId.value = null
   }
 }
 </script>

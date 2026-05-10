@@ -184,6 +184,7 @@ import {
   ArrowsRightLeftIcon,
   Cog6ToothIcon,
   UserCircleIcon,
+  RocketLaunchIcon,
 } from '@heroicons/vue/24/outline'
 definePageMeta({
   layout: 'dashboard',
@@ -209,6 +210,40 @@ type Category = {
 
 const categories: Category[] = [
   {
+    id: 'recent-updates',
+    title: 'Recent updates',
+    blurb: 'Highlights from the latest Storvv releases (May 2026).',
+    icon: RocketLaunchIcon,
+    articles: [
+      {
+        title: 'Stock loans (Enterprise)',
+        body: [
+          'Super admins and store managers on Storvv Enterprise get Stock loans under Inventory in the sidebar. Use it when serial-tracked inventory is lent to a borrower (for example stock on consignment) while it still belongs to your branch on paper.',
+          'Create a loan from a serial folder by selecting rows and confirming the borrower. Active loans list borrower, units, filters for Active / Returned / Sold (borrower) / All, and per-row actions.',
+        ],
+        bullets: [
+          'Selling a loaned serial line on Create New Receipt or Quick Sale marks it sold, clears borrowing flags from inventory, and updates the linked stock loan.',
+          'The row actions menu (three dots) opens Mark sold when the borrower sold off-POS, or Return to store when units come back. Mark sold writes the usual sold state to inventory.',
+          'Multi-store transfer screens still warn if an item is on a loan until you resolve it through receipt, borrower sale, or return.',
+        ],
+      },
+      {
+        title: 'Activity Logs readability',
+        body: [
+          'Activity Logs now normalizes long typographic dashes in automated descriptions to plain commas or hyphens, so rows stay easy to scan in the Target column.',
+        ],
+      },
+      {
+        title: 'Navigation polish',
+        body: [
+          'The Stock loans sidebar icon uses a filled glyph when that page is active so the active rail state matches bolder labels everywhere else.',
+          'The public Storvv site opens with a dedicated What\'s new band under the hero, then lists Stock loans in the capabilities grid.',
+          'This Help center is updated alongside product changes: search for stock loan or recent updates in the help search box to jump here.',
+        ],
+      },
+    ],
+  },
+  {
     id: 'getting-started',
     title: 'Getting started',
     blurb: 'Roles, stores, and first-time setup inside Storvv.',
@@ -219,7 +254,7 @@ const categories: Category[] = [
         body: [
           'Storvv is your operational workspace: inventory lives in folders and items, sales are recorded as receipts (with customers on the same Sales screen), and optional areas include Analytics, Activity Logs, Departments, and Multi-Store Sync depending on your subscription.',
           'Nearly all data is tied to the store that is active for your session. Super admins switch stores from the store selector in the header; managers and staff work inside the store they have been assigned.',
-          'The sidebar lists real product routes: Dashboard, Inventory, Receipts, Analytics, Activity Logs, Multi-Store Sync, Help center, Settings, and Profile. Items such as Analytics or Multi-Store Sync only appear when your plan includes them.',
+          'The sidebar lists real product routes: Dashboard, Inventory, Stock loans (Enterprise, managers/super admins), Receipts, Analytics, Activity Logs, Multi-Store Sync, Help center, Settings, and Profile. Items such as Analytics, Stock loans, or Multi-Store Sync only appear when your plan and role include them.',
         ],
       },
       {
@@ -342,6 +377,7 @@ const categories: Category[] = [
         title: 'Create New Receipt (three steps)',
         body: [
           'The modal title is “Create New Receipt” with subtitle “Select folder, items, then enter receipt details.” Step 1: Select Folder (search folders; empty state tells you to create folders in Inventory first). Step 2: Select Items and quantities from that folder. Step 3: Receipt Details; customer fields, payment method, Completed or Pending status, and notes.',
+          'Serial folders can include lines on an active Stock loan: you may add them like other sellable SKUs. Completing the receipt marks them sold and updates the borrower loan in the background when your plan includes Stock loans (Enterprise).',
           'After step 1, if your branch has a Sell screen note configured in Settings → create or edit branch, a short banner can appear at the top of the items and checkout steps with store-specific reminders (for example promos or price notes).',
           'Super admins can enable swap-in style lines inside the receipt flow when your business records trade-ins alongside standard SKUs.',
         ],
@@ -413,7 +449,8 @@ const categories: Category[] = [
         body: [
           'Activity Logs is limited to super admins and store managers. Standard staff see an access denied message.',
           'The feature requires Storvv Medium or Storvv Enterprise. Micro accounts see an upgrade notice with a shortcut to Settings.',
-          'Pick a store, then review the table columns User, Action, Item, and Date. Empty state explains that editing inventory will produce entries over time.',
+          'Pick a store, then review the table columns User, Activity, Target, and Date. Empty state explains that editing inventory will produce entries over time.',
+          'Automated descriptions use plain punctuation (no long dash characters) so entries stay easy to read in the Target column.',
         ],
       },
     ],
@@ -480,7 +517,7 @@ const categories: Category[] = [
         body: [
           'Storvv Micro: core dashboard, inventory, Sales (receipts + customers + refunds), notifications, Help center, Profile.',
           'Storvv Medium adds Analytics, Activity Logs, Departments, and higher caps for stores, departments, and staff.',
-          'Storvv Enterprise adds Multi-Store Sync with unlimited-scale positioning for stores/departments/staff per marketing copy inside Settings, plus Copy from branch on Inventory Folders to duplicate selected folder templates across branches.',
+          'Storvv Enterprise adds Multi-Store Sync with unlimited-scale positioning for stores/departments/staff per marketing copy inside Settings, Copy from branch on Inventory Folders, and Stock loans for serial inventory lent to borrowers.',
         ],
       },
     ],
@@ -521,6 +558,8 @@ const searchQuery = ref('')
 const showBackToTop = ref(false)
 
 const popularTopics = [
+  { label: "What's new", query: 'recent updates' },
+  { label: 'Stock loans', query: 'stock loan' },
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Receipts & refunds', query: 'receipt' },
   { label: 'Inventory & folders', query: 'inventory' },
@@ -534,6 +573,7 @@ const popularTopics = [
 const quickScreenLinks = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Inventory', to: '/dashboard/inventory' },
+  { label: 'Stock loans', to: '/dashboard/seller-loans' },
   { label: 'Receipts', to: '/dashboard/receipts' },
   { label: 'Settings', to: '/dashboard/settings' },
   { label: 'Profile', to: '/dashboard/profile' },

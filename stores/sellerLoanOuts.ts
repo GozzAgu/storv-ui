@@ -30,7 +30,7 @@ export interface SellerLoanLineSnapshot {
 export interface SellerLoanOut {
   id: string
   storeId: string
-  status: 'active' | 'returned'
+  status: 'active' | 'returned' | 'sold'
   partyName: string
   partyPhone: string
   partyNotes: string
@@ -38,6 +38,8 @@ export interface SellerLoanOut {
   createdAt?: Date
   updatedAt?: Date
   returnedAt?: Date
+  /** When all units were recorded as sold (e.g. borrower sold off-site). */
+  soldAt?: Date
   createdBy: string
 }
 
@@ -50,10 +52,13 @@ function snapshotToDate(v: unknown): Date | undefined {
 }
 
 function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
+  const rawStatus = typeof data.status === 'string' ? data.status : 'active'
+  const status: SellerLoanOut['status'] =
+    rawStatus === 'returned' ? 'returned' : rawStatus === 'sold' ? 'sold' : 'active'
   return {
     id,
     storeId: (data.storeId as string) || '',
-    status: (data.status === 'returned' ? 'returned' : 'active') as 'active' | 'returned',
+    status,
     partyName: (data.partyName as string) || '',
     partyPhone: (data.partyPhone as string) ?? '',
     partyNotes: (data.partyNotes as string) || '',
@@ -61,6 +66,7 @@ function mapLoanDoc(id: string, data: Record<string, unknown>): SellerLoanOut {
     createdAt: snapshotToDate(data.createdAt),
     updatedAt: snapshotToDate(data.updatedAt),
     returnedAt: snapshotToDate(data.returnedAt),
+    soldAt: snapshotToDate(data.soldAt),
     createdBy: (data.createdBy as string) || '',
   }
 }
@@ -217,6 +223,9 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       if (status === 'returned') {
         throw new Error('This loan was already marked as returned')
       }
+      if (status === 'sold') {
+        throw new Error('This loan was already marked as sold')
+      }
       const rawLines = Array.isArray(loanData.lines) ? (loanData.lines as SellerLoanLineSnapshot[]) : []
       if (rawLines.length > SELLER_LOAN_OUT_BATCH_CAP) {
         throw new Error('This loan lists too many items to return in one operation. Contact support.')
@@ -254,6 +263,81 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         entityType: 'items_batch',
         entityId: loanId,
         entityName: `Returned stock loan from ${partyNameStr} (${rawLines.length} item(s))`,
+        storeId,
+        userId: authStore.currentUser.uid,
+        userDisplayName,
+      }).catch(() => {})
+
+      await this.fetchSellerLoanOuts(true)
+    },
+
+    /** Borrower sold all units off‑POS: mark inventory sold (dateOut), clear loan fields, close loan as sold. */
+    async markSellerLoanOutSold(loanId: string) {
+      const db = useFirestore().getFirestoreInstance()
+      const authStore = useAuthStore()
+      if (!db || !authStore.currentUser) {
+        throw new Error('Not authenticated')
+      }
+
+      const userId = await getQueryUserId()
+      const storeId = await getCurrentStoreId()
+      if (!userId || !storeId) {
+        throw new Error('No store selected')
+      }
+
+      const loanSnap = await getDoc(getSellerLoanOutDocument(db, userId, storeId, loanId))
+      if (!loanSnap.exists()) {
+        throw new Error('Loan not found')
+      }
+      const loanData = loanSnap.data() as Record<string, unknown>
+      if (loanData.status === 'returned') {
+        throw new Error('This loan was already returned to the store')
+      }
+      if (loanData.status === 'sold') {
+        throw new Error('This loan was already marked as sold')
+      }
+
+      const rawLines = Array.isArray(loanData.lines) ? (loanData.lines as SellerLoanLineSnapshot[]) : []
+      if (rawLines.length === 0) {
+        throw new Error('This loan has no items to mark sold')
+      }
+      if (rawLines.length > SELLER_LOAN_OUT_BATCH_CAP) {
+        throw new Error('This loan lists too many items to update in one step. Contact support.')
+      }
+
+      const folderIds = new Set(rawLines.map((l) => l.folderId))
+      const now = new Date()
+      const loanRef = getSellerLoanOutDocument(db, userId, storeId, loanId)
+
+      const batch = writeBatch(db)
+      for (const line of rawLines) {
+        const itemRef = getInventoryItemDocument(db, userId, storeId, line.inventoryItemId)
+        batch.update(itemRef, {
+          dateOut: now,
+          sellerLoanOutId: deleteField(),
+          sellerLoanPartyName: deleteField(),
+          sellerLoanPartyPhone: deleteField(),
+          sellerLoanOutAt: deleteField(),
+          updatedAt: serverTimestamp(),
+        })
+      }
+      batch.update(loanRef, {
+        status: 'sold',
+        soldAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+
+      await batch.commit()
+
+      folderIds.forEach((fid) => invalidateFolderItemCaches(fid))
+
+      const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+      const partyNameStr = typeof loanData.partyName === 'string' ? loanData.partyName : 'borrower'
+      await logActivity({
+        action: 'updated',
+        entityType: 'items_batch',
+        entityId: loanId,
+        entityName: `Stock loan (${partyNameStr}): marked ${rawLines.length} item(s) sold, inventory updated`,
         storeId,
         userId: authStore.currentUser.uid,
         userDisplayName,

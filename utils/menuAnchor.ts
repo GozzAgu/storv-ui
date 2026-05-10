@@ -10,7 +10,8 @@ export function getVisibleMenuAnchorElement(
     | 'data-receipt-actions-anchor'
     | 'data-customer-actions-anchor'
     | 'data-folder-actions-anchor'
-    | 'data-department-actions-anchor',
+    | 'data-department-actions-anchor'
+    | 'data-stock-loan-actions-anchor',
   id: string
 ): HTMLElement | null {
   if (!import.meta.client) return null

@@ -15,6 +15,7 @@
             </NuxtLink>
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
             <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
+            <a href="#whats-new" class="landing-nav-link" @click.prevent="scrollToSection('whats-new')">What's new</a>
             <a href="#app-flow" class="landing-nav-link" @click.prevent="scrollToSection('app-flow')">Flow</a>
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
             <a href="#about" class="landing-nav-link" @click.prevent="scrollToSection('about')">About</a>
@@ -91,6 +92,11 @@
               class="landing-mobile-nav-link"
               @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
             >Features</a>
+            <a
+              href="#whats-new"
+              class="landing-mobile-nav-link"
+              @click.prevent="scrollToSection('whats-new'); mobileMenuOpen = false"
+            >What's new</a>
             <a
               href="#app-flow"
               class="landing-mobile-nav-link"
@@ -271,6 +277,75 @@
                 <p class="whitespace-normal break-words text-[9px] leading-tight text-white/70">Branches</p>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What's new: minimal strip with motion (below hero) -->
+    <section
+      id="whats-new"
+      data-section-id="whats-new"
+      class="landing-whats-new scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] overflow-hidden border-b border-gray-100/90 bg-[#fbfbfd] py-11 sm:py-14 lg:scroll-mt-28 dark:border-gray-800/80 dark:bg-slate-950"
+    >
+      <div
+        class="pointer-events-none absolute inset-x-0 top-0 h-[2px] overflow-hidden bg-gradient-to-r from-transparent via-gray-200/80 to-transparent dark:via-white/10"
+        aria-hidden="true"
+      >
+        <div class="landing-whats-new-shimmer h-full w-full" />
+      </div>
+      <div
+        class="landing-whats-new-orb-a pointer-events-none absolute -right-8 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-primary-400/[0.07] blur-3xl dark:bg-primary-500/10"
+        aria-hidden="true"
+      />
+      <div
+        class="landing-whats-new-orb-b pointer-events-none absolute -left-10 top-[42%] h-28 w-28 rounded-full bg-cyan-400/[0.06] blur-2xl dark:bg-cyan-400/10"
+        aria-hidden="true"
+      />
+
+      <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center text-center">
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/65 bg-white/50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-500 shadow-sm backdrop-blur-md dark:border-white/12 dark:bg-slate-900/45 dark:text-gray-400"
+          >
+            <RocketLaunchIcon class="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" stroke-width="2" aria-hidden="true" />
+            May 2026
+          </span>
+          <h2 class="mt-4 text-[1.65rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-3xl">
+            What's new in Storvv
+          </h2>
+          <p class="mt-2 max-w-md text-[13px] leading-relaxed text-gray-500 dark:text-gray-400 sm:text-sm">
+            A calmer footprint for big releases: quieter visuals, purposeful motion.
+          </p>
+        </div>
+
+        <div class="landing-whats-new-marquee-mask mx-auto mt-9 max-w-3xl overflow-hidden rounded-full border border-gray-200/65 bg-white/45 shadow-[inset_0_1px_0_rgb(255_255_255/0.65)] backdrop-blur-xl dark:border-white/12 dark:bg-slate-900/38 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]">
+          <div class="landing-whats-new-marquee-track">
+            <template v-for="pass in [0, 1]" :key="pass">
+              <span
+                v-for="(label, i) in whatsNewMarqueeLabels"
+                :key="`${pass}-${i}`"
+                class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-[12px] font-medium tracking-tight text-gray-600 dark:text-gray-300"
+              >
+                <span
+                  class="landing-whats-new-dot h-[5px] w-[5px] shrink-0 rounded-full bg-primary-500/80 dark:bg-primary-400/90"
+                  aria-hidden="true"
+                />
+                {{ label }}
+              </span>
+            </template>
+          </div>
+        </div>
+
+        <div class="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
+          <div
+            v-for="(item, i) in whatsNewHighlightCards"
+            :key="item.title"
+            :style="{ animationDelay: `${i * 0.55}s` }"
+            class="landing-whats-new-card group rounded-xl border border-gray-200/65 bg-white/50 px-4 py-4 text-center shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_10px_32px_-16px_rgb(15_23_42/0.12)] backdrop-blur-xl transition-[border-color,background-color] duration-300 hover:border-gray-300/85 dark:border-white/12 dark:bg-slate-900/42 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_18px_40px_-20px_rgb(0_0_0/0.45)] dark:hover:border-white/18"
+          >
+            <p class="text-[13px] font-semibold text-gray-900 dark:text-gray-100">{{ item.title }}</p>
+            <p class="mt-1 text-[11px] leading-snug text-gray-500 dark:text-gray-400">{{ item.detail }}</p>
           </div>
         </div>
       </div>
@@ -783,7 +858,11 @@
     </section>
 
     <!-- Advanced capabilities -->
-    <section data-section-id="capabilities-grid" class="scroll-animate scroll-animate-up relative overflow-hidden py-20 sm:py-24 lg:py-28">
+    <section
+      id="capabilities-grid"
+      data-section-id="capabilities-grid"
+      class="scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] overflow-hidden py-20 sm:py-24 lg:scroll-mt-28 lg:py-28"
+    >
       <div class="absolute inset-0 bg-gradient-to-br from-neutral-50/90 via-white to-neutral-50/80 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900" />
       <div class="absolute inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.04]" style="background-image: linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px); background-size: 48px 48px;" />
       <div class="absolute top-0 right-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary-100/15 blur-3xl dark:bg-primary-500/8" />
@@ -971,30 +1050,97 @@
             </div>
     </section>
 
-    <!-- Security -->
-    <section class="relative py-20 lg:py-28 overflow-hidden">
-      <div class="absolute inset-0">
-        <img src="/cloud security 2.jpg" alt="Security" class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-gray-900/75" />
-                </div>
-      <div class="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="w-14 h-14 rounded-sm bg-white/10 backdrop-blur flex items-center justify-center mx-auto mb-6 border border-white/20">
-          <ShieldCheckIcon class="w-7 h-7 text-white" />
-              </div>
-        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Security you can trust</h2>
-        <p class="mt-4 text-white/90 text-lg max-w-2xl mx-auto">Your data is safeguarded with industry-leading security and compliance.</p>
-        <div class="mt-12 grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-          <div class="rounded-sm bg-white/10 backdrop-blur border border-white/20 p-6 text-center">
-            <ShieldCheckIcon class="w-8 h-8 text-white mx-auto mb-3" />
-            <h3 class="font-semibold text-white">High-grade security</h3>
-            <p class="mt-1 text-sm text-white/80">End-to-end encryption for all data.</p>
-              </div>
-          <div class="rounded-sm bg-white/10 backdrop-blur border border-white/20 p-6 text-center">
-            <LockClosedIcon class="w-8 h-8 text-white mx-auto mb-3" />
-            <h3 class="font-semibold text-white">Data privacy</h3>
-            <p class="mt-1 text-sm text-white/80">Your data stays yours. We never share.</p>
-            </div>
+    <!-- Security & trust: calm gradient layout (no busy photo overlay) -->
+    <section
+      data-section-id="security"
+      class="scroll-animate scroll-animate-up relative overflow-hidden border-t border-white/[0.06] bg-[#06080f] py-16 sm:py-20 lg:py-[5.25rem]"
+    >
+      <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-5%,rgba(20,63,141,0.16),transparent_58%)]"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute -right-20 top-[38%] h-72 w-72 -translate-y-1/2 rounded-full bg-primary-500/[0.07] blur-3xl dark:bg-primary-400/[0.08]"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute -bottom-20 -left-16 h-56 w-56 rounded-full bg-sky-500/[0.05] blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute inset-0 opacity-[0.04]"
+        aria-hidden="true"
+        style="background-image: linear-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px); background-size: 48px 48px;"
+      />
+
+      <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Trust</p>
+          <h2 class="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            Security you can trust
+          </h2>
+          <p class="mt-3 text-[15px] leading-relaxed text-slate-300 sm:text-base">
+            Sensible safeguards for inventory, receipts, and team access. No flashy stock-photo clutter, just what matters for everyday operations.
+          </p>
         </div>
+
+        <div class="mx-auto mt-11 grid max-w-4xl gap-4 sm:mt-14 sm:grid-cols-3 sm:gap-5">
+          <div
+            class="flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.035] px-5 py-5 text-left shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] backdrop-blur-sm transition-colors hover:border-white/[0.11] hover:bg-white/[0.045] sm:text-center sm:py-6"
+          >
+            <span
+              class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-primary-200 sm:mx-auto"
+            >
+              <ShieldCheckIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
+            </span>
+            <h3 class="text-sm font-semibold text-white sm:text-[15px]">Secure connections</h3>
+            <p class="mt-2 text-xs leading-relaxed text-slate-400 sm:text-[13px]">
+              Sessions use HTTPS in transit. Your workspace runs on hardened, cloud-hosted infrastructure engineered for uptime.
+            </p>
+          </div>
+          <div
+            class="flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.035] px-5 py-5 text-left shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] backdrop-blur-sm transition-colors hover:border-white/[0.11] hover:bg-white/[0.045] sm:text-center sm:py-6"
+          >
+            <span
+              class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-primary-200 sm:mx-auto"
+            >
+              <KeyIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
+            </span>
+            <h3 class="text-sm font-semibold text-white sm:text-[15px]">Role-based control</h3>
+            <p class="mt-2 text-xs leading-relaxed text-slate-400 sm:text-[13px]">
+              Super admins, managers, and staff each see appropriate actions. Sensitive inventory setup stays restricted to admins.
+            </p>
+          </div>
+          <div
+            class="flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.035] px-5 py-5 text-left shadow-[inset_0_1px_0_0_rgb(255_255_255/0.04)] backdrop-blur-sm transition-colors hover:border-white/[0.11] hover:bg-white/[0.045] sm:text-center sm:py-6"
+          >
+            <span
+              class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-primary-200 sm:mx-auto"
+            >
+              <LockClosedIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
+            </span>
+            <h3 class="text-sm font-semibold text-white sm:text-[15px]">Your operational data</h3>
+            <p class="mt-2 text-xs leading-relaxed text-slate-400 sm:text-[13px]">
+              We treat your store data as yours to run the service. Read how we handle it in our Privacy and Terms policies.
+            </p>
+          </div>
+        </div>
+
+        <p class="mx-auto mt-10 max-w-lg text-center text-[12px] leading-relaxed text-slate-500">
+          <NuxtLink
+            to="/privacy"
+            class="font-medium text-slate-300 underline decoration-slate-500/60 underline-offset-2 transition-colors hover:text-white"
+          >
+            Privacy policy
+          </NuxtLink>
+          <span class="text-slate-600">&nbsp;·&nbsp;</span>
+          <NuxtLink
+            to="/terms"
+            class="font-medium text-slate-300 underline decoration-slate-500/60 underline-offset-2 transition-colors hover:text-white"
+          >
+            Terms of service
+          </NuxtLink>
+        </p>
       </div>
     </section>
 
@@ -1005,16 +1151,16 @@
         <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Common questions</h2>
         <p class="mt-2 text-gray-600 dark:text-gray-400 text-center text-sm">Answers to help you understand Storvv and billing.</p>
         <div class="mt-10 space-y-3">
-          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button
               @click="toggleFaq(0)"
               class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group"
             >
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <ClockIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How quickly can I get started?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">How quickly can I get started?</h3>
               </div>
               <ChevronUpIcon
                 :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(0) ? 'rotate-180' : '']"
@@ -1027,20 +1173,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
                   </div>
                 </div>
               </div>
             </div>
             </div>
             
-          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div data-section-id="faq-2" class="scroll-animate scroll-animate-scale stagger-2 rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(1)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <SparklesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Is Storvv difficult to learn?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">Is Storvv difficult to learn?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(1) ? 'rotate-180' : '']" />
             </button>
@@ -1051,20 +1197,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward: if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward: if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div data-section-id="faq-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(2)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <ChartBarIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I track in-store and online sales together?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">Can I track in-store and online sales together?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(2) ? 'rotate-180' : '']" />
             </button>
@@ -1075,20 +1221,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(3)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <FolderIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
             </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How do custom inventory folders work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">How do custom inventory folders work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(3) ? 'rotate-180' : '']" />
             </button>
@@ -1099,20 +1245,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
                   </div>
                 </div>
               </div>
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(4)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <DocumentTextIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I import products from Excel?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">Can I import products from Excel?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(4) ? 'rotate-180' : '']" />
             </button>
@@ -1123,20 +1269,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(5)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <UsersIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How does customer tracking work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">How does customer tracking work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(5) ? 'rotate-180' : '']" />
             </button>
@@ -1147,20 +1293,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer, all without manual data entry.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer, all without manual data entry.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(6)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <ArrowPathIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What are swap-in transactions?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">What are swap-in transactions?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(6) ? 'rotate-180' : '']" />
             </button>
@@ -1171,20 +1317,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
                   </div>
                 </div>
               </div>
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(7)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <KeyIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">How do role-based permissions work?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">How do role-based permissions work?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(7) ? 'rotate-180' : '']" />
             </button>
@@ -1195,20 +1341,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(8)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <BellAlertIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What are low stock alerts?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">What are low stock alerts?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(8) ? 'rotate-180' : '']" />
             </button>
@@ -1219,20 +1365,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(9)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <BuildingOfficeIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Can I manage multiple stores?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">Can I manage multiple stores?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(9) ? 'rotate-180' : '']" />
             </button>
@@ -1243,20 +1389,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
                   </div>
                 </div>
               </div>
             </div>
             </div>
             
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(10)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <ShieldCheckIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
           </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">Is my data secure?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">Is my data secure?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(10) ? 'rotate-180' : '']" />
             </button>
@@ -1267,20 +1413,20 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-white dark:bg-slate-950 rounded-sm overflow-hidden">
+          <div class="rounded-xl border border-gray-200/70 bg-white/55 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 dark:shadow-[0_14px_40px_-22px_rgb(0_0_0/0.55)] overflow-hidden">
             <button @click="toggleFaq(11)" class="w-full p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-left group">
-              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-sm bg-gray-100">
+              <div class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200/80 bg-white/70 backdrop-blur-sm dark:border-white/10 dark:bg-white/[0.08]">
                 <BanknotesIcon class="w-4 h-4 text-gray-500 flex-shrink-0" />
               </div>
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm sm:text-base font-semibold text-gray-900 pr-8">What’s the difference between Micro, Medium, and Enterprise?</h3>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-50 pr-8">What’s the difference between Micro, Medium, and Enterprise?</h3>
               </div>
               <ChevronUpIcon :class="['w-4 h-4 text-gray-400 flex-shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none', openFaqItems.has(11) ? 'rotate-180' : '']" />
             </button>
@@ -1291,7 +1437,7 @@
               <div class="min-h-0 overflow-hidden">
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
-                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                       <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard and notifications. No analytics, no multiple departments, no multi-store sync.<br><br>
                       <strong>Medium:</strong> Everything in Micro plus up to 5 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
                       <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); <strong>Copy from branch</strong> to copy selected inventory folder templates between branches without recreating fields; and priority support.
@@ -1319,7 +1465,7 @@
       <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="text-center mb-12 sm:mb-16">
-          <div class="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-sm rounded-sm mb-6 border border-white/20">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-white/12 backdrop-blur-md rounded-xl mb-6 border border-white/25 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]">
             <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
           </div>
           <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
@@ -1336,7 +1482,7 @@
             Store owners choose Storvv because it gives them:
           </p>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
+            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1347,7 +1493,7 @@
               </div>
             </div>
             
-            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
+            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1358,7 +1504,7 @@
               </div>
             </div>
             
-            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
+            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1369,7 +1515,7 @@
               </div>
             </div>
             
-            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5">
+            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1380,7 +1526,7 @@
               </div>
             </div>
             
-            <div class="group rounded-xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm transition-[background-color,border-color,transform] duration-300 ease-out hover:border-white/16 hover:bg-white/10 hover:-translate-y-0.5 sm:col-span-2 lg:col-span-1">
+            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5 sm:col-span-2 lg:col-span-1">
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
                   <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
@@ -1595,6 +1741,7 @@
               <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Product</h4>
               <ul class="space-y-2.5">
                 <li><a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('features')">Features</a></li>
+                <li><a href="#whats-new" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('whats-new')">What's new</a></li>
                 <li><a href="#app-flow" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('app-flow')">App flow</a></li>
                 <li><a href="#pricing" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('pricing')">Plans</a></li>
                 <li><a href="#faq" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('faq')">FAQs</a></li>
@@ -1778,6 +1925,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   ArrowsRightLeftIcon,
+  RocketLaunchIcon,
 } from '@heroicons/vue/24/outline'
 import {
   Cog6ToothIcon as Cog6ToothSolidIcon,
@@ -1802,6 +1950,31 @@ function applyLandingLightDocument() {
   const meta = document.getElementById('theme-color-meta')
   if (meta) meta.setAttribute('content', '#fafafa')
 }
+
+/** Landing: What's new marquee (duplicated in template for seamless loop). */
+const whatsNewMarqueeLabels = [
+  'Stock loans on Enterprise',
+  'Sell loaned serials from receipts',
+  'Clearer Activity Logs',
+  'Sidebar active-state polish',
+  'Help center refresh',
+  'Transfers respect open loans',
+] as const
+
+const whatsNewHighlightCards = [
+  {
+    title: 'Stock loans',
+    detail: 'Lend serial lines, sell on receipt or Quick Sale, or record a borrower-only sale.',
+  },
+  {
+    title: 'Cleaner audit trail',
+    detail: 'Activity Log lines use simpler punctuation so reviews take less scanning.',
+  },
+  {
+    title: 'Sharper chrome',
+    detail: 'Route focus in the sidebar and updated Help mirror what ships in-product.',
+  },
+] as const
 
 const mobileMenuOpen = ref(false)
 
@@ -1989,6 +2162,12 @@ const landingCapabilities: LandingCapability[] = [
     title: 'Returns, refunds & swap-ins',
     description:
       'Undo sales, reopen stock correctly, log swap-ins and trade-ins inside the receipt flow so finance and warehouse stay aligned.',
+  },
+  {
+    icon: BanknotesIcon,
+    title: 'Stock loans',
+    description:
+      'Enterprise-only: lend serial inventory to a borrower, sell through receipts or Quick Sale, record an off-POS borrower sale from Stock loans, or return units to the shelf. Borrowing flags clear when you sell so books stay tidy.',
   },
   {
     icon: UsersIcon,
@@ -2494,6 +2673,131 @@ useHead({
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+}
+
+/* What's new band: shimmer, marquee, ambient orbs, card drift */
+.landing-whats-new-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(20, 63, 141, 0.22) 45%,
+    rgba(20, 63, 141, 0.35) 50%,
+    rgba(20, 63, 141, 0.22) 55%,
+    transparent 100%
+  );
+  background-size: 45% 100%;
+  background-repeat: no-repeat;
+  animation: landingWhatsNewShimmer 5.5s ease-in-out infinite;
+}
+
+@keyframes landingWhatsNewShimmer {
+  0%,
+  100% {
+    background-position: -60% 0;
+    opacity: 0.35;
+  }
+  50% {
+    background-position: 160% 0;
+    opacity: 1;
+  }
+}
+
+.landing-whats-new-marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 2.25rem;
+  padding: 0.5rem 1.25rem;
+  animation: landingWhatsNewMarquee 38s linear infinite;
+}
+
+@keyframes landingWhatsNewMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.landing-whats-new-orb-a {
+  animation: landingWhatsNewOrbA 16s ease-in-out infinite alternate;
+}
+
+.landing-whats-new-orb-b {
+  animation: landingWhatsNewOrbB 20s ease-in-out infinite alternate;
+}
+
+@keyframes landingWhatsNewOrbA {
+  from {
+    transform: translateY(-50%) translate(0, 0) scale(1);
+    opacity: 0.65;
+  }
+  to {
+    transform: translateY(-50%) translate(-10px, 14px) scale(1.08);
+    opacity: 0.95;
+  }
+}
+
+@keyframes landingWhatsNewOrbB {
+  from {
+    transform: translate(0, 0);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(18px, -8px);
+    opacity: 0.85;
+  }
+}
+
+.landing-whats-new-dot {
+  animation: landingWhatsNewDot 2.4s ease-in-out infinite;
+}
+
+@keyframes landingWhatsNewDot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+}
+
+.landing-whats-new-card {
+  animation: landingWhatsNewCardFloat 6s ease-in-out infinite;
+}
+
+@keyframes landingWhatsNewCardFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-whats-new-shimmer,
+  .landing-whats-new-marquee-track,
+  .landing-whats-new-orb-a,
+  .landing-whats-new-orb-b,
+  .landing-whats-new-dot,
+  .landing-whats-new-card {
+    animation: none !important;
+  }
+  .landing-whats-new-marquee-track {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 36rem;
+    margin-left: auto;
+    margin-right: auto;
+    row-gap: 0.5rem;
   }
 }
 </style>

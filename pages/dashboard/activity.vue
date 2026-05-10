@@ -152,7 +152,7 @@
           </div>
           <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No matching activity</p>
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Try another name, item, action, or ID — or clear the search.
+            Try another name, item, action, or ID, or clear the search.
           </p>
           <button
             type="button"
