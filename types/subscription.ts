@@ -15,7 +15,7 @@ export type SubscriptionFeature =
   | 'customers'
   | 'analytics'
   | 'activity_logs'
-  /** Track units lent to external resellers until sold or returned — Enterprise only. */
+  /** Track units lent to external resellers until sold or returned. Enterprise only. */
   | 'seller_loans'
   | 'departments'
   | 'multi_store_sync'
@@ -152,7 +152,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   storvv_enterprise: [
     'Unlimited stores',
     'Everything in Medium',
-    'Stock loans — lend serial inventory until sold or returned',
+    'Stock loans: lend serial inventory until sold or returned',
     'Multi-store sync & transfers',
     'Unlimited departments & staff',
     'Priority support',

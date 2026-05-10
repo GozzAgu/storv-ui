@@ -858,11 +858,11 @@
                 </div>
                 <div v-else-if="'type' in column && column.type === 'date'" class="text-gray-700 dark:text-gray-300">
                   <span v-if="mobileDetailItem[column.key]">{{ formatItemDate(mobileDetailItem[column.key]) }}</span>
-                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">-</span>
                 </div>
                 <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-gray-700 dark:text-gray-300">
                   <span v-if="mobileDetailItem[column.key]">{{ formatItemDate(mobileDetailItem[column.key]) }}</span>
-                  <span v-else class="text-gray-400 dark:text-gray-500">—</span>
+                  <span v-else class="text-gray-400 dark:text-gray-500">-</span>
                 </div>
                 <div v-else-if="column.key === 'availability'">
                   <span
@@ -2104,7 +2104,7 @@ const isItemOutOnSellerLoan = (item: InventoryItem) => {
   return id != null && String(id).trim() !== ''
 }
 
-/** Sold or on a stock loan — block edits, discounts, deletion, bulk select. */
+/** Sold or on a stock loan: block edits, discounts, deletion, bulk select. */
 const isInventoryItemLocked = (item: InventoryItem) => isItemSold(item) || isItemOutOnSellerLoan(item)
 
 const selectedItemsEligibleForSellerLoan = computed(() =>
@@ -2118,7 +2118,7 @@ const createSellerLoanModalItems = computed(
 
 const sellerLoansEnterpriseUnlocked = computed(() => subscriptionFeaturesUi.canUse('seller_loans'))
 
-/** Super admin / manager + Enterprise + serial-number folder — same gate as Stock loan toolbar and row menu */
+/** Super admin / manager + Enterprise + serial-number folder; same gate as Stock loan toolbar and row menu */
 const canLoanToSellerUi = computed(
   () =>
     !!(

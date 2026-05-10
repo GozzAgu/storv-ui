@@ -196,7 +196,7 @@
                   <span v-else-if="loan.returnedAt" class="text-[10px] text-gray-500 dark:text-gray-400">
                     {{ formatWhen(loan.returnedAt) }}
                   </span>
-                  <span v-else class="text-[10px] text-gray-400">—</span>
+                  <span v-else class="text-[10px] text-gray-400">-</span>
                 </td>
               </tr>
             </tbody>
@@ -210,7 +210,7 @@
       class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Stock loans are included on Storvv Enterprise — lend serial inventory until it sells or comes back to the store. Upgrade in Settings when you are ready.
+        Stock loans are included on Storvv Enterprise: lend serial inventory until it sells or comes back to the store. Upgrade in Settings when you are ready.
       </p>
       <NuxtLink
         to="/dashboard/settings"
@@ -363,14 +363,14 @@ const filteredLoans = computed(() => {
 })
 
 function formatWhen(v: Date | undefined) {
-  if (!v) return '—'
+  if (!v) return '-'
   try {
     return v.toLocaleString(undefined, {
       dateStyle: 'medium',
       timeStyle: 'short',
     })
   } catch {
-    return '—'
+    return '-'
   }
 }
 
@@ -540,7 +540,7 @@ async function confirmReturn() {
   confirmReturnLoading.value = true
   try {
     await sellerLoansStore.returnSellerLoanOut(loan.id)
-    toast.success('Stock returned — items are available again in inventory.')
+    toast.success('Stock returned. Items are available again in inventory.')
     showReturnModal.value = false
     loanPendingReturn.value = null
   } catch (e: unknown) {
@@ -570,7 +570,7 @@ async function confirmMarkSold() {
   confirmSoldLoading.value = true
   try {
     await sellerLoansStore.markSellerLoanOutSold(loan.id)
-    toast.success('Items marked sold — they now show as sold in inventory.')
+    toast.success('Items marked sold. They now show as sold in inventory.')
     showSoldModal.value = false
     loanPendingSold.value = null
   } catch (e: unknown) {

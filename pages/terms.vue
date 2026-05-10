@@ -112,7 +112,7 @@
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">7. User Content</h2>
               <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">7.1 Ownership</h3>
               <p class="mb-4">
-                You retain ownership of your operational and business data that you submit to the Service ("User Content"), subject to applicable law. You grant Storvv a worldwide, non-exclusive license to host, reproduce, transmit, display, and process User Content solely to operate, secure, improve, and support the Service for you—including backups, redundancy, and machine-readable processing—and as described in our Privacy Policy.
+                You retain ownership of your operational and business data that you submit to the Service ("User Content"), subject to applicable law. You grant Storvv a worldwide, non-exclusive license to host, reproduce, transmit, display, and process User Content solely to operate, secure, improve, and support the Service for you, including backups, redundancy, and machine-readable processing, and as described in our Privacy Policy.
               </p>
 
               <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">7.2 Responsibility</h3>
@@ -166,7 +166,7 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">14. Governing Law and Disputes</h2>
               <p class="mb-4">
-                These Terms are governed by the laws that apply to Storvv’s operation of the Service, without regard to conflict-of-law rules that would require applying another jurisdiction’s laws—except where mandatory consumer protection laws in your country give you non-waivable rights, in which case those laws prevail to the minimum extent required.
+                These Terms are governed by the laws that apply to Storvv’s operation of the Service, without regard to conflict-of-law rules that would require applying another jurisdiction’s laws, except where mandatory consumer protection laws in your country give you non-waivable rights, in which case those laws prevail to the minimum extent required.
               </p>
             </section>
 

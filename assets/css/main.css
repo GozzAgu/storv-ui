@@ -147,7 +147,7 @@ html.theme-transitioning select,
 html.theme-transitioning textarea {
   /* Targeted list (instead of `*`) avoids stutter on very large tables. */
   /* Omit filter/backdrop on bulk nodes (tables); see `.frosted-glass` block below. */
-  /* Do not include tr/td/th — see `.data-table-shell` row rule below (zebra + scroll). */
+  /* Do not include tr/td/th; see `.data-table-shell` row rule below (zebra + scroll). */
   transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
     text-decoration-color, fill, stroke, opacity, accent-color, caret-color, column-rule-color !important;
   transition-duration: 0.4s !important;

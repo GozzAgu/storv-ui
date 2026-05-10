@@ -31,7 +31,7 @@
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Introduction</h2>
               <p class="mb-4">
-                Welcome to Storvv ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard information when you use Storvv, our cloud-based platform for retail and store operations—including inventory organized in custom folders, point-of-sale style receipts and returns, customer records tied to transactions, team access and roles, notifications, analytics (on eligible subscription plans), and related features described on <a href="https://www.storvv.com" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">storvv.com</a>.
+                Welcome to Storvv ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard information when you use Storvv, our cloud-based platform for retail and store operations, including inventory organized in custom folders, point-of-sale style receipts and returns, customer records tied to transactions, team access and roles, notifications, analytics (on eligible subscription plans), and related features described on <a href="https://www.storvv.com" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">storvv.com</a>.
               </p>
             </section>
 
@@ -47,7 +47,7 @@
                 <li>Operational data you create in the product inventory folders and item records, quantities, pricing, identifiers such as SKU or serials where you use those fields, receipts, returns, swaps, transfers, and activity logs your plan includes</li>
                 <li>Customer-related data you record (for example contact fields and purchase history derived from receipts)</li>
                 <li>Team and permission data for staff accounts and departments linked to your organization</li>
-                <li>Billing identifiers and subscription status; card and bank payments are handled by our payment processor—we do not store full card numbers on Storvv servers</li>
+                <li>Billing identifiers and subscription status; card and bank payments are handled by our payment processor; we do not store full card numbers on Storvv servers</li>
                 <li>Support and feedback messages you send us</li>
               </ul>
 

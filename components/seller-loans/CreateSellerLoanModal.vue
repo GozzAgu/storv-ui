@@ -131,7 +131,7 @@ async function submit() {
       partyNotes: partyNotes.value,
       lines,
     })
-    toast.success('Stock loan recorded — items stay on loan until sold or returned to the store.')
+    toast.success('Stock loan recorded. Items stay on loan until sold or returned to the store.')
     emit('update:modelValue', false)
     emit('success')
   } catch (e: unknown) {

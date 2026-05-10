@@ -16,7 +16,6 @@
           <div class="hidden md:flex items-center gap-6 lg:gap-8">
             <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
             <a href="#whats-new" class="landing-nav-link" @click.prevent="scrollToSection('whats-new')">What's new</a>
-            <a href="#app-flow" class="landing-nav-link" @click.prevent="scrollToSection('app-flow')">Flow</a>
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
             <a href="#about" class="landing-nav-link" @click.prevent="scrollToSection('about')">About</a>
             <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
@@ -97,11 +96,6 @@
               class="landing-mobile-nav-link"
               @click.prevent="scrollToSection('whats-new'); mobileMenuOpen = false"
             >What's new</a>
-            <a
-              href="#app-flow"
-              class="landing-mobile-nav-link"
-              @click.prevent="scrollToSection('app-flow'); mobileMenuOpen = false"
-            >Flow</a>
             <a
               href="#pricing"
               class="landing-mobile-nav-link"
@@ -257,25 +251,34 @@
       </div>
     </section>
 
-    <!-- What's new: minimal strip with motion (below hero) -->
+    <!-- What's new: tinted band + motion (below hero) -->
     <section
       id="whats-new"
       data-section-id="whats-new"
-      class="landing-whats-new scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] overflow-hidden border-b border-gray-100/90 bg-[#fbfbfd] py-14 sm:py-16 lg:scroll-mt-28 dark:border-gray-800/80 dark:bg-slate-950 lg:py-20"
+      class="landing-whats-new scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] overflow-hidden border-b border-primary-100/50 bg-gradient-to-b from-primary-50/95 via-sky-50/50 to-[#eef1f8] py-14 sm:py-16 lg:scroll-mt-28 dark:border-gray-800/80 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 lg:py-20"
     >
       <div
-        class="landing-whats-new-orb-a pointer-events-none absolute -right-8 top-1/2 h-40 w-40 -translate-y-1/2 rounded-full bg-primary-400/[0.07] blur-3xl dark:bg-primary-500/10"
+        class="pointer-events-none absolute inset-0 opacity-[0.45] dark:opacity-[0.2]"
+        aria-hidden="true"
+        style="background-image: radial-gradient(ellipse 85% 55% at 15% 20%, rgb(59 130 246 / 0.09), transparent 52%), radial-gradient(ellipse 70% 50% at 88% 75%, rgb(14 165 233 / 0.08), transparent 48%)"
+      />
+      <div
+        class="landing-whats-new-orb-a pointer-events-none absolute -right-4 top-1/2 h-52 w-52 -translate-y-1/2 rounded-full bg-primary-400/15 blur-3xl dark:bg-primary-500/15"
         aria-hidden="true"
       />
       <div
-        class="landing-whats-new-orb-b pointer-events-none absolute -left-10 top-[42%] h-28 w-28 rounded-full bg-cyan-400/[0.06] blur-2xl dark:bg-cyan-400/10"
+        class="landing-whats-new-orb-b pointer-events-none absolute -left-8 top-[38%] h-36 w-36 rounded-full bg-sky-400/14 blur-3xl dark:bg-cyan-400/12"
+        aria-hidden="true"
+      />
+      <div
+        class="landing-whats-new-orb-c pointer-events-none absolute left-1/2 top-0 h-32 w-[min(100%,28rem)] -translate-x-1/2 rounded-full bg-indigo-400/10 blur-3xl dark:bg-indigo-500/10"
         aria-hidden="true"
       />
 
       <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center text-center">
           <span
-            class="inline-flex items-center gap-1.5 rounded-full border border-gray-200/65 bg-white/50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-gray-600 backdrop-blur-md dark:border-white/12 dark:bg-slate-900/45 dark:text-gray-300"
+            class="inline-flex items-center gap-1.5 rounded-full border border-primary-200/60 bg-white/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-primary-800 shadow-sm shadow-primary-500/10 backdrop-blur-md dark:border-primary-400/25 dark:bg-slate-900/60 dark:text-primary-200"
           >
             <RocketLaunchIcon class="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" stroke-width="2" aria-hidden="true" />
             May 2026
@@ -288,13 +291,15 @@
           </p>
         </div>
 
-        <div class="landing-whats-new-marquee-mask mx-auto mt-9 max-w-3xl overflow-hidden rounded-full border border-gray-200/60 bg-white/40 backdrop-blur-md dark:border-white/10 dark:bg-slate-900/35">
+        <div
+          class="landing-whats-new-marquee-mask mx-auto mt-9 max-w-3xl overflow-hidden rounded-full border border-primary-200/55 bg-gradient-to-r from-white/85 via-primary-50/40 to-sky-50/50 shadow-[inset_0_1px_0_rgb(255_255_255/0.7)] backdrop-blur-md dark:border-white/12 dark:from-slate-900/55 dark:via-slate-900/45 dark:to-slate-900/50 dark:shadow-none"
+        >
           <div class="landing-whats-new-marquee-track">
             <template v-for="pass in [0, 1]" :key="pass">
               <span
                 v-for="(label, i) in whatsNewMarqueeLabels"
                 :key="`${pass}-${i}`"
-                class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs font-medium tracking-tight text-gray-600 dark:text-gray-300 sm:text-sm"
+                class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-xs font-medium tracking-tight text-slate-700 dark:text-gray-200 sm:text-sm"
               >
                 <span
                   class="landing-whats-new-dot h-[5px] w-[5px] shrink-0 rounded-full bg-primary-500/80 dark:bg-primary-400/90"
@@ -311,51 +316,10 @@
             v-for="(item, i) in whatsNewHighlightCards"
             :key="item.title"
             :style="{ animationDelay: `${i * 0.55}s` }"
-            class="landing-whats-new-card group rounded-xl border border-gray-200/60 bg-white/45 px-4 py-4 text-center backdrop-blur-md transition-[border-color,background-color] duration-300 hover:border-gray-300/80 dark:border-white/10 dark:bg-slate-900/40 dark:hover:border-white/16"
+            class="landing-whats-new-card group relative overflow-hidden rounded-xl border border-primary-100/90 bg-gradient-to-br from-white via-white to-primary-50/70 px-4 py-4 text-center shadow-sm shadow-primary-900/5 ring-1 ring-primary-500/[0.06] backdrop-blur-sm transition-[border-color,background-color,box-shadow,transform] duration-300 hover:border-primary-200/90 hover:shadow-md hover:shadow-primary-500/10 dark:border-white/12 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-primary-950/50 dark:ring-white/5 dark:hover:border-primary-400/25"
           >
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ item.title }}</p>
             <p class="mt-1 text-xs leading-snug text-gray-600 dark:text-gray-300 sm:text-[13px]">{{ item.detail }}</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Clarity block: editorial layout -->
-    <section data-section-id="value-clarity" class="scroll-animate scroll-animate-up border-b border-gray-100/70 bg-white py-20 dark:border-gray-800/70 dark:bg-slate-950 sm:py-24">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-12 gap-8 lg:gap-10 items-end">
-          <div class="lg:col-span-7">
-            <p class="text-sm uppercase tracking-[0.12em] font-semibold text-primary-600 dark:text-primary-400">Custom retail operations</p>
-            <h3 class="mt-2 text-3xl sm:text-[2.25rem] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100 max-w-xl">
-              Tailored structure for stores that need clarity
-            </h3>
-          </div>
-          <div class="lg:col-span-5">
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-gray-400 max-w-md lg:ml-auto">
-              Storvv helps you run inventory, checkout, and team workflows without the noise.
-              Keep operations consistent across branches and make faster decisions from one clean workspace.
-            </p>
-          </div>
-        </div>
-
-        <div class="mt-10 grid gap-7 sm:gap-8 md:grid-cols-3">
-          <div class="border-l border-gray-200 pl-5 dark:border-gray-700">
-            <h4 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Designed for retail teams</h4>
-            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Built for phone, gadget, fashion, beauty, and lifestyle stores that need structure without heavy setup.
-            </p>
-          </div>
-          <div class="border-l border-gray-200 pl-5 dark:border-gray-700">
-            <h4 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Built for clear outcomes</h4>
-            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Reduce stock mistakes, speed up checkout, and keep customer history connected to every sale and return.
-            </p>
-          </div>
-          <div class="border-l border-gray-200 pl-5 dark:border-gray-700">
-            <h4 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">Ready to scale operations</h4>
-            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Standardize permissions, departments, and reporting across one store or many branches.
-            </p>
           </div>
         </div>
       </div>
@@ -460,15 +424,20 @@
       </div>
     </section>
 
-    <!-- About: same grid language as app-flow -->
+    <!-- About -->
     <section
       id="about"
       data-section-id="about"
-      class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
+      class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-primary-100/40 bg-gradient-to-b from-primary-50/70 via-white to-sky-50/40 py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
     >
       <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
-        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
+        <div
+          class="pointer-events-none absolute inset-0 opacity-50 dark:opacity-25"
+          aria-hidden="true"
+          style="background-image: radial-gradient(ellipse 55% 45% at 12% 15%, rgb(59 130 246 / 0.11), transparent 55%), radial-gradient(ellipse 50% 40% at 92% 85%, rgb(14 165 233 / 0.09), transparent 50%)"
+        />
+        <div class="pointer-events-none absolute left-[6%] top-0 h-56 w-56 rounded-full bg-primary-400/18 blur-3xl dark:bg-primary-500/14" />
+        <div class="pointer-events-none absolute bottom-0 right-[8%] h-48 w-48 rounded-full bg-sky-300/30 blur-3xl dark:bg-cyan-500/12" />
 
         <div class="relative mx-auto max-w-3xl text-center">
           <p class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
@@ -483,10 +452,12 @@
         </div>
 
         <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
-          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
-            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
+          <div
+            class="overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-slate-200/55 via-primary-100/35 to-sky-100/45 p-px shadow-lg shadow-primary-900/[0.06] dark:from-slate-800/80 dark:via-slate-900/60 dark:to-primary-950/40 dark:shadow-black/30"
+          >
+            <div class="grid grid-cols-1 gap-px overflow-hidden rounded-[1.2rem] bg-slate-200/70 dark:bg-white/[0.08] lg:grid-cols-3">
               <div
-                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-gradient-to-br from-white from-35% via-white to-primary-50/55 px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-md hover:shadow-primary-500/8 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:from-slate-950 dark:via-slate-950 dark:to-primary-950/35 dark:hover:bg-slate-900/98"
                 :style="{ transitionDelay: '32ms' }"
               >
                 <div class="flex items-start justify-between gap-3">
@@ -510,7 +481,7 @@
               </div>
 
               <div
-                class="landing-about-cell group flex min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                class="landing-about-cell group flex min-h-[15rem] flex-col bg-gradient-to-br from-white from-35% via-sky-50/30 to-primary-50/50 px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-md hover:shadow-sky-500/8 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:from-slate-950 dark:via-slate-950 dark:to-sky-950/25 dark:hover:bg-slate-900/98"
                 :style="{ transitionDelay: '84ms' }"
               >
                 <div class="flex items-start justify-between gap-3">
@@ -534,12 +505,12 @@
               </div>
 
               <div
-                class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-100/65 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.05]"
+                class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-200/50 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.06]"
               >
                 <div
                   v-for="(pillar, idx) in aboutPillars"
                   :key="pillar.title"
-                  class="landing-about-cell group flex min-h-[12rem] flex-col bg-white px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:bg-neutral-50/90 hover:shadow-sm sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:bg-slate-950 dark:hover:bg-slate-900/95"
+                  class="landing-about-cell group flex min-h-[12rem] flex-col bg-gradient-to-br from-white to-primary-50/40 px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-sm hover:shadow-primary-500/5 sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:from-slate-950 dark:to-primary-950/30 dark:hover:bg-slate-900/95"
                   :style="{ transitionDelay: `${136 + idx * 52}ms` }"
                 >
                   <div class="flex items-start justify-between gap-3">
@@ -562,12 +533,13 @@
         </div>
 
         <p class="relative mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 sm:text-base">
-          See the same story in steps in
+          See the walkthrough with screenshots in
           <a
-            href="#app-flow"
+            href="#features"
             class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
-            @click.prevent="scrollToSection('app-flow')"
-            >the app flow</a>, or
+            @click.prevent="scrollToSection('features')"
+            >How Storvv works</a>
+          or
           <a
             href="#contact"
             class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
@@ -733,187 +705,6 @@
       </div>
     </section>
 
-    <!-- App flow: simple journey (plain language) -->
-    <section
-      id="app-flow"
-      data-section-id="app-flow"
-      class="landing-flow-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
-    >
-      <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="pointer-events-none absolute left-[8%] top-0 h-48 w-48 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/10" />
-        <div class="pointer-events-none absolute bottom-0 right-[10%] h-40 w-40 rounded-full bg-slate-300/25 blur-3xl dark:bg-slate-600/15" />
-
-        <div class="relative mx-auto max-w-3xl text-center">
-          <p class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
-            Your path in the app
-          </p>
-          <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
-            From sign-in to a calmer workday
-          </h2>
-          <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
-            Storvv walks your team through the same simple story every day: get in, pick the store you are working in, keep products organized, sell with confidence, look after shoppers, then see what matters at a glance.
-          </p>
-        </div>
-
-        <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
-          <div class="overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]">
-            <div class="grid grid-cols-1 gap-px lg:grid-cols-3">
-              <div
-                v-for="(step, idx) in landingFlowSteps"
-                :key="step.title"
-                class="landing-flow-step group flex h-full min-h-[15rem] flex-col bg-white px-6 py-8 text-left transition-colors duration-300 ease-out hover:bg-neutral-50/90 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:bg-slate-950 dark:hover:bg-slate-900/95"
-                :style="{ transitionDelay: `${32 + idx * 52}ms` }"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <span
-                    class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-sm font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
-                  >
-                    {{ idx + 1 }}
-                  </span>
-                  <div
-                    class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
-                  >
-                    <component :is="step.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
-                  </div>
-                </div>
-                <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-                  {{ step.title }}
-                </h3>
-                <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                  {{ step.description }}
-                </p>
-                <div
-                  v-if="idx < landingFlowSteps.length - 1"
-                  class="mt-6 flex flex-col items-center gap-2 border-t border-gray-100/90 pt-5 dark:border-white/[0.06]"
-                >
-                  <span class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-600/90 dark:text-primary-400/90">
-                    Next
-                  </span>
-                  <ChevronDownIcon
-                    class="h-8 w-8 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-y-0.5 lg:hidden dark:text-primary-400"
-                    stroke-width="2.25"
-                  />
-                  <ChevronRightIcon
-                    v-if="idx !== 2"
-                    class="hidden h-9 w-9 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-x-0.5 lg:block dark:text-primary-400"
-                    stroke-width="2.25"
-                  />
-                  <ChevronDownIcon
-                    v-else
-                    class="hidden h-9 w-9 text-primary-500 transition-transform duration-300 ease-out group-hover:translate-y-0.5 lg:block dark:text-primary-400"
-                    stroke-width="2.25"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p class="relative mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 sm:text-base">
-          You group products in folders, then add the items you count or track by serial. When you sell, Storvv updates stock for you. If someone brings something back, you handle it from the original sale so your records stay tidy.
-        </p>
-      </div>
-    </section>
-
-    <!-- Everything you need (flat grid chrome: no card shadows / rounded corners) -->
-    <section
-      data-section-id="features-list"
-      class="scroll-animate scroll-animate-up border-y border-gray-100/70 bg-gradient-to-b from-[#f7f8fa] via-white to-[#fafafa] py-16 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-20 lg:py-24"
-    >
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 flex flex-col justify-between gap-6 sm:mb-10 sm:flex-row sm:items-end">
-          <div>
-            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
-              Everything you need, nothing you don't
-            </h2>
-            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:text-base">
-              One system to run inventory, sales, customers, and team operations without tool sprawl.
-            </p>
-          </div>
-          <a
-            href="#features"
-            class="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-primary-600 outline-none transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-            @click.prevent="scrollToSection('features')"
-          >
-            Explore features
-            <ArrowRightIcon class="h-4 w-4 shrink-0" />
-          </a>
-        </div>
-
-        <div class="relative">
-          <button
-            type="button"
-            @click="previousFeature"
-            :disabled="currentFeatureIndex === 0"
-            :class="[
-              'absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-x-1 -translate-y-1/2 items-center justify-center border border-gray-300/90 bg-white text-gray-800 outline-none transition-colors duration-200 ease-out dark:border-white/15 dark:bg-slate-950 dark:text-gray-200',
-              currentFeatureIndex === 0
-                ? 'cursor-not-allowed opacity-40'
-                : 'hover:border-gray-400 hover:bg-neutral-50 dark:hover:border-white/25 dark:hover:bg-slate-900',
-            ]"
-            aria-label="Previous"
-          >
-            <ChevronLeftIcon class="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            @click="nextFeature"
-            :disabled="currentFeatureIndex >= features.length - visibleFeatures"
-            :class="[
-              'absolute right-0 top-1/2 z-10 flex h-10 w-10 translate-x-1 -translate-y-1/2 items-center justify-center border border-gray-300/90 bg-white text-gray-800 outline-none transition-colors duration-200 ease-out dark:border-white/15 dark:bg-slate-950 dark:text-gray-200',
-              currentFeatureIndex >= features.length - visibleFeatures
-                ? 'cursor-not-allowed opacity-40'
-                : 'hover:border-gray-400 hover:bg-neutral-50 dark:hover:border-white/25 dark:hover:bg-slate-900',
-            ]"
-            aria-label="Next"
-          >
-            <ChevronRightIcon class="h-5 w-5" />
-          </button>
-
-          <div class="overflow-hidden border border-gray-200/80 bg-white px-10 dark:border-gray-800/80 dark:bg-slate-950 sm:px-12">
-            <div
-              class="flex divide-x divide-gray-200/90 transition-[transform] duration-[480ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform dark:divide-gray-800"
-              :style="{ transform: `translate3d(-${currentFeatureIndex * (100 / visibleFeatures)}%,0,0)` }"
-            >
-              <div
-                v-for="(feature, index) in features"
-                :key="index"
-                class="min-w-0 flex-shrink-0 px-0"
-                :style="{ width: `${100 / visibleFeatures}%` }"
-              >
-                <div
-                  class="flex h-full min-h-[12rem] flex-col bg-white p-6 transition-colors duration-200 ease-out hover:bg-neutral-50/90 sm:min-h-[13rem] sm:p-7 dark:bg-slate-950 dark:hover:bg-slate-900/95"
-                >
-                  <h3 class="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">{{ feature.title }}</h3>
-                  <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{{ feature.description }}</p>
-                  <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary-600 dark:text-primary-400">
-                    Explore
-                    <ArrowRightIcon class="h-4 w-4 shrink-0" />
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 flex justify-center gap-1.5">
-            <button
-              v-for="(dot, index) in totalDots"
-              :key="index"
-              type="button"
-              :class="[
-                'h-1 rounded-sm transition-[width,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
-                Math.floor(currentFeatureIndex / visibleFeatures) === index
-                  ? 'w-6 bg-primary-600 dark:bg-primary-500'
-                  : 'w-1.5 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500',
-              ]"
-              :aria-label="`Slide ${index + 1}`"
-              @click="goToFeature(index * visibleFeatures)"
-            ></button>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Advanced capabilities -->
     <section
       id="capabilities-grid"
@@ -929,6 +720,15 @@
           <h2 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-gray-100 leading-tight max-w-5xl">
             Capabilities that mirror how Storvv actually runs inventory, checkout, teams, and multi-store chains
           </h2>
+          <p class="mt-4 max-w-3xl text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            Deeper questions:
+            <a
+              href="#faq"
+              class="font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+              @click.prevent="scrollToSection('faq')"
+            >FAQ</a>
+            · After sign-in, use Help for step-by-step articles.
+          </p>
         </div>
         <div
           class="mx-auto max-w-[92rem] overflow-hidden rounded-[1.25rem] bg-slate-100/65 dark:bg-white/[0.05]"
@@ -1151,6 +951,18 @@
               </div>
               </div>
             </div>
+
+        <div class="mx-auto mt-10 max-w-2xl border-t border-gray-200/90 pt-8 text-center dark:border-gray-800/80 sm:mt-12">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Ready to try the workspace? You can start on Micro and move up when your team is ready.
+          </p>
+          <a
+            :href="appOriginUrl"
+            class="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-500"
+          >
+            Get Started
+          </a>
+        </div>
     </section>
 
     <!-- Security & trust: calm gradient layout (no busy photo overlay) -->
@@ -1554,119 +1366,7 @@
       </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative py-20 sm:py-24 lg:py-28 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
-      <!-- Subtle pattern overlay -->
-      <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, rgb(255 255 255) 1px, transparent 0); background-size: 40px 40px;"></div>
-      
-      <!-- Decorative gradient orbs -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-primary-400/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-primary-400/10 rounded-full mix-blend-overlay filter blur-3xl"></div>
-      </div>
-
-      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="text-center mb-12 sm:mb-16">
-          <div class="inline-flex items-center justify-center w-14 h-14 bg-white/12 backdrop-blur-md rounded-xl mb-6 border border-white/25 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]">
-            <SparklesIcon class="w-7 h-7 text-white flex-shrink-0" />
-          </div>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
-            Ready to simplify your store operations?
-          </h2>
-          <p class="text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-            Start free, set up fast, and get full inventory and sales visibility in one place.
-          </p>
-      </div>
-
-        <!-- Features Grid -->
-        <div class="mb-12 sm:mb-16">
-          <p class="text-center text-base sm:text-lg text-white/70 mb-8 font-medium">
-            Store owners choose Storvv because it gives them:
-          </p>
-          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
-                  <FolderIcon class="w-5 h-5 text-white flex-shrink-0" />
-                </div>
-                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
-                  Complete flexibility to organize inventory their way
-                </p>
-              </div>
-            </div>
-            
-            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
-                  <UsersIcon class="w-5 h-5 text-white flex-shrink-0" />
-                </div>
-                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
-                  Automatic customer tracking from every transaction
-                </p>
-              </div>
-            </div>
-            
-            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
-                  <ReceiptPercentIcon class="w-5 h-5 text-white flex-shrink-0" />
-                </div>
-                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
-                  Professional receipts that print perfectly every time
-                </p>
-              </div>
-            </div>
-            
-            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
-                  <UserGroupIcon class="w-5 h-5 text-white flex-shrink-0" />
-                </div>
-                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
-                  Team management with precise access control
-                </p>
-              </div>
-            </div>
-            
-            <div class="group rounded-xl border border-white/20 bg-white/[0.085] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.14),0_12px_40px_-16px_rgb(0_0_0/0.5)] backdrop-blur-md transition-[background-color,border-color,transform,box-shadow] duration-300 ease-out hover:border-white/32 hover:bg-white/[0.14] hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_18px_48px_-14px_rgb(0_0_0/0.45)] hover:-translate-y-0.5 sm:col-span-2 lg:col-span-1">
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 w-10 h-10 bg-primary-400/20 rounded-sm flex items-center justify-center border border-primary-400/30 group-hover:bg-primary-400/30 transition-colors">
-                  <ChartBarIcon class="w-5 h-5 text-white flex-shrink-0" />
-                </div>
-                <p class="text-sm sm:text-base text-white/90 leading-relaxed pt-1.5">
-                  Real-time insights into what's actually happening
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CTA Button -->
-        <div class="text-center">
-          <p class="text-lg sm:text-xl font-semibold text-white/90 mb-6">
-            Experience the difference a truly flexible system makes.
-          </p>
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-            <a
-              :href="appOriginUrl"
-              class="group inline-flex items-center justify-center gap-2 rounded-lg bg-white px-7 py-3.5 font-medium text-slate-950 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-white/92 hover:shadow-md active:scale-[0.98]"
-            >
-              Get Started
-              <ArrowRightIcon class="h-4 w-4 shrink-0 transition-transform duration-300 ease-out group-hover:translate-x-1 sm:h-5 sm:w-5" />
-            </a>
-            <button
-              @click="scrollToSection('features')"
-              class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/18 bg-white/[0.08] px-7 py-3.5 font-medium text-white outline-none backdrop-blur-sm transition-all duration-300 ease-out hover:border-white/24 hover:bg-white/14 active:scale-[0.98]"
-            >
-              See it in action
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Contact: grid language (matches flow / about) -->
+    <!-- Contact -->
     <section
       id="contact"
       data-section-id="contact"
@@ -1845,7 +1545,6 @@
               <ul class="space-y-2.5">
                 <li><a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('features')">Features</a></li>
                 <li><a href="#whats-new" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('whats-new')">What's new</a></li>
-                <li><a href="#app-flow" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('app-flow')">App flow</a></li>
                 <li><a href="#pricing" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('pricing')">Plans</a></li>
                 <li><a href="#faq" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('faq')">FAQs</a></li>
               </ul>
@@ -2025,7 +1724,6 @@ import {
   EnvelopeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ChevronDownIcon,
   ChevronUpIcon,
   ArrowsRightLeftIcon,
   RocketLaunchIcon,
@@ -2055,7 +1753,7 @@ const howStorvvWorksScreenshotFiles = [
 const howStorvvWorksImages = howStorvvWorksScreenshotFiles.map((name) => `/${encodeURIComponent(name)}`)
 const howStorvvWorksSlide = ref(0)
 
-/** Landing “How Storvv works” — compact copy + icons (static HTML only for descriptions). */
+/** Landing “How Storvv works”: compact copy + icons (static HTML only for descriptions). */
 const howStorvvWorksSteps = [
   {
     sectionId: 'step-1',
@@ -2258,36 +1956,6 @@ const toggleFaq = (index: number) => {
   openFaqItems.value = next
 }
 
-// Feature carousel state
-const currentFeatureIndex = ref(0)
-const currentSlide = ref(0)
-const totalSlides = 9
-
-const nextSlide = () => {
-  if (currentSlide.value < totalSlides - 1) {
-    currentSlide.value++
-  } else {
-    currentSlide.value = 0 // Loop back to start
-  }
-}
-
-const previousSlide = () => {
-  if (currentSlide.value > 0) {
-    currentSlide.value--
-  } else {
-    currentSlide.value = totalSlides - 1 // Loop to end
-  }
-}
-
-const goToSlide = (index: number) => {
-  currentSlide.value = index
-}
-
-const visibleFeatures = computed(() => {
-  if (typeof window === 'undefined') return 3
-  return window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1
-})
-
 interface LandingCapability {
   icon: Component
   title: string
@@ -2400,46 +2068,6 @@ const landingCapabilities: LandingCapability[] = [
   },
 ]
 
-/** Homepage journey grid: plain-language version of docs/STORVV_APP_FLOW.md. */
-const landingFlowSteps: LandingCapability[] = [
-  {
-    icon: KeyIcon,
-    title: 'Sign in',
-    description:
-      'Open Storvv and sign in. We load your name, your role, and which stores you are allowed to work in before anything else appears.',
-  },
-  {
-    icon: BuildingOfficeIcon,
-    title: 'Pick your store',
-    description:
-      'Store owners switch branches from the menu at the top. Everyone else stays on the store they were invited to. What you see always matches that location.',
-  },
-  {
-    icon: FolderIcon,
-    title: 'Organize products',
-    description:
-      'Sort products into folders the way you already think about your shop. Add items one at a time or in a batch so shelves and counts stay easy to read.',
-  },
-  {
-    icon: ReceiptPercentIcon,
-    title: 'Record a sale',
-    description:
-      'When you sell, create a receipt with the products, any discounts, and how the customer paid. Stock updates from the sale so your team is not guessing.',
-  },
-  {
-    icon: UsersIcon,
-    title: 'Look after customers',
-    description:
-      'Save a name or phone when it helps. If someone brings something back, start from the same receipt so returns feel quick and your books stay clear.',
-  },
-  {
-    icon: ChartBarIcon,
-    title: 'See how you are doing',
-    description:
-      'Check the dashboard, alerts, and charts on the plans that include them. Running more than one branch? Larger plans add extra tools for moving stock between stores.',
-  },
-]
-
 const aboutPillars = [
   {
     title: 'Focus',
@@ -2457,82 +2085,6 @@ const aboutPillars = [
     icon: BuildingOfficeIcon,
   },
 ] as const
-
-const features = [
-  {
-    title: 'Custom Inventory Folders',
-    description: 'Create unlimited folders with your own fields (text, numbers, dates, currency, select, boolean). Each folder can have serial number tracking or bulk quantities. Organize inventory your way.'
-  },
-  {
-    title: 'Serial Number & Bulk Tracking',
-    description: 'Track items by serial number for devices and electronics, or by quantity for bulk stock. Low-stock thresholds and alerts keep you ahead of restocking.'
-  },
-  {
-    title: 'Excel Import & Export',
-    description: 'Bulk import products from Excel or export inventory for backup and analysis. Duplicate detection and column mapping make setup fast.'
-  },
-  {
-    title: 'Professional Receipts & Sales',
-    description: 'Generate clean, A4-optimized receipts. Apply discounts, record swap-ins and returns, and support multiple payment methods. Every sale links to your customer list.'
-  },
-  {
-    title: 'Automatic Customer History',
-    description: 'Customers are created from receipts (email, phone, or name). View purchase history, total spend, and order counts without manual data entry.'
-  },
-  {
-    title: 'Returns, Refunds & Swap-Ins',
-    description: 'Process returns and refunds with one click; inventory updates automatically. Swap-in transactions track exchanges and trade-ins back into stock.'
-  },
-  {
-    title: 'Departments & Staff Roles',
-    description: 'Create departments and assign staff with Super Admin, Manager, or Staff roles. Control which inventory folders each department can access.'
-  },
-  {
-    title: 'Dashboard & Analytics',
-    description: 'Overview dashboard with quick stats. On Medium and Enterprise: full analytics with revenue trends, busiest times, product performance, and exportable reports.'
-  },
-  {
-    title: 'Multiple Stores',
-    description: 'Medium and Enterprise support multiple store locations. Each store has its own inventory, receipts, and staff; manage all from one account.'
-  },
-  {
-    title: 'Multi-Store Sync (Enterprise)',
-    description: 'Transfer stock between stores, view consolidated reports, and keep a full transfer history. Built for chains and central warehouses.'
-  },
-  {
-    title: 'Copy from branch (Enterprise)',
-    description: 'On the Inventory Folders page, pick a source branch and select which folder templates to copy into your current branch. Brings layouts and field definitions only (not product stock), so new locations stay consistent.'
-  },
-  {
-    title: 'In-App Notifications',
-    description: 'Stay updated with notifications for sales, low stock, and important account activity, all in one feed.'
-  },
-  {
-    title: 'Settings & Profile',
-    description: 'Configure currency, timezone, and language per profile. Store-level settings, theme and notifications preferences, and secure account management.'
-  }
-]
-
-const totalDots = computed(() => {
-  return Math.ceil(features.length / visibleFeatures.value)
-})
-
-const nextFeature = () => {
-  const maxIndex = features.length - visibleFeatures.value
-  if (currentFeatureIndex.value < maxIndex) {
-    currentFeatureIndex.value = Math.min(currentFeatureIndex.value + visibleFeatures.value, maxIndex)
-  }
-}
-
-const previousFeature = () => {
-  if (currentFeatureIndex.value > 0) {
-    currentFeatureIndex.value = Math.max(currentFeatureIndex.value - visibleFeatures.value, 0)
-  }
-}
-
-const goToFeature = (index: number) => {
-  currentFeatureIndex.value = index
-}
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -2794,28 +2346,6 @@ useHead({
   }
 }
 
-/* Staggered reveal when scroll-animate adds .visible */
-.landing-flow-chart .landing-flow-step {
-  opacity: 0;
-  transform: translate3d(0, 0.75rem, 0);
-  transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.landing-flow-chart.visible .landing-flow-step {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-flow-chart .landing-flow-step {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
 /* About grid: staggered reveal when scroll-animate adds .visible */
 .landing-about-chart .landing-about-cell {
   opacity: 0;
@@ -2891,6 +2421,10 @@ useHead({
   animation: landingWhatsNewOrbB 20s ease-in-out infinite alternate;
 }
 
+.landing-whats-new-orb-c {
+  animation: landingWhatsNewOrbC 24s ease-in-out infinite alternate;
+}
+
 @keyframes landingWhatsNewOrbA {
   from {
     transform: translateY(-50%) translate(0, 0) scale(1);
@@ -2910,6 +2444,17 @@ useHead({
   to {
     transform: translate(18px, -8px);
     opacity: 0.85;
+  }
+}
+
+@keyframes landingWhatsNewOrbC {
+  from {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 0.45;
+  }
+  to {
+    transform: translate(-50%, 12px) scale(1.06);
+    opacity: 0.75;
   }
 }
 
@@ -2947,6 +2492,7 @@ useHead({
   .landing-whats-new-marquee-track,
   .landing-whats-new-orb-a,
   .landing-whats-new-orb-b,
+  .landing-whats-new-orb-c,
   .landing-whats-new-dot,
   .landing-whats-new-card {
     animation: none !important;
