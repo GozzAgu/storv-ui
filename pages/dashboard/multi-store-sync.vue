@@ -849,7 +849,7 @@ const executeTransfer = async (transfer: any) => {
 
         const rawLoanId = sourceItem.sellerLoanOutId
         if (rawLoanId !== undefined && rawLoanId !== null && String(rawLoanId).trim() !== '') {
-          errors.push(`Item ${itemId} is on an external seller loan — return or sell it before transferring`)
+          errors.push(`Item ${itemId} is on a stock loan — return or sell it before transferring`)
           continue
         }
 

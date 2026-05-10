@@ -838,7 +838,7 @@ const navigation: Array<{
 }> = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
   { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
-  { name: 'Seller loans', href: '/dashboard/seller-loans', icon: ArrowTopRightOnSquareIcon, iconSolid: ArrowTopRightOnSquareIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
+  { name: 'Stock loans', href: '/dashboard/seller-loans', icon: ArrowTopRightOnSquareIcon, iconSolid: ArrowTopRightOnSquareIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
   { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
   { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
   { name: 'Activity Logs', href: '/dashboard/activity', icon: ShieldCheckIcon, iconSolid: ShieldCheckIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },

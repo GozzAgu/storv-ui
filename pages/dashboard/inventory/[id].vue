@@ -99,7 +99,7 @@
               :aria-label="sellerLoanButtonTitle"
               @click="openCreateSellerLoanModal"
             >
-              <span class="hidden sm:inline">Loan to seller</span>
+              <span class="hidden sm:inline">Stock loan</span>
             </Button>
           </template>
           <Button
@@ -242,7 +242,7 @@
                       :aria-label="sellerLoanButtonTitle"
                       @click="openCreateSellerLoanModal"
                     >
-                      Loan to seller
+                      Stock loan
                     </Button>
                   </template>
                   <template v-if="canManageInventoryItems">
@@ -411,7 +411,7 @@
                 :aria-label="sellerLoanButtonTitle"
                 @click="openCreateSellerLoanModal"
               >
-                <span class="hidden sm:inline">Loan to seller</span>
+                <span class="hidden sm:inline">Stock loan</span>
               </Button>
             </template>
             <Button
@@ -1206,7 +1206,7 @@
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowTopRightOnSquareIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-          <span>Loan to seller</span>
+          <span>Stock loan</span>
         </button>
         <button
           v-if="canDuplicateByPlan"
@@ -1992,7 +1992,7 @@ const isItemOutOnSellerLoan = (item: InventoryItem) => {
   return id != null && String(id).trim() !== ''
 }
 
-/** Sold or lent to external seller — block edits, discounts, deletion, bulk select. */
+/** Sold or on a stock loan — block edits, discounts, deletion, bulk select. */
 const isInventoryItemLocked = (item: InventoryItem) => isItemSold(item) || isItemOutOnSellerLoan(item)
 
 const selectedItemsEligibleForSellerLoan = computed(() =>
@@ -2006,7 +2006,7 @@ const createSellerLoanModalItems = computed(
 
 const sellerLoansEnterpriseUnlocked = computed(() => subscriptionFeaturesUi.canUse('seller_loans'))
 
-/** Super admin / manager + Enterprise + serial-number folder — same gate as Loan to seller toolbar and row menu */
+/** Super admin / manager + Enterprise + serial-number folder — same gate as Stock loan toolbar and row menu */
 const canLoanToSellerUi = computed(
   () =>
     !!(
@@ -2016,7 +2016,7 @@ const canLoanToSellerUi = computed(
     ),
 )
 
-/** Checkboxes so managers/super admins can select rows for Loan to seller where that feature is unlocked */
+/** Checkboxes so managers/super admins can select rows for Stock loan where that feature is unlocked */
 const showBulkRowSelection = computed(
   () => canManageInventoryItems.value || canLoanToSellerUi.value,
 )
@@ -2025,7 +2025,7 @@ const sellerLoanButtonTitle = computed(() => {
   if (!folder.value?.hasSerialNumbers || !canManage.value) return ''
   return selectedItemsEligibleForSellerLoan.value.length === 0
     ? 'Select one or more available products using the checkboxes'
-    : 'Loan selected products to an external seller'
+    : 'Record a stock loan for the selected products'
 })
 
 // Determine item availability status
@@ -2047,7 +2047,7 @@ const getItemAvailability = (item: InventoryItem) => {
   if (isItemOutOnSellerLoan(item)) {
     return {
       status: 'with_seller',
-      label: 'With seller',
+      label: 'On stock loan',
       class:
         'ring-1 ring-inset ring-indigo-500/25 bg-indigo-500/10 text-indigo-900 dark:bg-indigo-400/12 dark:text-indigo-100 dark:ring-indigo-400/35',
     }
@@ -2426,7 +2426,7 @@ const openAddItemModal = () => {
 
 const handleEditItem = (item: InventoryItem) => {
   if (isInventoryItemLocked(item)) {
-    toast.error('Cannot edit a product while it is sold or on a seller loan')
+    toast.error('Cannot edit a product while it is sold or on a stock loan')
     return
   }
   cancelInlineEdit()
@@ -2457,7 +2457,7 @@ const getItemDisplayName = (item: InventoryItem) => {
 
 const handleDeleteItem = (item: InventoryItem) => {
   if (isInventoryItemLocked(item)) {
-    toast.error('Cannot delete while the product is sold or with an external seller')
+    toast.error('Cannot delete while the product is sold or on a stock loan')
     return
   }
   selectedItemForDelete.value = item
@@ -2466,7 +2466,7 @@ const handleDeleteItem = (item: InventoryItem) => {
 
 const handleDuplicateItem = (item: InventoryItem) => {
   if (isInventoryItemLocked(item)) {
-    toast.error('Cannot duplicate while the product is sold or with an external seller')
+    toast.error('Cannot duplicate while the product is sold or on a stock loan')
     return
   }
   if (!canDuplicateByPlan.value) {
@@ -2796,7 +2796,7 @@ const handleCancelItem = () => {
 // Discount handlers
 const handleApplyDiscount = (item: InventoryItem) => {
   if (isInventoryItemLocked(item)) {
-    toast.error('Cannot apply discount while the product is sold or with an external seller')
+    toast.error('Cannot apply discount while the product is sold or on a stock loan')
     return
   }
   selectedItemForDiscount.value = item
@@ -2805,7 +2805,7 @@ const handleApplyDiscount = (item: InventoryItem) => {
 
 const handleRemoveDiscount = async (item: InventoryItem) => {
   if (isInventoryItemLocked(item)) {
-    toast.error('Cannot modify discount while the product is sold or with an external seller')
+    toast.error('Cannot modify discount while the product is sold or on a stock loan')
     return
   }
   if (confirm(`Remove discount from this product?`)) {
@@ -2835,7 +2835,7 @@ const handleBulkDiscountApplied = async () => {
 }
 
 const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
-  // Prevent selecting sold or seller-loaned items
+  // Prevent selecting sold or stock-loaned items
   if (isInventoryItemLocked(item)) {
     // Remove if already selected
     const index = selectedItemsForBulk.value.findIndex(i => i.id === item.id)
@@ -2868,7 +2868,7 @@ const toggleItemSelection = (item: InventoryItem, checked?: boolean) => {
 }
 
 const toggleSelectAll = (checked?: boolean) => {
-  // Items that aren't sold / on seller loan can't be bulk-edited together
+  // Items that aren't sold / on a stock loan can't be bulk-edited together
   const availableItems = filteredItems.value.filter(item => !isInventoryItemLocked(item))
   
   // If called from checkbox component, use the checked value; otherwise toggle
@@ -2893,15 +2893,15 @@ const openBulkDiscountModal = () => {
 
 const openCreateSellerLoanModal = () => {
   if (!subscriptionFeaturesUi.canUse('seller_loans')) {
-    toast.error('Loan to seller is included on Storvv Enterprise. Upgrade in Settings.')
+    toast.error('Stock loans are included on Storvv Enterprise. Upgrade in Settings.')
     return
   }
   if (!folder.value?.hasSerialNumbers) {
-    toast.error('Loan to seller is only available for folders that track serial numbers.')
+    toast.error('Stock loans are only available for folders that track serial numbers.')
     return
   }
   if (selectedItemsEligibleForSellerLoan.value.length === 0) {
-    toast.warning('Select available items that are not sold or already with a seller.')
+    toast.warning('Select available items that are not sold or already on a stock loan.')
     return
   }
   sellerLoanModalItemsOverride.value = null
@@ -2912,15 +2912,15 @@ const handleLoanToSellerFromMenu = (item: InventoryItem) => {
   openItemMenuId.value = null
   if (!canManage.value) return
   if (!subscriptionFeaturesUi.canUse('seller_loans')) {
-    toast.error('Loan to seller is included on Storvv Enterprise. Upgrade in Settings.')
+    toast.error('Stock loans are included on Storvv Enterprise. Upgrade in Settings.')
     return
   }
   if (!folder.value?.hasSerialNumbers) {
-    toast.error('Loan to seller is only available for folders that track serial numbers.')
+    toast.error('Stock loans are only available for folders that track serial numbers.')
     return
   }
   if (isInventoryItemLocked(item)) {
-    toast.warning('This product is sold or already with a seller.')
+    toast.warning('This product is sold or already on a stock loan.')
     return
   }
   sellerLoanModalItemsOverride.value = [item]

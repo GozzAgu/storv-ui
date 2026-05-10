@@ -14,6 +14,7 @@ import {
   deleteField,
   writeBatch,
   getCountFromServer,
+  type Firestore,
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 
@@ -26,7 +27,14 @@ import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useStaffStore } from './staff'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
-import { getInventoryFoldersCollection, getInventoryFolderDocument, getInventoryItemsCollection, getInventoryItemDocument, getQueryUserId } from '~/composables/useFirestorePaths'
+import {
+  getInventoryFoldersCollection,
+  getInventoryFolderDocument,
+  getInventoryItemsCollection,
+  getInventoryItemDocument,
+  getQueryUserId,
+  getSellerLoanOutDocument,
+} from '~/composables/useFirestorePaths'
 import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { duplicateSerialExistsViaApi } from '~/utils/inventory-serial-validation'
 import {
@@ -1880,6 +1888,8 @@ export const useInventoryStore = defineStore('inventory', {
       }
 
       const itemIdsUnique = [...new Set(lines.map((l) => l.itemId))]
+      /** Present when the row was out on a stock loan before this sale (borrower sale / in-store receipt). */
+      const loanIdByItemId = new Map<string, string>()
       for (const itemId of itemIdsUnique) {
         const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
         const snap = await getDoc(itemRef)
@@ -1888,15 +1898,13 @@ export const useInventoryStore = defineStore('inventory', {
         }
         const loan = (snap.data() as Record<string, unknown> | undefined)?.sellerLoanOutId
         if (loan !== undefined && loan !== null && `${loan}`.trim() !== '') {
-          throw new Error(
-            'One or more items are with a seller. Return the seller loan before selling them on a receipt.'
-          )
+          loanIdByItemId.set(itemId, `${loan}`.trim())
         }
       }
 
       if (options.hasSerialNumbers) {
         const itemIds = lines.map((l) => l.itemId)
-        await this.updateItemsDateOut(folderId, itemIds)
+        await this.updateItemsDateOutWithLoanReconcile(folderId, itemIds, loanIdByItemId)
         return
       }
 
@@ -1961,9 +1969,184 @@ export const useInventoryStore = defineStore('inventory', {
           userId: authStore.currentUser!.uid,
           userDisplayName: userDisplayNameBulk,
         }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+
+        const soldWithLoan = Array.from(merged.keys())
+          .map((itemId) => ({ itemId, loanId: loanIdByItemId.get(itemId) }))
+          .filter((p): p is { itemId: string; loanId: string } => Boolean(p.loanId))
+        if (soldWithLoan.length > 0) {
+          await this.reconcileStockLoanDocsAfterSale(db, userId, storeId, soldWithLoan)
+        }
       } catch (error: any) {
         console.error('Error applying bulk sale to inventory:', error)
         throw new Error(error.message || 'Failed to update stock')
+      }
+    },
+
+    /**
+     * Serial receipt sale: mark items sold and remove sold lines from related stock-loan docs (single batch).
+     */
+    async updateItemsDateOutWithLoanReconcile(
+      folderId: string,
+      itemIds: string[],
+      loanIdByItemId: Map<string, string>,
+    ) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) {
+        throw new Error('Firestore not initialized')
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) {
+        throw new Error('User must be authenticated')
+      }
+
+      const userId = await getQueryUserId()
+      if (!userId) {
+        throw new Error('User ID not available')
+      }
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) {
+        throw new Error('No store selected')
+      }
+
+      const now = new Date()
+      const soldByLoan = new Map<string, Set<string>>()
+      for (const itemId of itemIds) {
+        const lid = loanIdByItemId.get(itemId)
+        if (lid) {
+          if (!soldByLoan.has(lid)) soldByLoan.set(lid, new Set())
+          soldByLoan.get(lid)!.add(itemId)
+        }
+      }
+
+      /** Firestore batch write limit is 500 operations. */
+      const batchOpCount = itemIds.length + soldByLoan.size
+      if (batchOpCount > 500) {
+        throw new Error(
+          'This receipt has too many lines to commit in one step. Split into smaller receipts (store limit).'
+        )
+      }
+
+      const loanSnapshots = new Map<string, Record<string, unknown>>()
+      for (const loanId of soldByLoan.keys()) {
+        const loanSnap = await getDoc(getSellerLoanOutDocument(db, userId, storeId, loanId))
+        if (loanSnap.exists()) {
+          loanSnapshots.set(loanId, loanSnap.data() as Record<string, unknown>)
+        }
+      }
+
+      try {
+        const batch = writeBatch(db)
+
+        for (const itemId of itemIds) {
+          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+          batch.update(itemRef, {
+            dateOut: now,
+            sellerLoanOutId: deleteField(),
+            sellerLoanPartyName: deleteField(),
+            sellerLoanPartyPhone: deleteField(),
+            sellerLoanOutAt: deleteField(),
+            updatedAt: serverTimestamp(),
+          })
+        }
+
+        for (const [loanId, soldIds] of soldByLoan) {
+          const data = loanSnapshots.get(loanId)
+          if (!data || data.status === 'returned') continue
+          const rawLines = Array.isArray(data.lines) ? (data.lines as Array<{ inventoryItemId: string }>) : []
+          const newLines = rawLines.filter((l) => !soldIds.has(l.inventoryItemId))
+          if (newLines.length === rawLines.length) continue
+
+          const patch: Record<string, unknown> = {
+            lines: newLines,
+            updatedAt: serverTimestamp(),
+          }
+          if (newLines.length === 0) {
+            patch.status = 'returned'
+            patch.returnedAt = serverTimestamp()
+          }
+          batch.update(getSellerLoanOutDocument(db, userId, storeId, loanId), patch)
+        }
+
+        await batch.commit()
+
+        const folderItems = this.items[folderId]
+        if (folderItems) {
+          itemIds.forEach((itemId) => {
+            const index = folderItems.findIndex((item) => item.id === itemId)
+            if (index > -1 && folderItems[index]) {
+              folderItems[index].dateOut = now
+              folderItems[index].updatedAt = now
+              delete folderItems[index].sellerLoanOutId
+              delete folderItems[index].sellerLoanPartyName
+              delete folderItems[index].sellerLoanPartyPhone
+              delete folderItems[index].sellerLoanOutAt
+            }
+          })
+        }
+
+        const userDisplayNameDateOut = await getCurrentUserDisplayName().catch(() => 'Unknown')
+        await logActivity({
+          action: 'updated',
+          entityType: 'items_batch',
+          entityId: folderId,
+          entityName: `${itemIds.length} item${itemIds.length !== 1 ? 's' : ''} marked as sold`,
+          storeId,
+          userId: authStore.currentUser!.uid,
+          userDisplayName: userDisplayNameDateOut,
+        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+      } catch (error: any) {
+        console.error('Error updating dateOut (with stock loan reconcile):', error)
+        throw new Error(error.message || 'Failed to update dateOut')
+      }
+    },
+
+    /**
+     * After quantity-based sale: drop sold units from stock-loan line lists; close loan when empty.
+     */
+    async reconcileStockLoanDocsAfterSale(
+      db: Firestore,
+      userId: string,
+      storeId: string,
+      soldWithLoan: Array<{ itemId: string; loanId: string }>,
+    ) {
+      const soldByLoan = new Map<string, Set<string>>()
+      for (const { itemId, loanId } of soldWithLoan) {
+        if (!soldByLoan.has(loanId)) soldByLoan.set(loanId, new Set())
+        soldByLoan.get(loanId)!.add(itemId)
+      }
+
+      const loanSnapshots = new Map<string, Record<string, unknown>>()
+      for (const loanId of soldByLoan.keys()) {
+        const loanSnap = await getDoc(getSellerLoanOutDocument(db, userId, storeId, loanId))
+        if (loanSnap.exists()) {
+          loanSnapshots.set(loanId, loanSnap.data() as Record<string, unknown>)
+        }
+      }
+
+      const batch = writeBatch(db)
+      let writes = 0
+      for (const [loanId, soldIds] of soldByLoan) {
+        const data = loanSnapshots.get(loanId)
+        if (!data || data.status === 'returned') continue
+        const rawLines = Array.isArray(data.lines) ? (data.lines as Array<{ inventoryItemId: string }>) : []
+        const newLines = rawLines.filter((l) => !soldIds.has(l.inventoryItemId))
+        if (newLines.length === rawLines.length) continue
+
+        const patch: Record<string, unknown> = {
+          lines: newLines,
+          updatedAt: serverTimestamp(),
+        }
+        if (newLines.length === 0) {
+          patch.status = 'returned'
+          patch.returnedAt = serverTimestamp()
+        }
+        batch.update(getSellerLoanOutDocument(db, userId, storeId, loanId), patch)
+        writes++
+      }
+      if (writes > 0) {
+        await batch.commit()
       }
     },
 

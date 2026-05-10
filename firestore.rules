@@ -98,7 +98,7 @@ service cloud.firestore {
     }
 
     // Sale / return-to-stock: only dateOut + updatedAt may change (not full item edits).
-    // Seller-loan handshake: optionally set/clear sellerLoan* + updatedAt, or combine with sale (dateOut + clear loan).
+    // Stock loan handshake: optionally set/clear sellerLoan* + updatedAt, or combine with sale (dateOut + clear loan).
     function inventoryItemOnlySaleOrReturnFieldChange() {
       let changed = request.resource.data.diff(resource.data).changedKeys();
       return changed.hasOnly(['dateOut', 'updatedAt'])

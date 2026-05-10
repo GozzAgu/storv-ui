@@ -5,10 +5,10 @@
         Inventory
       </p>
       <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-        Seller loans
+        Stock loans
       </h1>
       <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Track phones or serial items lent to external resellers until they appear on a receipt (sold) or you return stock to your shelf.
+        Track phones or serial items out on stock loans until they appear on a receipt (sold) or you return units to your shelf.
       </p>
     </header>
 
@@ -17,7 +17,7 @@
       class="rounded-sm bg-red-50/90 px-4 py-4 dark:bg-red-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-red-800 dark:text-red-200">
-        Only super admins and store managers can manage seller loans.
+        Only super admins and store managers can manage stock loans.
       </p>
     </div>
 
@@ -96,7 +96,7 @@
         </div>
 
         <div v-else-if="filteredLoans.length === 0" class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-          No loans in this filter.
+          No stock loans in this filter.
         </div>
 
         <div v-else class="overflow-x-auto">
@@ -104,7 +104,7 @@
             <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
               <tr>
                 <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Reseller / seller
+                  Borrower
                 </th>
                 <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
                   Units
@@ -150,7 +150,7 @@
                         : 'bg-gray-500/10 text-gray-700 ring-gray-400/25 dark:bg-gray-500/15 dark:text-gray-300',
                     ]"
                   >
-                    {{ loan.status === 'active' ? 'With seller' : 'Returned' }}
+                    {{ loan.status === 'active' ? 'On loan' : 'Returned' }}
                   </span>
                 </td>
                 <td class="px-3 py-2.5 text-right sm:px-4">
@@ -179,7 +179,7 @@
       class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5"
     >
       <p class="text-xs font-medium text-amber-900 dark:text-amber-100">
-        Seller loans are included on Storvv Enterprise — track inventory lent to external resellers until sold or returned. Upgrade in Settings when you are ready.
+        Stock loans are included on Storvv Enterprise — lend serial inventory until it sells or comes back to the store. Upgrade in Settings when you are ready.
       </p>
       <NuxtLink
         to="/dashboard/settings"
@@ -192,7 +192,7 @@
     <Modal
       v-model="showReturnModal"
       title="Return to store"
-      subtitle="This clears the loan flags on the listed inventory so the units show as available again on the shelf."
+      subtitle="This clears the stock-loan flags on the listed inventory so the units show as available again on the shelf."
       size="md"
       :close-on-backdrop="!confirmReturnLoading"
       :show-close="!confirmReturnLoading"

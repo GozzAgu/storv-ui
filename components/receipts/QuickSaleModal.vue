@@ -298,6 +298,7 @@ import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
+import { useSellerLoanOutsStore } from '~/stores/sellerLoanOuts'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useStoresStore } from '~/stores/stores'
 import { useAuthStore } from '~/stores/auth'
@@ -319,6 +320,7 @@ const emit = defineEmits<{
 }>()
 
 const inventoryStore = useInventoryStore()
+const sellerLoanOutsStore = useSellerLoanOutsStore()
 const receiptsStore = useReceiptsStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
@@ -504,13 +506,6 @@ const searchByBarcode = async () => {
       return
     }
 
-    const loanOut = foundItem.sellerLoanOutId as unknown
-    if (loanOut !== undefined && loanOut !== null && `${loanOut}`.trim() !== '') {
-      showWarningToast('This item is with a seller. Return it from the seller loan before selling.')
-      manualBarcode.value = ''
-      return
-    }
-    
     // Check if item is already in cart
     const existingIndex = cartItems.value.findIndex(ci => ci.id === foundItem.id)
     if (existingIndex >= 0 && cartItems.value[existingIndex]) {
@@ -615,6 +610,7 @@ const completeSale = async () => {
         await inventoryStore.applyReceiptSaleToInventory(selectedFolderId.value, saleLines, {
           hasSerialNumbers,
         })
+        await sellerLoanOutsStore.fetchSellerLoanOuts(true).catch(() => {})
       }
       
       // Get current store and user information

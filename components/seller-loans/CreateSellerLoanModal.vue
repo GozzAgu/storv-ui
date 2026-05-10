@@ -1,8 +1,8 @@
 <template>
   <Modal
     :model-value="modelValue"
-    title="Loan to external seller"
-    subtitle="Items stay in inventory until a receipt sells them or you mark them returned here."
+    title="Stock loan"
+    subtitle="Items stay in your inventory until a receipt sells them or you mark them returned here."
     size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
@@ -12,7 +12,7 @@
           class="rounded-sm border border-sky-200/80 bg-sky-50/90 p-3 text-xs text-sky-900 dark:border-sky-800/60 dark:bg-sky-950/35 dark:text-sky-100"
         >
           <strong>Not a sale:</strong>
-          Selected serial items are flagged as with an external reseller. When you ring one up on a receipt, it will be marked sold and removed from this loan automatically.
+          Selected serial items are marked as on a stock loan to the borrower below. Selling one on a receipt marks it sold and removes it from this stock loan automatically.
         </div>
 
         <div>
@@ -24,12 +24,12 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Seller name *</label>
+          <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Borrower name *</label>
           <input
             v-model="partyName"
             type="text"
             maxlength="120"
-            placeholder="Company or reseller name"
+            placeholder="Company or borrower name"
             autocomplete="organization"
             class="w-full rounded-sm border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
           />
@@ -69,7 +69,7 @@
         :disabled="!partyNameTrimmed"
         @click="submit"
       >
-        Confirm loan
+        Confirm stock loan
       </Button>
     </template>
   </Modal>
@@ -131,11 +131,11 @@ async function submit() {
       partyNotes: partyNotes.value,
       lines,
     })
-    toast.success('Loan recorded — items show as with seller until sold or returned')
+    toast.success('Stock loan recorded — items stay on loan until sold or returned to the store.')
     emit('update:modelValue', false)
     emit('success')
   } catch (e: unknown) {
-    toast.error(e instanceof Error ? e.message : 'Could not save loan')
+    toast.error(e instanceof Error ? e.message : 'Could not save stock loan')
   } finally {
     submitting.value = false
   }

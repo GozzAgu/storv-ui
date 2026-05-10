@@ -77,7 +77,7 @@ export function getInventoryItemDocument(db: Firestore, userId: string, storeId:
 }
 
 /**
- * Seller loan outs: phones held by external reseller/seller until sale or return.
+ * Stock loans (sellerLoanOuts): serial inventory lent out until sale or return to store.
  * users/{userId}/stores/{storeId}/sellerLoanOuts/{loanId}
  */
 export function getSellerLoanOutsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {

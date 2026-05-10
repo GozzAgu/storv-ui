@@ -152,7 +152,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
   storvv_enterprise: [
     'Unlimited stores',
     'Everything in Medium',
-    'Seller loans — track inventory with external resellers until sold',
+    'Stock loans — lend serial inventory until sold or returned',
     'Multi-store sync & transfers',
     'Unlimited departments & staff',
     'Priority support',

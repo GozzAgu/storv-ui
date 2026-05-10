@@ -106,7 +106,7 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         this.loans = snap.docs.map((d) => mapLoanDoc(d.id, d.data() as Record<string, unknown>))
         this.lastFetchedStoreId = storeId
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Failed to load seller loans'
+        const msg = e instanceof Error ? e.message : 'Failed to load stock loans'
         this.error = msg
         console.warn('[sellerLoanOuts] fetch failed:', e)
         this.loans = []
@@ -143,7 +143,7 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
         throw new Error('Select at least one product')
       }
       if (lines.length > SELLER_LOAN_OUT_BATCH_CAP) {
-        throw new Error(`You can loan at most ${SELLER_LOAN_OUT_BATCH_CAP} items at once. Split into multiple loans.`)
+        throw new Error(`A stock loan can include at most ${SELLER_LOAN_OUT_BATCH_CAP} items at once. Split into multiple loans.`)
       }
 
       const folderIds = new Set(lines.map((l) => l.folderId))
@@ -248,12 +248,12 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
       folderIds.forEach((fid) => invalidateFolderItemCaches(fid))
 
       const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-      const partyNameStr = typeof loanData.partyName === 'string' ? loanData.partyName : 'seller'
+      const partyNameStr = typeof loanData.partyName === 'string' ? loanData.partyName : 'borrower'
       await logActivity({
         action: 'updated',
         entityType: 'items_batch',
         entityId: loanId,
-        entityName: `Returned loan from ${partyNameStr} (${rawLines.length} item(s))`,
+        entityName: `Returned stock loan from ${partyNameStr} (${rawLines.length} item(s))`,
         storeId,
         userId: authStore.currentUser.uid,
         userDisplayName,
