@@ -4,7 +4,6 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
-  sendEmailVerification,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -18,6 +17,7 @@ import {
   type ConfirmationResult
 } from 'firebase/auth'
 import { useFirebase } from './useFirebase'
+import { sendUserEmailVerification } from '~/utils/emailVerification'
 
 /**
  * Composable for Firebase Authentication
@@ -63,7 +63,11 @@ export const useFirebaseAuth = () => {
   }
 
   // Sign up with email and password
-  const signUp = async (email: string, password: string, sendVerificationEmail: boolean = true) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    sendVerificationEmail: boolean = true
+  ): Promise<{ user: User; verificationEmailSent: boolean }> => {
     const auth = getAuthInstance()
     if (!auth) {
       throw new Error('Firebase Auth not initialized')
@@ -72,18 +76,21 @@ export const useFirebaseAuth = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
-      
-      // Send email verification if requested
+
+      let verificationEmailSent = false
       if (sendVerificationEmail && user && !user.emailVerified) {
         try {
-          await sendEmailVerification(user)
-        } catch (verificationError: any) {
-          // Log but don't fail signup if verification email fails
-          console.warn('Failed to send verification email:', verificationError)
+          const runtimeConfig = useRuntimeConfig()
+          await sendUserEmailVerification(user, (runtimeConfig.public.appOrigin as string) || '')
+          verificationEmailSent = true
+        } catch (verificationError: unknown) {
+          const code = (verificationError as { code?: string })?.code
+          const msg = (verificationError as Error)?.message
+          console.error('Failed to send verification email:', code, msg, verificationError)
         }
       }
-      
-      return user
+
+      return { user, verificationEmailSent }
     } catch (error: any) {
       throw new Error(error.message || 'Sign up failed')
     }
@@ -134,7 +141,8 @@ export const useFirebaseAuth = () => {
     }
 
     try {
-      await sendEmailVerification(targetUser)
+      const runtimeConfig = useRuntimeConfig()
+      await sendUserEmailVerification(targetUser, (runtimeConfig.public.appOrigin as string) || '')
     } catch (error: any) {
       if (error.code === 'auth/too-many-requests') {
         throw new Error('Too many verification emails sent. Please try again later.')

@@ -13,6 +13,7 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
+import { sendUserEmailVerification } from '~/utils/emailVerification'
 
 const getStoreMemberDoc = (
   db: Firestore,
@@ -400,6 +401,12 @@ export const useStaffStore = defineStore('staff', {
       const authSecondary = getAuth(staffApp)
       const userCred = await createUserWithEmailAndPassword(authSecondary, normalizedEmail, password)
       const staffAuthUid = userCred.user.uid
+      try {
+        const rc = useRuntimeConfig()
+        await sendUserEmailVerification(userCred.user, (rc.public.appOrigin as string) || '')
+      } catch (err) {
+        console.warn('[staff] Could not send verification email for new staff account:', err)
+      }
       await signOut(authSecondary)
 
       const db = useFirestore().getFirestoreInstance()

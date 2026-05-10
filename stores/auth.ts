@@ -5,7 +5,6 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   sendPasswordResetEmail,
-  sendEmailVerification,
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -17,6 +16,7 @@ import {
   type ConfirmationResult
 } from 'firebase/auth'
 import { useFirebase } from '~/composables/useFirebase'
+import { sendUserEmailVerification } from '~/utils/emailVerification'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -107,12 +107,12 @@ export const useAuthStore = defineStore('auth', {
         const user = userCredential.user
         this.currentUser = user
         
-        // Send email verification if requested
+        // Send email verification if requested (template: Firebase Console → Auth → Templates)
         if (sendVerificationEmail && user && !user.emailVerified) {
           try {
-            await sendEmailVerification(user)
+            const rc = useRuntimeConfig()
+            await sendUserEmailVerification(user, (rc.public.appOrigin as string) || '')
           } catch (verificationError: any) {
-            // Log but don't fail signup if verification email fails
             console.warn('Failed to send verification email:', verificationError)
           }
         }
@@ -163,7 +163,8 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        await sendEmailVerification(targetUser)
+        const rc = useRuntimeConfig()
+        await sendUserEmailVerification(targetUser, (rc.public.appOrigin as string) || '')
       } catch (error: any) {
         if (error.code === 'auth/too-many-requests') {
           throw new Error('Too many verification emails sent. Please try again later.')

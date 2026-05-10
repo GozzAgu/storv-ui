@@ -18,25 +18,42 @@
           class="mx-auto h-6 w-auto max-w-[104px] shrink-0 object-contain sm:h-7"
         />
       </a>
-      <p
-        class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
-      >
-        Get started
-      </p>
-      <h1
-        class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
-      >
-        Create your account
-      </h1>
-      <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-        Takes a minute. Already set up?
-        <NuxtLink
-          to="/signin"
-          class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+      <template v-if="!registrationComplete">
+        <p
+          class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
         >
-          Sign in instead
-        </NuxtLink>
-      </p>
+          Get started
+        </p>
+        <h1
+          class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
+        >
+          Create your account
+        </h1>
+        <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          Takes a minute. Already set up?
+          <NuxtLink
+            to="/signin"
+            class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+          >
+            Sign in instead
+          </NuxtLink>
+        </p>
+      </template>
+      <template v-else>
+        <p
+          class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
+        >
+          One more step
+        </p>
+        <h1
+          class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
+        >
+          Check your email
+        </h1>
+        <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+          We need you to confirm your address before you sign in.
+        </p>
+      </template>
     </div>
 
     <div
@@ -47,7 +64,55 @@
             class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent dark:via-primary-500/25"
             aria-hidden="true"
           />
-          <form @submit.prevent="handleSignUp" class="space-y-4">
+          <div
+            v-if="registrationComplete"
+            class="space-y-4 text-left"
+            role="status"
+          >
+            <div
+              class="flex flex-col items-center rounded-sm border border-primary-200/80 bg-primary-50/90 px-4 py-5 text-center dark:border-primary-800/45 dark:bg-primary-950/35 sm:px-5"
+            >
+              <div
+                class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500/15 ring-1 ring-primary-500/25 dark:bg-primary-500/12 dark:ring-primary-500/35"
+              >
+                <EnvelopeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+              </div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                <template v-if="registrationVerificationSent">
+                  Open the link we sent you
+                </template>
+                <template v-else>
+                  Account created
+                </template>
+              </p>
+              <p class="mt-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                <template v-if="registrationVerificationSent">
+                  We emailed
+                  <span class="font-medium text-gray-800 dark:text-gray-200">{{ registrationEmail }}</span>.
+                  Check your <strong>inbox</strong> and your <strong>Spam</strong> or
+                  <strong>Junk</strong> folder. Messages from new senders often land there.
+                </template>
+                <template v-else>
+                  We could not send a verification email automatically. You can still
+                  <NuxtLink
+                    :to="signInLinkWithEmail"
+                    class="font-semibold text-primary-600 underline decoration-primary-500/30 underline-offset-2 hover:text-primary-500 dark:text-primary-400"
+                    >sign in</NuxtLink
+                  >
+                  with the password you chose; verify your email from account settings when you can.
+                </template>
+              </p>
+              <p
+                v-if="registrationVerificationSent"
+                class="mt-3 text-xs leading-relaxed text-gray-600 dark:text-gray-400"
+              >
+                Tap <strong>Verify email</strong> in that message, then come back here to sign in and finish
+                setting up your store.
+              </p>
+            </div>
+          </div>
+
+          <form v-else @submit.prevent="handleSignUp" class="space-y-4">
             <div class="space-y-1.5">
               <label for="business-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
                 Business name
@@ -257,6 +322,7 @@
           </form>
 
           <p
+            v-if="!registrationComplete"
             class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400"
           >
             Questions?
@@ -273,8 +339,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { ref, computed, watch } from 'vue'
+import { EyeIcon, EyeSlashIcon, ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import Button from '~/components/ui/Button.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
@@ -312,7 +378,24 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const rulesCopied = ref(false)
 
-const { signUp, sendVerificationEmail } = useFirebaseAuth()
+/** After successful registration: show email instructions instead of routing away */
+const registrationComplete = ref(false)
+const registrationEmail = ref('')
+const registrationVerificationSent = ref(true)
+
+const signInLinkWithEmail = computed(() => {
+  const e = registrationEmail.value.trim()
+  if (!e) return '/signin'
+  return `/signin?${new URLSearchParams({ email: e }).toString()}`
+})
+
+watch(registrationComplete, (done) => {
+  if (import.meta.client && done) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+})
+
+const { signUp, signOut } = useFirebaseAuth()
 const { createUserDocument } = useUser()
 
 const passwordRuleChecks = computed(() => getPasswordRuleChecks(form.value.password))
@@ -431,9 +514,8 @@ const handleSignUp = async () => {
   errorMessage.value = ''
 
   try {
-    // Create Firebase Auth user (verification email is sent automatically)
-    const user = await signUp(form.value.email, form.value.password, true)
-    
+    const { user, verificationEmailSent } = await signUp(form.value.email, form.value.password, true)
+
     if (user) {
       // Create user document in Firestore
       await createUserDocument(user.uid, {
@@ -444,14 +526,26 @@ const handleSignUp = async () => {
         hasCompletedOnboarding: false,
         hasCompletedTutorial: false
       })
-      
-      // Show success message about email verification
+
+      try {
+        await signOut()
+      } catch (signOutErr) {
+        console.warn('Sign out after registration:', signOutErr)
+      }
+
+      registrationEmail.value = form.value.email.trim()
+      registrationVerificationSent.value = verificationEmailSent
+      registrationComplete.value = true
+
       const { useAppToast } = await import('~/composables/useAppToast')
       const toast = useAppToast()
-      toast.success('Account created! Please check your email to verify your account.')
-      
-      // Redirect to onboarding (first-time setup)
-      await navigateTo('/dashboard/onboarding')
+      if (verificationEmailSent) {
+        toast.success('Check your email for the verification link.')
+      } else {
+        toast.warning(
+          'We could not send the verification email. You can still sign in from this page when ready.'
+        )
+      }
     }
   } catch (error: any) {
     console.error('Sign up error:', error)

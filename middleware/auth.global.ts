@@ -1,3 +1,5 @@
+import { SIGNIN_ALLOW_WHILE_AUTHED_KEY } from './guest'
+
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
   if (import.meta.server) return
@@ -22,6 +24,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // For dashboard routes, check authentication
   if (isDashboardRoute) {
+    try {
+      sessionStorage.removeItem(SIGNIN_ALLOW_WHILE_AUTHED_KEY)
+    } catch {
+      /* ignore */
+    }
+
     const authStore = useAuthStore()
 
     // Wait for auth to finish loading

@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import Button from '~/components/ui/Button.vue'
@@ -181,6 +181,15 @@ const form = ref({
 const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
+
+const route = useRoute()
+
+onMounted(() => {
+  const email = route.query.email
+  if (typeof email === 'string' && email.trim()) {
+    form.value.email = decodeURIComponent(email).trim()
+  }
+})
 
 const { signIn } = useFirebaseAuth()
 const { storeCredentials } = useAdminCredentials()

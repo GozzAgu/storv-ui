@@ -75,11 +75,11 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/png',
-          href: '/4.png'
+          href: '/storvv%20logo%20mobile.png'
         },
         {
           rel: 'apple-touch-icon',
-          href: '/4.png'
+          href: '/storvv%20logo%20mobile.png'
         },
         {
           rel: 'preconnect',
