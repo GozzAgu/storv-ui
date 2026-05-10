@@ -577,69 +577,157 @@
       </div>
     </section>
 
-    <!-- How it works: dark left + primary right (reverted, cleaner) -->
-    <section id="features" data-section-id="features" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] grid min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28">
-      <div class="bg-slate-900 px-6 sm:px-8 lg:px-12 py-16 lg:py-24 flex flex-col justify-center">
-          <div class="max-w-xl mx-auto lg:mx-0">
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-              How Storvv works
-            </h2>
-          <p class="mt-4 text-lg text-slate-300">
-            Five steps to get your store running smoothly.
+    <!-- How it works: high-impact timeline + gradient preview strip -->
+    <section
+      id="features"
+      data-section-id="features"
+      class="scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] grid min-h-[min(100vh,44rem)] overflow-hidden lg:min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28"
+    >
+      <div
+        class="relative flex flex-col justify-center bg-slate-950 px-5 py-12 sm:px-7 sm:py-14 lg:px-12 lg:py-20"
+      >
+        <div
+          class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_15%_-15%,rgba(20,63,141,0.22),transparent_55%)]"
+        />
+        <div
+          class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_100%_110%,rgba(72,118,199,0.14),transparent_50%)]"
+        />
+        <div
+          class="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:16px_16px]"
+        />
+        <div class="pointer-events-none absolute -left-24 top-1/3 h-48 w-48 rounded-full bg-primary-500/12 blur-3xl" />
+        <div class="relative mx-auto max-w-lg lg:mx-0">
+          <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-primary-400 sm:text-[11px]">
+            The playbook
           </p>
-          <div class="mt-10 space-y-6">
-            <div data-section-id="step-1" class="scroll-animate scroll-animate-up stagger-1 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <Cog6ToothSolidIcon class="w-7 h-7 text-primary-300" />
+          <h2
+            class="mt-1.5 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl"
+          >
+            How Storvv works
+          </h2>
+          <p class="mt-2 max-w-md text-[11px] font-medium leading-relaxed text-slate-400 sm:text-xs sm:leading-relaxed">
+            Five crisp steps from a fresh account to a floor that runs calmer, every day.
+          </p>
+
+          <div class="mt-7 space-y-2 sm:mt-8 sm:space-y-2.5">
+            <div
+              v-for="(step, idx) in howStorvvWorksSteps"
+              :key="step.sectionId"
+              :data-section-id="step.sectionId"
+              class="group scroll-animate scroll-animate-up relative flex gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-colors duration-200 hover:border-primary-400/30"
+              :class="`stagger-${idx + 1}`"
+            >
+              <div class="flex shrink-0 flex-col items-center">
+                <span
+                  class="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary-300 via-primary-400 to-primary-600 p-[1.5px] ring-1 ring-white/15"
+                >
+                  <span
+                    class="flex h-full w-full items-center justify-center rounded-[10px] bg-slate-950 text-[10px] font-black tabular-nums tracking-tight text-white"
+                  >
+                    {{ step.num }}
+                  </span>
+                </span>
+                <div
+                  v-if="idx < howStorvvWorksSteps.length - 1"
+                  class="mt-1.5 min-h-[0.75rem] w-px flex-1 bg-gradient-to-b from-primary-400/45 via-primary-500/20 to-transparent"
+                  aria-hidden="true"
+                />
               </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Set up your store</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Set your store name, currency, timezone, and receipt preferences so totals, dates, and taxes appear correctly from day one. Add payment methods your team actually uses (cash, transfer, POS) and keep business settings consistent across staff accounts.</p>
-              </div>
-            </div>
-            <div data-section-id="step-2" class="scroll-animate scroll-animate-up stagger-2 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <UsersSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Departments & staff</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Create departments for how you already work (shop floor, warehouse, online orders) and invite team members with the right role. Control who can view, sell, edit, or delete items using folder-level permissions so managers and staff only access what they need.</p>
-              </div>
-            </div>
-            <div data-section-id="step-3" class="scroll-animate scroll-animate-up stagger-3 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <RectangleStackSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Organize inventory</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable. On Enterprise, use <span class="font-medium text-white">Copy from branch</span> on the Folders screen to bring selected folder layouts into a new location without rebuilding every template by hand.</p>
-              </div>
-            </div>
-            <div data-section-id="step-4" class="scroll-animate scroll-animate-up stagger-4 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <ReceiptPercentSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Sales & receipts</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Process sales quickly with clean, professional receipts, apply discounts when needed, and handle returns or exchanges without losing inventory accuracy. Each transaction can capture customer details automatically, helping you build a customer database as you sell.</p>
-              </div>
-            </div>
-            <div data-section-id="step-5" class="scroll-animate scroll-animate-up stagger-5 flex items-start gap-4">
-              <div class="flex-shrink-0 pt-0.5">
-                <PresentationChartLineSolidIcon class="w-7 h-7 text-primary-300" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-white">Monitor & analyze</h3>
-                <p class="mt-1 text-sm text-slate-300 leading-relaxed">Use real-time dashboards to understand revenue trends, top-selling products, low-stock alerts, and overall inventory health. Spot what is moving fast, what is tying up cash, and where to restock so you can make better decisions with confidence.</p>
+              <div class="flex min-w-0 flex-1 gap-2 sm:gap-2.5">
+                <div
+                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.05] text-primary-300 ring-1 ring-white/10 transition-colors group-hover:bg-primary-500/10 group-hover:text-primary-200"
+                >
+                  <component :is="step.icon" class="h-4 w-4" aria-hidden="true" />
+                </div>
+                <div class="min-w-0 pb-0.5 pt-0.5">
+                  <h3 class="text-[12px] font-semibold leading-snug text-white sm:text-[13px]">
+                    {{ step.title }}
+                  </h3>
+                  <div
+                    class="mt-1 text-[11px] leading-[1.55] text-slate-400 sm:text-xs sm:leading-relaxed [&_span]:font-medium [&_span]:text-primary-100"
+                    v-html="step.html"
+                  />
                 </div>
               </div>
             </div>
-                </div>
-                </div>
-      <div class="bg-primary-400 flex items-center justify-center p-8 lg:p-12">
-        <div class="w-full max-w-2xl">
-          <div class="rounded-sm overflow-hidden bg-white/5 backdrop-blur-sm">
-            <img :src="storvvDashboardImg" alt="Storvv Dashboard" class="w-full h-auto object-contain" width="2940" height="1686" />
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="relative flex min-h-[min(100%,28rem)] items-center justify-center overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 p-6 sm:p-8 lg:min-h-0 lg:p-10"
+      >
+        <div
+          class="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary-300/35 blur-3xl"
+        />
+        <div
+          class="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary-700/40 blur-3xl"
+        />
+        <div
+          class="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.14)_0%,transparent_42%,rgba(8,27,64,0.12)_100%)]"
+        />
+        <div class="relative w-full max-w-2xl">
+          <div class="mb-3 flex justify-center sm:mb-4">
+            <span
+              class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md sm:text-[10px] sm:tracking-[0.22em]"
+            >
+              <span class="relative flex h-2 w-2">
+                <span
+                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-200/80 opacity-50"
+                />
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-primary-100" />
+              </span>
+              Inside the app
+            </span>
+          </div>
+          <div
+            class="overflow-hidden rounded-2xl border border-white/25 bg-slate-950/25 ring-1 ring-white/20 backdrop-blur-[2px]"
+          >
+            <div class="relative">
+              <img
+                :src="howStorvvWorksImages[howStorvvWorksSlide]"
+                :alt="`Storvv product screenshot ${howStorvvWorksSlide + 1} of ${howStorvvWorksImages.length}`"
+                class="w-full max-h-[min(72vh,520px)] object-contain object-top"
+                loading="lazy"
+                decoding="async"
+              />
+              <button
+                type="button"
+                class="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-900 ring-1 ring-slate-900/5 transition-colors hover:bg-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                aria-label="Previous screenshot"
+                @click="
+                  howStorvvWorksSlide =
+                    (howStorvvWorksSlide - 1 + howStorvvWorksImages.length) % howStorvvWorksImages.length
+                "
+              >
+                <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-900 ring-1 ring-slate-900/5 transition-colors hover:bg-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                aria-label="Next screenshot"
+                @click="howStorvvWorksSlide = (howStorvvWorksSlide + 1) % howStorvvWorksImages.length"
+              >
+                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <div
+              class="flex flex-wrap items-center justify-center gap-1.5 border-t border-white/15 bg-black/10 px-3 py-3 backdrop-blur-sm"
+              aria-label="Choose screenshot"
+            >
+              <button
+                v-for="(_, idx) in howStorvvWorksImages"
+                :key="idx"
+                type="button"
+                :aria-pressed="idx === howStorvvWorksSlide"
+                :aria-label="`Show screenshot ${idx + 1}`"
+                class="h-1.5 rounded-full transition-[width,background-color] duration-300"
+                :class="
+                  idx === howStorvvWorksSlide ? 'w-8 bg-white' : 'w-1.5 bg-white/45 hover:bg-white/80'
+                "
+                @click="howStorvvWorksSlide = idx"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -867,60 +955,106 @@
     </section>
 
     <!-- Use Cases -->
-    <section data-section-id="use-cases" class="scroll-animate scroll-animate-up py-20 sm:py-24 bg-[#070d1d]">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
+    <section
+      data-section-id="use-cases"
+      class="scroll-animate scroll-animate-up relative overflow-hidden py-16 sm:py-20 lg:py-24"
+    >
+      <div class="absolute inset-0 bg-[#050912]" aria-hidden="true" />
+      <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_20%_-10%,rgba(72,118,199,0.14),transparent_52%)]"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_100%_80%,rgba(20,63,141,0.18),transparent_48%)]"
+        aria-hidden="true"
+      />
+      <div
+        class="pointer-events-none absolute top-1/2 left-1/2 h-[min(100%,28rem)] w-[min(100%,48rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-500/5 blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-300/95">Built for modern retail teams</p>
-            <h2 class="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-white">
+            <p
+              class="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary-300/90 sm:text-xs sm:tracking-[0.14em]"
+            >
+              Built for modern retail teams
+            </p>
+            <h2 class="mt-2 text-2xl font-bold tracking-tight text-white sm:text-[1.65rem] sm:leading-snug">
               Who uses Storvv?
             </h2>
-            <p class="mt-4 max-w-xl text-sm sm:text-base leading-relaxed text-slate-300">
-              Whether you run one branch or many, Storvv keeps inventory, sales, and staff operations in one clean workflow.
+            <p class="mt-3 max-w-xl text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-relaxed">
+              Whether you run one branch or many, Storvv keeps inventory, sales, and staff operations in one clean
+              workflow.
             </p>
-            <ul class="mt-6 space-y-3">
-              <li class="flex items-start gap-2.5 text-sm text-slate-200">
-                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+            <ul class="mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
+              <li class="flex items-start gap-2.5 text-xs leading-relaxed text-slate-300 sm:text-sm">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-400/95" />
                 Phone and gadget stores managing serial numbers and swaps.
               </li>
-              <li class="flex items-start gap-2.5 text-sm text-slate-200">
-                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+              <li class="flex items-start gap-2.5 text-xs leading-relaxed text-slate-300 sm:text-sm">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-400/95" />
                 Fashion and lifestyle retailers with fast-moving stock.
               </li>
-              <li class="flex items-start gap-2.5 text-sm text-slate-200">
-                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-300" />
+              <li class="flex items-start gap-2.5 text-xs leading-relaxed text-slate-300 sm:text-sm">
+                <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-400/95" />
                 Growing multi-branch teams standardizing operations.
               </li>
             </ul>
           </div>
 
-          <div class="space-y-4">
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
-              <div class="flex items-start gap-3">
-                <CubeIcon class="mt-0.5 h-6 w-6 shrink-0 text-orange-300" />
-                <div>
-                  <p class="text-xl font-semibold tracking-tight text-white">Serial-first inventory</p>
-                  <p class="mt-1 text-sm sm:text-base text-slate-200">Track IMEI, swaps, and pricing updates with clean item history.</p>
+          <div class="flex flex-col gap-3 sm:gap-3.5">
+            <div
+              class="group rounded-xl border border-white/[0.09] bg-white/[0.04] p-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 hover:border-primary-400/25 hover:bg-white/[0.07] sm:p-5"
+            >
+              <div class="flex items-start gap-3 sm:gap-4">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-gradient-to-b from-white/[0.12] to-white/[0.03]"
+                >
+                  <CubeIcon class="h-5 w-5 text-orange-200/95" stroke-width="1.5" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-base font-semibold tracking-tight text-white">Serial-first inventory</p>
+                  <p class="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-relaxed">
+                    Track IMEI, swaps, and pricing updates with clean item history.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
-              <div class="flex items-start gap-3">
-                <TagIcon class="mt-0.5 h-6 w-6 shrink-0 text-sky-300" />
-                <div>
-                  <p class="text-xl font-semibold tracking-tight text-white">Faster daily checkout</p>
-                  <p class="mt-1 text-sm sm:text-base text-slate-200">Receipts, returns, and customer history connected in one flow.</p>
+            <div
+              class="group rounded-xl border border-white/[0.09] bg-white/[0.04] p-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 hover:border-primary-400/25 hover:bg-white/[0.07] sm:p-5"
+            >
+              <div class="flex items-start gap-3 sm:gap-4">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-gradient-to-b from-white/[0.12] to-white/[0.03]"
+                >
+                  <TagIcon class="h-5 w-5 text-primary-200/95" stroke-width="1.5" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-base font-semibold tracking-tight text-white">Faster daily checkout</p>
+                  <p class="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-relaxed">
+                    Receipts, returns, and customer history connected in one flow.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div class="rounded-sm bg-white/10 backdrop-blur-md p-5">
-              <div class="flex items-start gap-3">
-                <UserGroupIcon class="mt-0.5 h-6 w-6 shrink-0 text-emerald-300" />
-                <div>
-                  <p class="text-xl font-semibold tracking-tight text-white">Teams that scale</p>
-                  <p class="mt-1 text-sm sm:text-base text-slate-200">Role-based access and branch-level control for growing operations.</p>
+            <div
+              class="group rounded-xl border border-white/[0.09] bg-white/[0.04] p-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 hover:border-primary-400/25 hover:bg-white/[0.07] sm:p-5"
+            >
+              <div class="flex items-start gap-3 sm:gap-4">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-gradient-to-b from-white/[0.12] to-white/[0.03]"
+                >
+                  <UserGroupIcon class="h-5 w-5 text-emerald-200/90" stroke-width="1.5" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-base font-semibold tracking-tight text-white">Teams that scale</p>
+                  <p class="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm sm:leading-relaxed">
+                    Role-based access and branch-level control for growing operations.
+                  </p>
                 </div>
               </div>
             </div>
@@ -974,7 +1108,7 @@
                 </ul>
             <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
               </div>
-          <!-- Medium: 5 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
+          <!-- Medium: 2 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-primary-50/35 p-6 flex flex-col dark:bg-slate-900">
             <p class="absolute -top-3 right-5 rounded-full bg-primary-500 px-3 py-1 text-sm font-semibold text-white">
               Most popular
@@ -988,7 +1122,7 @@
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
             <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 5 stores</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 2 stores</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 10 departments, 25 staff per store</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics & reports</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
@@ -1408,7 +1542,7 @@
                   <div class="pl-11 sm:pl-12">
                     <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                       <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard and notifications. No analytics, no multiple departments, no multi-store sync.<br><br>
-                      <strong>Medium:</strong> Everything in Micro plus up to 5 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
+                      <strong>Medium:</strong> Everything in Micro plus up to 2 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
                       <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); <strong>Copy from branch</strong> to copy selected inventory folder templates between branches without recreating fields; and priority support.
                     </p>
                   </div>
@@ -1855,7 +1989,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, type Component } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, markRaw, type Component } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
 import {
@@ -1904,7 +2038,61 @@ import {
   PresentationChartLineIcon as PresentationChartLineSolidIcon,
 } from '@heroicons/vue/24/solid'
 import { useThemeStore } from '~/stores/theme'
-import storvvDashboardImg from '~/assets/images/storvv-dashboard.png'
+
+/** Product shots for “How Storvv works” (files in /public). */
+const howStorvvWorksScreenshotFiles = [
+  'Screenshot 2026-05-10 at 17.09.01.png',
+  'Screenshot 2026-05-10 at 17.09.20.png',
+  'Screenshot 2026-05-10 at 17.10.05.png',
+  'Screenshot 2026-05-10 at 17.10.12.png',
+  'Screenshot 2026-05-10 at 17.10.21.png',
+  'Screenshot 2026-05-10 at 17.11.07.png',
+  'Screenshot 2026-05-10 at 17.11.56.png',
+  'Screenshot 2026-05-10 at 19.03.41.png',
+  'Screenshot 2026-05-10 at 19.03.47.png',
+] as const
+
+const howStorvvWorksImages = howStorvvWorksScreenshotFiles.map((name) => `/${encodeURIComponent(name)}`)
+const howStorvvWorksSlide = ref(0)
+
+/** Landing “How Storvv works” — compact copy + icons (static HTML only for descriptions). */
+const howStorvvWorksSteps = [
+  {
+    sectionId: 'step-1',
+    num: '01',
+    icon: markRaw(Cog6ToothSolidIcon),
+    title: 'Set up your store',
+    html: 'Set your store name, currency, timezone, and receipt preferences so totals, dates, and taxes appear correctly from day one. Add payment methods your team actually uses (cash, transfer, POS) and keep business settings consistent across staff accounts.',
+  },
+  {
+    sectionId: 'step-2',
+    num: '02',
+    icon: markRaw(UsersSolidIcon),
+    title: 'Departments & staff',
+    html: 'Create departments for how you already work (shop floor, warehouse, online orders) and invite team members with the right role. Control who can view, sell, edit, or delete items using folder-level permissions so managers and staff only access what they need.',
+  },
+  {
+    sectionId: 'step-3',
+    num: '03',
+    icon: markRaw(RectangleStackSolidIcon),
+    title: 'Organize inventory',
+    html: 'Structure products with custom folders and reusable templates, then add stock one-by-one or in bulk from Excel. Track key details like SKU, serial number, IMEI, cost price, and selling price so your records stay complete and searchable. On Enterprise, use <span class="font-medium text-primary-100">Copy from branch</span> on the Folders screen to bring selected folder layouts into a new location without rebuilding every template by hand.',
+  },
+  {
+    sectionId: 'step-4',
+    num: '04',
+    icon: markRaw(ReceiptPercentSolidIcon),
+    title: 'Sales & receipts',
+    html: 'Process sales quickly with clean, professional receipts, apply discounts when needed, and handle returns or exchanges without losing inventory accuracy. Each transaction can capture customer details automatically, helping you build a customer database as you sell.',
+  },
+  {
+    sectionId: 'step-5',
+    num: '05',
+    icon: markRaw(PresentationChartLineSolidIcon),
+    title: 'Monitor & analyze',
+    html: 'Use real-time dashboards to understand revenue trends, top-selling products, low-stock alerts, and overall inventory health. Spot what is moving fast, what is tying up cash, and where to restock so you can make better decisions with confidence.',
+  },
+]
 
 /** Marketing site is light-only; logo asset for light backgrounds. */
 const marketingLogoSrc = '/storvv logo 2.png'
@@ -2190,7 +2378,7 @@ const landingCapabilities: LandingCapability[] = [
     icon: BuildingOfficeIcon,
     title: 'Multi-store workspaces',
     description:
-      'Micro stays on one flagship store; Medium expands to five separate ledgers tied to one account; Enterprise lifts store limits entirely.',
+      'Micro stays on one flagship store; Medium supports up to two branches on one account; Enterprise lifts store limits entirely.',
   },
   {
     icon: Square2StackIcon,

@@ -78,7 +78,7 @@ const LIMITS_BY_PLAN: Record<SubscriptionPlan, SubscriptionLimits> = {
     maxStaffPerStore: 2,
   },
   storvv_medium: {
-    maxStores: 5,
+    maxStores: 2,
     maxDepartmentsPerStore: 10,
     maxStaffPerStore: 25,
   },
@@ -143,7 +143,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Settings & profile',
   ],
   storvv_medium: [
-    'Up to 5 stores',
+    'Up to 2 stores',
     'Everything in Micro',
     'Analytics & reports',
     'Departments & teams (up to 10 depts, 25 staff per store)',

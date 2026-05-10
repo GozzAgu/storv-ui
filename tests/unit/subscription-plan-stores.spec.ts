@@ -18,12 +18,12 @@ describe('getEligibleStoresForPlan', () => {
     expect(e.map((s) => s.id)).toEqual(['c'])
   })
 
-  it('medium (max 5) returns all stores when under cap', () => {
+  it('medium (max 2) keeps two oldest when three exist', () => {
     const e = getEligibleStoresForPlan([...stores], 'storvv_medium')
-    expect(e).toHaveLength(3)
+    expect(e.map((s) => s.id)).toEqual(['c', 'a'])
   })
 
-  it('medium keeps five oldest when six exist', () => {
+  it('medium keeps two oldest when six exist', () => {
     const six = [
       { id: '1', createdAt: { toMillis: () => 10 } },
       { id: '2', createdAt: { toMillis: () => 20 } },
@@ -33,6 +33,6 @@ describe('getEligibleStoresForPlan', () => {
       { id: '6', createdAt: { toMillis: () => 60 } },
     ]
     const e = getEligibleStoresForPlan([...six], 'storvv_medium')
-    expect(e.map((s) => s.id)).toEqual(['1', '2', '3', '4', '5'])
+    expect(e.map((s) => s.id)).toEqual(['1', '2'])
   })
 })

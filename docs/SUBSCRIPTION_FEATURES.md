@@ -33,7 +33,7 @@ Includes **everything in Micro**, plus:
 
 | Area | What’s included |
 |------|------------------|
-| **Stores** | Up to 5 stores |
+| **Stores** | Up to 2 stores |
 | **Departments** | Up to 10 departments per store |
 | **Staff** | Up to 25 staff per store |
 | **Analytics** | Reports, charts, revenue trends, busiest time, heatmaps, exports |
