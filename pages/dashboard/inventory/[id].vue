@@ -26,25 +26,25 @@
     </template>
 
     <!-- Mobile / tablet toolbar -->
-    <div v-else class="flex flex-col gap-2.5 lg:hidden">
+    <div v-else class="flex flex-col gap-2 lg:hidden">
       <div
-        class="flex items-start gap-2 rounded-sm border border-gray-200/80 bg-white px-3 py-2.5 dark:border-gray-700/80 dark:!bg-dashboard-card"
+        class="flex items-start gap-1.5 rounded-sm border border-gray-200/70 bg-white px-2.5 py-2 shadow-none dark:border-gray-700/70 dark:!bg-dashboard-card"
       >
         <button
           type="button"
-          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+          class="mt-px flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
           @click="navigateTo('/dashboard/inventory')"
         >
-          <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
+          <ArrowLeftIcon class="h-3.5 w-3.5" stroke-width="1.75" />
         </button>
         <div class="min-w-0 flex-1">
-          <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <h2 class="truncate text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+          <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            <h2 class="truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50">
               {{ folder?.name || 'Folder' }}
             </h2>
             <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
           </div>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
             <span class="tabular-nums font-medium text-gray-700 dark:text-gray-300">{{ folder?.itemCount ?? 0 }} items</span>
             <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
             <span class="tabular-nums">{{ formatCurrency(totalInventoryValue) }} total value</span>
@@ -55,25 +55,25 @@
           </p>
         </div>
       </div>
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
         <div class="relative min-w-0 flex-1">
           <MagnifyingGlassIcon
-            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
           />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Search by name, SKU…"
-            class="w-full rounded-sm border border-gray-200/90 bg-white py-2.5 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
+            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40 sm:py-2.5 sm:pl-10 sm:pr-3 sm:text-sm"
           />
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
             <Button
               variant="outline"
               size="sm"
               :icon="TagIcon"
-              class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 !text-xs sm:!px-3"
+              class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
               @click="openBulkDiscountModal"
             >
               <span class="hidden sm:inline">Discount</span>
@@ -82,7 +82,7 @@
               variant="outline"
               size="sm"
               :icon="TrashIcon"
-              class="shrink-0 !rounded-2xl !border-red-200/80 !px-2.5 !py-2.5 !text-xs dark:!border-red-800/40 sm:!px-3"
+              class="shrink-0 !rounded-xl !border-red-200/80 !px-2 !py-2 !text-[11px] dark:!border-red-800/40 sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
               @click="openBulkDeleteModal"
             >
               <span class="hidden sm:inline">Delete</span>
@@ -93,7 +93,7 @@
               variant="outline"
               size="sm"
               :icon="ArrowTopRightOnSquareIcon"
-              class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 !text-xs sm:!px-3"
+              class="shrink-0 !rounded-xl !px-2 !py-2 !text-[11px] sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:!text-xs"
               :disabled="selectedItemsEligibleForSellerLoan.length === 0"
               :title="sellerLoanButtonTitle"
               :aria-label="sellerLoanButtonTitle"
@@ -102,11 +102,11 @@
               <span class="hidden sm:inline">Stock loan</span>
             </Button>
           </template>
-          <Button
+            <Button
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
-            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 sm:!px-3"
+            class="shrink-0 !rounded-xl !px-2 !py-2 sm:!rounded-2xl sm:!px-3 sm:!py-2.5"
             :icon="ArrowDownTrayIcon"
             :loading="isImporting"
             :disabled="isExporting"
@@ -114,11 +114,11 @@
             title="Import from Excel"
             @click="fileInputRef?.click()"
           />
-          <Button
+            <Button
             v-if="canManageInventoryItems"
             variant="outline"
             size="sm"
-            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 sm:!px-3"
+            class="shrink-0 !rounded-xl !px-2 !py-2 sm:!rounded-2xl sm:!px-3 sm:!py-2.5"
             :icon="ArrowUpTrayIcon"
             :loading="isExporting"
             :disabled="isImporting || (folder?.itemCount ?? 0) === 0"
@@ -126,10 +126,10 @@
             title="Export to Excel"
             @click="handleExportToExcel"
           />
-          <Button
+            <Button
             v-if="canManageInventoryItems"
             variant="primary"
-            class="shrink-0 !rounded-2xl !px-2.5 !py-2.5 text-sm sm:!px-3"
+            class="shrink-0 !rounded-xl !px-2 !py-2 text-xs sm:!rounded-2xl sm:!px-3 sm:!py-2.5 sm:text-sm"
             :icon="PlusIcon"
             aria-label="Add product"
             @click="openAddItemModal"
@@ -138,7 +138,7 @@
           </Button>
           <select
             v-model="sortBy"
-            class="min-w-[120px] flex-1 cursor-pointer rounded-sm border border-gray-200/90 bg-white px-3 py-2.5 text-sm font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 sm:flex-none dark:focus:border-primary-500/40"
+            class="min-w-[6.5rem] flex-1 cursor-pointer rounded-sm border border-gray-200/90 bg-white px-2 py-2 text-xs font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 sm:min-w-[120px] sm:flex-none sm:px-3 sm:py-2.5 sm:text-sm dark:focus:border-primary-500/40"
             @change="handleSortByChange"
           >
             <option value="name">Name</option>
@@ -147,7 +147,7 @@
             <option value="dateIn">Date In</option>
             <option value="availability">Status</option>
           </select>
-          <Button variant="outline" class="shrink-0 !rounded-2xl" :icon="ArrowPathIcon" @click="resetFilters" />
+          <Button variant="outline" class="shrink-0 !rounded-xl !p-2 sm:!rounded-2xl sm:!px-2.5 sm:!py-2.5" :icon="ArrowPathIcon" @click="resetFilters" />
         </div>
       </div>
     </div>
@@ -309,7 +309,11 @@
           </div>
 
           <div
-            :class="[ isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell', ]"
+            :class="[
+              isFullscreen
+                ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+                : 'data-table-shell max-sm:!rounded-none max-sm:!bg-transparent dark:max-sm:!bg-transparent',
+            ]"
           >
         <!-- Desktop toolbar -->
         <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
@@ -495,16 +499,16 @@
       <div :class="isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'contents'">
       <!-- Mobile: card list when has items -->
       <div
-        class="block space-y-3 sm:hidden"
-        :class="isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-1'"
+        class="block space-y-2 sm:hidden"
+        :class="isFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'px-0'"
       >
         <div
           v-for="item in paginatedItems"
           :key="item.id"
-          class="rounded-sm bg-white p-3.5 dark:!bg-dashboard-card"
+          class="rounded-sm border border-gray-200/60 bg-white p-3 shadow-none dark:border-gray-700/55 dark:!bg-dashboard-card"
         >
-          <div class="flex items-start justify-between gap-2">
-            <div class="min-w-0 flex-1 flex items-start gap-2">
+          <div class="flex items-start justify-between gap-1.5">
+            <div class="min-w-0 flex-1 flex items-start gap-1.5">
               <Checkbox
                 v-if="showBulkRowSelection && !isInventoryItemLocked(item)"
                 :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
@@ -514,37 +518,47 @@
                 @click.stop
               />
               <div class="min-w-0 flex-1">
-                <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" :title="getItemPrimaryLabel(item)">
+                <p class="truncate text-[11px] font-semibold leading-snug text-gray-900 dark:text-gray-100" :title="getItemPrimaryLabel(item)">
                   {{ getItemPrimaryLabel(item) }}
                 </p>
-                <div class="mt-1 flex items-center justify-between gap-2 flex-wrap">
-                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <div class="mt-0.5 flex flex-wrap items-center justify-between gap-1.5">
+                  <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
                     {{ item.discountedPrice !== undefined ? formatCurrency(item.discountedPrice) : formatCurrency(item.price ?? item.originalPrice ?? 0) }}
                   </span>
                   <span
-                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide', getItemAvailability(item).class, ]"
+                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide', getItemAvailability(item).class, ]"
                   >
                     {{ getItemAvailability(item).label }}
                   </span>
                 </div>
-                <p v-if="item.sku || item.serialNumber || item.serialNo" class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                <p v-if="item.sku || item.serialNumber || item.serialNo" class="mt-0.5 truncate text-[9px] text-gray-500 dark:text-gray-400">
                   {{ item.sku || item.serialNumber || item.serialNo }}
                 </p>
               </div>
             </div>
-            <div class="relative shrink-0" data-inventory-item-menu @click.stop>
+            <div class="flex shrink-0 flex-col items-center gap-0.5" @click.stop>
               <button
                 type="button"
-                :data-item-actions-anchor="item.id"
-                @click="toggleItemMenu(item.id)"
-                :disabled="isItemSold(item)"
-                :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
-                aria-label="Item actions"
-                aria-haspopup="menu"
-                :aria-expanded="openItemMenuId === item.id"
+                class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-950/50"
+                aria-label="View details"
+                @click="openMobileItemDetail(item)"
               >
-                <EllipsisVerticalIcon class="w-4 h-4" stroke-width="2" />
+                <EyeIcon class="h-4 w-4" stroke-width="1.75" />
               </button>
+              <div class="relative" data-inventory-item-menu>
+                <button
+                  type="button"
+                  :data-item-actions-anchor="item.id"
+                  @click="toggleItemMenu(item.id)"
+                  :disabled="isItemSold(item)"
+                  :class="[ 'inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                  aria-label="Item actions"
+                  aria-haspopup="menu"
+                  :aria-expanded="openItemMenuId === item.id"
+                >
+                  <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -779,6 +793,101 @@
       class="hidden"
       @change="handleFileImport"
     />
+
+    <!-- Mobile: read-only product details (matches desktop columns) -->
+    <SidePanel
+      v-model="showMobileItemDetailPanel"
+      eyebrow="Inventory"
+      title="Product details"
+      :subtitle="mobileDetailItem ? `${folder?.name || 'Folder'} · ${getItemAvailability(mobileDetailItem).label}` : undefined"
+      content-padding="p-4 sm:p-5"
+      @close="mobileDetailItem = null"
+    >
+      <div v-if="mobileDetailItem" class="space-y-4 pb-2">
+        <div
+          v-if="isItemOutOnSellerLoan(mobileDetailItem)"
+          class="rounded-md border border-indigo-200/80 bg-indigo-50/80 px-3 py-2 dark:border-indigo-800/50 dark:bg-indigo-950/35"
+        >
+          <p class="text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:text-indigo-200">Stock loan</p>
+          <p v-if="mobileDetailItem.sellerLoanPartyName" class="mt-0.5 text-sm text-indigo-950 dark:text-indigo-50">
+            {{ mobileDetailItem.sellerLoanPartyName }}
+          </p>
+          <p v-if="mobileDetailItem.sellerLoanPartyPhone" class="text-xs tabular-nums text-indigo-800/90 dark:text-indigo-200/95">
+            {{ mobileDetailItem.sellerLoanPartyPhone }}
+          </p>
+        </div>
+        <dl class="divide-y divide-gray-100 dark:divide-gray-800">
+          <div
+            v-for="(column, colIndex) in columns"
+            :key="column.key"
+            class="flex flex-col gap-1 py-3 first:pt-0"
+          >
+            <dt class="text-[10px] font-semibold uppercase tracking-[0.08em] text-gray-400 dark:text-gray-500">
+              {{ column.label }}
+            </dt>
+            <dd class="min-w-0 text-[13px] leading-snug text-gray-900 dark:text-gray-100">
+              <template v-if="colIndex === 0">
+                <span class="font-medium">{{ getItemPrimaryLabel(mobileDetailItem) }}</span>
+              </template>
+              <template v-else>
+                <div
+                  v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')"
+                  class="space-y-0.5"
+                >
+                  <template v-if="mobileDetailItem.discountedPrice !== undefined">
+                    <span class="font-semibold text-green-600 dark:text-green-400">
+                      {{ formatCurrency(mobileDetailItem.discountedPrice) }}
+                    </span>
+                    <span class="block text-xs text-gray-400 line-through dark:text-gray-500">
+                      {{ formatCurrency(mobileDetailItem.originalPrice || mobileDetailItem[column.key] || 0) }}
+                    </span>
+                    <span class="block text-xs font-medium text-red-600 dark:text-red-400">
+                      {{
+                        mobileDetailItem.discountPercentage
+                          ? `-${mobileDetailItem.discountPercentage}%`
+                          : `-${formatCurrency(mobileDetailItem.discountAmount || 0)}`
+                      }}
+                    </span>
+                  </template>
+                  <span v-else class="font-semibold">
+                    {{ formatCurrency(mobileDetailItem[column.key] || 0) }}
+                  </span>
+                </div>
+                <div v-else-if="'type' in column && column.type === 'number'" class="text-gray-700 dark:text-gray-300">
+                  {{ formatNumber(mobileDetailItem[column.key]) }}
+                </div>
+                <div v-else-if="'type' in column && column.type === 'date'" class="text-gray-700 dark:text-gray-300">
+                  <span v-if="mobileDetailItem[column.key]">{{ formatItemDate(mobileDetailItem[column.key]) }}</span>
+                  <span v-else class="text-gray-400 italic dark:text-gray-500">—</span>
+                </div>
+                <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-gray-700 dark:text-gray-300">
+                  <span v-if="mobileDetailItem[column.key]">{{ formatItemDate(mobileDetailItem[column.key]) }}</span>
+                  <span v-else class="text-gray-400 dark:text-gray-500">—</span>
+                </div>
+                <div v-else-if="column.key === 'availability'">
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide"
+                    :class="getItemAvailability(mobileDetailItem).class"
+                  >
+                    {{ getItemAvailability(mobileDetailItem).label }}
+                  </span>
+                </div>
+                <div
+                  v-else-if="'type' in column && column.type === 'boolean'"
+                  class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
+                  :class="mobileDetailItem[column.key] ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                >
+                  {{ mobileDetailItem[column.key] ? 'Yes' : 'No' }}
+                </div>
+                <div v-else class="whitespace-pre-wrap break-words text-gray-700 dark:text-gray-300">
+                  {{ getItemDisplayValue(mobileDetailItem[column.key]) }}
+                </div>
+              </template>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </SidePanel>
 
     <!-- Enhanced Add/Edit Item (slide-over) -->
     <SidePanel
@@ -1249,6 +1358,7 @@ import {
   ArrowPathIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  EyeIcon,
   BarsArrowUpIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
@@ -1277,7 +1387,6 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
-import { useCopy } from '~/composables/useCopy'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import * as XLSX from 'xlsx'
@@ -1319,12 +1428,6 @@ const canDuplicateByPlan = computed(() => {
 })
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
-const { copyToClipboard } = useCopy()
-
-const copyItemId = (itemId: string) => {
-  copyToClipboard(itemId, 'Item ID')
-}
-
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
@@ -1377,6 +1480,15 @@ const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
 
 const sortBy = ref('name')
 const showAddItemModal = ref(false)
+
+/** Mobile list: slide-over with the same fields as the desktop table */
+const showMobileItemDetailPanel = ref(false)
+const mobileDetailItem = ref<InventoryItem | null>(null)
+
+function openMobileItemDetail(item: InventoryItem) {
+  mobileDetailItem.value = item
+  showMobileItemDetailPanel.value = true
+}
 const editingItem = ref<InventoryItem | null>(null)
 // Load pagination state from localStorage - use folder ID in key for uniqueness
 const getInitialPage = (): number => {
@@ -2429,6 +2541,8 @@ const handleEditItem = (item: InventoryItem) => {
     toast.error('Cannot edit a product while it is sold or on a stock loan')
     return
   }
+  showMobileItemDetailPanel.value = false
+  mobileDetailItem.value = null
   cancelInlineEdit()
   editingItem.value = item
   serialNumbers.value = []

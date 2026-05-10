@@ -172,16 +172,16 @@
       </div>
 
       <div
-        :class="[ isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell flex flex-1 flex-col min-h-[calc(100svh-20rem)] !rounded-2xl border border-gray-200/60 shadow-sm shadow-gray-950/[0.04] dark:border-gray-700/55 dark:shadow-black/30', ]"
+        :class="[ isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell flex min-h-[calc(100svh-20rem)] flex-1 flex-col border border-gray-200/60 !rounded-none shadow-none max-sm:!bg-transparent dark:border-gray-700/55 dark:max-sm:!bg-transparent sm:!rounded-2xl sm:shadow-sm sm:shadow-gray-950/[0.04] dark:sm:shadow-black/30', ]"
       >
         <!-- Toolbar: search + filters (left), primary action (right) -->
         <DataTableToolbar v-if="!receiptsStore.loading && !isReceiptsFullscreen">
           <template #heading>
             <div class="min-w-0 flex-1">
-              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+              <h2 class="text-[11px] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
                 Receipts
               </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <p class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400 sm:text-[11px]">
                 <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ receipts.length }} in store</span>
                 <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
                 <span class="tabular-nums">{{ formatCurrency(totalSales) }} completed</span>
@@ -316,15 +316,15 @@
       <div :class="isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'contents'">
       <!-- Mobile: card list (no horizontal scroll) -->
       <div
-        class="space-y-3 sm:hidden"
-        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'block px-1'"
+        class="space-y-2 sm:hidden"
+        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'block px-0'"
       >
         <div
           v-for="receipt in paginatedReceipts"
           :key="receipt.id"
           :data-receipt-row="receipt.id"
           :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-          class="rounded-2xl border border-gray-200/55 bg-white p-3 shadow-sm shadow-gray-950/[0.03] duration-300 dark:border-gray-700/60 dark:!bg-dashboard-card dark:shadow-black/25"
+          class="rounded-lg border border-gray-200/60 bg-white p-2.5 shadow-none dark:border-gray-700/55 dark:!bg-dashboard-card"
           :class="flashReceiptId === receipt.id ? '!ring-2 !ring-primary-500/25 ring-offset-2 ring-offset-white dark:bg-gray-800/75 dark:!ring-offset-gray-900' : ''"
         >
           <div class="flex items-start justify-between gap-2">
@@ -339,7 +339,7 @@
               />
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ receipt.receiptNumber }}</span>
+                  <span class="text-[11px] font-semibold text-gray-900 dark:text-gray-100">{{ receipt.receiptNumber }}</span>
                   <button
                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
                     class="p-0.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
@@ -354,17 +354,17 @@
                     Swap
                   </span>
                 </div>
-                <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-0.5">
+                <p class="mt-0.5 text-[10px] leading-snug text-gray-600 dark:text-gray-400">
                   <span class="line-clamp-2">{{ receipt.customerName }}</span>
-                  <span v-if="receipt.customerEmail" class="block text-[10px] text-gray-500 dark:text-gray-500 truncate">{{ receipt.customerEmail }}</span>
-                  <span v-if="receipt.customerPhone" class="block text-[10px] text-gray-500 dark:text-gray-500 tabular-nums">{{ receipt.customerPhone }}</span>
+                  <span v-if="receipt.customerEmail" class="block truncate text-[9px] text-gray-500 dark:text-gray-500">{{ receipt.customerEmail }}</span>
+                  <span v-if="receipt.customerPhone" class="block tabular-nums text-[9px] text-gray-500 dark:text-gray-500">{{ receipt.customerPhone }}</span>
                 </p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5">{{ formatDate(receipt.date) }}</p>
-                <div class="mt-2 rounded-xl border border-gray-200/65 bg-gray-50/85 px-2.5 py-1.5 shadow-sm shadow-gray-950/3 dark:border-gray-700/65 dark:bg-gray-900/45 dark:shadow-black/25">
-                  <p class="text-[10px] font-medium text-gray-800 dark:text-gray-200">
+                <p class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-500">{{ formatDate(receipt.date) }}</p>
+                <div class="mt-1.5 rounded-lg border border-gray-200/70 bg-gray-50/90 px-2 py-1.5 dark:border-gray-700/60 dark:bg-gray-900/45">
+                  <p class="text-[9px] font-medium text-gray-800 dark:text-gray-200">
                     {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
                   </p>
-                  <p v-if="getReceiptLineItemsPreview(receipt)" class="text-[10px] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 mt-0.5">
+                  <p v-if="getReceiptLineItemsPreview(receipt)" class="mt-0.5 line-clamp-2 text-[9px] leading-snug text-gray-600 dark:text-gray-400">
                     {{ getReceiptLineItemsPreview(receipt) }}
                   </p>
                   <button
@@ -387,10 +387,10 @@
                     />
                   </div>
                 </div>
-                <div class="mt-2 flex items-center justify-between gap-2">
-                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
+                <div class="mt-1.5 flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
                   <span
-                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-sm shadow-gray-950/3 ring-1 ring-inset dark:shadow-transparent', receipt.status === 'completed' ? 'bg-emerald-500/12 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/14 text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/12 text-rose-950 ring-rose-500/22 dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
+                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset', receipt.status === 'completed' ? 'bg-emerald-500/12 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/14 text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/12 text-rose-950 ring-rose-500/22 dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
                   >
                     {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
                   </span>
@@ -402,7 +402,7 @@
                 type="button"
                 :data-receipt-actions-anchor="receipt.id"
                 @click="toggleReceiptMenu(receipt.id)"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/85 dark:hover:text-gray-100"
                 aria-label="Receipt actions"
                 aria-haspopup="menu"
                 :aria-expanded="openReceiptMenuId === receipt.id"
