@@ -8,7 +8,6 @@
       v-if="departmentId"
       :department-id="departmentId"
       :can-show="canCreateNewStaff"
-      class="rounded-sm bg-white dark:!bg-dashboard-card"
     />
 
     <Teleport to="body" :disabled="!isStaffFullscreen">
@@ -70,7 +69,12 @@
         </div>
 
         <div
-          :class="[ 'flex min-h-0 flex-col', isStaffFullscreen ? 'min-h-0 flex-1 overflow-hidden' : 'data-table-shell overflow-hidden', ]"
+          :class="[
+            'flex min-h-0 flex-col',
+            isStaffFullscreen
+              ? 'min-h-0 flex-1 overflow-hidden'
+              : 'overflow-hidden rounded-2xl border border-gray-200/55 bg-white/75 backdrop-blur-xl dark:border-gray-700/45 dark:bg-[#12141c]/80',
+          ]"
         >
         <div
           v-if="canManageDepartments && selectedStaffForBulk.length > 0"
@@ -191,12 +195,105 @@
 
         <div
           v-else
-          :class="[ 'min-h-0 flex-1', isStaffFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto', ]"
+          :class="[
+            'flex min-h-0 flex-1 flex-col gap-3',
+            isStaffFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : '',
+          ]"
         >
+          <div
+            v-if="!isStaffFullscreen"
+            class="space-y-2.5 px-0.5 md:hidden"
+          >
+            <div
+              v-for="member in paginatedStaff"
+              :key="`mobile-${member.id}`"
+              class="rounded-xl border border-gray-200/65 bg-white/95 p-3 shadow-none backdrop-blur-sm dark:border-gray-700/55 dark:bg-white/[0.04]"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div v-if="canManageDepartments" class="pt-0.5" @click.stop>
+                  <Checkbox
+                    :model-value="selectedStaffForBulk.some(s => s.id === member.id)"
+                    @update:model-value="(checked) => toggleStaffSelection(member, checked)"
+                    size="sm"
+                    wrapper-class="justify-center"
+                  />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                    {{ member.firstName }} {{ member.lastName }}
+                  </p>
+                  <p v-if="member.position" class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+                    {{ member.position }}
+                  </p>
+                  <p class="mt-1 truncate text-[11px] text-gray-500 dark:text-gray-500">
+                    {{ member.email }}
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
+                      :class="[ member.role === 'manager' ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25' : member.role === 'intern' ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25' : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20', ]"
+                    >
+                      {{ member.role }}
+                    </span>
+                    <span
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
+                      :class="[ member.status === 'active' ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25' : member.status === 'on_leave' ? 'bg-amber-500/10 text-amber-800 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/25' : 'bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25', ]"
+                    >
+                      {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="canManageDepartments" class="relative shrink-0" @click.stop>
+                  <button
+                    type="button"
+                    class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80"
+                    @click="toggleStaffMenu(member.id)"
+                  >
+                    <EllipsisVerticalIcon class="h-5 w-5" />
+                  </button>
+                  <div
+                    v-if="openStaffMenuId === member.id"
+                    class="absolute right-0 top-10 z-50 min-w-[10rem] overflow-hidden rounded-lg border border-gray-200/90 bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:border-gray-700/80 dark:bg-slate-950/95"
+                  >
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
+                      @click="handleToggleStaffRole(member); openStaffMenuId = null"
+                    >
+                      <UserGroupIcon class="h-4 w-4 shrink-0" />
+                      Toggle role
+                    </button>
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
+                      @click="handleEditStaff(member); openStaffMenuId = null"
+                    >
+                      <PencilSquareIcon class="h-4 w-4 shrink-0" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
+                      @click="handleDeleteStaff(member); openStaffMenuId = null"
+                    >
+                      <TrashIcon class="h-4 w-4 shrink-0" />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            :class="[
+              isStaffFullscreen ? 'min-h-0 overflow-auto' : 'hidden min-h-0 overflow-x-auto md:block',
+            ]"
+          >
           <table class="min-w-full divide-y divide-gray-100/90 dark:divide-gray-800/80">
             <thead
-              class="bg-gray-50/95 dark:!bg-dashboard-card/85"
-              :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''"
+              class="border-b border-gray-200/60 bg-gray-50/90 dark:border-gray-800/70 dark:!bg-dashboard-card/90"
+              :class="isStaffFullscreen ? 'sticky top-0 z-10 backdrop-blur-md' : ''"
             >
               <tr>
                 <th v-if="canManageDepartments" class="w-10 px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">
@@ -207,6 +304,7 @@
                     wrapper-class="justify-center"
                   />
                 </th>
+                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Name</th>
                 <th class="hidden px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:table-cell sm:px-5">Position</th>
                 <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Role</th>
                 <th class="hidden px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell md:px-5">Email</th>
@@ -217,14 +315,13 @@
                 >
                   Action
                 </th>
-                  <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Name</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100/90 bg-white/80 dark:divide-gray-800/80 dark:!bg-dashboard-card/25">
+            <tbody class="divide-y divide-gray-100/90 bg-white/70 dark:divide-gray-800/80 dark:!bg-dashboard-card/20">
               <tr
                 v-for="member in paginatedStaff"
                 :key="member.id"
-                class="transition-colors hover:bg-gray-50/90 dark:hover:bg-gray-900/35"
+                class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-900/40"
               >
               <td v-if="canManageDepartments" class="w-10 px-4 py-3 text-center sm:px-5">
                 <Checkbox
@@ -323,6 +420,7 @@
             </tr>
           </tbody>
         </table>
+          </div>
         </div>
 
         <!-- Fullscreen: pagination pinned inside overlay -->

@@ -3,7 +3,9 @@
     class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
     <!-- Hero + filters (aligned with Inventory → Folders) -->
-    <header class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5">
+    <header
+      class="relative overflow-hidden rounded-2xl border border-gray-200/55 bg-white/85 px-4 py-4 shadow-none backdrop-blur-xl dark:border-gray-700/45 dark:bg-[#12141c]/85 sm:px-5 sm:py-5"
+    >
       <div class="relative">
         <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
           <div class="min-w-0 flex-1">
@@ -143,7 +145,7 @@
     <!-- Error state -->
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
-      class="rounded-sm bg-white px-4 py-10 text-center dark:!bg-dashboard-card sm:px-6"
+      class="rounded-2xl border border-gray-200/55 bg-white/90 px-4 py-10 text-center shadow-none backdrop-blur-md dark:border-gray-700/45 dark:bg-[#12141c]/80 sm:px-6"
     >
       <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-red-50 ring-1 ring-red-200/80 dark:bg-red-950/40 dark:ring-red-900/50">
         <BuildingOfficeIcon class="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -238,7 +240,7 @@
 
       <div
         v-else-if="filteredDepartments.length === 0"
-        class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)] sm:px-6"
+        class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-gray-200/55 bg-white/90 px-4 py-14 text-center shadow-none backdrop-blur-md dark:border-gray-700/45 dark:bg-[#12141c]/80 sm:min-h-[min(48vh,22rem)] sm:px-6"
       >
         <div class="relative z-10">
           <div

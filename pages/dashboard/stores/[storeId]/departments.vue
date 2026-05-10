@@ -1,18 +1,18 @@
 <template>
   <div
-    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-2 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-2.5 sm:pb-32"
+    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-3 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-4 sm:pb-32"
   >
-    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-4 sm:!mb-5" />
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-2 sm:!mb-4" />
 
     <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
     <header
-      class="relative overflow-hidden rounded-sm bg-white px-3 py-2.5 dark:bg-[#12141c] sm:px-4 sm:py-3"
+      class="relative overflow-hidden rounded-2xl border border-gray-200/55 bg-white/85 px-3 py-3 shadow-none backdrop-blur-xl dark:border-gray-700/45 dark:bg-[#12141c]/85 sm:px-4 sm:py-4"
     >
       <div
-        class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/12 via-primary-500/5 to-transparent blur-2xl dark:hidden"
+        class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/14 via-primary-500/6 to-transparent blur-2xl dark:from-primary-500/8 dark:via-transparent dark:to-transparent"
       />
       <div
-        class="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-gradient-to-tr from-gray-200/35 to-transparent blur-2xl dark:hidden"
+        class="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-gradient-to-tr from-gray-200/40 to-transparent blur-2xl dark:from-gray-600/15 dark:to-transparent"
       />
       <div class="relative">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
@@ -60,7 +60,7 @@
 
         <div
           v-if="store && !departmentsStore.loading && !storesLoading"
-          class="mt-2 flex flex-col gap-2 border-t border-gray-100/90 pt-2 dark:border-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
+          class="mt-3 flex flex-col gap-2 border-t border-gray-200/60 pt-3 dark:border-gray-800/70 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
         >
           <div class="relative min-w-0 flex-1 sm:min-w-[200px] sm:max-w-md">
             <MagnifyingGlassIcon
@@ -128,10 +128,10 @@
       </div>
     </header>
 
-    <!-- Mobile stats (compact, same surface language as folder cards) -->
-    <div v-if="store" class="grid grid-cols-2 gap-1.5 lg:hidden">
+    <!-- Mobile stats -->
+    <div v-if="store" class="grid grid-cols-2 gap-2 lg:hidden">
       <div
-        class="rounded-sm bg-white px-2.5 py-2 dark:!bg-dashboard-card"
+        class="rounded-xl border border-gray-200/65 bg-white/90 px-3 py-2.5 shadow-none backdrop-blur-md dark:border-gray-700/50 dark:bg-white/[0.04]"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -140,11 +140,11 @@
               {{ storeDepartments.length }}
             </p>
           </div>
-          <BuildingOfficeIcon class="h-6 w-6 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
+          <BuildingOfficeIcon class="h-6 w-6 shrink-0 text-primary-500/70 dark:text-primary-400/80" stroke-width="1.2" />
         </div>
       </div>
       <div
-        class="rounded-sm bg-white px-2.5 py-2 dark:!bg-dashboard-card"
+        class="rounded-xl border border-gray-200/65 bg-white/90 px-3 py-2.5 shadow-none backdrop-blur-md dark:border-gray-700/50 dark:bg-white/[0.04]"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
@@ -153,7 +153,7 @@
               {{ totalStaffForStore }}
             </p>
           </div>
-          <UsersIcon class="h-6 w-6 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
+          <UsersIcon class="h-6 w-6 shrink-0 text-primary-500/70 dark:text-primary-400/80" stroke-width="1.2" />
         </div>
       </div>
     </div>
@@ -172,12 +172,12 @@
 
     <div
       v-else-if="departmentsStore.loading || storesLoading"
-      class="grid min-h-[96px] grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+      class="grid min-h-[96px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-sm bg-white px-2 pb-2 pt-2 dark:!bg-dashboard-card animate-pulse"
+        class="group relative flex flex-col items-center overflow-hidden rounded-xl border border-gray-100/80 bg-white/70 px-2 pb-2 pt-2 dark:border-gray-800/60 dark:bg-white/[0.04] animate-pulse"
       >
         <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
         <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
@@ -190,17 +190,17 @@
     <div v-else-if="!departmentsStore.error">
       <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
       >
         <div
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex min-h-[108px] cursor-pointer flex-col items-stretch overflow-hidden rounded-sm bg-white duration-200 ease-out active:scale-[0.99] dark:!bg-dashboard-card sm:min-h-[112px] hover:-translate-y-px"
+          class="group relative flex min-h-[104px] cursor-pointer flex-col items-stretch overflow-hidden rounded-xl border border-gray-200/60 bg-white/95 shadow-none backdrop-blur-sm duration-200 ease-out active:scale-[0.99] dark:border-gray-700/45 dark:bg-white/[0.04] sm:min-h-[108px]"
           :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false, 'pointer-events-none': deletingDepartmentId === department.id }"
           @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
         >
           <div
-            class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:via-primary-500/30"
+            class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/45 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:via-primary-500/35"
           />
           <div
             v-if="deletingDepartmentId === department.id"
@@ -239,11 +239,15 @@
             class="flex w-full flex-1 flex-col items-center justify-between px-2 pb-2 pt-1 text-center"
             :class="canManageDepartments ? 'pt-7' : 'pt-3'"
           >
-            <div class="mb-1 flex min-h-[48px] w-full flex-1 flex-col items-center justify-center sm:min-h-[52px]">
-              <BuildingOfficeIcon
-                class="h-9 w-9 shrink-0 text-gray-400 transition-colors group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400 sm:h-10 sm:w-10"
-                stroke-width="1.25"
-              />
+            <div class="mb-1 flex min-h-[44px] w-full flex-1 flex-col items-center justify-center sm:min-h-[48px]">
+              <div
+                class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-500/10 ring-1 ring-primary-500/15 transition-colors group-hover:bg-primary-500/[0.14] dark:bg-primary-500/12 dark:ring-primary-500/25 sm:h-12 sm:w-12"
+              >
+                <BuildingOfficeIcon
+                  class="h-6 w-6 shrink-0 text-primary-600 transition-colors group-hover:text-primary-700 dark:text-primary-400 dark:group-hover:text-primary-300 sm:h-7 sm:w-7"
+                  stroke-width="1.25"
+                />
+              </div>
             </div>
 
             <div class="mt-auto w-full min-w-0">
@@ -254,7 +258,7 @@
                 {{ department.name }}
               </h3>
               <p
-                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/80 bg-white/90 px-1.5 py-px text-[9px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-400"
+                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/70 bg-gray-50/90 px-2 py-0.5 text-[9px] font-medium tabular-nums text-gray-600 dark:border-gray-700/70 dark:bg-white/[0.06] dark:text-gray-400"
               >
                 {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
               </p>
@@ -271,10 +275,10 @@
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-10 text-center dark:!bg-dashboard-card sm:min-h-[min(50vh,24rem)] sm:px-6"
+        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-gray-200/55 bg-white/80 px-4 py-10 text-center shadow-none backdrop-blur-md dark:border-gray-700/45 dark:bg-[#12141c]/75 sm:min-h-[min(50vh,24rem)] sm:px-6"
       >
         <div
-          class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/12 via-transparent to-gray-200/15 blur-3xl dark:from-primary-500/10 dark:to-gray-600/10"
+          class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/15 via-transparent to-gray-200/18 blur-3xl dark:from-primary-500/12 dark:to-gray-600/12"
         />
         <div class="relative z-10">
           <div class="mx-auto mb-3 flex items-center justify-center">

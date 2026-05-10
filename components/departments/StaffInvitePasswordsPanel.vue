@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="canShow && filteredEntries.length > 0"
-    class="rounded-sm border border-amber-200/80 dark:border-amber-800/60 bg-amber-50/90 dark:bg-amber-950/30 px-4 py-3 sm:px-5 sm:py-4"
+    class="rounded-2xl border border-amber-200/75 bg-amber-50/85 px-4 py-3 backdrop-blur-md dark:border-amber-800/55 dark:bg-amber-950/35 sm:px-5 sm:py-4"
   >
     <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
       <div class="min-w-0">
