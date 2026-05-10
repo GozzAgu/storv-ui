@@ -1063,7 +1063,7 @@
               <ShieldCheckIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
             </span>
             <h3 class="text-sm font-semibold text-white sm:text-[15px]">Secure connections</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-300 sm:text-base">
+            <p class="mt-2 text-xs leading-relaxed text-slate-300 sm:text-sm">
               Sessions use HTTPS in transit. Your workspace runs on hardened, cloud-hosted infrastructure engineered for uptime.
             </p>
           </div>
@@ -1076,7 +1076,7 @@
               <KeyIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
             </span>
             <h3 class="text-sm font-semibold text-white sm:text-[15px]">Role-based control</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-300 sm:text-base">
+            <p class="mt-2 text-xs leading-relaxed text-slate-300 sm:text-sm">
               Super admins, managers, and staff each see appropriate actions. Sensitive inventory setup stays restricted to admins.
             </p>
           </div>
@@ -1089,13 +1089,13 @@
               <LockClosedIcon class="h-5 w-5" stroke-width="1.75" aria-hidden="true" />
             </span>
             <h3 class="text-sm font-semibold text-white sm:text-[15px]">Your operational data</h3>
-            <p class="mt-2 text-sm leading-relaxed text-slate-300 sm:text-base">
+            <p class="mt-2 text-xs leading-relaxed text-slate-300 sm:text-sm">
               We treat your store data as yours to run the service. Read how we handle it in our Privacy and Terms policies.
             </p>
           </div>
         </div>
 
-        <p class="mx-auto mt-10 max-w-lg text-center text-base leading-relaxed text-slate-400">
+        <p class="mx-auto mt-10 max-w-lg text-center text-sm leading-relaxed text-slate-400">
           <NuxtLink
             to="/privacy"
             class="font-medium text-slate-300 underline decoration-slate-500/60 underline-offset-2 transition-colors hover:text-white"
