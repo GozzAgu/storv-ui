@@ -4,8 +4,11 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 dark:bg-slate-950/90">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center gap-3 h-16 lg:h-20">
-          <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-            Storvv
+          <NuxtLink
+            to="/"
+            class="inline-flex shrink-0 rounded-sm outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary-400/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+          >
+            <img :src="logoSource" alt="Storvv" class="h-7 w-auto max-w-[122px] object-contain sm:h-8" />
           </NuxtLink>
           <div class="flex items-center gap-3 sm:gap-4">
             <ThemeToggle />
@@ -22,20 +25,20 @@
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="prose prose-lg max-w-none">
           <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Terms of Service</h1>
-          <p class="text-gray-600 dark:text-gray-400 mb-8">Last updated: January 2025</p>
+          <p class="text-gray-600 dark:text-gray-400 mb-8">Last updated: May 9, 2026</p>
 
           <div class="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">1. Agreement to Terms</h2>
               <p class="mb-4">
-                By accessing or using Storvv ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these terms, you may not access the Service.
+                By accessing or using Storvv ("the Service"), you agree to these Terms of Service ("Terms") and our <NuxtLink to="/privacy" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 hover:text-primary-700 dark:text-primary-400">Privacy Policy</NuxtLink>. If you disagree with any part of these Terms, you may not access the Service.
               </p>
             </section>
 
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">2. Description of Service</h2>
               <p class="mb-4">
-                Storvv is an inventory management platform that allows businesses to track, organize, and manage their inventory. We provide various features including real-time tracking, analytics, alerts, and reporting tools.
+                Storvv is a cloud software service for retail and store operations. Depending on your subscription, features may include custom inventory folders and templates, stock and serial tracking, receipts and returns, customer records tied to transactions, staff accounts with role-based access, dashboards and notifications, analytics and reporting, multi-location management, inventory transfers between locations, duplication of folders or items, audit-style activity logs, and other capabilities described on <a href="https://www.storvv.com" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">storvv.com</a> or in-product. Features and limits vary by plan (see below).
               </p>
             </section>
 
@@ -63,7 +66,8 @@
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">4. Acceptable Use</h2>
               <p class="mb-4">You agree not to:</p>
               <ul class="list-disc pl-6 mb-4 space-y-2">
-                <li>Use the Service for any illegal purpose or in violation of any laws</li>
+                <li>Use the Service for any unlawful purpose or in violation of applicable laws</li>
+                <li>Upload or collect personal data without a lawful basis, or use the Service to violate privacy rights of customers, staff, or others</li>
                 <li>Violate or infringe upon the rights of others</li>
                 <li>Transmit any harmful code, viruses, or malicious software</li>
                 <li>Attempt to gain unauthorized access to the Service or related systems</li>
@@ -76,24 +80,24 @@
 
             <section>
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">5. Subscription and Payment</h2>
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.1 Subscription Plans</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.1 Subscription plans</h3>
               <p class="mb-4">
-                We offer various subscription plans with different features and pricing. Details of current plans are available on our pricing page.
+                Storvv is offered in tiers such as <strong>Storvv Micro</strong> (free, with limits on stores, departments, staff, and certain features), <strong>Storvv Medium</strong>, and <strong>Storvv Enterprise</strong>, each with different limits and capabilities. Current plan details, limits, and prices are shown in the product and on our public site; we may change plans and pricing with reasonable notice where required.
               </p>
 
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.2 Billing</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.2 Billing and payment processor</h3>
               <p class="mb-4">
-                Subscription fees are billed in advance on a monthly or annual basis. By subscribing, you authorize us to charge your payment method for the subscription fees.
+                Paid upgrades are processed through a third-party payment provider (for example Paystack). By purchasing a paid plan, you agree to that provider’s terms and privacy policy. You authorize us and our payment partners to charge your chosen payment method for applicable fees, taxes, and renewals on the schedule shown at checkout.
               </p>
 
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.3 Cancellation</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.3 Renewals and cancellation</h3>
               <p class="mb-4">
-                You may cancel your subscription at any time. Cancellation will take effect at the end of your current billing period. You will continue to have access to the Service until the end of your paid period.
+                Subscriptions renew according to the billing cycle you select unless canceled in accordance with the controls we provide (for example through your Paystack subscription or account settings where available). Canceling stops future renewal; access for the current prepaid period continues unless we state otherwise at the time of cancellation.
               </p>
 
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.4 Refunds</h3>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">5.4 Taxes and refunds</h3>
               <p class="mb-4">
-                Refund policies vary by plan. Free plans are not eligible for refunds. Paid plans may be eligible for refunds within the first 30 days of subscription, subject to our refund policy.
+                Fees may be stated excluding applicable taxes unless we specify otherwise. Refunds, if any, are governed by the policy communicated at purchase and mandatory consumer laws in your jurisdiction. The Micro plan has no subscription fee and is not refundable as a subscription product.
               </p>
             </section>
 
@@ -108,7 +112,7 @@
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">7. User Content</h2>
               <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">7.1 Ownership</h3>
               <p class="mb-4">
-                You retain ownership of any data, information, or content you upload to the Service ("User Content"). By uploading User Content, you grant us a license to use, store, and process that content as necessary to provide the Service.
+                You retain ownership of your operational and business data that you submit to the Service ("User Content"), subject to applicable law. You grant Storvv a worldwide, non-exclusive license to host, reproduce, transmit, display, and process User Content solely to operate, secure, improve, and support the Service for you—including backups, redundancy, and machine-readable processing—and as described in our Privacy Policy.
               </p>
 
               <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mt-6 mb-3">7.2 Responsibility</h3>
@@ -160,9 +164,9 @@
             </section>
 
             <section>
-              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">14. Governing Law</h2>
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mt-6 sm:mt-8 mb-3 sm:mb-4">14. Governing Law and Disputes</h2>
               <p class="mb-4">
-                These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Storvv operates, without regard to its conflict of law provisions.
+                These Terms are governed by the laws that apply to Storvv’s operation of the Service, without regard to conflict-of-law rules that would require applying another jurisdiction’s laws—except where mandatory consumer protection laws in your country give you non-waivable rights, in which case those laws prevail to the minimum extent required.
               </p>
             </section>
 
@@ -179,8 +183,8 @@
                 If you have any questions about these Terms, please contact us:
               </p>
               <ul class="list-none mb-4 space-y-2">
-                <li><strong>Email:</strong> legal@storv.com</li>
-                <li><strong>Address:</strong> Storvv, Inc.</li>
+                <li><strong>Email:</strong> <a href="mailto:hello@storvv.com" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 dark:text-primary-400">hello@storvv.com</a></li>
+                <li><strong>Website:</strong> <a href="https://www.storvv.com" class="font-medium text-primary-600 underline decoration-primary-500/35 underline-offset-2 dark:text-primary-400">storvv.com</a></li>
               </ul>
             </section>
           </div>
@@ -192,11 +196,14 @@
     <footer class="bg-gray-900 text-gray-400 py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <NuxtLink to="/" class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent mb-3 sm:mb-4 inline-block">
-            Storvv
+          <NuxtLink
+            to="/"
+            class="mb-3 sm:mb-4 inline-flex justify-center rounded-sm outline-none ring-offset-gray-900 transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary-400/40 focus-visible:ring-offset-2"
+          >
+            <img src="/storvv logo.png" alt="Storvv" class="h-7 w-auto max-w-[122px] object-contain sm:h-8" />
           </NuxtLink>
           <p class="text-gray-500 text-sm">
-            &copy; 2025 Storvv. All rights reserved.
+            &copy; 2026 Storvv. All rights reserved.
           </p>
         </div>
       </div>
@@ -205,14 +212,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import { useTheme } from '~/composables/useTheme'
+
+const { actualTheme } = useTheme()
+const logoSource = computed(() =>
+  actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
+)
 
 useHead({
   title: 'Terms of Service - Storvv',
   meta: [
     {
       name: 'description',
-      content: 'Terms of Service for Storvv inventory management service'
+      content: 'Terms of Service for Storvv retail and store operations software'
     }
   ]
 })
