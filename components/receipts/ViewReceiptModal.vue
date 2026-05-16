@@ -33,12 +33,13 @@
             <span>WhatsApp</span>
           </button>
           <button
-            @click="showEmailModal = true"
-            :disabled="isSendingEmail || !receipt"
+            type="button"
+            @click="handleEmailClick"
+            :disabled="!receipt"
             class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
           >
             <EnvelopeIcon class="w-4 h-4" stroke-width="1.5" />
-            <span>{{ isSendingEmail ? 'Sending...' : 'Email' }}</span>
+            <span>Email</span>
           </button>
           <button
             type="button"
@@ -1198,6 +1199,11 @@ const generateReceiptPDF = async (): Promise<string> => {
   } finally {
     isCapturingPdf.value = false
   }
+}
+
+const handleEmailClick = () => {
+  if (!props.receipt) return
+  toast.info('Email receipts are coming soon.')
 }
 
 const handleSendEmail = async () => {
