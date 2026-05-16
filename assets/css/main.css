@@ -699,3 +699,22 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 }
 
+/*
+ * Capacitor WKWebView: auth entrance animations often never run (content stays opacity:0).
+ * Force sign-in and related screens visible immediately.
+ */
+html.capacitor-native .animate-auth-fade-up,
+html.capacitor-native .animate-auth-glow-drift {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.capacitor-native {
+  background-color: #f4f6f9 !important;
+}
+
+html.capacitor-native.dark {
+  background-color: #07080c !important;
+}
+

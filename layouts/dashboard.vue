@@ -679,6 +679,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
+import { waitForAuthStore } from '~/utils/wait-for-auth'
 
 const { actualTheme } = useTheme()
 
@@ -756,7 +757,8 @@ function scheduleProfileMenuPosition() {
 const notificationsOpen = ref(false)
 const notificationsRef = ref<HTMLElement | null>(null)
 const notificationsPanelRef = ref<HTMLElement | null>(null)
-const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
+/** Never block the whole shell on auth — show UI with a short gate only (Capacitor-safe). */
+const checkingAuth = ref(false)
 
 const toggleNotifications = () => {
   notificationsOpen.value = !notificationsOpen.value
@@ -1535,38 +1537,9 @@ const checkAuth = async () => {
     return
   }
   
-  checkingAuth.value = true
-  
-  // Wait for auth to finish loading
-  if (authStore.loading) {
-    await new Promise<void>((resolve) => {
-      let resolved = false
-      const maxWait = 5000 // 5 seconds max wait
-      const startTime = Date.now()
-      
-      const checkAuthState = () => {
-        if (!authStore.loading) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        
-        if (Date.now() - startTime > maxWait) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        
-        setTimeout(checkAuthState, 50)
-      }
-      
-      checkAuthState()
-    })
-  }
+  checkingAuth.value = authStore.loading
+
+  await waitForAuthStore(authStore, 5000)
   
   // Redirect to signin if no user after loading completes
   // But add loop prevention

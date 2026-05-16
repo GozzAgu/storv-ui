@@ -76,6 +76,13 @@ export default defineNuxtConfig({
     baseURL: '/',
     buildAssetsDir: '/_nuxt/',
     head: {
+      script: [
+        {
+          key: 'capacitor-native-mark',
+          innerHTML: `(function(){try{var h=location.href||'';if(location.protocol==='capacitor:'||h.indexOf('capacitor://')===0){document.documentElement.classList.add('capacitor-native');document.documentElement.classList.add('styles-loaded');}}catch(e){}})();`,
+          tagPosition: 'head',
+        },
+      ],
       link: [
         {
           rel: 'icon',

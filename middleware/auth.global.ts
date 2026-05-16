@@ -1,4 +1,5 @@
 import { SIGNIN_ALLOW_WHILE_AUTHED_KEY } from './guest'
+import { waitForAuthStore } from '~/utils/wait-for-auth'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
@@ -32,33 +33,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     const authStore = useAuthStore()
 
-    // Wait for auth to finish loading
-    if (authStore.loading) {
-      await new Promise<void>((resolve) => {
-        let resolved = false
-        const maxWait = 3000 // 3 seconds max wait
-        const startTime = Date.now()
-        
-        const checkAuth = () => {
-          if (!authStore.loading) {
-            if (!resolved) {
-              resolved = true
-              resolve()
-            }
-            return
-          }
-          if (Date.now() - startTime > maxWait) {
-            if (!resolved) {
-              resolved = true
-              resolve()
-            }
-            return
-          }
-          setTimeout(checkAuth, 50)
-        }
-        checkAuth()
-      })
-    }
+    await waitForAuthStore(authStore, 5000)
 
     // Redirect to signin if not authenticated
     if (!authStore.loading && !authStore.currentUser) {

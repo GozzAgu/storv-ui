@@ -1,25 +1,40 @@
 import { watch } from 'vue'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { withTimeout } from '~/utils/with-timeout'
 
-export default defineNuxtPlugin(async () => {
-  // Only run on client side
+export default defineNuxtPlugin(() => {
   if (import.meta.server) return
 
-  const { usePreferences } = await import('~/composables/usePreferences')
-  const { initialize } = usePreferences()
-
-  // Initialize preferences immediately (loads from localStorage first)
-  // This ensures preferences are available right away
-  await initialize()
-
-  // Also set up a watcher to reload from Firestore when auth becomes available
-  const { useFirebaseAuth } = await import('~/composables/useFirebaseAuth')
-  const { currentUser, loading: authLoading } = useFirebaseAuth()
-  
-  // Watch for auth state changes and reload preferences from Firestore when user logs in
-  watch([currentUser, authLoading], async ([user, loading]) => {
-    if (!loading && user) {
-      // User is authenticated, reload preferences from Firestore
-      await initialize()
+  const runInitialize = async (label: string) => {
+    const { usePreferences } = await import('~/composables/usePreferences')
+    const { initialize, initializeLocalOnly } = usePreferences()
+    if (isCapacitorNative()) {
+      initializeLocalOnly()
+      return
     }
-  }, { immediate: true })
+    await withTimeout(initialize(), 4000, label)
+  }
+
+  void runInitialize('preferences initialize')
+
+  void (async () => {
+    const { usePreferences } = await import('~/composables/usePreferences')
+    const { initialize } = usePreferences()
+    const { useFirebaseAuth } = await import('~/composables/useFirebaseAuth')
+    const { currentUser, loading: authLoading } = useFirebaseAuth()
+
+    watch(
+      [currentUser, authLoading],
+      async ([user, loading]) => {
+        if (!loading && user) {
+          if (isCapacitorNative()) {
+            await withTimeout(initialize(), 8000, 'preferences after auth (native)')
+          } else {
+            await withTimeout(initialize(), 4000, 'preferences after auth')
+          }
+        }
+      },
+      { immediate: false }
+    )
+  })()
 })

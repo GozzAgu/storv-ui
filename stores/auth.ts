@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import {
-  getAuth,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -15,7 +14,7 @@ import {
   type Auth,
   type ConfirmationResult
 } from 'firebase/auth'
-import { useFirebase } from '~/composables/useFirebase'
+import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
 
 export const useAuthStore = defineStore('auth', {
@@ -39,15 +38,11 @@ export const useAuthStore = defineStore('auth', {
         return
       }
 
-      const { getApp } = useFirebase()
-      const app = getApp()
-
-      if (!app) {
+      const auth = getFirebaseClientAuth()
+      if (!auth) {
         setTimeout(() => this.initAuth(), 500)
         return
       }
-
-      const auth = getAuth(app)
       const timeout = setTimeout(() => {
         if (this.loading) {
           this.loading = false
@@ -73,14 +68,7 @@ export const useAuthStore = defineStore('auth', {
     getAuthInstance(): Auth | null {
       if (import.meta.server) return null
 
-      const { getApp } = useFirebase()
-      const app = getApp()
-      if (!app) {
-        console.warn('Firebase app not initialized')
-        return null
-      }
-
-      return getAuth(app)
+      return getFirebaseClientAuth()
     },
 
     // Sign in with email and password

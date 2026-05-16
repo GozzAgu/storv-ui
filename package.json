@@ -16,6 +16,7 @@
     "test:debug": "playwright test --debug",
     "test:unit": "vitest run tests/server tests/integration tests/unit",
     "test:rules": "firebase emulators:exec --only firestore,storage \"vitest run tests/rules --reporter=dot\"",
+    "cap:build": "nuxt generate && npx cap sync",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
     "cap:update": "npx cap update",

@@ -65,12 +65,26 @@ export const useCurrencyConversion = () => {
     }
   }
 
+  const FETCH_TIMEOUT_MS = 5000
+
+  const fetchWithTimeout = async (url: string): Promise<Response> => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+    try {
+      return await fetch(url, { signal: controller.signal })
+    } finally {
+      clearTimeout(timeoutId)
+    }
+  }
+
   // Fetch exchange rates from API
   const fetchExchangeRates = async (fromCurrency: string = 'USD'): Promise<ExchangeRates | null> => {
     try {
       // Use a free API - exchangerate-api.com (no API key required for basic usage)
       // Alternative: exchangerate.host (also free)
-      const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+      const response = await fetchWithTimeout(
+        `https://api.exchangerate-api.com/v4/latest/${fromCurrency}`
+      )
       
       if (!response.ok) {
         throw new Error('Failed to fetch exchange rates')
@@ -95,7 +109,9 @@ export const useCurrencyConversion = () => {
       
       // Try fallback API
       try {
-        const fallbackResponse = await fetch(`https://open.er-api.com/v6/latest/${fromCurrency}`)
+        const fallbackResponse = await fetchWithTimeout(
+          `https://open.er-api.com/v6/latest/${fromCurrency}`
+        )
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json()
           if (fallbackData && fallbackData.rates) {

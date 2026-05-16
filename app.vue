@@ -1,5 +1,14 @@
 <template>
   <UApp>
+  <div
+    v-if="capacitorBooting"
+    class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#07080c]"
+    aria-busy="true"
+    aria-label="Loading Storv"
+  >
+    <div class="h-10 w-10 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+    <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading Storv…</p>
+  </div>
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
@@ -11,7 +20,22 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
+import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
+
+const capacitorBooting = ref(false)
+
+onMounted(() => {
+  if (!isCapacitorNative()) return
+  markCapacitorDocument()
+  capacitorBooting.value = true
+  const hide = () => {
+    capacitorBooting.value = false
+  }
+  requestAnimationFrame(hide)
+  setTimeout(hide, 400)
+})
 
 // Global error handler for unhandled promise rejections
 if (import.meta.client) {

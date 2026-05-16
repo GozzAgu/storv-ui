@@ -1,4 +1,6 @@
 import type { RouteLocationNormalized } from 'vue-router'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { waitForAuthStore } from '~/utils/wait-for-auth'
 
 /** Let verified users finish on /signin (and survive refresh) without guest → dashboard bounce. */
 export const SIGNIN_ALLOW_WHILE_AUTHED_KEY = 'storv_allow_signin_while_authed'
@@ -35,33 +37,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Use Pinia store directly for more reliable state
   const authStore = useAuthStore()
   
-  // Wait for auth to finish loading (with proper timeout)
-  if (authStore.loading) {
-    await new Promise<void>((resolve) => {
-      let resolved = false
-      const maxWait = 3000 // 3 seconds max wait
-      const startTime = Date.now()
-      
-      const checkAuth = () => {
-        if (!authStore.loading) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        if (Date.now() - startTime > maxWait) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        setTimeout(checkAuth, 50)
-      }
-      checkAuth()
-    })
-  }
+  await waitForAuthStore(authStore, isCapacitorNative() ? 800 : 5000)
   
   // Only redirect if auth has finished loading and user is authenticated
   if (!authStore.loading && authStore.currentUser) {

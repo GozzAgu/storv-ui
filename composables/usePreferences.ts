@@ -370,11 +370,16 @@ export const usePreferences = () => {
     return formatDate(date, { includeTime: true })
   }
 
+  /** Local storage only — safe for Capacitor cold start (no network). */
+  const initializeLocalOnly = () => {
+    loadFromLocalStorage()
+  }
+
   // Initialize preferences
   const initialize = async () => {
     loadFromLocalStorage()
     await loadFromFirestore()
-    
+
     // Initialize currency conversion with base currency
     if (import.meta.client) {
       try {
@@ -397,6 +402,7 @@ export const usePreferences = () => {
     formatDate,
     formatTime,
     initialize,
+    initializeLocalOnly,
   }
 }
 
