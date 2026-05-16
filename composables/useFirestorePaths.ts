@@ -117,6 +117,23 @@ export function getCustomerDocument(db: Firestore, userId: string, storeId: stri
 }
 
 /**
+ * Customer account balance keyed by contact (email/phone/name).
+ * users/{userId}/stores/{storeId}/customerAccounts/{accountId}
+ */
+export function getCustomerAccountsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {
+  return collection(db, 'users', userId, 'stores', storeId, 'customerAccounts')
+}
+
+export function getCustomerAccountDocument(
+  db: Firestore,
+  userId: string,
+  storeId: string,
+  accountId: string
+): DocumentReference {
+  return doc(db, 'users', userId, 'stores', storeId, 'customerAccounts', accountId)
+}
+
+/**
  * Get notifications collection path: users/{userId}/stores/{storeId}/notifications
  */
 export function getNotificationsCollection(db: Firestore, userId: string, storeId: string): CollectionReference {

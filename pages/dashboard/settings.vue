@@ -245,7 +245,7 @@
             <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
             <button
               @click="saveStoreInfo"
-              class="inline-flex items-center justify-center w-9 h-8 rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors"
+              class="btn-primary inline-flex h-8 w-9 items-center justify-center !px-0"
               aria-label="Done"
             >
               <CheckIcon class="w-4 h-4" />
@@ -766,14 +766,11 @@ async function uploadAccountLogoWithFallback(
     const body = new FormData()
     body.append('file', file)
     try {
-      return await $fetch<{ url: string; path: string }>(
-        '/api/storage/upload-account-logo',
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body,
-        }
-      )
+      return (await $fetch('/api/storage/upload-account-logo', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body,
+      })) as { url: string; path: string }
     } catch (apiErr: unknown) {
       const serverHint = extractUploadFailureMessage(apiErr)
       if (isBillingDelinquentMessage(serverHint)) {
@@ -1026,9 +1023,15 @@ onMounted(async () => {
   const isPaystackCallback = route.query.paystack_callback === '1' || (refParam && String(refParam).startsWith('storvv_'))
   if (currentUser.value && refParam && isPaystackCallback) {
     try {
-      const verify = await $fetch<{ success?: boolean; paid?: boolean; userId?: string; planId?: string; message?: string }>(
+      const verify = (await $fetch(
         `/api/paystack/verify?reference=${encodeURIComponent(refParam)}`
-      )
+      )) as {
+        success?: boolean
+        paid?: boolean
+        userId?: string
+        planId?: string
+        message?: string
+      }
       if (verify.paid && verify.userId === currentUser.value.uid && verify.planId) {
         // Subscription is persisted server-side during verification; refresh local user data.
         await userStore.fetchUserData(currentUser.value.uid)

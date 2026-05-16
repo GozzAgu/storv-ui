@@ -87,7 +87,7 @@
           </div>
           <div v-else class="flex gap-1.5">
             <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="savePersonalInfo" class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Save changes</button>
+            <button @click="savePersonalInfo" class="btn-primary btn-primary-sm">Save changes</button>
           </div>
         </div>
         <div class="p-3 sm:p-4">
@@ -164,7 +164,7 @@
               </button>
               <button
                 type="button"
-                class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors"
+                class="btn-primary btn-primary-sm"
                 @click="saveReceiptPolicies"
               >
                 Save
@@ -302,7 +302,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
                 </div>
               </div>
-              <button @click="showPasswordModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Change</button>
+              <button @click="showPasswordModal = true" class="btn-primary btn-primary-sm">Change</button>
             </div>
             <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
               <div class="flex items-center gap-2.5">
@@ -374,7 +374,7 @@
             </div>
             <div v-else class="text-center py-8">
               <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="inline-block px-3 py-1.5 text-xs font-medium rounded-sm bg-primary-500 hover:bg-primary-600 text-white transition-colors">Set up store information</NuxtLink>
+              <NuxtLink to="/dashboard/settings" class="btn-primary btn-primary-sm inline-block">Set up store information</NuxtLink>
             </div>
           </div>
         </div>

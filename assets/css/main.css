@@ -94,6 +94,15 @@
     pointer-events: none !important;
   }
 
+  /** Solid navy primary actions */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-sm border-0 bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/55 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary-sm {
+    @apply px-3 py-1 text-xs font-semibold;
+  }
+
   /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
     @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
@@ -652,8 +661,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     border-radius: var(--app-radius-md) !important;
   }
 
-  /* Ensure common form/actions follow the same subtle radius */
-  :where(button, input, select, textarea):not(.rounded-full) {
+  /* Ensure common form/actions follow the same subtle radius (pill buttons excluded) */
+  :where(button, input, select, textarea):not(.rounded-full):not(.btn-primary) {
     border-radius: var(--app-radius-sm);
   }
 
@@ -669,6 +678,11 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
 
   :where(table) {
     border-radius: var(--app-radius-sm);
+  }
+
+  /** Keep column titles on one line; parent `.overflow-x-auto` handles narrow viewports */
+  :where(table thead th) {
+    white-space: nowrap;
   }
 
   :where(table thead tr:first-child th:first-child) {

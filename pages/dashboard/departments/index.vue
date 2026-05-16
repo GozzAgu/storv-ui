@@ -133,7 +133,7 @@
         </div>
         <NuxtLink
           :to="currentDepartment && currentDepartment.isActive === false ? '#' : `/dashboard/departments/${currentStaffMember.departmentId}`"
-          class="inline-flex shrink-0 items-center justify-center rounded-sm bg-primary-500 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary-600"
+          class="btn-primary btn-primary-sm shrink-0"
           :class="{ 'pointer-events-none cursor-not-allowed opacity-50': currentDepartment && currentDepartment.isActive === false }"
           :title="currentDepartment && currentDepartment.isActive === false ? 'This department is inactive' : ''"
         >

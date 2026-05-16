@@ -23,6 +23,16 @@
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0">
           <button
+            v-if="hasWhatsAppFeature"
+            type="button"
+            @click="openWhatsAppModal"
+            :disabled="!receipt"
+            class="px-3 py-1.5 rounded-sm border border-[#25D366]/40 bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366]/20 dark:border-[#25D366]/30 dark:text-[#25D366] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
+          >
+            <WhatsAppIcon class="w-4 h-4 shrink-0" />
+            <span>WhatsApp</span>
+          </button>
+          <button
             @click="showEmailModal = true"
             :disabled="isSendingEmail || !receipt"
             class="px-3 py-1.5 rounded-sm border border-gray-200 dark:border-gray-600 bg-white dark:!bg-dashboard-card text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 text-xs font-medium"
@@ -316,12 +326,30 @@
       </div>
     </template>
   </Modal>
+
+  <SendWhatsAppModal
+    v-model="showWhatsAppModal"
+    mode="receipt"
+    :phone="receipt?.customerPhone || ''"
+    :email="receipt?.customerEmail || ''"
+    :template-vars="whatsAppTemplateVars"
+    :receipt-number="receipt?.receiptNumber"
+    :store-name="storeName"
+    :store-address="storeAddress"
+    :store-logo-url="storeLogoUrl"
+    :receipt-data="receipt || undefined"
+    :get-receipt-element="() => receiptContent"
+    :get-receipt-pdf-blob="getReceiptPdfBlobForShare"
+    @sent="onWhatsAppSent"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, nextTick, shallowRef } from 'vue'
 import { PrinterIcon, EnvelopeIcon, ClipboardDocumentIcon } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
+import WhatsAppIcon from '~/components/icons/WhatsAppIcon.vue'
+import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
 import type { Receipt, ReceiptItem } from '~/stores/receipts'
 import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
@@ -335,6 +363,8 @@ import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDispl
 import { useAppToast } from '~/composables/useAppToast'
 import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
+import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
+import { base64ToBlob } from '~/utils/file-share'
 
 interface Props {
   modelValue: boolean
@@ -352,9 +382,12 @@ const isCapturingPdf = ref(false)
 const isPrinting = ref(false)
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
+const showWhatsAppModal = ref(false)
 const emailToSend = ref('')
 const { copyToClipboard } = useCopy()
 const toast = useAppToast()
+const { hasFeature: hasWhatsAppFeature } = useWhatsAppMessaging()
+const { authFetch } = useAuthenticatedFetch()
 
 const copyReceiptNumber = (receiptNumber: string) => {
   copyToClipboard(receiptNumber, 'Receipt number')
@@ -506,6 +539,35 @@ const showSwapCreditLine = computed(() => {
 const receiptTotalLabel = computed(() => {
   return showSwapCreditLine.value ? 'Amount due' : 'Total'
 })
+
+const receiptDisplayTotal = computed(() => {
+  if (!props.receipt) return 0
+  if (showSwapCreditLine.value) {
+    return Math.max(0, lineItemsNetTotal.value - swapCreditAmount.value)
+  }
+  return props.receipt.total ?? lineItemsNetTotal.value
+})
+
+const whatsAppTemplateVars = computed(() => ({
+  customerName: props.receipt?.customerName || 'Customer',
+  storeName: storeName.value || 'Store',
+  receiptNumber: props.receipt?.receiptNumber || '',
+  receiptDate: props.receipt?.date ? formatReceiptDateForWhatsApp(props.receipt.date) : '',
+  total: formatCurrency(receiptDisplayTotal.value),
+}))
+
+const openWhatsAppModal = () => {
+  showWhatsAppModal.value = true
+}
+
+async function getReceiptPdfBlobForShare(): Promise<Blob> {
+  const base64 = await generateReceiptPDF()
+  return base64ToBlob(base64, 'application/pdf')
+}
+
+const onWhatsAppSent = () => {
+  /* toast from modal */
+}
 
 // Pre-fill email when receipt changes
 watch(() => props.receipt, (receipt) => {
@@ -1155,21 +1217,24 @@ const handleSendEmail = async () => {
     const pdfBase64 = await generateReceiptPDF()
 
     // Send email with PDF attachment
-    const response = await $fetch('/api/receipts/send-email', {
-      method: 'POST',
-      body: {
-        receiptId: props.receipt.id,
-        receiptNumber: props.receipt.receiptNumber,
-        customerEmail: emailToSend.value,
-        receiptData: {
-          ...props.receipt,
-          salesTerms: receiptPolicies.salesTerms,
-          refundPolicy: receiptPolicies.refundPolicy,
-          warrantyPolicy: receiptPolicies.warrantyPolicy,
+    const response = await authFetch<{ success: boolean; error?: string; message?: string }>(
+      '/api/receipts/send-email',
+      {
+        method: 'POST',
+        body: {
+          receiptId: props.receipt.id,
+          receiptNumber: props.receipt.receiptNumber,
+          customerEmail: emailToSend.value,
+          receiptData: {
+            ...props.receipt,
+            salesTerms: receiptPolicies.salesTerms,
+            refundPolicy: receiptPolicies.refundPolicy,
+            warrantyPolicy: receiptPolicies.warrantyPolicy,
+          },
+          pdfBase64: pdfBase64,
         },
-        pdfBase64: pdfBase64,
-      },
-    })
+      }
+    )
 
     if (!response.success) {
       const errorMessage = ('error' in response && response.error) ? String(response.error) : 'Failed to send email'

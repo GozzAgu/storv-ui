@@ -525,11 +525,11 @@
                   <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
                     {{ item.discountedPrice !== undefined ? formatCurrency(item.discountedPrice) : formatCurrency(item.price ?? item.originalPrice ?? 0) }}
                   </span>
-                  <span
-                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide', getItemAvailability(item).class, ]"
-                  >
-                    {{ getItemAvailability(item).label }}
-                  </span>
+                  <InventoryStatusBadge
+                    :badge="getItemAvailability(item)"
+                    :inline-meta="false"
+                    class="shrink-0"
+                  />
                 </div>
                 <p v-if="item.sku || item.serialNumber || item.serialNo" class="mt-0.5 truncate text-[9px] text-gray-500 dark:text-gray-400">
                   {{ item.sku || item.serialNumber || item.serialNo }}
@@ -550,8 +550,8 @@
                   type="button"
                   :data-item-actions-anchor="item.id"
                   @click="toggleItemMenu(item.id)"
-                  :disabled="isItemSold(item)"
-                  :class="[ 'inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                  :disabled="isInventoryItemLocked(item)"
+                  :class="[ 'inline-flex h-7 w-7 items-center justify-center rounded-lg transition-colors', isInventoryItemLocked(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                   aria-label="Item actions"
                   aria-haspopup="menu"
                   :aria-expanded="openItemMenuId === item.id"
@@ -591,7 +591,7 @@
               <th
                 v-for="column in columns"
                 :key="column.key"
-                :class="[ 'px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100', ]"
+                :class="[ 'whitespace-nowrap px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100', ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
                 <div class="flex items-center gap-1.5">
@@ -611,7 +611,7 @@
               </th>
               <th
                 v-if="canManageInventoryItems"
-                class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+                class="w-12 whitespace-nowrap px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
               >
                 Actions
               </th>
@@ -669,15 +669,20 @@
                   <template v-else>
                     <!-- Check if column is a price field (by key or type) -->
                     <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[10px]">
-                      <div v-if="item.discountedPrice !== undefined" class="flex flex-col">
-                        <span class="font-semibold text-green-600 dark:text-green-400">
-                          {{ formatCurrency(item.discountedPrice) }}
-                        </span>
-                        <span class="text-[9px] text-gray-400 dark:text-gray-500 line-through">
+                      <div v-if="item.discountedPrice !== undefined" class="flex flex-col gap-0.5">
+                        <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+                          <span class="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                            {{ formatCurrency(item.discountedPrice) }}
+                          </span>
+                          <span
+                            v-if="getItemDiscountLabel(item)"
+                            class="text-[9px] font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
+                          >
+                            {{ getItemDiscountLabel(item) }}
+                          </span>
+                        </div>
+                        <span class="text-[9px] tabular-nums text-gray-400 line-through dark:text-gray-500">
                           {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
-                        </span>
-                        <span class="text-[9px] text-red-600 dark:text-red-400 font-medium">
-                          {{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }}
                         </span>
                       </div>
                       <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
@@ -703,13 +708,8 @@
                         -
                       </span>
                     </div>
-                    <div v-else-if="column.key === 'availability'" class="text-[10px]">
-                      <span
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wide"
-                        :class="getItemAvailability(item).class"
-                      >
-                        {{ getItemAvailability(item).label }}
-                      </span>
+                    <div v-else-if="column.key === 'availability'">
+                      <InventoryStatusBadge :badge="getItemAvailability(item)" />
                     </div>
                     <div v-else-if="'type' in column && column.type === 'boolean'" class="inline-flex items-center px-2 py-0.5 text-[9px] font-medium"
                       :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
@@ -736,8 +736,8 @@
                     type="button"
                     :data-item-actions-anchor="item.id"
                     @click="toggleItemMenu(item.id)"
-                    :disabled="isItemSold(item)"
-                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isItemSold(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                    :disabled="isInventoryItemLocked(item)"
+                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isInventoryItemLocked(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
                     aria-label="Item actions"
                     aria-haspopup="menu"
                     :aria-expanded="openItemMenuId === item.id"
@@ -799,7 +799,7 @@
       v-model="showMobileItemDetailPanel"
       eyebrow="Inventory"
       title="Product details"
-      :subtitle="mobileDetailItem ? `${folder?.name || 'Folder'} · ${getItemAvailability(mobileDetailItem).label}` : undefined"
+      :subtitle="mobileDetailItem ? `${folder?.name || 'Folder'} · ${formatAvailabilityLabel(getItemAvailability(mobileDetailItem))}` : undefined"
       content-padding="p-4 sm:p-5"
       @close="mobileDetailItem = null"
     >
@@ -835,18 +835,19 @@
                   class="space-y-0.5"
                 >
                   <template v-if="mobileDetailItem.discountedPrice !== undefined">
-                    <span class="font-semibold text-green-600 dark:text-green-400">
-                      {{ formatCurrency(mobileDetailItem.discountedPrice) }}
-                    </span>
-                    <span class="block text-xs text-gray-400 line-through dark:text-gray-500">
+                    <div class="flex flex-wrap items-baseline gap-x-2">
+                      <span class="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                        {{ formatCurrency(mobileDetailItem.discountedPrice) }}
+                      </span>
+                      <span
+                        v-if="getItemDiscountLabel(mobileDetailItem)"
+                        class="text-xs font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
+                      >
+                        {{ getItemDiscountLabel(mobileDetailItem) }}
+                      </span>
+                    </div>
+                    <span class="block text-xs tabular-nums text-gray-400 line-through dark:text-gray-500">
                       {{ formatCurrency(mobileDetailItem.originalPrice || mobileDetailItem[column.key] || 0) }}
-                    </span>
-                    <span class="block text-xs font-medium text-red-600 dark:text-red-400">
-                      {{
-                        mobileDetailItem.discountPercentage
-                          ? `-${mobileDetailItem.discountPercentage}%`
-                          : `-${formatCurrency(mobileDetailItem.discountAmount || 0)}`
-                      }}
                     </span>
                   </template>
                   <span v-else class="font-semibold">
@@ -865,12 +866,7 @@
                   <span v-else class="text-gray-400 dark:text-gray-500">-</span>
                 </div>
                 <div v-else-if="column.key === 'availability'">
-                  <span
-                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide"
-                    :class="getItemAvailability(mobileDetailItem).class"
-                  >
-                    {{ getItemAvailability(mobileDetailItem).label }}
-                  </span>
+                  <InventoryStatusBadge :badge="getItemAvailability(mobileDetailItem)" />
                 </div>
                 <div
                   v-else-if="'type' in column && column.type === 'boolean'"
@@ -1389,6 +1385,17 @@ import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
+import {
+  AVAILABILITY_SORT_ORDER,
+  availabilityBadgeForAwaitingPayment,
+  availabilityBadgeForAvailable,
+  availabilityBadgeForReturned,
+  availabilityBadgeForSold,
+  availabilityBadgeForStockLoan,
+  formatAvailabilityLabel,
+  isItemAwaitingPayment,
+} from '~/utils/inventory-availability'
+import { formatDiscountPercent } from '~/utils/format-discount'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'
@@ -2104,8 +2111,9 @@ const isItemOutOnSellerLoan = (item: InventoryItem) => {
   return id != null && String(id).trim() !== ''
 }
 
-/** Sold or on a stock loan: block edits, discounts, deletion, bulk select. */
-const isInventoryItemLocked = (item: InventoryItem) => isItemSold(item) || isItemOutOnSellerLoan(item)
+/** Sold, on loan, or reserved for balance-due: block edits, discounts, deletion, bulk select. */
+const isInventoryItemLocked = (item: InventoryItem) =>
+  isItemSold(item) || isItemOutOnSellerLoan(item) || isItemAwaitingPayment(item)
 
 const selectedItemsEligibleForSellerLoan = computed(() =>
   selectedItemsForBulk.value.filter((item) => !isInventoryItemLocked(item))
@@ -2140,6 +2148,15 @@ const sellerLoanButtonTitle = computed(() => {
     : 'Record a stock loan for the selected products'
 })
 
+const getItemDiscountLabel = (item: InventoryItem): string | null => {
+  const pct = formatDiscountPercent(item.discountPercentage)
+  if (pct) return `-${pct}%`
+  if (item.discountAmount != null && item.discountAmount > 0) {
+    return `-${formatCurrency(item.discountAmount)}`
+  }
+  return null
+}
+
 // Determine item availability status
 const getItemAvailability = (item: InventoryItem) => {
   // Check if item is in a refunded receipt (highest priority - returned takes precedence)
@@ -2148,38 +2165,26 @@ const getItemAvailability = (item: InventoryItem) => {
   )
   
   if (refundedReceipts.length > 0) {
-    return {
-      status: 'returned',
-      label: 'Returned',
-      class:
-        'ring-1 ring-inset ring-amber-500/25 bg-amber-500/10 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200 dark:ring-amber-400/30',
-    }
+    return availabilityBadgeForReturned()
   }
 
   if (isItemOutOnSellerLoan(item)) {
-    return {
-      status: 'with_seller',
-      label: 'On stock loan',
-      class:
-        'ring-1 ring-inset ring-indigo-500/25 bg-indigo-500/10 text-indigo-900 dark:bg-indigo-400/12 dark:text-indigo-100 dark:ring-indigo-400/35',
-    }
+    return availabilityBadgeForStockLoan()
+  }
+
+  if (isItemAwaitingPayment(item)) {
+    const receiptId = item.pendingSaleReceiptId
+    const receipt = receiptId
+      ? receiptsStore.receipts.find((r) => r.id === receiptId)
+      : undefined
+    return availabilityBadgeForAwaitingPayment(receipt?.receiptNumber)
   }
 
   if (isItemSold(item)) {
-    return {
-      status: 'sold',
-      label: 'Sold',
-      class:
-        'ring-1 ring-inset ring-orange-500/25 bg-orange-500/10 text-orange-900 dark:bg-orange-400/10 dark:text-orange-200 dark:ring-orange-400/30',
-    }
+    return availabilityBadgeForSold()
   }
 
-  return {
-    status: 'available',
-    label: 'Available',
-    class:
-      'ring-1 ring-inset ring-emerald-500/25 bg-emerald-500/10 text-emerald-900 dark:bg-emerald-400/10 dark:text-emerald-200 dark:ring-emerald-400/30',
-  }
+  return availabilityBadgeForAvailable()
 }
 
 const filteredItems = computed(() => {
@@ -2211,7 +2216,7 @@ const doSort = (list: InventoryItem[]) => {
     if (currentSort.value.key === 'availability') {
       const aAvail = getItemAvailability(a).status
       const bAvail = getItemAvailability(b).status
-      const order = ['available', 'with_seller', 'sold', 'returned']
+      const order = AVAILABILITY_SORT_ORDER
       const aIndex = order.indexOf(aAvail)
       const bIndex = order.indexOf(bAvail)
       return currentSort.value.order === 'asc' ? aIndex - bIndex : bIndex - aIndex

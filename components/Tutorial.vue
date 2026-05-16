@@ -68,7 +68,7 @@
             </button>
             <button
               @click="nextStep"
-              class="px-3.5 py-1.5 text-xs font-semibold bg-primary-500 hover:bg-primary-600 text-white rounded-sm transition-colors"
+              class="btn-primary btn-primary-sm"
             >
               {{ currentStep === totalSteps ? 'Get Started' : 'Next' }}
             </button>

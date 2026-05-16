@@ -55,6 +55,29 @@
       <button
         type="button"
         role="tab"
+        :aria-selected="activeTab === 'outstanding'"
+        class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+        :class="activeTab === 'outstanding' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
+        @click="activeTab = 'outstanding'"
+      >
+        <span class="inline-flex items-center gap-1.5">
+          Outstanding
+          <span
+            v-if="outstandingReceipts.length > 0"
+            class="min-w-[1.125rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+          >
+            {{ outstandingReceipts.length }}
+          </span>
+        </span>
+        <span
+          class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+          :class="activeTab === 'outstanding' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        role="tab"
         :aria-selected="activeTab === 'customers'"
         class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
         :class="activeTab === 'customers' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
@@ -852,8 +875,119 @@
       />
     </template>
 
+    <!-- Outstanding (balance due) tab -->
+    <template v-else-if="activeTab === 'outstanding'">
+      <div class="data-table-shell flex min-h-0 flex-1 flex-col">
+        <DataTableToolbar v-if="!receiptsStore.loading">
+          <template #heading>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Outstanding payments
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                Deposits collected — stock reserved until the balance is paid. Completed orders move to Receipts.
+              </p>
+            </div>
+          </template>
+          <template #filters>
+            <div class="relative min-w-0 flex-1 sm:max-w-xs">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                v-model="outstandingSearchQuery"
+                type="text"
+                placeholder="Search customer or receipt #..."
+                class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100"
+              />
+            </div>
+          </template>
+        </DataTableToolbar>
+
+        <div
+          v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
+          class="flex flex-col items-center justify-center px-4 py-16 text-center"
+        >
+          <ClockIcon class="mb-3 h-8 w-8 text-gray-400" stroke-width="1.5" />
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No outstanding payments</h3>
+          <p class="mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
+            Create a receipt with “Balance due” when a customer pays a deposit. It will appear here until paid in full.
+          </p>
+        </div>
+
+        <div v-else class="min-h-0 flex-1 overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
+              <tr>
+                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</th>
+                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</th>
+                <th class="hidden px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500 md:table-cell">Items</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Total</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Paid</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Balance</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:!bg-dashboard-card">
+              <tr
+                v-for="row in filteredOutstandingReceipts"
+                :key="row.id"
+                class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40"
+              >
+                <td class="px-3 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">
+                  {{ row.receiptNumber }}
+                  <p class="mt-0.5 text-[10px] font-normal text-gray-500">{{ formatDate(row.date) }}</p>
+                </td>
+                <td class="px-3 py-3 text-xs text-gray-700 dark:text-gray-300">
+                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ row.customerName }}</p>
+                  <p v-if="row.customerPhone" class="text-[10px] text-gray-500">{{ row.customerPhone }}</p>
+                  <p v-if="row.customerEmail" class="text-[10px] text-gray-500">{{ row.customerEmail }}</p>
+                </td>
+                <td class="hidden px-3 py-3 text-xs text-gray-600 dark:text-gray-400 md:table-cell">
+                  {{ getReceiptLineItemsPreview(row) || '—' }}
+                </td>
+                <td class="px-3 py-3 text-right text-xs font-medium tabular-nums">{{ formatCurrency(row.total) }}</td>
+                <td class="px-3 py-3 text-right text-xs tabular-nums text-emerald-700 dark:text-emerald-300">
+                  {{ formatCurrency(outstandingAmountPaid(row)) }}
+                </td>
+                <td class="px-3 py-3 text-right text-xs font-semibold tabular-nums text-amber-800 dark:text-amber-200">
+                  {{ formatCurrency(outstandingBalanceDue(row)) }}
+                </td>
+                <td class="px-3 py-3">
+                  <div class="flex flex-wrap justify-end gap-1.5">
+                    <button
+                      type="button"
+                      class="btn-primary btn-primary-sm"
+                      @click="openRecordPayment(row)"
+                    >
+                      Record payment
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-sm border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 dark:hover:bg-gray-800"
+                      @click="viewOutstandingReceipt(row)"
+                    >
+                      View
+                    </button>
+                    <button
+                      v-if="canEditReceipts"
+                      type="button"
+                      class="rounded-sm border border-red-200/80 bg-white px-3 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
+                      @click="cancelOutstandingReceipt(row)"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </template>
+
     <!-- Customers tab -->
-    <template v-if="activeTab === 'customers'">
+    <template v-else-if="activeTab === 'customers'">
       <div
         class="data-table-shell"
       >
@@ -943,6 +1077,12 @@
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Contact</th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Orders</th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Total Spent</th>
+                <th
+                  v-if="hasBalanceFeature"
+                  class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+                >
+                  Balance
+                </th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Last Order</th>
                 <th class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4">Actions</th>
               </tr>
@@ -982,6 +1122,15 @@
                   <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
+                  <td v-if="hasBalanceFeature" class="px-3 py-2.5 sm:px-4">
+                    <span
+                      v-if="getCustomerBalance(customer) > 0"
+                      class="text-[10px] font-semibold tabular-nums text-amber-800 dark:text-amber-300"
+                    >
+                      {{ formatCurrency(getCustomerBalance(customer)) }}
+                    </span>
+                    <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">—</span>
+                  </td>
                   <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
                   </td>
@@ -1002,7 +1151,7 @@
                   </td>
                 </tr>
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50/80 dark:bg-gray-800/60">
-                  <td colspan="7" class="px-3 py-2.5 sm:px-4">
+                  <td :colspan="hasBalanceFeature ? 8 : 7" class="px-3 py-2.5 sm:px-4">
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                       Purchased items
                     </p>
@@ -1110,11 +1259,11 @@
       <button
         type="button"
         role="menuitem"
-        @click="handlePrintReceipt(receiptForOpenMenu); openReceiptMenuId = null"
+        @click="handleViewReceipt(receiptForOpenMenu); openReceiptMenuId = null"
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
-        <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-        <span>Print</span>
+        <EyeIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+        <span>View receipt</span>
       </button>
       <button
         v-if="receiptForOpenMenu.status === 'completed' && canEditReceipts"
@@ -1156,8 +1305,50 @@
         <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
         <span>View receipts</span>
       </button>
+      <button
+        v-if="hasBalanceFeature"
+        type="button"
+        role="menuitem"
+        @click="openCustomerBalance(customerForOpenMenu); openCustomerMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+      >
+        <span>Manage balance</span>
+      </button>
+      <button
+        v-if="hasWhatsAppFeature && (customerForOpenMenu.phone || customerForOpenMenu.email)"
+        type="button"
+        role="menuitem"
+        @click="openCustomerPaymentReminder(customerForOpenMenu); openCustomerMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-[#128C7E] transition-colors hover:bg-emerald-50 dark:text-[#25D366] dark:hover:bg-emerald-950/30"
+      >
+        <span>WhatsApp payment reminder</span>
+      </button>
     </div>
   </Teleport>
+
+  <CustomerBalanceModal
+    v-if="customerBalanceTarget"
+    v-model="showCustomerBalanceModal"
+    :customer-name="customerBalanceTarget.name"
+    :email="customerBalanceTarget.email"
+    :phone="customerBalanceTarget.phone"
+    @saved="onCustomerBalanceSaved"
+  />
+
+  <SendWhatsAppModal
+    v-model="showCustomerWhatsAppModal"
+    mode="payment_reminder"
+    :phone="customerWhatsAppTarget?.phone || ''"
+    :email="customerWhatsAppTarget?.email || ''"
+    :template-vars="customerWhatsAppVars"
+    :store-name="userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name"
+  />
+
+  <BalanceDuePaymentModal
+    v-model="showBalancePaymentModal"
+    :receipt="balancePaymentReceipt"
+    @completed="onBalancePaymentCompleted"
+  />
 </template>
 
 <script setup lang="ts">
@@ -1168,6 +1359,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   PrinterIcon,
+  EyeIcon,
   UsersIcon,
   UserCircleIcon,
   ClockIcon,
@@ -1213,6 +1405,12 @@ import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { getCustomerContactKey } from '~/utils/customer-key'
+import { useCustomerAccountsStore } from '~/stores/customerAccounts'
+import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
+import CustomerBalanceModal from '~/components/whatsapp/CustomerBalanceModal.vue'
+import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
+import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1232,6 +1430,47 @@ const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
 const { copyToClipboard } = useCopy()
+const customerAccountsStore = useCustomerAccountsStore()
+const { hasFeature: hasWhatsAppFeature, hasBalanceFeature } = useWhatsAppMessaging()
+const userStore = useUserStore()
+
+const showCustomerBalanceModal = ref(false)
+const showCustomerWhatsAppModal = ref(false)
+const customerBalanceTarget = ref<CustomerDisplay | null>(null)
+const customerWhatsAppTarget = ref<CustomerDisplay | null>(null)
+
+const customerWhatsAppVars = computed(() => {
+  const c = customerWhatsAppTarget.value
+  if (!c) return {}
+  const balance = getCustomerBalance(c)
+  return {
+    customerName: c.name,
+    storeName: userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name || 'Store',
+    balanceDue: formatCurrency(balance),
+  }
+})
+
+function getCustomerBalance(customer: CustomerDisplay): number {
+  return customerAccountsStore.getBalanceForContactKey(customer.contactKey)
+}
+
+function openCustomerBalance(customer: CustomerDisplay) {
+  customerBalanceTarget.value = customer
+  showCustomerBalanceModal.value = true
+}
+
+function openCustomerPaymentReminder(customer: CustomerDisplay) {
+  if (!customer.phone && !customer.email) {
+    toast.error('Add a phone number or email on receipts for this customer first.')
+    return
+  }
+  customerWhatsAppTarget.value = customer
+  showCustomerWhatsAppModal.value = true
+}
+
+function onCustomerBalanceSaved() {
+  void customerAccountsStore.fetchAccountsForStore()
+}
 
 // Copy functions
 const copyReceiptNumber = (receiptNumber: string) => {
@@ -1294,7 +1533,14 @@ function applyReceiptHighlight(receiptId: string) {
   }, 3500)
 }
 
-const activeTab = ref<'receipts' | 'customers'>((route.query.tab as any) || 'receipts')
+const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
+  (['receipts', 'outstanding', 'customers'].includes(String(route.query.tab))
+    ? route.query.tab
+    : 'receipts') as 'receipts' | 'outstanding' | 'customers'
+)
+const outstandingSearchQuery = ref('')
+const showBalancePaymentModal = ref(false)
+const balancePaymentReceipt = ref<Receipt | null>(null)
 const isReceiptsFullscreen = ref(false)
 const isCustomersFullscreen = ref(false)
 const openReceiptMenuId = ref<string | null>(null)
@@ -1344,6 +1590,9 @@ watch(activeTab, (newTab) => {
     flashReceiptId.value = null
   }
   void router.replace({ query: q })
+  if (newTab === 'customers' && hasBalanceFeature.value) {
+    void customerAccountsStore.fetchAccountsForStore()
+  }
 })
 
 // Initialize loading state synchronously on client
@@ -1425,6 +1674,7 @@ const customersItemsPerPage = ref(100)
 // Customer interface for display
 interface CustomerDisplay {
   id: string
+  contactKey: string
   name: string
   email?: string
   phone?: string
@@ -1473,6 +1723,11 @@ const uniqueCustomers = computed(() => {
       const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
       customerMap.set(key, {
         id: key,
+        contactKey: getCustomerContactKey({
+          email: receipt.customerEmail,
+          phone: receiptWithPhone.customerPhone,
+          name: receipt.customerName,
+        }),
         name: receipt.customerName,
         email: receipt.customerEmail,
         phone: receiptWithPhone.customerPhone,
@@ -1681,8 +1936,69 @@ const monthReceipts = computed(() => {
   }).length
 })
 
+const outstandingReceipts = computed(() =>
+  receipts.value
+    .filter((r) => r.status === 'balance_due')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+)
+
+const filteredOutstandingReceipts = computed(() => {
+  const q = outstandingSearchQuery.value.trim().toLowerCase()
+  if (!q) return outstandingReceipts.value
+  return outstandingReceipts.value.filter(
+    (r) =>
+      r.receiptNumber.toLowerCase().includes(q) ||
+      r.customerName.toLowerCase().includes(q) ||
+      (r.customerEmail || '').toLowerCase().includes(q) ||
+      (r.customerPhone || '').includes(q)
+  )
+})
+
+function outstandingAmountPaid(receipt: Receipt) {
+  return receiptAmountPaid(receipt)
+}
+
+function outstandingBalanceDue(receipt: Receipt) {
+  return receiptBalanceDue(receipt)
+}
+
+function openRecordPayment(receipt: Receipt) {
+  balancePaymentReceipt.value = receipt
+  showBalancePaymentModal.value = true
+}
+
+function viewOutstandingReceipt(receipt: Receipt) {
+  selectedReceipt.value = receipt
+  showViewReceiptModal.value = true
+}
+
+async function cancelOutstandingReceipt(receipt: Receipt) {
+  if (
+    !confirm(
+      `Cancel ${receipt.receiptNumber}? Reserved stock will be released. This cannot be undone.`
+    )
+  ) {
+    return
+  }
+  try {
+    await receiptsStore.cancelBalanceDueReceipt(receipt.id)
+    toast.success('Order cancelled and stock released.')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Could not cancel order')
+  }
+}
+
+async function onBalancePaymentCompleted(receiptId: string) {
+  await receiptsStore.fetchReceipts({ force: true })
+  const completed = receiptsStore.receipts.find((r) => r.id === receiptId)
+  if (completed?.status === 'completed') {
+    activeTab.value = 'receipts'
+    flashReceiptId.value = receiptId
+  }
+}
+
 const filteredReceipts = computed(() => {
-  let result = [...receipts.value]
+  let result = receipts.value.filter((r) => r.status !== 'balance_due')
 
   // Search filter
   if (searchQuery.value) {
@@ -2150,11 +2466,10 @@ const handleViewReceiptTimeline = (receipt: Receipt) => {
   showTimelineModal.value = true
 }
 
-const handlePrintReceipt = (receipt: Receipt) => {
+const handleViewReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
   showViewReceiptModal.value = true
 
-  // Track as recent item
   addRecentItem({
     id: receipt.id,
     type: 'receipt',
