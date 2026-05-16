@@ -117,6 +117,7 @@ import {
   TrashIcon,
   InboxIcon,
 } from '@heroicons/vue/24/outline'
+import { tableMoneyClass } from '~/utils/table-money-styles'
 
 export interface TableColumn {
   key: string
@@ -125,6 +126,8 @@ export interface TableColumn {
   formatter?: (value: any) => string
   class?: string
   valueClass?: string
+  /** Renders amount in green (credit / currency columns). */
+  type?: 'currency' | 'text' | 'number'
 }
 
 interface Props {
@@ -167,6 +170,7 @@ const getValue = (row: any, key: string) => {
 }
 
 const getValueClass = (column: TableColumn) => {
+  if (column.type === 'currency') return tableMoneyClass()
   return column.valueClass || 'text-gray-900 dark:text-gray-100'
 }
 

@@ -796,6 +796,30 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     color: rgb(243 244 246);
   }
 
+  .data-table-shell .dashboard-table .dashboard-table__money,
+  .data-table-shell .dashboard-table__money {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: rgb(4 120 87);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__money,
+  html.dark .data-table-shell .dashboard-table__money {
+    color: rgb(52 211 153);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__money-owed,
+  .data-table-shell .dashboard-table__money-owed {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: rgb(146 64 14);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__money-owed,
+  html.dark .data-table-shell .dashboard-table__money-owed {
+    color: rgb(252 211 77);
+  }
+
   .data-table-shell .dashboard-table th.dashboard-table__col-status,
   .data-table-shell .dashboard-table td.dashboard-table__col-status {
     min-width: 10.75rem;
@@ -874,4 +898,62 @@ html.capacitor-native {
 
 html.capacitor-native.dark {
   background-color: #07080c !important;
+}
+
+/*
+ * Capacitor iOS: keep content below the status bar / notch (requires viewport-fit=cover).
+ * Scoped to .capacitor-native — do not add padding-top on body for the web app.
+ */
+html.capacitor-native {
+  --cap-safe-top: env(safe-area-inset-top, 0px);
+  --cap-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cap-safe-left: env(safe-area-inset-left, 0px);
+  --cap-safe-right: env(safe-area-inset-right, 0px);
+}
+
+html.capacitor-native #__nuxt {
+  min-height: 100dvh;
+  padding-left: var(--cap-safe-left);
+  padding-right: var(--cap-safe-right);
+}
+
+/* Auth (sign-in / sign-up) */
+html.capacitor-native .auth-shell-root {
+  min-height: 100dvh;
+  padding-top: var(--cap-safe-top);
+  padding-bottom: var(--cap-safe-bottom);
+}
+
+html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
+  top: calc(1rem + var(--cap-safe-top));
+}
+
+/* Dashboard shell */
+html.capacitor-native .dashboard-layout-root > aside.fixed {
+  top: var(--cap-safe-top);
+  bottom: var(--cap-safe-bottom);
+  height: auto;
+}
+
+html.capacitor-native .dashboard-layout-root > header.dashboard-top-nav {
+  top: var(--cap-safe-top);
+}
+
+html.capacitor-native .dashboard-layout-root .dashboard-top-nav-spacer {
+  height: calc(3rem + var(--cap-safe-top));
+}
+
+@media (min-width: 640px) {
+  html.capacitor-native .dashboard-layout-root .dashboard-top-nav-spacer {
+    height: calc(3.5rem + var(--cap-safe-top));
+  }
+}
+
+html.capacitor-native .dashboard-layout-root .dashboard-mobile-scrim {
+  top: var(--cap-safe-top);
+}
+
+html.capacitor-native .capacitor-boot-splash {
+  padding-top: var(--cap-safe-top);
+  padding-bottom: var(--cap-safe-bottom);
 }

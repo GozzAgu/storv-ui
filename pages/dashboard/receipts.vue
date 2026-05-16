@@ -410,7 +410,7 @@
                   />
                 </div>
                 <div class="mt-1.5 flex items-center justify-between gap-2">
-                  <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
+                  <span class="text-xs" :class="tableMoneyClass()">{{ formatCurrency(receipt.total) }}</span>
                   <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
                 </div>
               </div>
@@ -692,7 +692,7 @@
                 </button>
               </td>
               <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
-                <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+                <span class="text-xs" :class="tableMoneyClass()">
                   {{ formatCurrency(receipt.total) }}
                 </span>
               </td>
@@ -930,11 +930,11 @@
                 <td class="hidden px-3 py-3 text-xs text-gray-600 dark:text-gray-400 md:table-cell">
                   {{ getReceiptLineItemsPreview(row) || '—' }}
                 </td>
-                <td class="px-3 py-3 text-right text-xs font-medium tabular-nums">{{ formatCurrency(row.total) }}</td>
-                <td class="px-3 py-3 text-right text-xs tabular-nums text-emerald-700 dark:text-emerald-300">
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">{{ formatCurrency(row.total) }}</td>
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">
                   {{ formatCurrency(outstandingAmountPaid(row)) }}
                 </td>
-                <td class="px-3 py-3 text-right text-xs font-semibold tabular-nums text-amber-800 dark:text-amber-200">
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyOwedClass()">
                   {{ formatCurrency(outstandingBalanceDue(row)) }}
                 </td>
                 <td class="px-3 py-3">
@@ -1104,12 +1104,12 @@
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ customer.receipts.length }}</span>
                   </td>
                   <td class="px-3 py-2.5 sm:px-4">
-                    <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</span>
+                    <span class="text-[10px]" :class="tableMoneyClass()">{{ formatCurrency(customer.totalSpent) }}</span>
                   </td>
                   <td v-if="hasBalanceFeature" class="px-3 py-2.5 sm:px-4">
                     <span
                       v-if="getCustomerBalance(customer) > 0"
-                      class="text-[10px] font-semibold tabular-nums text-amber-800 dark:text-amber-300"
+                      :class="tableMoneyOwedClass() + ' text-[10px]'"
                     >
                       {{ formatCurrency(getCustomerBalance(customer)) }}
                     </span>
@@ -1157,7 +1157,7 @@
                             <span>{{ formatDate(receipt.date) }}, {{ formatTime(receipt.date) }}</span>
                           </p>
                           <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                            <span class="text-[10px]" :class="tableMoneyClass()">
                               {{ formatCurrency(receipt.total) }}
                             </span>
                             <span
@@ -1179,7 +1179,7 @@
                             <span class="min-w-0 truncate text-gray-800 dark:text-gray-200">{{ item.itemName }}</span>
                             <span class="shrink-0 tabular-nums text-gray-600 dark:text-gray-400">
                               {{ item.quantity }}× {{ formatCurrency(item.price) }}
-                              <span class="font-medium text-gray-900 dark:text-gray-100"> · {{ formatCurrency(item.price * item.quantity) }}</span>
+                              <span :class="tableMoneyClass()"> · {{ formatCurrency(item.price * item.quantity) }}</span>
                             </span>
                           </li>
                         </ul>
@@ -1396,6 +1396,7 @@ import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
 import CustomerBalanceModal from '~/components/whatsapp/CustomerBalanceModal.vue'
 import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
 import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
+import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
 
 definePageMeta({
   layout: 'dashboard',

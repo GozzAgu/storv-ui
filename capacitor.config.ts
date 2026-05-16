@@ -5,8 +5,12 @@ const config: CapacitorConfig = {
   appName: 'Storv',
   webDir: 'dist',
   server: {
-    iosScheme: 'capacitor'
-  }
+    iosScheme: 'capacitor',
+  },
+  ios: {
+    /** Respect notch / status bar — WebView content inset matches safe areas. */
+    contentInset: 'always',
+  },
 }
 
 export default config

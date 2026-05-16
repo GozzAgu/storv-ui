@@ -4,5 +4,8 @@
 	"webDir": "dist",
 	"server": {
 		"iosScheme": "capacitor"
+	},
+	"ios": {
+		"contentInset": "always"
 	}
 }

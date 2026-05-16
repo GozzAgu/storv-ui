@@ -674,7 +674,7 @@
                     <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')">
                       <div v-if="item.discountedPrice !== undefined" class="flex flex-col gap-0.5">
                         <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                          <span class="dashboard-table__numeric text-emerald-700 dark:text-emerald-400">
+                          <span :class="tableMoneyClass()">
                             {{ formatCurrency(item.discountedPrice) }}
                           </span>
                           <span
@@ -688,7 +688,7 @@
                           {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                         </span>
                       </div>
-                      <span v-else class="dashboard-table__numeric">
+                      <span v-else :class="tableMoneyClass()">
                         {{ formatCurrency(item[column.key] || 0) }}
                       </span>
                     </div>
@@ -839,7 +839,7 @@
                 >
                   <template v-if="mobileDetailItem.discountedPrice !== undefined">
                     <div class="flex flex-wrap items-baseline gap-x-2">
-                      <span class="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                      <span :class="tableMoneyClass()">
                         {{ formatCurrency(mobileDetailItem.discountedPrice) }}
                       </span>
                       <span
@@ -854,7 +854,7 @@
                     </span>
                   </template>
                   <span v-else class="font-semibold">
-                    {{ formatCurrency(mobileDetailItem[column.key] || 0) }}
+                    <span :class="tableMoneyClass()">{{ formatCurrency(mobileDetailItem[column.key] || 0) }}</span>
                   </span>
                 </div>
                 <div v-else-if="'type' in column && column.type === 'number'" class="text-gray-700 dark:text-gray-300">
@@ -1399,6 +1399,7 @@ import {
   isItemAwaitingPayment,
 } from '~/utils/inventory-availability'
 import { formatDiscountPercent } from '~/utils/format-discount'
+import { tableMoneyClass } from '~/utils/table-money-styles'
 import * as XLSX from 'xlsx'
 import DiscountModal from '~/components/inventory/DiscountModal.vue'
 import BulkDiscountModal from '~/components/inventory/BulkDiscountModal.vue'

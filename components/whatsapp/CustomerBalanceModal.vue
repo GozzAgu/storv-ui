@@ -79,8 +79,8 @@
             >
               <span class="min-w-0 truncate capitalize">{{ entry.type }}{{ entry.note ? ` · ${entry.note}` : '' }}</span>
               <span
-                class="shrink-0 tabular-nums font-medium"
-                :class="entry.amount >= 0 ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'"
+                class="shrink-0"
+                :class="entry.amount >= 0 ? tableMoneyOwedClass() : tableMoneyClass()"
               >
                 {{ entry.amount >= 0 ? '+' : '' }}{{ formatCurrency(entry.amount) }}
               </span>
@@ -118,6 +118,7 @@ import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import { getCustomerContactKey } from '~/utils/customer-key'
+import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
 
 const props = defineProps<{
   modelValue: boolean

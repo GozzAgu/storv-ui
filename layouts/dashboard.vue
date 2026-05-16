@@ -8,7 +8,7 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
+  <div v-else class="dashboard-layout-root min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
     <!-- Sidebar -->
     <aside
       :class="[
@@ -300,7 +300,7 @@
 
     <!-- Mobile scrim: opacity + backdrop-filter easing/duration match drawer slide; stays mounted so blur eases in/out -->
     <div
-      class="fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
+      class="dashboard-mobile-scrim fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
       :class="[
         sidebarOpen
           ? 'pointer-events-auto bg-black/[0.05] opacity-100 backdrop-blur-md backdrop-saturate-110 dark:bg-[#07080c]/30'
@@ -319,7 +319,7 @@
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'fixed top-0 left-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.07] dark:bg-[#07080c]/70',
+          'dashboard-top-nav fixed top-0 left-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.07] dark:bg-[#07080c]/70',
           sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
           sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
         ]"
@@ -595,7 +595,7 @@
       </header>
 
       <!-- Spacer so fixed nav never overlaps page content -->
-      <div class="h-12 shrink-0 sm:h-14" aria-hidden="true" />
+      <div class="dashboard-top-nav-spacer h-12 shrink-0 sm:h-14" aria-hidden="true" />
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main
