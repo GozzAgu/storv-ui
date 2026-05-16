@@ -70,10 +70,10 @@
 
         <div
           :class="[
-            'flex min-h-0 flex-col',
+            'data-table-shell flex min-h-0 flex-col',
             isStaffFullscreen
               ? 'min-h-0 flex-1 overflow-hidden'
-              : 'overflow-hidden rounded-2xl border border-gray-200/55 bg-white/75 backdrop-blur-xl dark:border-gray-700/45 dark:bg-[#12141c]/80',
+              : 'overflow-hidden',
           ]"
         >
         <div
@@ -101,7 +101,7 @@
               <button
                 type="button"
                 class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-                @click="navigateTo('/dashboard/departments')"
+                @click="departmentsListPath && navigateTo(departmentsListPath)"
               >
                 <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
               </button>
@@ -290,13 +290,10 @@
               isStaffFullscreen ? 'min-h-0 overflow-auto' : 'hidden min-h-0 overflow-x-auto md:block',
             ]"
           >
-          <table class="min-w-full divide-y divide-gray-100/90 dark:divide-gray-800/80">
-            <thead
-              class="border-b border-gray-200/60 bg-gray-50/90 dark:border-gray-800/70 dark:!bg-dashboard-card/90"
-              :class="isStaffFullscreen ? 'sticky top-0 z-10 backdrop-blur-md' : ''"
-            >
+          <table class="dashboard-table">
+            <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
               <tr>
-                <th v-if="canManageDepartments" class="w-10 px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">
+                <th v-if="canManageDepartments" class="w-10 text-center">
                   <Checkbox
                     :model-value="paginatedStaff.length > 0 && selectedStaffForBulk.length === paginatedStaff.length"
                     @update:model-value="toggleSelectAllStaff"
@@ -304,26 +301,25 @@
                     wrapper-class="justify-center"
                   />
                 </th>
-                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Name</th>
-                <th class="hidden px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:table-cell sm:px-5">Position</th>
-                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Role</th>
-                <th class="hidden px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 md:table-cell md:px-5">Email</th>
-                <th class="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5">Status</th>
+                <th>Name</th>
+                <th class="hidden sm:table-cell">Position</th>
+                <th>Role</th>
+                <th class="hidden md:table-cell">Email</th>
+                <th class="dashboard-table__col-status">Status</th>
                 <th
                   v-if="canManageDepartments"
-                  class="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 sm:px-5"
+                  class="dashboard-table__col-actions"
                 >
-                  Action
+                  <span class="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100/90 bg-white/70 dark:divide-gray-800/80 dark:!bg-dashboard-card/20">
+            <tbody>
               <tr
                 v-for="member in paginatedStaff"
                 :key="member.id"
-                class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-900/40"
               >
-              <td v-if="canManageDepartments" class="w-10 px-4 py-3 text-center sm:px-5">
+              <td v-if="canManageDepartments" class="text-center">
                 <Checkbox
                   :model-value="selectedStaffForBulk.some(s => s.id === member.id)"
                   @update:model-value="(checked) => toggleStaffSelection(member, checked)"
@@ -332,50 +328,46 @@
                   @click.stop
                 />
               </td>
-              <td class="px-4 py-3 sm:px-5">
-                <span class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ member.firstName }} {{ member.lastName }}</span>
+              <td>
+                <span class="dashboard-table__primary">{{ member.firstName }} {{ member.lastName }}</span>
               </td>
-              <td class="hidden px-4 py-3 sm:table-cell sm:px-5">
-                <span class="text-xs text-gray-600 dark:text-gray-300">{{ member.position }}</span>
+              <td class="hidden sm:table-cell">
+                <span class="dashboard-table__muted">{{ member.position || '—' }}</span>
               </td>
-              <td class="px-4 py-3 sm:px-5">
-                <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                  :class="[ member.role === 'manager' ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25' : member.role === 'intern' ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25' : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20', ]"
-                >
-                  {{ member.role }}
-                </span>
+              <td>
+                <DashboardTableBadge
+                  :badge-class="staffRoleBadgeClass(member.role)"
+                  :label="member.role"
+                />
               </td>
-              <td class="hidden px-4 py-3 md:table-cell md:px-5">
-                <span class="max-w-[150px] truncate text-xs text-gray-600 dark:text-gray-300">{{ member.email }}</span>
+              <td class="hidden md:table-cell">
+                <span class="dashboard-table__muted block max-w-[12rem] truncate" :title="member.email">{{ member.email }}</span>
               </td>
-              <td class="px-4 py-3 sm:px-5">
-                <span
-                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
-                  :class="[ member.status === 'active' ? 'bg-emerald-500/10 text-emerald-800 ring-emerald-500/20 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25' : member.status === 'on_leave' ? 'bg-amber-500/10 text-amber-800 ring-amber-500/20 dark:bg-amber-400/10 dark:text-amber-300 dark:ring-amber-400/25' : 'bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25', ]"
-                >
-                  {{ member.status === 'on_leave' ? 'On Leave' : member.status }}
-                </span>
+              <td class="dashboard-table__col-status">
+                <DashboardTableBadge
+                  :badge-class="staffStatusBadgeClass(member.status)"
+                  :label="formatStaffStatusLabel(member.status)"
+                />
               </td>
-              <td v-if="canManageDepartments" class="px-4 py-3 sm:px-5">
-                <div class="hidden shrink-0 items-center justify-end gap-1 sm:flex" @click.stop>
+              <td v-if="canManageDepartments" class="dashboard-table__col-actions">
+                <div class="dashboard-table__action-group hidden sm:inline-flex" @click.stop>
                   <button
                     type="button"
-                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-blue-600 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-blue-400"
+                    class="dashboard-table__action-btn hover:!text-primary-600 dark:hover:!text-primary-400"
                     @click="handleToggleStaffRole(member)"
                   >
                     <UserGroupIcon class="h-3.5 w-3.5 shrink-0" />
                   </button>
                   <button
                     type="button"
-                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60 dark:hover:text-gray-100"
+                    class="dashboard-table__action-btn"
                     @click="handleEditStaff(member)"
                   >
                     <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
                   </button>
                   <button
                     type="button"
-                    class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-red-200/80 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:border-red-800/50 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                    class="dashboard-table__action-btn hover:!text-red-600 dark:hover:!text-red-400"
                     @click="handleDeleteStaff(member)"
                   >
                     <TrashIcon class="h-3.5 w-3.5 shrink-0" />
@@ -531,6 +523,12 @@ import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
+import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
+import {
+  formatStaffStatusLabel,
+  staffRoleBadgeClass,
+  staffStatusBadgeClass,
+} from '~/utils/table-badge-styles'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -544,6 +542,12 @@ import type { Department } from '~/composables/useDepartments'
 import type { Staff } from '~/composables/useStaff'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAppToast } from '~/composables/useAppToast'
+import { useStoresStore } from '~/stores/stores'
+import {
+  departmentDetailPath,
+  resolveStoreDepartmentsPath,
+  storeDepartmentsPath,
+} from '~/utils/department-routes'
 
 definePageMeta({
   layout: 'dashboard',
@@ -555,10 +559,20 @@ definePageMeta({
 const route = useRoute()
 const departmentId = computed(() => route.params.id as string)
 
-const departmentBreadcrumbs = computed(() => [
-  { label: 'Departments', href: '/dashboard/departments', icon: BuildingOfficeIcon },
-  { label: department.value?.name || 'Department', icon: UsersIcon },
-])
+const departmentBreadcrumbs = computed(() => {
+  const storeId = department.value?.storeId || storesStore.currentStoreId
+  const store = storeId ? storesStore.getStoreById(storeId) : null
+  const items: Array<{ label: string; href?: string; icon: typeof BuildingOfficeIcon }> = []
+  if (storeId) {
+    items.push({
+      label: store?.name || 'Departments',
+      href: storeDepartmentsPath(storeId),
+      icon: BuildingOfficeIcon,
+    })
+  }
+  items.push({ label: department.value?.name || 'Department', icon: UsersIcon })
+  return items
+})
 
 const department = ref<Department | null>(null)
 const staff = ref<Staff[]>([])
@@ -597,6 +611,15 @@ const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const storesStore = useStoresStore()
+
+const departmentsListPath = computed(() =>
+  resolveStoreDepartmentsPath(
+    department.value?.storeId,
+    storesStore.currentStoreId,
+    storesStore.stores[0]?.id
+  )
+)
 const sidebarCollapsed = ref(false)
 const isStaffFullscreen = ref(false)
 const openStaffMenuId = ref<string | null>(null)
@@ -737,7 +760,8 @@ const loadDepartmentData = async () => {
 
   if (!departmentId.value || typeof departmentId.value !== 'string') {
     console.error('Invalid department ID:', departmentId.value)
-    navigateTo('/dashboard/departments')
+    if (departmentsListPath.value) await navigateTo(departmentsListPath.value)
+    else await navigateTo('/dashboard')
     return
   }
 
@@ -746,15 +770,17 @@ const loadDepartmentData = async () => {
     try {
       const member = await staffStore.fetchCurrentStaffMember()
       if (!member?.departmentId) {
-        await navigateTo('/dashboard/departments')
+        if (departmentsListPath.value) await navigateTo(departmentsListPath.value)
+        else await navigateTo('/dashboard')
         return
       }
       if (departmentId.value !== member.departmentId) {
-        await navigateTo(`/dashboard/departments/${member.departmentId}`)
+        await navigateTo(departmentDetailPath(member.departmentId))
         return
       }
     } catch {
-      await navigateTo('/dashboard/departments')
+      if (departmentsListPath.value) await navigateTo(departmentsListPath.value)
+      else await navigateTo('/dashboard')
       return
     }
   }
@@ -771,7 +797,8 @@ const loadDepartmentData = async () => {
       })
     } else {
       // Department not found, redirect
-      navigateTo('/dashboard/departments')
+      if (departmentsListPath.value) await navigateTo(departmentsListPath.value)
+      else await navigateTo('/dashboard')
       return
     }
 
@@ -798,7 +825,8 @@ const loadDepartmentData = async () => {
   } catch (error: any) {
     console.error('Error loading department data:', error.message || error)
     alert(error.message || 'Failed to load department data')
-    navigateTo('/dashboard/departments')
+    if (departmentsListPath.value) await navigateTo(departmentsListPath.value)
+    else await navigateTo('/dashboard')
   } finally {
     isLoadingStaff.value = false
   }

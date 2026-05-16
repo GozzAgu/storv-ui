@@ -568,15 +568,12 @@
         class="hidden sm:block"
         :class="isFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto'"
       >
-        <table class="min-w-full border-separate border-spacing-0">
-          <thead
-            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
-            :class="isFullscreen ? 'sticky top-0 z-10' : ''"
-          >
+        <table class="dashboard-table">
+          <thead :class="isFullscreen ? 'sticky top-0 z-10' : ''">
               <tr>
               <th
                 v-if="showBulkRowSelection"
-                class="px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+                class="w-10 text-center"
               >
                 <Checkbox
                   :model-value="(() => {
@@ -591,7 +588,11 @@
               <th
                 v-for="column in columns"
                 :key="column.key"
-                :class="[ 'whitespace-nowrap px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', column.sortable && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100', ]"
+                :class="[
+                  column.key === 'availability' && 'dashboard-table__col-status',
+                  (column.type === 'currency' || column.key.toLowerCase().includes('price')) && 'dashboard-table__col-price',
+                  column.sortable && 'cursor-pointer select-none hover:text-gray-800 dark:hover:text-gray-200',
+                ]"
                 @click="column.sortable && toggleSort(column.key)"
               >
                 <div class="flex items-center gap-1.5">
@@ -611,19 +612,18 @@
               </th>
               <th
                 v-if="canManageInventoryItems"
-                class="w-12 whitespace-nowrap px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
+                class="dashboard-table__col-actions"
               >
-                Actions
+                <span class="sr-only">Actions</span>
               </th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:!bg-dashboard-card/35">
+            <tbody>
               <tr
                 v-for="(item, index) in paginatedItems"
                 :key="item.id"
-                class="border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
               >
-              <td v-if="showBulkRowSelection" class="px-3 py-2.5 sm:px-4 text-center">
+              <td v-if="showBulkRowSelection" class="text-center">
                 <Checkbox
                   :model-value="selectedItemsForBulk.some(i => i.id === item.id)"
                   @update:model-value="(checked) => toggleItemSelection(item, checked)"
@@ -635,7 +635,10 @@
               <td
                 v-for="(column, colIndex) in columns"
                 :key="column.key"
-                class="px-3 py-2.5 sm:px-4 align-top"
+                :class="[
+                  column.key === 'availability' && 'dashboard-table__col-status',
+                  (column.type === 'currency' || column.key.toLowerCase().includes('price')) && 'dashboard-table__col-price',
+                ]"
               >
                 <!-- Inline edit mode (large screens only); click outside saves -->
                 <div
@@ -662,37 +665,37 @@
                   @click="startInlineEdit(item, column)"
                 >
                   <template v-if="colIndex === 0">
-                    <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">
+                    <span class="dashboard-table__primary">
                       {{ getItemPrimaryLabel(item) }}
                     </span>
                   </template>
                   <template v-else>
                     <!-- Check if column is a price field (by key or type) -->
-                    <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')" class="text-[10px]">
+                    <div v-if="('type' in column && column.type === 'currency') || column.key.toLowerCase() === 'price' || column.key.toLowerCase().includes('price')">
                       <div v-if="item.discountedPrice !== undefined" class="flex flex-col gap-0.5">
                         <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
-                          <span class="font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                          <span class="dashboard-table__numeric text-emerald-700 dark:text-emerald-400">
                             {{ formatCurrency(item.discountedPrice) }}
                           </span>
                           <span
                             v-if="getItemDiscountLabel(item)"
-                            class="text-[9px] font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
+                            class="text-[10px] font-medium tabular-nums text-red-600/90 dark:text-red-400/90"
                           >
                             {{ getItemDiscountLabel(item) }}
                           </span>
                         </div>
-                        <span class="text-[9px] tabular-nums text-gray-400 line-through dark:text-gray-500">
+                        <span class="text-[11px] tabular-nums text-gray-400 line-through dark:text-gray-500">
                           {{ formatCurrency(item.originalPrice || item[column.key] || 0) }}
                         </span>
                       </div>
-                      <span v-else class="font-semibold text-gray-900 dark:text-gray-100">
+                      <span v-else class="dashboard-table__numeric">
                         {{ formatCurrency(item[column.key] || 0) }}
                       </span>
                     </div>
-                    <div v-else-if="'type' in column && column.type === 'number'" class="text-[10px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="'type' in column && column.type === 'number'" class="dashboard-table__numeric">
                       {{ formatNumber(item[column.key]) }}
                     </div>
-                    <div v-else-if="'type' in column && column.type === 'date'" class="text-[10px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="'type' in column && column.type === 'date'" class="dashboard-table__muted">
                       <span v-if="item[column.key]">
                         {{ formatItemDate(item[column.key]) }}
                       </span>
@@ -700,7 +703,7 @@
                         -
                       </span>
                     </div>
-                    <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="text-[10px] text-gray-600 dark:text-gray-300">
+                    <div v-else-if="column.key === 'dateIn' || column.key === 'dateOut'" class="dashboard-table__muted">
                       <span v-if="item[column.key]">
                         {{ formatItemDate(item[column.key]) }}
                       </span>
@@ -715,7 +718,7 @@
                       :class="item[column.key] ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'">
                       {{ item[column.key] ? 'Yes' : 'No' }}
                     </div>
-                    <div v-else class="text-[10px] text-gray-600 dark:text-gray-300">
+                    <div v-else class="dashboard-table__muted">
                       <span 
                         v-if="getItemDisplayValue(item[column.key]) && typeof getItemDisplayValue(item[column.key]) === 'string' && getItemDisplayValue(item[column.key]).length > 30"
                         class="block truncate max-w-xs"
@@ -730,14 +733,14 @@
                   </template>
                 </div>
               </td>
-              <td v-if="canManageInventoryItems" class="px-3 py-2.5 sm:px-4 text-right">
+              <td v-if="canManageInventoryItems" class="dashboard-table__col-actions">
                 <div class="relative inline-flex justify-end" data-inventory-item-menu @click.stop>
                   <button
                     type="button"
                     :data-item-actions-anchor="item.id"
                     @click="toggleItemMenu(item.id)"
                     :disabled="isInventoryItemLocked(item)"
-                    :class="[ 'inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors', isInventoryItemLocked(item) ? 'cursor-not-allowed opacity-40' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80 hover:text-gray-800 dark:hover:text-gray-200' ]"
+                    :class="[ 'dashboard-table__action-btn', isInventoryItemLocked(item) ? 'cursor-not-allowed opacity-40' : '' ]"
                     aria-label="Item actions"
                     aria-haspopup="menu"
                     :aria-expanded="openItemMenuId === item.id"

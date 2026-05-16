@@ -7,6 +7,7 @@ import { useReceiptsStore } from './receipts'
 import { useInventoryStore } from './inventory'
 import { useCustomersStore } from './customers'
 import { useDepartmentsStore } from './departments'
+import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { useStaffStore } from './staff'
 
 export type SearchEntityType = 'all' | 'receipts' | 'inventory' | 'customers' | 'departments' | 'staff'
@@ -358,7 +359,9 @@ export const useSearchStore = defineStore('search', {
                 subtitle: staff.email || staff.phone || 'No contact info',
                 description: `Department: ${staff.departmentName || 'N/A'}`,
                 icon: 'UserIcon',
-                url: `/dashboard/departments?staff=${staff.id}`,
+                url: staff.departmentId
+                  ? `/dashboard/departments/${staff.departmentId}`
+                  : resolveStoreDepartmentsPath(staff.storeId) || '/dashboard',
                 metadata: {
                   departmentName: staff.departmentName,
                   role: staff.role,

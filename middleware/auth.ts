@@ -1,4 +1,4 @@
-import { waitForAuthStore } from '~/utils/wait-for-auth'
+import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 
 /**
  * Page-level auth middleware
@@ -11,7 +11,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   // Use Pinia store directly for more reliable state
   const authStore = useAuthStore()
   
-  await waitForAuthStore(authStore, 5000)
+  await waitForAuthStore(authStore, getAuthWaitMs())
   
   // Only redirect if auth has finished loading and there's no user
   if (!authStore.loading && !authStore.currentUser) {

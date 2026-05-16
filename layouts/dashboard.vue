@@ -679,7 +679,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
-import { waitForAuthStore } from '~/utils/wait-for-auth'
+import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 
 const { actualTheme } = useTheme()
 
@@ -1159,7 +1159,8 @@ const toggleDepartmentExpanded = async (departmentId: string) => {
 
 // Departments navigation (kept for compatibility)
 const isDepartmentsRoute = computed(() => {
-  return route.path.startsWith('/dashboard/departments')
+  if (route.path.startsWith('/dashboard/departments')) return true
+  return route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
 })
 
 const departmentsList = computed(() => {
@@ -1539,13 +1540,15 @@ const checkAuth = async () => {
   
   checkingAuth.value = authStore.loading
 
-  await waitForAuthStore(authStore, 5000)
-  
+  try {
+    await waitForAuthStore(authStore, getAuthWaitMs())
+  } finally {
+    checkingAuth.value = false
+  }
+
   // Redirect to signin if no user after loading completes
   // But add loop prevention
   if (!authStore.loading && !authStore.currentUser) {
-    checkingAuth.value = false
-    
     // Prevent redirect loops
     const redirectKey = 'dashboard_layout_redirect'
     if (sessionStorage.getItem(redirectKey) === 'true') {
@@ -1578,8 +1581,6 @@ const checkAuth = async () => {
     sessionStorage.removeItem('dashboard_layout_redirect')
     sessionStorage.removeItem('dashboard_redirect_count')
   }
-  
-  checkingAuth.value = false
 }
 
 onMounted(async () => {

@@ -6,7 +6,7 @@
     panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
   >
     <div
-      class="mb-8 text-center opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:40ms] lg:mb-9 lg:text-left"
+      :class="[authEntranceClass(40), 'mb-8 text-center lg:mb-9 lg:text-left']"
     >
       <a
         href="https://www.storvv.com"
@@ -57,7 +57,10 @@
     </div>
 
     <div
-      class="overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms]"
+      :class="[
+        authEntranceClass(120),
+        'overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95',
+      ]"
     >
         <div class="relative p-4 sm:p-5">
           <div
@@ -339,7 +342,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { EyeIcon, EyeSlashIcon, ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
 import AuthShell from '~/components/auth/AuthShell.vue'
 import Button from '~/components/ui/Button.vue'
@@ -353,6 +356,8 @@ import {
   isPasswordPolicyValid,
   getPasswordStrength,
 } from '~/utils/passwordPolicy'
+import { authEntranceClass } from '~/utils/auth-entrance'
+import { markCapacitorDocument } from '~/utils/capacitor-env'
 
 definePageMeta({
   layout: false,
@@ -363,6 +368,10 @@ const { actualTheme } = useTheme()
 const logoSource = computed(() =>
   actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 )
+
+onMounted(() => {
+  markCapacitorDocument()
+})
 
 const form = ref({
   name: '',

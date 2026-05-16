@@ -1,5 +1,7 @@
 import { SIGNIN_ALLOW_WHILE_AUTHED_KEY } from './guest'
-import { waitForAuthStore } from '~/utils/wait-for-auth'
+import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
+import { isCapacitorNative } from '~/utils/capacitor-env'
+import { isCapacitorMarketingRoot } from '~/utils/capacitor-root-path'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
   // Only run on client side (Firebase Auth is client-only)
@@ -23,6 +25,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     return
   }
 
+  // Native shell: never load marketing `/` — go straight to sign-in (app.html + plugin also redirect).
+  if (isCapacitorNative() && isCapacitorMarketingRoot(to.path)) {
+    return navigateTo('/signin', { replace: true })
+  }
+
   // For dashboard routes, check authentication
   if (isDashboardRoute) {
     try {
@@ -33,7 +40,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     const authStore = useAuthStore()
 
-    await waitForAuthStore(authStore, 5000)
+    await waitForAuthStore(authStore, getAuthWaitMs())
 
     // Redirect to signin if not authenticated
     if (!authStore.loading && !authStore.currentUser) {

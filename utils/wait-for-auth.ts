@@ -1,8 +1,16 @@
 import type { useAuthStore } from '~/stores/auth'
+import { isCapacitorNative } from '~/utils/capacitor-env'
 
 type AuthStore = ReturnType<typeof useAuthStore>
 
 const DEFAULT_MAX_MS = 5000
+/** Shorter cap on native so route + layout guards do not stack long blank waits. */
+const NATIVE_MAX_MS = 800
+
+/** Use for middleware and layout auth guards. */
+export function getAuthWaitMs(): number {
+  return isCapacitorNative() ? NATIVE_MAX_MS : DEFAULT_MAX_MS
+}
 
 /**
  * Wait for Pinia auth to finish initial restore. Always resolves within `maxMs`

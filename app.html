@@ -96,6 +96,31 @@
         'use strict';
         var html = document.documentElement;
         var revealed = false;
+
+        function isCapacitorShell() {
+          try {
+            var loc = window.location;
+            var p = loc.protocol;
+            var h = loc.hostname;
+            var port = loc.port || '';
+            var href = loc.href || '';
+            if (p === 'capacitor:' || href.indexOf('capacitor://') === 0) return true;
+            if (h === 'localhost' && p === 'https:') {
+              return !port || port === '443';
+            }
+          } catch (e) {}
+          return false;
+        }
+
+        if (isCapacitorShell()) {
+          html.classList.add('capacitor-native', 'styles-loaded');
+          html.style.removeProperty('display');
+          var capPath = location.pathname || '/';
+          if (capPath === '/' || capPath === '/index.html') {
+            location.replace('/signin');
+          }
+          return;
+        }
         
         // HIDE IMMEDIATELY - before anything renders - use display:none
         html.style.cssText = 'display: none !important;';

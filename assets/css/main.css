@@ -697,17 +697,175 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   :where(table tbody tr:last-child td:last-child) {
     border-bottom-right-radius: var(--app-radius-sm);
   }
+
+  /* Professional dashboard data tables (inventory, staff, shared Table.vue) */
+  .data-table-shell .dashboard-table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table-shell .dashboard-table thead th {
+    border-bottom: 1px solid rgb(229 231 235 / 0.85);
+    background-color: rgb(249 250 251 / 0.98);
+    padding: 0.625rem 1rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(107 114 128);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  html.dark .data-table-shell .dashboard-table thead th {
+    border-bottom-color: rgb(31 41 55 / 0.9);
+    background-color: rgb(18 20 28 / 0.95);
+    color: rgb(156 163 175);
+  }
+
+  .data-table-shell .dashboard-table tbody td {
+    border-bottom: 1px solid rgb(243 244 246 / 0.95);
+    padding: 0.625rem 1rem;
+    vertical-align: middle;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: rgb(75 85 99);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody td {
+    border-bottom-color: rgb(31 41 55 / 0.55);
+    color: rgb(209 213 219);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table-shell .dashboard-table tbody tr {
+    background-color: rgb(255 255 255);
+    transition: background-color 0.15s ease;
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr {
+    background-color: rgb(18 20 28);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:nth-child(even) {
+    background-color: rgb(249 250 251 / 0.65);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr:nth-child(even) {
+    background-color: rgb(255 255 255 / 0.02);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(239 246 255 / 0.55);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(20 63 141 / 0.08);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__primary {
+    font-weight: 500;
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__primary {
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__muted {
+    color: rgb(107 114 128);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__muted {
+    color: rgb(156 163 175);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__numeric {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__numeric {
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-status,
+  .data-table-shell .dashboard-table td.dashboard-table__col-status {
+    min-width: 10.75rem;
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-price,
+  .data-table-shell .dashboard-table td.dashboard-table__col-price {
+    min-width: 8.5rem;
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-actions,
+  .data-table-shell .dashboard-table td.dashboard-table__col-actions {
+    width: 3.25rem;
+    text-align: right;
+  }
+
+  .data-table-shell .dashboard-table__action-btn {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--app-radius-sm);
+    color: rgb(107 114 128);
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .data-table-shell .dashboard-table__action-btn:hover {
+    background-color: rgb(243 244 246);
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table__action-btn:hover {
+    background-color: rgb(255 255 255 / 0.06);
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table__action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    border-radius: var(--app-radius-sm);
+    border: 1px solid rgb(229 231 235 / 0.85);
+    background-color: rgb(249 250 251 / 0.9);
+    padding: 0.125rem;
+  }
+
+  html.dark .data-table-shell .dashboard-table__action-group {
+    border-color: rgb(55 65 81 / 0.8);
+    background-color: rgb(255 255 255 / 0.03);
+  }
 }
 
 /*
  * Capacitor WKWebView: auth entrance animations often never run (content stays opacity:0).
  * Force sign-in and related screens visible immediately.
  */
+html.capacitor-native [class*='animate-auth-fade-up'],
 html.capacitor-native .animate-auth-fade-up,
+html.capacitor-native [class*='animate-auth-glow-drift'],
 html.capacitor-native .animate-auth-glow-drift {
   animation: none !important;
   opacity: 1 !important;
   transform: none !important;
+}
+
+html.capacitor-native.styles-loaded,
+html.capacitor-native.styles-loaded body {
+  display: block !important;
+  opacity: 1 !important;
 }
 
 html.capacitor-native {
@@ -717,4 +875,3 @@ html.capacitor-native {
 html.capacitor-native.dark {
   background-color: #07080c !important;
 }
-

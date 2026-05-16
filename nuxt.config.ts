@@ -79,7 +79,7 @@ export default defineNuxtConfig({
       script: [
         {
           key: 'capacitor-native-mark',
-          innerHTML: `(function(){try{var h=location.href||'';if(location.protocol==='capacitor:'||h.indexOf('capacitor://')===0){document.documentElement.classList.add('capacitor-native');document.documentElement.classList.add('styles-loaded');}}catch(e){}})();`,
+          innerHTML: `(function(){try{var l=location,p=l.protocol,h=l.hostname,port=l.port||'',href=l.href||'',path=l.pathname||'/';var cap=p==='capacitor:'||href.indexOf('capacitor://')===0||(h==='localhost'&&p==='https:'&&(!port||port==='443'));if(cap){var el=document.documentElement;el.classList.add('capacitor-native','styles-loaded');el.style.removeProperty('display');document.body&&document.body.style.removeProperty('display');if(path==='/'||path==='/index.html'){location.replace('/signin');}}}catch(e){}})();`,
           tagPosition: 'head',
         },
       ],

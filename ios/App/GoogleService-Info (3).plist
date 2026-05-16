@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1038005888848-og3ahq3fntj03t0c19bl1oafr2555220.apps.googleusercontent.com</string>
+	<string>1038005888848-aoq8km8cl1m8ua73f23pe0utt5ggek5f.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1038005888848-og3ahq3fntj03t0c19bl1oafr2555220</string>
+	<string>com.googleusercontent.apps.1038005888848-aoq8km8cl1m8ua73f23pe0utt5ggek5f</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCjTZwWRM1vp-19qdxa0eyYV2hx8ruUfgY</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.storv.app</string>
+	<string>com.storvv.app</string>
 	<key>PROJECT_ID</key>
 	<string>storv-ux</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1038005888848:ios:29e3f7c830e1558708ee55</string>
+	<string>1:1038005888848:ios:c9a6a1f6185d61b008ee55</string>
 </dict>
 </plist>

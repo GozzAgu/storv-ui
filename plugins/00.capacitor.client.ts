@@ -1,39 +1,34 @@
 import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
+import { isCapacitorMarketingRoot, redirectCapacitorRootToSignIn } from '~/utils/capacitor-root-path'
 
 /**
- * Capacitor shell: mark document, open sign-in (not marketing), keep page visible.
+ * Capacitor shell: reveal document, force /signin (not marketing /), keep router guard.
  */
-export default defineNuxtPlugin((nuxtApp) => {
-  if (import.meta.server || !isCapacitorNative()) return
+export default defineNuxtPlugin({
+  name: 'capacitor-native',
+  enforce: 'pre',
+  setup(nuxtApp) {
+    if (import.meta.server || !isCapacitorNative()) return
 
-  markCapacitorDocument()
+    markCapacitorDocument()
 
-  const router = useRouter()
+    if (redirectCapacitorRootToSignIn()) return
 
-  const goSignIn = () => {
-    const path = router.currentRoute.value.path
-    if (path === '/' || path === '/index.html') {
-      void router.replace('/signin')
-    }
-  }
+    const router = useRouter()
 
-  goSignIn()
+    router.beforeEach((to) => {
+      if (isCapacitorMarketingRoot(to.path)) {
+        return '/signin'
+      }
+    })
 
-  router.beforeEach((to) => {
-    if (to.path === '/' || to.path === '/index.html') {
-      return '/signin'
-    }
-  })
+    nuxtApp.hook('page:finish', () => {
+      if (isCapacitorMarketingRoot(router.currentRoute.value.path)) {
+        void router.replace('/signin')
+      }
+    })
 
-  nuxtApp.hook('page:finish', goSignIn)
-
-  if (typeof document !== 'undefined') {
-    const reveal = () => {
-      document.documentElement.classList.add('styles-loaded')
-      document.documentElement.style.removeProperty('display')
-      document.body?.style.removeProperty('display')
-    }
-    reveal()
-    setTimeout(reveal, 50)
-  }
+    markCapacitorDocument()
+    setTimeout(markCapacitorDocument, 0)
+  },
 })
