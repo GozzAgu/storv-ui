@@ -928,32 +928,86 @@ html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
   top: calc(1rem + var(--cap-safe-top));
 }
 
-/* Dashboard shell */
+/* Dashboard shell (web sidebar — hidden on native) */
 html.capacitor-native .dashboard-layout-root > aside.fixed {
   top: var(--cap-safe-top);
   bottom: var(--cap-safe-bottom);
   height: auto;
 }
 
-html.capacitor-native .dashboard-layout-root > header.dashboard-top-nav {
-  top: var(--cap-safe-top);
-}
-
-html.capacitor-native .dashboard-layout-root .dashboard-top-nav-spacer {
-  height: calc(3rem + var(--cap-safe-top));
-}
-
-@media (min-width: 640px) {
-  html.capacitor-native .dashboard-layout-root .dashboard-top-nav-spacer {
-    height: calc(3.5rem + var(--cap-safe-top));
-  }
-}
-
 html.capacitor-native .dashboard-layout-root .dashboard-mobile-scrim {
   top: var(--cap-safe-top);
+}
+
+/*
+ * Native top bar: fixed to viewport, background fills status-bar inset so content
+ * never sits under the notch / Dynamic Island.
+ */
+html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 54;
+  box-sizing: border-box;
+  padding-top: var(--cap-safe-top);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+html.capacitor-native .dashboard-top-nav-spacer-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav-spacer {
+  height: calc(3rem + var(--cap-safe-top)) !important;
+  min-height: calc(3rem + var(--cap-safe-top)) !important;
 }
 
 html.capacitor-native .capacitor-boot-splash {
   padding-top: var(--cap-safe-top);
   padding-bottom: var(--cap-safe-bottom);
+}
+
+/* Native app: prevent horizontal scroll and iOS input zoom */
+html.capacitor-native,
+html.capacitor-native body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  overscroll-behavior-x: none;
+}
+
+html.capacitor-native .dashboard-layout-root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Do not set overflow on the shell — it breaks position:fixed top nav on iOS WKWebView */
+html.capacitor-native .dashboard-native-shell {
+  max-width: 100vw;
+  padding-left: 0 !important;
+}
+
+html.capacitor-native [data-dashboard-main],
+html.capacitor-native .dashboard-native-main {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+html.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-native select,
+html.capacitor-native textarea {
+  font-size: 16px !important;
+}
+
+html.capacitor-native .dashboard-sidebar,
+html.capacitor-native .dashboard-mobile-scrim {
+  display: none !important;
+}
+
+html.capacitor-native .dashboard-native-main {
+  padding-bottom: calc(5.75rem + var(--cap-safe-bottom));
+}
+
+html.capacitor-native .dashboard-native-bottom-nav {
+  padding-left: var(--cap-safe-left);
+  padding-right: var(--cap-safe-right);
 }

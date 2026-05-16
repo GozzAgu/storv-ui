@@ -9,8 +9,10 @@
   
   <!-- Dashboard content (only shown if authenticated) -->
   <div v-else class="dashboard-layout-root min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
-    <!-- Sidebar -->
+    <!-- Sidebar (web / tablet — native app uses bottom nav) -->
     <aside
+      v-if="!isNativeApp"
+      class="dashboard-sidebar"
       :class="[
         /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
         'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
@@ -298,8 +300,9 @@
       </div>
     </aside>
 
-    <!-- Mobile scrim: opacity + backdrop-filter easing/duration match drawer slide; stays mounted so blur eases in/out -->
+    <!-- Mobile scrim (web drawer only) -->
     <div
+      v-if="!isNativeApp"
       class="dashboard-mobile-scrim fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
       :class="[
         sidebarOpen
@@ -311,17 +314,26 @@
     />
 
     <!-- Main Content -->
-    <div 
-      :class="['min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
-      class="w-full"
+    <div
+      :class="[
+        'min-h-screen w-full',
+        isNativeApp
+          ? 'dashboard-native-shell'
+          : ['transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'],
+      ]"
       style="min-width: 0; max-width: 100vw;"
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'dashboard-top-nav fixed top-0 left-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.07] dark:bg-[#07080c]/70',
-          sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
-          sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
+          'dashboard-top-nav fixed top-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#07080c]/70',
+          isNativeApp
+            ? 'dashboard-top-nav-native left-0 z-[54]'
+            : [
+                'left-0 transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
+                sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
+              ],
         ]"
       >
         <div
@@ -329,10 +341,14 @@
           aria-hidden="true"
         />
         <div
-          class="relative flex h-12 w-full items-center gap-2 px-3 sm:h-14 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6"
+          :class="[
+            'relative flex h-12 w-full items-center gap-2 px-3 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6',
+            !isNativeApp && 'sm:h-14',
+          ]"
         >
-          <!-- Mobile nav trigger: own column so flex-1 page title never squeezes the logo -->
+          <!-- Mobile nav trigger (web drawer) -->
           <button
+            v-if="!isNativeApp"
             type="button"
             class="group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
             aria-label="Open menu"
@@ -353,8 +369,27 @@
             />
           </button>
 
+          <!-- Native: compact page title; web: desktop only -->
+          <div
+            v-if="isNativeApp"
+            class="flex min-w-0 flex-1 items-center gap-2"
+          >
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-500/10 ring-1 ring-inset ring-primary-500/20 dark:bg-primary-500/15 dark:ring-primary-400/25"
+            >
+              <component
+                :is="currentPageIcon"
+                class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
+                stroke-width="1.75"
+              />
+            </div>
+            <h1 class="min-w-0 truncate text-[15px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              {{ currentPageName }}
+            </h1>
+          </div>
+
           <!-- Page title (shrinks / truncates; not coupled to logo) -->
-          <div class="hidden min-w-0 flex-1 items-center md:flex">
+          <div v-else class="hidden min-w-0 flex-1 items-center md:flex">
             <div
               class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
             >
@@ -595,12 +630,19 @@
       </header>
 
       <!-- Spacer so fixed nav never overlaps page content -->
-      <div class="dashboard-top-nav-spacer h-12 shrink-0 sm:h-14" aria-hidden="true" />
+      <div
+        class="dashboard-top-nav-spacer shrink-0"
+        :class="isNativeApp ? 'dashboard-top-nav-spacer-native' : 'h-12 sm:h-14'"
+        aria-hidden="true"
+      />
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main
         data-dashboard-main
-        class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible"
+        :class="[
+          'w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
+          isNativeApp && 'dashboard-native-main',
+        ]"
       >
         <div
           :key="route.path"
@@ -616,6 +658,14 @@
     
     <!-- Global Search -->
     <GlobalSearch />
+
+    <!-- Native app bottom navigation -->
+    <DashboardNativeBottomNav
+      v-if="isNativeApp"
+      :primary-items="nativePrimaryNav"
+      :more-items="nativeMoreNav"
+      @sign-out="handleSignOut"
+    />
   </div>
 </template>
 
@@ -662,6 +712,9 @@ import {
 } from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
+import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
+import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
+import { splitNativeBottomNav } from '~/utils/dashboard-native-nav'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
@@ -712,6 +765,7 @@ watch(() => authStore.currentUser, (newUser) => {
 
 // Computed unread count
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
+const isNativeApp = ref(false)
 const sidebarOpen = ref(false)
 
 function closeMobileSidebarOverlay() {
@@ -861,6 +915,9 @@ const filteredNavigation = computed(() => {
     return true
   })
 })
+
+const nativePrimaryNav = computed(() => splitNativeBottomNav(filteredNavigation.value).primary)
+const nativeMoreNav = computed(() => splitNativeBottomNav(filteredNavigation.value).more)
 
 const route = useRoute()
 
@@ -1584,6 +1641,11 @@ const checkAuth = async () => {
 }
 
 onMounted(async () => {
+  if (import.meta.client) {
+    isNativeApp.value = isCapacitorNative()
+    markCapacitorDocument()
+  }
+
   document.addEventListener('click', handleClickOutside)
   if (import.meta.client) {
     window.addEventListener('resize', onProfileMenuScrollOrResize)
