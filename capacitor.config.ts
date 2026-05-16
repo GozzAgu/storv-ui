@@ -5,6 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Storv',
   webDir: 'dist',
   server: {
+    url: 'https://app.storvv.com',
     iosScheme: 'capacitor'
   }
 }

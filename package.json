@@ -23,8 +23,9 @@
     "cap:open:android": "npx cap open android"
   },
   "dependencies": {
-    "@capacitor/cli": "^8.0.1",
-    "@capacitor/core": "^8.0.1",
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.0.1",
     "@pinia/nuxt": "^0.11.3",
     "apexcharts": "^5.3.6",
