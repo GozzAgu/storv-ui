@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.storv.app',
-  appName: 'Storv',
+  appName: 'Storvv',
   webDir: 'dist',
   server: {
     iosScheme: 'capacitor',
