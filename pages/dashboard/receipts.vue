@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div
-      class="flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
+      class="dashboard-page-with-footer flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
     >
       <!-- Initial loading -->
       <template v-if="isInitialLoading">

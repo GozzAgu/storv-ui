@@ -25,10 +25,27 @@ describe('capacitor-env', () => {
 
   it('is false on https', async () => {
     Object.defineProperty(window, 'location', {
-      value: { protocol: 'https:', href: 'https://app.storvv.com/signin', hostname: 'app.storvv.com' },
+      value: { protocol: 'https:', href: 'https://app.storvv.com/signin', hostname: 'app.storvv.com', port: '443' },
       writable: true,
+    })
+    Object.defineProperty(window.navigator, 'userAgent', {
+      value: 'Mozilla/5.0',
+      configurable: true,
     })
     const { isCapacitorNative } = await import('~/utils/capacitor-env')
     expect(isCapacitorNative()).toBe(false)
+  })
+
+  it('detects Capacitor user agent', async () => {
+    Object.defineProperty(window, 'location', {
+      value: { protocol: 'https:', href: 'https://app.storvv.com/signin', hostname: 'app.storvv.com', port: '443' },
+      writable: true,
+    })
+    Object.defineProperty(window.navigator, 'userAgent', {
+      value: 'Mozilla/5.0 Mobile/15E148 Capacitor',
+      configurable: true,
+    })
+    const { isCapacitorNative } = await import('~/utils/capacitor-env')
+    expect(isCapacitorNative()).toBe(true)
   })
 })

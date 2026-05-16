@@ -342,15 +342,15 @@
         />
         <div
           :class="[
-            'relative flex h-12 w-full items-center gap-2 px-3 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6',
-            !isNativeApp && 'sm:h-14',
+            'relative flex w-full items-center gap-2 px-3 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6',
+            isNativeApp ? 'dashboard-top-nav-native-row h-11' : 'h-12 sm:h-14',
           ]"
         >
           <!-- Mobile nav trigger (web drawer) -->
           <button
             v-if="!isNativeApp"
             type="button"
-            class="group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
+            class="dashboard-sidebar-open-trigger group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
             aria-label="Open menu"
             @click="sidebarOpen = true"
           >
@@ -369,23 +369,22 @@
             />
           </button>
 
-          <!-- Native: compact page title; web: desktop only -->
-          <div
-            v-if="isNativeApp"
-            class="flex min-w-0 flex-1 items-center gap-2"
-          >
-            <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-500/10 ring-1 ring-inset ring-primary-500/20 dark:bg-primary-500/15 dark:ring-primary-400/25"
+          <!-- Native: Storvv logo (links home) -->
+          <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center">
+            <NuxtLink
+              to="/dashboard"
+              class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
+              aria-label="Storv home"
             >
-              <component
-                :is="currentPageIcon"
-                class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
-                stroke-width="1.75"
+              <img
+                src="/storvv logo mobile.png"
+                alt="Storv"
+                class="h-8 w-8 object-contain"
+                width="32"
+                height="32"
+                decoding="async"
               />
-            </div>
-            <h1 class="min-w-0 truncate text-[15px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-              {{ currentPageName }}
-            </h1>
+            </NuxtLink>
           </div>
 
           <!-- Page title (shrinks / truncates; not coupled to logo) -->
@@ -445,10 +444,13 @@
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
             </button>
 
-            <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
+            <StoreSelector
+              v-if="userStore.userData?.role === 'superAdmin'"
+              :class="isNativeApp ? 'max-w-[5.25rem] shrink' : ''"
+            />
 
             <div
-              class="group relative flex h-9 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
+              class="group relative flex h-9 shrink-0 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
             >
               <ThemeToggle />
             </div>
@@ -495,7 +497,12 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="group relative flex min-w-0 max-w-[11rem] items-center gap-2 rounded-xl border-0 bg-white/90 py-1 pl-1 pr-1.5 font-medium text-gray-800 ring-1 ring-inset ring-gray-200/55 backdrop-blur-md transition-colors hover:bg-white sm:max-w-[14rem] sm:pr-2 dark:bg-white/[0.07] dark:text-gray-100 dark:ring-white/12 dark:hover:bg-white/[0.11] md:max-w-[17rem] md:pr-2.5"
+                :class="[
+                  'group relative flex items-center rounded-xl border-0 bg-white/90 font-medium text-gray-800 ring-1 ring-inset ring-gray-200/55 backdrop-blur-md transition-colors hover:bg-white dark:bg-white/[0.07] dark:text-gray-100 dark:ring-white/12 dark:hover:bg-white/[0.11]',
+                  isNativeApp
+                    ? 'h-9 w-9 shrink-0 justify-center p-0'
+                    : 'min-w-0 max-w-[11rem] gap-2 py-1 pl-1 pr-1.5 sm:max-w-[14rem] sm:pr-2 md:max-w-[17rem] md:pr-2.5',
+                ]"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
@@ -659,9 +666,9 @@
     <!-- Global Search -->
     <GlobalSearch />
 
-    <!-- Native app bottom navigation -->
+    <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
     <DashboardNativeBottomNav
-      v-if="isNativeApp"
+      class="dashboard-native-bottom-nav-host"
       :primary-items="nativePrimaryNav"
       :more-items="nativeMoreNav"
       @sign-out="handleSignOut"
@@ -713,7 +720,6 @@ import {
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
-import { isCapacitorNative, markCapacitorDocument } from '~/utils/capacitor-env'
 import { splitNativeBottomNav } from '~/utils/dashboard-native-nav'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
@@ -765,7 +771,7 @@ watch(() => authStore.currentUser, (newUser) => {
 
 // Computed unread count
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
-const isNativeApp = ref(false)
+const { isNativeApp } = useCapacitorNativeApp()
 const sidebarOpen = ref(false)
 
 function closeMobileSidebarOverlay() {
@@ -1641,11 +1647,6 @@ const checkAuth = async () => {
 }
 
 onMounted(async () => {
-  if (import.meta.client) {
-    isNativeApp.value = isCapacitorNative()
-    markCapacitorDocument()
-  }
-
   document.addEventListener('click', handleClickOutside)
   if (import.meta.client) {
     window.addEventListener('resize', onProfileMenuScrollOrResize)

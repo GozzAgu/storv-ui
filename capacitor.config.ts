@@ -8,8 +8,8 @@ const config: CapacitorConfig = {
     iosScheme: 'capacitor',
   },
   ios: {
-    /** Respect notch / status bar — WebView content inset matches safe areas. */
-    contentInset: 'always',
+    /** Let CSS env(safe-area-inset-*) handle insets — avoids double gap with our fixed top bar. */
+    contentInset: 'automatic',
   },
 }
 

@@ -1,8 +1,15 @@
+import { Capacitor } from '@capacitor/core'
 import { isCapacitorShellLocation } from '~/utils/capacitor-shell-detect'
 
 /** True when running inside Capacitor iOS/Android (WKWebView). */
 export function isCapacitorNative(): boolean {
   if (import.meta.server || typeof window === 'undefined') return false
+
+  try {
+    if (Capacitor.isNativePlatform()) return true
+  } catch {
+    /* ignore */
+  }
 
   try {
     const cap = (window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor
@@ -11,9 +18,17 @@ export function isCapacitorNative(): boolean {
     /* ignore */
   }
 
+  if (document.documentElement.classList.contains('capacitor-native')) return true
+
+  try {
+    if (/Capacitor/i.test(navigator.userAgent)) return true
+  } catch {
+    /* ignore */
+  }
+
   try {
     const { protocol, hostname, port, href } = window.location
-    if (isCapacitorShellLocation(protocol, hostname, port, href)) return true
+    if (isCapacitorShellLocation(protocol, hostname, port, href, navigator.userAgent)) return true
   } catch {
     /* ignore */
   }

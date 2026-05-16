@@ -909,6 +909,10 @@ html.capacitor-native {
   --cap-safe-bottom: env(safe-area-inset-bottom, 0px);
   --cap-safe-left: env(safe-area-inset-left, 0px);
   --cap-safe-right: env(safe-area-inset-right, 0px);
+  --dashboard-native-top-bar: 2.75rem;
+  --dashboard-native-top-chrome: calc(var(--dashboard-native-top-bar) + var(--cap-safe-top));
+  --dashboard-bottom-nav-height: 5.5rem;
+  --dashboard-fixed-footer-height: 2.75rem;
 }
 
 html.capacitor-native #__nuxt {
@@ -940,8 +944,7 @@ html.capacitor-native .dashboard-layout-root .dashboard-mobile-scrim {
 }
 
 /*
- * Native top bar: fixed to viewport, background fills status-bar inset so content
- * never sits under the notch / Dynamic Island.
+ * Native top bar: fixed, opaque through the status-bar inset (single safe-area application).
  */
 html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
 html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
@@ -952,14 +955,41 @@ html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
   z-index: 54;
   box-sizing: border-box;
   padding-top: var(--cap-safe-top);
+  background-color: rgb(255 255 255 / 0.94) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
 
+html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
+  background-color: rgb(7 8 12 / 0.94) !important;
+}
+
+html.capacitor-native .dashboard-top-nav-native-row {
+  height: var(--dashboard-native-top-bar);
+  min-height: var(--dashboard-native-top-bar);
+}
+
+html.capacitor-native .dashboard-top-nav-native .store-switch-trigger {
+  max-width: 5.5rem;
+}
+
 html.capacitor-native .dashboard-top-nav-spacer-native,
 html.capacitor-native .dashboard-native-shell .dashboard-top-nav-spacer {
-  height: calc(3rem + var(--cap-safe-top)) !important;
-  min-height: calc(3rem + var(--cap-safe-top)) !important;
+  height: var(--dashboard-native-top-chrome) !important;
+  min-height: var(--dashboard-native-top-chrome) !important;
+}
+
+/* Inline pagination (native) — flows with page content, not fixed */
+html.capacitor-native .dashboard-inline-footer {
+  position: relative;
+  margin-bottom: 0.25rem;
+}
+
+html.capacitor-native .dashboard-page-with-footer {
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.5rem) !important;
 }
 
 html.capacitor-native .capacitor-boot-splash {
@@ -999,12 +1029,26 @@ html.capacitor-native textarea {
 }
 
 html.capacitor-native .dashboard-sidebar,
-html.capacitor-native .dashboard-mobile-scrim {
+html.capacitor-native .dashboard-mobile-scrim,
+html.capacitor-native .dashboard-sidebar-open-trigger {
   display: none !important;
 }
 
+/* Bottom nav: hidden on web, shown in Capacitor shell (even before Vue hydrates isNativeApp) */
+.dashboard-native-bottom-nav-host {
+  display: none;
+}
+
+html.capacitor-native .dashboard-native-bottom-nav-host {
+  display: block !important;
+}
+
 html.capacitor-native .dashboard-native-main {
-  padding-bottom: calc(5.75rem + var(--cap-safe-bottom));
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
+}
+
+html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
+  padding-bottom: 0;
 }
 
 html.capacitor-native .dashboard-native-bottom-nav {

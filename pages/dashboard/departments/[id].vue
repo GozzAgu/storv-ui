@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+    class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 overflow-x-hidden pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
     <Breadcrumbs :items="departmentBreadcrumbs" class="text-[11px] text-gray-500 dark:text-gray-400" />
 

@@ -6,6 +6,6 @@
 		"iosScheme": "capacitor"
 	},
 	"ios": {
-		"contentInset": "always"
+		"contentInset": "automatic"
 	}
 }

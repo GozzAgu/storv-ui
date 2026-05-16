@@ -101,13 +101,15 @@
           try {
             var loc = window.location;
             var p = loc.protocol;
-            var h = loc.hostname;
+            var h = (loc.hostname || '').toLowerCase();
             var port = loc.port || '';
             var href = loc.href || '';
+            var ua = navigator.userAgent || '';
+            var local = h === 'localhost' || h === '127.0.0.1';
             if (p === 'capacitor:' || href.indexOf('capacitor://') === 0) return true;
-            if (h === 'localhost' && p === 'https:') {
-              return !port || port === '443';
-            }
+            if (local && p === 'https:' && (!port || port === '443')) return true;
+            if (local && p === 'http:' && (!port || port === '80')) return true;
+            if (/Capacitor/i.test(ua)) return true;
           } catch (e) {}
           return false;
         }
