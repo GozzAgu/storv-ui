@@ -1,5 +1,4 @@
 import { 
-  getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -16,26 +15,16 @@ import {
   type Auth,
   type ConfirmationResult
 } from 'firebase/auth'
-import { useFirebase } from './useFirebase'
+import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
 
 /**
  * Composable for Firebase Authentication
  */
 export const useFirebaseAuth = () => {
-  const { getApp } = useFirebase()
-  
-  // Get Auth instance
   const getAuthInstance = (): Auth | null => {
     if (import.meta.server) return null
-    
-    const app = getApp()
-    if (!app) {
-      console.warn('Firebase app not initialized')
-      return null
-    }
-    
-    return getAuth(app)
+    return getFirebaseClientAuth()
   }
 
   // Use shared state (initialized by plugin)

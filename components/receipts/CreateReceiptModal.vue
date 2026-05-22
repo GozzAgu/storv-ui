@@ -327,6 +327,7 @@
                 Payment Method *
               </label>
                 <Checkbox
+                  v-if="paymentSettlement !== 'balance_due'"
                   v-model="useSplitPayment"
                   label="Split Payment"
                   size="sm"
@@ -427,18 +428,55 @@
                 </div>
               </div>
             </div>
-            <div>
+            <div class="sm:col-span-2">
               <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Status *
+                Payment *
               </label>
-              <select
-                v-model="receiptForm.status"
-                required
-                class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  :class="paymentSettlement === 'paid_in_full' ? settlementActiveClass : settlementInactiveClass"
+                  @click="paymentSettlement = 'paid_in_full'"
+                >
+                  Paid in full
+                </button>
+                <button
+                  type="button"
+                  :class="paymentSettlement === 'balance_due' ? settlementActiveClass : settlementInactiveClass"
+                  @click="paymentSettlement = 'balance_due'"
+                >
+                  Balance due
+                </button>
+              </div>
+              <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                {{
+                  paymentSettlement === 'balance_due'
+                    ? 'Stock stays reserved until paid off — order appears under Outstanding.'
+                    : 'Stock is marked sold when the receipt is created.'
+                }}
+              </p>
+              <div
+                v-if="paymentSettlement === 'balance_due'"
+                class="mt-3 rounded-sm border border-amber-200/70 bg-amber-50/50 p-3 dark:border-amber-900/40 dark:bg-amber-950/15"
               >
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-              </select>
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Deposit collected today *
+                </label>
+                <input
+                  v-model.number="depositAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  :max="receiptTotal"
+                  class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card tabular-nums dark:text-gray-100"
+                />
+                <p class="mt-1.5 text-[11px] text-gray-600 dark:text-gray-400 tabular-nums">
+                  Balance remaining:
+                  <span class="font-semibold text-amber-800 dark:text-amber-200">
+                    {{ formatCurrency(Math.max(0, receiptTotal - (depositAmount || 0))) }}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
           <div>
@@ -712,6 +750,7 @@ import { useUserStore } from '~/stores/user'
 import { useStaffStore } from '~/stores/staff'
 import { usePreferences } from '~/composables/usePreferences'
 import { getReceiptProductDetails } from '~/composables/useReceiptProductDetails'
+import { computeBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import {
   getInventoryItemDisplayName as getItemDisplayName,
   getInventoryItemField as getItemField,
@@ -733,6 +772,7 @@ const receiptsStore = useReceiptsStore()
 const customersStore = useCustomersStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
+const { authFetch } = useAuthenticatedFetch()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
@@ -771,8 +811,27 @@ const receiptForm = ref({
   customerPhone: '',
   customerAddress: '',
   paymentMethod: '',
-  status: 'completed' as 'completed' | 'pending',
   notes: '',
+})
+
+/** paid_in_full = normal sale; balance_due = deposit now, stock held until paid off */
+const paymentSettlement = ref<'paid_in_full' | 'balance_due'>('paid_in_full')
+const depositAmount = ref(0)
+
+const settlementActiveClass =
+  'rounded-sm border border-primary-500/50 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
+const settlementInactiveClass =
+  'rounded-sm border border-gray-200/90 bg-white px-3 py-2 text-xs font-medium text-gray-600 dark:border-gray-700 dark:!bg-dashboard-card dark:text-gray-400'
+
+watch(paymentSettlement, (mode) => {
+  if (mode === 'balance_due') {
+    useSplitPayment.value = false
+    if (isSwapIn.value) {
+      isSwapIn.value = false
+      swapInFolderId.value = ''
+      swapInItemForm.value = {}
+    }
+  }
 })
 
 // Swap-in state
@@ -919,7 +978,11 @@ const isFormValid = computed(() => {
     selectedItems.value.length > 0
   
   // Payment validation
-  if (useSplitPayment.value) {
+  if (paymentSettlement.value === 'balance_due') {
+    const deposit = roundMoney(Number(depositAmount.value) || 0)
+    if (deposit <= 0 || deposit >= receiptTotal.value) return false
+    if (!receiptForm.value.paymentMethod) return false
+  } else if (useSplitPayment.value) {
     if (splitPayments.value.length === 0) return false
     if (splitPayments.value.some(p => !p.method || p.amount <= 0)) return false
     if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) return false
@@ -1069,7 +1132,7 @@ const loadItems = async () => {
   try {
     const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, { force: true })
     // Only show items that haven't been sold yet (no dateOut)
-    availableItems.value = items.filter(item => !item.dateOut)
+    availableItems.value = items.filter((item) => !item.dateOut && !item.pendingSaleReceiptId)
 
     selectedItems.value = selectedItems.value.filter(si =>
       availableItems.value.some(i => i.id === si.id),
@@ -1252,9 +1315,10 @@ const resetForm = () => {
     customerPhone: '',
     customerAddress: '',
     paymentMethod: '',
-    status: 'completed',
     notes: '',
   }
+  paymentSettlement.value = 'paid_in_full'
+  depositAmount.value = 0
   // Reset swap-in state
   isSwapIn.value = false
   swapInFolderId.value = ''
@@ -1310,7 +1374,11 @@ const handleCreateReceipt = async () => {
     })
     
     const itemIds = selectedItems.value.map(si => si.id)
-    if (itemIds.length > 0 && selectedFolder.value) {
+    const isBalanceDue = paymentSettlement.value === 'balance_due'
+    const total = calculateTotal()
+    const deposit = roundMoney(Number(depositAmount.value) || 0)
+
+    if (!isBalanceDue && itemIds.length > 0 && selectedFolder.value) {
       const saleLines = selectedItems.value.map(si => ({
         itemId: si.id,
         quantitySold: hasSerialNumbers ? 1 : si.quantity,
@@ -1373,10 +1441,22 @@ const handleCreateReceipt = async () => {
       date: new Date(),
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,
-      total: calculateTotal(),
+      total,
       paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
-      status: receiptForm.value.status as 'completed' | 'pending',
+      status: isBalanceDue ? 'balance_due' : 'completed',
       notes: receiptForm.value.notes || '',
+      hasSerialNumbers,
+      ...(isBalanceDue && {
+        amountPaid: deposit,
+        balanceDue: computeBalanceDue(total, deposit),
+        payments: [
+          {
+            amount: deposit,
+            method: receiptForm.value.paymentMethod,
+            paidAt: new Date(),
+          },
+        ],
+      }),
       folderId: selectedFolder.value.id,
       itemIds,
       storeId: currentStoreId, // Store ID where receipt was created
@@ -1403,6 +1483,10 @@ const handleCreateReceipt = async () => {
     
     // Create receipt first
     const receiptId = await receiptsStore.createReceipt(receiptData)
+
+    if (isBalanceDue && itemIds.length > 0) {
+      await inventoryStore.reserveInventoryForBalanceDue(receiptId, itemIds)
+    }
     
     // Update swap-in item to link it to the receipt (if created)
     if (swapInItemId && swapInFolderId.value) {
@@ -1434,15 +1518,9 @@ const handleCreateReceipt = async () => {
 
     emit('receipt-created', { ...receiptData, id: receiptId })
     
-    // Store receipt data for email sending
     lastCreatedReceiptId.value = receiptId
     lastCreatedReceiptData.value = receiptData
-    
-    // Show email prompt after receipt creation
-    const emailAddress = receiptForm.value.customerEmail || ''
-    emailToSend.value = emailAddress // Pre-fill if available
-    showEmailModal.value = true
-    
+
     resetForm()
     emit('update:modelValue', false)
   } catch (error: any) {
@@ -1472,14 +1550,13 @@ const sendReceiptEmail = async (receiptId: string, receiptData: any) => {
     // To attach PDF, you would need to either:
     // 1. Open ViewReceiptModal to generate PDF from DOM
     // 2. Generate PDF on server side from receipt data
-    const response = await $fetch('/api/receipts/send-email', {
+    const response = await authFetch<{ success: boolean; error?: string }>('/api/receipts/send-email', {
       method: 'POST',
       body: {
         receiptId,
         receiptNumber: receiptData.receiptNumber,
         customerEmail: emailToSend.value,
         receiptData,
-        // pdfBase64 is optional - only sent if available
       },
     })
 

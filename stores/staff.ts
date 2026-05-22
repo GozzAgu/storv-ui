@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
-import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signOut } from 'firebase/auth'
+import { getFirebaseClientAuthForApp } from '~/utils/firebase-client-auth'
 import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, deleteField, collectionGroup, type Firestore } from 'firebase/firestore'
 import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
@@ -398,7 +399,7 @@ export const useStaffStore = defineStore('staff', {
       if (!staffApp) {
         staffApp = initializeApp(config, 'StaffCreation')
       }
-      const authSecondary = getAuth(staffApp)
+      const authSecondary = getFirebaseClientAuthForApp(staffApp)
       const userCred = await createUserWithEmailAndPassword(authSecondary, normalizedEmail, password)
       const staffAuthUid = userCred.user.uid
       try {

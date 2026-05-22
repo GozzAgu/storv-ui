@@ -22,12 +22,18 @@ export type SubscriptionFeature =
   | 'settings'
   | 'profile'
   | 'notifications'
+  /** WhatsApp receipt share & payment nudges (Micro: monthly cap). */
+  | 'whatsapp_messaging'
+  /** Customer balance / credit ledger & payment reminders tied to balance. */
+  | 'customer_balance'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
 interface SubscriptionLimits {
   maxStores: number
   maxDepartmentsPerStore: number
   maxStaffPerStore: number
+  /** WhatsApp sends per calendar month; -1 = unlimited. */
+  maxWhatsAppMessagesPerMonth: number
 }
 
 const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
@@ -40,6 +46,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'settings',
     'profile',
     'notifications',
+    'whatsapp_messaging',
   ],
   storvv_medium: [
     'dashboard',
@@ -53,6 +60,8 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'settings',
     'profile',
     'notifications',
+    'whatsapp_messaging',
+    'customer_balance',
   ],
   storvv_enterprise: [
     'dashboard',
@@ -68,6 +77,8 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
     'settings',
     'profile',
     'notifications',
+    'whatsapp_messaging',
+    'customer_balance',
   ],
 }
 
@@ -76,16 +87,19 @@ const LIMITS_BY_PLAN: Record<SubscriptionPlan, SubscriptionLimits> = {
     maxStores: 1,
     maxDepartmentsPerStore: 1,
     maxStaffPerStore: 2,
+    maxWhatsAppMessagesPerMonth: 10,
   },
   storvv_medium: {
     maxStores: 2,
     maxDepartmentsPerStore: 10,
     maxStaffPerStore: 25,
+    maxWhatsAppMessagesPerMonth: -1,
   },
   storvv_enterprise: {
     maxStores: -1,
     maxDepartmentsPerStore: -1,
     maxStaffPerStore: -1,
+    maxWhatsAppMessagesPerMonth: -1,
   },
 }
 
@@ -141,10 +155,13 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Returns & customers',
     'Dashboard & notifications',
     'Settings & profile',
+    'WhatsApp receipts (10/month)',
   ],
   storvv_medium: [
     'Up to 2 stores',
     'Everything in Micro',
+    'Unlimited WhatsApp receipts & payment nudges',
+    'Customer balance ledger',
     'Analytics & reports',
     'Departments & teams (up to 10 depts, 25 staff per store)',
     'Full receipts & returns',
@@ -156,5 +173,6 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
     'Multi-store sync & transfers',
     'Unlimited departments & staff',
     'Priority support',
+    'Customer balance ledger',
   ],
 }

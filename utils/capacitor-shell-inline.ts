@@ -1,0 +1,4 @@
+/**
+ * Minified Capacitor shell bootstrap for app.html / nuxt head (keep in sync with capacitor-shell-detect.ts).
+ */
+export const CAPACITOR_SHELL_INLINE_SCRIPT = `(function(){try{var l=location,p=l.protocol,h=(l.hostname||'').toLowerCase(),port=l.port||'',href=l.href||'',path=l.pathname||'/',ua=navigator.userAgent||'';var local=h==='localhost'||h==='127.0.0.1';var cap=p==='capacitor:'||href.indexOf('capacitor://')===0||(local&&p==='https:'&&(!port||port==='443'))||(local&&p==='http:'&&(!port||port==='80'))||/Capacitor/i.test(ua);if(cap){var el=document.documentElement;el.classList.add('capacitor-native','styles-loaded');el.style.removeProperty('display');document.body&&document.body.style.removeProperty('display');if(path==='/'||path==='/index.html'){location.replace('/signin');}}}catch(e){}})();`

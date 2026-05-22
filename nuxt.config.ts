@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { CAPACITOR_SHELL_INLINE_SCRIPT } from './utils/capacitor-shell-inline'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -35,6 +37,11 @@ export default defineNuxtConfig({
     paystackPlanEnterpriseAmount: parseInt(process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT || '0', 10),
     firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
     firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    resendFromEmail: process.env.RESEND_FROM_EMAIL || 'receipts@storvv.com',
+    whatsappCloudAccessToken: process.env.WHATSAPP_CLOUD_ACCESS_TOKEN || '',
+    whatsappCloudPhoneNumberId: process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID || '',
+    whatsappCloudApiVersion: process.env.WHATSAPP_CLOUD_API_VERSION || 'v21.0',
     // Public keys (exposed to client-side)
     public: {
       appVersion: '0.1',
@@ -71,6 +78,19 @@ export default defineNuxtConfig({
     baseURL: '/',
     buildAssetsDir: '/_nuxt/',
     head: {
+      meta: [
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1, viewport-fit=cover',
+        },
+      ],
+      script: [
+        {
+          key: 'capacitor-native-mark',
+          innerHTML: CAPACITOR_SHELL_INLINE_SCRIPT,
+          tagPosition: 'head',
+        },
+      ],
       link: [
         {
           rel: 'icon',

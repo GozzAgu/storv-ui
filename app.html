@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" id="theme-color-meta" content="#fafafa">
     
     <!-- CRITICAL: Apply theme IMMEDIATELY - blocking script that runs before rendering -->
@@ -96,6 +96,33 @@
         'use strict';
         var html = document.documentElement;
         var revealed = false;
+
+        function isCapacitorShell() {
+          try {
+            var loc = window.location;
+            var p = loc.protocol;
+            var h = (loc.hostname || '').toLowerCase();
+            var port = loc.port || '';
+            var href = loc.href || '';
+            var ua = navigator.userAgent || '';
+            var local = h === 'localhost' || h === '127.0.0.1';
+            if (p === 'capacitor:' || href.indexOf('capacitor://') === 0) return true;
+            if (local && p === 'https:' && (!port || port === '443')) return true;
+            if (local && p === 'http:' && (!port || port === '80')) return true;
+            if (/Capacitor/i.test(ua)) return true;
+          } catch (e) {}
+          return false;
+        }
+
+        if (isCapacitorShell()) {
+          html.classList.add('capacitor-native', 'styles-loaded');
+          html.style.removeProperty('display');
+          var capPath = location.pathname || '/';
+          if (capPath === '/' || capPath === '/index.html') {
+            location.replace('/signin');
+          }
+          return;
+        }
         
         // HIDE IMMEDIATELY - before anything renders - use display:none
         html.style.cssText = 'display: none !important;';

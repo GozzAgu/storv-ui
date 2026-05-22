@@ -635,10 +635,13 @@
     :model-value="showEmailModal"
     @update:model-value="showEmailModal = $event"
     size="sm"
-    title="Send Receipt via Email"
+    title="Send receipt to customer"
   >
     <template #default>
       <div class="space-y-4">
+        <p v-if="hasWhatsAppFeature && receiptForm.customerPhone" class="text-xs text-gray-500 dark:text-gray-400">
+          Send via email or WhatsApp with a shareable receipt link.
+        </p>
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Email Address
@@ -656,19 +659,41 @@
             @click="showEmailModal = false"
             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
           >
-            Cancel
+            Skip
+          </button>
+          <button
+            v-if="hasWhatsAppFeature && receiptForm.customerPhone"
+            type="button"
+            @click="openPostCreateWhatsApp"
+            class="px-4 py-2 text-sm font-medium text-[#128C7E] border border-[#25D366]/40 bg-[#25D366]/10 rounded-sm hover:bg-[#25D366]/20 transition-colors"
+          >
+            WhatsApp
           </button>
           <button
             @click="sendReceiptEmail(lastCreatedReceiptId, lastCreatedReceiptData)"
             :disabled="!emailToSend || !isValidEmail(emailToSend) || isSendingEmail"
             class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 rounded-sm transition-colors"
           >
-            {{ isSendingEmail ? 'Sending...' : 'Send' }}
+            {{ isSendingEmail ? 'Sending...' : 'Send email' }}
           </button>
         </div>
       </div>
     </template>
   </Modal>
+
+  <SendWhatsAppModal
+    v-model="showPostCreateWhatsAppModal"
+    mode="receipt"
+    :phone="receiptForm.customerPhone || ''"
+    :email="receiptForm.customerEmail || ''"
+    :template-vars="postCreateWhatsAppVars"
+    :receipt-for-capture="postCreateReceiptForCapture"
+    :receipt-data="lastCreatedReceiptData"
+    :receipt-number="lastCreatedReceiptData?.receiptNumber"
+    :store-name="userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name"
+    :store-address="userStore.userData?.storeDetails?.storeAddress"
+    :store-logo-url="userStore.userData?.storeLogoUrl || storesStore.currentStore?.logoUrl"
+  />
 </template>
 
 <script setup lang="ts">
@@ -682,6 +707,9 @@ import {
   EnvelopeIcon,
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
+import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
+import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
+import type { Receipt } from '~/stores/receipts'
 import SidePanel from '~/components/ui/SidePanel.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
 import Button from '~/components/ui/Button.vue'
@@ -726,6 +754,9 @@ const canUseSwapInReceipt = computed(() => userStore.isSuperAdmin)
 
 const isSendingEmail = ref(false)
 const showEmailModal = ref(false)
+const showPostCreateWhatsAppModal = ref(false)
+const { hasFeature: hasWhatsAppFeature } = useWhatsAppMessaging()
+const { authFetch } = useAuthenticatedFetch()
 const emailToSend = ref('')
 const lastCreatedReceiptId = ref('')
 const lastCreatedReceiptData = ref<any>(null)
@@ -1399,15 +1430,9 @@ const handleCreateReceipt = async () => {
 
     emit('receipt-created', { ...receiptData, id: receiptId })
     
-    // Store receipt data for email sending
     lastCreatedReceiptId.value = receiptId
     lastCreatedReceiptData.value = receiptData
-    
-    // Show email prompt after receipt creation
-    const emailAddress = receiptForm.value.customerEmail || ''
-    emailToSend.value = emailAddress // Pre-fill if available
-    showEmailModal.value = true
-    
+
     resetForm()
     emit('update:modelValue', false)
   } catch (error: any) {
@@ -1421,6 +1446,29 @@ const handleCreateReceipt = async () => {
 const isValidEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
+}
+
+const postCreateWhatsAppVars = computed(() => {
+  const data = lastCreatedReceiptData.value
+  if (!data) return {}
+  return {
+    customerName: data.customerName || receiptForm.value.customerName,
+    storeName: userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name || 'Store',
+    receiptNumber: data.receiptNumber || '',
+    receiptDate: formatReceiptDateForWhatsApp(new Date()),
+    total: formatCurrency(calculateTotal()),
+  }
+})
+
+const postCreateReceiptForCapture = computed((): Receipt | null => {
+  const d = lastCreatedReceiptData.value
+  if (!d) return null
+  return { ...d, id: lastCreatedReceiptId.value } as Receipt
+})
+
+const openPostCreateWhatsApp = () => {
+  showEmailModal.value = false
+  showPostCreateWhatsAppModal.value = true
 }
 
 const sendReceiptEmail = async (receiptId: string, receiptData: any) => {
@@ -1437,14 +1485,13 @@ const sendReceiptEmail = async (receiptId: string, receiptData: any) => {
     // To attach PDF, you would need to either:
     // 1. Open ViewReceiptModal to generate PDF from DOM
     // 2. Generate PDF on server side from receipt data
-    const response = await $fetch('/api/receipts/send-email', {
+    const response = await authFetch<{ success: boolean; error?: string }>('/api/receipts/send-email', {
       method: 'POST',
       body: {
         receiptId,
         receiptNumber: receiptData.receiptNumber,
         customerEmail: emailToSend.value,
         receiptData,
-        // pdfBase64 is optional - only sent if available
       },
     })
 
