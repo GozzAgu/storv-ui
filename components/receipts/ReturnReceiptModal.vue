@@ -225,9 +225,15 @@ const handleConfirmReturn = async () => {
     }
     const hasSerialNumbers = folder?.hasSerialNumbers ?? true
 
-    if (itemIds.length > 0) {
+    if (itemIds.length > 0 && receipt.folderId) {
       try {
-        if (!hasSerialNumbers && receipt.items?.length) {
+        if (receipt.inventoryApplied === false) {
+          const lines = (receipt.items || []).map((line) => ({ itemId: line.itemId }))
+          await inventoryStore.clearOutstandingForReceipt(receipt.folderId, lines, {
+            receiptId: receipt.id,
+            storeId: receipt.storeId,
+          })
+        } else if (!hasSerialNumbers && receipt.items?.length) {
           const restoreQuantities: Record<string, number> = {}
           for (const line of receipt.items) {
             if (!line.itemId) continue

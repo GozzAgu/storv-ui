@@ -1039,8 +1039,11 @@ const loadItems = async () => {
   loadingItems.value = true
   try {
     const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, { force: true })
-    // Only show items that haven't been sold yet (no dateOut)
-    availableItems.value = items.filter(item => !item.dateOut)
+    availableItems.value = items.filter((item) => {
+      if (item.dateOut) return false
+      const onOutstanding = item.outstandingReceiptId != null && `${item.outstandingReceiptId}`.trim() !== ''
+      return !onOutstanding
+    })
   } catch (error) {
     console.error('Error loading items:', error)
   } finally {
@@ -1276,14 +1279,32 @@ const handleCreateReceipt = async () => {
     })
     
     const itemIds = selectedItems.value.map(si => si.id)
+    const receiptTotal = calculateTotal()
+    let amountPaidAtCreate = 0
+    let paymentHistoryAtCreate: Array<{ amount: number; method: string; date: Date }> = []
+    if (useSplitPayment.value && splitPayments.value.length > 0) {
+      amountPaidAtCreate = splitPaymentsTotal.value
+      paymentHistoryAtCreate = splitPayments.value
+        .filter((p) => p.method && p.amount > 0)
+        .map((p) => ({ amount: p.amount, method: p.method, date: new Date() }))
+    }
+    const isOutstandingSale =
+      receiptForm.value.status === 'pending' || amountPaidAtCreate < receiptTotal - 0.01
+
+    let inventoryAppliedAtCreate = false
     if (itemIds.length > 0 && selectedFolder.value) {
       const saleLines = selectedItems.value.map(si => ({
         itemId: si.id,
         quantitySold: hasSerialNumbers ? 1 : si.quantity,
       }))
-      await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
-        hasSerialNumbers,
-      })
+      if (!isOutstandingSale) {
+        await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
+          hasSerialNumbers,
+        })
+        inventoryAppliedAtCreate = true
+        amountPaidAtCreate = receiptTotal
+        await useSellerLoanOutsStore().fetchSellerLoanOuts(true).catch(() => {})
+      }
     }
     
     // Handle swap-in: Create inventory item for swapped-in device
@@ -1338,9 +1359,9 @@ const handleCreateReceipt = async () => {
       date: new Date(),
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,
-      total: calculateTotal(),
+      total: receiptTotal,
       paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
-      status: receiptForm.value.status as 'completed' | 'pending',
+      status: isOutstandingSale ? 'pending' : (receiptForm.value.status as 'completed' | 'pending'),
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
       itemIds,
@@ -1348,6 +1369,9 @@ const handleCreateReceipt = async () => {
       storeBranchName, // Store branch name
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
+      amountPaid: amountPaidAtCreate,
+      paymentHistory: paymentHistoryAtCreate.length > 0 ? paymentHistoryAtCreate : undefined,
+      inventoryApplied: inventoryAppliedAtCreate,
     }
     
     // Add split payments if enabled
@@ -1368,6 +1392,19 @@ const handleCreateReceipt = async () => {
     
     // Create receipt first
     const receiptId = await receiptsStore.createReceipt(receiptData)
+
+    if (isOutstandingSale && itemIds.length > 0 && selectedFolder.value) {
+      const saleLines = selectedItems.value.map(si => ({
+        itemId: si.id,
+        quantitySold: hasSerialNumbers ? 1 : si.quantity,
+      }))
+      await inventoryStore.markItemsOutstandingForReceipt(selectedFolder.value.id, saleLines, {
+        hasSerialNumbers,
+        receiptId,
+        receiptNumber,
+        storeId: currentStoreId,
+      })
+    }
     
     // Update swap-in item to link it to the receipt (if created)
     if (swapInItemId && swapInFolderId.value) {

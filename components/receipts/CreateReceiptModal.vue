@@ -437,7 +437,7 @@
                 class="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
               >
                 <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Pending (outstanding — inventory held until paid)</option>
               </select>
             </div>
           </div>
@@ -919,12 +919,16 @@ const isFormValid = computed(() => {
     selectedItems.value.length > 0
   
   // Payment validation
+  const isCreditSale =
+    receiptForm.value.status === 'pending' ||
+    (useSplitPayment.value && splitPaymentsTotal.value < receiptTotal.value - 0.01)
   if (useSplitPayment.value) {
     if (splitPayments.value.length === 0) return false
     if (splitPayments.value.some(p => !p.method || p.amount <= 0)) return false
-    if (Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) return false
+    if (!isCreditSale && Math.abs(splitPaymentsTotal.value - receiptTotal.value) > 0.01) return false
+    if (isCreditSale && splitPaymentsTotal.value > receiptTotal.value + 0.01) return false
   } else {
-    if (!receiptForm.value.paymentMethod) return false
+    if (!receiptForm.value.paymentMethod && receiptForm.value.status !== 'pending') return false
   }
   
   // If swap-in is enabled, validate swap-in fields (only those we display, aligned with inventory)
@@ -1068,8 +1072,12 @@ const loadItems = async () => {
   loadingItems.value = true
   try {
     const items = await inventoryStore.fetchItemsAllChunked(selectedFolder.value.id, { force: true })
-    // Only show items that haven't been sold yet (no dateOut)
-    availableItems.value = items.filter(item => !item.dateOut)
+    // Only show items available for sale (not sold, not on outstanding hold)
+    availableItems.value = items.filter((item) => {
+      if (item.dateOut) return false
+      const onOutstanding = item.outstandingReceiptId != null && `${item.outstandingReceiptId}`.trim() !== ''
+      return !onOutstanding
+    })
 
     selectedItems.value = selectedItems.value.filter(si =>
       availableItems.value.some(i => i.id === si.id),
@@ -1310,15 +1318,35 @@ const handleCreateReceipt = async () => {
     })
     
     const itemIds = selectedItems.value.map(si => si.id)
+    const receiptTotal = calculateTotal()
+    let amountPaidAtCreate = 0
+    let paymentHistoryAtCreate: Array<{ amount: number; method: string; date: Date }> = []
+    if (useSplitPayment.value && splitPayments.value.length > 0) {
+      amountPaidAtCreate = splitPaymentsTotal.value
+      paymentHistoryAtCreate = splitPayments.value
+        .filter((p) => p.method && p.amount > 0)
+        .map((p) => ({ amount: p.amount, method: p.method, date: new Date() }))
+    }
+    const isOutstandingSale =
+      receiptForm.value.status === 'pending' || amountPaidAtCreate < receiptTotal - 0.01
+
+    let inventoryAppliedAtCreate = false
     if (itemIds.length > 0 && selectedFolder.value) {
       const saleLines = selectedItems.value.map(si => ({
         itemId: si.id,
         quantitySold: hasSerialNumbers ? 1 : si.quantity,
       }))
-      await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
-        hasSerialNumbers,
-      })
-      await useSellerLoanOutsStore().fetchSellerLoanOuts(true).catch(() => {})
+      if (isOutstandingSale) {
+        // Hold stock as outstanding until the receipt is fully paid
+        inventoryAppliedAtCreate = false
+      } else {
+        await inventoryStore.applyReceiptSaleToInventory(selectedFolder.value.id, saleLines, {
+          hasSerialNumbers,
+        })
+        inventoryAppliedAtCreate = true
+        amountPaidAtCreate = receiptTotal
+        await useSellerLoanOutsStore().fetchSellerLoanOuts(true).catch(() => {})
+      }
     }
     
     // Handle swap-in: Create inventory item for swapped-in device
@@ -1373,9 +1401,9 @@ const handleCreateReceipt = async () => {
       date: new Date(),
       items: receiptItems,
       itemsCount: totalSelectedQuantity.value,
-      total: calculateTotal(),
+      total: receiptTotal,
       paymentMethod: useSplitPayment.value ? 'Split Payment' : receiptForm.value.paymentMethod,
-      status: receiptForm.value.status as 'completed' | 'pending',
+      status: isOutstandingSale ? 'pending' : (receiptForm.value.status as 'completed' | 'pending'),
       notes: receiptForm.value.notes || '',
       folderId: selectedFolder.value.id,
       itemIds,
@@ -1383,6 +1411,9 @@ const handleCreateReceipt = async () => {
       storeBranchName, // Store branch name
       storeLogoUrl: storesStore.currentStore?.logoUrl || userStore.userData?.storeLogoUrl || '', // Account logo - empty string if none (Firestore rejects undefined)
       createdByUserName, // User who created the receipt
+      amountPaid: amountPaidAtCreate,
+      paymentHistory: paymentHistoryAtCreate.length > 0 ? paymentHistoryAtCreate : undefined,
+      inventoryApplied: inventoryAppliedAtCreate,
     }
     
     // Add split payments if enabled
@@ -1401,8 +1432,21 @@ const handleCreateReceipt = async () => {
       receiptData.swapInCredit = getSwapInCredit()
     }
     
-    // Create receipt first
+    // Create receipt first (outstanding inventory flags need receipt id)
     const receiptId = await receiptsStore.createReceipt(receiptData)
+
+    if (isOutstandingSale && itemIds.length > 0 && selectedFolder.value) {
+      const saleLines = selectedItems.value.map(si => ({
+        itemId: si.id,
+        quantitySold: hasSerialNumbers ? 1 : si.quantity,
+      }))
+      await inventoryStore.markItemsOutstandingForReceipt(selectedFolder.value.id, saleLines, {
+        hasSerialNumbers,
+        receiptId,
+        receiptNumber,
+        storeId: currentStoreId,
+      })
+    }
     
     // Update swap-in item to link it to the receipt (if created)
     if (swapInItemId && swapInFolderId.value) {

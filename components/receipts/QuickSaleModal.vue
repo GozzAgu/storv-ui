@@ -528,6 +528,11 @@ const searchByBarcode = async () => {
           manualBarcode.value = ''
           return
         }
+        if (foundItem.outstandingReceiptId) {
+          showErrorToast('This product is on an outstanding sale')
+          manualBarcode.value = ''
+          return
+        }
       } else {
         const stock = resolveBulkStockFieldAndValue(foundItem as Record<string, unknown>, selectedFolder.value)
         const onHand = stock?.value ?? 0
