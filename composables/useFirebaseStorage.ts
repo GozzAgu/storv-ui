@@ -8,8 +8,8 @@ import {
   type FirebaseStorage,
   type UploadTaskSnapshot,
 } from 'firebase/storage'
-import { getAuth } from 'firebase/auth'
 import { FirebaseError } from 'firebase/app'
+import { getFirebaseClientAuth } from '~/utils/firebase-client-auth'
 import { useFirebase } from './useFirebase'
 
 /** Allowed image MIME types */
@@ -107,8 +107,8 @@ export const useFirebaseStorage = () => {
       throw new Error('Firebase Storage not initialized')
     }
 
-    const auth = getAuth(app)
-    if (auth.currentUser) {
+    const auth = getFirebaseClientAuth()
+    if (auth?.currentUser) {
       await auth.currentUser.getIdToken(true)
     }
 

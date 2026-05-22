@@ -1,6 +1,7 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAnalytics, type Analytics } from 'firebase/analytics'
 import { getFirebaseConfig } from '~/config/firebase.config'
+import { isCapacitorNative } from '~/utils/firebase-client-auth'
 
 export default defineNuxtPlugin(() => {
   let app: FirebaseApp | undefined
@@ -75,12 +76,11 @@ export default defineNuxtPlugin(() => {
         app = getApps()[0]
       }
 
-      // Initialize Analytics only in browser environment
-      if (typeof window !== 'undefined') {
+      // Analytics can hang or fail in Capacitor WKWebView — skip on native shells
+      if (typeof window !== 'undefined' && !isCapacitorNative()) {
         try {
           analytics = getAnalytics(app)
         } catch (error) {
-          // Analytics might fail in development or if not enabled
           console.warn('Firebase Analytics initialization failed:', error)
         }
       }

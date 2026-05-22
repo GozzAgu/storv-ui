@@ -335,7 +335,7 @@
                 <tbody class="divide-y divide-gray-200/80 bg-white dark:divide-gray-700/80 dark:!bg-dashboard-card/40">
                   <tr v-for="store in consolidatedReport.storeBreakdown" :key="store.id" class="hover:bg-gray-50/80 dark:hover:bg-white/[0.03]">
                     <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ store.name }}</td>
-                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ formatCurrency(store.revenue) }}</td>
+                    <td class="px-3 py-2 text-right" :class="tableMoneyClass()">{{ formatCurrency(store.revenue) }}</td>
                     <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ store.sales }}</td>
                     <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">{{ store.items }}</td>
                   </tr>
@@ -489,6 +489,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { useFirestore } from '~/composables/useFirestore'
+import { tableMoneyClass } from '~/utils/table-money-styles'
 
 definePageMeta({
   layout: 'dashboard'

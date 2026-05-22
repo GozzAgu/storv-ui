@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col bg-[#f4f6f9] dark:bg-slate-950 lg:flex-row">
+  <div class="auth-shell-root flex min-h-screen flex-col bg-[#f4f6f9] dark:bg-slate-950 lg:flex-row">
     <!-- Mobile: short brand strip -->
     <div
       class="relative overflow-hidden border-b border-white/10 bg-gradient-to-r from-primary-900 via-primary-900 to-[#0a1733] px-4 py-3.5 text-center lg:hidden"
@@ -34,7 +34,7 @@
       <div class="relative z-10">
         <a
           href="https://www.storvv.com"
-          class="inline-flex rounded-sm opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900"
+          :class="authEntranceClass() + ' inline-flex rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900'"
         >
           <img
             src="/storvv logo.png"
@@ -44,12 +44,12 @@
         </a>
 
         <h2
-          class="mt-10 text-2xl font-semibold leading-tight tracking-tight opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:60ms] xl:mt-12 xl:text-[1.65rem] xl:leading-snug"
+          :class="authEntranceClass(60) + ' mt-10 text-2xl font-semibold leading-tight tracking-tight xl:mt-12 xl:text-[1.65rem] xl:leading-snug'"
         >
           {{ panelTitle }}
         </h2>
         <p
-          class="mt-3 max-w-sm text-sm leading-relaxed text-white/85 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms]"
+          :class="authEntranceClass(120) + ' mt-3 max-w-sm text-sm leading-relaxed text-white/85'"
         >
           {{ panelDescription }}
         </p>
@@ -58,8 +58,7 @@
           <li
             v-for="(item, i) in featureItems"
             :key="i"
-            class="group flex gap-3.5 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up"
-            :style="{ animationDelay: `${180 + i * 70}ms` }"
+            :class="authEntranceClass(180 + i * 70) + ' group flex gap-3.5'"
           >
             <span
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-white/10 transition duration-300 ease-out group-hover:bg-white/16"
@@ -74,7 +73,7 @@
       </div>
 
       <p
-        class="relative z-10 text-[11px] font-medium tracking-wide text-white/45 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:420ms]"
+        :class="authEntranceClass(420) + ' relative z-10 text-[11px] font-medium tracking-wide text-white/45'"
       >
         Secure sign-in · Encrypted connection
       </p>
@@ -84,7 +83,7 @@
     <div
       class="relative flex flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-10 lg:px-12 lg:py-12"
     >
-      <div class="absolute right-4 top-4 z-10 sm:right-6 sm:top-6 lg:right-12 lg:top-10">
+      <div class="auth-shell-theme-toggle absolute right-4 top-4 z-10 sm:right-6 sm:top-6 lg:right-12 lg:top-10">
         <ThemeToggle />
       </div>
       <div
@@ -103,8 +102,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Component } from 'vue'
+import { computed, onMounted, type Component } from 'vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
+import { authEntranceClass } from '~/utils/auth-entrance'
+import { markCapacitorDocument } from '~/utils/capacitor-env'
 import {
   ChartBarSquareIcon,
   CubeIcon,
@@ -147,4 +148,8 @@ const props = withDefaults(
 const featureItems = computed(() =>
   props.features && props.features.length > 0 ? props.features : defaultFeatures
 )
+
+onMounted(() => {
+  markCapacitorDocument()
+})
 </script>

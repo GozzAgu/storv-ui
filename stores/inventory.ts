@@ -163,12 +163,18 @@ export interface InventoryItem {
   [key: string]: any // Dynamic fields based on template
   dateIn?: Date | string // Date when item was added (from createdAt)
   dateOut?: Date | string // Date when item was sold (from receipt generation)
+<<<<<<< HEAD
   /** Set while a receipt is unpaid; cleared when payment completes and item is sold. */
   outstandingReceiptId?: string
   outstandingReceiptNumber?: string
   outstandingAt?: Date | string
   /** Bulk folders: units reserved on this row until payment completes. */
   outstandingQtySold?: number
+=======
+  /** Set while a balance-due receipt holds this unit; cleared when paid in full or order cancelled. */
+  pendingSaleReceiptId?: string
+  pendingSaleAt?: Date | string
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
   swapIn?: boolean // Indicates if this item was swapped in by a customer
   swapInReceiptId?: string // Receipt ID associated with this swap-in
   // Discount fields
@@ -1870,6 +1876,7 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /**
+<<<<<<< HEAD
      * Credit / outstanding sale: reserve lines without marking sold (no dateOut, no stock decrement).
      */
     async markItemsOutstandingForReceipt(
@@ -1881,6 +1888,13 @@ export const useInventoryStore = defineStore('inventory', {
         receiptNumber?: string
         storeId?: string
       },
+=======
+     * Hold inventory for a balance-due receipt (not sold until paid in full).
+     */
+    async reserveInventoryForBalanceDue(
+      receiptId: string,
+      itemIds: string[],
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error('Firestore not initialized')
@@ -1891,6 +1905,7 @@ export const useInventoryStore = defineStore('inventory', {
       const userId = await getQueryUserId()
       if (!userId) throw new Error('User ID not available')
 
+<<<<<<< HEAD
       const storeId = options.storeId ?? (await getCurrentStoreId())
       if (!storeId) throw new Error('No store selected')
 
@@ -2009,6 +2024,76 @@ export const useInventoryStore = defineStore('inventory', {
         console.error('Error clearing outstanding flags:', error)
         throw new Error(error.message || 'Failed to clear outstanding hold')
       }
+=======
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const uniqueIds = [...new Set(itemIds.filter(Boolean))]
+      if (uniqueIds.length === 0) return
+
+      const batch = writeBatch(db)
+      const now = serverTimestamp()
+
+      for (const itemId of uniqueIds) {
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+        const snap = await getDoc(itemRef)
+        if (!snap.exists()) throw new Error(`Inventory item not found: ${itemId}`)
+        const data = snap.data() as Record<string, unknown>
+        if (data.dateOut) throw new Error(`"${itemId}" is already sold`)
+        const other = data.pendingSaleReceiptId
+        if (other && `${other}` !== receiptId) {
+          throw new Error('One or more items are reserved on another outstanding order')
+        }
+        batch.update(itemRef, {
+          pendingSaleReceiptId: receiptId,
+          pendingSaleAt: now,
+          updatedAt: now,
+        })
+      }
+
+      await batch.commit()
+    },
+
+    async releaseInventoryReservation(receiptId: string, itemIds: string[]) {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+
+      const userId = await getQueryUserId()
+      if (!userId) throw new Error('User ID not available')
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const uniqueIds = [...new Set(itemIds.filter(Boolean))]
+      if (uniqueIds.length === 0) return
+
+      const batch = writeBatch(db)
+      for (const itemId of uniqueIds) {
+        const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
+        const snap = await getDoc(itemRef)
+        if (!snap.exists()) continue
+        const data = snap.data() as Record<string, unknown>
+        if (`${data.pendingSaleReceiptId || ''}` !== receiptId) continue
+        batch.update(itemRef, {
+          pendingSaleReceiptId: deleteField(),
+          pendingSaleAt: deleteField(),
+          updatedAt: serverTimestamp(),
+        })
+      }
+      await batch.commit()
+    },
+
+    /** Complete sale for a fully paid balance-due receipt (clears hold + marks sold). */
+    async finalizeBalanceDueInventorySale(
+      folderId: string,
+      receiptId: string,
+      lines: { itemId: string; quantitySold: number }[],
+      options: { hasSerialNumbers: boolean },
+    ) {
+      await this.applyReceiptSaleToInventory(folderId, lines, options)
+      const itemIds = lines.map((l) => l.itemId)
+      await this.releaseInventoryReservation(receiptId, itemIds)
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     },
 
     /**
@@ -2102,7 +2187,12 @@ export const useInventoryStore = defineStore('inventory', {
           await updateDoc(itemRef, {
             [resolved.fieldKey]: newQty,
             dateOut: deleteField(),
+<<<<<<< HEAD
             ...outstandingClearPatch,
+=======
+            pendingSaleReceiptId: deleteField(),
+            pendingSaleAt: deleteField(),
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
             updatedAt: serverTimestamp(),
           })
 
@@ -2215,7 +2305,12 @@ export const useInventoryStore = defineStore('inventory', {
           const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           batch.update(itemRef, {
             dateOut: now,
+<<<<<<< HEAD
             ...outstandingClearPatch,
+=======
+            pendingSaleReceiptId: deleteField(),
+            pendingSaleAt: deleteField(),
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
             sellerLoanOutId: deleteField(),
             sellerLoanPartyName: deleteField(),
             sellerLoanPartyPhone: deleteField(),

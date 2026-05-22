@@ -8,9 +8,11 @@
   </div>
   
   <!-- Dashboard content (only shown if authenticated) -->
-  <div v-else class="min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
-    <!-- Sidebar -->
+  <div v-else class="dashboard-layout-root min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
+    <!-- Sidebar (web / tablet — native app uses bottom nav) -->
     <aside
+      v-if="!isNativeApp"
+      class="dashboard-sidebar"
       :class="[
         /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
         'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
@@ -298,9 +300,10 @@
       </div>
     </aside>
 
-    <!-- Mobile scrim: opacity + backdrop-filter easing/duration match drawer slide; stays mounted so blur eases in/out -->
+    <!-- Mobile scrim (web drawer only) -->
     <div
-      class="fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
+      v-if="!isNativeApp"
+      class="dashboard-mobile-scrim fixed inset-0 z-[54] lg:hidden touch-manipulation transition-[opacity,backdrop-filter,-webkit-backdrop-filter,background-color] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none motion-reduce:duration-0"
       :class="[
         sidebarOpen
           ? 'pointer-events-auto bg-black/[0.05] opacity-100 backdrop-blur-md backdrop-saturate-110 dark:bg-[#07080c]/30'
@@ -311,17 +314,26 @@
     />
 
     <!-- Main Content -->
-    <div 
-      :class="['min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64']"
-      class="w-full"
+    <div
+      :class="[
+        'min-h-screen w-full',
+        isNativeApp
+          ? 'dashboard-native-shell'
+          : ['transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'],
+      ]"
       style="min-width: 0; max-width: 100vw;"
     >
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'fixed top-0 left-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-white/[0.07] dark:bg-[#07080c]/70',
-          sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
-          sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
+          'dashboard-top-nav fixed top-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#07080c]/70',
+          isNativeApp
+            ? 'dashboard-top-nav-native left-0 z-[54]'
+            : [
+                'left-0 transition-[left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                sidebarOpen ? 'z-40 lg:z-[54]' : 'z-[54]',
+                sidebarCollapsed ? 'lg:left-[72px]' : 'lg:left-64',
+              ],
         ]"
       >
         <div
@@ -329,12 +341,16 @@
           aria-hidden="true"
         />
         <div
-          class="relative flex h-12 w-full items-center gap-2 px-3 sm:h-14 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6"
+          :class="[
+            'relative flex w-full items-center gap-2 px-3 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6',
+            isNativeApp ? 'dashboard-top-nav-native-row h-11' : 'h-12 sm:h-14',
+          ]"
         >
-          <!-- Mobile nav trigger: own column so flex-1 page title never squeezes the logo -->
+          <!-- Mobile nav trigger (web drawer) -->
           <button
+            v-if="!isNativeApp"
             type="button"
-            class="group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
+            class="dashboard-sidebar-open-trigger group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
             aria-label="Open menu"
             @click="sidebarOpen = true"
           >
@@ -353,8 +369,26 @@
             />
           </button>
 
+          <!-- Native: Storvv logo (links home) -->
+          <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center">
+            <NuxtLink
+              to="/dashboard"
+              class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
+              aria-label="Storv home"
+            >
+              <img
+                src="/storvv logo mobile.png"
+                alt="Storv"
+                class="h-8 w-8 object-contain"
+                width="32"
+                height="32"
+                decoding="async"
+              />
+            </NuxtLink>
+          </div>
+
           <!-- Page title (shrinks / truncates; not coupled to logo) -->
-          <div class="hidden min-w-0 flex-1 items-center md:flex">
+          <div v-else class="hidden min-w-0 flex-1 items-center md:flex">
             <div
               class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
             >
@@ -410,10 +444,13 @@
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
             </button>
 
-            <StoreSelector v-if="userStore.userData?.role === 'superAdmin'" />
+            <StoreSelector
+              v-if="userStore.userData?.role === 'superAdmin'"
+              :class="isNativeApp ? 'max-w-[5.25rem] shrink' : ''"
+            />
 
             <div
-              class="group relative flex h-9 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
+              class="group relative flex h-9 shrink-0 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
             >
               <ThemeToggle />
             </div>
@@ -460,7 +497,12 @@
               <button
                 type="button"
                 @click="profileMenuOpen = !profileMenuOpen"
-                class="group relative flex min-w-0 max-w-[11rem] items-center gap-2 rounded-xl border-0 bg-white/90 py-1 pl-1 pr-1.5 font-medium text-gray-800 ring-1 ring-inset ring-gray-200/55 backdrop-blur-md transition-colors hover:bg-white sm:max-w-[14rem] sm:pr-2 dark:bg-white/[0.07] dark:text-gray-100 dark:ring-white/12 dark:hover:bg-white/[0.11] md:max-w-[17rem] md:pr-2.5"
+                :class="[
+                  'group relative flex items-center rounded-xl border-0 bg-white/90 font-medium text-gray-800 ring-1 ring-inset ring-gray-200/55 backdrop-blur-md transition-colors hover:bg-white dark:bg-white/[0.07] dark:text-gray-100 dark:ring-white/12 dark:hover:bg-white/[0.11]',
+                  isNativeApp
+                    ? 'h-9 w-9 shrink-0 justify-center p-0'
+                    : 'min-w-0 max-w-[11rem] gap-2 py-1 pl-1 pr-1.5 sm:max-w-[14rem] sm:pr-2 md:max-w-[17rem] md:pr-2.5',
+                ]"
                 :aria-expanded="profileMenuOpen"
                 aria-haspopup="true"
               >
@@ -595,12 +637,19 @@
       </header>
 
       <!-- Spacer so fixed nav never overlaps page content -->
-      <div class="h-12 shrink-0 sm:h-14" aria-hidden="true" />
+      <div
+        class="dashboard-top-nav-spacer shrink-0"
+        :class="isNativeApp ? 'dashboard-top-nav-spacer-native' : 'h-12 sm:h-14'"
+        aria-hidden="true"
+      />
 
       <!-- Page Content (same soft entrance as auth pages; re-runs on route change) -->
       <main
         data-dashboard-main
-        class="px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4 w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible"
+        :class="[
+          'w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
+          isNativeApp && 'dashboard-native-main',
+        ]"
       >
         <div
           :key="route.path"
@@ -616,6 +665,14 @@
     
     <!-- Global Search -->
     <GlobalSearch />
+
+    <!-- Native app bottom navigation (CSS fallback via html.capacitor-native) -->
+    <DashboardNativeBottomNav
+      class="dashboard-native-bottom-nav-host"
+      :primary-items="nativePrimaryNav"
+      :more-items="nativeMoreNav"
+      @sign-out="handleSignOut"
+    />
   </div>
 </template>
 
@@ -662,6 +719,8 @@ import {
 } from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
+import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
+import { splitNativeBottomNav } from '~/utils/dashboard-native-nav'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
@@ -679,6 +738,7 @@ import { useDepartmentsStore } from '~/stores/departments'
 import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useSearchStore } from '~/stores/search'
+import { getAuthWaitMs, waitForAuthStore } from '~/utils/wait-for-auth'
 
 const { actualTheme } = useTheme()
 
@@ -711,6 +771,7 @@ watch(() => authStore.currentUser, (newUser) => {
 
 // Computed unread count
 const unreadNotificationCount = computed(() => notificationsStore.unreadCount)
+const { isNativeApp } = useCapacitorNativeApp()
 const sidebarOpen = ref(false)
 
 function closeMobileSidebarOverlay() {
@@ -756,7 +817,8 @@ function scheduleProfileMenuPosition() {
 const notificationsOpen = ref(false)
 const notificationsRef = ref<HTMLElement | null>(null)
 const notificationsPanelRef = ref<HTMLElement | null>(null)
-const checkingAuth = ref(import.meta.client) // Track authentication check status - true on client, false on server
+/** Never block the whole shell on auth — show UI with a short gate only (Capacitor-safe). */
+const checkingAuth = ref(false)
 
 const toggleNotifications = () => {
   notificationsOpen.value = !notificationsOpen.value
@@ -859,6 +921,9 @@ const filteredNavigation = computed(() => {
     return true
   })
 })
+
+const nativePrimaryNav = computed(() => splitNativeBottomNav(filteredNavigation.value).primary)
+const nativeMoreNav = computed(() => splitNativeBottomNav(filteredNavigation.value).more)
 
 const route = useRoute()
 
@@ -1157,7 +1222,8 @@ const toggleDepartmentExpanded = async (departmentId: string) => {
 
 // Departments navigation (kept for compatibility)
 const isDepartmentsRoute = computed(() => {
-  return route.path.startsWith('/dashboard/departments')
+  if (route.path.startsWith('/dashboard/departments')) return true
+  return route.path.startsWith('/dashboard/stores/') && route.path.includes('/departments')
 })
 
 const departmentsList = computed(() => {
@@ -1535,44 +1601,17 @@ const checkAuth = async () => {
     return
   }
   
-  checkingAuth.value = true
-  
-  // Wait for auth to finish loading
-  if (authStore.loading) {
-    await new Promise<void>((resolve) => {
-      let resolved = false
-      const maxWait = 5000 // 5 seconds max wait
-      const startTime = Date.now()
-      
-      const checkAuthState = () => {
-        if (!authStore.loading) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        
-        if (Date.now() - startTime > maxWait) {
-          if (!resolved) {
-            resolved = true
-            resolve()
-          }
-          return
-        }
-        
-        setTimeout(checkAuthState, 50)
-      }
-      
-      checkAuthState()
-    })
+  checkingAuth.value = authStore.loading
+
+  try {
+    await waitForAuthStore(authStore, getAuthWaitMs())
+  } finally {
+    checkingAuth.value = false
   }
-  
+
   // Redirect to signin if no user after loading completes
   // But add loop prevention
   if (!authStore.loading && !authStore.currentUser) {
-    checkingAuth.value = false
-    
     // Prevent redirect loops
     const redirectKey = 'dashboard_layout_redirect'
     if (sessionStorage.getItem(redirectKey) === 'true') {
@@ -1605,8 +1644,6 @@ const checkAuth = async () => {
     sessionStorage.removeItem('dashboard_layout_redirect')
     sessionStorage.removeItem('dashboard_redirect_count')
   }
-  
-  checkingAuth.value = false
 }
 
 onMounted(async () => {

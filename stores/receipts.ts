@@ -11,20 +11,35 @@ import { useSellerLoanOutsStore } from './sellerLoanOuts'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 import {
+<<<<<<< HEAD
   buildPaymentEntry,
   isReceiptFullyPaid,
   receiptAmountPaid,
   receiptBalanceDue,
 } from '~/utils/receipt-outstanding'
 import { isInventoryItemOutstanding, isInventoryItemSold } from '~/utils/inventory-outstanding'
+=======
+  computeBalanceDue,
+  isBalanceFullyPaid,
+  normalizePayments,
+  roundMoney,
+} from '~/utils/receipt-balance'
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
 
+<<<<<<< HEAD
 export interface ReceiptPaymentEntry {
   amount: number
   method: string
   date: Date | any
+=======
+export interface ReceiptPayment {
+  amount: number
+  method: string
+  paidAt: Date | any
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
   recordedBy?: string
 }
 
@@ -57,7 +72,15 @@ export interface Receipt {
   itemsCount: number
   total: number
   paymentMethod: string
-  status: 'completed' | 'pending' | 'refunded'
+  status: 'completed' | 'pending' | 'refunded' | 'balance_due' | 'cancelled'
+  /** Amount collected so far (balance-due / layaway sales). */
+  amountPaid?: number
+  /** Remaining amount owed; cleared when status becomes completed. */
+  balanceDue?: number
+  /** Payment history for balance-due receipts. */
+  payments?: ReceiptPayment[]
+  /** Folder used serial-number flow (needed when completing a balance-due sale). */
+  hasSerialNumbers?: boolean
   notes?: string
   refundReason?: string // Reason for return/refund (when status is refunded)
   folderId: string
@@ -258,11 +281,17 @@ export const useReceiptsStore = defineStore('receipts', {
             swapInItemId: data.swapInItemId || undefined,
             swapInCredit: typeof data.swapInCredit === 'number' ? data.swapInCredit : undefined,
             amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
+<<<<<<< HEAD
             paymentHistory: data.paymentHistory || undefined,
             inventoryApplied:
               typeof data.inventoryApplied === 'boolean'
                 ? data.inventoryApplied
                 : (data.status || 'completed') === 'completed',
+=======
+            balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
+            payments: data.payments || undefined,
+            hasSerialNumbers: data.hasSerialNumbers === true,
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
           } as Receipt
         })
 
@@ -536,6 +565,7 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
+<<<<<<< HEAD
     /**
      * Record a partial payment; when fully paid, finalize inventory (mark sold) and complete receipt.
      */
@@ -621,6 +651,150 @@ export const useReceiptsStore = defineStore('receipts', {
 
       await this.updateReceipt(receiptId, updates, { storeId })
       return { ...receipt, ...updates, id: receiptId } as Receipt
+=======
+    async recordBalancePayment(
+      receiptId: string,
+      payment: { amount: number; method: string }
+    ): Promise<{ completed: boolean }> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+
+      const amount = roundMoney(Number(payment.amount))
+      if (amount <= 0) throw new Error('Payment amount must be greater than zero')
+
+      const userId = await getQueryUserId()
+      if (!userId) throw new Error('User ID not available')
+
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
+      const snap = await getDoc(receiptRef)
+      if (!snap.exists()) throw new Error('Receipt not found')
+
+      const data = snap.data() as Record<string, unknown>
+      if (data.status !== 'balance_due') {
+        throw new Error('This receipt is not awaiting payment')
+      }
+
+      const total = Number(data.total) || 0
+      const prevPaid = typeof data.amountPaid === 'number' ? data.amountPaid : 0
+      const newPaid = roundMoney(prevPaid + amount)
+      const balanceDue = computeBalanceDue(total, newPaid)
+      if (newPaid > total + 0.01) {
+        throw new Error('Payment exceeds the amount owed')
+      }
+
+      const payments = normalizePayments(data.payments)
+      payments.push({
+        amount,
+        method: payment.method.trim() || 'Cash',
+        paidAt: new Date(),
+        recordedBy: authStore.currentUser.uid,
+      })
+
+      const inventoryStore = useInventoryStore()
+      let completed = false
+
+      if (isBalanceFullyPaid(total, newPaid)) {
+        const folderId = String(data.folderId || '')
+        const items = (data.items as ReceiptItem[]) || []
+        const hasSerialNumbers = data.hasSerialNumbers === true
+        const saleLines = items.map((i) => ({
+          itemId: i.itemId,
+          quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
+        }))
+        if (folderId && saleLines.length > 0) {
+          await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
+            hasSerialNumbers,
+          })
+        }
+        await updateDoc(receiptRef, {
+          status: 'completed',
+          amountPaid: newPaid,
+          balanceDue: 0,
+          payments,
+          paymentMethod: payment.method.trim() || data.paymentMethod || 'Cash',
+          updatedAt: serverTimestamp(),
+          completedAt: serverTimestamp(),
+        })
+        completed = true
+      } else {
+        await updateDoc(receiptRef, {
+          amountPaid: newPaid,
+          balanceDue,
+          payments,
+          updatedAt: serverTimestamp(),
+        })
+      }
+
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index > -1) {
+        const existing = this.receipts[index]!
+        this.receipts[index] = {
+          ...existing,
+          amountPaid: newPaid,
+          balanceDue,
+          payments,
+          status: completed ? 'completed' : 'balance_due',
+          paymentMethod: completed
+            ? payment.method.trim() || existing.paymentMethod
+            : existing.paymentMethod,
+          updatedAt: new Date(),
+        }
+      }
+
+      return { completed }
+    },
+
+    async cancelBalanceDueReceipt(receiptId: string): Promise<void> {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+
+      const userId = await getQueryUserId()
+      if (!userId) throw new Error('User ID not available')
+
+      const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const receiptRef = getReceiptDocument(db, userId, storeId, receiptId)
+      const snap = await getDoc(receiptRef)
+      if (!snap.exists()) throw new Error('Receipt not found')
+
+      const data = snap.data() as Record<string, unknown>
+      if (data.status !== 'balance_due') {
+        throw new Error('Only outstanding orders can be cancelled')
+      }
+
+      const itemIds = Array.isArray(data.itemIds) ? (data.itemIds as string[]) : []
+      if (itemIds.length > 0) {
+        await useInventoryStore().releaseInventoryReservation(receiptId, itemIds)
+      }
+
+      await updateDoc(receiptRef, {
+        status: 'cancelled',
+        balanceDue: 0,
+        updatedAt: serverTimestamp(),
+      })
+
+      const index = this.receipts.findIndex((r) => r.id === receiptId)
+      if (index > -1) {
+        this.receipts[index] = {
+          ...this.receipts[index]!,
+          status: 'cancelled',
+          balanceDue: 0,
+          updatedAt: new Date(),
+        }
+      }
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     },
 
     // Optimistically remove receipt from local state (for undo flow)

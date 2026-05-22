@@ -84,9 +84,31 @@ const HIDDEN_RECEIPT_DETAIL_KEYS = new Set<string>([
 /** Shown as the swap-in headline; omit from repeated detail rows. */
 const INVENTORY_PRIMARY_NAME_KEYS = new Set(['name', 'title', 'productName', 'itemName'])
 
+/** Fields already shown as line-item columns — omit from detail chips in receipt tables. */
+const LINE_ITEM_TABLE_HIDDEN_KEYS = new Set<string>([
+  'name',
+  'itemName',
+  'productName',
+  'title',
+  'quantity',
+  'qty',
+  'price',
+  'originalPrice',
+  'discountedPrice',
+  'unitPrice',
+  'amount',
+  'discountPercentage',
+  'discountAmount',
+  'hasDiscount',
+  'total',
+  'lineTotal',
+])
+
 export interface ReceiptDetailLinesOptions {
   /** Format numeric product-detail fields whose keys look like prices (matches column totals). */
   formatMoney?: (amount: number) => string
+  /** Hide price/qty/name echoes from inventory snapshots (receipt list line details). */
+  omitLineItemFields?: boolean
 }
 
 function normalizeMoneyDetailKey(key: string): string {
@@ -121,6 +143,7 @@ export function getProductDetailLines(item: ReceiptItem, opts?: ReceiptDetailLin
   const lines: string[] = []
   for (const key of DETAIL_ORDER) {
     if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
+    if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     const value = raw[key]
     if (value === undefined || value === null) continue
     const text = String(value).trim()
@@ -135,6 +158,7 @@ export function getProductDetailLines(item: ReceiptItem, opts?: ReceiptDetailLin
   for (const [key, value] of Object.entries(raw)) {
     if ((DETAIL_ORDER as readonly string[]).includes(key)) continue
     if (HIDDEN_RECEIPT_DETAIL_KEYS.has(key)) continue
+    if (opts?.omitLineItemFields && LINE_ITEM_TABLE_HIDDEN_KEYS.has(key)) continue
     if (value === undefined || value === null) continue
     const text = String(value).trim()
     if (!text) continue

@@ -363,7 +363,7 @@
                     <span class="text-gray-900 dark:text-gray-100 truncate">{{ product.name }}</span>
                   </td>
                   <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">{{ product.quantity }}</td>
-                  <td class="py-1.5 pl-2 text-right font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(product.revenue) }}</td>
+                  <td class="py-1.5 pl-2 text-right" :class="tableMoneyClass()">{{ formatCurrency(product.revenue) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -403,7 +403,7 @@
                     </div>
                   </td>
                   <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">{{ customer.orders }}</td>
-                  <td class="py-1.5 pl-2 text-right font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</td>
+                  <td class="py-1.5 pl-2 text-right" :class="tableMoneyClass()">{{ formatCurrency(customer.totalSpent) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -513,6 +513,7 @@ import Card from '~/components/ui/Card.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import jsPDF from 'jspdf'
+import { tableMoneyClass } from '~/utils/table-money-styles'
 
 definePageMeta({
   layout: 'dashboard'

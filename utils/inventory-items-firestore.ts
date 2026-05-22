@@ -41,6 +41,8 @@ export function docToInventoryItem(
     'createdBy',
     'dateIn',
     'dateOut',
+    'pendingSaleReceiptId',
+    'pendingSaleAt',
     'sellerLoanOutId',
     'sellerLoanPartyName',
     'sellerLoanPartyPhone',
@@ -65,6 +67,13 @@ export function docToInventoryItem(
           ? data.createdAt.toDate()
           : new Date(data.createdAt) || new Date(),
     dateOut: data.dateOut?.toDate ? data.dateOut.toDate() : data.dateOut ? new Date(data.dateOut) : undefined,
+    pendingSaleReceiptId:
+      typeof data.pendingSaleReceiptId === 'string' ? data.pendingSaleReceiptId : undefined,
+    pendingSaleAt: data.pendingSaleAt?.toDate
+      ? data.pendingSaleAt.toDate()
+      : data.pendingSaleAt
+        ? new Date(data.pendingSaleAt as string | number)
+        : undefined,
     sellerLoanOutId: data.sellerLoanOutId ?? undefined,
     sellerLoanPartyName: data.sellerLoanPartyName ?? undefined,
     sellerLoanPartyPhone:

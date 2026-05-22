@@ -1068,7 +1068,7 @@
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
               <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No stock transfers between stores (Enterprise only)</li>
                 </ul>
-            <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-primary-500 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-primary-600">Get Started</a>
+            <a :href="appOriginUrl" class="btn-primary mt-6 flex w-full justify-center py-2.5">Get Started</a>
               </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
@@ -1611,7 +1611,7 @@
                 </div>
                 <button
                   type="button"
-                  class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-3 text-sm font-medium text-white outline-none transition-all duration-300 ease-out hover:bg-primary-700 active:scale-[0.98] sm:w-auto"
+                  class="btn-primary mt-6 inline-flex w-full items-center justify-center gap-2 px-6 py-3 text-base sm:w-auto active:scale-[0.98]"
                   @click="showContactFormModal = true"
                 >
                   Contact us

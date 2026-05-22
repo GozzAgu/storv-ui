@@ -5,7 +5,7 @@
     panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
   >
     <div
-      class="mb-8 text-center opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:40ms] lg:mb-9 lg:text-left"
+      :class="[authEntranceClass(40), 'mb-8 text-center lg:mb-9 lg:text-left']"
     >
       <a
         href="https://www.storvv.com"
@@ -39,7 +39,10 @@
     </div>
 
     <div
-      class="overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0 animate-auth-fade-up [animation-delay:120ms]"
+      :class="[
+        authEntranceClass(120),
+        'overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95',
+      ]"
     >
         <div class="relative p-4 sm:p-5">
           <div
@@ -161,6 +164,8 @@ import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useTheme } from '~/composables/useTheme'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
 import { useUserStore } from '~/stores/user'
+import { authEntranceClass } from '~/utils/auth-entrance'
+import { markCapacitorDocument } from '~/utils/capacitor-env'
 
 definePageMeta({
   layout: false,
@@ -185,6 +190,7 @@ const errorMessage = ref('')
 const route = useRoute()
 
 onMounted(() => {
+  markCapacitorDocument()
   const email = route.query.email
   if (typeof email === 'string' && email.trim()) {
     form.value.email = decodeURIComponent(email).trim()

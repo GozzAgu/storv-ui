@@ -94,6 +94,15 @@
     pointer-events: none !important;
   }
 
+  /** Solid navy primary actions */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-sm border-0 bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/55 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary-sm {
+    @apply px-3 py-1 text-xs font-semibold;
+  }
+
   /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
     @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
@@ -652,8 +661,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     border-radius: var(--app-radius-md) !important;
   }
 
-  /* Ensure common form/actions follow the same subtle radius */
-  :where(button, input, select, textarea):not(.rounded-full) {
+  /* Ensure common form/actions follow the same subtle radius (pill buttons excluded) */
+  :where(button, input, select, textarea):not(.rounded-full):not(.btn-primary) {
     border-radius: var(--app-radius-sm);
   }
 
@@ -671,6 +680,11 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     border-radius: var(--app-radius-sm);
   }
 
+  /** Keep column titles on one line; parent `.overflow-x-auto` handles narrow viewports */
+  :where(table thead th) {
+    white-space: nowrap;
+  }
+
   :where(table thead tr:first-child th:first-child) {
     border-top-left-radius: var(--app-radius-sm);
   }
@@ -683,5 +697,361 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   :where(table tbody tr:last-child td:last-child) {
     border-bottom-right-radius: var(--app-radius-sm);
   }
+
+  /* Professional dashboard data tables (inventory, staff, shared Table.vue) */
+  .data-table-shell .dashboard-table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .data-table-shell .dashboard-table thead th {
+    border-bottom: 1px solid rgb(229 231 235 / 0.85);
+    background-color: rgb(249 250 251 / 0.98);
+    padding: 0.625rem 1rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(107 114 128);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  html.dark .data-table-shell .dashboard-table thead th {
+    border-bottom-color: rgb(31 41 55 / 0.9);
+    background-color: rgb(18 20 28 / 0.95);
+    color: rgb(156 163 175);
+  }
+
+  .data-table-shell .dashboard-table tbody td {
+    border-bottom: 1px solid rgb(243 244 246 / 0.95);
+    padding: 0.625rem 1rem;
+    vertical-align: middle;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: rgb(75 85 99);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody td {
+    border-bottom-color: rgb(31 41 55 / 0.55);
+    color: rgb(209 213 219);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table-shell .dashboard-table tbody tr {
+    background-color: rgb(255 255 255);
+    transition: background-color 0.15s ease;
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr {
+    background-color: rgb(18 20 28);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:nth-child(even) {
+    background-color: rgb(249 250 251 / 0.65);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr:nth-child(even) {
+    background-color: rgb(255 255 255 / 0.02);
+  }
+
+  .data-table-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(239 246 255 / 0.55);
+  }
+
+  html.dark .data-table-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(20 63 141 / 0.08);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__primary {
+    font-weight: 500;
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__primary {
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__muted {
+    color: rgb(107 114 128);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__muted {
+    color: rgb(156 163 175);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__numeric {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__numeric {
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__money,
+  .data-table-shell .dashboard-table__money {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: rgb(4 120 87);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__money,
+  html.dark .data-table-shell .dashboard-table__money {
+    color: rgb(52 211 153);
+  }
+
+  .data-table-shell .dashboard-table .dashboard-table__money-owed,
+  .data-table-shell .dashboard-table__money-owed {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: rgb(146 64 14);
+  }
+
+  html.dark .data-table-shell .dashboard-table .dashboard-table__money-owed,
+  html.dark .data-table-shell .dashboard-table__money-owed {
+    color: rgb(252 211 77);
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-status,
+  .data-table-shell .dashboard-table td.dashboard-table__col-status {
+    min-width: 10.75rem;
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-price,
+  .data-table-shell .dashboard-table td.dashboard-table__col-price {
+    min-width: 8.5rem;
+  }
+
+  .data-table-shell .dashboard-table th.dashboard-table__col-actions,
+  .data-table-shell .dashboard-table td.dashboard-table__col-actions {
+    width: 3.25rem;
+    text-align: right;
+  }
+
+  .data-table-shell .dashboard-table__action-btn {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--app-radius-sm);
+    color: rgb(107 114 128);
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .data-table-shell .dashboard-table__action-btn:hover {
+    background-color: rgb(243 244 246);
+    color: rgb(17 24 39);
+  }
+
+  html.dark .data-table-shell .dashboard-table__action-btn:hover {
+    background-color: rgb(255 255 255 / 0.06);
+    color: rgb(243 244 246);
+  }
+
+  .data-table-shell .dashboard-table__action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    border-radius: var(--app-radius-sm);
+    border: 1px solid rgb(229 231 235 / 0.85);
+    background-color: rgb(249 250 251 / 0.9);
+    padding: 0.125rem;
+  }
+
+  html.dark .data-table-shell .dashboard-table__action-group {
+    border-color: rgb(55 65 81 / 0.8);
+    background-color: rgb(255 255 255 / 0.03);
+  }
 }
 
+/*
+ * Capacitor WKWebView: auth entrance animations often never run (content stays opacity:0).
+ * Force sign-in and related screens visible immediately.
+ */
+html.capacitor-native [class*='animate-auth-fade-up'],
+html.capacitor-native .animate-auth-fade-up,
+html.capacitor-native [class*='animate-auth-glow-drift'],
+html.capacitor-native .animate-auth-glow-drift {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html.capacitor-native.styles-loaded,
+html.capacitor-native.styles-loaded body {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+html.capacitor-native {
+  background-color: #f4f6f9 !important;
+}
+
+html.capacitor-native.dark {
+  background-color: #07080c !important;
+}
+
+/*
+ * Capacitor iOS: keep content below the status bar / notch (requires viewport-fit=cover).
+ * Scoped to .capacitor-native — do not add padding-top on body for the web app.
+ */
+html.capacitor-native {
+  --cap-safe-top: env(safe-area-inset-top, 0px);
+  --cap-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cap-safe-left: env(safe-area-inset-left, 0px);
+  --cap-safe-right: env(safe-area-inset-right, 0px);
+  --dashboard-native-top-bar: 2.75rem;
+  --dashboard-native-top-chrome: calc(var(--dashboard-native-top-bar) + var(--cap-safe-top));
+  --dashboard-bottom-nav-height: 5.5rem;
+  --dashboard-fixed-footer-height: 2.75rem;
+}
+
+html.capacitor-native #__nuxt {
+  min-height: 100dvh;
+  padding-left: var(--cap-safe-left);
+  padding-right: var(--cap-safe-right);
+}
+
+/* Auth (sign-in / sign-up) */
+html.capacitor-native .auth-shell-root {
+  min-height: 100dvh;
+  padding-top: var(--cap-safe-top);
+  padding-bottom: var(--cap-safe-bottom);
+}
+
+html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
+  top: calc(1rem + var(--cap-safe-top));
+}
+
+/* Dashboard shell (web sidebar — hidden on native) */
+html.capacitor-native .dashboard-layout-root > aside.fixed {
+  top: var(--cap-safe-top);
+  bottom: var(--cap-safe-bottom);
+  height: auto;
+}
+
+html.capacitor-native .dashboard-layout-root .dashboard-mobile-scrim {
+  top: var(--cap-safe-top);
+}
+
+/*
+ * Native top bar: fixed, opaque through the status-bar inset (single safe-area application).
+ */
+html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 54;
+  box-sizing: border-box;
+  padding-top: var(--cap-safe-top);
+  background-color: rgb(255 255 255 / 0.94) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
+  background-color: rgb(7 8 12 / 0.94) !important;
+}
+
+html.capacitor-native .dashboard-top-nav-native-row {
+  height: var(--dashboard-native-top-bar);
+  min-height: var(--dashboard-native-top-bar);
+}
+
+html.capacitor-native .dashboard-top-nav-native .store-switch-trigger {
+  max-width: 5.5rem;
+}
+
+html.capacitor-native .dashboard-top-nav-spacer-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav-spacer {
+  height: var(--dashboard-native-top-chrome) !important;
+  min-height: var(--dashboard-native-top-chrome) !important;
+}
+
+/* Inline pagination (native) — flows with page content, not fixed */
+html.capacitor-native .dashboard-inline-footer {
+  position: relative;
+  margin-bottom: 0.25rem;
+}
+
+html.capacitor-native .dashboard-page-with-footer {
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.5rem) !important;
+}
+
+html.capacitor-native .capacitor-boot-splash {
+  padding-top: var(--cap-safe-top);
+  padding-bottom: var(--cap-safe-bottom);
+}
+
+/* Native app: prevent horizontal scroll and iOS input zoom */
+html.capacitor-native,
+html.capacitor-native body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  overscroll-behavior-x: none;
+}
+
+html.capacitor-native .dashboard-layout-root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Do not set overflow on the shell — it breaks position:fixed top nav on iOS WKWebView */
+html.capacitor-native .dashboard-native-shell {
+  max-width: 100vw;
+  padding-left: 0 !important;
+}
+
+html.capacitor-native [data-dashboard-main],
+html.capacitor-native .dashboard-native-main {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+html.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-native select,
+html.capacitor-native textarea {
+  font-size: 16px !important;
+}
+
+html.capacitor-native .dashboard-sidebar,
+html.capacitor-native .dashboard-mobile-scrim,
+html.capacitor-native .dashboard-sidebar-open-trigger {
+  display: none !important;
+}
+
+/* Bottom nav: hidden on web, shown in Capacitor shell (even before Vue hydrates isNativeApp) */
+.dashboard-native-bottom-nav-host {
+  display: none;
+}
+
+html.capacitor-native .dashboard-native-bottom-nav-host {
+  display: block !important;
+}
+
+html.capacitor-native .dashboard-native-main {
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
+}
+
+html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
+  padding-bottom: 0;
+}
+
+html.capacitor-native .dashboard-native-bottom-nav {
+  padding-left: var(--cap-safe-left);
+  padding-right: var(--cap-safe-right);
+}

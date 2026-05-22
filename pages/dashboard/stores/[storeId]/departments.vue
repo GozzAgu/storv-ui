@@ -1,48 +1,33 @@
 <template>
   <div
-    class="flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-3 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-4 sm:pb-32"
+    class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
-    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" class="!mb-2 sm:!mb-4" />
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
-    <!-- Title + store context + search / bulk (aligned with Inventory → Folders) -->
-    <header
-      class="relative overflow-hidden rounded-2xl border border-gray-200/55 bg-white/85 px-3 py-3 shadow-none backdrop-blur-xl dark:border-gray-700/45 dark:bg-[#12141c]/85 sm:px-4 sm:py-4"
-    >
-      <div
-        class="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-gradient-to-br from-primary-400/14 via-primary-500/6 to-transparent blur-2xl dark:from-primary-500/8 dark:via-transparent dark:to-transparent"
-      />
-      <div
-        class="pointer-events-none absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-gradient-to-tr from-gray-200/40 to-transparent blur-2xl dark:from-gray-600/15 dark:to-transparent"
-      />
+    <header class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5">
       <div class="relative">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div class="min-w-0">
-            <p class="text-[8px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Store
+        <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
+          <div class="min-w-0 flex-1">
+            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
+              Settings
             </p>
-            <h1 class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-lg">
+            <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
               Departments in {{ store?.name || 'Store' }}
             </h1>
-            <p class="mt-0.5 max-w-xl text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-              Manage departments and staff for this store: search and open cards below.
+            <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              Manage departments and staff for this store.
+              <template v-if="store && !departmentsStore.loading && !storesLoading">
+                <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
+                  {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
+                </span>
+                <span class="text-gray-300 dark:text-gray-600"> · </span>
+                <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
+                <template v-if="currentStore?.id === store.id">
+                  <span class="text-gray-300 dark:text-gray-600"> · </span>
+                  <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
+                </template>
+              </template>
             </p>
-            <div
-              v-if="store"
-              class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-gray-600 dark:text-gray-400"
-            >
-              <span class="font-medium text-gray-800 dark:text-gray-200">{{ store.name }}</span>
-              <span
-                v-if="currentStore?.id === store.id"
-                class="rounded-full bg-emerald-100/90 px-2 py-px text-[10px] font-medium text-emerald-800 dark:bg-emerald-900/35 dark:text-emerald-300"
-              >
-                Current
-              </span>
-              <span v-if="store.address" class="text-gray-500 dark:text-gray-500">· {{ store.address }}</span>
-              <span class="hidden text-gray-400 sm:inline">·</span>
-              <span v-if="storeDepartments.length" class="tabular-nums text-gray-500 dark:text-gray-500">{{ storeDepartments.length }} depts</span>
-              <span v-if="storeDepartments.length && totalStaffForStore" class="text-gray-400">·</span>
-              <span v-if="totalStaffForStore" class="tabular-nums text-gray-500 dark:text-gray-500">{{ totalStaffForStore }} staff</span>
-            </div>
           </div>
           <Button
             v-if="canManageDepartments"
@@ -51,7 +36,7 @@
             :icon="PlusIcon"
             :disabled="!canAddDepartmentForStore"
             :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
-            extra-class="!rounded-2xl w-full shrink-0 sm:w-auto"
+            extra-class="!rounded-2xl shrink-0 w-full sm:w-auto"
             @click="openCreateDepartmentModal"
           >
             New department
@@ -60,7 +45,7 @@
 
         <div
           v-if="store && !departmentsStore.loading && !storesLoading"
-          class="mt-3 flex flex-col gap-2 border-t border-gray-200/60 pt-3 dark:border-gray-800/70 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
+          class="mt-4 flex flex-col gap-2.5 border-t border-gray-100/90 pt-4 dark:border-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
         >
           <div class="relative min-w-0 flex-1 sm:min-w-[200px] sm:max-w-md">
             <MagnifyingGlassIcon
@@ -128,36 +113,6 @@
       </div>
     </header>
 
-    <!-- Mobile stats -->
-    <div v-if="store" class="grid grid-cols-2 gap-2 lg:hidden">
-      <div
-        class="rounded-xl border border-gray-200/65 bg-white/90 px-3 py-2.5 shadow-none backdrop-blur-md dark:border-gray-700/50 dark:bg-white/[0.04]"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Departments</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-              {{ storeDepartments.length }}
-            </p>
-          </div>
-          <BuildingOfficeIcon class="h-6 w-6 shrink-0 text-primary-500/70 dark:text-primary-400/80" stroke-width="1.2" />
-        </div>
-      </div>
-      <div
-        class="rounded-xl border border-gray-200/65 bg-white/90 px-3 py-2.5 shadow-none backdrop-blur-md dark:border-gray-700/50 dark:bg-white/[0.04]"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0">
-            <p class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Total staff</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-              {{ totalStaffForStore }}
-            </p>
-          </div>
-          <UsersIcon class="h-6 w-6 shrink-0 text-primary-500/70 dark:text-primary-400/80" stroke-width="1.2" />
-        </div>
-      </div>
-    </div>
-
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
       class="rounded-sm border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
@@ -172,122 +127,81 @@
 
     <div
       v-else-if="departmentsStore.loading || storesLoading"
-      class="grid min-h-[96px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+      class="grid min-h-[78px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
     >
       <div
         v-for="i in 14"
         :key="i"
-        class="group relative flex flex-col items-center overflow-hidden rounded-xl border border-gray-100/80 bg-white/70 px-2 pb-2 pt-2 dark:border-gray-800/60 dark:bg-white/[0.04] animate-pulse"
+        class="relative flex min-h-[78px] flex-col overflow-hidden rounded-sm bg-white px-2 pb-1 pt-5 shadow-[0_1px_2px_rgb(0_0_0_/_0.06)] animate-pulse sm:min-h-[82px] dark:!bg-dashboard-card"
       >
         <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
         <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
-        <div class="mb-1.5 mt-3 h-9 w-9 rounded-sm bg-gray-200 dark:bg-white/10 sm:h-10 sm:w-10" />
-        <div class="mb-0.5 h-2.5 w-16 rounded bg-gray-200 dark:bg-white/10" />
-        <div class="h-2 w-20 rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-0.5 flex flex-1 items-center gap-1.5">
+          <div class="h-8 w-7 shrink-0 rounded-sm bg-gray-100 dark:bg-white/10" />
+          <div class="min-w-0 flex-1 space-y-2">
+            <div class="h-2.5 w-[70%] rounded bg-gray-200 dark:bg-white/15" />
+            <div class="h-2 w-12 rounded bg-gray-200/80 dark:bg-white/10" />
+          </div>
+        </div>
       </div>
     </div>
 
     <div v-else-if="!departmentsStore.error">
       <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
       >
-        <div
+        <DepartmentCard
           v-for="department in paginatedDepartments"
           :key="department.id"
-          class="group relative flex min-h-[104px] cursor-pointer flex-col items-stretch overflow-hidden rounded-xl border border-gray-200/60 bg-white/95 shadow-none backdrop-blur-sm duration-200 ease-out active:scale-[0.99] dark:border-gray-700/45 dark:bg-white/[0.04] sm:min-h-[108px]"
-          :class="{ 'opacity-60 cursor-not-allowed': department.isActive === false, 'pointer-events-none': deletingDepartmentId === department.id }"
-          @click="department.isActive === false || deletingDepartmentId === department.id ? null : navigateToDepartment(department.id)"
+          :name="department.name"
+          :staff-count="department.staffCount || 0"
+          :department-type="department.departmentType || ''"
+          :inactive="department.isActive === false"
+          :deleting="deletingDepartmentId === department.id"
+          :has-overlays="canManageDepartments"
+          @open="navigateToDepartment(department.id)"
         >
-          <div
-            class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/45 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100 dark:via-primary-500/35"
-          />
-          <div
-            v-if="deletingDepartmentId === department.id"
-            class="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-sm bg-gray-900/60 backdrop-blur-[2px] dark:bg-gray-950/70"
-          >
-            <ArrowPathIcon class="mb-1 h-6 w-6 animate-spin text-white" aria-hidden="true" />
-            <span class="text-[11px] font-medium text-white">Deleting...</span>
-          </div>
-          <div v-if="canManageDepartments" class="absolute left-1.5 top-1.5 z-10" @click.stop>
-            <Checkbox
-              :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
-              @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
-              size="sm"
-              wrapper-class="justify-center"
-            />
-          </div>
-
-          <div
-            v-if="canManageDepartments"
-            class="absolute right-1 top-1 z-20"
-            data-department-menu
-            @click.stop
-          >
-            <button
-              type="button"
-              :data-department-actions-anchor="department.id"
-              class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-white/90 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
-              aria-label="Department options"
-              @click="toggleDepartmentMenu(department.id)"
-            >
-              <EllipsisVerticalIcon class="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <div
-            class="flex w-full flex-1 flex-col items-center justify-between px-2 pb-2 pt-1 text-center"
-            :class="canManageDepartments ? 'pt-7' : 'pt-3'"
-          >
-            <div class="mb-1 flex min-h-[44px] w-full flex-1 flex-col items-center justify-center sm:min-h-[48px]">
-              <div
-                class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-500/10 ring-1 ring-primary-500/15 transition-colors group-hover:bg-primary-500/[0.14] dark:bg-primary-500/12 dark:ring-primary-500/25 sm:h-12 sm:w-12"
-              >
-                <BuildingOfficeIcon
-                  class="h-6 w-6 shrink-0 text-primary-600 transition-colors group-hover:text-primary-700 dark:text-primary-400 dark:group-hover:text-primary-300 sm:h-7 sm:w-7"
-                  stroke-width="1.25"
-                />
-              </div>
+          <template v-if="canManageDepartments" #checkbox>
+            <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
+              <Checkbox
+                :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
+                @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+                size="sm"
+                wrapper-class="justify-center"
+              />
             </div>
-
-            <div class="mt-auto w-full min-w-0">
-              <h3
-                class="max-w-full truncate px-0.5 text-center text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100"
-                :title="department.name"
+          </template>
+          <template v-if="canManageDepartments" #menu>
+            <div class="absolute right-1.5 top-1.5 z-20" data-department-menu @click.stop>
+              <button
+                type="button"
+                :data-department-actions-anchor="department.id"
+                class="rounded-sm p-0.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                aria-label="Department options"
+                @click="toggleDepartmentMenu(department.id)"
               >
-                {{ department.name }}
-              </h3>
-              <p
-                class="mt-1 inline-flex items-center justify-center rounded-full border border-gray-200/70 bg-gray-50/90 px-2 py-0.5 text-[9px] font-medium tabular-nums text-gray-600 dark:border-gray-700/70 dark:bg-white/[0.06] dark:text-gray-400"
-              >
-                {{ department.staffCount || 0 }} {{ (department.staffCount || 0) === 1 ? 'member' : 'members' }}
-              </p>
-              <span
-                v-if="department.isActive === false"
-                class="mt-1 inline-block text-[9px] font-medium text-amber-700 dark:text-amber-400/90"
-              >
-                Inactive
-              </span>
+                <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+              </button>
             </div>
-          </div>
-        </div>
+          </template>
+        </DepartmentCard>
       </div>
 
       <div
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="relative flex min-h-[min(60vh,28rem)] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-gray-200/55 bg-white/80 px-4 py-10 text-center shadow-none backdrop-blur-md dark:border-gray-700/45 dark:bg-[#12141c]/75 sm:min-h-[min(50vh,24rem)] sm:px-6"
+        class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)] sm:px-6"
       >
-        <div
-          class="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,22rem)] w-[min(70vw,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-primary-400/15 via-transparent to-gray-200/18 blur-3xl dark:from-primary-500/12 dark:to-gray-600/12"
-        />
         <div class="relative z-10">
-          <div class="mx-auto mb-3 flex items-center justify-center">
-            <BuildingOfficeIcon class="h-10 w-10 text-gray-400 dark:text-gray-500" stroke-width="1.2" />
+          <div
+            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+          >
+            <BuildingOfficeIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
           </div>
-          <h2 class="max-w-md break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          <h2 class="max-w-md break-words text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
             {{ searchQuery ? 'No departments found' : 'No departments yet' }}
           </h2>
-          <p class="mx-auto mt-1.5 max-w-sm break-words text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+          <p class="mx-auto mt-2 max-w-sm break-words text-xs leading-relaxed text-gray-500 dark:text-gray-400">
             {{ searchQuery ? 'Try a different search.' : 'Create a department for this store.' }}
           </p>
         </div>
@@ -412,6 +326,7 @@ import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
+import DepartmentCard from '~/components/departments/DepartmentCard.vue'
 import type { Department } from '~/composables/useDepartments'
 import { getEligibleStoresForPlan } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'

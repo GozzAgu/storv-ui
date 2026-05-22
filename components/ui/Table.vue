@@ -1,13 +1,13 @@
 <template>
   <div class="overflow-x-auto">
-    <table :class="['w-full', tableClass]">
+    <table :class="['dashboard-table', tableClass]">
       <!-- Header -->
-      <thead v-if="columns && columns.length > 0" class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90">
+      <thead v-if="columns && columns.length > 0">
         <tr>
           <th
             v-for="column in columns"
             :key="column.key"
-            :class="[ 'bg-gray-50/95 px-3 py-2.5 text-left text-[11px] !font-semibold text-gray-600 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase tracking-wide', column.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 select-none' : '', column.class || '', headerClass ]"
+            :class="[ column.sortable ? 'cursor-pointer select-none hover:text-gray-800 dark:hover:text-gray-200' : '', column.class || '', headerClass ]"
             @click="column.sortable ? handleSort(column.key) : null"
           >
             <div class="flex items-center gap-1.5">
@@ -27,7 +27,7 @@
           </th>
           <th
             v-if="showActions"
-            class="bg-gray-50/95 px-3 py-2.5 text-right text-[11px] !font-semibold text-gray-600 dark:!bg-dashboard-card/90 dark:text-gray-400 uppercase tracking-wide"
+            class="dashboard-table__col-actions"
           >
             Actions
           </th>
@@ -35,16 +35,16 @@
       </thead>
 
       <!-- Body -->
-      <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800/80 dark:!bg-dashboard-card">
+      <tbody>
         <tr
           v-for="(row, index) in sortedData"
           :key="getRowKey(row, index)"
-          :class="[ 'transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]', rowClass ]"
+          :class="rowClass"
         >
           <td
             v-for="column in columns"
             :key="column.key"
-            :class="['whitespace-nowrap px-3 py-2.5 text-xs', column.class || '', cellClass]"
+            :class="[column.class || '', cellClass]"
           >
             <slot
               :name="`cell-${column.key}`"
@@ -52,7 +52,7 @@
               :value="getValue(row, column.key)"
               :column="column"
             >
-              <span :class="getValueClass(column)">
+              <span :class="[getValueClass(column), 'dashboard-table__primary']">
                 {{ formatValue(getValue(row, column.key), column) }}
               </span>
             </slot>
@@ -117,6 +117,7 @@ import {
   TrashIcon,
   InboxIcon,
 } from '@heroicons/vue/24/outline'
+import { tableMoneyClass } from '~/utils/table-money-styles'
 
 export interface TableColumn {
   key: string
@@ -125,6 +126,8 @@ export interface TableColumn {
   formatter?: (value: any) => string
   class?: string
   valueClass?: string
+  /** Renders amount in green (credit / currency columns). */
+  type?: 'currency' | 'text' | 'number'
 }
 
 interface Props {
@@ -167,6 +170,7 @@ const getValue = (row: any, key: string) => {
 }
 
 const getValueClass = (column: TableColumn) => {
+  if (column.type === 'currency') return tableMoneyClass()
   return column.valueClass || 'text-gray-900 dark:text-gray-100'
 }
 

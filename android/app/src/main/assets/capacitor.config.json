@@ -1,0 +1,11 @@
+{
+	"appId": "com.storv.app",
+	"appName": "Storvv",
+	"webDir": "dist",
+	"server": {
+		"iosScheme": "capacitor"
+	},
+	"ios": {
+		"contentInset": "automatic"
+	}
+}

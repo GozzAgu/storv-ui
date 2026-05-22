@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div
-      class="flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
+      class="dashboard-page-with-footer flex w-full max-w-none flex-col gap-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:gap-6 sm:pb-32 min-h-[calc(100svh-4.5rem)]"
     >
       <!-- Initial loading -->
       <template v-if="isInitialLoading">
@@ -60,7 +60,19 @@
         :class="activeTab === 'outstanding' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
         @click="activeTab = 'outstanding'"
       >
+<<<<<<< HEAD
         Outstanding payments
+=======
+        <span class="inline-flex items-center gap-1.5">
+          Outstanding
+          <span
+            v-if="outstandingReceipts.length > 0"
+            class="min-w-[1.125rem] rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+          >
+            {{ outstandingReceipts.length }}
+          </span>
+        </span>
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
         <span
           class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
           :class="activeTab === 'outstanding' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
@@ -364,7 +376,7 @@
                   </button>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-sky-500/12 text-sky-800 ring-1 ring-inset ring-sky-500/18 dark:bg-sky-400/12 dark:text-sky-300 dark:ring-sky-400/25"
+                    class="inline-flex items-center rounded-sm border border-sky-200/80 bg-sky-50/90 px-1.5 py-0.5 text-[9px] font-medium text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
                   >
                     Swap
                   </span>
@@ -375,40 +387,35 @@
                   <span v-if="receipt.customerPhone" class="block tabular-nums text-[9px] text-gray-500 dark:text-gray-500">{{ receipt.customerPhone }}</span>
                 </p>
                 <p class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-500">{{ formatDate(receipt.date) }}</p>
-                <div class="mt-1.5 rounded-lg border border-gray-200/70 bg-gray-50/90 px-2 py-1.5 dark:border-gray-700/60 dark:bg-gray-900/45">
-                  <p class="text-[9px] font-medium text-gray-800 dark:text-gray-200">
-                    {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
-                  </p>
-                  <p v-if="getReceiptLineItemsPreview(receipt)" class="mt-0.5 line-clamp-2 text-[9px] leading-snug text-gray-600 dark:text-gray-400">
-                    {{ getReceiptLineItemsPreview(receipt) }}
-                  </p>
-                  <button
-                    type="button"
-                    class="mt-1 inline-flex items-center gap-1 rounded-lg border border-transparent bg-gray-100/95 px-2 py-0.5 text-[11px] font-medium text-primary-700 transition-colors hover:border-primary-200/80 hover:bg-primary-50/90 dark:bg-gray-800/70 dark:text-primary-300 dark:hover:border-primary-500/35 dark:hover:bg-primary-500/10"
-                    @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
-                  >
-                    <ChevronDownIcon
-                      class="h-3.5 w-3.5 shrink-0 transition-transform duration-200"
-                      :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
-                      stroke-width="2"
-                    />
-                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} item details
-                  </button>
-                  <div v-if="expandedReceiptLineItems[receipt.id]" class="mt-2 border-t border-gray-200/70 pt-2 dark:border-gray-700/70">
-                    <ReceiptTableLineItems
-                      :items="receipt.items"
-                      :items-count-fallback="receipt.itemsCount"
-                      compact
-                    />
-                  </div>
+                <p
+                  v-if="getReceiptLineItemsPreview(receipt)"
+                  class="mt-1 line-clamp-2 text-[10px] text-gray-600 dark:text-gray-400"
+                >
+                  {{ getReceiptLineItemsPreview(receipt) }}
+                </p>
+                <button
+                  v-if="getReceiptLineItemsCount(receipt) > 0"
+                  type="button"
+                  class="mt-1 inline-flex items-center gap-0.5 text-[11px] font-medium text-primary-600 dark:text-primary-400"
+                  @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
+                >
+                  <ChevronDownIcon
+                    class="h-3 w-3 shrink-0 transition-transform duration-200"
+                    :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
+                    stroke-width="2"
+                  />
+                  {{ expandedReceiptLineItems[receipt.id] ? 'Hide details' : 'View details' }}
+                </button>
+                <div v-if="expandedReceiptLineItems[receipt.id]" class="mt-2 overflow-hidden rounded-sm border border-gray-200/70 dark:border-gray-700/60">
+                  <ReceiptTableLineItems
+                    :items="receipt.items"
+                    :items-count-fallback="receipt.itemsCount"
+                    compact
+                  />
                 </div>
                 <div class="mt-1.5 flex items-center justify-between gap-2">
-                  <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ formatCurrency(receipt.total) }}</span>
-                  <span
-                    :class="[ 'inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset', receipt.status === 'completed' ? 'bg-emerald-500/12 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/14 text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/12 text-rose-950 ring-rose-500/22 dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
-                  >
-                    {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
-                  </span>
+                  <span class="text-xs" :class="tableMoneyClass()">{{ formatCurrency(receipt.total) }}</span>
+                  <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
                 </div>
               </div>
             </div>
@@ -435,11 +442,11 @@
       >
         <table class="w-full min-w-full border-separate border-spacing-0">
           <thead
-            class="border-b border-gray-200/45 bg-gray-50/80 backdrop-blur-[6px] dark:border-gray-800/50 dark:!bg-dashboard-card/75 supports-[backdrop-filter]:bg-gray-50/65 dark:supports-[backdrop-filter]:!bg-dashboard-card/65"
-            :class="isReceiptsFullscreen ? 'sticky top-0 z-10 backdrop-blur-md bg-white/90 dark:!bg-dashboard-card/92 supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:!bg-dashboard-card/80' : ''"
+            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
+            :class="isReceiptsFullscreen ? 'sticky top-0 z-10' : ''"
           >
             <tr>
-              <th v-if="canDeleteReceipts" class="w-10 rounded-tl-2xl px-4 py-2 text-center text-[11px] font-medium text-gray-500 dark:text-gray-400 sm:px-5">
+              <th v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">
                 <Checkbox
                   :model-value="paginatedReceipts.length > 0 && selectedReceiptsForBulk.length === paginatedReceipts.length"
                   @update:model-value="toggleSelectAllReceipts"
@@ -448,7 +455,7 @@
                 />
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', !canDeleteReceipts && 'rounded-tl-2xl', isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('receiptNumber') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('receiptNumber') && toggleSort('receiptNumber')"
               >
                 <div class="flex items-center gap-1.5">
@@ -467,7 +474,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('customerName') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('customerName') && toggleSort('customerName')"
               >
                 <div class="flex items-center gap-1.5">
@@ -486,7 +493,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('date') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('date') && toggleSort('date')"
               >
                 <div class="flex items-center gap-1.5">
@@ -505,7 +512,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'min-w-[10rem] max-w-[18rem] px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'min-w-[9rem] max-w-[16rem] px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('itemsCount') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('itemsCount') && toggleSort('itemsCount')"
               >
                 <div class="flex items-center gap-1.5">
@@ -524,7 +531,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('total') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('total') && toggleSort('total')"
               >
                 <div class="flex items-center gap-1.5">
@@ -543,7 +550,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('paymentMethod') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('paymentMethod') && toggleSort('paymentMethod')"
               >
                 <div class="flex items-center gap-1.5">
@@ -562,7 +569,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('status') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('status') && toggleSort('status')"
               >
                 <div class="flex items-center gap-1.5">
@@ -581,7 +588,7 @@
                 </div>
               </th>
               <th
-                :class="[ 'px-4 py-2 text-left text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:px-5', isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
+                :class="[ 'px-3 py-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4', isColumnSortable('createdBy') && 'cursor-pointer hover:text-gray-900 dark:hover:text-gray-100' ]"
                 @click="isColumnSortable('createdBy') && toggleSort('createdBy')"
               >
                 <div class="flex items-center gap-1.5">
@@ -600,21 +607,24 @@
                 </div>
               </th>
               <th
-                class="w-12 rounded-tr-2xl px-4 py-2 text-right text-[11px] font-medium capitalize tracking-normal text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-5"
+                class="w-12 px-3 py-2.5 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100/80 bg-white dark:divide-gray-800/55 dark:!bg-dashboard-card/40">
-            <template v-for="receipt in paginatedReceipts" :key="receipt.id">
+          <tbody class="bg-white dark:!bg-dashboard-card/35">
+            <template v-for="(receipt, rowIndex) in paginatedReceipts" :key="receipt.id">
             <tr
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-              class="transition-colors duration-200 ease-out hover:bg-gray-50/90 dark:hover:bg-gray-800/35"
-              :class="flashReceiptId === receipt.id ? '!bg-primary-500/[0.08] hover:!bg-primary-500/[0.1] dark:!bg-primary-500/15 dark:hover:!bg-primary-500/[0.18]' : ''"
+              class="border-b border-gray-100/90 transition-colors hover:bg-gray-50/90 dark:border-gray-800/70 dark:hover:bg-gray-900/40"
+              :class="[
+                rowIndex % 2 === 1 ? 'bg-gray-50/35 dark:bg-gray-900/20' : '',
+                flashReceiptId === receipt.id ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12' : '',
+              ]"
             >
-              <td v-if="canDeleteReceipts" class="w-10 px-4 py-2 text-center align-middle sm:px-5">
+              <td v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center align-middle sm:px-4">
                 <Checkbox
                   :model-value="selectedReceiptsForBulk.some(r => r.id === receipt.id)"
                   @update:model-value="(checked) => toggleReceiptSelection(receipt, checked)"
@@ -623,91 +633,85 @@
                   @click.stop
                 />
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
+              <td class="px-3 py-2.5 align-middle sm:px-4">
                 <div class="flex flex-wrap items-center gap-1.5">
-                  <div class="text-sm font-medium tabular-nums tracking-tight text-gray-900 dark:text-gray-50">
+                  <span class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-50">
                     {{ receipt.receiptNumber }}
-                  </div>
+                  </span>
                   <button
                     type="button"
                     @click.stop="copyReceiptNumber(receipt.receiptNumber)"
-                    class="rounded-md p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800/90 dark:hover:text-primary-400"
+                    class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-gray-800/90 dark:hover:text-primary-400"
+                    aria-label="Copy receipt number"
                   >
                     <ClipboardDocumentIcon class="w-3.5 h-3.5" stroke-width="1.5" />
                   </button>
                   <span
                     v-if="receipt.isSwapIn"
-                    class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide bg-sky-500/12 text-sky-800 ring-1 ring-inset ring-sky-500/18 dark:bg-sky-400/12 dark:text-sky-300 dark:ring-sky-400/25"
+                    class="inline-flex items-center rounded-sm border border-sky-200/80 bg-sky-50/90 px-1.5 py-0.5 text-[9px] font-medium text-sky-800 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
                     title="Swap-in transaction"
                   >
                     Swap
                   </span>
                 </div>
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <div class="text-sm font-medium leading-snug text-gray-900 dark:text-gray-50">
+              <td class="max-w-[12rem] px-3 py-2.5 align-middle sm:px-4">
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-50">
                   {{ receipt.customerName }}
-                </div>
-                <div v-if="receipt.customerPhone" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400 tabular-nums">
-                  {{ receipt.customerPhone }}
-                </div>
-                <div v-else-if="receipt.customerEmail" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  {{ receipt.customerEmail }}
-                </div>
+                </p>
+                <p
+                  v-if="receipt.customerPhone || receipt.customerEmail"
+                  class="mt-0.5 truncate text-[11px] tabular-nums text-gray-500 dark:text-gray-400"
+                >
+                  {{ receipt.customerPhone || receipt.customerEmail }}
+                </p>
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <div class="text-sm tabular-nums text-gray-600 dark:text-gray-300">
+              <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
+                <span class="text-xs tabular-nums text-gray-600 dark:text-gray-300">
                   {{ formatDate(receipt.date) }}
-                </div>
+                </span>
               </td>
-              <td class="min-w-[10rem] max-w-[20rem] px-4 py-2 align-top sm:px-5">
-                <div class="space-y-1">
-                  <p class="text-sm font-medium tabular-nums text-gray-900 dark:text-gray-50">
-                    {{ getReceiptLineItemsCount(receipt) }} item{{ getReceiptLineItemsCount(receipt) === 1 ? '' : 's' }}
-                  </p>
-                  <p
-                    v-if="getReceiptLineItemsPreview(receipt)"
-                    class="text-xs leading-relaxed text-gray-600 dark:text-gray-400 line-clamp-2"
-                  >
-                    {{ getReceiptLineItemsPreview(receipt) }}
-                  </p>
-                  <p v-else-if="getReceiptLineItemsCount(receipt) > 0" class="text-xs text-gray-500 dark:text-gray-500">-</p>
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1 rounded-lg border border-transparent bg-gray-100/95 px-2 py-0.5 text-xs font-medium text-primary-700 transition-colors hover:border-primary-200/80 hover:bg-primary-50/90 dark:bg-gray-800/70 dark:text-primary-300 dark:hover:border-primary-500/35 dark:hover:bg-primary-500/10"
-                    :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
-                    @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
-                  >
-                    <ChevronDownIcon
-                      class="h-3.5 w-3.5 shrink-0 transition-transform duration-200"
-                      :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
-                      stroke-width="2"
-                    />
-                    {{ expandedReceiptLineItems[receipt.id] ? 'Hide' : 'Show' }} line details
-                  </button>
-                </div>
+              <td class="min-w-[9rem] max-w-[16rem] px-3 py-2.5 align-middle sm:px-4">
+                <p
+                  v-if="getReceiptLineItemsPreview(receipt)"
+                  class="truncate text-xs text-gray-800 dark:text-gray-200"
+                  :title="getReceiptLineItemsPreview(receipt)"
+                >
+                  {{ getReceiptLineItemsPreview(receipt) }}
+                </p>
+                <p v-else class="text-xs text-gray-500">—</p>
+                <button
+                  v-if="getReceiptLineItemsCount(receipt) > 0"
+                  type="button"
+                  class="mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                  :aria-expanded="!!expandedReceiptLineItems[receipt.id]"
+                  @click.stop="toggleReceiptLineItemsExpand(receipt.id)"
+                >
+                  <ChevronDownIcon
+                    class="h-3 w-3 shrink-0 transition-transform duration-200"
+                    :class="expandedReceiptLineItems[receipt.id] ? 'rotate-180' : ''"
+                    stroke-width="2"
+                  />
+                  {{ expandedReceiptLineItems[receipt.id] ? 'Hide details' : 'View details' }}
+                </button>
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <span class="text-sm font-semibold tabular-nums tracking-tight text-gray-900 dark:text-gray-50">
+              <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
+                <span class="text-xs" :class="tableMoneyClass()">
                   {{ formatCurrency(receipt.total) }}
                 </span>
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <span class="text-sm text-gray-700 dark:text-gray-300">
-                  {{ receipt.paymentMethod }}
+              <td class="whitespace-nowrap px-3 py-2.5 align-middle sm:px-4">
+                <span class="text-xs text-gray-700 dark:text-gray-300">
+                  {{ formatPaymentMethod(receipt.paymentMethod) }}
                 </span>
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <span
-                  :class="[ 'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide shadow-sm shadow-gray-950/[0.03] ring-1 ring-inset dark:shadow-transparent', receipt.status === 'completed' ? 'bg-emerald-500/[0.12] text-emerald-900 ring-emerald-500/[0.2] dark:bg-emerald-400/14 dark:text-emerald-100 dark:ring-emerald-400/30' : receipt.status === 'pending' ? 'bg-amber-500/[0.14] text-amber-950 ring-amber-500/22 dark:bg-amber-400/14 dark:text-amber-50 dark:ring-amber-400/28' : 'bg-rose-500/[0.12] text-rose-950 ring-rose-500/[0.22] dark:bg-rose-400/14 dark:text-rose-50 dark:ring-rose-400/28', ]"
-                >
-                  {{ receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1) }}
-                </span>
+              <td class="px-3 py-2.5 align-middle sm:px-4">
+                <ReceiptStatusBadge :badge="receiptStatusBadge(receipt)" />
               </td>
-              <td class="px-4 py-2 align-middle sm:px-5">
-                <div class="text-sm text-gray-600 dark:text-gray-300">
+              <td class="max-w-[10rem] px-3 py-2.5 align-middle sm:px-4">
+                <p class="truncate text-xs text-gray-600 dark:text-gray-300">
                   {{ receipt.createdByUserName || getCreatorName(receipt.actualCreator || receipt.createdBy) }}
-                </div>
+                </p>
               </td>
               <td class="px-4 py-2 text-right align-middle sm:px-5">
                 <div class="relative inline-flex justify-end" data-receipt-menu @click.stop>
@@ -727,21 +731,13 @@
             </tr>
             <tr
               v-if="expandedReceiptLineItems[receipt.id]"
-              class="bg-gradient-to-b from-gray-50/90 to-gray-50/35 dark:from-gray-950/55 dark:to-gray-950/20"
+              class="border-b border-gray-100/90 bg-gray-50/50 dark:border-gray-800/70 dark:bg-gray-900/30"
             >
               <td
                 :colspan="receiptLineItemsDetailColspan"
-                class="px-4 py-2 sm:px-5"
+                class="px-3 py-2 sm:px-4"
               >
-                <div class="rounded-xl border border-gray-200/70 bg-white/95 px-3 py-2 shadow-sm shadow-gray-950/[0.03] backdrop-blur-[2px] dark:border-gray-700/65 dark:bg-gray-900/50 dark:shadow-black/35">
-                  <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-[11px] font-semibold tracking-wide text-gray-600 dark:text-gray-400">
-                      Line item details
-                    </p>
-                    <span class="rounded-lg bg-gray-100/95 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-700 ring-1 ring-gray-200/80 dark:bg-gray-800/90 dark:text-gray-200 dark:ring-gray-600/65">
-                      {{ receipt.receiptNumber }}
-                    </span>
-                  </div>
+                <div class="overflow-hidden rounded-sm border border-gray-200/80 bg-white dark:border-gray-700/60 dark:bg-gray-900/40">
                   <ReceiptTableLineItems
                     :items="receipt.items"
                     :items-count-fallback="receipt.itemsCount"
@@ -867,8 +863,13 @@
       />
     </template>
 
+<<<<<<< HEAD
     <!-- Outstanding payments tab -->
     <template v-if="activeTab === 'outstanding'">
+=======
+    <!-- Outstanding (balance due) tab -->
+    <template v-else-if="activeTab === 'outstanding'">
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
       <div class="data-table-shell flex min-h-0 flex-1 flex-col">
         <DataTableToolbar v-if="!receiptsStore.loading">
           <template #heading>
@@ -877,6 +878,7 @@
                 Outstanding payments
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+<<<<<<< HEAD
                 <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ outstandingReceipts.length }} open</span>
                 <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
                 <span class="tabular-nums">{{ formatCurrency(outstandingTotalBalance) }} balance due</span>
@@ -923,21 +925,119 @@
                   >
                     Record payment
                   </button>
+=======
+                Deposits collected — stock reserved until the balance is paid. Completed orders move to Receipts.
+              </p>
+            </div>
+          </template>
+          <template #filters>
+            <div class="relative min-w-0 flex-1 sm:max-w-xs">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                v-model="outstandingSearchQuery"
+                type="text"
+                placeholder="Search customer or receipt #..."
+                class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100"
+              />
+            </div>
+          </template>
+        </DataTableToolbar>
+
+        <div
+          v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
+          class="flex flex-col items-center justify-center px-4 py-16 text-center"
+        >
+          <ClockIcon class="mb-3 h-8 w-8 text-gray-400" stroke-width="1.5" />
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No outstanding payments</h3>
+          <p class="mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
+            Create a receipt with “Balance due” when a customer pays a deposit. It will appear here until paid in full.
+          </p>
+        </div>
+
+        <div v-else class="min-h-0 flex-1 overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
+              <tr>
+                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</th>
+                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</th>
+                <th class="hidden px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500 md:table-cell">Items</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Total</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Paid</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Balance</th>
+                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:!bg-dashboard-card">
+              <tr
+                v-for="row in filteredOutstandingReceipts"
+                :key="row.id"
+                class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40"
+              >
+                <td class="px-3 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">
+                  {{ row.receiptNumber }}
+                  <p class="mt-0.5 text-[10px] font-normal text-gray-500">{{ formatDate(row.date) }}</p>
+                </td>
+                <td class="px-3 py-3 text-xs text-gray-700 dark:text-gray-300">
+                  <p class="font-medium text-gray-900 dark:text-gray-100">{{ row.customerName }}</p>
+                  <p v-if="row.customerPhone" class="text-[10px] text-gray-500">{{ row.customerPhone }}</p>
+                  <p v-if="row.customerEmail" class="text-[10px] text-gray-500">{{ row.customerEmail }}</p>
+                </td>
+                <td class="hidden px-3 py-3 text-xs text-gray-600 dark:text-gray-400 md:table-cell">
+                  {{ getReceiptLineItemsPreview(row) || '—' }}
+                </td>
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">{{ formatCurrency(row.total) }}</td>
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">
+                  {{ formatCurrency(outstandingAmountPaid(row)) }}
+                </td>
+                <td class="px-3 py-3 text-right text-xs" :class="tableMoneyOwedClass()">
+                  {{ formatCurrency(outstandingBalanceDue(row)) }}
+                </td>
+                <td class="px-3 py-3">
+                  <div class="flex flex-wrap justify-end gap-1.5">
+                    <button
+                      type="button"
+                      class="btn-primary btn-primary-sm"
+                      @click="openRecordPayment(row)"
+                    >
+                      Record payment
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-sm border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-300 dark:hover:bg-gray-800"
+                      @click="viewOutstandingReceipt(row)"
+                    >
+                      View
+                    </button>
+                    <button
+                      v-if="canEditReceipts"
+                      type="button"
+                      class="rounded-sm border border-red-200/80 bg-white px-3 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-900/40 dark:text-red-300 dark:hover:bg-red-950/30"
+                      @click="cancelOutstandingReceipt(row)"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+<<<<<<< HEAD
       <RecordPaymentModal
         v-model="showRecordPaymentModal"
         :receipt="receiptForPayment"
         @recorded="handlePaymentRecorded"
       />
+=======
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     </template>
 
     <!-- Customers tab -->
-    <template v-if="activeTab === 'customers'">
+    <template v-else-if="activeTab === 'customers'">
       <div
         class="data-table-shell"
       >
@@ -1027,6 +1127,12 @@
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Contact</th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Orders</th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Total Spent</th>
+                <th
+                  v-if="hasBalanceFeature"
+                  class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
+                >
+                  Balance
+                </th>
                 <th class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">Last Order</th>
                 <th class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4">Actions</th>
               </tr>
@@ -1064,7 +1170,16 @@
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ customer.receipts.length }}</span>
                   </td>
                   <td class="px-3 py-2.5 sm:px-4">
-                    <span class="text-[10px] font-semibold text-gray-900 dark:text-gray-100">{{ formatCurrency(customer.totalSpent) }}</span>
+                    <span class="text-[10px]" :class="tableMoneyClass()">{{ formatCurrency(customer.totalSpent) }}</span>
+                  </td>
+                  <td v-if="hasBalanceFeature" class="px-3 py-2.5 sm:px-4">
+                    <span
+                      v-if="getCustomerBalance(customer) > 0"
+                      :class="tableMoneyOwedClass() + ' text-[10px]'"
+                    >
+                      {{ formatCurrency(getCustomerBalance(customer)) }}
+                    </span>
+                    <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">—</span>
                   </td>
                   <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
@@ -1086,7 +1201,7 @@
                   </td>
                 </tr>
                 <tr v-if="expandedCustomers[customer.id]" class="bg-gray-50/80 dark:bg-gray-800/60">
-                  <td colspan="7" class="px-3 py-2.5 sm:px-4">
+                  <td :colspan="hasBalanceFeature ? 8 : 7" class="px-3 py-2.5 sm:px-4">
                     <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
                       Purchased items
                     </p>
@@ -1108,7 +1223,7 @@
                             <span>{{ formatDate(receipt.date) }}, {{ formatTime(receipt.date) }}</span>
                           </p>
                           <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                            <span class="text-[10px]" :class="tableMoneyClass()">
                               {{ formatCurrency(receipt.total) }}
                             </span>
                             <span
@@ -1130,7 +1245,7 @@
                             <span class="min-w-0 truncate text-gray-800 dark:text-gray-200">{{ item.itemName }}</span>
                             <span class="shrink-0 tabular-nums text-gray-600 dark:text-gray-400">
                               {{ item.quantity }}× {{ formatCurrency(item.price) }}
-                              <span class="font-medium text-gray-900 dark:text-gray-100"> · {{ formatCurrency(item.price * item.quantity) }}</span>
+                              <span :class="tableMoneyClass()"> · {{ formatCurrency(item.price * item.quantity) }}</span>
                             </span>
                           </li>
                         </ul>
@@ -1194,11 +1309,11 @@
       <button
         type="button"
         role="menuitem"
-        @click="handlePrintReceipt(receiptForOpenMenu); openReceiptMenuId = null"
+        @click="handleViewReceipt(receiptForOpenMenu); openReceiptMenuId = null"
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
-        <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
-        <span>Print</span>
+        <EyeIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
+        <span>View receipt</span>
       </button>
       <button
         v-if="receiptForOpenMenu.status === 'completed' && canEditReceipts"
@@ -1240,8 +1355,50 @@
         <PrinterIcon class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" stroke-width="1.75" />
         <span>View receipts</span>
       </button>
+      <button
+        v-if="hasBalanceFeature"
+        type="button"
+        role="menuitem"
+        @click="openCustomerBalance(customerForOpenMenu); openCustomerMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
+      >
+        <span>Manage balance</span>
+      </button>
+      <button
+        v-if="hasWhatsAppFeature && (customerForOpenMenu.phone || customerForOpenMenu.email)"
+        type="button"
+        role="menuitem"
+        @click="openCustomerPaymentReminder(customerForOpenMenu); openCustomerMenuId = null"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-[#128C7E] transition-colors hover:bg-emerald-50 dark:text-[#25D366] dark:hover:bg-emerald-950/30"
+      >
+        <span>WhatsApp payment reminder</span>
+      </button>
     </div>
   </Teleport>
+
+  <CustomerBalanceModal
+    v-if="customerBalanceTarget"
+    v-model="showCustomerBalanceModal"
+    :customer-name="customerBalanceTarget.name"
+    :email="customerBalanceTarget.email"
+    :phone="customerBalanceTarget.phone"
+    @saved="onCustomerBalanceSaved"
+  />
+
+  <SendWhatsAppModal
+    v-model="showCustomerWhatsAppModal"
+    mode="payment_reminder"
+    :phone="customerWhatsAppTarget?.phone || ''"
+    :email="customerWhatsAppTarget?.email || ''"
+    :template-vars="customerWhatsAppVars"
+    :store-name="userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name"
+  />
+
+  <BalanceDuePaymentModal
+    v-model="showBalancePaymentModal"
+    :receipt="balancePaymentReceipt"
+    @completed="onBalancePaymentCompleted"
+  />
 </template>
 
 <script setup lang="ts">
@@ -1252,6 +1409,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   PrinterIcon,
+  EyeIcon,
   UsersIcon,
   UserCircleIcon,
   ClockIcon,
@@ -1278,6 +1436,7 @@ import CreateReceiptModal from '~/components/receipts/CreateReceiptModal.vue'
 // @ts-ignore
 import ViewReceiptModal from '~/components/receipts/ViewReceiptModal.vue'
 import ReceiptTableLineItems from '~/components/receipts/ReceiptTableLineItems.vue'
+import { getReceiptStatusBadge } from '~/utils/receipt-status'
 // @ts-ignore
 import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 // @ts-ignore
@@ -1304,6 +1463,13 @@ import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { getCustomerContactKey } from '~/utils/customer-key'
+import { useCustomerAccountsStore } from '~/stores/customerAccounts'
+import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
+import CustomerBalanceModal from '~/components/whatsapp/CustomerBalanceModal.vue'
+import BalanceDuePaymentModal from '~/components/receipts/BalanceDuePaymentModal.vue'
+import { receiptAmountPaid, receiptBalanceDue } from '~/utils/receipt-balance'
+import { tableMoneyClass, tableMoneyOwedClass } from '~/utils/table-money-styles'
 
 definePageMeta({
   layout: 'dashboard',
@@ -1323,6 +1489,47 @@ const { getUserDocument } = useUser()
 const { getFirestoreInstance } = useFirestore()
 const staffStore = useStaffStore()
 const { copyToClipboard } = useCopy()
+const customerAccountsStore = useCustomerAccountsStore()
+const { hasFeature: hasWhatsAppFeature, hasBalanceFeature } = useWhatsAppMessaging()
+const userStore = useUserStore()
+
+const showCustomerBalanceModal = ref(false)
+const showCustomerWhatsAppModal = ref(false)
+const customerBalanceTarget = ref<CustomerDisplay | null>(null)
+const customerWhatsAppTarget = ref<CustomerDisplay | null>(null)
+
+const customerWhatsAppVars = computed(() => {
+  const c = customerWhatsAppTarget.value
+  if (!c) return {}
+  const balance = getCustomerBalance(c)
+  return {
+    customerName: c.name,
+    storeName: userStore.userData?.storeDetails?.storeName || storesStore.currentStore?.name || 'Store',
+    balanceDue: formatCurrency(balance),
+  }
+})
+
+function getCustomerBalance(customer: CustomerDisplay): number {
+  return customerAccountsStore.getBalanceForContactKey(customer.contactKey)
+}
+
+function openCustomerBalance(customer: CustomerDisplay) {
+  customerBalanceTarget.value = customer
+  showCustomerBalanceModal.value = true
+}
+
+function openCustomerPaymentReminder(customer: CustomerDisplay) {
+  if (!customer.phone && !customer.email) {
+    toast.error('Add a phone number or email on receipts for this customer first.')
+    return
+  }
+  customerWhatsAppTarget.value = customer
+  showCustomerWhatsAppModal.value = true
+}
+
+function onCustomerBalanceSaved() {
+  void customerAccountsStore.fetchAccountsForStore()
+}
 
 // Copy functions
 const copyReceiptNumber = (receiptNumber: string) => {
@@ -1385,6 +1592,7 @@ function applyReceiptHighlight(receiptId: string) {
   }, 3500)
 }
 
+<<<<<<< HEAD
 const activeTab = ref<'receipts' | 'outstanding' | 'customers'>((route.query.tab as any) || 'receipts')
 const showRecordPaymentModal = ref(false)
 const receiptForPayment = ref<Receipt | null>(null)
@@ -1407,6 +1615,16 @@ function handlePaymentRecorded() {
   toast.success('Payment recorded')
   void receiptsStore.fetchReceipts({ force: true })
 }
+=======
+const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
+  (['receipts', 'outstanding', 'customers'].includes(String(route.query.tab))
+    ? route.query.tab
+    : 'receipts') as 'receipts' | 'outstanding' | 'customers'
+)
+const outstandingSearchQuery = ref('')
+const showBalancePaymentModal = ref(false)
+const balancePaymentReceipt = ref<Receipt | null>(null)
+>>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
 const isReceiptsFullscreen = ref(false)
 const isCustomersFullscreen = ref(false)
 const openReceiptMenuId = ref<string | null>(null)
@@ -1459,6 +1677,9 @@ watch(activeTab, (newTab) => {
     void receiptsStore.fetchReceipts({ force: true })
   }
   void router.replace({ query: q })
+  if (newTab === 'customers' && hasBalanceFeature.value) {
+    void customerAccountsStore.fetchAccountsForStore()
+  }
 })
 
 // Initialize loading state synchronously on client
@@ -1487,6 +1708,14 @@ const expandedReceiptLineItems = ref<Record<string, boolean>>({})
 const receiptLineItemsDetailColspan = computed(() => (canDeleteReceipts.value ? 10 : 9))
 
 const getReceiptLineItemsCount = (receipt: Receipt) => receipt.items?.length ?? receipt.itemsCount ?? 0
+
+const receiptStatusBadge = (receipt: Receipt) => getReceiptStatusBadge(receipt.status)
+
+const formatPaymentMethod = (method: string | undefined) => {
+  if (!method?.trim()) return '—'
+  const m = method.trim()
+  return m.charAt(0).toUpperCase() + m.slice(1)
+}
 
 const getReceiptLineItemsPreview = (receipt: Receipt): string => {
   if (!receipt.items?.length) return ''
@@ -1540,6 +1769,7 @@ const customersItemsPerPage = ref(100)
 // Customer interface for display
 interface CustomerDisplay {
   id: string
+  contactKey: string
   name: string
   email?: string
   phone?: string
@@ -1588,6 +1818,11 @@ const uniqueCustomers = computed(() => {
       const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
       customerMap.set(key, {
         id: key,
+        contactKey: getCustomerContactKey({
+          email: receipt.customerEmail,
+          phone: receiptWithPhone.customerPhone,
+          name: receipt.customerName,
+        }),
         name: receipt.customerName,
         email: receipt.customerEmail,
         phone: receiptWithPhone.customerPhone,
@@ -1796,8 +2031,69 @@ const monthReceipts = computed(() => {
   }).length
 })
 
+const outstandingReceipts = computed(() =>
+  receipts.value
+    .filter((r) => r.status === 'balance_due')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+)
+
+const filteredOutstandingReceipts = computed(() => {
+  const q = outstandingSearchQuery.value.trim().toLowerCase()
+  if (!q) return outstandingReceipts.value
+  return outstandingReceipts.value.filter(
+    (r) =>
+      r.receiptNumber.toLowerCase().includes(q) ||
+      r.customerName.toLowerCase().includes(q) ||
+      (r.customerEmail || '').toLowerCase().includes(q) ||
+      (r.customerPhone || '').includes(q)
+  )
+})
+
+function outstandingAmountPaid(receipt: Receipt) {
+  return receiptAmountPaid(receipt)
+}
+
+function outstandingBalanceDue(receipt: Receipt) {
+  return receiptBalanceDue(receipt)
+}
+
+function openRecordPayment(receipt: Receipt) {
+  balancePaymentReceipt.value = receipt
+  showBalancePaymentModal.value = true
+}
+
+function viewOutstandingReceipt(receipt: Receipt) {
+  selectedReceipt.value = receipt
+  showViewReceiptModal.value = true
+}
+
+async function cancelOutstandingReceipt(receipt: Receipt) {
+  if (
+    !confirm(
+      `Cancel ${receipt.receiptNumber}? Reserved stock will be released. This cannot be undone.`
+    )
+  ) {
+    return
+  }
+  try {
+    await receiptsStore.cancelBalanceDueReceipt(receipt.id)
+    toast.success('Order cancelled and stock released.')
+  } catch (e: unknown) {
+    toast.error(e instanceof Error ? e.message : 'Could not cancel order')
+  }
+}
+
+async function onBalancePaymentCompleted(receiptId: string) {
+  await receiptsStore.fetchReceipts({ force: true })
+  const completed = receiptsStore.receipts.find((r) => r.id === receiptId)
+  if (completed?.status === 'completed') {
+    activeTab.value = 'receipts'
+    flashReceiptId.value = receiptId
+  }
+}
+
 const filteredReceipts = computed(() => {
-  let result = [...receipts.value]
+  let result = receipts.value.filter((r) => r.status !== 'balance_due')
 
   // Search filter
   if (searchQuery.value) {
@@ -2265,11 +2561,10 @@ const handleViewReceiptTimeline = (receipt: Receipt) => {
   showTimelineModal.value = true
 }
 
-const handlePrintReceipt = (receipt: Receipt) => {
+const handleViewReceipt = (receipt: Receipt) => {
   selectedReceipt.value = receipt
   showViewReceiptModal.value = true
 
-  // Track as recent item
   addRecentItem({
     id: receipt.id,
     type: 'receipt',

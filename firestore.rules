@@ -102,8 +102,19 @@ service cloud.firestore {
     function inventoryItemOnlySaleOrReturnFieldChange() {
       let changed = request.resource.data.diff(resource.data).changedKeys();
       return changed.hasOnly(['dateOut', 'updatedAt'])
+             || changed.hasOnly(['pendingSaleReceiptId', 'pendingSaleAt', 'updatedAt'])
              || changed.hasOnly(['sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt'])
-             || changed.hasOnly(['dateOut', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
+             || changed.hasOnly(['dateOut', 'pendingSaleReceiptId', 'pendingSaleAt', 'updatedAt'])
+             || changed.hasOnly(['dateOut', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt'])
+             || changed.hasOnly(['dateOut', 'pendingSaleReceiptId', 'pendingSaleAt', 'sellerLoanOutId', 'sellerLoanPartyName', 'sellerLoanPartyPhone', 'sellerLoanOutAt', 'updatedAt']);
+    }
+
+    function receiptBalanceDuePaymentUpdate() {
+      return resource.data.status == 'balance_due'
+        && request.resource.data.status in ['balance_due', 'completed', 'cancelled']
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(
+          ['amountPaid', 'balanceDue', 'payments', 'status', 'paymentMethod', 'updatedAt', 'completedAt']
+        );
     }
 
     // Legacy name kept for a few rules; prefer the helpers above.
@@ -311,9 +322,13 @@ service cloud.firestore {
           allow create: if canCreateReceipt(userId, storeId) &&
                          request.resource.data.storeId == storeId;
 
-          allow update: if (isStoreOwnerForPath(userId) || isStoreManager(userId, storeId)) &&
+          allow update: if ((isStoreOwnerForPath(userId) || isStoreManager(userId, storeId)) &&
                          resourceMatchesStore(storeId) &&
-                         requestMatchesStore(storeId);
+                         requestMatchesStore(storeId))
+                        || (canCreateReceipt(userId, storeId) &&
+                         receiptBalanceDuePaymentUpdate() &&
+                         resourceMatchesStore(storeId) &&
+                         requestMatchesStore(storeId));
           
           allow delete: if ownsStore(userId, storeId) &&
                          resourceMatchesStore(storeId);
@@ -343,6 +358,14 @@ service cloud.firestore {
           allow read: if canAccessStoreData(userId, storeId);
           
           // Staff can upsert from POS; delete: super admin or manager only.
+          allow create: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
+          allow update: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
+          allow delete: if canManageNonInventoryOps(userId, storeId);
+        }
+
+        // Customer balance / credit ledger (Medium+ in product; rules allow all store roles to record payments).
+        match /customerAccounts/{accountId} {
+          allow read: if canAccessStoreData(userId, storeId);
           allow create: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
           allow update: if canManageNonInventoryOps(userId, storeId) || isStoreStaff(userId, storeId);
           allow delete: if canManageNonInventoryOps(userId, storeId);

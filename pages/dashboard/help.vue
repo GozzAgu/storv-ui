@@ -464,7 +464,7 @@ const categories: Category[] = [
       {
         title: 'Departments',
         body: [
-          'The department directory is at /dashboard/departments; opening a department goes to /dashboard/departments/[id] for staff and department settings. Super admins also see each store in the sidebar under Stores; expand a store to open department shortcuts or “View departments” for that location.',
+          'Departments live under each branch: open Branches in the sidebar, expand a location, then “View departments” or the location name. Opening a department card goes to its staff page. There is no separate global departments list.',
           'Use these screens to organize teams, roles, and staff per department. How many departments and staff you can add depends on your plan; check caps and upgrades in Settings.',
         ],
       },
