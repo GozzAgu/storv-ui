@@ -1,6 +1,6 @@
 {
 	"appId": "com.storv.app",
-	"appName": "Storv",
+	"appName": "Storvv",
 	"webDir": "dist",
 	"server": {
 		"iosScheme": "capacitor"
