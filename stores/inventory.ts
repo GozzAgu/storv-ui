@@ -46,6 +46,10 @@ import {
   docToInventoryItem,
 } from '~/utils/inventory-items-firestore'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
+import {
+  computeFolderAvailabilityStats,
+  type FolderAvailabilityStats,
+} from '~/utils/inventory-folder-availability'
 
 export { INVENTORY_FIRESTORE_PAGE_SIZE }
 
@@ -189,6 +193,9 @@ export const useInventoryStore = defineStore('inventory', {
     selectedItemId: null as string | null,
     loading: false,
     itemsLoading: {} as Record<string, boolean>, // Keyed by folderId
+    /** Per-folder unit breakdown for category cards (available / sold / on loan). */
+    folderAvailabilityStats: {} as Record<string, FolderAvailabilityStats>,
+    availabilityStatsLoading: false,
     error: null as string | null,
   }),
 
@@ -198,6 +205,8 @@ export const useInventoryStore = defineStore('inventory', {
     totalValue: (state) => state.folders.reduce((sum, folder) => sum + folder.totalValue, 0),
     lowStockFolders: (state) => state.folders.filter(folder => folder.lowStockCount > 0),
     getFolderById: (state) => (id: string) => state.folders.find(f => f.id === id),
+    getFolderAvailabilityStats: (state) => (folderId: string) =>
+      state.folderAvailabilityStats[folderId],
   },
 
   actions: {
@@ -426,6 +435,52 @@ export const useInventoryStore = defineStore('inventory', {
         this.error = error.message || 'Failed to fetch inventory folders'
         this.loading = false
         throw new Error(error.message || 'Failed to fetch inventory folders')
+      }
+    },
+
+    /** Scan store inventory items and compute available / sold / on-loan units per category. */
+    async fetchFolderAvailabilityStats() {
+      if (this.folders.length === 0) {
+        this.folderAvailabilityStats = {}
+        return
+      }
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) return
+
+      this.availabilityStatsLoading = true
+      try {
+        const ctx = await this._prepareStoreInventoryItemsContext()
+        const itemsQuery = ctx.isStaff
+          ? query(ctx.itemsRef)
+          : query(ctx.itemsRef, where('createdBy', '==', ctx.queryUserId))
+
+        const snapshot = await getDocs(itemsQuery)
+        const itemsByFolder = new Map<string, InventoryItem[]>()
+
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data()
+          const folderId = String(data.folderId || '')
+          if (!folderId) continue
+          const item = docToInventoryItem(docSnap, folderId, ctx.queryUserId)
+          const list = itemsByFolder.get(folderId) ?? []
+          list.push(item)
+          itemsByFolder.set(folderId, list)
+        }
+
+        const next: Record<string, FolderAvailabilityStats> = {}
+        for (const folder of this.folders) {
+          const queried = itemsByFolder.get(folder.id) ?? []
+          const cached = this.items[folder.id] ?? []
+          const items = queried.length >= cached.length ? queried : cached.length ? cached : queried
+          next[folder.id] = computeFolderAvailabilityStats(items, folder)
+        }
+        this.folderAvailabilityStats = { ...next }
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.warn('[InventoryStore] fetchFolderAvailabilityStats failed:', message)
+      } finally {
+        this.availabilityStatsLoading = false
       }
     },
 
@@ -995,6 +1050,30 @@ export const useInventoryStore = defineStore('inventory', {
         console.error('Error deleting folder:', error)
         throw new Error(error.message || 'Failed to delete folder')
       }
+    },
+
+    /** Store-wide inventory items path (no per-folder access gate). */
+    async _prepareStoreInventoryItemsContext() {
+      const db = useFirestore().getFirestoreInstance()
+      if (!db) throw new Error('Firestore not initialized')
+
+      const authStore = useAuthStore()
+      if (!authStore.currentUser) throw new Error('User must be authenticated')
+
+      const userStore = useUserStore()
+      if (!userStore.userData) {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+      }
+
+      const queryUserId = await getQueryUserId()
+      if (!queryUserId) throw new Error('User ID not available')
+
+      const storeId = await getCurrentStoreId()
+      if (!storeId) throw new Error('No store selected')
+
+      const itemsRef = getInventoryItemsCollection(db, queryUserId, storeId)
+      const isStaff = userStore.userData?.role === 'staff'
+      return { db, queryUserId, storeId, itemsRef, isStaff }
     },
 
     /** Shared auth/path setup for inventory item queries. */

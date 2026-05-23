@@ -26,9 +26,19 @@ export function getPendingSaleReceiptId(item: InventoryItem): string | null {
   return s || null
 }
 
+export function isItemSold(item: InventoryItem): boolean {
+  const dateOutValue = item.dateOut
+  return dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
+}
+
+export function isItemOnStockLoan(item: InventoryItem): boolean {
+  const id = item.sellerLoanOutId
+  return id != null && String(id).trim() !== ''
+}
+
 /** Reserved on an outstanding (balance-due) receipt — not sold until paid in full. */
 export function isItemAwaitingPayment(item: InventoryItem): boolean {
-  return !!getPendingSaleReceiptId(item) && !item.dateOut
+  return !!getPendingSaleReceiptId(item) && !isItemSold(item)
 }
 
 export function availabilityBadgeForAwaitingPayment(receiptNumber?: string): InventoryAvailabilityBadge {

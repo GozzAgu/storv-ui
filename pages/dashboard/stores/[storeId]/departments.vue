@@ -127,20 +127,27 @@
 
     <div
       v-else-if="departmentsStore.loading || storesLoading"
-      class="grid min-h-[78px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
     >
       <div
-        v-for="i in 14"
+        v-for="i in 12"
         :key="i"
-        class="relative flex min-h-[78px] flex-col overflow-hidden rounded-sm bg-white px-2 pb-1 pt-5 shadow-[0_1px_2px_rgb(0_0_0_/_0.06)] animate-pulse sm:min-h-[82px] dark:!bg-dashboard-card"
+        class="animate-pulse rounded-xl bg-white p-2.5 ring-1 ring-gray-200/60 dark:bg-[#141820] dark:ring-white/[0.06]"
       >
-        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
-        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
-        <div class="mt-0.5 flex flex-1 items-center gap-1.5">
-          <div class="h-8 w-7 shrink-0 rounded-sm bg-gray-100 dark:bg-white/10" />
-          <div class="min-w-0 flex-1 space-y-2">
-            <div class="h-2.5 w-[70%] rounded bg-gray-200 dark:bg-white/15" />
-            <div class="h-2 w-12 rounded bg-gray-200/80 dark:bg-white/10" />
+        <div class="mb-2 flex justify-between">
+          <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
+          <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
+        <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="flex-1 pt-0.5">
+            <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
           </div>
         </div>
       </div>
@@ -149,39 +156,42 @@
     <div v-else-if="!departmentsStore.error">
       <div
         v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+        class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
       >
         <DepartmentCard
           v-for="department in paginatedDepartments"
           :key="department.id"
           :name="department.name"
+          :description="department.description"
           :staff-count="department.staffCount || 0"
           :department-type="department.departmentType || ''"
+          :manager="department.manager"
+          :store-name="store?.name"
           :inactive="department.isActive === false"
           :deleting="deletingDepartmentId === department.id"
+          :updated-at="department.updatedAt"
+          :created-at="department.createdAt"
           :has-overlays="canManageDepartments"
           @open="navigateToDepartment(department.id)"
         >
           <template v-if="canManageDepartments" #checkbox>
-            <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
-              <Checkbox
-                :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
-                @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
-                size="sm"
-                wrapper-class="justify-center"
-              />
-            </div>
+            <Checkbox
+              :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
+              @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+              size="sm"
+              wrapper-class="justify-center"
+            />
           </template>
           <template v-if="canManageDepartments" #menu>
-            <div class="absolute right-1.5 top-1.5 z-20" data-department-menu @click.stop>
+            <div data-department-menu>
               <button
                 type="button"
                 :data-department-actions-anchor="department.id"
-                class="rounded-sm p-0.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
                 aria-label="Department options"
                 @click="toggleDepartmentMenu(department.id)"
               >
-                <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
               </button>
             </div>
           </template>

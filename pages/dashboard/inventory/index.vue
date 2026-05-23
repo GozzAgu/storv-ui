@@ -2,19 +2,21 @@
   <div
     class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
   >
-    <!-- Hero + filters -->
+    <!-- Header + filters -->
     <header
-      class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
+      class="relative rounded-xl border border-gray-200/70 bg-white px-4 py-4 dark:border-white/[0.06] dark:!bg-dashboard-card sm:px-5 sm:py-5"
     >
       <div class="relative">
         <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
           <div class="min-w-0 flex-1">
-            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Inventory
-            </p>
-            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+            <nav class="text-[11px] text-gray-500 dark:text-gray-500" aria-label="Breadcrumb">
+              <span class="text-gray-400 dark:text-gray-500">Inventory</span>
+              <span class="mx-1.5 text-gray-300 dark:text-gray-600">/</span>
+              <span class="font-medium text-gray-700 dark:text-gray-300">Categories</span>
+            </nav>
+            <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
               <h1
-                class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+                class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
               >
                 Categories
               </h1>
@@ -22,9 +24,6 @@
                 :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
               />
             </div>
-            <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Search, filter, and open categories. Switch between grid and table view.
-            </p>
           </div>
           <div
             v-if="canCreateInventoryFolders"
@@ -160,20 +159,27 @@
     <!-- Loading skeleton -->
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="grid min-h-[78px] grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
     >
       <div
-        v-for="i in 14"
+        v-for="i in 12"
         :key="i"
-        class="relative flex min-h-[78px] flex-col overflow-hidden rounded-sm bg-white px-2 pb-1 pt-5 shadow-[0_1px_2px_rgb(0_0_0_/_0.06)] animate-pulse sm:min-h-[82px] dark:!bg-dashboard-card"
+        class="animate-pulse rounded-xl bg-white p-2.5 ring-1 ring-gray-200/60 dark:bg-[#141820] dark:ring-white/[0.06]"
       >
-        <div class="absolute left-1.5 top-1.5 h-3.5 w-3.5 rounded bg-gray-200 dark:bg-white/10" />
-        <div class="absolute right-1.5 top-1.5 h-4 w-4 rounded-sm bg-gray-200/80 dark:bg-white/10" />
-        <div class="mt-0.5 flex flex-1 items-center gap-1.5">
-          <div class="h-8 w-7 shrink-0 rounded-sm bg-gray-100 dark:bg-white/10" />
-          <div class="min-w-0 flex-1 space-y-2">
-            <div class="h-2.5 w-[70%] rounded bg-gray-200 dark:bg-white/15" />
-            <div class="h-2 w-12 rounded bg-gray-200/80 dark:bg-white/10" />
+        <div class="mb-2 flex justify-between">
+          <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
+          <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
+        <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="flex-1 pt-0.5">
+            <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
           </div>
         </div>
       </div>
@@ -184,45 +190,47 @@
       <div
         v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
         key="grid"
-        class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8"
+        class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
       >
-        <InventoryFolderUiverseTile
+        <InventoryCategoryCard
           v-for="folder in paginatedFolders"
           :key="folder.id"
           :name="folder.name"
+          :description="folder.description"
+          :type="folder.type"
           :item-count="folder.itemCount"
-          :tile-key="folder.id"
+          :low-stock-count="folder.lowStockCount"
+          :total-value="folder.totalValue"
+          :has-serial-numbers="folder.hasSerialNumbers"
+          :allowed-department-ids="folder.allowedDepartments"
+          :resolve-department-name="getDepartmentName"
+          :availability-stats="inventoryStore.folderAvailabilityStats[folder.id] ?? null"
+          :stats-loading="inventoryStore.availabilityStatsLoading"
           :has-overlays="canCreateInventoryFolders"
           @click="navigateToFolder(folder.id)"
         >
           <template v-if="canCreateInventoryFolders" #checkbox>
-            <div class="absolute left-1.5 top-1.5 z-10" @click.stop>
-              <Checkbox
-                :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
-                @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
-                size="sm"
-                wrapper-class="justify-center"
-              />
-            </div>
+            <Checkbox
+              :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
+              @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+              size="sm"
+              wrapper-class="justify-center"
+            />
           </template>
           <template v-if="canCreateInventoryFolders" #menu>
-            <div
-              class="absolute right-1 top-1 z-20"
-              data-inventory-folder-menu
-              @click.stop
-            >
+            <div data-inventory-folder-menu>
               <button
                 type="button"
                 :data-folder-actions-anchor="folder.id"
                 @click="toggleFolderMenu(folder.id)"
-                class="rounded-sm p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+                class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
                 aria-label="Category options"
               >
-                <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
+                <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
               </button>
             </div>
           </template>
-        </InventoryFolderUiverseTile>
+        </InventoryCategoryCard>
       </div>
 
       <!-- Folders table (styling aligned with folder item table on /inventory/[id]) -->
@@ -908,7 +916,7 @@ import SidePanel from '~/components/ui/SidePanel.vue'
 import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
-import InventoryFolderUiverseTile from '~/components/inventory/InventoryFolderUiverseTile.vue'
+import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
@@ -2170,6 +2178,7 @@ onMounted(async () => {
       // Now fetch folders
       // console.log('[InventoryPage] Fetching folders...')
       await inventoryStore.fetchFolders()
+      await inventoryStore.fetchFolderAvailabilityStats()
       // console.log('[InventoryPage] Folders fetched:', inventoryStore.folders.length)
     } catch (error: any) {
       console.error('[InventoryPage] Error loading data:', error.message || error)
@@ -2222,6 +2231,7 @@ watch(() => storesStore.currentStoreId, async (newStoreId, oldStoreId) => {
       selectedDepartmentId.value = ''
       // Refetch folders for new store
       await inventoryStore.fetchFolders()
+      await inventoryStore.fetchFolderAvailabilityStats()
       // Refetch departments for new store
       if (authStore.currentUser) {
         await departmentsStore.fetchDepartments()
