@@ -35,7 +35,7 @@ export async function generatePaymentReminderImage(params: {
 
   ctx.fillStyle = '#6b7280'
   ctx.font = '14px system-ui, sans-serif'
-  const line = 'Outstanding balance — please arrange payment at your earliest convenience.'
+  const line = 'Outstanding balance. Please arrange payment at your earliest convenience.'
   wrapText(ctx, line, 40, 210, width - 80, 20)
 
   ctx.fillStyle = '#9ca3af'

@@ -1,80 +1,60 @@
 <template>
   <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
-    <header
-      class="rounded-sm border border-gray-200/80 bg-white/90 px-4 py-4 dark:border-gray-800/80 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="min-w-0">
-        <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-          Help
-        </p>
-        <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-          Help center
-        </h1>
-        <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Help</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Help center</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
           How Storvv works: permissions, screens, and plan limits. Filter topics by keyword or open a common screen below.
         </p>
-      </div>
-
-      <div class="mt-3 space-y-3 border-t border-gray-100/90 pt-3 dark:border-gray-800/80">
-        <label for="help-search" class="sr-only">Search help articles</label>
-        <div class="relative max-w-md">
-          <MagnifyingGlassIcon
-            class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            stroke-width="1.75"
-          />
-          <input
-            id="help-search"
+      </template>
+      <template #toolbar>
+        <div class="flex w-full min-w-0 flex-col gap-3">
+          <DashboardToolbarSearch
+            input-id="help-search"
             v-model="searchQuery"
-            type="search"
-            autocomplete="off"
-            placeholder="Search help topics..."
-            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-8 pr-3 text-[11px] text-gray-900 placeholder:text-gray-400 focus:border-primary-500/60 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/50"
+            placeholder="Search help topics…"
+            :wide="false"
+            wrapper-class="max-w-md"
           />
-        </div>
-        <div v-if="searchQuery" class="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            class="text-xs font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            @click="searchQuery = ''"
-          >
-            Clear search
-          </button>
-        </div>
-
-        <div>
-          <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-            Popular topics
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="topic in popularTopics"
-              :key="topic.query"
-              type="button"
-              class="rounded-full border border-gray-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:border-primary-300/60 hover:bg-primary-50/80 hover:text-primary-800 dark:border-gray-700 dark:!bg-dashboard-card/60 dark:text-gray-200 dark:hover:border-primary-600/50 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
-              @click="searchQuery = topic.query"
-            >
-              {{ topic.label }}
-            </button>
+          <div>
+            <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+              Popular topics
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="topic in popularTopics"
+                :key="topic.query"
+                type="button"
+                class="rounded-full border border-gray-200/90 bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:border-primary-300/60 hover:bg-primary-50/80 hover:text-primary-800 dark:border-gray-700 dark:!bg-dashboard-card/60 dark:text-gray-200 dark:hover:border-primary-600/50 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
+                @click="searchQuery = topic.query"
+              >
+                {{ topic.label }}
+              </button>
+            </div>
+          </div>
+          <div>
+            <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+              Common screens
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <NuxtLink
+                v-for="link in quickScreenLinks"
+                :key="link.to"
+                :to="link.to"
+                class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-800 transition-colors hover:border-primary-300/50 hover:bg-white hover:text-primary-800 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-100 dark:hover:border-primary-600/40 dark:hover:bg-gray-800"
+              >
+                {{ link.label }}
+              </NuxtLink>
+            </div>
           </div>
         </div>
-
-        <div>
-          <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-            Common screens
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <NuxtLink
-              v-for="link in quickScreenLinks"
-              :key="link.to"
-              :to="link.to"
-              class="inline-flex items-center rounded-full border border-gray-200/90 bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-800 transition-colors hover:border-primary-300/50 hover:bg-white hover:text-primary-800 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-100 dark:hover:border-primary-600/40 dark:hover:bg-gray-800"
-            >
-              {{ link.label }}
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
-    </header>
+      </template>
+    </DashboardPageHeader>
 
     <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
       <nav
@@ -173,7 +153,6 @@
 import type { Component } from 'vue'
 import {
   ArrowUpIcon,
-  MagnifyingGlassIcon,
   SparklesIcon,
   Squares2X2Icon,
   CubeIcon,
@@ -193,6 +172,8 @@ definePageMeta({
 useHead({
   title: 'Help center - Storvv',
 })
+
+const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
 
 type Article = {
   title: string

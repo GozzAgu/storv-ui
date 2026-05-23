@@ -1,21 +1,19 @@
 <template>
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
-    <header
-      class="relative rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-        Enterprise
-      </p>
-      <h1
-        class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
-      >
-        Multi-Store Sync
-      </h1>
-      <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Transfer items between stores and view consolidated reports
-      </p>
-    </header>
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Enterprise</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Multi-Store Sync</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Transfer items between stores and view consolidated reports
+        </p>
+      </template>
+    </DashboardPageHeader>
 
     <div
       v-if="!canAccess"
@@ -158,8 +156,8 @@
           <div v-if="transferForm.folderId && availableItems.length > 0" class="space-y-1.5">
             <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Select items to transfer</label>
             <div class="data-table-shell max-h-52 overflow-y-auto overflow-x-hidden">
-              <table class="w-full text-xs">
-                <thead class="sticky top-0 bg-white/60 dark:!bg-dashboard-card/85">
+              <table class="dashboard-table min-w-full">
+                <thead class="sticky top-0">
                   <tr>
                     <th class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Item</th>
                     <th v-if="!currentFolderHasSerialNumbers" class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Available</th>
@@ -244,33 +242,31 @@
             </div>
           </template>
           <template #filters>
-            <div class="flex min-w-0 flex-1 flex-wrap items-end gap-2 sm:gap-3">
-              <div class="min-w-[140px] flex-1 sm:max-w-[200px]">
-                <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Date range</label>
-                <select
-                  v-model="reportFilters.dateRange"
-                  @change="loadConsolidatedReports"
-                  class="w-full rounded-sm px-3 py-2 text-xs ring-1 ring-gray-200/80 focus:outline-none focus:ring-2 focus:ring-primary-400/30 dark:bg-gray-800/80 dark:ring-gray-600/80 dark:text-gray-100"
-                >
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 90 days</option>
-                  <option value="365">Last year</option>
-                  <option value="all">All time</option>
-                </select>
-              </div>
-              <div class="min-w-[140px] flex-1 sm:max-w-[220px]">
-                <label class="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">Stores</label>
-                <select
-                  v-model="reportFilters.storeIds"
-                  @change="loadConsolidatedReports"
-                  class="w-full rounded-sm px-3 py-2 text-xs ring-1 ring-gray-200/80 focus:outline-none focus:ring-2 focus:ring-primary-400/30 dark:bg-gray-800/80 dark:ring-gray-600/80 dark:text-gray-100"
-                >
-                  <option value="all">All stores</option>
-                  <option v-for="store in stores" :key="store.id" :value="store.id">{{ store.name || store.branchName || store.id }}</option>
-                </select>
-              </div>
-            </div>
+            <DashboardToolbarSelect
+              v-model="reportFilters.dateRange"
+              min-width-class="min-w-[8rem]"
+              @change="loadConsolidatedReports"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="365">Last year</option>
+              <option value="all">All time</option>
+            </DashboardToolbarSelect>
+            <DashboardToolbarSelect
+              v-model="reportFilters.storeIds"
+              min-width-class="min-w-[8.5rem]"
+              @change="loadConsolidatedReports"
+            >
+              <option value="all">All stores</option>
+              <option
+                v-for="store in stores"
+                :key="store.id"
+                :value="store.id"
+              >
+                {{ store.name || store.branchName || store.id }}
+              </option>
+            </DashboardToolbarSelect>
           </template>
           <template #actions>
             <Button
@@ -278,7 +274,7 @@
               variant="success"
               size="sm"
               :icon="ArrowDownTrayIcon"
-              extra-class="!rounded-2xl font-medium"
+              :extra-class="headerBtnClass"
             >
               Export report
             </Button>
@@ -323,8 +319,8 @@
               </template>
             </DataTableToolbar>
             <div class="overflow-x-auto">
-              <table class="w-full text-xs">
-                <thead class="bg-white/60 dark:!bg-dashboard-card/85">
+              <table class="dashboard-table min-w-full">
+                <thead>
                   <tr>
                     <th class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Store</th>
                     <th class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">Revenue</th>
@@ -498,6 +494,8 @@ definePageMeta({
 useHead({
   title: 'Multi-Store Sync - Storvv',
 })
+
+const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass } = useDashboardPageChrome()
 
 const { formatCurrency } = usePreferences()
 const toast = useAppToast()

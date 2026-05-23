@@ -128,7 +128,7 @@
               </NuxtLink>
             </li>
             <li v-if="moreItems.length === 0" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-              You’re all set — main tabs cover everything.
+              You're all set. Main tabs cover everything.
             </li>
           </ul>
 

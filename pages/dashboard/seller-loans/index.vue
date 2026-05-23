@@ -1,16 +1,18 @@
 <template>
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
-    <header class="rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5">
-      <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-        Inventory
-      </p>
-      <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-        Stock loans
-      </h1>
-      <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Track serial items lent to a borrower. Mark sold when they sell outside your POS (inventory shows sold), use a receipt to sell through the till, or return units to stock.
-      </p>
-    </header>
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Inventory</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Stock loans</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Track serial items lent to a borrower. Mark sold when they sell outside your POS (inventory shows sold), use a receipt to sell through the till, or return units to stock.
+        </p>
+      </template>
+    </DashboardPageHeader>
 
     <div
       v-if="!canAccessByRole"
@@ -34,61 +36,31 @@
       </div>
 
       <div v-else class="data-table-shell overflow-hidden">
-        <div class="border-b border-gray-200/80 bg-white/95 px-4 py-3 dark:border-gray-800/70 dark:!bg-dashboard-card sm:px-5">
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="flex gap-1.5 rounded-sm bg-gray-100/95 p-0.5 dark:bg-gray-800/80">
+        <div class="border-b border-gray-100/90 bg-gradient-to-b from-gray-50/90 to-white px-4 py-3 dark:border-gray-800/70 dark:from-white/[0.03] dark:to-transparent sm:px-5">
+          <div class="flex flex-wrap items-center gap-2">
+            <div
+              class="flex h-8 shrink-0 items-center rounded-lg border border-gray-200/90 bg-gray-50/50 p-0.5 dark:border-gray-700/80 dark:bg-white/[0.03]"
+              role="group"
+              aria-label="Loan status"
+            >
               <button
+                v-for="tab in loanStatusTabs"
+                :key="tab.value"
                 type="button"
-                :class="[
-                  'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  statusFilter === 'active'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                ]"
-                @click="statusFilter = 'active'"
+                class="rounded-md px-2.5 text-xs font-medium transition-colors"
+                :class="
+                  statusFilter === tab.value
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                "
+                @click="statusFilter = tab.value"
               >
-                Active
-              </button>
-              <button
-                type="button"
-                :class="[
-                  'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  statusFilter === 'returned'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                ]"
-                @click="statusFilter = 'returned'"
-              >
-                Returned
-              </button>
-              <button
-                type="button"
-                :class="[
-                  'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  statusFilter === 'sold'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                ]"
-                @click="statusFilter = 'sold'"
-              >
-                Sold (borrower)
-              </button>
-              <button
-                type="button"
-                :class="[
-                  'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors',
-                  statusFilter === 'all'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-gray-50'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                ]"
-                @click="statusFilter = 'all'"
-              >
-                All
+                {{ tab.label }}
               </button>
             </div>
             <button
               type="button"
-              class="text-[11px] font-medium text-primary-700 underline underline-offset-2 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-200"
+              class="inline-flex h-8 items-center px-2 text-xs font-medium text-primary-700 underline underline-offset-2 hover:text-primary-900 disabled:opacity-50 dark:text-primary-400 dark:hover:text-primary-200"
               :disabled="sellerLoansStore.loading"
               @click="sellerLoansStore.fetchSellerLoanOuts(true)"
             >
@@ -112,29 +84,19 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
-            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
+          <table class="dashboard-table min-w-full">
+            <thead>
               <tr>
-                <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Borrower
-                </th>
-                <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Units
-                </th>
-                <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Started
-                </th>
-                <th scope="col" class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Status
-                </th>
-                <th scope="col" class="w-[1%] whitespace-nowrap px-3 py-2.5 text-right text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4">
-                  Actions
-                </th>
+                <th scope="col">Borrower</th>
+                <th scope="col">Units</th>
+                <th scope="col">Started</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="w-[1%] whitespace-nowrap text-right">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200/80 bg-white dark:divide-gray-700/80 dark:!bg-dashboard-card">
-              <tr v-for="loan in filteredLoans" :key="loan.id" class="hover:bg-gray-50/85 dark:hover:bg-gray-900/55">
-                <td class="px-3 py-2.5 sm:px-4">
+            <tbody>
+              <tr v-for="loan in filteredLoans" :key="loan.id">
+                <td>
                   <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-50">{{ loan.partyName }}</p>
                   <p v-if="loan.partyPhone" class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">{{ loan.partyPhone }}</p>
                   <p v-if="loan.partyNotes && loan.status === 'active'" class="mt-1 max-w-xs truncate text-[10px] text-gray-600 dark:text-gray-300" :title="loan.partyNotes">
@@ -343,6 +305,8 @@ definePageMeta({
   layout: 'dashboard',
 })
 
+const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
+
 const sellerLoansStore = useSellerLoanOutsStore()
 const storesStore = useStoresStore()
 const { canManage } = usePermissions()
@@ -351,6 +315,13 @@ const toast = useAppToast()
 
 const canAccessByRole = computed(() => canManage.value)
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
+
+const loanStatusTabs = [
+  { value: 'active' as const, label: 'Active' },
+  { value: 'returned' as const, label: 'Returned' },
+  { value: 'sold' as const, label: 'Sold (borrower)' },
+  { value: 'all' as const, label: 'All' },
+]
 
 const statusFilter = ref<'active' | 'returned' | 'sold' | 'all'>('active')
 

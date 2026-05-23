@@ -1,21 +1,19 @@
 <template>
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
-    <header
-      class="relative rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-        Security
-      </p>
-      <h1
-        class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
-      >
-        Activity Logs
-      </h1>
-      <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Track who changed what in inventory. Improves accountability and supports security auditing.
-      </p>
-    </header>
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Security</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Activity Logs</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Track who changed what in inventory. Improves accountability and supports security auditing.
+        </p>
+      </template>
+    </DashboardPageHeader>
 
     <div
       v-if="!canAccess"
@@ -93,18 +91,12 @@
             </div>
           </template>
           <template #filters>
-            <div class="relative min-w-0 sm:min-w-0">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-              <input
-                v-model="searchQuery"
-                type="search"
-                autocomplete="off"
-                placeholder="Search logs…"
-                class="w-full min-w-[9rem] rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 sm:w-56"
-              />
-            </div>
+            <DashboardToolbarSearch
+              v-model="searchQuery"
+              placeholder="Search logs…"
+              :wide="false"
+              input-class="sm:w-56"
+            />
           </template>
         </DataTableToolbar>
 
@@ -165,42 +157,21 @@
 
         <div v-else class="flex flex-col">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200/80 dark:divide-gray-700/80">
-            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
+            <table class="dashboard-table min-w-full">
+            <thead>
               <tr>
-                <th
-                  scope="col"
-                  class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
-                >
-                  User
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
-                >
-                  Activity
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
-                >
-                  Target
-                </th>
-                <th
-                  scope="col"
-                  class="px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 sm:px-4"
-                >
-                  Date
-                </th>
+                <th scope="col">User</th>
+                <th scope="col">Activity</th>
+                <th scope="col">Target</th>
+                <th scope="col">Date</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200/80 bg-white/90 dark:divide-gray-700/80 dark:!bg-dashboard-card">
+            <tbody>
               <tr
                 v-for="log in paginatedLogs"
                 :key="log.id"
-                class="transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/70"
               >
-                <td class="px-3 py-2.5 sm:px-4">
+                <td>
                   <div class="flex items-center gap-2 min-w-0">
                     <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-gray-100 text-[10px] font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                       {{ getInitials(log.userDisplayName) }}
@@ -215,14 +186,14 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-3 py-2.5 sm:px-4">
+                <td>
                   <span
                     :class="[ 'inline-flex rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide', actionClass(log.action) ]"
                   >
                     {{ actionLabel(log.action) }}
                   </span>
                 </td>
-                <td class="max-w-[260px] px-3 py-2.5 sm:px-4">
+                <td class="max-w-[260px]">
                   <p class="truncate text-[11px] font-medium text-gray-800 dark:text-gray-200" :title="log.entityName">
                     {{ log.entityName }}
                   </p>
@@ -230,7 +201,7 @@
                     {{ entityTypeLabel(log.entityType) }} · ID {{ log.entityId || '-' }}
                   </p>
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 sm:px-4">
+                <td class="whitespace-nowrap">
                   <p class="text-[11px] text-gray-700 dark:text-gray-300">
                     {{ formatDate(log.createdAt) }}
                   </p>
@@ -239,16 +210,12 @@
             </tbody>
           </table>
           </div>
-          <div
-            class="shrink-0 border-t border-gray-200/80 bg-gray-50/90 px-3 py-2 dark:border-gray-700/80 dark:bg-white/[0.03] sm:px-5 sm:py-2.5"
-          >
-            <Pagination
-              :current-page="currentPage"
-              :items-per-page="itemsPerPage"
-              :total="filteredLogs.length"
-              @page-change="handlePageChange"
-            />
-          </div>
+          <DashboardTablePagination
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredLogs.length"
+            @page-change="handlePageChange"
+          />
         </div>
       </div>
     </template>
@@ -263,7 +230,8 @@ import type { ActivityLog } from '~/composables/useActivityLog'
 import { ACTIVITY_LOGS_FETCH_LIMIT, fetchActivityLogs } from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
-import Pagination from '~/components/ui/Pagination.vue'
+
+const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()

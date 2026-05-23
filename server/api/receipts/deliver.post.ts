@@ -112,6 +112,6 @@ export default defineEventHandler(async (event) => {
     channel: 'whatsapp',
     normalizedPhone,
     message:
-      'WhatsApp Business API is not configured. WhatsApp will open for this number — paste or attach the receipt there.',
+      'WhatsApp Business API is not configured. WhatsApp will open for this number. Paste or attach the receipt there.',
   }
 })

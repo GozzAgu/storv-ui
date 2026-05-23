@@ -55,19 +55,14 @@
           </p>
         </div>
       </div>
-      <div class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
-        <div class="relative min-w-0 flex-1">
-          <MagnifyingGlassIcon
-            class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-          />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by name, SKU…"
-            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-9 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40 sm:py-2.5 sm:pl-10 sm:pr-3 sm:text-sm"
-          />
-        </div>
-        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+        <DashboardToolbarSearch
+          v-model="searchQuery"
+          placeholder="Search by name, SKU…"
+          :wide="false"
+          wrapper-class="flex-1"
+        />
+        <div class="flex flex-wrap items-center gap-2">
             <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
             <Button
               variant="outline"
@@ -346,20 +341,15 @@
             </div>
           </template>
           <template #filters>
-            <div class="relative">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search…"
-                class="w-40 rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 sm:w-48 dark:focus:border-primary-500/40"
-              />
-            </div>
-            <select
+            <DashboardToolbarSearch
+              v-model="searchQuery"
+              placeholder="Search…"
+              :wide="false"
+              input-class="w-40 sm:w-48"
+            />
+            <DashboardToolbarSelect
               v-model="sortBy"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
+              min-width-class="min-w-[6.5rem]"
               @change="handleSortByChange"
             >
               <option value="name">Name</option>
@@ -367,21 +357,17 @@
               <option value="sku">SKU</option>
               <option value="dateIn">Date In</option>
               <option value="availability">Status</option>
-            </select>
-            <button
-              type="button"
-              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
-              @click="resetFilters"
-            >
+            </DashboardToolbarSelect>
+            <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
               <ArrowPathIcon class="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
+            </DashboardToolbarIconButton>
+            <DashboardToolbarIconButton
+              class="hidden lg:inline-flex"
+              aria-label="Expand table"
               @click="isFullscreen = !isFullscreen"
             >
               <ArrowsPointingOutIcon class="h-4 w-4" />
-            </button>
+            </DashboardToolbarIconButton>
           </template>
           <template #actions>
             <template v-if="canManageInventoryItems && selectedItemsForBulk.length > 0">
@@ -757,22 +743,15 @@
       </template>
 
       <!-- Fullscreen: pagination pinned inside overlay -->
-      <div
+      <DashboardTablePagination
         v-if="isFullscreen && paginationTotal > 0"
-        class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
+        class="shrink-0"
         style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-      >
-        <div
-          class="w-full min-w-0 max-w-full overflow-x-hidden px-3 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-1.5 lg:px-7"
-        >
-          <Pagination
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="paginationTotal"
-            @page-change="handlePageChange"
-          />
-        </div>
-      </div>
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="paginationTotal"
+        @page-change="handlePageChange"
+      />
           </div>
         </div>
       </Teleport>
@@ -1478,6 +1457,8 @@ if (import.meta.client) {
     }
   }, 1000)
 }
+const { headerBtnClass, iconBtnClass } = useDashboardPageChrome()
+
 const searchQuery = ref('')
 /** Full folder list for search filter (client-side); not stored in Pinia. */
 const folderSearchItems = ref<InventoryItem[] | null>(null)

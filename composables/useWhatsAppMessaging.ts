@@ -133,9 +133,9 @@ export function useWhatsAppMessaging() {
         }
         const messageByMethod: Record<string, string> = {
           clipboard_whatsapp:
-            'WhatsApp opened for this number — paste the receipt image in the chat and send.',
+            'WhatsApp opened for this number. Paste the receipt image in the chat and send.',
           download_whatsapp:
-            'WhatsApp opened — attach the downloaded receipt file using 📎 in the chat.',
+            'WhatsApp opened. Attach the downloaded receipt file using 📎 in the chat.',
         }
         return {
           success: true,

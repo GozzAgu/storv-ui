@@ -1,20 +1,18 @@
 <template>
   <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
-    <header
-      class="rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="min-w-0">
-        <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-          Account
-        </p>
-        <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-          Profile
-        </h1>
-        <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Account</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Profile</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
           Identity, preferences, and security, aligned with your dashboard.
         </p>
-      </div>
-    </header>
+      </template>
+    </DashboardPageHeader>
 
     <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-3">
       <!-- Profile card -->
@@ -882,6 +880,8 @@ definePageMeta({
 useHead({
   title: 'Profile - Storvv',
 })
+
+const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
 
 // Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
 const profileData = reactive({

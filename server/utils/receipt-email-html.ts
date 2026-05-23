@@ -73,7 +73,7 @@ export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): 
         </table>
         <p style="font-size: 18px; font-weight: bold; text-align: right;">Total: ${formatCurrency(Number(receiptData.total) || 0)}</p>
         <p style="font-size: 12px; color: #666;">Receipt #${escapeHtml(String(receiptData.receiptNumber || ''))} · ${formatDate(receiptData.date)}</p>
-        <p style="margin-top: 24px; font-size: 12px; color: #666;">Thank you for your business — Storvv</p>
+        <p style="margin-top: 24px; font-size: 12px; color: #666;">Thank you for your business. Storvv</p>
       </body>
     </html>
   `

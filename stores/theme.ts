@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export type Theme = 'light' | 'dark' | 'system'
 
 /** Keep in sync with `assets/css/main.css` (`html.theme-transitioning` duration). */
-const THEME_TRANSITION_MS = 400
+const THEME_TRANSITION_MS = 500
 const THEME_TRANSITION_MS_REDUCED = 110
 
 /** Browser `setTimeout` id (avoid Node `Timeout` vs `number` mismatch in TS). */

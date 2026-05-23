@@ -1,74 +1,59 @@
 <template>
   <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
     <!-- Hero -->
-    <header
-      class="relative rounded-sm bg-white/90 px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div class="relative min-w-0">
-          <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-            Analytics
-          </p>
-          <h1
-            class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Analytics</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Analytics & Reports</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Track your sales, inventory, and customer insights
+        </p>
+      </template>
+      <template #actions>
+        <div
+          class="flex h-8 shrink-0 items-center rounded-lg border border-gray-200/90 bg-gray-50/50 p-0.5 dark:border-gray-700/80 dark:bg-white/[0.03]"
+          role="group"
+          aria-label="Analytics period"
+        >
+          <button
+            v-for="period in analyticsPeriods"
+            :key="period.value"
+            type="button"
+            class="rounded-md px-2.5 text-xs font-medium transition-colors"
+            :class="
+              selectedPeriod === period.value
+                ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+            "
+            @click="selectedPeriod = period.value; loadAnalytics()"
           >
-            Analytics & Reports
-          </h1>
-          <p class="mt-1 max-w-lg text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-            Track your sales, inventory, and customer insights
-          </p>
+            {{ period.label }}
+          </button>
         </div>
-        <div class="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:justify-end sm:gap-3">
-          <div
-            class="inline-flex w-fit shrink-0 rounded-full border border-gray-200/90 bg-gray-50/90 p-0.5 dark:border-gray-700/80 dark:!bg-dashboard-card/60"
-            role="group"
-            aria-label="Analytics period"
-          >
-            <button
-              type="button"
-              @click="selectedPeriod = 'daily'; loadAnalytics()"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', selectedPeriod === 'daily' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Daily
-            </button>
-            <button
-              type="button"
-              @click="selectedPeriod = 'weekly'; loadAnalytics()"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', selectedPeriod === 'weekly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Weekly
-            </button>
-            <button
-              type="button"
-              @click="selectedPeriod = 'monthly'; loadAnalytics()"
-              :class="[ 'rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200', selectedPeriod === 'monthly' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Monthly
-            </button>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              @click="exportReport('pdf')"
-              :disabled="isExporting"
-              class="inline-flex items-center gap-1.5 rounded-sm border border-gray-200/90 bg-white px-3 py-1.5 text-xs font-medium text-gray-800 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/80 dark:!bg-dashboard-card/60 dark:text-gray-100 dark:hover:bg-gray-800/80"
-            >
-              <ArrowDownTrayIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-              <span>{{ isExporting ? 'Exporting...' : 'Export PDF' }}</span>
-            </button>
-            <button
-              type="button"
-              @click="exportReport('excel')"
-              :disabled="isExporting"
-              class="inline-flex items-center gap-1.5 rounded-sm border border-emerald-200/90 bg-emerald-50/90 px-3 py-1.5 text-xs font-medium text-emerald-800 transition hover:bg-emerald-100/90 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
-            >
-              <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
-              <span>{{ isExporting ? 'Exporting...' : 'Export Excel' }}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+        <button
+          type="button"
+          :disabled="isExporting"
+          :class="[headerBtnClass, 'gap-1.5 !border !border-gray-200/90 !bg-white !font-medium !text-gray-800 hover:!bg-gray-50 dark:!border-gray-700/80 dark:!bg-dashboard-card dark:!text-gray-100']"
+          @click="exportReport('pdf')"
+        >
+          <ArrowDownTrayIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <span>{{ isExporting ? 'Exporting…' : 'Export PDF' }}</span>
+        </button>
+        <button
+          type="button"
+          :disabled="isExporting"
+          :class="[headerBtnClass, 'gap-1.5 !border !border-emerald-200/90 !bg-emerald-50/90 !font-medium !text-emerald-800 hover:!bg-emerald-100/90 dark:!border-emerald-800/60 dark:!bg-emerald-950/40 dark:!text-emerald-300']"
+          @click="exportReport('excel')"
+        >
+          <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
+          <span>{{ isExporting ? 'Exporting…' : 'Export Excel' }}</span>
+        </button>
+      </template>
+    </DashboardPageHeader>
 
     <!-- Loading State -->
     <template v-if="isLoading">
@@ -348,8 +333,8 @@
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
-            <table class="w-full text-xs">
-              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+            <table class="dashboard-table min-w-full">
+              <thead>
                 <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Product</th>
                   <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Qty</th>
@@ -385,8 +370,8 @@
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
-            <table class="w-full text-xs">
-              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+            <table class="dashboard-table min-w-full">
+              <thead>
                 <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Customer</th>
                   <th class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Orders</th>
@@ -425,8 +410,8 @@
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
-            <table class="w-full text-xs">
-              <thead class="bg-gray-50/95 dark:!bg-dashboard-card/85">
+            <table class="dashboard-table min-w-full">
+              <thead>
                 <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
                   <th class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Receipt</th>
                   <th class="text-left py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">Date</th>
@@ -550,6 +535,14 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 // State
 const isLoading = ref(true)
 const isExporting = ref(false)
+const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass } = useDashboardPageChrome()
+
+const analyticsPeriods = [
+  { value: 'daily' as const, label: 'Daily' },
+  { value: 'weekly' as const, label: 'Weekly' },
+  { value: 'monthly' as const, label: 'Monthly' },
+]
+
 const selectedPeriod = ref<'daily' | 'weekly' | 'monthly'>('monthly')
 
 const needsStoreSelection = computed(() => {

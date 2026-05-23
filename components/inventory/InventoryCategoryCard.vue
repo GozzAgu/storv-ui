@@ -1,6 +1,6 @@
 <template>
   <article
-    class="inv-category-card group relative flex w-full cursor-pointer flex-col rounded-xl bg-white p-2.5 shadow-[0_1px_2px_rgb(0_0_0/0.04)] ring-1 ring-gray-200/70 transition-[ring-color] duration-200 hover:ring-gray-300/90 dark:bg-[#141820] dark:shadow-none dark:ring-white/[0.07] dark:hover:ring-white/12"
+    class="inv-category-card group relative flex w-full cursor-pointer flex-col rounded-xl bg-white p-2.5 shadow-[0_1px_2px_rgb(0_0_0/0.04)] ring-1 ring-gray-200/70 dark:bg-dashboard-card! dark:shadow-none dark:ring-white/[0.07] hover:ring-gray-300/90 dark:hover:ring-white/12"
     @click="$emit('click')"
   >
     <!-- Header: folder · pill · menu -->

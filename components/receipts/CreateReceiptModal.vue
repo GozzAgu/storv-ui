@@ -451,7 +451,7 @@
               <p class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
                 {{
                   paymentSettlement === 'balance_due'
-                    ? 'Stock stays reserved until paid off — order appears under Outstanding.'
+                    ? 'Stock stays reserved until paid off. Order appears under Outstanding.'
                     : 'Stock is marked sold when the receipt is created.'
                 }}
               </p>

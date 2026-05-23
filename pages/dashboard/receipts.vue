@@ -195,7 +195,11 @@
       </div>
 
       <div
-        :class="[ isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'data-table-shell flex min-h-[calc(100svh-20rem)] flex-1 flex-col border border-gray-200/60 !rounded-none shadow-none max-sm:!bg-transparent dark:border-gray-700/55 dark:max-sm:!bg-transparent sm:!rounded-2xl sm:shadow-sm sm:shadow-gray-950/[0.04] dark:sm:shadow-black/30', ]"
+        :class="[
+          isReceiptsFullscreen
+            ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
+            : 'data-table-shell flex min-h-[calc(100svh-20rem)] min-h-0 flex-1 flex-col overflow-hidden',
+        ]"
       >
         <!-- Toolbar: search + filters (left), primary action (right) -->
         <DataTableToolbar v-if="!receiptsStore.loading && !isReceiptsFullscreen">
@@ -220,50 +224,35 @@
             </div>
           </template>
           <template #filters>
-            <div class="relative min-w-0 sm:min-w-0">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search receipts..."
-                class="w-full min-w-[9rem] rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 sm:w-48"
-              />
-            </div>
-            <select
-              v-model="statusFilter"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
-            >
+            <DashboardToolbarSearch
+              v-model="searchQuery"
+              placeholder="Search receipts…"
+              :wide="false"
+              input-class="sm:w-48"
+            />
+            <DashboardToolbarSelect v-model="statusFilter" min-width-class="min-w-[6.5rem]">
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
               <option value="pending">Pending</option>
               <option value="refunded">Refunded</option>
-            </select>
-            <select
-              v-model="dateFilter"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
-            >
+            </DashboardToolbarSelect>
+            <DashboardToolbarSelect v-model="dateFilter" min-width-class="min-w-[6.5rem]">
               <option value="all">All Dates</option>
               <option value="today">Today</option>
               <option value="week">This Week</option>
               <option value="month">This Month</option>
-            </select>
-            <button
-              type="button"
-              class="rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200"
-              @click="resetFilters"
-            >
+            </DashboardToolbarSelect>
+            <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
               <ArrowPathIcon class="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              class="hidden rounded-sm p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800/80 dark:hover:text-gray-200 lg:inline-flex"
+            </DashboardToolbarIconButton>
+            <DashboardToolbarIconButton
+              class="hidden lg:inline-flex"
+              :aria-label="isReceiptsFullscreen ? 'Exit expanded view' : 'Expand table'"
               @click="isReceiptsFullscreen = !isReceiptsFullscreen"
             >
               <ArrowsPointingOutIcon v-if="!isReceiptsFullscreen" class="h-4 w-4" />
               <XMarkIcon v-else class="h-4 w-4" />
-            </button>
+            </DashboardToolbarIconButton>
           </template>
           <template #actions>
             <Button
@@ -272,7 +261,7 @@
               size="sm"
               :icon="PlusIcon"
               aria-label="New receipt"
-              extra-class="!rounded-2xl shrink-0 max-sm:!px-2 max-sm:!py-1.5"
+              :extra-class="headerBtnClass"
               @click="openCreateReceiptModal"
             >
               <span class="hidden sm:inline">New receipt</span>
@@ -300,17 +289,17 @@
         v-if="receiptsStore.loading"
         :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 lg:px-8' : 'min-h-0 flex-1 overflow-x-auto'"
       >
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:!bg-dashboard-card/85">
+        <table class="dashboard-table min-w-full">
+          <thead>
             <tr>
               <th v-for="i in 6" :key="i" class="px-3 py-2">
                 <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:!bg-dashboard-card">
+          <tbody>
             <tr v-for="i in 5" :key="i">
-              <td v-for="j in 6" :key="j" class="px-3 py-3">
+              <td v-for="j in 6" :key="j">
                 <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-full animate-pulse"></div>
               </td>
             </tr>
@@ -433,14 +422,14 @@
       </div>
       <!-- Desktop: table -->
       <div
-        class="hidden sm:block"
-        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto px-0.5 pb-px'"
+        class="hidden min-h-0 flex-1 flex-col sm:flex"
+        :class="isReceiptsFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
       >
-        <table class="w-full min-w-full border-separate border-spacing-0">
-          <thead
-            class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90"
-            :class="isReceiptsFullscreen ? 'sticky top-0 z-10' : ''"
-          >
+        <div
+          class="min-h-0 flex-1 overflow-x-auto"
+        >
+        <table class="dashboard-table min-w-full">
+          <thead :class="isReceiptsFullscreen ? 'sticky top-0 z-10' : ''">
             <tr>
               <th v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4">
                 <Checkbox
@@ -609,16 +598,12 @@
               </th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:!bg-dashboard-card/35">
-            <template v-for="(receipt, rowIndex) in paginatedReceipts" :key="receipt.id">
+          <tbody>
+            <template v-for="receipt in paginatedReceipts" :key="receipt.id">
             <tr
               :data-receipt-row="receipt.id"
               :data-receipt-flash="flashReceiptId === receipt.id ? '' : undefined"
-              class="border-b border-gray-100/90 transition-colors hover:bg-gray-50/90 dark:border-gray-800/70 dark:hover:bg-gray-900/40"
-              :class="[
-                rowIndex % 2 === 1 ? 'bg-gray-50/35 dark:bg-gray-900/20' : '',
-                flashReceiptId === receipt.id ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12' : '',
-              ]"
+              :class="flashReceiptId === receipt.id ? '!bg-primary-500/[0.06] dark:!bg-primary-500/12' : ''"
             >
               <td v-if="canDeleteReceipts" class="w-10 px-3 py-2.5 text-center align-middle sm:px-4">
                 <Checkbox
@@ -675,7 +660,7 @@
                 >
                   {{ getReceiptLineItemsPreview(receipt) }}
                 </p>
-                <p v-else class="text-xs text-gray-500">—</p>
+                <p v-else class="text-xs text-gray-500">{{ EMPTY_CELL }}</p>
                 <button
                   v-if="getReceiptLineItemsCount(receipt) > 0"
                   type="button"
@@ -727,7 +712,7 @@
             </tr>
             <tr
               v-if="expandedReceiptLineItems[receipt.id]"
-              class="border-b border-gray-100/90 bg-gray-50/50 dark:border-gray-800/70 dark:bg-gray-900/30"
+              class="bg-gray-50/60 dark:bg-white/[0.02]"
             >
               <td
                 :colspan="receiptLineItemsDetailColspan"
@@ -744,42 +729,31 @@
             </template>
           </tbody>
         </table>
+        </div>
+        <DashboardTablePagination
+          v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
+          :current-page="currentPage"
+          :items-per-page="itemsPerPage"
+          :total="sortedFilteredReceipts.length"
+          @page-change="handlePageChange"
+        />
       </div>
       </div>
       </template>
 
-      <!-- Fullscreen: pagination pinned inside overlay (fills viewport with table + footer) -->
-      <div
+      <!-- Fullscreen: pagination pinned inside overlay -->
+      <DashboardTablePagination
         v-if="isReceiptsFullscreen && sortedFilteredReceipts.length > 0"
-        class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
+        class="shrink-0"
         style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-      >
-        <div
-          class="w-full min-w-0 max-w-full overflow-x-hidden px-3 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-1.5 lg:px-7"
-        >
-          <Pagination
-            :current-page="currentPage"
-            :items-per-page="itemsPerPage"
-            :total="sortedFilteredReceipts.length"
-            @page-change="handlePageChange"
-          />
-        </div>
-      </div>
-      </div>
-    </div>
-      </Teleport>
-
-    <DashboardFixedFooter
-      v-if="sortedFilteredReceipts.length > 0 && !isReceiptsFullscreen"
-      :sidebar-collapsed="sidebarCollapsed"
-    >
-      <Pagination
         :current-page="currentPage"
         :items-per-page="itemsPerPage"
         :total="sortedFilteredReceipts.length"
         @page-change="handlePageChange"
       />
-    </DashboardFixedFooter>
+      </div>
+    </div>
+      </Teleport>
 
       <!-- Create Receipt Modal -->
       <CreateReceiptModal
@@ -861,7 +835,7 @@
 
     <!-- Outstanding (balance due) tab -->
     <template v-else-if="activeTab === 'outstanding'">
-      <div class="data-table-shell flex min-h-0 flex-1 flex-col">
+      <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
         <DataTableToolbar v-if="!receiptsStore.loading">
           <template #heading>
             <div class="min-w-0 flex-1">
@@ -869,22 +843,16 @@
                 Outstanding payments
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-                Deposits collected — stock reserved until the balance is paid. Completed orders move to Receipts.
+                Deposits collected. Stock stays reserved until the balance is paid. Completed orders move to Receipts.
               </p>
             </div>
           </template>
           <template #filters>
-            <div class="relative min-w-0 flex-1 sm:max-w-xs">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                v-model="outstandingSearchQuery"
-                type="text"
-                placeholder="Search customer or receipt #..."
-                class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100"
-              />
-            </div>
+            <DashboardToolbarSearch
+              v-model="outstandingSearchQuery"
+              placeholder="Search customer or receipt #…"
+              wrapper-class="sm:max-w-xs"
+            />
           </template>
         </DataTableToolbar>
 
@@ -900,23 +868,22 @@
         </div>
 
         <div v-else class="min-h-0 flex-1 overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50/90 dark:!bg-dashboard-card/85">
+          <table class="dashboard-table min-w-full">
+            <thead>
               <tr>
-                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</th>
-                <th class="px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</th>
-                <th class="hidden px-3 py-2 text-left text-[10px] font-medium uppercase tracking-wider text-gray-500 md:table-cell">Items</th>
-                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Total</th>
-                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Paid</th>
-                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Balance</th>
-                <th class="px-3 py-2 text-right text-[10px] font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                <th class="text-left">Receipt</th>
+                <th class="text-left">Customer</th>
+                <th class="hidden text-left md:table-cell">Items</th>
+                <th class="text-right">Total</th>
+                <th class="text-right">Paid</th>
+                <th class="text-right">Balance</th>
+                <th class="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:!bg-dashboard-card">
+            <tbody>
               <tr
                 v-for="row in filteredOutstandingReceipts"
                 :key="row.id"
-                class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40"
               >
                 <td class="px-3 py-3 text-xs font-medium text-gray-900 dark:text-gray-100">
                   {{ row.receiptNumber }}
@@ -928,7 +895,7 @@
                   <p v-if="row.customerEmail" class="text-[10px] text-gray-500">{{ row.customerEmail }}</p>
                 </td>
                 <td class="hidden px-3 py-3 text-xs text-gray-600 dark:text-gray-400 md:table-cell">
-                  {{ getReceiptLineItemsPreview(row) || '—' }}
+                  {{ getReceiptLineItemsPreview(row) || EMPTY_CELL }}
                 </td>
                 <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">{{ formatCurrency(row.total) }}</td>
                 <td class="px-3 py-3 text-right text-xs" :class="tableMoneyClass()">
@@ -972,9 +939,7 @@
 
     <!-- Customers tab -->
     <template v-else-if="activeTab === 'customers'">
-      <div
-        class="data-table-shell"
-      >
+      <div class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
         <DataTableToolbar v-if="!receiptsStore.loading">
           <template #heading>
             <div class="min-w-0 flex-1">
@@ -1001,26 +966,17 @@
             </div>
           </template>
           <template #filters>
-            <div class="relative min-w-0 flex-1 sm:min-w-[160px] sm:flex-initial">
-              <MagnifyingGlassIcon
-                class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-              />
-              <input
-                v-model="customersSearchQuery"
-                type="text"
-                placeholder="Search customers..."
-                class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-xs text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500"
-              />
-            </div>
-            <select
-              v-model="customersSortBy"
-              class="min-w-[100px] cursor-pointer rounded-sm border border-gray-200/90 bg-white py-1.5 pl-2.5 pr-7 text-xs font-medium text-gray-800 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-200 dark:focus:border-primary-500/40"
-            >
+            <DashboardToolbarSearch
+              v-model="customersSearchQuery"
+              placeholder="Search customers…"
+              wrapper-class="sm:max-w-xs"
+            />
+            <DashboardToolbarSelect v-model="customersSortBy" min-width-class="min-w-[6.5rem]">
               <option value="name">Name</option>
               <option value="orders">Orders</option>
               <option value="spent">Total Spent</option>
               <option value="lastOrder">Last Order</option>
-            </select>
+            </DashboardToolbarSelect>
           </template>
         </DataTableToolbar>
         <div v-if="receiptsStore.loading" class="px-4 py-12 sm:px-6">
@@ -1051,8 +1007,8 @@
           </p>
         </div>
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full border-separate border-spacing-0">
-            <thead class="border-b border-gray-200/90 bg-gray-50/95 dark:border-gray-800/80 dark:!bg-dashboard-card/90">
+          <table class="dashboard-table min-w-full">
+            <thead>
               <tr>
                 <th class="min-w-[90px] px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:min-w-[100px] sm:px-4">
                   Receipts
@@ -1071,11 +1027,9 @@
                 <th class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4">Actions</th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:!bg-dashboard-card/35">
+            <tbody>
               <template v-for="customer in paginatedCustomers" :key="customer.id">
-                <tr
-                  class="border-b border-gray-100/90 transition-colors duration-300 even:bg-gray-50/40 hover:bg-gray-50/95 dark:border-gray-800/70 dark:even:bg-gray-900/25 dark:hover:bg-gray-900/70"
-                >
+                <tr>
                   <td class="px-3 py-2.5 align-middle sm:px-4">
                     <button
                       @click="toggleCustomerExpanded(customer.id)"
@@ -1113,7 +1067,7 @@
                     >
                       {{ formatCurrency(getCustomerBalance(customer)) }}
                     </span>
-                    <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">—</span>
+                    <span v-else class="text-[10px] text-gray-400 dark:text-gray-500">{{ EMPTY_CELL }}</span>
                   </td>
                   <td class="px-3 py-2.5 sm:px-4">
                     <span class="text-[10px] text-gray-600 dark:text-gray-300">{{ formatDate(customer.lastOrderDate) }}</span>
@@ -1390,6 +1344,7 @@ import { useCopy } from '~/composables/useCopy'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 import { getCustomerContactKey } from '~/utils/customer-key'
 import { useCustomerAccountsStore } from '~/stores/customerAccounts'
 import SendWhatsAppModal from '~/components/whatsapp/SendWhatsAppModal.vue'
@@ -1583,6 +1538,8 @@ watch(activeTab, (newTab) => {
 
 // Initialize loading state synchronously on client
 const isInitialLoading = ref(true)
+const { headerBtnClass } = useDashboardPageChrome()
+
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const dateFilter = ref('all')
@@ -1611,7 +1568,7 @@ const getReceiptLineItemsCount = (receipt: Receipt) => receipt.items?.length ?? 
 const receiptStatusBadge = (receipt: Receipt) => getReceiptStatusBadge(receipt.status)
 
 const formatPaymentMethod = (method: string | undefined) => {
-  if (!method?.trim()) return '—'
+  if (!method?.trim()) return EMPTY_CELL
   const m = method.trim()
   return m.charAt(0).toUpperCase() + m.slice(1)
 }

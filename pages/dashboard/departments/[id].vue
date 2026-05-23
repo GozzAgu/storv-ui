@@ -100,7 +100,7 @@
             <div class="flex min-w-0 flex-1 items-start gap-2">
               <button
                 type="button"
-                class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
+                :class="[iconBtnClass, 'mt-0.5']"
                 @click="departmentsListPath && navigateTo(departmentsListPath)"
               >
                 <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
@@ -129,18 +129,18 @@
               variant="primary"
               size="sm"
               :icon="PlusIcon"
-              extra-class="!rounded-2xl"
+              :extra-class="headerBtnClass"
               @click="openCreateStaffModal"
             >
               Add staff
             </Button>
-            <button
-              type="button"
-              class="hidden rounded-sm border border-gray-200/90 bg-white p-2 text-gray-500 transition-colors hover:border-gray-300/90 hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card/50 dark:text-gray-400 dark:hover:border-gray-600/80 dark:hover:bg-gray-800 lg:inline-flex"
+            <DashboardToolbarIconButton
+              class="hidden lg:inline-flex"
+              aria-label="Expand table"
               @click="isStaffFullscreen = true"
             >
               <ArrowsPointingOutIcon class="h-4 w-4" />
-            </button>
+            </DashboardToolbarIconButton>
           </template>
         </DataTableToolbar>
 
@@ -332,7 +332,7 @@
                 <span class="dashboard-table__primary">{{ member.firstName }} {{ member.lastName }}</span>
               </td>
               <td class="hidden sm:table-cell">
-                <span class="dashboard-table__muted">{{ member.position || '—' }}</span>
+                <span class="dashboard-table__muted">{{ member.position || EMPTY_CELL }}</span>
               </td>
               <td>
                 <DashboardTableBadge
@@ -416,22 +416,15 @@
         </div>
 
         <!-- Fullscreen: pagination pinned inside overlay -->
-        <div
+        <DashboardTablePagination
           v-if="isStaffFullscreen && staff.length > 0"
-          class="shrink-0 border-t border-gray-200/25 bg-gray-100/95 backdrop-blur-sm dark:border-white/[0.05] dark:bg-[#07080c]/95 dark:backdrop-blur-sm"
+          class="shrink-0"
           style="padding-bottom: env(safe-area-inset-bottom, 0px)"
-        >
-          <div
-            class="w-full min-w-0 max-w-full overflow-x-hidden px-3 py-1 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-5 sm:py-1.5 lg:px-7"
-          >
-            <Pagination
-              :current-page="staffCurrentPage"
-              :items-per-page="staffItemsPerPage"
-              :total="staff.length"
-              @page-change="handleStaffPageChange"
-            />
-          </div>
-        </div>
+          :current-page="staffCurrentPage"
+          :items-per-page="staffItemsPerPage"
+          :total="staff.length"
+          @page-change="handleStaffPageChange"
+        />
       </div>
       </div>
     </Teleport>
@@ -534,6 +527,7 @@ import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
+import { EMPTY_CELL } from '~/utils/ui-empty'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useStaffStore } from '~/stores/staff'
 import { useAuthStore } from '~/stores/auth'
@@ -557,6 +551,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const { headerBtnClass, iconBtnClass } = useDashboardPageChrome()
 const departmentId = computed(() => route.params.id as string)
 
 const departmentBreadcrumbs = computed(() => {

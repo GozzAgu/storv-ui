@@ -1,29 +1,26 @@
 <template>
   <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
-    <header
-      class="rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5"
-    >
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="min-w-0">
-          <p class="text-[9px] font-semibold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
-            Store & app
-          </p>
-          <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-            Settings
-          </h1>
-          <p class="mt-1 max-w-2xl text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-            Branches, business details, inventory defaults, and receipts, tuned to match how you work.
-          </p>
-        </div>
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Store & app</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Settings</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Branches, business details, inventory defaults, and receipts, tuned to match how you work.
+        </p>
+      </template>
+      <template v-if="!canEditSettings" #actions>
         <div
-          v-if="!canEditSettings"
-          class="inline-flex shrink-0 items-center gap-2 rounded-full border border-amber-200/80 bg-amber-50/90 px-3 py-1.5 dark:border-amber-500/25 dark:bg-amber-950/30"
+          class="inline-flex h-8 shrink-0 items-center gap-2 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 dark:border-amber-500/25 dark:bg-amber-950/30"
         >
           <span class="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
           <span class="text-xs font-medium text-amber-800 dark:text-amber-200">View only</span>
         </div>
-      </div>
-    </header>
+      </template>
+    </DashboardPageHeader>
 
     <div class="space-y-4 sm:space-y-5">
       <!-- Account: logo + subscription -->
@@ -611,6 +608,8 @@ definePageMeta({
 useHead({
   title: 'Settings - Storvv',
 })
+
+const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
 
 // Store information
 const storeInfo = reactive({

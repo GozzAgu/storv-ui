@@ -22,7 +22,7 @@ export async function sendReceiptEmail(params: {
 
   const storeName = String(params.receiptData.storeBranchName || params.receiptData.storeName || 'Store')
   const html = generateReceiptEmailHTML(params.receiptData)
-  const subject = `Your receipt #${params.receiptNumber} — ${storeName}`
+  const subject = `Your receipt #${params.receiptNumber} from ${storeName}`
 
   const intro = params.caption?.trim() || 'Please find your receipt below.'
   const linkBlock = params.shareUrl

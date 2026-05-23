@@ -4,114 +4,84 @@
   >
     <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
-    <header class="relative rounded-sm bg-white px-4 py-4 dark:!bg-dashboard-card sm:px-5 sm:py-5">
-      <div class="relative">
-        <div class="flex flex-wrap items-start justify-between gap-3 gap-y-2">
-          <div class="min-w-0 flex-1">
-            <p class="text-[9px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">
-              Settings
-            </p>
-            <h1 class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
-              Departments in {{ store?.name || 'Store' }}
-            </h1>
-            <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Manage departments and staff for this store.
-              <template v-if="store && !departmentsStore.loading && !storesLoading">
-                <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
-                  {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
-                </span>
-                <span class="text-gray-300 dark:text-gray-600"> · </span>
-                <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
-                <template v-if="currentStore?.id === store.id">
-                  <span class="text-gray-300 dark:text-gray-600"> · </span>
-                  <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
-                </template>
-              </template>
-            </p>
-          </div>
-          <Button
-            v-if="canManageDepartments"
-            variant="primary"
-            size="sm"
-            :icon="PlusIcon"
-            :disabled="!canAddDepartmentForStore"
-            :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
-            extra-class="!rounded-2xl shrink-0 w-full sm:w-auto"
-            @click="openCreateDepartmentModal"
-          >
-            New department
-          </Button>
-        </div>
-
-        <div
-          v-if="store && !departmentsStore.loading && !storesLoading"
-          class="mt-4 flex flex-col gap-2.5 border-t border-gray-100/90 pt-4 dark:border-gray-800/80 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 sm:gap-y-1.5"
-        >
-          <div class="relative min-w-0 flex-1 sm:min-w-[200px] sm:max-w-md">
-            <MagnifyingGlassIcon
-              class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 dark:text-gray-500"
-            />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search departments…"
-              class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-8 text-[11px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
-            />
-            <button
-              v-if="searchQuery"
-              type="button"
-              class="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-              aria-label="Clear search"
-              @click="searchQuery = ''"
-            >
-              <span class="text-sm leading-none">×</span>
-            </button>
-          </div>
-          <div class="flex flex-wrap items-center gap-1.5 sm:shrink-0">
-            <button
-              type="button"
-              class="inline-flex items-center justify-center rounded-sm border border-gray-200/90 bg-white p-1.5 text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:hover:bg-gray-800"
-              aria-label="Reset filters"
-              @click="resetFilters"
-            >
-              <ArrowPathIcon class="h-4 w-4" />
-            </button>
-            <span
-              class="hidden items-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 sm:inline-flex"
-            >
-              {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Settings</p>
+      </template>
+      <template #title>
+        <h1 :class="pageTitleClass">Departments in {{ store?.name || 'Store' }}</h1>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Manage departments and staff for this store.
+          <template v-if="store && !departmentsStore.loading && !storesLoading">
+            <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
+              {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
             </span>
-          </div>
-
-          <div
-            v-if="canManageDepartments && paginatedDepartments.length > 0"
-            class="flex flex-wrap items-center gap-2 sm:ml-auto sm:border-l sm:border-gray-200/80 sm:pl-3 dark:sm:border-gray-700/80"
-          >
-            <Checkbox
-              :model-value="allDepartmentsOnPageSelected"
-              size="sm"
-              wrapper-class="justify-center"
-              label-class="!text-xs !ml-2 !font-normal text-gray-500 dark:text-gray-500"
-              @update:model-value="setSelectAllDepartmentsBulk"
-            >
-              {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
-            </Checkbox>
-            <template v-if="selectedDepartmentsForBulk.length > 0">
-              <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ selectedDepartmentsForBulk.length }} selected</span>
-              <Button
-                variant="outline"
-                size="sm"
-                :icon="TrashIcon"
-                class="!rounded-2xl !px-2.5 !py-1 !text-xs !border-gray-200/80 dark:!border-gray-700/80 !text-gray-600 dark:!text-gray-300 hover:!text-red-600 dark:hover:!text-red-400 hover:!border-red-200/80 dark:hover:!border-red-800/50 hover:!bg-red-50/60 dark:hover:!bg-red-900/10"
-                @click="openBulkDeleteDepartmentsModal"
-              >
-                Delete
-              </Button>
+            <span class="text-gray-300 dark:text-gray-600"> · </span>
+            <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
+            <template v-if="currentStore?.id === store.id">
+              <span class="text-gray-300 dark:text-gray-600"> · </span>
+              <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
             </template>
-          </div>
+          </template>
+        </p>
+      </template>
+      <template v-if="canManageDepartments" #actions>
+        <Button
+          variant="primary"
+          size="sm"
+          :icon="PlusIcon"
+          :disabled="!canAddDepartmentForStore"
+          :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
+          :extra-class="headerBtnClass + ' w-full sm:w-auto'"
+          @click="openCreateDepartmentModal"
+        >
+          New department
+        </Button>
+      </template>
+      <template v-if="store && !departmentsStore.loading && !storesLoading" #toolbar>
+        <DashboardToolbarSearch v-model="searchQuery" placeholder="Search departments…" />
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
+            <ArrowPathIcon class="h-4 w-4" />
+          </DashboardToolbarIconButton>
+          <DashboardToolbarMeta>
+            {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
+          </DashboardToolbarMeta>
         </div>
-      </div>
-    </header>
+        <div
+          v-if="canManageDepartments && paginatedDepartments.length > 0"
+          :class="bulkActionsClass"
+        >
+          <Checkbox
+            :model-value="allDepartmentsOnPageSelected"
+            size="sm"
+            wrapper-class="!h-8 items-center"
+            label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+            @update:model-value="setSelectAllDepartmentsBulk"
+          >
+            {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
+          </Checkbox>
+          <template v-if="selectedDepartmentsForBulk.length > 0">
+            <span
+              class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+            >
+              {{ selectedDepartmentsForBulk.length }} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              :extra-class="headerBtnClass + ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'"
+              @click="openBulkDeleteDepartmentsModal"
+            >
+              Delete
+            </Button>
+          </template>
+        </div>
+      </template>
+    </DashboardPageHeader>
 
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
@@ -323,7 +293,6 @@ import {
   Cog6ToothIcon,
   UsersIcon,
   UserCircleIcon,
-  MagnifyingGlassIcon,
   ArrowPathIcon,
   PencilSquareIcon,
   TrashIcon,
@@ -353,6 +322,9 @@ const storeId = computed(() => route.params.storeId as string)
 useHead({
   title: `Departments - Storvv`,
 })
+
+const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass, bulkActionsClass } =
+  useDashboardPageChrome()
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)

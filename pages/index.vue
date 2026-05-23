@@ -1947,7 +1947,7 @@ const whyPillars: WhyPillar[] = [
   },
   {
     title: 'Simple operations',
-    body: 'One workflow for inventory, receipts, and handoffs—repeatable as you hire and expand.',
+    body: 'One workflow for inventory, receipts, and handoffs, repeatable as you hire and expand.',
     icon: markRaw(ArrowPathIcon),
   },
 ]

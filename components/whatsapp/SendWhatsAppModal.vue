@@ -196,7 +196,7 @@ const sendDisabled = computed(
 
 const defaultCaption = computed(() => {
   if (props.mode === 'payment_reminder') {
-    return `Payment reminder — ${props.templateVars?.balanceDue || 'balance due'}`
+    return `Payment reminder: ${props.templateVars?.balanceDue || 'balance due'}`
   }
   const store = props.templateVars?.storeName || props.storeName || 'our store'
   return `Your receipt from ${store}`

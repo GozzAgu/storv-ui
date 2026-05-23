@@ -10,7 +10,7 @@
     >
       <span class="font-medium text-gray-600 dark:text-gray-300">Results:</span>
       <span class="mx-1 font-semibold text-gray-900 dark:text-gray-100">{{ displayStart }}</span>
-      <span class="text-gray-400 dark:text-gray-500">-</span>
+      <span class="text-gray-400 dark:text-gray-500">to</span>
       <span class="mx-1 font-semibold text-gray-900 dark:text-gray-100">{{ displayEnd }}</span>
       <span class="text-gray-400 dark:text-gray-500">of</span>
       <span class="ml-1 font-semibold text-gray-900 dark:text-gray-100">{{ total }}</span>

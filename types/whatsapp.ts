@@ -20,7 +20,7 @@ Total: {{total}}
 
 View your receipt: {{receiptLink}}
 
-— {{storeName}}`,
+{{storeName}}`,
   },
   {
     id: 'receipt_short',

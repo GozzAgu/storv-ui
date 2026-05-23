@@ -187,7 +187,7 @@ async function submit() {
     })
     toast.success(
       completed
-        ? 'Payment complete — receipt is now in your sales list and stock is marked sold.'
+        ? 'Payment complete. Receipt is now in your sales list and stock is marked sold.'
         : 'Payment recorded.'
     )
     emit('completed', props.receipt.id)
