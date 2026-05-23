@@ -2,7 +2,7 @@
   <SidePanel
     :model-value="props.modelValue"
     title="Create New Receipt"
-    subtitle="Select folder, items, then enter receipt details."
+    subtitle="Select category, items, then enter receipt details."
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
@@ -51,7 +51,7 @@
                 <input
                   v-model="folderSearchQuery"
                   type="text"
-                  placeholder="Search folders..."
+                  placeholder="Search categories..."
                   class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
                 />
               </div>
@@ -59,7 +59,7 @@
             
             <div v-if="loadingFolders" class="text-center py-6">
               <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
-              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading folders...</p>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories...</p>
             </div>
             <div
               v-else-if="filteredFolders.length === 0"
@@ -69,10 +69,10 @@
                 <FolderIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
               </div>
               <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {{ folderSearchQuery ? 'No folders found' : 'No inventory folders' }}
+                {{ folderSearchQuery ? 'No categories found' : 'No inventory categories' }}
               </p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                {{ folderSearchQuery ? 'Try a different search' : 'Create a folder in Inventory first' }}
+                {{ folderSearchQuery ? 'Try a different search' : 'Create a category in Inventory first' }}
               </p>
             </div>
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto">

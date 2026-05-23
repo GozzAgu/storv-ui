@@ -40,7 +40,7 @@
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
             <h2 class="truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50">
-              {{ folder?.name || 'Folder' }}
+              {{ folder?.name || 'Category' }}
             </h2>
             <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
           </div>
@@ -329,7 +329,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <h2 class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                    {{ folder?.name || 'Folder' }}
+                    {{ folder?.name || 'Category' }}
                   </h2>
                   <DuplicateFeatureUpsellBanner :loading="isLoadingFolder" />
                 </div>
@@ -802,7 +802,7 @@
       v-model="showMobileItemDetailPanel"
       eyebrow="Inventory"
       title="Product details"
-      :subtitle="mobileDetailItem ? `${folder?.name || 'Folder'} · ${formatAvailabilityLabel(getItemAvailability(mobileDetailItem))}` : undefined"
+      :subtitle="mobileDetailItem ? `${folder?.name || 'Category'} · ${formatAvailabilityLabel(getItemAvailability(mobileDetailItem))}` : undefined"
       content-padding="p-4 sm:p-5"
       @close="mobileDetailItem = null"
     >
@@ -1417,7 +1417,7 @@ const folderId = computed(() => route.params.id as string)
 
 const inventoryBreadcrumbs = computed(() => [
   { label: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon },
-  { label: folder.value?.name || 'Folder', icon: FolderIcon },
+  { label: folder.value?.name || 'Category', icon: FolderIcon },
 ])
 
 // Import InventoryItem from store

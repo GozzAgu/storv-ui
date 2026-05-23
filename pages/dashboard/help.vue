@@ -320,11 +320,11 @@ const categories: Category[] = [
   {
     id: 'inventory',
     title: 'Inventory',
-    blurb: 'Folders page (grid or table), folder detail, items, and permissions.',
+    blurb: 'Categories page (grid or table), category detail, items, and permissions.',
     icon: CubeIcon,
     articles: [
       {
-        title: 'Folders list (/dashboard/inventory)',
+        title: 'Categories list (/dashboard/inventory)',
         body: [
           'The Inventory entry opens Folders: search folders, filter by department, sort by name / products / date, and paginate through the list. Super admins can create, rename, delete, and bulk-delete folders where the UI provides those actions.',
           'Use the grid / table toggle next to the filters to switch layout. Grid shows folder cards; table matches the same styling as the product table inside a folder (striped rows, column alignment). Your choice is remembered on this browser.',
@@ -562,7 +562,7 @@ const popularTopics = [
   { label: 'Stock loans', query: 'stock loan' },
   { label: 'Staff & roles', query: 'staff' },
   { label: 'Receipts & refunds', query: 'receipt' },
-  { label: 'Inventory & folders', query: 'inventory' },
+  { label: 'Inventory & categories', query: 'inventory' },
   { label: 'Table view', query: 'table' },
   { label: 'Sell screen note', query: 'sell' },
   { label: 'Copy from branch', query: 'copy from branch' },

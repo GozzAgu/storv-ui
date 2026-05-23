@@ -94,7 +94,7 @@
                   class="shrink-0 rounded-lg p-1.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   :class="isActive(item.href) ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'"
                   :aria-expanded="inventoryExpanded"
-                  aria-label="Toggle inventory folders"
+                  aria-label="Toggle inventory categories"
                 >
                   <span class="group relative inline-flex">
                     <ChevronDownIcon class="w-3.5 h-3.5 transition-transform duration-200" :class="inventoryExpanded ? 'rotate-180' : ''" stroke-width="2" />

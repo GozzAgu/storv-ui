@@ -237,7 +237,7 @@
                 class="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary-400/30 bg-primary-500/[0.18] px-2 py-1 text-xs font-medium text-primary-50"
               >
                 <FolderIcon class="h-3 w-3" />
-                Folders
+                Categories
               </span>
             </div>
             <p class="mt-2 text-[0.8125rem] font-semibold leading-snug tracking-tight text-white/95">Templates that match how you sell</p>

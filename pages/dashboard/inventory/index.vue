@@ -16,14 +16,14 @@
               <h1
                 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
               >
-                Folders
+                Categories
               </h1>
               <DuplicateFeatureUpsellBanner
                 :loading="inventoryStore.loading && inventoryStore.folders.length === 0"
               />
             </div>
             <p class="mt-1 max-w-xl text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Search, filter, and open folders. Switch between grid and table view.
+              Search, filter, and open categories. Switch between grid and table view.
             </p>
           </div>
           <div
@@ -47,7 +47,7 @@
               extra-class="!rounded-2xl shrink-0"
               @click="openCreateFolderModal"
             >
-              New folder
+              New category
             </Button>
           </div>
         </div>
@@ -64,7 +64,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search folders…"
+              placeholder="Search categories…"
               class="w-full rounded-sm border border-gray-200/90 bg-white py-1.5 pl-8 pr-2.5 text-[11px] text-gray-900 placeholder:text-gray-400 transition-colors focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-primary-500/40"
             />
           </div>
@@ -89,12 +89,12 @@
             <span
               class="hidden items-center rounded-full border border-gray-200/80 bg-gray-50/90 px-2 py-0.5 text-[10px] font-medium tabular-nums text-gray-600 dark:border-gray-700/80 dark:bg-gray-800/80 dark:text-gray-400 sm:inline-flex"
             >
-              {{ filteredFolders.length }} folder{{ filteredFolders.length === 1 ? '' : 's' }}
+              {{ filteredFolders.length }} {{ filteredFolders.length === 1 ? 'category' : 'categories' }}
             </span>
             <div
               class="inline-flex items-center rounded-sm border border-gray-200/90 p-0.5 dark:border-gray-700/80"
               role="group"
-              aria-label="Folder layout"
+              aria-label="Category layout"
             >
               <button
                 type="button"
@@ -216,7 +216,7 @@
                 :data-folder-actions-anchor="folder.id"
                 @click="toggleFolderMenu(folder.id)"
                 class="rounded-sm p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
-                aria-label="Folder options"
+                aria-label="Category options"
               >
                 <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
               </button>
@@ -254,7 +254,7 @@
                 scope="col"
                 class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
               >
-                Folder
+                Category
               </th>
               <th
                 scope="col"
@@ -330,7 +330,7 @@
                     type="button"
                     :data-folder-actions-anchor="folder.id"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                    aria-label="Folder options"
+                    aria-label="Category options"
                     @click="toggleFolderMenu(folder.id)"
                   >
                     <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
@@ -356,10 +356,10 @@
           <FolderIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
         </div>
         <h2 class="max-w-md break-words text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-          {{ selectedDepartmentId ? `No folders in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No folders found' : 'No folders yet') }}
+          {{ selectedDepartmentId ? `No categories in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No categories found' : 'No categories yet') }}
         </h2>
         <p class="mx-auto mt-2 max-w-sm break-words text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a folder to start organizing your inventory.') }}
+          {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a category to start organizing your inventory.') }}
         </p>
       </div>
       <div v-if="selectedDepartmentId" class="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
@@ -395,19 +395,19 @@
             <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
           </div>
           <div class="min-w-0">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected folders</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedFoldersForBulk.length }} folder{{ selectedFoldersForBulk.length !== 1 ? 's' : '' }} selected</p>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected categories</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedFoldersForBulk.length }} {{ selectedFoldersForBulk.length === 1 ? 'category' : 'categories' }} selected</p>
           </div>
         </div>
       </template>
       <div class="space-y-3">
         <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
-          <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected folders and all products inside them. This action cannot be undone.</p>
+          <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected categories and all products inside them. This action cannot be undone.</p>
         </div>
         <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
           <Checkbox
             v-model="bulkDeleteFoldersConfirmed"
-            label="I understand that these folders and their products will be permanently deleted."
+            label="I understand that these categories and their products will be permanently deleted."
             size="sm"
             wrapper-class="items-start"
             label-class="text-xs text-gray-700 dark:text-gray-300"
@@ -424,7 +424,7 @@
           class="!rounded-2xl"
           @click="handleConfirmBulkDeleteFolders"
         >
-          {{ isBulkDeletingFolders ? 'Deleting...' : `Delete ${selectedFoldersForBulk.length} folder${selectedFoldersForBulk.length !== 1 ? 's' : ''}` }}
+          {{ isBulkDeletingFolders ? 'Deleting...' : `Delete ${selectedFoldersForBulk.length} ${selectedFoldersForBulk.length === 1 ? 'category' : 'categories'}` }}
         </Button>
       </template>
     </Modal>
@@ -438,8 +438,8 @@
     <!-- Create Folder (slide-over) -->
     <SidePanel
       v-model="showCreateFolderModal"
-      :title="editingFolder ? 'Edit Folder' : 'Create New Folder'"
-      :subtitle="editingFolder ? 'Update folder details and template.' : 'Add a new inventory folder and define its table columns.'"
+      :title="editingFolder ? 'Edit category' : 'Create new category'"
+      :subtitle="editingFolder ? 'Update category details and template.' : 'Add a new inventory category and define its table columns.'"
     >
       <div class="min-h-0">
         <form @submit.prevent="handleSaveFolder" class="bg-transparent">
@@ -450,13 +450,13 @@
             <div class="space-y-3">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Folder name *</label>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Category name *</label>
             <input
               v-model="folderForm.name"
               type="text"
               required
                     class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-              placeholder="Enter folder name"
+              placeholder="Enter category name"
             />
           </div>
                 <div>
@@ -483,7 +483,7 @@
             v-model="folderForm.description"
             rows="3"
                   class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-            placeholder="Describe the folder's purpose"
+            placeholder="Describe the category's purpose"
                 />
         </div>
           </div>
@@ -506,14 +506,14 @@
             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Department access <span class="font-normal text-gray-500 dark:text-gray-400">(optional)</span></h4>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">
               Leave all unchecked for <span class="font-medium text-gray-700 dark:text-gray-300">all departments</span> in this store.
-              Check specific departments to limit who can use this folder. You can change this anytime by editing the folder.
+              Check specific departments to limit who can use this category. You can change this anytime by editing the category.
             </p>
             <div v-if="departmentsStore.loading" class="text-xs text-gray-500 dark:text-gray-400 py-1.5">Loading departments…</div>
             <div
               v-else-if="currentStoreDepartments.length === 0"
               class="rounded-sm bg-gray-50 dark:!bg-dashboard-card/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
             >
-              <p>No departments in this store yet. You can still create this folder. It will be available to everyone until you add departments and optionally restrict access here.</p>
+              <p>No departments in this store yet. You can still create this category. It will be available to everyone until you add departments and optionally restrict access here.</p>
               <NuxtLink
                 v-if="currentStoreId"
                 :to="`/dashboard/stores/${currentStoreId}/departments`"
@@ -577,7 +577,7 @@
               </div>
           </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Define columns for this folder’s table, or import row 1 of a sheet as column headers. Types are guessed from sample rows when possible.
+              Define columns for this category’s table, or import row 1 of a sheet as column headers. Types are guessed from sample rows when possible.
             </p>
             <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto px-1 py-1">
             <div
@@ -653,7 +653,7 @@
           @click="handleSaveFolder"
           extra-class="!rounded-2xl"
         >
-          {{ editingFolder ? 'Update' : 'Create' }} folder
+          {{ editingFolder ? 'Update' : 'Create' }} category
         </Button>
       </template>
     </SidePanel>
@@ -661,21 +661,21 @@
     <!-- Duplicate Folder Modal (multiple folder names) -->
     <Modal
       v-model="showDuplicateFolderModal"
-      title="Duplicate folder"
-      subtitle="Create copies with the same template and settings. Enter one or more folder names."
+      title="Duplicate category"
+      subtitle="Create copies with the same template and settings. Enter one or more category names."
       size="md"
       @update:model-value="(v: boolean) => { if (!v) clearDuplicateFolderModal() }"
     >
       <form @submit.prevent="handleConfirmDuplicateFolder" class="space-y-4">
         <div class="flex items-center justify-between">
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Folder name(s)</label>
+          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">Category name(s)</label>
           <Button variant="outline" size="sm" type="button" @click="addDuplicateFolderName" extra-class="!rounded-2xl">
             + Add name
           </Button>
         </div>
         <div class="space-y-2 max-h-48 overflow-y-auto">
           <div v-if="duplicateFolderNames.length === 0" class="text-center py-4 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/30">
-            Click "+ Add name" to enter folder name(s)
+            Click "+ Add name" to enter category name(s)
           </div>
           <div
             v-for="(name, index) in duplicateFolderNames"
@@ -686,7 +686,7 @@
               v-model="duplicateFolderNames[index]"
               type="text"
               class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-colors"
-              placeholder="New folder name"
+              placeholder="New category name"
             />
             <button
               type="button"
@@ -703,7 +703,7 @@
       <template #footer>
         <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-2xl">Cancel</Button>
         <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-2xl">
-          {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} folder${validDuplicateFolderNamesCount !== 1 ? 's' : ''}` }}
+          {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} ${validDuplicateFolderNamesCount === 1 ? 'category' : 'categories'}` }}
         </Button>
       </template>
     </Modal>
@@ -711,7 +711,7 @@
     <!-- Copy selected folder templates from another branch -->
     <Modal
       v-model="showCopyFolderTemplatesModal"
-      title="Copy folder templates from another branch"
+      title="Copy category templates from another branch"
       subtitle="The checklist is always for the branch you choose in Source branch, not the branch shown in your inventory grid behind this window."
       size="md"
     >
@@ -734,7 +734,7 @@
         </div>
         <div v-if="copyTemplatesSourceStoreId" class="space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Folders to copy</label>
+            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Categories to copy</label>
             <div class="flex items-center gap-2">
               <span class="text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
                 {{ copyTemplatesSelectedCount }} selected
@@ -762,21 +762,21 @@
             class="max-h-[min(240px,calc(100vh-20rem))] overflow-y-auto overscroll-contain rounded-sm border border-gray-200/90 dark:border-gray-600"
           >
             <div v-if="loadingCopyTemplatesSourceFolders" class="px-3 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
-              Loading folders…
+              Loading categories…
             </div>
             <div
               v-else-if="copyTemplatesSourceFoldersList.length === 0"
               class="space-y-2 px-3 py-5 text-left text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
             >
               <p>
-                No folder templates were found under
+                No category templates were found under
                 <strong class="font-medium text-gray-700 dark:text-gray-300">{{ copyTemplatesSourceBranchLabel }}</strong>
                 (<span class="whitespace-normal">your &ldquo;Source branch&rdquo;</span> above).
               </p>
               <p v-if="storesStore.currentStoreId && copyTemplatesSourceStoreId && copyTemplatesSourceStoreId !== storesStore.currentStoreId && inventoryViewBranchLabel">
-                The folder tiles behind this modal are from
+                The category tiles behind this modal are from
                 <strong class="font-medium text-gray-700 dark:text-gray-300">{{ inventoryViewBranchLabel }}</strong>
-                Switch &ldquo;Source branch&rdquo; to that branch if those are the folders you want to copy, or create folders first on {{ copyTemplatesSourceBranchLabel }}.
+                Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
               </p>
             </div>
             <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/90">
@@ -799,10 +799,10 @@
           </div>
         </div>
         <fieldset class="space-y-2">
-          <legend class="text-xs font-medium text-gray-700 dark:text-gray-300">When a folder name already exists here</legend>
+          <legend class="text-xs font-medium text-gray-700 dark:text-gray-300">When a category name already exists here</legend>
           <label class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input v-model="copyTemplatesNameCollision" type="radio" value="skip" class="mt-0.5" />
-            <span>Skip that folder</span>
+            <span>Skip that category</span>
           </label>
           <label class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input v-model="copyTemplatesNameCollision" type="radio" value="suffix" class="mt-0.5" />
@@ -840,7 +840,7 @@
           {{
             isCopyingFolderTemplates
               ? 'Copying…'
-              : `Copy ${copyTemplatesSelectedCount || 0} folder${copyTemplatesSelectedCount === 1 ? '' : 's'}`
+              : `Copy ${copyTemplatesSelectedCount || 0} ${copyTemplatesSelectedCount === 1 ? 'category' : 'categories'}`
           }}
         </Button>
       </template>
@@ -928,7 +928,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Inventory Folders - Storvv',
+  title: 'Inventory categories - Storvv',
 })
 
 const searchQuery = ref('')
