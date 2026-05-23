@@ -100,8 +100,35 @@
 
     <!-- Analytics Content -->
     <template v-else>
+      <!-- Period summary -->
+      <section :class="analyticsCardClass">
+        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{{ analyticsSummary }}</p>
+        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Completed sales</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+              {{ completedReceiptsInPeriod.length }}
+            </p>
+          </div>
+          <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Units sold</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">{{ itemsSoldInPeriod }}</p>
+          </div>
+          <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Customers</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">{{ uniqueCustomersInPeriod }}</p>
+          </div>
+          <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <p class="text-[11px] text-gray-500 dark:text-gray-400">Repeat rate</p>
+            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+              {{ repeatPurchaseRate.toFixed(0) }}%
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- Key Metrics -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Total revenue"
           :value="formatCurrency(totalRevenue)"
@@ -110,19 +137,24 @@
           :change-positive="revenueChangePositive"
         />
         <StatCard
-          label="Total sales"
-          :value="totalSales.toString()"
-          :subtext="`${totalOrders} orders`"
+          label="Completed revenue"
+          :value="formatCurrency(totalPeriodSales)"
+          :subtext="periodLabel"
+        />
+        <StatCard
+          label="Orders"
+          :value="totalOrders.toString()"
+          :subtext="`${completedReceiptsInPeriod.length} completed`"
         />
         <StatCard
           label="Avg. order value"
           :value="formatCurrency(averageOrderValue)"
-          subtext="Per transaction"
+          subtext="Per completed sale"
         />
         <StatCard
-          label="Low stock items"
+          label="Low stock"
           :value="lowStockCount.toString()"
-          :subtext="lowStockCount > 0 ? 'Need restocking' : 'All stocked'"
+          :subtext="lowStockCount > 0 ? 'Review inventory' : 'All stocked'"
           :subtext-class="lowStockCount > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
         />
         <StatCard
@@ -139,7 +171,7 @@
         <Card
           class="lg:col-span-2"
           padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
+          :extra-class="analyticsCardClass"
         >
           <div class="mb-4 flex items-center justify-between">
             <div>
@@ -158,15 +190,12 @@
         </Card>
 
         <!-- Top Products Chart -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
+        <Card padding="sm" :extra-class="analyticsCardClass">
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Top Products
+              Top products
             </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">By sales volume</p>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Share of revenue (top 5)</p>
           </div>
           <apexchart
             type="donut"
@@ -179,97 +208,131 @@
 
       <!-- Inventory & Customer Insights Row -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
-        <!-- Inventory Turnover -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
-          <div class="mb-4">
-            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Inventory Turnover
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Sales vs Stock levels</p>
+        <!-- Sales by category -->
+        <Card padding="sm" :extra-class="analyticsCardClass">
+          <div class="mb-3 flex items-start justify-between gap-2">
+            <div>
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Sales by category
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                Top folders in {{ periodLabel.toLowerCase() }} (max 8)
+              </p>
+            </div>
+            <NuxtLink
+              to="/dashboard/inventory"
+              class="shrink-0 text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              Inventory →
+            </NuxtLink>
+          </div>
+          <div v-if="topFoldersBySales.length === 0" class="py-8 text-center text-xs text-gray-500 dark:text-gray-400">
+            No category sales in this period.
           </div>
           <apexchart
+            v-else
             type="bar"
-            height="250"
-            :options="inventoryTurnoverChartOptions"
-            :series="inventoryTurnoverChartSeries"
+            :height="Math.max(240, topFoldersBySales.length * 40)"
+            :options="categorySalesChartOptions"
+            :series="categorySalesChartSeries"
           />
         </Card>
 
-        <!-- Customer Insights -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
-          <div class="mb-4">
+        <!-- Top customers -->
+        <Card padding="sm" :extra-class="analyticsCardClass">
+          <div class="mb-3">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Customer Insights
+              Top customers
             </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Top customers & repeat rate</p>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              By spend · {{ repeatPurchaseRate.toFixed(0) }}% repeat purchase rate
+            </p>
+          </div>
+          <div v-if="customerChartCustomers.length === 0" class="py-8 text-center text-xs text-gray-500 dark:text-gray-400">
+            No customer emails on receipts in this period.
           </div>
           <apexchart
+            v-else
             type="bar"
-            height="250"
+            :height="Math.max(220, customerChartCustomers.length * 44)"
             :options="customerChartOptions"
             :series="customerChartSeries"
           />
         </Card>
       </div>
 
+      <!-- Payment methods -->
+      <section v-if="paymentMethodBreakdown.length > 0" :class="analyticsCardClass">
+        <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-50 sm:text-sm">Payment methods</h2>
+        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Completed sales by tender type</p>
+        <ul class="mt-4 space-y-3">
+          <li v-for="row in paymentMethodBreakdown.slice(0, 6)" :key="row.label">
+            <div class="mb-1 flex items-baseline justify-between gap-2 text-xs">
+              <span class="font-medium text-gray-800 dark:text-gray-200">{{ row.label }}</span>
+              <span class="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
+                {{ row.share }}% · {{ formatCurrency(row.revenue) }}
+              </span>
+            </div>
+            <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
+              <div
+                class="h-full rounded-full bg-primary-500/75 dark:bg-primary-400/65"
+                :style="{ width: `${Math.max(row.share, 3)}%` }"
+              />
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <!-- Peak hours, Sales by day, Busiest time -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <!-- Busiest day & hour -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 overflow-hidden rounded-sm border border-gray-200/80 bg-white/90 dark:border-gray-800/70 dark:!bg-dashboard-card"
-        >
+        <Card padding="sm" :extra-class="analyticsCardClass">
           <div class="flex items-start justify-between gap-3">
             <div class="flex min-w-0 items-start gap-2.5">
               <div
-                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800/80"
               >
                 <ClockIcon class="h-4 w-4 text-gray-600 dark:text-gray-300" />
               </div>
               <div class="min-w-0">
-                <h2 class="text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-                  Busiest time
+                <h2 class="text-xs font-semibold leading-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                  Peak hours
                 </h2>
-                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Peak day & hour in period</p>
+                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
               </div>
             </div>
-            <span
-              class="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800/80 dark:text-gray-300"
-            >
-              {{ selectedPeriod === 'daily' ? 'Today' : selectedPeriod === 'weekly' ? 'This week' : 'This month' }}
-            </span>
           </div>
 
-          <div
-            class="mt-3 rounded-sm bg-gray-50/90 p-3 dark:!bg-dashboard-card"
-          >
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Highest revenue occurs at</p>
-            <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-              {{ busiestTimeSummary }}
-            </p>
-          </div>
+          <p class="mt-3 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            {{ busiestTimeSummary }}
+          </p>
+
+          <dl class="mt-4 grid grid-cols-2 gap-2">
+            <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-2.5 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[10px] text-gray-500 dark:text-gray-400">Best day</dt>
+              <dd class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ busiestDayName ?? '-' }}</dd>
+              <dd class="text-[10px] tabular-nums text-gray-500">{{ formatCurrency(peakDayRevenue) }}</dd>
+            </div>
+            <div class="rounded-lg border border-gray-100/90 bg-gray-50/80 px-2.5 py-2 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[10px] text-gray-500 dark:text-gray-400">Best hour</dt>
+              <dd class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ busiestHourLabel ?? '-' }}</dd>
+              <dd class="text-[10px] tabular-nums text-gray-500">{{ formatCurrency(peakHourRevenue) }}</dd>
+            </div>
+          </dl>
         </Card>
 
-        <!-- Sales by hour (peak hours) -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 lg:col-span-2 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
-          <div class="mb-4">
+        <Card padding="sm" :extra-class="`${analyticsCardClass} lg:col-span-2`">
+          <div class="mb-3">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
               Sales by hour
             </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Peak hours (revenue)</p>
+            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              Revenue by hour of day · hover for order count
+            </p>
           </div>
           <apexchart
             type="bar"
-            height="250"
+            height="260"
             :options="peakHoursChartOptions"
             :series="peakHoursChartSeries"
           />
@@ -277,11 +340,7 @@
       </div>
 
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
-        <!-- Sales by day of week -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
+        <Card padding="sm" :extra-class="analyticsCardClass">
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
               Sales by day of week
@@ -296,11 +355,7 @@
           />
         </Card>
 
-        <!-- Traffic heatmap: day × hour -->
-        <Card
-          padding="sm"
-          extra-class="!p-4 rounded-sm bg-white/90 dark:!bg-dashboard-card"
-        >
+        <Card padding="sm" :extra-class="analyticsCardClass">
           <div class="mb-4">
             <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
               Traffic heatmap
@@ -499,6 +554,12 @@ import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import jsPDF from 'jspdf'
 import { tableMoneyClass } from '~/utils/table-money-styles'
+import {
+  truncateChartLabel,
+  safeTurnoverPercent,
+  apexTheme,
+  createChartCurrencyAxisFormatter,
+} from '~/utils/analytics-charts'
 
 definePageMeta({
   layout: 'dashboard'
@@ -509,6 +570,21 @@ useHead({
 })
 
 const { formatCurrency, preferences, baseCurrency, initialize: initPreferences } = usePreferences()
+
+const analyticsCardClass =
+  'rounded-xl border border-gray-200/70 bg-white p-4 dark:border-white/[0.06] dark:!bg-dashboard-card sm:p-5'
+
+const chartLocale = computed(() =>
+  preferences.value.region === 'NG' ? 'en-NG' : preferences.value.language === 'fr' ? 'fr-FR' : 'en-US'
+)
+
+const chartCurrencyAxis = computed(() =>
+  createChartCurrencyAxisFormatter(
+    formatCurrency,
+    preferences.value.currency || 'USD',
+    chartLocale.value
+  )
+)
 const toast = useAppToast()
 
 /** ApexCharts stores formatters built in computed runs; read prefs during eval so options refresh when profile currency/base changes */
@@ -819,6 +895,126 @@ const refundRate = computed(() => {
 })
 const refundRateText = computed(() => `${refundRate.value.toFixed(1)}% refund rate`)
 
+const uniqueCustomersInPeriod = computed(() => {
+  const keys = new Set<string>()
+  filteredReceipts.value.forEach((r) => {
+    const key = r.customerEmail?.trim() || r.customerPhone?.trim()
+    if (key) keys.add(key)
+  })
+  return keys.size
+})
+
+const itemsSoldInPeriod = computed(() => {
+  let count = 0
+  completedReceiptsInPeriod.value.forEach((r) => {
+    if (r.items?.length) {
+      r.items.forEach((item: { quantity?: number }) => {
+        count += item.quantity || 0
+      })
+    } else {
+      count += r.itemsCount || 0
+    }
+  })
+  return count
+})
+
+const paymentMethodBreakdown = computed(() => {
+  const map = new Map<string, { label: string; count: number; revenue: number }>()
+  completedReceiptsInPeriod.value.forEach((r) => {
+    const raw = (r.paymentMethod || 'other').trim().toLowerCase()
+    const label = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : 'Other'
+    const row = map.get(raw) || { label, count: 0, revenue: 0 }
+    row.count += 1
+    row.revenue += r.total || 0
+    map.set(raw, row)
+  })
+  const total = completedReceiptsInPeriod.value.length || 1
+  return Array.from(map.values())
+    .sort((a, b) => b.revenue - a.revenue)
+    .map((row) => ({
+      ...row,
+      share: Math.round((row.count / total) * 100),
+    }))
+})
+
+const topFoldersBySales = computed(() => {
+  const rows = inventoryStore.folders.map((folder) => {
+    const folderItems = inventoryItems.value.filter((item) => item.folderId === folder.id)
+    const stockValue = folderItems.reduce((sum, item) => {
+      const price = Number(item.price ?? item.Price ?? 0) || 0
+      const qty = folder.hasSerialNumbers
+        ? item.dateOut
+          ? 0
+          : 1
+        : Number(item.quantity ?? item.Quantity ?? 0) || 0
+      return sum + price * qty
+    }, 0)
+
+    const sales = filteredReceipts.value
+      .flatMap((r) => r.items || [])
+      .filter((line) => {
+        const inv = inventoryItems.value.find((i) => i.id === line.itemId)
+        return inv?.folderId === folder.id
+      })
+      .reduce((sum, line) => sum + (line.price || 0) * (line.quantity || 0), 0)
+
+    return {
+      id: folder.id,
+      name: folder.name,
+      sales,
+      stockValue,
+      turnover: safeTurnoverPercent(sales, stockValue),
+      unitsSold: filteredReceipts.value
+        .flatMap((r) => r.items || [])
+        .filter((line) => {
+          const inv = inventoryItems.value.find((i) => i.id === line.itemId)
+          return inv?.folderId === folder.id
+        })
+        .reduce((sum, line) => sum + (line.quantity || 0), 0),
+    }
+  })
+
+  return rows
+    .filter((r) => r.sales > 0 || r.stockValue > 0)
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 8)
+})
+
+const totalPeriodSales = computed(() =>
+  completedReceiptsInPeriod.value.reduce((s, r) => s + (r.total || 0), 0)
+)
+
+const peakHourRevenue = computed(() => {
+  const idx = busiestHourIndex.value
+  if (idx == null) return 0
+  return salesByHour.value[idx]?.revenue ?? 0
+})
+
+const peakDayRevenue = computed(() => {
+  const idx = busiestDayIndex.value
+  if (idx == null) return 0
+  return salesByDayOfWeek.value[idx]?.revenue ?? 0
+})
+
+const analyticsSummary = computed(() => {
+  const parts: string[] = []
+  parts.push(
+    `${completedReceiptsInPeriod.value.length} completed sale${completedReceiptsInPeriod.value.length === 1 ? '' : 's'} in ${periodLabel.value.toLowerCase()}.`
+  )
+  if (uniqueCustomersInPeriod.value > 0) {
+    parts.push(
+      `${uniqueCustomersInPeriod.value} unique customer${uniqueCustomersInPeriod.value === 1 ? '' : 's'}; repeat rate ${repeatPurchaseRate.value.toFixed(0)}%.`
+    )
+  }
+  if (busiestTimeSummary.value !== 'No sales in period') {
+    parts.push(`Peak traffic: ${busiestTimeSummary.value}.`)
+  }
+  if (lowStockCount.value > 0) {
+    parts.push(`${lowStockCount.value} low-stock group${lowStockCount.value === 1 ? '' : 's'} need attention.`)
+  }
+  return parts.join(' ')
+})
+
 // Recent returns for table (receipt number, date, amount, reason)
 function getRefundReason(receipt: { refundReason?: string; notes?: string }): string {
   if (receipt.refundReason && receipt.refundReason.trim()) return receipt.refundReason.trim()
@@ -947,49 +1143,60 @@ const heatmapMaxRevenue = computed(() => {
 
 const peakHoursChartSeries = computed(() => [{
   name: 'Revenue',
-  data: salesByHour.value.map(s => s.revenue)
+  data: salesByHour.value.map((s) => s.revenue),
 }])
 const peakHoursChartOptions = computed(() => {
   void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
-  const textColor = isDark ? '#E5E7EB' : '#1F2937'
-  const mutedColor = isDark ? '#9CA3AF' : '#6B7280'
-  const borderColor = isDark ? '#4B5563' : '#E5E7EB'
+  const theme = apexTheme(isDark)
+  const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
     colors: [isDark ? '#60a5fa' : '#2563eb'],
+    plotOptions: {
+      bar: { borderRadius: 3, columnWidth: '70%', dataLabels: { position: 'top' } },
+    },
+    dataLabels: { enabled: false },
     xaxis: {
       categories: HOUR_LABELS,
+      tickAmount: 12,
       labels: {
-        style: { colors: mutedColor, fontSize: '10px' },
-        rotate: -45,
-        rotateAlways: false
+        style: { colors: theme.muted, fontSize: '10px' },
+        rotate: 0,
+        hideOverlappingLabels: true,
+        formatter: (_val: string, _ts: number, opts?: { i?: number }) => {
+          const i = opts?.i ?? 0
+          return i % 3 === 0 ? HOUR_LABELS[i] ?? '' : ''
+        },
       },
-      axisBorder: { show: true, color: borderColor },
-      axisTicks: { show: true, color: borderColor },
-      title: { style: { color: textColor, fontSize: '12px' } }
+      axisBorder: { show: true, color: theme.border },
+      axisTicks: { show: false },
     },
     yaxis: {
       labels: {
-        style: { colors: mutedColor, fontSize: '12px' },
-        formatter: (val: number) => formatCurrency(val)
+        style: { colors: theme.muted, fontSize: '11px' },
+        formatter: (val: number) => axisFmt(val),
       },
-      axisBorder: { show: true, color: borderColor },
-      axisTicks: { show: true, color: borderColor },
-      title: { style: { color: textColor, fontSize: '12px' } }
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     grid: {
-      borderColor,
+      borderColor: theme.grid,
       strokeDashArray: 4,
-      xaxis: { lines: { show: true } },
-      yaxis: { lines: { show: true } }
+      padding: { left: 8, right: 8 },
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
-      style: { fontSize: '12px' },
-      y: { formatter: (val: number) => formatCurrency(val), title: { formatter: () => 'Revenue' } }
+      x: {
+        formatter: (_: string, opts?: { dataPointIndex?: number }) => {
+          const i = opts?.dataPointIndex ?? 0
+          const slot = salesByHour.value[i]
+          return slot ? `${HOUR_LABELS[i]} · ${slot.count} order${slot.count === 1 ? '' : 's'}` : HOUR_LABELS[i]
+        },
+      },
+      y: { formatter: (val: number) => formatCurrency(val) },
     },
-    theme: { mode: isDark ? 'dark' : 'light' }
+    theme: { mode: isDark ? 'dark' : 'light' },
   }
 })
 
@@ -1000,22 +1207,37 @@ const salesByDayChartSeries = computed(() => [{
 const salesByDayChartOptions = computed(() => {
   void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
+  const theme = apexTheme(isDark)
+  const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: ['#059669'],
+    colors: [isDark ? '#34d399' : '#059669'],
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+    dataLabels: { enabled: false },
     xaxis: {
       categories: DAY_NAMES,
-      labels: { style: { colors: isDark ? '#9CA3AF' : '#1F2937', fontSize: '12px' } },
-      axisBorder: { show: true, color: isDark ? '#374151' : '#E5E7EB' },
-      axisTicks: { show: true, color: isDark ? '#374151' : '#E5E7EB' }
+      labels: { style: { colors: theme.muted, fontSize: '11px' } },
+      axisBorder: { show: true, color: theme.border },
+      axisTicks: { show: false },
     },
     yaxis: {
-      labels: { style: { colors: isDark ? '#9CA3AF' : '#1F2937', fontSize: '12px' } },
-      formatter: (val: number) => formatCurrency(val)
+      labels: {
+        style: { colors: theme.muted, fontSize: '11px' },
+        formatter: (val: number) => axisFmt(val),
+      },
     },
-    grid: { borderColor: isDark ? '#374151' : '#E5E7EB', strokeDashArray: 4 },
-    tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val: number) => formatCurrency(val) } },
-    theme: { mode: isDark ? 'dark' : 'light' }
+    grid: { borderColor: theme.grid, strokeDashArray: 4 },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (val: number, opts?: { dataPointIndex?: number }) => {
+          const i = opts?.dataPointIndex ?? 0
+          const slot = salesByDayOfWeek.value[i]
+          return `${formatCurrency(val)} (${slot?.count ?? 0} orders)`
+        },
+      },
+    },
+    theme: { mode: isDark ? 'dark' : 'light' },
   }
 })
 
@@ -1059,8 +1281,12 @@ const heatmapChartOptions = computed(() => {
       categories: HOUR_LABELS,
       labels: {
         style: { colors: mutedColor, fontSize: '9px' },
-        rotate: -45,
-        rotateAlways: false
+        rotate: 0,
+        hideOverlappingLabels: true,
+        formatter: (_val: string, _ts: number, opts?: { i?: number }) => {
+          const i = opts?.i ?? 0
+          return i % 4 === 0 ? HOUR_LABELS[i] ?? '' : ''
+        },
       },
       axisBorder: { show: true, color: borderColor },
       axisTicks: { show: true, color: borderColor }
@@ -1207,24 +1433,25 @@ const revenueChartOptions = computed(() => {
       labels: {
         style: {
           colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
+          fontSize: '11px',
         },
-        formatter: (val: number) => formatCurrency(val)
-      }
+        formatter: (val: number) => chartCurrencyAxis.value(val),
+      },
     },
     grid: {
       borderColor: isDark ? '#374151' : '#E5E7EB',
-      strokeDashArray: 4
+      strokeDashArray: 4,
     },
+    dataLabels: { enabled: false },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
       y: {
-        formatter: (val: number) => formatCurrency(val)
-      }
+        formatter: (val: number) => formatCurrency(val),
+      },
     },
     theme: {
-      mode: isDark ? 'dark' : 'light'
-    }
+      mode: isDark ? 'dark' : 'light',
+    },
   }
 })
 
@@ -1241,7 +1468,7 @@ const topProductsChartOptions = computed(() => {
       type: 'donut',
       background: 'transparent'
     },
-    labels: topProducts.value.slice(0, 5).map(p => p.name),
+    labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 20)),
     colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
     legend: {
       position: 'bottom',
@@ -1261,146 +1488,131 @@ const topProductsChartOptions = computed(() => {
   }
 })
 
-const inventoryTurnoverChartSeries = computed(() => {
-  const folders = inventoryStore.folders
-  const turnoverData = folders.map(folder => {
-    const folderItems = inventoryItems.value.filter(item => item.folderId === folder.id)
-    const totalValue = folderItems.reduce((sum, item) => {
-      const price = item.price || item.Price || 0
-      const quantity = item.quantity || item.Quantity || 0
-      return sum + (price * quantity)
-    }, 0)
-    
-    const salesFromFolder = filteredReceipts.value
-      .flatMap(r => r.items || [])
-      .filter(item => {
-        const folderItem = inventoryItems.value.find(i => i.id === item.itemId)
-        return folderItem?.folderId === folder.id
-      })
-      .reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0)
-    
-    return salesFromFolder > 0 ? (salesFromFolder / totalValue) * 100 : 0
-  })
-  
-  return [{
-    name: 'Turnover Rate (%)',
-    data: turnoverData
-  }]
-})
+const categorySalesChartSeries = computed(() => [
+  {
+    name: 'Sales',
+    data: topFoldersBySales.value.map((f) => f.sales),
+  },
+])
 
-const inventoryTurnoverChartOptions = computed(() => {
-  const isDark = themeStore.actualTheme === 'dark'
-
-  return {
-    chart: {
-      type: 'bar',
-      toolbar: { show: false },
-      background: 'transparent'
-    },
-    colors: ['#7c3aed'],
-    xaxis: {
-      categories: inventoryStore.folders.map(f => f.name),
-      labels: {
-        style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
-        }
-      },
-      axisBorder: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      },
-      axisTicks: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      }
-    },
-    yaxis: {
-      labels: {
-        style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
-        }
-      },
-      title: {
-        text: 'Turnover Rate (%)',
-        style: {
-          color: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px',
-          fontWeight: 500
-        }
-      }
-    },
-    grid: {
-      borderColor: isDark ? '#374151' : '#E5E7EB',
-      strokeDashArray: 4
-    },
-    tooltip: {
-      theme: isDark ? 'dark' : 'light'
-    },
-    theme: {
-      mode: isDark ? 'dark' : 'light'
-    }
-  }
-})
-
-const customerChartSeries = computed(() => {
-  return [{
-    name: 'Total Spent',
-    data: topCustomers.value.slice(0, 5).map(c => c.totalSpent)
-  }]
-})
-
-const customerChartOptions = computed(() => {
+const categorySalesChartOptions = computed(() => {
   void displayCurrencyDeps.value
   const isDark = themeStore.actualTheme === 'dark'
+  const theme = apexTheme(isDark)
+  const axisFmt = chartCurrencyAxis.value
+  const folders = topFoldersBySales.value
+  const categories = folders.map((f) => truncateChartLabel(f.name, 18))
 
   return {
-    chart: {
-      type: 'bar',
-      toolbar: { show: false },
-      background: 'transparent'
+    chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
+    colors: [isDark ? '#a78bfa' : '#7c3aed'],
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 4,
+        barHeight: '72%',
+        dataLabels: { position: 'center' },
+      },
     },
-    colors: ['#059669'],
+    dataLabels: { enabled: false },
     xaxis: {
-      categories: topCustomers.value.slice(0, 5).map(c => c.name.split(' ')[0]),
+      categories,
       labels: {
-        style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
-        }
+        style: { colors: theme.muted, fontSize: '11px' },
       },
-      axisBorder: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      },
-      axisTicks: {
-        show: true,
-        color: isDark ? '#374151' : '#E5E7EB'
-      }
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     yaxis: {
       labels: {
-        style: {
-          colors: isDark ? '#9CA3AF' : '#1F2937',
-          fontSize: '12px'
-        },
-        formatter: (val: number) => formatCurrency(val)
-      }
+        style: { colors: theme.muted, fontSize: '11px' },
+        formatter: (val: number) => axisFmt(val),
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
     },
     grid: {
-      borderColor: isDark ? '#374151' : '#E5E7EB',
-      strokeDashArray: 4
+      borderColor: theme.grid,
+      strokeDashArray: 4,
+      padding: { left: 4, right: 16 },
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
       y: {
-        formatter: (val: number) => formatCurrency(val)
-      }
+        formatter: (val: number) => formatCurrency(val),
+        title: {
+          formatter: (_seriesName: string, opts?: { dataPointIndex?: number }) => {
+            const f = folders[opts?.dataPointIndex ?? 0]
+            if (!f) return 'Category'
+            return `${f.name} · ${f.unitsSold} units · ${f.turnover}% turnover`
+          },
+        },
+      },
     },
-    theme: {
-      mode: isDark ? 'dark' : 'light'
-    }
+    theme: { mode: isDark ? 'dark' : 'light' },
+  }
+})
+
+const customerChartCustomers = computed(() => topCustomers.value.slice(0, 5))
+
+const customerChartSeries = computed(() => [
+  {
+    name: 'Total spent',
+    data: customerChartCustomers.value.map((c) => c.totalSpent),
+  },
+])
+
+const customerChartOptions = computed(() => {
+  void displayCurrencyDeps.value
+  const isDark = themeStore.actualTheme === 'dark'
+  const theme = apexTheme(isDark)
+  const axisFmt = chartCurrencyAxis.value
+  const customers = customerChartCustomers.value
+  const categories = customers.map((c) => truncateChartLabel(c.name, 14))
+
+  return {
+    chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
+    colors: [isDark ? '#34d399' : '#059669'],
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        borderRadius: 4,
+        barHeight: '68%',
+      },
+    },
+    dataLabels: { enabled: false },
+    xaxis: {
+      categories,
+      labels: {
+        style: { colors: theme.muted, fontSize: '11px' },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: theme.muted, fontSize: '11px' },
+        formatter: (val: number) => axisFmt(val),
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    grid: {
+      borderColor: theme.grid,
+      strokeDashArray: 4,
+      padding: { left: 4, right: 16 },
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (_val: number, opts?: { dataPointIndex?: number }) => {
+          const c = customers[opts?.dataPointIndex ?? 0]
+          if (!c) return ''
+          return `${formatCurrency(c.totalSpent)} · ${c.orders} order${c.orders === 1 ? '' : 's'}`
+        },
+      },
+    },
+    theme: { mode: isDark ? 'dark' : 'light' },
   }
 })
 

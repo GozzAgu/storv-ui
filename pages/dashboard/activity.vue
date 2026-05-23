@@ -190,7 +190,7 @@
                   <span
                     :class="[ 'inline-flex rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide', actionClass(log.action) ]"
                   >
-                    {{ actionLabel(log.action) }}
+                    {{ activityActionLabel(log.action) }}
                   </span>
                 </td>
                 <td class="max-w-[260px]">
@@ -198,7 +198,7 @@
                     {{ log.entityName }}
                   </p>
                   <p class="mt-0.5 truncate text-[10px] text-gray-500 dark:text-gray-400">
-                    {{ entityTypeLabel(log.entityType) }} · ID {{ log.entityId || '-' }}
+                    {{ activityEntityTypeLabel(log.entityType) }} · ID {{ log.entityId || '-' }}
                   </p>
                 </td>
                 <td class="whitespace-nowrap">
@@ -227,7 +227,12 @@ definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
 import { BuildingStorefrontIcon, ClipboardDocumentListIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import type { ActivityLog } from '~/composables/useActivityLog'
-import { ACTIVITY_LOGS_FETCH_LIMIT, fetchActivityLogs } from '~/composables/useActivityLog'
+import {
+  ACTIVITY_LOGS_FETCH_LIMIT,
+  activityActionLabel,
+  activityEntityTypeLabel,
+  fetchActivityLogs,
+} from '~/composables/useActivityLog'
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 
@@ -263,8 +268,8 @@ const filteredLogs = computed(() => {
       log.entityName,
       log.entityId,
       log.action,
-      actionLabel(log.action),
-      entityTypeLabel(log.entityType),
+      activityActionLabel(log.action),
+      activityEntityTypeLabel(log.entityType),
       dateStr,
     ]
       .join(' ')
@@ -320,12 +325,6 @@ function relativeTime(d: Date | unknown): string {
   return `${days}d ago`
 }
 
-function actionLabel(action: ActivityLog['action']): string {
-  if (action === 'created') return 'Created'
-  if (action === 'deleted') return 'Deleted'
-  return 'Updated'
-}
-
 function actionClass(action: ActivityLog['action']): string {
   if (action === 'created') {
     return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
@@ -334,12 +333,6 @@ function actionClass(action: ActivityLog['action']): string {
     return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'
   }
   return 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300'
-}
-
-function entityTypeLabel(type: ActivityLog['entityType']): string {
-  if (type === 'items_batch') return 'Batch items'
-  if (type === 'folder') return 'Folder'
-  return 'Item'
 }
 
 function getInitials(name: string): string {

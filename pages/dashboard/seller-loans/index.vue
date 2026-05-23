@@ -58,14 +58,6 @@
                 {{ tab.label }}
               </button>
             </div>
-            <button
-              type="button"
-              class="inline-flex h-8 items-center px-2 text-xs font-medium text-primary-700 underline underline-offset-2 hover:text-primary-900 disabled:opacity-50 dark:text-primary-400 dark:hover:text-primary-200"
-              :disabled="sellerLoansStore.loading"
-              @click="sellerLoansStore.fetchSellerLoanOuts(true)"
-            >
-              Refresh
-            </button>
           </div>
         </div>
 

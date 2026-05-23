@@ -4,62 +4,69 @@
     aria-label="Main navigation"
   >
     <div
-      class="pointer-events-auto mx-3 mb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-stretch justify-around gap-0.5 rounded-[1.35rem] border border-white/60 bg-white/75 px-1 py-1 shadow-[0_-4px_32px_rgb(15_23_42/0.08),0_8px_24px_rgb(15_23_42/0.06)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#0c0e14]/82 dark:shadow-[0_-8px_40px_rgb(0_0_0/0.45)]"
+      :class="[barClass, 'pb-[env(safe-area-inset-bottom,0px)]']"
       role="tablist"
     >
-      <NuxtLink
-        v-for="item in primaryItems"
-        :key="item.href"
-        :to="item.href"
-        role="tab"
-        :aria-selected="isActive(item.href)"
-        class="native-bottom-nav__tab group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[1.1rem] px-1 py-2 transition-[transform,color] duration-200 active:scale-[0.94] motion-reduce:active:scale-100"
-        :class="isActive(item.href) ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
-        @click="moreOpen = false"
-      >
-        <span
-          v-if="isActive(item.href)"
-          class="absolute inset-x-1.5 inset-y-0.5 rounded-[0.95rem] bg-primary-500/12 ring-1 ring-inset ring-primary-500/20 dark:bg-primary-400/14 dark:ring-primary-400/25"
-          aria-hidden="true"
-        />
-        <component
-          :is="isActive(item.href) ? item.iconSolid : item.icon"
-          class="relative z-[1] h-[1.35rem] w-[1.35rem] shrink-0 transition-transform duration-200 group-active:scale-95"
-          :stroke-width="isActive(item.href) ? undefined : 1.75"
-        />
-        <span
-          class="relative z-[1] mt-1 max-w-full truncate text-[10px] font-semibold leading-none tracking-tight"
-          :class="isActive(item.href) ? 'text-primary-700 dark:text-primary-300' : ''"
+      <div class="mx-auto flex h-[3.25rem] max-w-lg items-stretch justify-around px-0.5">
+        <NuxtLink
+          v-for="item in primaryItems"
+          :key="item.href"
+          :to="item.href"
+          role="tab"
+          :aria-selected="isActive(item.href)"
+          :class="[
+            tabClass,
+            isActive(item.href) ? tabActiveClass : tabInactiveClass,
+          ]"
+          @click="moreOpen = false"
         >
-          {{ shortLabel(item.name) }}
-        </span>
-      </NuxtLink>
+          <span
+            v-if="isActive(item.href)"
+            :class="tabIndicatorClass"
+            aria-hidden="true"
+          />
+          <component
+            :is="isActive(item.href) ? item.iconSolid : item.icon"
+            class="h-[1.375rem] w-[1.375rem] shrink-0"
+            :stroke-width="isActive(item.href) ? undefined : 1.75"
+          />
+          <span
+            class="max-w-full truncate text-[10px] font-medium leading-none tracking-tight"
+            :class="isActive(item.href) ? 'font-semibold' : ''"
+          >
+            {{ shortLabel(item.name) }}
+          </span>
+        </NuxtLink>
 
-      <button
-        type="button"
-        role="tab"
-        :aria-selected="moreOpen"
-        :aria-expanded="moreOpen"
-        class="native-bottom-nav__tab group relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-[1.1rem] px-1 py-2 transition-[transform,color] duration-200 active:scale-[0.94] motion-reduce:active:scale-100"
-        :class="moreOpen || moreHasActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'"
-        @click="moreOpen = !moreOpen"
-      >
-        <span
-          v-if="moreOpen || moreHasActive"
-          class="absolute inset-x-1.5 inset-y-0.5 rounded-[0.95rem] bg-primary-500/12 ring-1 ring-inset ring-primary-500/20 dark:bg-primary-400/14 dark:ring-primary-400/25"
-          aria-hidden="true"
-        />
-        <Squares2X2Icon
-          class="relative z-[1] h-[1.35rem] w-[1.35rem] shrink-0"
-          :stroke-width="moreOpen || moreHasActive ? undefined : 1.75"
-        />
-        <span
-          class="relative z-[1] mt-1 text-[10px] font-semibold leading-none tracking-tight"
-          :class="moreOpen || moreHasActive ? 'text-primary-700 dark:text-primary-300' : ''"
+        <button
+          type="button"
+          role="tab"
+          :aria-selected="moreOpen"
+          :aria-expanded="moreOpen"
+          :class="[
+            tabClass,
+            moreOpen || moreHasActive ? tabActiveClass : tabInactiveClass,
+          ]"
+          @click="moreOpen = !moreOpen"
         >
-          More
-        </span>
-      </button>
+          <span
+            v-if="moreOpen || moreHasActive"
+            :class="tabIndicatorClass"
+            aria-hidden="true"
+          />
+          <component
+            :is="moreOpen || moreHasActive ? Squares2X2IconSolid : Squares2X2Icon"
+            class="h-[1.375rem] w-[1.375rem] shrink-0"
+            :stroke-width="moreOpen || moreHasActive ? undefined : 1.75"
+          />
+          <span
+            class="text-[10px] font-medium leading-none tracking-tight"
+            :class="moreOpen || moreHasActive ? 'font-semibold' : ''"
+          >
+            More
+          </span>
+        </button>
+      </div>
     </div>
 
     <Teleport to="body">
@@ -74,7 +81,7 @@
         <button
           v-if="moreOpen"
           type="button"
-          class="native-bottom-nav__backdrop fixed inset-0 z-[58] bg-slate-950/40 backdrop-blur-[2px] dark:bg-black/55"
+          class="native-bottom-nav__backdrop fixed inset-0 z-[58] bg-gray-900/40 backdrop-blur-[2px] dark:bg-black/55"
           aria-label="Close menu"
           @click="moreOpen = false"
         />
@@ -90,58 +97,61 @@
       >
         <div
           v-if="moreOpen"
-          class="native-bottom-nav__sheet fixed inset-x-0 bottom-0 z-[59] max-h-[min(72dvh,520px)] overflow-hidden rounded-t-[1.75rem] border border-white/50 bg-white/95 shadow-[0_-12px_48px_rgb(15_23_42/0.14)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#11131a]/96 dark:shadow-[0_-16px_56px_rgb(0_0_0/0.5)]"
-          :style="{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }"
+          :class="sheetClass"
+          :style="{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }"
           role="dialog"
           aria-label="More navigation"
         >
-          <div class="mx-auto mt-2.5 h-1 w-10 rounded-full bg-gray-300/90 dark:bg-white/20" aria-hidden="true" />
-          <div class="border-b border-gray-100/90 px-5 pb-3 pt-4 dark:border-white/10">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">
-              Workspace
+          <div class="shrink-0 border-b border-gray-100/90 bg-gray-50/50 px-4 pb-3 pt-3 dark:border-gray-800/80 dark:bg-white/[0.02]">
+            <div class="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300/80 dark:bg-white/15" aria-hidden="true" />
+            <p class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+              Menu
             </p>
-            <p class="mt-0.5 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-              More options
+            <p class="mt-0.5 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+              More
             </p>
           </div>
 
-          <ul class="native-bottom-nav__sheet-list max-h-[min(50dvh,380px)] overflow-y-auto overscroll-contain px-3 py-2">
+          <ul class="native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2">
             <li v-for="item in moreItems" :key="item.href">
               <NuxtLink
                 :to="item.href"
-                class="flex items-center gap-3 rounded-2xl px-3 py-3 transition-colors active:bg-gray-100/90 dark:active:bg-white/[0.06]"
-                :class="isActive(item.href) ? 'bg-primary-500/10 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300' : 'text-gray-800 dark:text-gray-200'"
+                :class="[
+                  sheetRowClass,
+                  isActive(item.href) ? sheetRowActiveClass : sheetRowInactiveClass,
+                ]"
                 @click="moreOpen = false"
               >
                 <span
-                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset"
-                  :class="isActive(item.href) ? 'bg-primary-500/15 ring-primary-500/25 text-primary-600 dark:text-primary-400' : 'bg-gray-100/90 ring-gray-200/60 text-gray-600 dark:bg-white/[0.06] dark:ring-white/10 dark:text-gray-300'"
+                  :class="[
+                    sheetIconWrapClass,
+                    isActive(item.href) ? sheetIconWrapActiveClass : '',
+                  ]"
                 >
                   <component
                     :is="isActive(item.href) ? item.iconSolid : item.icon"
-                    class="h-5 w-5"
+                    class="h-[1.125rem] w-[1.125rem]"
                     :stroke-width="isActive(item.href) ? undefined : 1.75"
                   />
                 </span>
                 <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
-                <ChevronRightIcon class="h-4 w-4 shrink-0 opacity-40" stroke-width="2" />
               </NuxtLink>
             </li>
-            <li v-if="moreItems.length === 0" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-              You're all set. Main tabs cover everything.
+            <li v-if="moreItems.length === 0" class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+              Main tabs cover everything here.
             </li>
           </ul>
 
-          <div class="border-t border-gray-100/90 px-3 pt-2 dark:border-white/10">
+          <div class="shrink-0 border-t border-gray-100/90 px-2 py-2 dark:border-gray-800/80">
             <button
               type="button"
-              class="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-medium text-red-600 transition-colors active:bg-red-50/90 dark:text-red-400 dark:active:bg-red-500/10"
+              :class="[sheetRowClass, 'w-full text-red-600 dark:text-red-400']"
               @click="onSignOut"
             >
-              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50/90 text-red-600 ring-1 ring-inset ring-red-200/70 dark:bg-red-500/12 dark:text-red-400 dark:ring-red-500/25">
-                <ArrowRightOnRectangleIcon class="h-5 w-5" stroke-width="1.75" />
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50/90 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+                <ArrowRightOnRectangleIcon class="h-[1.125rem] w-[1.125rem]" stroke-width="1.75" />
               </span>
-              Sign out
+              <span class="text-sm font-medium">Sign out</span>
             </button>
           </div>
         </div>
@@ -153,11 +163,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  Squares2X2Icon,
-  ChevronRightIcon,
-  ArrowRightOnRectangleIcon,
-} from '@heroicons/vue/24/outline'
+import { Squares2X2Icon, ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
+import { Squares2X2Icon as Squares2X2IconSolid } from '@heroicons/vue/24/solid'
 import {
   isDashboardNavActive,
   nativeNavShortLabel,
@@ -172,6 +179,20 @@ const props = defineProps<{
 const emit = defineEmits<{
   signOut: []
 }>()
+
+const {
+  barClass,
+  tabClass,
+  tabInactiveClass,
+  tabActiveClass,
+  tabIndicatorClass,
+  sheetClass,
+  sheetRowClass,
+  sheetRowActiveClass,
+  sheetRowInactiveClass,
+  sheetIconWrapClass,
+  sheetIconWrapActiveClass,
+} = useDashboardNativeNavChrome()
 
 const route = useRoute()
 const moreOpen = ref(false)

@@ -12,8 +12,9 @@
           Branches, business details, inventory defaults, and receipts, tuned to match how you work.
         </p>
       </template>
-      <template v-if="!canEditSettings" #actions>
+      <template #actions>
         <div
+          v-if="!canEditSettings"
           class="inline-flex h-8 shrink-0 items-center gap-2 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 dark:border-amber-500/25 dark:bg-amber-950/30"
         >
           <span class="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
@@ -24,98 +25,89 @@
 
     <div class="space-y-4 sm:space-y-5">
       <!-- Account: logo + subscription -->
-      <div
+      <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
+        title="Account"
+        subtitle="Logo and subscription for your whole account."
+        :badge="`Plan: ${currentSubscriptionLabel}`"
       >
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Account</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Logo and subscription for your whole account.</p>
-          </div>
-          <span class="px-2.5 py-1 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
-            Plan: {{ currentSubscriptionLabel }}
-          </span>
-        </div>
-
-        <div class="px-5 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <!-- Logo -->
-          <div class="flex items-center gap-5">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+          <div class="flex items-start gap-4">
             <div class="relative shrink-0">
-              <div class="w-16 h-16 rounded-sm flex items-center justify-center overflow-hidden ring-2 ring-gray-200/80 dark:ring-gray-600/80 bg-gray-50 dark:bg-gray-800/80">
-                <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Account logo" class="w-full h-full object-cover" />
-                <BuildingStorefrontIcon v-else class="w-8 h-8 text-gray-400 dark:text-gray-500" />
+              <div
+                class="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-xl border border-gray-200/80 bg-gray-50/80 dark:border-gray-700/80 dark:bg-white/[0.03]"
+              >
+                <img v-if="accountLogoUrl" :src="displayAccountLogoSrc" alt="Account logo" class="h-full w-full object-cover" />
+                <BuildingStorefrontIcon v-else class="h-8 w-8 text-gray-400 dark:text-gray-500" />
               </div>
               <button
                 type="button"
-                @click="accountLogoInput?.click()"
+                class="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white shadow-sm transition hover:bg-primary-600 disabled:opacity-50"
                 :disabled="isUploadingAccountLogo"
-                class="absolute -bottom-0.5 -right-0.5 w-7 h-7 bg-primary-400 hover:bg-primary-500 text-white rounded-full flex items-center justify-center disabled:opacity-50 transition-all"
                 aria-label="Upload logo"
+                @click="accountLogoInput?.click()"
               >
-                <ArrowPathIcon v-if="isUploadingAccountLogo" class="w-3.5 h-3.5 animate-spin" />
-                <CameraIcon v-else class="w-3.5 h-3.5" />
+                <ArrowPathIcon v-if="isUploadingAccountLogo" class="h-3.5 w-3.5 animate-spin" />
+                <CameraIcon v-else class="h-3.5 w-3.5" />
               </button>
               <input ref="accountLogoInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleAccountLogoUpload" />
             </div>
-            <div class="min-w-0">
+            <div class="min-w-0 pt-0.5">
               <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account logo</p>
-              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">One logo for all stores. Shown on receipts.</p>
+              <p class="mt-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+                One logo for all branches. Shown on receipts and store cards.
+              </p>
               <button
                 v-if="accountLogoUrl"
                 type="button"
+                class="mt-2 text-[11px] font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 @click="removeAccountLogo"
-                class="mt-2 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
               >
                 Remove logo
               </button>
             </div>
           </div>
 
-          <!-- Subscription -->
-          <div class="flex flex-col justify-between gap-2">
+          <div class="space-y-3">
             <div>
               <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">Subscription</p>
-              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Upgrade your plan to unlock more features.</p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Upgrade to unlock more branches and features.</p>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-              <div class="flex-1">
-                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Upgrade to</label>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div class="min-w-0 flex-1">
+                <label :class="labelClass">Upgrade to</label>
                 <select
                   v-model="selectedUpgradePlan"
                   :disabled="!canEditSettings || isUpgradingSubscription || upgradeOptions.length === 0"
-                  :class="[ 'w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0 ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed' ]"
+                  :class="inputClass(canEditSettings && !isUpgradingSubscription && upgradeOptions.length > 0)"
                 >
                   <option value="" disabled>
                     {{ upgradeOptions.length === 0 ? 'No upgrades available' : 'Select a plan' }}
                   </option>
-                  <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">
-                    {{ p.name }}
-                  </option>
+                  <option v-for="p in upgradeOptions" :key="p.id" :value="p.id">{{ p.name }}</option>
                 </select>
               </div>
-
               <Button
                 variant="primary"
                 size="sm"
-                extra-class="!rounded-2xl"
+                :class="headerBtnClass"
                 :disabled="!canEditSettings || !selectedUpgradePlan || isUpgradingSubscription || upgradeOptions.length === 0"
                 @click="handleUpgradeSubscription"
               >
-                {{ isUpgradingSubscription ? 'Upgrading...' : 'Upgrade' }}
+                {{ isUpgradingSubscription ? 'Upgrading…' : 'Upgrade' }}
               </Button>
             </div>
-            <p class="text-[10px] text-gray-500 dark:text-gray-400">
-              You’ll be redirected to Paystack to complete payment; your plan updates after payment.
+            <p class="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400">
+              Paystack checkout · plan updates after payment completes.
             </p>
-            <details class="mt-3 group">
-              <summary class="text-[10px] font-medium text-gray-500 dark:text-gray-400 cursor-pointer list-none inline-flex items-center gap-1">
-                <span class="group-open:rotate-90 transition-transform">›</span> What’s in each plan?
+            <details class="group rounded-lg border border-gray-100/90 bg-gray-50/50 px-3 py-2 dark:border-white/[0.06] dark:bg-white/[0.02]">
+              <summary class="cursor-pointer list-none text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                <span class="inline-block transition group-open:rotate-90">›</span> Compare plans
               </summary>
-              <ul class="mt-2 space-y-2 pl-3 border-l border-gray-200 dark:border-gray-600">
+              <ul class="mt-2 space-y-2 border-l border-gray-200/80 pl-3 dark:border-gray-700/80">
                 <li v-for="(plan, id) in SUBSCRIPTION_FEATURE_SUMMARY" :key="id" class="text-[10px]">
-                  <span class="font-medium text-gray-700 dark:text-gray-300">{{ SUBSCRIPTION_PLANS.find(p => p.id === id)?.name }}</span>
-                  <ul class="mt-0.5 text-gray-500 dark:text-gray-400 list-disc list-inside">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">{{ SUBSCRIPTION_PLANS.find((p) => p.id === id)?.name }}</span>
+                  <ul class="mt-0.5 list-inside list-disc text-gray-500 dark:text-gray-400">
                     <li v-for="(line, i) in plan" :key="i">{{ line }}</li>
                   </ul>
                 </li>
@@ -123,48 +115,43 @@
             </details>
           </div>
         </div>
-      </div>
+      </DashboardSettingsPanel>
 
       <!-- Stores -->
-      <div
+      <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
-        class="relative overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card"
+        title="Branches"
+        subtitle="Create, edit, and switch between store locations."
       >
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Stores</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Create, edit, and delete your stores</p>
-          </div>
+        <template #actions>
           <Button
             v-if="!isStaff"
-            @click="openCreateStoreModal"
             size="sm"
-            extra-class="!rounded-2xl !px-2"
+            :class="headerBtnClass"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
             aria-label="Create branch"
             :disabled="!canAddStore"
+            @click="openCreateStoreModal"
           >
-            <PlusIcon class="w-4 h-4" />
+            <PlusIcon class="h-4 w-4" />
           </Button>
-        </div>
+        </template>
 
         <p
           v-if="isMicroSubscription"
-          class="mx-5 sm:mx-6 -mt-1 mb-1 text-[11px] sm:text-xs leading-snug font-extralight text-amber-500/75 dark:text-amber-400/50"
+          class="mb-3 text-[11px] leading-relaxed text-amber-700/90 dark:text-amber-400/85"
         >
-          Multiple store branches are not included on Storvv Micro (free). Upgrade to Medium or Enterprise in the
-          Account section above to add more stores.
+          Storvv Micro includes one branch. Upgrade in Account above for Medium or Enterprise.
         </p>
         <p
           v-if="hiddenStoreCount > 0"
-          class="mx-5 sm:mx-6 -mt-1 mb-3 text-[11px] sm:text-xs leading-snug text-amber-600/90 dark:text-amber-400/80"
+          class="mb-3 text-[11px] leading-relaxed text-amber-700/90 dark:text-amber-400/85"
         >
-          {{ hiddenStoreCount }}
-          {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your account but not available on your
-          current plan. Upgrade in Account above to access them again. The oldest branches stay available first.
+          {{ hiddenStoreCount }} {{ hiddenStoreCount === 1 ? 'branch is' : 'branches are' }} on your account but not on
+          your current plan. Oldest branches stay available first.
         </p>
 
-        <div class="relative px-5 sm:px-6 py-5">
+        <div class="relative">
           <div v-if="storesLoading" class="text-center py-10">
             <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary-500/20 border-t-primary-500 animate-spin" />
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Loading stores...</p>
@@ -183,121 +170,119 @@
             <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl mt-5">Create branch</Button>
           </div>
 
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+          <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <div
               v-for="store in eligibleStores"
               :key="store.id"
-              class="group relative flex min-h-[52px] w-full items-center overflow-hidden rounded-sm bg-gradient-to-b from-white to-gray-50/90 px-2.5 py-2 transition-all duration-200 active:scale-[0.99] dark:from-gray-900/35 dark:to-gray-950/30 sm:min-h-[50px] sm:px-0 sm:py-2 sm:hover:-translate-y-px"
-              :class="currentStore?.id === store.id ? 'bg-primary-50/90 dark:bg-primary-950/20' : ''"
+              :class="[storeRowClass, currentStore?.id === store.id ? storeRowActiveClass : '']"
             >
               <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-gray-100 dark:bg-gray-800/80 sm:ml-2 sm:h-8 sm:w-8"
+                class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]"
               >
-                <img v-if="store.logoUrl || accountLogoUrl" :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)" :alt="store.name" class="h-full w-full object-cover" />
+                <img
+                  v-if="store.logoUrl || accountLogoUrl"
+                  :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)"
+                  :alt="store.name"
+                  class="h-full w-full object-cover"
+                />
                 <BuildingStorefrontIcon v-else class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.75" />
               </div>
-              <div class="flex-1 min-w-0 ml-2.5 sm:ml-2 pr-1.5 sm:pr-2">
-                <p class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors" :title="store.name">
-                  {{ store.name }}
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p class="truncate text-xs font-semibold text-gray-900 dark:text-gray-100" :title="store.name">
+                    {{ store.name }}
+                  </p>
+                  <span
+                    v-if="currentStore?.id === store.id"
+                    class="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                  >
+                    Current
+                  </span>
+                  <span
+                    v-else-if="!store.isActive"
+                    class="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  >
+                    Inactive
+                  </span>
+                </div>
+                <p class="mt-0.5 truncate text-[10px] text-gray-500 dark:text-gray-400">
+                  {{ store.address || store.description || 'No address' }}
                 </p>
-                <span class="text-[10px] text-gray-500 dark:text-gray-400 block leading-tight truncate">{{ store.address || store.description || 'No address' }}</span>
               </div>
-              <div class="flex items-center gap-0.5 pr-1 sm:pr-2 shrink-0 self-center sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              <div class="flex shrink-0 items-center gap-0.5 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
                 <button
-                  @click.stop="editStore(store)"
-                  class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors touch-manipulation"
+                  type="button"
+                  class="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100"
                   aria-label="Edit store"
+                  @click.stop="editStore(store)"
                 >
-                  <PencilSquareIcon class="w-3.5 h-3.5" />
+                  <PencilSquareIcon class="h-3.5 w-3.5" />
                 </button>
                 <button
-                  @click.stop="confirmDelete(store)"
+                  type="button"
+                  class="rounded-lg p-1.5 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
                   :disabled="currentStore?.id === store.id"
-                  class="p-1.5 sm:p-1 rounded-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Delete store"
+                  @click.stop="confirmDelete(store)"
                 >
-                  <TrashIcon class="w-3.5 h-3.5" />
+                  <TrashIcon class="h-3.5 w-3.5" />
                 </button>
-              </div>
-              <div v-if="currentStore?.id === store.id" class="absolute top-1.5 right-1.5 z-10 sm:right-10">
-                <span class="px-1.5 py-0.5 text-[9px] font-medium rounded-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-nowrap">Current</span>
-              </div>
-              <div v-else-if="!store.isActive" class="absolute top-1.5 right-1.5 z-10 sm:right-10">
-                <span class="px-1 py-0.5 text-[9px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full whitespace-nowrap">Inactive</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </DashboardSettingsPanel>
 
       <!-- Store information -->
-      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Store information</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Update your business details</p>
-          </div>
-          <button v-if="canEditSettings && !isEditingStore" @click="enableEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
-          <div v-else-if="canEditSettings && isEditingStore" class="flex gap-1.5">
-            <button @click="cancelEditing('store')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button
-              @click="saveStoreInfo"
-              class="btn-primary inline-flex h-8 w-9 items-center justify-center !px-0"
-              aria-label="Done"
-            >
-              <CheckIcon class="w-4 h-4" />
+      <DashboardSettingsPanel title="Store information" subtitle="Business details for the active branch.">
+        <template #actions>
+          <button v-if="canEditSettings && !isEditingStore" type="button" :class="editLinkClass" @click="enableEditing('store')">
+            Edit
+          </button>
+          <template v-else-if="canEditSettings && isEditingStore">
+            <button type="button" :class="cancelLinkClass" @click="cancelEditing('store')">Cancel</button>
+            <button type="button" :class="editLinkClass" aria-label="Save store information" @click="saveStoreInfo">
+              Save
             </button>
-          </div>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
-        </div>
-        <div class="px-5 sm:px-6 py-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          </template>
+          <span v-else :class="viewOnlyBadgeClass">View only</span>
+        </template>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Branch name</label>
-            <input v-model="storeInfo.name" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter branch name" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Business type</label>
-            <input v-model="storeInfo.businessType" type="text" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter business type" />
+            <label :class="labelClass">Branch name</label>
+            <input v-model="storeInfo.name" type="text" :disabled="!canEditSettings || !isEditingStore" :class="inputClass(canEditSettings && isEditingStore)" placeholder="Enter branch name" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-            <input v-model="storeInfo.email" type="email" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store email" />
+            <label :class="labelClass">Business type</label>
+            <input v-model="storeInfo.businessType" type="text" :disabled="!canEditSettings || !isEditingStore" :class="inputClass(canEditSettings && isEditingStore)" placeholder="Enter business type" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-            <input v-model="storeInfo.phone" type="tel" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter phone number" />
+            <label :class="labelClass">Email</label>
+            <input v-model="storeInfo.email" type="email" :disabled="!canEditSettings || !isEditingStore" :class="inputClass(canEditSettings && isEditingStore)" placeholder="Enter store email" />
+          </div>
+          <div>
+            <label :class="labelClass">Phone</label>
+            <input v-model="storeInfo.phone" type="tel" :disabled="!canEditSettings || !isEditingStore" :class="inputClass(canEditSettings && isEditingStore)" placeholder="Enter phone number" />
           </div>
           <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address</label>
-            <textarea v-model="storeInfo.address" rows="2" :disabled="!canEditSettings || !isEditingStore" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingStore ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter store address" />
+            <label :class="labelClass">Address</label>
+            <textarea v-model="storeInfo.address" rows="2" :disabled="!canEditSettings || !isEditingStore" :class="[inputClass(canEditSettings && isEditingStore), 'resize-none']" placeholder="Enter store address" />
           </div>
         </div>
-        </div>
-      </div>
+      </DashboardSettingsPanel>
 
       <!-- Inventory settings -->
-      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Inventory settings</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Configure inventory management preferences</p>
-          </div>
-          <Button
-            v-if="canEditSettings"
-            @click="saveInventorySettings"
-            variant="primary"
-            size="sm"
-            extra-class="!rounded-2xl !px-2"
-            title="Done"
-            aria-label="Done"
-          >
-            <CheckIcon class="w-4 h-4" />
+      <DashboardSettingsPanel title="Inventory" subtitle="Stock alerts and defaults for new products." compact>
+        <template #actions>
+          <Button v-if="canEditSettings" variant="primary" size="sm" :class="headerBtnClass" aria-label="Save inventory settings" @click="saveInventorySettings">
+            Save
           </Button>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
-        </div>
-        <div class="space-y-0 px-5 py-4 sm:px-6">
-          <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
+          <span v-else :class="viewOnlyBadgeClass">View only</span>
+        </template>
+
+        <div class="space-y-0">
+          <div :class="settingRowClass">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Low stock alert threshold</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Alert when stock falls below this quantity</p>
@@ -308,10 +293,10 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
-            <div class="flex-1">
+          <div :class="settingRowClass">
+            <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Auto-reorder enabled</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Create purchase orders when stock is low</p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Create purchase orders when stock is low</p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -324,12 +309,12 @@
             </label>
           </div>
 
-          <div class="flex items-center justify-between py-3">
-            <div class="flex-1">
+          <div :class="[settingRowClass, '!border-0']">
+            <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Default category</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Default category for new products</p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Default category for new products</p>
             </div>
-            <select v-model="inventorySettings.defaultCategory" :disabled="!canEditSettings" :class="['px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']">
+            <select v-model="inventorySettings.defaultCategory" :disabled="!canEditSettings" :class="[inputClass(canEditSettings), '!w-auto min-w-[8rem]']">
               <option value="general">General</option>
               <option value="electronics">Electronics</option>
               <option value="clothing">Clothing</option>
@@ -338,30 +323,19 @@
             </select>
           </div>
         </div>
-      </div>
+      </DashboardSettingsPanel>
 
       <!-- Receipt & invoice settings -->
-      <div class="overflow-hidden rounded-sm bg-white dark:!bg-dashboard-card">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 px-5 py-4 dark:border-gray-800/60 sm:px-6">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Receipt & invoice settings</h2>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Customize receipt and invoice preferences</p>
-          </div>
-          <Button
-            v-if="canEditSettings"
-            @click="saveReceiptSettings"
-            variant="primary"
-            size="sm"
-            extra-class="!rounded-2xl !px-2"
-            title="Done"
-            aria-label="Done"
-          >
-            <CheckIcon class="w-4 h-4" />
+      <DashboardSettingsPanel title="Receipts & invoices" subtitle="Numbering, prefixes, and print behavior." compact>
+        <template #actions>
+          <Button v-if="canEditSettings" variant="primary" size="sm" :class="headerBtnClass" aria-label="Save receipt settings" @click="saveReceiptSettings">
+            Save
           </Button>
-          <div v-else class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800">View only</div>
-        </div>
-        <div class="space-y-0 px-5 py-4 sm:px-6">
-          <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
+          <span v-else :class="viewOnlyBadgeClass">View only</span>
+        </template>
+
+        <div class="space-y-0">
+          <div :class="settingRowClass">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Receipt prefix</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Prefix for receipt numbers (e.g. REC-)</p>
@@ -369,15 +343,15 @@
             <input v-model="receiptSettings.prefix" type="text" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="REC-" />
           </div>
 
-          <div class="flex items-center justify-between border-b border-gray-100/90 py-3 dark:border-gray-800/60">
-            <div class="flex-1">
+          <div :class="settingRowClass">
+            <div class="flex-1 min-w-0">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Next receipt number</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Starting number for next receipt</p>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Starting number for next receipt</p>
             </div>
-            <input v-model.number="receiptSettings.nextNumber" type="number" min="1" :disabled="!canEditSettings" :class="['w-24 px-2.5 py-1.5 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', canEditSettings ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" />
+            <input v-model.number="receiptSettings.nextNumber" type="number" min="1" :disabled="!canEditSettings" :class="[inputClass(canEditSettings), '!w-24']" />
           </div>
 
-          <div class="flex items-center justify-between py-3">
+          <div :class="[settingRowClass, '!border-0']">
             <div class="flex-1">
               <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Print receipt automatically</p>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Print receipt after sale</p>
@@ -393,7 +367,7 @@
             </label>
           </div>
         </div>
-      </div>
+      </DashboardSettingsPanel>
     </div>
   </div>
 
@@ -600,6 +574,9 @@ import {
   isBillingDelinquentMessage,
 } from '~/utils/storage-billing-errors'
 import { isCloudinaryUrl, optimizeCloudinaryLogo } from '~/utils/cloudinary'
+import { resolveApiPath } from '~/utils/api-url'
+
+type AccountLogoUploadResult = { url: string; path: string }
 
 definePageMeta({
   layout: 'dashboard'
@@ -609,7 +586,20 @@ useHead({
   title: 'Settings - Storvv',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
+const {
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+  headerBtnClass,
+  labelClass,
+  inputClass,
+  editLinkClass,
+  cancelLinkClass,
+  viewOnlyBadgeClass,
+  settingRowClass,
+  storeRowClass,
+  storeRowActiveClass,
+} = useDashboardSettingsChrome()
 
 // Store information
 const storeInfo = reactive({
@@ -765,11 +755,11 @@ async function uploadAccountLogoWithFallback(
     const body = new FormData()
     body.append('file', file)
     try {
-      return (await $fetch('/api/storage/upload-account-logo', {
+      return (await $fetch(resolveApiPath('/api/storage/upload-account-logo'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body,
-      })) as { url: string; path: string }
+      })) as AccountLogoUploadResult
     } catch (apiErr: unknown) {
       const serverHint = extractUploadFailureMessage(apiErr)
       if (isBillingDelinquentMessage(serverHint)) {
@@ -1015,6 +1005,52 @@ const getTargetUserId = async (): Promise<string | null> => {
   return userId
 }
 
+
+async function loadSettingsFromFirestore() {
+  if (!currentUser.value) {
+    isLoadingStoreInfo.value = false
+    return
+  }
+  isLoadingStoreInfo.value = true
+  try {
+    if (!userStore.userData) {
+      await userStore.fetchUserData(currentUser.value.uid)
+    }
+    if (userStore.isSuperAdmin) {
+      await storesStore.fetchStores()
+      await storesStore.initializeCurrentStore()
+    }
+    const targetUserId = await getTargetUserId()
+    if (!targetUserId) return
+    const userData = await getUserDocument(targetUserId)
+    if (userData?.storeDetails) {
+      storeInfo.name = userData.storeDetails.storeName || ''
+      storeInfo.email = userData.storeDetails.storeEmail || ''
+      storeInfo.phone = userData.storeDetails.storePhone || ''
+      storeInfo.address = userData.storeDetails.storeAddress || ''
+      storeInfo.businessType = userData.storeDetails.storeDescription || ''
+      Object.assign(backupStoreInfo, { ...storeInfo })
+      if (userData.storeDetails.settings) {
+        const settings = userData.storeDetails.settings
+        if (settings.inventory) {
+          inventorySettings.lowStockThreshold = settings.inventory.lowStockThreshold ?? 10
+          inventorySettings.autoReorder = settings.inventory.autoReorder ?? false
+          inventorySettings.defaultCategory = settings.inventory.defaultCategory || 'general'
+        }
+        if (settings.receipt) {
+          receiptSettings.prefix = settings.receipt.prefix || 'REC-'
+          receiptSettings.nextNumber = settings.receipt.nextNumber ?? 1001
+          receiptSettings.autoPrint = settings.receipt.autoPrint ?? false
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error loading store info:', error)
+  } finally {
+    isLoadingStoreInfo.value = false
+  }
+}
+
 // Load store information and settings from Firestore
 onMounted(async () => {
   // Handle Paystack callback after payment redirect
@@ -1054,57 +1090,7 @@ onMounted(async () => {
   }
 
   if (currentUser.value) {
-    try {
-      // Fetch current user data first to check permissions
-      if (!userStore.userData) {
-        await userStore.fetchUserData(currentUser.value.uid)
-      }
-
-      // Load stores if super admin
-      if (userStore.isSuperAdmin) {
-        await storesStore.fetchStores()
-        await storesStore.initializeCurrentStore()
-      }
-      
-      const targetUserId = await getTargetUserId()
-      if (!targetUserId) {
-        isLoadingStoreInfo.value = false
-        return
-      }
-      
-      const userData = await getUserDocument(targetUserId)
-      if (userData?.storeDetails) {
-        storeInfo.name = userData.storeDetails.storeName || ''
-        storeInfo.email = userData.storeDetails.storeEmail || ''
-        storeInfo.phone = userData.storeDetails.storePhone || ''
-        storeInfo.address = userData.storeDetails.storeAddress || ''
-        storeInfo.businessType = userData.storeDetails.storeDescription || ''
-        
-        // Update backup
-        Object.assign(backupStoreInfo, { ...storeInfo })
-        
-        // Load settings
-        if (userData.storeDetails.settings) {
-          const settings = userData.storeDetails.settings
-          
-          if (settings.inventory) {
-            inventorySettings.lowStockThreshold = settings.inventory.lowStockThreshold ?? 10
-            inventorySettings.autoReorder = settings.inventory.autoReorder ?? false
-            inventorySettings.defaultCategory = settings.inventory.defaultCategory || 'general'
-          }
-          
-          if (settings.receipt) {
-            receiptSettings.prefix = settings.receipt.prefix || 'REC-'
-            receiptSettings.nextNumber = settings.receipt.nextNumber ?? 1001
-            receiptSettings.autoPrint = settings.receipt.autoPrint ?? false
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error loading store info:', error)
-    } finally {
-      isLoadingStoreInfo.value = false
-    }
+    await loadSettingsFromFirestore()
   } else {
     isLoadingStoreInfo.value = false
   }

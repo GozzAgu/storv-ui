@@ -41,6 +41,37 @@ export function normalizeActivityLogText(value: string): string {
     .replace(/\s*\u2013\s*/g, ' - ')
 }
 
+export function activityActionLabel(action: ActivityAction): string {
+  if (action === 'created') return 'Created'
+  if (action === 'deleted') return 'Deleted'
+  return 'Updated'
+}
+
+export function activityEntityTypeLabel(type: ActivityEntityType): string {
+  if (type === 'items_batch') return 'Batch'
+  if (type === 'folder') return 'Folder'
+  return 'Item'
+}
+
+export function activityActionBadgeClass(action: ActivityAction): string {
+  if (action === 'created') {
+    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
+  }
+  if (action === 'deleted') {
+    return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'
+  }
+  return 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300'
+}
+
+/** Primary line for compact activity previews (dashboard, widgets). */
+export function activityLogPreviewTitle(
+  log: Pick<ActivityLog, 'action' | 'entityType' | 'entityName'>
+): string {
+  const name = normalizeActivityLogText(log.entityName).trim()
+  if (name && name !== '-') return name
+  return `${activityActionLabel(log.action)} ${activityEntityTypeLabel(log.entityType).toLowerCase()}`
+}
+
 /** Write an activity log (fire-and-forget; does not throw). */
 export async function logActivity(params: LogActivityParams): Promise<void> {
   if (import.meta.server) return

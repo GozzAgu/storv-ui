@@ -19,7 +19,8 @@
           />
         </div>
       </template>
-      <template v-if="canCreateInventoryFolders" #actions>
+      <template #actions>
+        <template v-if="canCreateInventoryFolders">
         <Button
           v-if="canShowCopyFolderTemplatesFromBranch"
           variant="outline"
@@ -40,6 +41,7 @@
         >
           New category
         </Button>
+        </template>
       </template>
       <template v-if="!inventoryStore.loading" #toolbar>
         <DashboardToolbarSearch v-model="searchQuery" placeholder="Search categories…" />

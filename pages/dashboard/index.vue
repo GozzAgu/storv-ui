@@ -1,422 +1,451 @@
 <template>
-  <div class="w-full max-w-none space-y-4 pb-6 sm:space-y-5 sm:pb-8">
-    <!-- Tutorial Component -->
+  <div class="w-full max-w-none space-y-5 pb-8 sm:space-y-6">
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
-    <!-- Hero -->
+
     <header
-      class="relative overflow-hidden rounded-xl bg-white/80 px-4 py-4 ring-1 ring-inset ring-gray-200/50 backdrop-blur-md dark:bg-dashboard-card/72 dark:ring-white/[0.07] sm:px-5 sm:py-4"
       data-tutorial="dashboard"
+      class="flex flex-col gap-3 border-b border-gray-200/80 pb-4 dark:border-gray-800/80 sm:flex-row sm:items-end sm:justify-between"
     >
-      <span
-        class="pointer-events-none absolute inset-0 bg-linear-to-br from-primary-500/[0.04] via-transparent to-transparent dark:from-primary-400/[0.06]"
-        aria-hidden="true"
-      />
-      <div class="relative">
-        <p class="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
-          Overview
-        </p>
-        <h1
-          class="mt-1 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl sm:tracking-tight"
-        >
+      <div class="min-w-0">
+        <h1 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl">
           Welcome back, {{ userName }}
         </h1>
-        <p class="mt-1.5 max-w-xl text-xs leading-relaxed text-gray-600 dark:text-gray-400 sm:text-[13px]">
-          Revenue, inventory, and activity at a glance. Clear metrics, minimal clutter.
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <span class="font-medium text-gray-800 dark:text-gray-200">{{ currentStoreLabel }}</span>
+          <span v-if="userRoleLabel" class="text-gray-400 dark:text-gray-500"> · {{ userRoleLabel }}</span>
+          <span class="text-gray-400 dark:text-gray-500"> · {{ totalOrders }} receipts</span>
         </p>
       </div>
     </header>
 
-    <!-- Loading State -->
-    <template v-if="isLoading">
-      <!-- Stats Cards Skeleton -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-3.5">
-        <div v-for="i in 4" :key="i" class="rounded-xl bg-white/80 p-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-dashboard-card/75 dark:ring-white/[0.06] sm:p-3.5">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-              <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded w-2/3 mb-1.5 animate-pulse"></div>
-              <div class="h-6 sm:h-7 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-1 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2 animate-pulse"></div>
-            </div>
-            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse shrink-0"></div>
-          </div>
-        </div>
+    <div
+      v-if="needsStoreSelection && !isLoading"
+      class="rounded-xl border border-amber-200/80 bg-amber-50/90 px-5 py-8 text-center dark:border-amber-900/50 dark:bg-amber-950/30 sm:px-8"
+    >
+      <BuildingStorefrontIcon class="mx-auto mb-3 h-8 w-8 text-amber-700 dark:text-amber-400" stroke-width="1.5" />
+      <p class="text-sm font-semibold text-amber-950 dark:text-amber-100">Select a store to load your dashboard</p>
+      <p class="mx-auto mt-1 max-w-md text-xs text-amber-900/80 dark:text-amber-200/80">
+        Choose a branch from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active store.
+      </p>
+      <NuxtLink
+        to="/dashboard/settings"
+        class="mt-4 inline-block text-xs font-medium text-amber-950 underline underline-offset-2 dark:text-amber-100"
+      >
+        Manage stores in Settings
+      </NuxtLink>
+    </div>
+
+    <template v-else-if="isLoading">
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 xl:grid-cols-4">
+        <div
+          v-for="i in 8"
+          :key="i"
+          class="h-[5.5rem] animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-[6rem]"
+        />
       </div>
-
-      <!-- Charts Row Skeleton -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4">
-        <!-- Revenue Chart Skeleton -->
-        <Card>
-          <div class="mb-2 flex items-center justify-between sm:mb-3">
-            <div>
-              <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-32 mb-2 animate-pulse"></div>
-              <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-24 animate-pulse"></div>
-            </div>
-            <div class="flex gap-0.5 rounded-full bg-gray-100/90 p-1 dark:bg-white/[0.05]">
-              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-              <div class="h-7 w-16 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10"></div>
-            </div>
-          </div>
-          <div class="h-40 animate-pulse rounded-sm bg-gray-100 dark:!bg-white/[0.06] sm:h-52 lg:h-56"></div>
-        </Card>
-      </div>
-
-      <!-- Bottom Row Skeleton -->
-      <div class="grid grid-cols-1 gap-3 lg:grid-cols-3 sm:gap-4">
-        <!-- Recent Transactions Skeleton -->
-        <Card>
-          <div class="flex items-center justify-between mb-4">
-            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-32 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
-          </div>
-          <div class="space-y-3">
-            <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2">
-              <div class="flex items-center gap-3 flex-1">
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse"></div>
-                <div class="flex-1">
-                  <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-32 mb-2 animate-pulse"></div>
-                  <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
-                </div>
-              </div>
-              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
-            </div>
-          </div>
-        </Card>
-
-        <!-- Top Selling Products Skeleton -->
-        <Card>
-          <div class="flex items-center justify-between mb-4">
-            <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-36 animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
-          </div>
-          <div class="space-y-3">
-            <div v-for="i in 3" :key="i" class="flex items-center justify-between">
-              <div class="flex items-center gap-3 flex-1">
-                <div class="w-10 h-10 rounded-sm bg-gray-200 dark:bg-white/10 animate-pulse"></div>
-                <div class="flex-1">
-                  <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-24 mb-1 animate-pulse"></div>
-                  <div class="h-2.5 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
-                </div>
-              </div>
-              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
-            </div>
-          </div>
-        </Card>
-
-        <!-- Inventory Status Skeleton -->
-        <Card>
-          <div class="h-4 sm:h-5 bg-gray-200 dark:bg-white/10 rounded-sm w-28 mb-4 animate-pulse"></div>
-          <div class="space-y-3">
-            <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-20 animate-pulse"></div>
-            <div class="h-2 bg-gray-200 dark:bg-white/10 rounded-full w-full animate-pulse"></div>
-            <div class="h-3 bg-gray-200 dark:bg-white/10 rounded-sm w-16 animate-pulse"></div>
-          </div>
-        </Card>
+      <div class="h-48 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-56" />
+      <div class="grid gap-3 lg:grid-cols-3">
+        <div v-for="i in 3" :key="i" class="h-40 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06]" />
       </div>
     </template>
 
-    <!-- Actual Content (shown when not loading) -->
     <template v-else>
-    <!-- Key metrics -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 lg:gap-3.5">
-      <StatCard
-        label="Total revenue"
-        :value="formatCurrency(totalRevenue)"
-        :subtext="revenueChangeText"
-        :subtext-class="revenueChangeClass"
-        :change="revenueChangePercent"
-        :change-positive="revenueChangePositive"
-        :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
-      />
-      <StatCard
-        label="Active customers"
-        :value="totalCustomers.toString()"
-        :subtext="`${newCustomersToday} new today`"
-        :subtext-class="newCustomersToday > 0 ? 'text-green-600 dark:text-green-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
-      />
-      <StatCard
-        label="Total items"
-        :value="totalInventoryItems.toString()"
-        :subtext="lowStockCount > 0 ? `${lowStockCount} low stock` : 'All items in stock'"
-        :subtext-class="lowStockCount > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
-      />
-      <StatCard
-        label="Orders today"
-        :value="todayReceiptsCount.toString()"
-        :subtext="`${formatCurrency(todaySales)} in sales`"
-        :subtext-class="'text-gray-500 dark:text-gray-400 text-xs'"
-      />
-    </div>
-
-    <!-- Revenue chart -->
-    <div class="grid grid-cols-1 gap-3 sm:gap-4">
-      <!-- Revenue Chart -->
-      <Card
-        padding="sm"
-        extra-class="!p-0 overflow-hidden rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/80 dark:ring-white/[0.06]"
+      <!-- Period snapshot (compact, no narrative block) -->
+      <div
+        class="grid grid-cols-2 divide-x divide-y divide-gray-200/80 overflow-hidden rounded-lg border border-gray-200/80 bg-white dark:divide-gray-800/80 dark:border-gray-800/80 dark:bg-dashboard-card sm:grid-cols-4 sm:divide-y-0"
       >
-        <div
-          class="flex flex-col gap-2 border-b border-gray-100/70 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-4 sm:py-3 dark:border-white/[0.06]"
-        >
-          <div>
-            <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
-              Revenue
-            </h2>
-            <p class="mt-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400 sm:text-xs">{{ chartSubtitle }}</p>
-          </div>
-          <div
-            class="inline-flex w-fit shrink-0 rounded-full bg-gray-100/85 p-0.5 dark:bg-white/[0.05]"
-            role="group"
-            aria-label="Chart period"
-          >
-            <button
-              type="button"
-              @click="chartView = 'daily'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'daily' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Daily
-            </button>
-            <button
-              type="button"
-              @click="chartView = 'weekly'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'weekly' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Weekly
-            </button>
-            <button
-              type="button"
-              @click="chartView = 'monthly'"
-              :class="[ 'rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 sm:px-3.5 sm:py-1.5 sm:text-xs', chartView === 'monthly' ? 'bg-white text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200', ]"
-            >
-              Monthly
-            </button>
-          </div>
+        <div class="px-3 py-2.5 sm:px-4 sm:py-3">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Today</p>
+          <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+            {{ todayReceiptsCount }} orders
+          </p>
+          <p class="text-[11px] tabular-nums text-gray-600 dark:text-gray-400">{{ formatCurrency(todaySales) }}</p>
         </div>
-        <div class="relative h-[11rem] px-2 pb-3 pt-0.5 sm:h-[13.5rem] sm:px-3 lg:h-[15rem]">
-          <div v-if="chartData.length === 0" class="flex flex-col items-center justify-center py-6 text-center">
-            <div
-              class="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100/90 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.06] dark:ring-white/[0.08]"
-            >
-              <ChartBarIcon class="h-6 w-6 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-            </div>
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Start making sales to see your revenue chart</p>
-          </div>
-          <ClientOnly>
-            <apexchart
-              v-if="chartData.length > 0"
-              type="area"
-              :height="chartHeight"
-              :options="chartOptions"
-              :series="chartSeries"
-            />
-            <template #fallback>
-              <div class="flex items-center justify-center h-full">
-                <div class="animate-pulse text-gray-400">Loading chart...</div>
-              </div>
-            </template>
-          </ClientOnly>
+        <div class="px-3 py-2.5 sm:px-4 sm:py-3">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">This month</p>
+          <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+            {{ formatCurrency(monthSales) }}
+          </p>
+          <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ completedReceiptsCount }} completed</p>
+        </div>
+        <div class="px-3 py-2.5 sm:px-4 sm:py-3">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Last 7 days</p>
+          <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+            {{ salesLast7Days }} sales
+          </p>
+          <p class="text-[11px] tabular-nums text-gray-600 dark:text-gray-400">{{ formatCurrency(revenueLast7Days) }}</p>
+        </div>
+        <div class="px-3 py-2.5 sm:px-4 sm:py-3">
+          <p class="text-[11px] text-gray-500 dark:text-gray-400">Inventory</p>
+          <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
+            {{ sellThroughRate }}% sold
+          </p>
+          <p class="text-[11px] text-gray-600 dark:text-gray-400">
+            {{ outstandingCount > 0 ? `${outstandingCount} balance open` : 'No open balances' }}
+          </p>
+        </div>
       </div>
-      </Card>
-    </div>
 
-    <!-- Bento: secondary panels -->
-    <div
-      class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-6 xl:grid-rows-[auto_auto]"
-    >
-      <!-- Orders & departments -->
-      <Card
-        padding="sm"
-        extra-class="!p-3 xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
-      >
-        <p
-          class="mb-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-        >
-          Orders & departments
-        </p>
-        <div class="space-y-2">
-          <div class="flex items-baseline justify-between gap-3">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Completed</span>
-            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ completedReceiptsCount }}</span>
+      <!-- Inventory health (top) -->
+      <section :class="panelClass">
+        <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+              Inventory health
+            </p>
+            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+              {{ inStockCount }} available units · {{ outOfStockCount }} sold · {{ lowStockItems.length }} low-stock lines
+            </p>
           </div>
-          <div class="flex items-baseline justify-between gap-3">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Pending</span>
-            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ pendingReceiptsCount }}</span>
-          </div>
-          <div class="flex items-baseline justify-between gap-3">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Refunded</span>
-            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ refundedReceiptsCount }}</span>
-          </div>
-          <div class="flex items-baseline justify-between gap-3 border-t border-gray-100/90 pt-2 dark:border-white/[0.06]">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Departments</span>
-            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalDepartments }}</span>
-          </div>
-        </div>
-      </Card>
-
-      <!-- Recent transactions -->
-      <Card
-        padding="sm"
-        extra-class="!p-3 flex min-h-[124px] flex-col xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
-      >
-        <div class="mb-2 flex items-center justify-between">
-          <p
-            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-          >
-            Recent
-          </p>
-          <NuxtLink
-            to="/dashboard/receipts"
-            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-          >
-            View all
-          </NuxtLink>
-        </div>
-        <div class="min-h-0 flex-1 space-y-1 overflow-y-auto">
-          <template v-if="recentTransactions.length === 0">
-            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">No transactions</p>
-          </template>
-          <template v-else>
-            <div
-              v-for="tx in recentTransactions"
-              :key="tx.id"
-              class="flex items-start justify-between gap-3 rounded-xl px-1 py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-white/[0.04]"
-            >
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ tx.description }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-500">{{ tx.time }}</p>
-              </div>
-              <p :class="['shrink-0 text-xs font-semibold tabular-nums', tx.amountClass]">{{ tx.amount }}</p>
-            </div>
-          </template>
-        </div>
-      </Card>
-
-      <!-- Top products -->
-      <Card
-        padding="sm"
-        extra-class="!p-3 flex min-h-[124px] flex-col xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
-      >
-        <div class="mb-2 flex items-center justify-between">
-          <p
-            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-          >
-            Top products
-          </p>
           <NuxtLink
             to="/dashboard/inventory"
-            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+            class="text-xs font-medium text-primary-700 underline underline-offset-2 dark:text-primary-400"
           >
-            View all
+            Open inventory
           </NuxtLink>
         </div>
-        <div class="min-h-0 flex-1 divide-y divide-gray-100/90 overflow-y-auto dark:divide-white/[0.06]">
-          <template v-if="topSellingItems.length === 0">
-            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">No sales yet</p>
-          </template>
-          <template v-else>
-            <div
-              v-for="(item, i) in topSellingItems.slice(0, 5)"
-              :key="item.id"
-              class="flex items-start justify-between gap-3 py-1.5 first:pt-0 last:pb-0"
-            >
-              <div class="flex min-w-0 flex-1 items-center gap-2.5">
-                <span
-                  class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-[10px] font-semibold text-gray-600 dark:bg-white/[0.06] dark:text-gray-400"
-                  >{{ i + 1 }}</span
-                >
-                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-              </div>
-              <div class="shrink-0 text-right">
-                <p class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-                  {{ formatCurrency(item.sales > 0 ? item.revenue / item.sales : 0) }}
-                </p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-500">avg/unit, {{ item.sales }} sold</p>
-              </div>
-            </div>
-          </template>
-        </div>
-      </Card>
-
-      <!-- Low stock -->
-      <Card
-        padding="sm"
-        extra-class="!p-3 flex min-h-[156px] flex-col sm:col-span-1 xl:col-span-2 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
-      >
-        <div class="mb-2 flex items-center justify-between">
-          <p
-            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-          >
-            Low stock
-          </p>
-          <NuxtLink
-            to="/dashboard/inventory"
-            class="text-xs font-medium text-primary-600 transition hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-          >
-            View all
-          </NuxtLink>
-        </div>
-        <div class="min-h-0 flex-1 space-y-1 overflow-y-auto">
-          <template v-if="lowStockItems.length === 0">
-            <p class="py-3 text-xs text-gray-500 dark:text-gray-400">All stocked</p>
-          </template>
-          <template v-else>
-            <div
-              v-for="item in lowStockItems.slice(0, 5)"
-              :key="item.id"
-              class="flex items-baseline justify-between gap-2 rounded-xl px-1 py-2 transition-colors hover:bg-amber-500/[0.06] dark:hover:bg-amber-500/10"
-            >
-              <p class="min-w-0 truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
-              <span class="shrink-0 text-xs font-semibold tabular-nums text-amber-700 dark:text-amber-400">
-                {{ item.quantity }}<span v-if="!item.isSerialNumber">/{{ item.threshold }}</span>
-              </span>
-            </div>
-          </template>
-        </div>
-      </Card>
-
-      <!-- Inventory status -->
-      <Card
-        padding="sm"
-        extra-class="!p-3 sm:col-span-2 xl:col-span-4 rounded-xl bg-white/85 ring-1 ring-inset ring-gray-200/45 backdrop-blur-md dark:bg-dashboard-card/78 dark:ring-white/[0.06] sm:!p-3.5"
-      >
-        <p
-          class="mb-2.5 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-        >
-          Inventory
-        </p>
         <div class="flex h-2 gap-px overflow-hidden rounded-full bg-gray-200/90 dark:bg-white/[0.08]">
-          <div class="bg-emerald-500 transition-all" :style="`width: ${inStockPercentage}%`" title="In stock" />
-          <div class="bg-amber-500 transition-all" :style="`width: ${lowStockPercentage}%`" title="Low stock" />
-          <div class="bg-red-500 transition-all" :style="`width: ${outOfStockPercentage}%`" title="Out of stock" />
+          <div class="bg-emerald-500 transition-all" :style="{ width: `${inStockPercentage}%` }" title="Available" />
+          <div class="bg-amber-500 transition-all" :style="{ width: `${lowStockPercentage}%` }" title="Low stock" />
+          <div class="bg-slate-400 transition-all dark:bg-slate-500" :style="{ width: `${soldPercentage}%` }" title="Sold" />
         </div>
-        <div class="mt-2 flex justify-between text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
-          <span>{{ inStockCount }} in stock</span>
-          <span>{{ lowStockCount }} low</span>
-          <span>{{ outOfStockCount }} out</span>
+        <div class="mt-2 flex flex-wrap justify-between gap-2 text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]">
+          <span>{{ inStockPercentage }}% available</span>
+          <span>{{ soldPercentage }}% sold through</span>
+          <span>{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
         </div>
-        <div class="mt-2 flex items-baseline justify-between border-t border-gray-100/90 pt-2 dark:border-white/[0.06]">
-          <span class="text-xs text-gray-600 dark:text-gray-400">Total SKUs</span>
-          <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalInventoryItems }}</span>
-        </div>
-      </Card>
-    </div>
+      </section>
 
-      <div class="flex justify-center pt-4 pb-1 sm:pt-6">
-        <img
-          :src="dashboardFooterLogoSrc"
-          alt="Storvv"
-          :class="[
-            'object-center opacity-90 dark:opacity-95',
-            dashboardFooterIsLgUp
-              ? 'h-9 w-auto max-h-9 max-w-[15rem] origin-center object-contain scale-110 sm:h-10 sm:max-h-10 sm:max-w-[17rem] sm:scale-[1.15] lg:scale-125'
-              : 'h-11 w-11 max-h-11 max-w-11 origin-center object-contain scale-125 sm:h-12 sm:w-12 sm:max-h-12 sm:max-w-12 sm:scale-[1.28]',
-          ]"
-          width="180"
-          height="48"
-          loading="lazy"
-          decoding="async"
+      <!-- Attention (inline, not stacked alert cards) -->
+      <ul v-if="attentionItems.length > 0" class="flex flex-col gap-2">
+        <li
+          v-for="alert in attentionItemsTop"
+          :key="alert.id"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs"
+          :class="alertRowClass(alert.level)"
+        >
+          <span class="text-gray-800 dark:text-gray-200">
+            <span class="font-medium text-gray-900 dark:text-gray-50">{{ alert.title }}.</span>
+            {{ alert.description }}
+          </span>
+          <NuxtLink
+            :to="alert.href"
+            class="shrink-0 font-medium text-gray-900 underline underline-offset-2 dark:text-gray-100"
+          >
+            {{ alert.cta }}
+          </NuxtLink>
+        </li>
+      </ul>
+
+      <!-- KPI grid -->
+      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+        <StatCard
+          label="Total revenue"
+          :value="formatCurrency(totalRevenue)"
+          :subtext="revenueChangeText"
+          :change="revenueChangePercent"
+          :change-positive="revenueChangePositive"
+          :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
         />
+        <StatCard
+          label="Avg. order value"
+          :value="formatCurrency(averageOrderValue)"
+          :subtext="`${completedReceiptsCount} completed orders`"
+        />
+        <StatCard
+          label="Customers"
+          :value="totalCustomers.toString()"
+          :subtext="`${newCustomersToday} active today`"
+          :subtext-class="newCustomersToday > 0 ? 'text-emerald-600 dark:text-emerald-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
+        />
+        <StatCard
+          label="Orders today"
+          :value="todayReceiptsCount.toString()"
+          :subtext="`${formatCurrency(todaySales)} revenue`"
+        />
+        <StatCard
+          label="Inventory units"
+          :value="totalInventoryItems.toString()"
+          :subtext="`${inStockCount} available · ${outOfStockCount} sold`"
+        />
+        <StatCard
+          label="Low stock signals"
+          :value="lowStockItems.length.toString()"
+          :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
+          :subtext-class="lowStockItems.length > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
+        />
+        <StatCard
+          label="Outstanding"
+          :value="formatCurrency(outstandingBalanceTotal)"
+          :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
+          :subtext-class="outstandingCount > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
+        />
+        <StatCard
+          label="Book value"
+          :value="formatCurrency(inventoryTotalValue)"
+          :subtext="`${totalFolders} folders · ${serialFolderCount} serial`"
+        />
+      </div>
+
+      <!-- Chart + payment mix -->
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
+        <Card
+          padding="sm"
+          extra-class="!p-0 overflow-hidden lg:col-span-8 rounded-xl border border-gray-200/70 bg-white dark:border-white/[0.06] dark:!bg-dashboard-card"
+        >
+          <div
+            class="flex flex-col gap-2 border-b border-gray-100/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.06]"
+          >
+            <div>
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Revenue performance
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ chartSubtitle }}</p>
+            </div>
+            <div
+              class="inline-flex w-fit shrink-0 rounded-lg border border-gray-200/90 bg-gray-50/50 p-0.5 dark:border-gray-700/80 dark:bg-white/[0.03]"
+              role="group"
+              aria-label="Chart period"
+            >
+              <button
+                v-for="opt in chartPeriodOptions"
+                :key="opt.value"
+                type="button"
+                class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+                :class="
+                  chartView === opt.value
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
+                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                "
+                @click="chartView = opt.value"
+              >
+                {{ opt.label }}
+              </button>
+            </div>
+          </div>
+          <div class="relative h-[11rem] px-2 pb-3 pt-1 sm:h-[14rem] sm:px-3 lg:h-[15rem]">
+            <div v-if="chartData.length === 0" class="flex h-full flex-col items-center justify-center text-center">
+              <ChartBarIcon class="mb-2 h-8 w-8 text-gray-400" stroke-width="1.5" />
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No revenue data yet</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Completed receipts will populate this chart</p>
+            </div>
+            <ClientOnly v-else>
+              <apexchart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
+              <template #fallback>
+                <div class="flex h-full items-center justify-center text-xs text-gray-400">Loading chart…</div>
+              </template>
+            </ClientOnly>
+          </div>
+        </Card>
+
+        <div :class="[panelClass, 'lg:col-span-4 flex flex-col']">
+          <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+            Payment methods
+          </p>
+          <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Share of completed receipts by tender type</p>
+          <div v-if="paymentMethodBreakdown.length === 0" class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            No completed sales to analyze yet.
+          </div>
+          <ul v-else class="mt-4 space-y-3">
+            <li v-for="slice in paymentMethodsTop" :key="slice.method">
+              <div class="mb-1 flex items-baseline justify-between gap-2 text-xs">
+                <span class="font-medium text-gray-800 dark:text-gray-200">{{ slice.label }}</span>
+                <span class="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
+                  {{ slice.share }}% · {{ formatCurrency(slice.revenue) }}
+                </span>
+              </div>
+              <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
+                <div
+                  class="h-full rounded-full bg-primary-500/70 transition-all dark:bg-primary-400/60"
+                  :style="{ width: `${Math.max(slice.share, 2)}%` }"
+                />
+              </div>
+              <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">{{ slice.count }} receipt{{ slice.count === 1 ? '' : 's' }}</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Sales + operations detail -->
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
+        <section :class="panelClass">
+          <p class="mb-3 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+            Sales breakdown
+          </p>
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+            <div v-for="row in salesMetricsTop" :key="row.label" class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]">
+              <dt class="text-xs text-gray-600 dark:text-gray-400">{{ row.label }}</dt>
+              <dd class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ row.value }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section :class="panelClass">
+          <p class="mb-3 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+            Store operations
+          </p>
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5">
+            <div v-for="row in operationsMetricsTop" :key="row.label" class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]">
+              <dt class="text-xs text-gray-600 dark:text-gray-400">{{ row.label }}</dt>
+              <dd class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ row.value }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <!-- Recent + top products -->
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
+        <section :class="panelClass">
+          <div class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent receipts</h2>
+            <NuxtLink
+              to="/dashboard/receipts"
+              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              View all
+            </NuxtLink>
+          </div>
+          <div v-if="recentReceipts.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
+            No receipts yet.
+          </div>
+          <ul v-else class="mt-1 space-y-0">
+            <li
+              v-for="tx in recentReceiptsTop"
+              :key="tx.id"
+              class="flex items-center justify-between gap-3 border-b border-gray-100/90 py-2.5 last:border-0 dark:border-gray-800/70"
+            >
+              <div class="min-w-0">
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ tx.customerName }}</p>
+                <p class="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0 text-[11px] text-gray-500 dark:text-gray-500">
+                  <span class="font-medium text-gray-600 dark:text-gray-400">#{{ tx.receiptNumber }}</span>
+                  <span class="text-gray-400 dark:text-gray-600" aria-hidden="true">·</span>
+                  <span>{{ tx.paymentMethod }}</span>
+                  <span class="hidden text-gray-400 sm:inline dark:text-gray-600" aria-hidden="true">·</span>
+                  <span class="hidden sm:inline">{{ tx.statusLabel }}</span>
+                  <span class="text-gray-400 dark:text-gray-600" aria-hidden="true">·</span>
+                  <span class="shrink-0">{{ tx.time }}</span>
+                </p>
+              </div>
+              <p class="shrink-0 text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ tx.amount }}</p>
+            </li>
+          </ul>
+        </section>
+
+        <section :class="panelClass">
+          <div class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Top products</h2>
+            <NuxtLink
+              to="/dashboard/analytics"
+              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              Analytics
+            </NuxtLink>
+          </div>
+          <div v-if="topSellingItems.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
+            No product sales yet.
+          </div>
+          <ul v-else class="mt-1 space-y-0">
+            <li
+              v-for="item in topProductsTop"
+              :key="item.id"
+              class="flex items-center justify-between gap-3 border-b border-gray-100/90 py-2.5 last:border-0 dark:border-gray-800/70"
+            >
+              <div class="min-w-0">
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">{{ item.name }}</p>
+                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-500">{{ item.sales }} sold</p>
+              </div>
+              <p class="shrink-0 text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                {{ formatCurrency(item.revenue) }}
+              </p>
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- Low stock + activity + quick links -->
+      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:items-start">
+        <section :class="[panelClass, 'lg:col-span-1']">
+          <div class="mb-2.5 flex items-center justify-between border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Low stock</h2>
+            <NuxtLink
+              to="/dashboard/inventory"
+              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              Inventory
+            </NuxtLink>
+          </div>
+          <div v-if="lowStockItems.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
+            All lines above threshold.
+          </div>
+          <ul v-else class="mt-1 space-y-0">
+            <li
+              v-for="item in lowStockItemsTop"
+              :key="item.id"
+              class="flex items-baseline justify-between gap-2 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/70"
+            >
+              <p class="min-w-0 truncate text-xs text-gray-800 dark:text-gray-200">{{ item.name }}</p>
+              <span class="shrink-0 text-xs font-medium tabular-nums text-amber-800 dark:text-amber-300">
+                {{ item.quantity }}<span v-if="!item.isSerialNumber"> / {{ item.threshold }}</span>
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <section v-if="canViewActivity" :class="[panelClass, 'lg:col-span-1']">
+          <div class="mb-2.5 flex items-center justify-between border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent activity</h2>
+            <NuxtLink
+              to="/dashboard/activity"
+              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              All logs
+            </NuxtLink>
+          </div>
+          <div v-if="recentActivityLogs.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
+            No activity logged yet.
+          </div>
+          <ul v-else class="mt-1 space-y-0">
+            <li
+              v-for="log in recentActivityLogsTop"
+              :key="log.id"
+              class="flex gap-2 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/70"
+            >
+              <span
+                class="mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium leading-none"
+                :class="activityActionBadgeClass(log.action)"
+              >
+                {{ activityActionLabel(log.action) }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
+                  {{ activityLogPreviewTitle(log) }}
+                </p>
+                <p class="mt-0.5 truncate text-[11px] text-gray-500 dark:text-gray-500">
+                  {{ activityEntityTypeLabel(log.entityType) }}
+                  <span class="hidden sm:inline"> · {{ log.userDisplayName }}</span>
+                  · {{ formatActivityTime(log.createdAt) }}
+                </p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <section :class="[panelClass, canViewActivity ? 'lg:col-span-1' : 'lg:col-span-2']">
+          <div class="mb-2.5 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Shortcuts</h2>
+          </div>
+          <ul class="mt-1 space-y-0">
+            <li v-for="link in quickLinksTop" :key="link.href" class="border-b border-gray-100/90 last:border-0 dark:border-gray-800/70">
+              <NuxtLink
+                :to="link.href"
+                class="flex items-center justify-between gap-2 py-2.5 text-xs transition-colors hover:text-gray-900 dark:hover:text-gray-100"
+              >
+                <span class="font-medium text-gray-800 dark:text-gray-200">{{ link.label }}</span>
+                <span class="text-gray-400 dark:text-gray-500">→</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </section>
       </div>
     </template>
   </div>
@@ -425,19 +454,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import {
-  CubeIcon,
-  UsersIcon,
-  ShoppingCartIcon,
-  ArrowPathIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  XCircleIcon,
-  ReceiptPercentIcon,
-  HomeIcon,
-  BuildingOfficeIcon,
-  Cog6ToothIcon,
-  ExclamationTriangleIcon,
+  BuildingStorefrontIcon,
   ChartBarIcon,
+  CubeIcon,
+  Cog6ToothIcon,
+  HomeIcon,
+  ReceiptPercentIcon,
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -447,48 +469,69 @@ import { useInventoryStore } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
+import { useStoresStore } from '~/stores/stores'
+import { useStaffStore } from '~/stores/staff'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
-import { useMinWidthQuery } from '~/composables/useMinWidthQuery'
-import type { Receipt } from '~/stores/receipts'
+import { useDashboardInsights, type DashboardAlertLevel } from '~/composables/useDashboardInsights'
+import {
+  activityActionBadgeClass,
+  activityActionLabel,
+  activityEntityTypeLabel,
+  activityLogPreviewTitle,
+  fetchActivityLogs,
+  type ActivityLog,
+} from '~/composables/useActivityLog'
+import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import type { InventoryItem } from '~/stores/inventory'
 
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: 'auth',
 })
+
+const panelClass =
+  'rounded-xl border border-gray-200/70 bg-white px-4 py-3.5 dark:border-white/[0.06] dark:!bg-dashboard-card sm:px-5 sm:py-4'
+
+/** Max rows shown in dashboard list cards (no in-card scrolling). */
+const DASHBOARD_LIST_TOP = 5
 
 const tutorialSteps = [
   {
-    title: 'Welcome to Your Dashboard! 👋',
-    description: 'This is your command center. Here you can see your total revenue, active customers, inventory status, and recent transactions all in one place. The charts show your sales trends over time, helping you understand your business performance at a glance.',
+    title: 'Welcome to Your Dashboard',
+    description:
+      'Your command center summarizes revenue, inventory health, outstanding balances, and recent receipts for the active store.',
     icon: HomeIcon,
-    targetSelector: '[data-tutorial="dashboard"]'
+    targetSelector: '[data-tutorial="dashboard"]',
   },
   {
     title: 'Manage Your Inventory',
-    description: 'Click "Inventory" in the sidebar to organize your products. Create folders (like "Electronics" or "Clothing") to categorize items. Add products to each folder with details like name, price, and quantity. You can track which items are in stock, low stock, or sold out.',
+    description:
+      'Inventory folders track serial or quantity-based stock. Low-stock signals and sell-through rates appear here automatically.',
     icon: CubeIcon,
-    targetSelector: '[data-tutorial="inventory"]'
+    targetSelector: '[data-tutorial="inventory"]',
   },
   {
     title: 'Create and Track Receipts',
-    description: 'Click "Receipts" to record sales. When a customer makes a purchase, create a new receipt, add the items sold, and the system automatically tracks revenue and updates inventory. You can also view all past receipts, handle returns, and send receipts via email.',
+    description:
+      'Receipts drive revenue charts, customer counts, and payment-method breakdowns. Balance-due sales surface under Needs attention.',
     icon: ReceiptPercentIcon,
-    targetSelector: '[data-tutorial="receipts"]'
+    targetSelector: '[data-tutorial="receipts"]',
   },
   {
     title: 'View Analytics & Reports',
-    description: 'Click "Analytics" to see detailed insights about your business. View sales trends, top-selling products, customer behavior, and inventory turnover. Export reports to PDF or Excel for your records or accounting needs.',
+    description:
+      'Open Analytics for deeper period comparisons, exports, and product-level charts beyond this overview.',
     icon: ChartBarIcon,
-    targetSelector: '[data-tutorial="analytics"]'
+    targetSelector: '[data-tutorial="analytics"]',
   },
   {
     title: 'Configure Your Settings',
-    description: 'Click "Settings" to customize your store preferences, manage departments, add staff members, and configure how your store operates. You can also update your profile and account information here.',
+    description:
+      'Settings is where you manage stores, departments, staff roles, and inventory thresholds that shape dashboard alerts.',
     icon: Cog6ToothIcon,
-    targetSelector: '[data-tutorial="settings"]'
-  }
+    targetSelector: '[data-tutorial="settings"]',
+  },
 ]
 
 const receiptsStore = useReceiptsStore()
@@ -496,466 +539,115 @@ const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const authStore = useAuthStore()
 const userStore = useUserStore()
+const storesStore = useStoresStore()
+const staffStore = useStaffStore()
+const themeStore = useThemeStore()
 
-const { formatCurrency: formatCurrencyFromPrefs, preferences } = usePreferences()
+const { preferences } = usePreferences()
+const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
-const formatCurrency = formatCurrencyFromPrefs
-/** Full per-folder item lists for dashboard KPIs only (not kept in Pinia). */
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
+
+const insights = useDashboardInsights(dashboardFolderItems)
+const {
+  formatCurrency,
+  totalRevenue,
+  todaySales,
+  monthSales,
+  totalOrders,
+  averageOrderValue,
+  todayReceiptsCount,
+  completedReceiptsCount,
+  outstandingCount,
+  outstandingBalanceTotal,
+  totalCustomers,
+  newCustomersToday,
+  totalInventoryItems,
+  totalFolders,
+  inventoryTotalValue,
+  serialFolderCount,
+  inStockCount,
+  outOfStockCount,
+  sellThroughRate,
+  inStockPercentage,
+  soldPercentage,
+  lowStockPercentage,
+  dailyRevenueData,
+  weeklyRevenueData,
+  monthlyRevenueData,
+  revenueChangePercent,
+  revenueChangePositive,
+  statCardRevenueSparkline,
+  revenueChangeText,
+  topSellingItems,
+  lowStockItems,
+  paymentMethodBreakdown,
+  recentReceipts,
+  attentionItems,
+  quickLinks,
+  operationsMetrics,
+  salesMetrics,
+  salesLast7Days,
+  revenueLast7Days,
+} = insights
+
+function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
+  return items.slice(0, limit)
+}
+
+const attentionItemsTop = computed(() => topN(attentionItems.value))
+const paymentMethodsTop = computed(() => topN(paymentMethodBreakdown.value))
+const salesMetricsTop = computed(() => topN(salesMetrics.value))
+const operationsMetricsTop = computed(() => topN(operationsMetrics.value))
+const recentReceiptsTop = computed(() => topN(recentReceipts.value))
+const topProductsTop = computed(() => topN(topSellingItems.value))
+const lowStockItemsTop = computed(() => topN(lowStockItems.value))
+const recentActivityLogsTop = computed(() => topN(recentActivityLogs.value))
+const quickLinksTop = computed(() => topN(quickLinks.value))
 
 const isLoading = ref(true)
 const chartView = ref<'daily' | 'weekly' | 'monthly'>('monthly')
+const recentActivityLogs = ref<ActivityLog[]>([])
 
-// User name for welcome message
+const chartPeriodOptions = [
+  { value: 'daily' as const, label: 'Daily' },
+  { value: 'weekly' as const, label: 'Weekly' },
+  { value: 'monthly' as const, label: 'Monthly' },
+]
+
+const isManager = computed(
+  () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
+)
+const canViewActivity = computed(
+  () => (userStore.isSuperAdmin || isManager.value) && canUseSubscriptionFeature('activity_logs')
+)
+
+const needsStoreSelection = computed(() => !storesStore.currentStoreId)
+
+const currentStoreLabel = computed(() => {
+  const store = storesStore.currentStore
+  if (!store) return 'No store selected'
+  return store.name || 'Active store'
+})
+
+const userRoleLabel = computed(() => {
+  const role = userStore.userData?.role
+  if (role === 'superAdmin') return 'Super admin'
+  if (role === 'admin') return 'Admin'
+  if (role === 'staff') return isManager.value ? 'Manager' : 'Staff'
+  if (role === 'user') return 'User'
+  return ''
+})
+
 const userName = computed(() => {
-  // During SSR, return a safe default to prevent hydration mismatch
-  if (import.meta.server) {
-    return 'User'
-  }
-  
-  if (userStore.userData?.name) {
-    return userStore.userData.name.split(' ')[0] || 'User'
-  }
-  if (authStore.currentUser?.displayName) {
-    return authStore.currentUser.displayName.split(' ')[0] || 'User'
-  }
-  if (authStore.currentUser?.email) {
-    return authStore.currentUser.email.split('@')[0]
-  }
+  if (import.meta.server) return 'User'
+  if (userStore.userData?.name) return userStore.userData.name.split(' ')[0] || 'User'
+  if (authStore.currentUser?.displayName) return authStore.currentUser.displayName.split(' ')[0] || 'User'
+  if (authStore.currentUser?.email) return authStore.currentUser.email.split('@')[0]
   return 'User'
 })
 
-// Revenue metrics
-const totalRevenue = computed(() => receiptsStore.totalSales)
-const todaySales = computed(() => receiptsStore.todaySales)
-const monthSales = computed(() => receiptsStore.monthSales)
-const revenueChangeText = computed(() => {
-  if (totalRevenue.value === 0) return 'No sales yet'
-  return `${formatCurrency(monthSales.value)} this month`
-})
-const revenueChangeClass = computed(() => {
-  return totalRevenue.value > 0 ? 'text-green-600 dark:text-green-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'
-})
-// Percentage change: last 15 days vs previous 15 days (for Shopify-style trend)
-const revenueChangePercent = computed(() => {
-  const daily = dailyRevenueData.value
-  if (!daily || daily.length < 30) return null
-  const recent = daily.slice(-15).reduce((s, d) => s + d.revenue, 0)
-  const previous = daily.slice(-30, -15).reduce((s, d) => s + d.revenue, 0)
-  if (previous === 0) return recent > 0 ? '+100%' : null
-  const pct = Math.round(((recent - previous) / previous) * 100)
-  if (pct === 0) return null
-  return pct > 0 ? `+${pct}%` : `${pct}%`
-})
-const revenueChangePositive = computed(() => {
-  const p = revenueChangePercent.value
-  if (!p || p === null) return null
-  return p.startsWith('+')
-})
-// Sparkline data for revenue card (last 14 days)
-const statCardRevenueSparkline = computed(() => {
-  const daily = dailyRevenueData.value
-  if (!daily || daily.length < 2) return []
-  return daily.slice(-14).map(d => d.revenue)
-})
-
-// Customer metrics
-const uniqueCustomers = computed(() => {
-  const customersMap = new Map<string, { name: string; email: string; lastOrder: Date }>()
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.customerEmail) {
-      const existing = customersMap.get(receipt.customerEmail)
-      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-      if (!existing || receiptDate > existing.lastOrder) {
-        customersMap.set(receipt.customerEmail, {
-          name: receipt.customerName,
-          email: receipt.customerEmail,
-          lastOrder: receiptDate
-        })
-      }
-    }
-  })
-  return Array.from(customersMap.values())
-})
-const totalCustomers = computed(() => uniqueCustomers.value.length)
-const newCustomersToday = computed(() => {
-  const today = new Date().toDateString()
-  return uniqueCustomers.value.filter(c => c.lastOrder.toDateString() === today).length
-})
-
-// Inventory metrics
-const totalInventoryItems = computed(() => inventoryStore.totalItems)
-const lowStockCount = computed(() => inventoryStore.lowStockFolders.reduce((sum, folder) => sum + folder.lowStockCount, 0))
-
-// Inventory status breakdown
-// In stock = items without dateOut (available)
-const inStockCount = computed(() => {
-  let count = 0
-  inventoryStore.folders.forEach(folder => {
-    const items = dashboardFolderItems.value[folder.id] || []
-    items.forEach(item => {
-      // Item is in stock if it doesn't have dateOut set (not sold)
-      // Check for null, undefined, and empty string to be safe
-      const dateOutValue = item.dateOut
-      const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-      if (!hasDateOut) {
-        count++
-      }
-    })
-  })
-  return count
-})
-
-// Low stock doesn't apply anymore since we track individual items, not quantities
-// Set to 0 or keep for backward compatibility with UI
-const lowStockItemsCount = computed(() => {
-  return 0 // No low stock concept with individual item tracking
-})
-
-// Out of stock = items with dateOut set (sold)
-const outOfStockCount = computed(() => {
-  let count = 0
-  inventoryStore.folders.forEach(folder => {
-    const items = dashboardFolderItems.value[folder.id] || []
-    items.forEach(item => {
-      // Item is out of stock if it has dateOut set (sold)
-      // Check for null, undefined, and empty string to be safe
-      const dateOutValue = item.dateOut
-      const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-      if (hasDateOut) {
-        count++
-      }
-    })
-  })
-  return count
-})
-
-const inStockPercentage = computed(() => {
-  if (totalInventoryItems.value === 0) return 0
-  return Math.round((inStockCount.value / totalInventoryItems.value) * 100)
-})
-const lowStockPercentage = computed(() => {
-  if (totalInventoryItems.value === 0) return 0
-  return Math.round((lowStockItemsCount.value / totalInventoryItems.value) * 100)
-})
-const outOfStockPercentage = computed(() => {
-  if (totalInventoryItems.value === 0) return 0
-  return Math.round((outOfStockCount.value / totalInventoryItems.value) * 100)
-})
-
-// Receipt metrics
-const todayReceiptsCount = computed(() => {
-  const today = new Date().toDateString()
-  return receiptsStore.receipts.filter(r => {
-    const receiptDate = r.date?.toDate ? r.date.toDate() : new Date(r.date)
-    return receiptDate.toDateString() === today
-  }).length
-})
-
-const completedReceiptsCount = computed(() => {
-  return receiptsStore.receipts.filter(r => r.status === 'completed').length
-})
-const pendingReceiptsCount = computed(() => {
-  return receiptsStore.receipts.filter(r => r.status === 'pending').length
-})
-const refundedReceiptsCount = computed(() => {
-  return receiptsStore.receipts.filter(r => r.status === 'refunded').length
-})
-
-const totalDepartments = computed(() => departmentsStore.totalDepartments)
-
-// Recent transactions
-const recentTransactions = computed(() => {
-  return receiptsStore.receipts
-    .slice()
-    .sort((a, b) => {
-      const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date)
-      const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date)
-      return dateB.getTime() - dateA.getTime()
-    })
-    .slice(0, 5)
-    .map(receipt => {
-      const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-      const timeAgo = getTimeAgo(receiptDate)
-      
-      return {
-        id: receipt.id,
-        description: `Payment from ${receipt.customerName}`,
-        time: timeAgo,
-        amount: receipt.status === 'refunded' ? `-${formatCurrency(receipt.total)}` : `+${formatCurrency(receipt.total)}`,
-        amountClass: receipt.status === 'refunded' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400',
-        icon: receipt.status === 'refunded' ? ArrowPathIcon : ReceiptPercentIcon,
-        iconBg: receipt.status === 'refunded' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30',
-        iconColor: receipt.status === 'refunded' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400',
-      }
-    })
-})
-
-// Top selling products
-const topSellingItems = computed(() => {
-  const itemSales = new Map<string, { name: string; sales: number; revenue: number }>()
-  
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.status === 'completed' && receipt.items) {
-      receipt.items.forEach(item => {
-        const existing = itemSales.get(item.itemName) || { name: item.itemName, sales: 0, revenue: 0 }
-        existing.sales += item.quantity
-        existing.revenue += item.price * item.quantity
-        itemSales.set(item.itemName, existing)
-      })
-    }
-  })
-  
-  return Array.from(itemSales.values())
-    .sort((a, b) => b.sales - a.sales)
-    .map((item, index) => ({
-      id: `item-${index}`,
-      ...item
-    }))
-})
-
-// Low stock items - get actual items that are low on stock
-const lowStockItems = computed(() => {
-  const lowStockItemsList: Array<{
-    id: string
-    name: string
-    quantity: number
-    folderName: string
-    folderId: string
-    threshold: number
-    isSerialNumber: boolean
-  }> = []
-
-  // Get low stock threshold from user settings
-  const userStore = useUserStore()
-  const lowStockThreshold = userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
-
-  inventoryStore.folders.forEach(folder => {
-    const items = dashboardFolderItems.value[folder.id] || []
-    
-    // For serial number folders: check total available items
-    if (folder.hasSerialNumbers) {
-      // Count available (not sold) items
-      let availableCount = 0
-      items.forEach(item => {
-        const dateOutValue = item.dateOut
-        const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-        if (!hasDateOut) {
-          availableCount++
-        }
-      })
-      
-      // Folder is low stock if available count is below threshold
-      if (availableCount > 0 && availableCount <= lowStockThreshold) {
-        lowStockItemsList.push({
-          id: folder.id,
-          name: folder.name,
-          quantity: availableCount,
-          folderName: folder.name,
-          folderId: folder.id,
-          threshold: lowStockThreshold,
-          isSerialNumber: true
-        })
-      }
-    } else {
-      // For bulk items: check individual item quantities
-      // Find quantity field name from template
-      const quantityField = folder.template?.fields?.find(f => 
-        f.name.toLowerCase() === 'quantity' ||
-        f.name.toLowerCase() === 'qty'
-      )?.name
-
-      if (!quantityField) return // No quantity field, skip
-
-      items.forEach(item => {
-        // Skip sold items
-        const dateOutValue = item.dateOut
-        const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-        if (hasDateOut) return
-
-        // Check if item has quantity field
-        if (item[quantityField] !== undefined) {
-          const quantity = typeof item[quantityField] === 'number' 
-            ? item[quantityField] 
-            : parseFloat(String(item[quantityField])) || 0
-          
-          // Item is low stock if quantity > 0 and <= threshold
-          if (quantity > 0 && quantity <= lowStockThreshold) {
-            // Get item name from template (usually 'name' field)
-            const nameField = folder.template?.fields?.find(f => 
-              f.name.toLowerCase() === 'name' ||
-              f.name.toLowerCase() === 'item'
-            )?.name || 'name'
-            
-            const itemName = item[nameField] || item.name || 'Unnamed Item'
-            
-            lowStockItemsList.push({
-              id: item.id,
-              name: String(itemName),
-              quantity,
-              folderName: folder.name,
-              folderId: folder.id,
-              threshold: lowStockThreshold,
-              isSerialNumber: false
-            })
-          }
-        }
-      })
-    }
-  })
-
-  // Sort by quantity (lowest first)
-  return lowStockItemsList.sort((a, b) => a.quantity - b.quantity)
-})
-
-// Daily revenue data aggregation (last 30 days)
-const dailyRevenueData = computed(() => {
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setHours(0, 0, 0, 0)
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-  
-  // Create a map for daily totals
-  const dailyTotals = new Map<string, number>()
-  
-  // Initialize all days with 0
-  for (let i = 0; i < 30; i++) {
-    const date = new Date(thirtyDaysAgo)
-    date.setDate(date.getDate() + i)
-    const dateKey = date.toISOString().split('T')[0]
-    if (dateKey) {
-      dailyTotals.set(dateKey, 0)
-    }
-  }
-  
-  // Aggregate receipts by day
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.status !== 'completed') return
-    
-    const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-    receiptDate.setHours(0, 0, 0, 0)
-    
-    if (receiptDate >= thirtyDaysAgo) {
-      const dateKey = receiptDate.toISOString().split('T')[0]
-      const currentTotal = dailyTotals.get(dateKey) || 0
-      dailyTotals.set(dateKey, currentTotal + receipt.total)
-    }
-  })
-  
-  // Convert to array and sort by date
-  return Array.from(dailyTotals.entries())
-    .map(([date, revenue]) => ({
-      date: new Date(date),
-      revenue,
-      dateKey: date
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-})
-
-// Weekly revenue data aggregation (last 12 weeks)
-const weeklyRevenueData = computed(() => {
-  const twelveWeeksAgo = new Date()
-  twelveWeeksAgo.setHours(0, 0, 0, 0)
-  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - (12 * 7))
-  
-  // Get Monday of the week for twelveWeeksAgo
-  const dayOfWeek = twelveWeeksAgo.getDay()
-  const diff = twelveWeeksAgo.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Adjust to Monday
-  const startOfWeek = new Date(twelveWeeksAgo.setDate(diff))
-  startOfWeek.setHours(0, 0, 0, 0)
-  
-  const weeklyTotals = new Map<string, { revenue: number; startDate: Date; endDate: Date }>()
-  
-  // Initialize all weeks with 0
-  for (let i = 0; i < 12; i++) {
-    const weekStart = new Date(startOfWeek)
-    weekStart.setDate(weekStart.getDate() + (i * 7))
-    const weekEnd = new Date(weekStart)
-    weekEnd.setDate(weekEnd.getDate() + 6)
-    
-    const weekKey = `Week ${i + 1}`
-    weeklyTotals.set(weekKey, {
-      revenue: 0,
-      startDate: new Date(weekStart),
-      endDate: new Date(weekEnd)
-    })
-  }
-  
-  // Aggregate receipts by week
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.status !== 'completed') return
-    
-    const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-    receiptDate.setHours(0, 0, 0, 0)
-    
-    if (receiptDate >= startOfWeek) {
-      // Find which week this receipt belongs to
-      const daysDiff = Math.floor((receiptDate.getTime() - startOfWeek.getTime()) / (1000 * 60 * 60 * 24))
-      const weekIndex = Math.floor(daysDiff / 7)
-      
-      if (weekIndex >= 0 && weekIndex < 12) {
-        const weekKey = `Week ${weekIndex + 1}`
-        const weekData = weeklyTotals.get(weekKey)
-        if (weekData) {
-          weekData.revenue += receipt.total
-        }
-      }
-    }
-  })
-  
-  // Convert to array and sort by date
-  return Array.from(weeklyTotals.values())
-    .map((week, index) => ({
-      date: week.startDate,
-      revenue: week.revenue,
-      dateKey: `Week ${index + 1}`,
-      endDate: week.endDate
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-})
-
-// Monthly revenue data aggregation (last 12 months)
-const monthlyRevenueData = computed(() => {
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-  now.setDate(1) // First day of current month
-  
-  const monthlyTotals: Array<{ revenue: number; date: Date; dateKey: string }> = []
-  
-  // Initialize exactly 12 months (current month + 11 previous months)
-  for (let i = 11; i >= 0; i--) {
-    const monthDate = new Date(now)
-    monthDate.setMonth(monthDate.getMonth() - i)
-    const monthKey = monthDate.toLocaleDateString('en-US', { month: 'short' })
-    
-    monthlyTotals.push({
-      revenue: 0,
-      date: new Date(monthDate),
-      dateKey: monthKey
-    })
-  }
-  
-  // Aggregate receipts by month
-  receiptsStore.receipts.forEach(receipt => {
-    if (receipt.status !== 'completed') return
-    
-    const receiptDate = receipt.date?.toDate ? receipt.date.toDate() : new Date(receipt.date)
-    receiptDate.setHours(0, 0, 0, 0)
-    receiptDate.setDate(1) // First day of the month
-    
-    // Find the matching month in our array
-    const monthIndex = monthlyTotals.findIndex(month => {
-      return month.date.getTime() === receiptDate.getTime()
-    })
-    
-    if (monthIndex >= 0 && monthlyTotals[monthIndex]) {
-      monthlyTotals[monthIndex].revenue += receipt.total
-    }
-  })
-  
-  return monthlyTotals
-})
-
-// Chart data based on selected view
 const chartData = computed(() => {
   switch (chartView.value) {
     case 'weekly':
@@ -967,54 +659,34 @@ const chartData = computed(() => {
   }
 })
 
-// Chart subtitle based on view
 const chartSubtitle = computed(() => {
   switch (chartView.value) {
     case 'weekly':
-      return 'Last 12 weeks performance'
+      return 'Last 12 weeks · completed sales only'
     case 'monthly':
-      return 'Last 12 months performance'
+      return 'Last 12 months · completed sales only'
     default:
-      return 'Last 30 days performance'
+      return 'Last 30 days · completed sales only'
   }
 })
 
-const totalRevenue30Days = computed(() => {
-  return dailyRevenueData.value.reduce((sum, day) => sum + day.revenue, 0)
-})
-
-// ApexCharts configuration
 const chartSeries = computed(() => {
   if (chartData.value.length === 0) return []
-  
-  const seriesName = chartView.value === 'weekly' 
-    ? 'Weekly Revenue' 
-    : chartView.value === 'monthly' 
-      ? 'Monthly Revenue' 
-      : 'Daily Revenue'
-  
-  // For monthly view, ensure we only show exactly 12 months
-  let dataToUse = chartData.value
-  if (chartView.value === 'monthly') {
-    // Ensure we have exactly 12 months
-    dataToUse = chartData.value.slice(-12) // Get last 12 months
-  }
-  
-  return [{
-    name: seriesName,
-    data: dataToUse.map(item => item.revenue)
-  }]
+  const seriesName =
+    chartView.value === 'weekly'
+      ? 'Weekly revenue'
+      : chartView.value === 'monthly'
+        ? 'Monthly revenue'
+        : 'Daily revenue'
+  const dataToUse = chartView.value === 'monthly' ? chartData.value.slice(-12) : chartData.value
+  return [
+    {
+      name: seriesName,
+      data: dataToUse.map((item) => item.revenue),
+    },
+  ]
 })
 
-const themeStore = useThemeStore()
-const dashboardFooterIsLgUp = useMinWidthQuery(1024)
-
-const dashboardFooterLogoSrc = computed(() => {
-  if (!dashboardFooterIsLgUp.value) return '/storvv logo mobile.png'
-  return themeStore.actualTheme === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-})
-
-// Responsive chart height - use ref for reactive updates
 const isMobile = ref(false)
 if (import.meta.client) {
   isMobile.value = window.innerWidth < 640
@@ -1026,7 +698,6 @@ const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
-  // Light: neutral slate line (clean, not brand-blue); dark: soft blue for contrast on charcoal
   const lineColor = isDark ? '#93C5FD' : '#4876c7'
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.05)'
   const labelColor = isDark ? '#A1A1AA' : '#64748B'
@@ -1039,18 +710,10 @@ const chartOptions = computed(() => {
       zoom: { enabled: false },
       fontFamily: 'inherit',
       background: 'transparent',
-      animations: {
-        enabled: true,
-        easing: 'easeinout',
-        speed: 600
-      }
+      animations: { enabled: true, easing: 'easeinout', speed: 600 },
     },
     dataLabels: { enabled: false },
-    stroke: {
-      curve: 'smooth',
-      width: 2,
-      colors: [lineColor]
-    },
+    stroke: { curve: 'smooth', width: 2, colors: [lineColor] },
     fill: {
       type: 'gradient',
       gradient: {
@@ -1060,172 +723,108 @@ const chartOptions = computed(() => {
         stops: [0, 100],
         colorStops: [
           { offset: 0, color: lineColor, opacity: 0.22 },
-          { offset: 100, color: lineColor, opacity: 0 }
-        ]
-      }
+          { offset: 100, color: lineColor, opacity: 0 },
+        ],
+      },
     },
     xaxis: {
       categories: (() => {
         const data = chartView.value === 'monthly' ? chartData.value.slice(-12) : chartData.value
         return data.map((item, index) => {
-          if (chartView.value === 'weekly') {
-            const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
-            return `Week ${index + 1}`
-          } else if (chartView.value === 'monthly') {
-            return item.date.toLocaleDateString('en-US', { month: 'short' })
-          } else {
-            return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          }
+          if (chartView.value === 'weekly') return `W${index + 1}`
+          if (chartView.value === 'monthly') return item.date.toLocaleDateString('en-US', { month: 'short' })
+          return item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         })
       })(),
       labels: {
-        style: {
-          colors: labelColor,
-          fontSize: '11px',
-          fontWeight: 400
-        },
+        style: { colors: labelColor, fontSize: '11px', fontWeight: 400 },
         rotate: chartView.value === 'monthly' ? 0 : -45,
         rotateAlways: false,
-        offsetY: 4
+        offsetY: 4,
       },
       axisBorder: { show: false },
       axisTicks: { show: false },
-      crosshairs: { show: false }
     },
     yaxis: {
       labels: {
-        style: {
-          colors: labelColor,
-          fontSize: '11px',
-          fontWeight: 400
-        },
+        style: { colors: labelColor, fontSize: '11px', fontWeight: 400 },
         formatter: (value: number) => {
           const symbol = currencySymbol.value || '$'
-          if (value >= 1000) {
-            return `${symbol}${(value / 1000).toFixed(1)}k`
-          }
+          if (value >= 1000) return `${symbol}${(value / 1000).toFixed(1)}k`
           return `${symbol}${Math.round(value)}`
-        }
+        },
       },
-      title: { text: undefined },
       axisBorder: { show: false },
       axisTicks: { show: false },
-      crosshairs: { show: false }
     },
     grid: {
       borderColor: 'transparent',
-      strokeDashArray: 0,
       xaxis: { lines: { show: false } },
-      yaxis: {
-        lines: {
-          show: true,
-          strokeDashArray: 0,
-          color: gridColor
-        }
-      },
-      padding: {
-        top: 8,
-        right: 4,
-        bottom: 36,
-        left: 4
-      }
+      yaxis: { lines: { show: true, color: gridColor } },
+      padding: { top: 8, right: 4, bottom: 36, left: 4 },
     },
     tooltip: {
       theme: isDark ? 'dark' : 'light',
-      followCursor: true,
-      style: { fontSize: '12px' },
       y: { formatter: (value: number) => formatCurrency(value) },
-      x: {
-        formatter: (value: string) => {
-          const index = parseInt(value)
-          if (chartData.value[index]) {
-            const item = chartData.value[index]
-            if (chartView.value === 'weekly') {
-              const week = item as { date: Date; revenue: number; dateKey: string; endDate: Date }
-              return `Week: ${week.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${week.endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-            } else if (chartView.value === 'monthly') {
-              return item.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-            } else {
-              return item.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
-            }
-          }
-          return value
-        }
-      }
     },
     theme: { mode: isDark ? 'dark' : 'light' },
     colors: [lineColor],
     legend: { show: false },
-    markers: {
-      size: 0,
-      strokeColors: lineColor,
-      strokeWidth: 0,
-      hover: { size: 4, strokeWidth: 0 }
-    },
-    states: {
-      hover: { filter: { type: 'none' } },
-      active: { filter: { type: 'none' } }
-    }
+    markers: { size: 0, hover: { size: 4 } },
   }
 })
 
-const getTimeAgo = (date: Date) => {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
+function alertRowClass(level: DashboardAlertLevel): string {
+  switch (level) {
+    case 'critical':
+      return 'border-red-200/70 bg-red-50/40 dark:border-red-900/35 dark:bg-red-950/20'
+    case 'warning':
+      return 'border-amber-200/70 bg-amber-50/40 dark:border-amber-900/35 dark:bg-amber-950/20'
+    default:
+      return 'border-gray-200/80 bg-gray-50/60 dark:border-gray-800/80 dark:bg-white/[0.02]'
+  }
+}
+
+function formatActivityTime(createdAt: ActivityLog['createdAt']): string {
+  const d =
+    createdAt instanceof Date
+      ? createdAt
+      : typeof createdAt === 'object' && createdAt && 'toDate' in createdAt
+        ? (createdAt as { toDate: () => Date }).toDate()
+        : new Date()
+  const seconds = Math.floor((Date.now() - d.getTime()) / 1000)
   if (seconds < 60) return 'just now'
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+  if (minutes < 60) return `${minutes}m ago`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} ${days === 1 ? 'day' : 'days'} ago`
-  return date.toLocaleDateString()
+  if (hours < 24) return `${hours}h ago`
+  return d.toLocaleDateString()
 }
 
-const onTutorialComplete = () => {
-  // Tutorial completed - no action needed
-}
+const onTutorialComplete = () => {}
 
-// Load all data
 const loadDashboardData = async () => {
-  isLoading.value = true
   try {
-    // Wait for auth to be ready (especially important after cross-domain redirect)
     if (authStore.loading) {
       let attempts = 0
-      const maxAttempts = 100 // Increased to 10 seconds
-      while (authStore.loading && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 100))
+      while (authStore.loading && attempts < 100) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
         attempts++
       }
-      if (authStore.loading) {
-        console.warn('[Dashboard] Auth still loading after timeout')
-      }
     }
-    
-    if (!authStore.currentUser) {
-      console.warn('[Dashboard] No authenticated user after auth loaded')
-      isLoading.value = false
-      return
-    }
-    
-    // console.log('[Dashboard] Auth ready, user:', authStore.currentUser.uid)
-    
-    // Fetch user data if not loaded
+
+    if (!authStore.currentUser) return
+
     if (!userStore.userData || userStore.userData.uid !== authStore.currentUser.uid) {
-      // console.log('[Dashboard] Fetching user data for:', authStore.currentUser.uid)
       await userStore.fetchUserData(authStore.currentUser.uid)
-      // console.log('[Dashboard] User data fetched:', userStore.userData)
-    } else {
-      // console.log('[Dashboard] User data already loaded:', userStore.userData)
     }
-    
-    // Fetch all stores in parallel
+
     await Promise.all([
       receiptsStore.fetchReceipts(),
       inventoryStore.fetchFolders(),
       departmentsStore.fetchDepartments(),
     ])
-    
+
     if (inventoryStore.folders.length > 0) {
       const map: Record<string, InventoryItem[]> = {}
       await Promise.all(
@@ -1237,23 +836,43 @@ const loadDashboardData = async () => {
     } else {
       dashboardFolderItems.value = {}
     }
+
+    if (canViewActivity.value) {
+      recentActivityLogs.value = await fetchActivityLogs(DASHBOARD_LIST_TOP)
+    } else {
+      recentActivityLogs.value = []
+    }
+
   } catch (error) {
     console.error('Error loading dashboard data:', error)
-  } finally {
-    isLoading.value = false
   }
 }
 
 onMounted(async () => {
+  isLoading.value = true
   await loadDashboardData()
+  isLoading.value = false
 })
 
-// Watch for auth changes
-watch(() => authStore.currentUser, async (newUser) => {
-  if (newUser && !isLoading.value) {
-    await loadDashboardData()
+watch(
+  () => storesStore.currentStoreId,
+  async (id, prev) => {
+    if (id && id !== prev && authStore.currentUser) {
+      isLoading.value = true
+      await loadDashboardData()
+      isLoading.value = false
+    }
   }
-}, { immediate: false })
+)
+
+watch(
+  () => authStore.currentUser,
+  async (newUser) => {
+    if (newUser && !isLoading.value) {
+      await loadDashboardData()
+    }
+  }
+)
 
 useHead({
   title: 'Dashboard - Storvv',

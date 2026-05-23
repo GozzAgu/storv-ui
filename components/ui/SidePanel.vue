@@ -15,7 +15,10 @@
     >
       <div
         v-if="modelValue"
-        :class="[ 'fixed inset-0 z-[1100] bg-slate-950/55 dark:bg-black/65', blurBackdrop ? 'backdrop-blur-[2px]' : '', ]"
+        :class="[
+          'fixed inset-0 z-[1100] bg-gray-900/40 dark:bg-black/55',
+          blurBackdrop ? 'backdrop-blur-[3px]' : '',
+        ]"
         aria-hidden="true"
         @click="handleBackdropClick"
       />
@@ -39,13 +42,17 @@
           aria-modal="true"
           :aria-labelledby="labelledBy"
           :aria-describedby="describedBy"
-          :class="[ 'frosted-glass pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'w-full min-w-0 rounded-none lg:rounded-l-md', panelWidthClasses, ]"
+          :class="[
+            'pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-l border-gray-200/90 bg-white pb-[env(safe-area-inset-bottom,0)] text-gray-900 shadow-2xl shadow-gray-900/10 dark:border-gray-800/90 dark:!bg-dashboard-card dark:text-gray-100 dark:shadow-black/40',
+            'w-full min-w-0 rounded-none lg:rounded-l-xl',
+            panelWidthClasses,
+          ]"
           @click.stop
         >
             <!-- Header -->
             <div
               v-if="title || subtitle || $slots.header || showClose"
-              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-200/90 bg-transparent px-4 py-3.5 dark:border-gray-800 sm:px-5 sm:py-4"
+              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-100/90 bg-gray-50/50 px-4 py-3.5 dark:border-gray-800/80 dark:bg-white/[0.02] sm:px-5 sm:py-4"
             >
               <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
                 <slot name="header">
@@ -59,7 +66,7 @@
                     <h3
                       v-if="title"
                       :id="titleId"
-                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-[1.0625rem]"
+                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50"
                     >
                       {{ title }}
                     </h3>
@@ -76,7 +83,7 @@
               <button
                 v-if="showClose"
                 type="button"
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100"
                 aria-label="Close panel"
                 @click="handleClose"
               >
@@ -86,7 +93,7 @@
 
             <!-- Body -->
             <div
-              class="side-panel-body-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-transparent"
+              class="side-panel-body-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-white dark:!bg-dashboard-card"
               :class="contentPadding"
             >
               <slot />
@@ -95,7 +102,7 @@
             <!-- Footer -->
             <div
               v-if="$slots.footer"
-              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-200/90 bg-transparent px-4 py-3 dark:border-gray-800 sm:flex-row sm:items-center sm:px-5 sm:py-4"
+              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-100/90 bg-gray-50/60 px-4 py-3 dark:border-gray-800/80 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-5 sm:py-3.5"
             >
               <slot name="footer" />
             </div>
@@ -130,7 +137,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showClose: true,
   closeOnBackdrop: true,
-  contentPadding: 'p-4 sm:p-5',
+  contentPadding: 'px-4 py-4 sm:px-5 sm:py-5',
   blurBackdrop: false,
 })
 
@@ -148,9 +155,12 @@ const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 const panelWidthClasses = computed(() => {
   // Full width through tablet (`lg`); partial-width drawer on desktop only
   if (props.size === 'xl') {
-    return 'max-lg:w-full lg:w-[min(92vw,72rem)]'
+    return 'max-lg:w-full lg:w-[min(92vw,42rem)]'
   }
-  return 'max-lg:w-full lg:w-[35%]'
+  if (props.size === 'lg') {
+    return 'max-lg:w-full lg:w-[min(92vw,32rem)]'
+  }
+  return 'max-lg:w-full lg:w-[min(92vw,28rem)]'
 })
 
 const handleClose = () => {

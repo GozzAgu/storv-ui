@@ -683,7 +683,6 @@ import {
   HomeIcon,
   CubeIcon,
   ReceiptPercentIcon,
-  ArrowPathIcon,
   UsersIcon,
   BuildingOfficeIcon,
   Cog6ToothIcon,
@@ -754,7 +753,6 @@ const storesStore = useStoresStore()
 const staffStore = useStaffStore()
 const searchStore = useSearchStore()
 const { eligibleStores } = usePlanEligibleStores()
-
 // Fetch notifications on mount
 onMounted(() => {
   if (authStore.currentUser) {

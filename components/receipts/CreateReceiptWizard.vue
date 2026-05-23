@@ -2,218 +2,172 @@
   <SidePanel
     :model-value="props.modelValue"
     title="Create New Receipt"
-    subtitle="Select category, items, then enter receipt details."
+    subtitle="Category → items → receipt details"
+    size="lg"
     @update:model-value="(value: boolean) => emit('update:modelValue', value)"
   >
     <template #default>
-      <div class="space-y-4">
-        <!-- Step Indicator -->
-        <div class="flex items-center justify-between mb-4">
-          <div
-            v-for="(step, index) in steps"
-            :key="step.id"
-            class="flex items-center flex-1"
-          >
-            <div class="flex items-center flex-1">
-              <div
-                :class="[ 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all', 'aspect-square', currentStep >= index ? 'bg-primary-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' ]"
-              >
-                {{ index + 1 }}
-              </div>
-              <div class="ml-2 hidden sm:block">
-                <p
-                  :class="[ 'text-xs font-medium', currentStep >= index ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' ]"
-                >
-                  {{ step.label }}
-                </p>
-              </div>
-            </div>
-            <div
-              v-if="index < steps.length - 1"
-              :class="[ 'hidden sm:block h-0.5 flex-1 mx-3 transition-all', currentStep > index ? 'bg-primary-500' : 'bg-gray-200 dark:bg-gray-700' ]"
-            ></div>
-          </div>
-        </div>
+      <div class="flex min-h-0 flex-1 flex-col gap-4">
+        <DashboardDrawerStepper :steps="steps" :current-step="currentStep" />
 
         <SellScreenNoteBanner v-if="currentStep >= 1" />
 
         <!-- Step 1: Select Folder -->
-        <div v-if="currentStep === 0" class="space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Select Inventory Folder
-            </label>
-            
-            <!-- Search Bar for Folders -->
-            <div class="mb-3">
-              <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-                <input
-                  v-model="folderSearchQuery"
-                  type="text"
-                  placeholder="Search categories..."
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
-                />
-              </div>
-            </div>
-            
-            <div v-if="loadingFolders" class="text-center py-6">
-              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
-              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories...</p>
-            </div>
-            <div
-              v-else-if="filteredFolders.length === 0"
-              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
-            >
-              <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <FolderIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
-              </div>
-              <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {{ folderSearchQuery ? 'No categories found' : 'No inventory categories' }}
-              </p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                {{ folderSearchQuery ? 'Try a different search' : 'Create a category in Inventory first' }}
-              </p>
-            </div>
-            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[360px] overflow-y-auto">
+        <div v-if="currentStep === 0" class="flex min-h-0 flex-1 flex-col gap-3">
+          <p :class="sectionLabelClass">Inventory category</p>
+          <DashboardDrawerSearch v-model="folderSearchQuery" placeholder="Search categories…" />
+
+          <div v-if="loadingFolders" class="flex flex-1 flex-col items-center justify-center py-12">
+            <div class="h-5 w-5 animate-spin rounded-full border-2 border-primary-500/30 border-t-primary-500" />
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading categories…</p>
+          </div>
+          <div v-else-if="filteredFolders.length === 0" :class="emptyStateClass">
+            <FolderIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">
+              {{ folderSearchQuery ? 'No categories found' : 'No categories yet' }}
+            </p>
+            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+              {{ folderSearchQuery ? 'Try another search' : 'Create a category in Inventory first' }}
+            </p>
+          </div>
+          <div v-else :class="pickListClass">
+            <div :class="pickListScrollClass">
               <button
                 v-for="folder in filteredFolders"
                 :key="folder.id"
+                type="button"
+                :class="[pickRowClass, selectedFolder?.id === folder.id ? pickRowSelectedClass : '']"
                 @click="selectFolder(folder)"
-                :class="[ 'p-3 border-2 rounded-sm transition-all text-left', selectedFolder?.id === folder.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600' ]"
               >
-                <div class="flex items-center gap-2.5">
-                  <div
-                    :class="[ 'w-8 h-8 rounded-sm flex items-center justify-center', getFolderColorClass(folder.color) ]"
-                  >
-                    <FolderIcon class="w-4 h-4 text-white" />
-                  </div>
-                  <div class="flex-1">
-                    <h3 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ folder.name }}</h3>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      {{ folder.itemCount }} items
-                    </p>
-                  </div>
-                  <CheckCircleIcon
-                    v-if="selectedFolder?.id === folder.id"
-                    class="w-4 h-4 text-primary-500"
-                  />
+                <div
+                  :class="['flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', getFolderColorClass(folder.color)]"
+                >
+                  <FolderIcon class="h-4 w-4 text-white" stroke-width="1.75" />
                 </div>
+                <div class="min-w-0 flex-1">
+                  <p :class="pickRowTitleClass">{{ folder.name }}</p>
+                  <p :class="pickRowMetaClass">
+                    {{ folder.itemCount }} {{ folder.itemCount === 1 ? 'item' : 'items' }}
+                  </p>
+                </div>
+                <CheckCircleIcon
+                  v-if="selectedFolder?.id === folder.id"
+                  class="h-4 w-4 shrink-0 text-primary-500"
+                  stroke-width="2"
+                />
               </button>
             </div>
           </div>
         </div>
 
         <!-- Step 2: Select Items -->
-        <div v-if="currentStep === 1" class="space-y-3">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300">
-                Select Items from {{ selectedFolder?.name }}
-              </label>
-              <button
-                @click="loadItems"
-                class="text-xs text-primary-500 dark:text-primary-400 hover:underline"
-              >
-                Refresh
-              </button>
-            </div>
-            
-            <!-- Search Bar for Items -->
-            <div class="mb-3">
-              <div class="relative">
-                <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-                <input
-                  v-model="itemSearchQuery"
-                  type="text"
-                  :placeholder="selectedFolder?.hasSerialNumbers ? 'Search by product name or serial number...' : 'Search by product name...'"
-                  class="w-full pl-8 pr-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
-                />
-              </div>
-            </div>
-            <div v-if="loadingItems" class="text-center py-6">
-              <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500"></div>
-              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items...</p>
-            </div>
-            <div
-              v-else-if="availableItems.length === 0"
-              class="text-center py-6 px-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-sm bg-gray-50/50 dark:bg-gray-800/50"
-            >
-              <div class="w-14 h-14 mx-auto mb-3 rounded-sm bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                <CubeIcon class="w-7 h-7 text-primary-400 dark:text-primary-400" />
-              </div>
-              <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">No items available</p>
-              <p class="text-[11px] text-gray-500 dark:text-gray-400">This folder has no items to add</p>
-            </div>
-            <div v-else class="max-h-[360px] overflow-y-auto space-y-2">
+        <div v-if="currentStep === 1" class="flex min-h-0 flex-1 flex-col gap-3">
+          <div class="flex shrink-0 items-center justify-between gap-2">
+            <p :class="sectionLabelClass">Items · {{ selectedFolder?.name }}</p>
+            <button type="button" class="text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400" @click="loadItems">
+              Refresh list
+            </button>
+          </div>
+          <DashboardDrawerSearch
+            v-model="itemSearchQuery"
+            :placeholder="selectedFolder?.hasSerialNumbers ? 'Search name or serial…' : 'Search products…'"
+          />
+          <div v-if="loadingItems" class="flex min-h-0 flex-1 flex-col items-center justify-center py-8">
+            <div class="h-5 w-5 animate-spin rounded-full border-2 border-primary-500/30 border-t-primary-500" />
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Loading items…</p>
+          </div>
+          <div v-else-if="availableItems.length === 0" :class="emptyStateClass">
+            <CubeIcon class="mb-2 h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.5" />
+            <p class="text-xs font-medium text-gray-800 dark:text-gray-200">No items available</p>
+            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">This category has no items to add</p>
+          </div>
+          <div v-else :class="pickListClass">
+            <div :class="pickListScrollClass">
               <div
                 v-for="item in filteredAvailableItems"
                 :key="item.id"
-                :class="[ 'p-3 border rounded-sm transition-all cursor-pointer', selectedItems.find(si => si.id === item.id) ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600' ]"
-                @click="toggleItemSelection(item)"
+                :class="[
+                  pickRowClass,
+                  'cursor-pointer',
+                  selectedItems.find(si => si.id === item.id) ? pickRowSelectedClass : '',
+                  itemIsOutOnSellerLoan(item) && !selectedItems.find(si => si.id === item.id)
+                    ? 'bg-primary-50/50 dark:bg-primary-950/15'
+                    : '',
+                ]"
+                @click="onReceiptItemRowClick(item)"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2.5">
-                      <Checkbox
-                        :model-value="selectedItems.find(si => si.id === item.id) !== undefined"
-                        @update:model-value="(checked) => toggleItemSelection(item, checked)"
-                        @click.stop
-                        size="sm"
-                      />
-                      <div class="flex-1">
-                        <h4 class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                          {{ getItemDisplayName(item) }}
-                        </h4>
-                        <div class="flex items-center gap-3 mt-0.5 text-[10px] sm:text-xs flex-wrap">
-                          <span v-if="(selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) && (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))" class="text-gray-500 dark:text-gray-400">
-                            Serial: {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
+                <div class="flex w-full items-start gap-2.5">
+                  <Checkbox
+                    :model-value="selectedItems.find(si => si.id === item.id) !== undefined"
+                    @update:model-value="(checked) => toggleItemSelection(item, checked)"
+                    @click.stop
+                    size="sm"
+                    class="mt-0.5"
+                  />
+                  <div class="min-w-0 flex-1">
+                    <h4
+                      class="text-xs font-medium text-gray-900 dark:text-gray-100"
+                      :class="itemIsOutOnSellerLoan(item) && 'font-semibold text-primary-900 dark:text-primary-50'"
+                    >
+                      {{ getItemDisplayName(item) }}
+                    </h4>
+                    <div class="mt-0.5 flex flex-wrap items-center gap-3 text-[10px] sm:text-xs">
+                      <span
+                        v-if="itemIsOutOnSellerLoan(item)"
+                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-900 bg-white/95 shadow-sm shadow-primary-900/10 ring-1 ring-primary-400/45 dark:bg-primary-800/90 dark:text-primary-50 dark:ring-primary-400/55 dark:shadow-md dark:shadow-black/40"
+                      >
+                        On stock loan<span v-if="item.sellerLoanPartyName">&nbsp;· {{ item.sellerLoanPartyName }}</span>
+                      </span>
+                      <span v-if="(selectedFolder?.hasSerialNumbers || hasSerialNumberInTemplate) && (getItemField(item, 'serialNo') || getItemField(item, 'serialNumber'))" class="text-gray-500 dark:text-gray-400">
+                        Serial: {{ getItemField(item, 'serialNo') || getItemField(item, 'serialNumber') }}
+                      </span>
+                      <span v-if="getItemField(item, 'sku')" class="text-gray-500 dark:text-gray-400">SKU: {{ getItemField(item, 'sku') }}</span>
+                      <span v-if="getItemField(item, 'price')">
+                        <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
+                          <span class="text-gray-400 line-through dark:text-gray-500">
+                            {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
                           </span>
-                          <span v-if="getItemField(item, 'sku')" class="text-gray-500 dark:text-gray-400">SKU: {{ getItemField(item, 'sku') }}</span>
-                          <span v-if="getItemField(item, 'price')">
-                            <span v-if="item.discountedPrice !== undefined && item.discountedPrice !== null" class="flex items-center gap-1">
-                              <span class="text-gray-400 dark:text-gray-500 line-through">
-                                {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
-                              </span>
-                              <span class="text-green-600 dark:text-green-400 font-semibold">
-                                {{ formatCurrency(item.discountedPrice) }}
-                              </span>
-                              <span class="text-red-600 dark:text-red-400">
-                                ({{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }})
-                              </span>
-                            </span>
-                            <span v-else class="text-gray-500 dark:text-gray-400">
-                              Price: {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
-                            </span>
+                          <span class="font-semibold text-green-600 dark:text-green-400">
+                            {{ formatCurrency(item.discountedPrice) }}
                           </span>
-                          <span v-if="!selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate && getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
-                            Stock: {{ getItemField(item, 'stock') }}
+                          <span class="text-red-600 dark:text-red-400">
+                            ({{ item.discountPercentage ? `-${item.discountPercentage}%` : `-${formatCurrency(item.discountAmount || 0)}` }})
                           </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-if="selectedItems.find(si => si.id === item.id) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate" class="mt-2.5 pt-2.5 border-t border-gray-200 dark:border-gray-700">
-                      <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Quantity
-                      </label>
-                      <input
-                        type="number"
-                        :value="getSelectedItemQuantity(item.id)"
-                        @input="updateItemQuantity(item.id, parseInt(($event.target as HTMLInputElement).value) || 1)"
-                        @click.stop
-                        min="1"
-                        :max="getItemField(item, 'stock') || 1"
-                        class="w-20 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/60"
-                      />
+                        </span>
+                        <span v-else class="text-gray-500 dark:text-gray-400">
+                          Price: {{ formatCurrency(parseFloat(getItemField(item, 'price') || '0')) }}
+                        </span>
+                      </span>
+                      <span v-if="!selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate && getItemField(item, 'stock')" class="text-gray-500 dark:text-gray-400">
+                        Stock: {{ getItemField(item, 'stock') }}
+                      </span>
                     </div>
                   </div>
+                </div>
+                <div
+                  v-if="selectedItems.find(si => si.id === item.id) && !selectedFolder?.hasSerialNumbers && !hasSerialNumberInTemplate"
+                  class="mt-2 w-full border-t border-gray-100/90 pt-2 dark:border-gray-800/80"
+                  @click.stop
+                >
+                  <label class="mb-1 block text-[10px] font-medium text-gray-600 dark:text-gray-400">Quantity</label>
+                  <input
+                    type="number"
+                    :value="getSelectedItemQuantity(item.id)"
+                    class="h-8 w-20 rounded-lg border border-gray-200/90 bg-white px-2 text-xs dark:border-gray-700/80 dark:!bg-dashboard-card"
+                    min="1"
+                    :max="getItemField(item, 'stock') || 1"
+                    @input="updateItemQuantity(item.id, parseInt(($event.target as HTMLInputElement).value) || 1)"
+                  />
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="selectedItems.length > 0" class="p-3 bg-gray-50 dark:!bg-dashboard-card rounded-sm">
-            <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Selected Items ({{ totalSelectedQuantity }})
+          <div
+            v-if="selectedItems.length > 0"
+            class="shrink-0 rounded-lg border border-gray-200/70 bg-gray-50/80 px-3 py-2.5 dark:border-white/[0.06] dark:bg-white/[0.03]"
+          >
+            <p class="mb-1.5 text-xs font-medium text-gray-700 dark:text-gray-300">
+              Selected items ({{ totalSelectedQuantity }})
             </p>
             <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">
               Total: {{ formatCurrency(itemsSubtotal) }}
@@ -584,33 +538,28 @@
     </template>
 
     <template #footer>
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
+      <div class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           v-if="currentStep > 0"
           variant="outline"
           size="sm"
+          :class="[footerBtnOutlineClass, 'w-full sm:w-auto']"
           @click="previousStep"
-          class="w-full sm:w-auto order-2 sm:order-1 !rounded-2xl"
         >
-          Previous
+          Back
         </Button>
-        <div v-else class="hidden sm:block"></div>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 order-1 sm:order-2">
-          <Button
-            variant="outline"
-            size="sm"
-            @click="handleCancel"
-            class="w-full sm:w-auto !rounded-2xl"
-          >
+        <div v-else class="hidden sm:block sm:min-w-[4rem]" />
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <Button variant="outline" size="sm" :class="[footerBtnOutlineClass, 'w-full sm:w-auto']" @click="handleCancel">
             Cancel
           </Button>
           <Button
             v-if="currentStep < 2"
             variant="primary"
             size="sm"
-            class="w-full sm:w-auto !rounded-2xl"
-            @click="nextStep"
+            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
             :disabled="!canProceed"
+            @click="nextStep"
           >
             Next
           </Button>
@@ -618,12 +567,11 @@
             v-else
             variant="primary"
             size="sm"
-            @click="handleCreateReceipt"
+            :class="[footerBtnPrimaryClass, 'w-full sm:w-auto']"
             :disabled="!isFormValid || isCreating"
-            class="w-full sm:w-auto !rounded-2xl"
+            @click="handleCreateReceipt"
           >
-            <span v-if="isCreating">Creating...</span>
-            <span v-else>Create Receipt</span>
+            {{ isCreating ? 'Creating…' : 'Create receipt' }}
           </Button>
         </div>
       </div>
@@ -747,6 +695,18 @@ const authStore = useAuthStore()
 const userStore = useUserStore()
 const staffStore = useStaffStore()
 const { formatCurrency, preferences } = usePreferences()
+const {
+  sectionLabelClass,
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowSelectedClass,
+  pickRowTitleClass,
+  pickRowMetaClass,
+  emptyStateClass,
+  footerBtnOutlineClass,
+  footerBtnPrimaryClass,
+} = useDashboardDrawerChrome()
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 
 // Swap-in creates inventory rows: super admin only (managers/staff cannot edit inventory structure).
@@ -825,14 +785,19 @@ const matchingCustomers = computed(() => {
 })
 
 const filteredFolders = computed(() => {
-  if (!folderSearchQuery.value.trim()) {
-    return folders.value
+  const query = folderSearchQuery.value.trim().toLowerCase()
+  let list = folders.value
+  if (query) {
+    list = list.filter(
+      (folder) =>
+        folder.name.toLowerCase().includes(query) ||
+        folder.description.toLowerCase().includes(query)
+    )
   }
-  const query = folderSearchQuery.value.toLowerCase()
-  return folders.value.filter(folder =>
-    folder.name.toLowerCase().includes(query) ||
-    folder.description.toLowerCase().includes(query)
-  )
+  return [...list].sort((a, b) => {
+    if (b.itemCount !== a.itemCount) return b.itemCount - a.itemCount
+    return a.name.localeCompare(b.name)
+  })
 })
 
 const hasSerialNumberInTemplate = computed(() => {
@@ -844,31 +809,43 @@ const hasSerialNumberInTemplate = computed(() => {
   )
 })
 
+function itemIsOutOnSellerLoan(item: InventoryItem): boolean {
+  const loan = item.sellerLoanOutId as unknown
+  if (loan === undefined || loan === null) return false
+  return `${loan}`.trim().length > 0
+}
+
 const filteredAvailableItems = computed(() => {
+  let list: InventoryItem[]
   if (!itemSearchQuery.value.trim()) {
-    return availableItems.value
+    list = [...availableItems.value]
+  } else {
+    const query = itemSearchQuery.value.toLowerCase()
+    list = availableItems.value.filter((item) => {
+      const itemName = getItemDisplayName(item).toLowerCase()
+      if (itemName.includes(query)) return true
+
+      if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
+        const serialNo =
+          getItemField(item, 'serialNo') ||
+          getItemField(item, 'serialNumber') ||
+          getItemField(item, 'serial')
+        if (serialNo && serialNo.toLowerCase().includes(query)) return true
+      }
+
+      const sku = getItemField(item, 'sku')
+      if (sku && sku.toLowerCase().includes(query)) return true
+
+      return false
+    })
   }
-  const query = itemSearchQuery.value.toLowerCase()
-  return availableItems.value.filter(item => {
-    // Search by item name
-    const itemName = getItemDisplayName(item).toLowerCase()
-    if (itemName.includes(query)) return true
-    
-    // Search by serial number if folder has serial numbers
-    if (selectedFolder.value?.hasSerialNumbers || hasSerialNumberInTemplate.value) {
-      const serialNo = getItemField(item, 'serialNo') || 
-                       getItemField(item, 'serialNumber') ||
-                       getItemField(item, 'serial')
-      if (serialNo && serialNo.toLowerCase().includes(query)) return true
-    }
-    
-    // Search by SKU
-    const sku = getItemField(item, 'sku')
-    if (sku && sku.toLowerCase().includes(query)) return true
-    
-    return false
-  })
+  list.sort((a, b) => Number(itemIsOutOnSellerLoan(a)) - Number(itemIsOutOnSellerLoan(b)))
+  return list
 })
+
+function onReceiptItemRowClick(item: InventoryItem) {
+  toggleItemSelection(item)
+}
 
 // Swap-in folder
 const swapInFolder = computed(() => {

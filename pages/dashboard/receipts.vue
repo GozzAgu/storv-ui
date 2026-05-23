@@ -34,9 +34,10 @@
         <div class="flex w-full min-h-0 flex-1 flex-col gap-5 sm:gap-6">
         <!-- Tabs -->
         <nav
-          class="flex gap-8"
+          class="flex items-center justify-between gap-4"
           aria-label="Sales views"
         >
+        <div class="flex gap-8">
       <button
         type="button"
         role="tab"
@@ -90,6 +91,7 @@
           aria-hidden="true"
         />
       </button>
+        </div>
     </nav>
 
     <!-- Receipts Tab Content -->
@@ -2569,6 +2571,13 @@ const loadCreatorNames = async () => {
   } finally {
     loadingCreators.value = false
   }
+}
+
+
+async function reloadReceiptsPage() {
+  if (!authStore.currentUser) return
+  await receiptsStore.fetchReceipts({ force: true })
+  await loadCreatorNames()
 }
 
 // Load receipts on mount

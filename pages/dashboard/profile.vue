@@ -14,339 +14,216 @@
       </template>
     </DashboardPageHeader>
 
-    <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-3">
-      <!-- Profile card -->
-      <div class="w-full shrink-0 lg:col-span-1 lg:sticky lg:top-14 lg:z-10 lg:self-start">
-        <div
-          class="relative overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card"
-        >
-          <div class="relative flex flex-col items-center px-6 py-7 text-center sm:px-7">
-            <!-- Avatar -->
+    <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
+      <!-- Profile summary -->
+      <aside class="w-full lg:col-span-4 xl:col-span-3 lg:sticky lg:top-14 lg:self-start">
+        <section :class="panelClass">
+          <div class="px-4 py-6 text-center sm:px-5 sm:py-7">
             <div
-              class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-gray-200/90 bg-gradient-to-br from-primary-500/90 to-primary-600/95 text-sm font-semibold text-white dark:border-gray-600/80 dark:from-primary-600/90 dark:to-primary-700/95"
+              class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gray-200/90 bg-gradient-to-br from-primary-500/90 to-primary-600 text-sm font-semibold text-white dark:border-gray-600/80"
             >
               {{ profileAvatarInitials }}
             </div>
-            <div v-if="isLoadingProfile" class="space-y-2 w-full mt-4 max-w-[180px] mx-auto">
-              <div class="h-4 bg-gray-200/80 dark:bg-white/10 rounded-sm animate-pulse" />
-              <div class="h-3 bg-gray-200/80 dark:bg-white/10 rounded animate-pulse" />
-              <div class="h-3 bg-gray-200/80 dark:bg-white/10 rounded animate-pulse w-3/4 mx-auto" />
+            <div v-if="isLoadingProfile" class="mx-auto mt-4 max-w-[180px] space-y-2">
+              <div class="h-4 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
+              <div class="h-3 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
             </div>
             <template v-else>
-              <p class="mt-1 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Business</p>
-              <h2 class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
-                {{ leftCardHeading }}
-              </h2>
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate max-w-full px-2" :title="leftCardLine2 || ''">
-                {{ leftCardLine2 || '-' }}
-              </p>
-              <p v-if="leftCardBadgeExtra" class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ leftCardBadgeExtra }}</p>
+              <p class="mt-4 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">Business</p>
+              <h2 class="mt-1 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">{{ leftCardHeading }}</h2>
+              <p class="mt-1 truncate px-2 text-xs text-gray-500 dark:text-gray-400" :title="leftCardLine2 || ''">{{ leftCardLine2 || '—' }}</p>
               <span
-                class="mt-2.5 inline-flex items-center rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-[10px] font-medium tracking-wide text-primary-700 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
+                class="mt-2.5 inline-flex items-center rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-[10px] font-medium text-primary-700 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
               >
-                {{ profileData.role === 'staff' ? 'Staff' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
+                {{ profileData.role === 'staff' ? 'Staff' : profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User' }}
               </span>
             </template>
-            <div
-              class="mt-6 flex w-full items-center justify-center gap-0 rounded-sm bg-gray-50/90 px-2 py-3 dark:!bg-dashboard-card/55"
-            >
-              <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
+
+            <div :class="profileStatBarClass">
+              <div class="flex-1 px-2 py-3 text-center">
+                <p v-if="isLoadingStats" class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalOrders }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Orders</p>
+                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Orders</p>
               </div>
-              <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
-              <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
+              <div class="w-px bg-gray-200/80 dark:bg-gray-700/60" />
+              <div class="flex-1 px-2 py-3 text-center">
+                <p v-if="isLoadingStats" class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalProducts }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Products</p>
+                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Products</p>
               </div>
-              <div class="w-px h-8 bg-gray-200/80 dark:bg-gray-600/60" />
-              <div class="flex-1 min-w-0">
-                <p v-if="isLoadingStats" class="h-5 bg-gray-200/80 dark:bg-white/10 rounded w-8 mx-auto animate-pulse" />
+              <div class="w-px bg-gray-200/80 dark:bg-gray-700/60" />
+              <div class="flex-1 px-2 py-3 text-center">
+                <p v-if="isLoadingStats" class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
                 <p v-else class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ totalCustomers }}</p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Customers</p>
+                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Customers</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </aside>
 
-      <div class="space-y-4 lg:col-span-2">
-        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-          <div>
-            <p v-if="isStaff" class="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Staff</p>
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ isStaff ? 'Staff profile' : 'Business profile' }}</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ isStaff ? 'Your details as a team member' : 'Update your business details' }}</p>
-          </div>
-          <div v-if="!isEditingPersonalInfo">
-            <button @click="enableEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Edit</button>
-          </div>
-          <div v-else class="flex gap-1.5">
-            <button @click="cancelEditing('personal')" class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button @click="savePersonalInfo" class="btn-primary btn-primary-sm">Save changes</button>
-          </div>
-        </div>
-        <div class="p-3 sm:p-4">
-          <!-- Super admin: business name + contact -->
-          <div v-if="!isStaff" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="space-y-4 sm:space-y-5 lg:col-span-8 xl:col-span-9">
+        <DashboardSettingsPanel
+          :title="isStaff ? 'Staff profile' : 'Business profile'"
+          :subtitle="isStaff ? 'Your details as a team member' : 'Update your business contact information'"
+        >
+          <template #actions>
+            <button v-if="!isEditingPersonalInfo" type="button" :class="editLinkClass" @click="enableEditing('personal')">Edit</button>
+            <template v-else>
+              <button type="button" :class="cancelLinkClass" @click="cancelEditing('personal')">Cancel</button>
+              <button type="button" :class="editLinkClass" @click="savePersonalInfo">Save</button>
+            </template>
+          </template>
+
+          <div v-if="!isStaff" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Business name</label>
-              <input v-model="profileData.businessName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Your business or store name" />
+              <label :class="labelClass">Business name</label>
+              <input v-model="profileData.businessName" type="text" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Your business or store name" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Enter email" />
+              <label :class="labelClass">Email</label>
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Enter email" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Business phone" />
+              <label :class="labelClass">Phone</label>
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Business phone" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Tell customers about your business" />
+              <label :class="labelClass">Bio</label>
+              <textarea v-model="profileData.bio" rows="3" :disabled="!isEditingPersonalInfo" :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']" placeholder="Tell customers about your business" />
             </div>
           </div>
-          <!-- Staff: personal name + contact -->
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
-              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="First name" />
+              <label :class="labelClass">First name</label>
+              <input v-model="profileData.firstName" type="text" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="First name" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Last name</label>
-              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Last name" />
+              <label :class="labelClass">Last name</label>
+              <input v-model="profileData.lastName" type="text" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Last name" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
-              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Work email" />
+              <label :class="labelClass">Email</label>
+              <input v-model="profileData.email" type="email" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Work email" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone</label>
-              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Phone" />
+              <label :class="labelClass">Phone</label>
+              <input v-model="profileData.phone" type="tel" :disabled="!isEditingPersonalInfo" :class="inputClass(isEditingPersonalInfo)" placeholder="Phone" />
             </div>
             <div class="sm:col-span-2">
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bio</label>
-              <textarea v-model="profileData.bio" rows="2" :disabled="!isEditingPersonalInfo" :class="['w-full px-3 py-2 text-xs rounded-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30', isEditingPersonalInfo ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400' : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed']" placeholder="Optional note" />
+              <label :class="labelClass">Bio</label>
+              <textarea v-model="profileData.bio" rows="3" :disabled="!isEditingPersonalInfo" :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']" placeholder="Optional note" />
             </div>
           </div>
-        </div>
-        </div>
+        </DashboardSettingsPanel>
 
-        <!-- Super admin: receipt legal / policy text (shown on all receipts) -->
-        <div v-if="!isStaff" class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-            <div>
-              <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Receipt terms & policies</h2>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Sales, refunds, and warranty, shown on printed and PDF receipts for your store
-              </p>
-            </div>
-            <div v-if="!isEditingReceiptPolicies">
-              <button
-                type="button"
-                class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
-                @click="startEditingReceiptPolicies"
-              >
-                Edit
-              </button>
-            </div>
-            <div v-else class="flex gap-1.5">
-              <button
-                type="button"
-                class="px-3 py-1.5 text-xs font-medium rounded-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                @click="cancelEditingReceiptPolicies"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                class="btn-primary btn-primary-sm"
-                @click="saveReceiptPolicies"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-          <div class="p-3 sm:p-4 space-y-4">
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Sales terms & conditions</label>
-              <textarea
-                v-model="receiptPoliciesForm.salesTerms"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. All sales are final unless otherwise stated; prices include/exclude VAT…"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Refund policy</label>
-              <textarea
-                v-model="receiptPoliciesForm.refundPolicy"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. Refunds within 7 days with receipt; opened items may be excluded…"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Warranty policy</label>
-              <textarea
-                v-model="receiptPoliciesForm.warrantyPolicy"
-                rows="4"
-                :disabled="!isEditingReceiptPolicies"
-                :class="policyTextareaClass"
-                placeholder="e.g. Manufacturer warranty applies; service warranty terms…"
-              />
-            </div>
-          </div>
-        </div>
+        <DashboardSettingsPanel
+          v-if="!isStaff"
+          title="Receipt terms & policies"
+          subtitle="Shown on printed and PDF receipts for your store."
+        >
+          <template #actions>
+            <button v-if="!isEditingReceiptPolicies" type="button" :class="editLinkClass" @click="startEditingReceiptPolicies">Edit</button>
+            <template v-else>
+              <button type="button" :class="cancelLinkClass" @click="cancelEditingReceiptPolicies">Cancel</button>
+              <button type="button" :class="editLinkClass" @click="saveReceiptPolicies">Save</button>
+            </template>
+          </template>
 
-        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
-          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Account settings</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your account preferences</p>
-          </div>
-          <div class="space-y-0 p-3 sm:p-4">
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <LanguageIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Language</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.language }}</p>
-                </div>
-              </div>
-              <button @click="showLanguageModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+          <div class="space-y-4">
+            <div>
+              <label :class="labelClass">Sales terms & conditions</label>
+              <textarea v-model="receiptPoliciesForm.salesTerms" rows="4" :disabled="!isEditingReceiptPolicies" :class="policyTextareaClass" placeholder="e.g. All sales are final unless otherwise stated…" />
             </div>
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <GlobeAltIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Region</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.region }}</p>
-                </div>
-              </div>
-              <button @click="showRegionModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+            <div>
+              <label :class="labelClass">Refund policy</label>
+              <textarea v-model="receiptPoliciesForm.refundPolicy" rows="4" :disabled="!isEditingReceiptPolicies" :class="policyTextareaClass" placeholder="e.g. Refunds within 7 days with receipt…" />
             </div>
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <CurrencyDollarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Currency</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.currency }}</p>
-                </div>
-              </div>
-              <button @click="showCurrencyModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
-            </div>
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <BellIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Notifications</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.notifications }}</p>
-                </div>
-              </div>
-              <button @click="showNotificationsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Manage</button>
-            </div>
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <MoonIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Theme</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.theme }}</p>
-                </div>
-              </div>
-              <button @click="showThemeModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
-            </div>
-            <div class="flex items-center justify-between py-2.5">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
-                  <CalendarIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                </div>
-                <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Timezone</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ accountSettings.timezone }}</p>
-                </div>
-              </div>
-              <button @click="showTimezoneModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">Change</button>
+            <div>
+              <label :class="labelClass">Warranty policy</label>
+              <textarea v-model="receiptPoliciesForm.warrantyPolicy" rows="4" :disabled="!isEditingReceiptPolicies" :class="policyTextareaClass" placeholder="e.g. Manufacturer warranty applies…" />
             </div>
           </div>
-        </div>
+        </DashboardSettingsPanel>
 
-        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
-          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Security</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage your security settings</p>
+        <DashboardSettingsPanel title="Preferences" subtitle="Language, region, currency, and display." compact>
+          <div class="space-y-0">
+            <div v-for="pref in preferenceRows" :key="pref.key" :class="[settingRowClass, pref.key === 'timezone' ? '!border-0' : '']">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                  <component :is="pref.icon" class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ pref.label }}</p>
+                  <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ pref.value }}</p>
+                </div>
+              </div>
+              <button type="button" :class="editLinkClass" @click="pref.action">{{ pref.actionLabel }}</button>
+            </div>
           </div>
-          <div class="space-y-0 p-3 sm:p-4">
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
+        </DashboardSettingsPanel>
+
+        <DashboardSettingsPanel title="Security" subtitle="Password, two-factor auth, and active sessions." compact>
+          <div class="space-y-0">
+            <div :class="settingRowClass">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
                   <KeyIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">Last changed 30 days ago</p>
+                  <p class="text-[11px] text-gray-500 dark:text-gray-400">Update your sign-in password</p>
                 </div>
               </div>
-              <button @click="showPasswordModal = true" class="btn-primary btn-primary-sm">Change</button>
+              <button type="button" :class="editLinkClass" @click="showPasswordModal = true">Change</button>
             </div>
-            <div class="flex items-center justify-between border-b border-gray-100/90 py-2.5 dark:border-gray-800/60">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
+            <div :class="settingRowClass">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
                   <ShieldCheckIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-Factor Authentication</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
+                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-factor authentication</p>
+                  <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
                 </div>
               </div>
-              <button @click="handle2FAToggle" :class="['px-3 py-1.5 text-xs font-medium rounded-sm transition-colors', securitySettings.twoFactor ? 'bg-red-600 hover:bg-red-700 text-white' : 'ring-1 ring-gray-200/80 dark:ring-gray-600/80 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300']">{{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}</button>
+              <button
+                type="button"
+                :class="securitySettings.twoFactor ? 'inline-flex h-8 items-center rounded-lg bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700' : editLinkClass"
+                @click="handle2FAToggle"
+              >
+                {{ securitySettings.twoFactor ? 'Disable' : 'Enable' }}
+              </button>
             </div>
-            <div class="flex items-center justify-between py-2.5">
-              <div class="flex items-center gap-2.5">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50">
+            <div :class="[settingRowClass, '!border-0']">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
                   <DevicePhoneMobileIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </div>
                 <div>
                   <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
+                  <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
                 </div>
               </div>
-              <button @click="showSessionsModal = true" class="px-3 py-1.5 text-xs font-medium rounded-sm text-primary-500 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">View all</button>
+              <button type="button" :class="editLinkClass" @click="showSessionsModal = true">View all</button>
             </div>
           </div>
-        </div>
+        </DashboardSettingsPanel>
 
-        <div
+        <DashboardSettingsPanel
           v-if="storeInfo.storeName || isLoadingProfile"
-          class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card"
+          title="Store information"
+          subtitle="Branch details from onboarding."
         >
-          <div class="border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-            <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Store information</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your store details from onboarding</p>
-          </div>
-          <div class="p-3 sm:p-4">
             <div v-if="isLoadingProfile" class="space-y-4">
               <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
               <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
               <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
             </div>
             <div v-else-if="storeInfo.storeName" class="space-y-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Branch name</p>
+                  <p :class="labelClass">Branch name</p>
                   <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
                 </div>
                 <div v-if="storeInfo.storeEmail">
@@ -366,31 +243,22 @@
                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address</p>
                 <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
               </div>
-              <div class="pt-4 border-t border-gray-200/80 dark:border-gray-700/80">
-                <NuxtLink to="/dashboard/settings" class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:underline inline-flex items-center gap-1.5">Manage store settings</NuxtLink>
+              <div class="border-t border-gray-100/90 pt-4 dark:border-gray-800/70">
+                <NuxtLink to="/dashboard/settings" :class="editLinkClass">Manage store settings →</NuxtLink>
               </div>
             </div>
-            <div v-else class="text-center py-8">
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="btn-primary btn-primary-sm inline-block">Set up store information</NuxtLink>
+            <div v-else class="py-6 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400">No store information available.</p>
+              <NuxtLink to="/dashboard/settings" class="mt-3 inline-flex" :class="editLinkClass">Set up store information</NuxtLink>
             </div>
-          </div>
-        </div>
+        </DashboardSettingsPanel>
 
-        <div class="overflow-hidden rounded-sm bg-white/95 dark:!bg-dashboard-card">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 p-3 dark:border-gray-800/60 sm:p-4">
-            <div>
-              <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Roles & permissions</h2>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Your current role and access permissions</p>
-            </div>
-            <span
-              class="rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-xs font-medium text-primary-800 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
-            >
-              {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
-            </span>
-          </div>
-          <div class="p-3 sm:p-4 space-y-3">
-            <div class="rounded-sm border border-primary-200/60 bg-primary-50/50 p-3 dark:border-primary-500/25 dark:bg-primary-950/25">
+        <DashboardSettingsPanel
+          title="Roles & permissions"
+          subtitle="Your current role and access permissions."
+          :badge="profileData.role === 'staff' ? 'Staff' : profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User'"
+        >
+            <div class="rounded-lg border border-primary-200/60 bg-primary-50/40 p-3 dark:border-primary-500/25 dark:bg-primary-950/20">
               <p class="mb-1.5 text-xs font-medium text-gray-900 dark:text-gray-100">
                 {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
               </p>
@@ -432,8 +300,7 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+        </DashboardSettingsPanel>
       </div>
     </div>
   </div>
@@ -881,7 +748,18 @@ useHead({
   title: 'Profile - Storvv',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
+const {
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+  panelClass,
+  profileStatBarClass,
+  labelClass,
+  inputClass,
+  editLinkClass,
+  cancelLinkClass,
+  settingRowClass,
+} = useDashboardSettingsChrome()
 
 // Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person
 const profileData = reactive({
@@ -920,10 +798,8 @@ const backupReceiptPolicies = reactive({
 const isEditingReceiptPolicies = ref(false)
 
 const policyTextareaClass = computed(() => [
-  'w-full px-3 py-2 text-xs rounded-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary-500/30 min-h-[5rem]',
-  isEditingReceiptPolicies.value
-    ? 'bg-white dark:bg-gray-800 ring-1 ring-gray-200/80 dark:ring-gray-600/80 text-gray-900 dark:text-gray-100 placeholder-gray-400'
-    : 'bg-gray-100 dark:bg-gray-800/80 ring-1 ring-gray-200/60 dark:ring-gray-600/60 text-gray-500 cursor-not-allowed',
+  inputClass(isEditingReceiptPolicies.value),
+  'min-h-[5rem] resize-y',
 ])
 
 // Edit state
@@ -1379,6 +1255,15 @@ const show2FADisableModal = ref(false)
 const disable2FAPassword = ref('')
 const isDisabling2FA = ref(false)
 const disable2FAError = ref('')
+
+const preferenceRows = computed(() => [
+  { key: 'language', label: 'Language', value: accountSettings.language, icon: LanguageIcon, actionLabel: 'Change', action: () => { showLanguageModal.value = true } },
+  { key: 'region', label: 'Region', value: accountSettings.region, icon: GlobeAltIcon, actionLabel: 'Change', action: () => { showRegionModal.value = true } },
+  { key: 'currency', label: 'Currency', value: accountSettings.currency, icon: CurrencyDollarIcon, actionLabel: 'Change', action: () => { showCurrencyModal.value = true } },
+  { key: 'notifications', label: 'Notifications', value: accountSettings.notifications, icon: BellIcon, actionLabel: 'Manage', action: () => { showNotificationsModal.value = true } },
+  { key: 'theme', label: 'Theme', value: accountSettings.theme, icon: MoonIcon, actionLabel: 'Change', action: () => { showThemeModal.value = true } },
+  { key: 'timezone', label: 'Timezone', value: accountSettings.timezone, icon: CalendarIcon, actionLabel: 'Change', action: () => { showTimezoneModal.value = true } },
+])
 
 // Functions
 const enableEditing = (section: string) => {

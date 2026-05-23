@@ -27,8 +27,9 @@
           </template>
         </p>
       </template>
-      <template v-if="canManageDepartments" #actions>
+      <template #actions>
         <Button
+          v-if="canManageDepartments"
           variant="primary"
           size="sm"
           :icon="PlusIcon"

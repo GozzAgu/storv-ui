@@ -3715,4 +3715,5 @@ const loadItems = async () => {
     isLoadingItems.value = false
   }
 }
+
 </script>
