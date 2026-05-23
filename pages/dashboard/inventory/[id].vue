@@ -307,7 +307,7 @@
             :class="[
               isFullscreen
                 ? 'flex min-h-0 flex-1 flex-col overflow-hidden'
-                : 'data-table-shell max-sm:!rounded-none max-sm:!bg-transparent dark:max-sm:!bg-transparent',
+                : 'data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden',
             ]"
           >
         <!-- Desktop toolbar -->
@@ -482,7 +482,9 @@
         </Button>
       </div>
       <template v-else>
-      <div :class="isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'contents'">
+      <div
+        :class="isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'flex min-h-0 flex-1 flex-col'"
+      >
       <!-- Mobile: card list when has items -->
       <div
         class="block space-y-2 sm:hidden"
@@ -551,10 +553,13 @@
       </div>
       <!-- Desktop: table when has items -->
       <div
-        class="hidden sm:block"
-        :class="isFullscreen ? 'min-h-0 flex-1 overflow-auto px-4 pb-2 pt-2 lg:px-8' : 'overflow-x-auto'"
+        class="hidden min-h-0 flex-1 flex-col sm:flex"
+        :class="isFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : ''"
       >
-        <table class="dashboard-table">
+        <div
+          class="min-h-0 flex-1 overflow-x-auto"
+        >
+        <table class="dashboard-table min-w-full">
           <thead :class="isFullscreen ? 'sticky top-0 z-10' : ''">
               <tr>
               <th
@@ -738,7 +743,15 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
+      <DashboardTablePagination
+        v-if="paginationTotal > 0 && !isFullscreen"
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="paginationTotal"
+        @page-change="handlePageChange"
+      />
       </div>
       </template>
 
@@ -756,15 +769,6 @@
         </div>
       </Teleport>
     </template>
-
-    <DashboardFixedFooter v-if="paginationTotal > 0 && !isFullscreen" :sidebar-collapsed="sidebarCollapsed">
-      <Pagination
-        :current-page="currentPage"
-        :items-per-page="itemsPerPage"
-        :total="paginationTotal"
-        @page-change="handlePageChange"
-      />
-    </DashboardFixedFooter>
 
     <!-- Hidden file input for import -->
     <input
@@ -1352,8 +1356,6 @@ import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
 import Modal from '~/components/ui/Modal.vue'
 import SidePanel from '~/components/ui/SidePanel.vue'
-import Pagination from '~/components/ui/Pagination.vue'
-import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type TemplateField, INVENTORY_FIRESTORE_PAGE_SIZE } from '~/stores/inventory'
@@ -1421,42 +1423,6 @@ const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
-const sidebarCollapsed = ref(false)
-
-// Load sidebar state from localStorage
-if (import.meta.client) {
-  try {
-    const savedState = localStorage.getItem('sidebarCollapsed')
-    if (savedState !== null) {
-      sidebarCollapsed.value = savedState === 'true'
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// Watch for sidebar state changes
-if (import.meta.client) {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
-      sidebarCollapsed.value = e.newValue === 'true'
-    }
-  })
-  // Same-tab sidebar toggles don’t fire `storage`; poll lightly (100ms was needlessly hot on heavy pages).
-  setInterval(() => {
-    try {
-      const savedState = localStorage.getItem('sidebarCollapsed')
-      if (savedState !== null) {
-        const newValue = savedState === 'true'
-        if (newValue !== sidebarCollapsed.value) {
-          sidebarCollapsed.value = newValue
-        }
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }, 1000)
-}
 const { headerBtnClass, iconBtnClass } = useDashboardPageChrome()
 
 const searchQuery = ref('')

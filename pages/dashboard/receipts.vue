@@ -1006,7 +1006,8 @@
             {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
           </p>
         </div>
-        <div v-else class="overflow-x-auto">
+        <div v-else class="flex min-h-0 flex-1 flex-col">
+          <div class="min-h-0 flex-1 overflow-x-auto">
           <table class="dashboard-table min-w-full">
             <thead>
               <tr>
@@ -1147,17 +1148,16 @@
               </template>
             </tbody>
           </table>
+          </div>
+          <DashboardTablePagination
+            v-if="filteredCustomers.length > 0"
+            :current-page="customersCurrentPage"
+            :items-per-page="customersItemsPerPage"
+            :total="filteredCustomers.length"
+            @page-change="handleCustomersPageChange"
+          />
         </div>
       </div>
-
-      <DashboardFixedFooter v-if="filteredCustomers.length > 0" :sidebar-collapsed="sidebarCollapsed">
-        <Pagination
-          :current-page="customersCurrentPage"
-          :items-per-page="customersItemsPerPage"
-          :total="filteredCustomers.length"
-          @page-change="handleCustomersPageChange"
-        />
-      </DashboardFixedFooter>
     </template>
 
         </div>
@@ -1314,8 +1314,6 @@ import {
   EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
-import Pagination from '~/components/ui/Pagination.vue'
-import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
@@ -1557,8 +1555,6 @@ const getInitialPage = (): number => {
 }
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(100)
-const sidebarCollapsed = ref(false)
-
 /** Expandable full line-item details (desktop secondary row + mobile accordion) */
 const expandedReceiptLineItems = ref<Record<string, boolean>>({})
 const receiptLineItemsDetailColspan = computed(() => (canDeleteReceipts.value ? 10 : 9))
@@ -1798,41 +1794,6 @@ const handleCustomersPageChange = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-
-// Load sidebar state from localStorage
-if (import.meta.client) {
-  try {
-    const savedState = localStorage.getItem('sidebarCollapsed')
-    if (savedState !== null) {
-      sidebarCollapsed.value = savedState === 'true'
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// Watch for sidebar state changes
-if (import.meta.client) {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
-      sidebarCollapsed.value = e.newValue === 'true'
-    }
-  })
-  // Also check periodically for changes (since storage event doesn't fire on same window)
-  setInterval(() => {
-    try {
-      const savedState = localStorage.getItem('sidebarCollapsed')
-      if (savedState !== null) {
-        const newValue = savedState === 'true'
-        if (newValue !== sidebarCollapsed.value) {
-          sidebarCollapsed.value = newValue
-        }
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }, 100)
-}
 
 // Filter receipts by current store for all computed properties
 const currentStoreId = computed(() => storesStore.currentStoreId)

@@ -290,7 +290,7 @@
               isStaffFullscreen ? 'min-h-0 overflow-auto' : 'hidden min-h-0 overflow-x-auto md:block',
             ]"
           >
-          <table class="dashboard-table">
+          <table class="dashboard-table min-w-full">
             <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
               <tr>
                 <th v-if="canManageDepartments" class="w-10 text-center">
@@ -415,6 +415,14 @@
           </div>
         </div>
 
+        <DashboardTablePagination
+          v-if="staff.length > 0 && !isStaffFullscreen"
+          :current-page="staffCurrentPage"
+          :items-per-page="staffItemsPerPage"
+          :total="staff.length"
+          @page-change="handleStaffPageChange"
+        />
+
         <!-- Fullscreen: pagination pinned inside overlay -->
         <DashboardTablePagination
           v-if="isStaffFullscreen && staff.length > 0"
@@ -428,15 +436,6 @@
       </div>
       </div>
     </Teleport>
-
-    <DashboardFixedFooter v-if="staff.length > 0 && !isStaffFullscreen" :sidebar-collapsed="sidebarCollapsed">
-      <Pagination
-        :current-page="staffCurrentPage"
-        :items-per-page="staffItemsPerPage"
-        :total="staff.length"
-        @page-change="handleStaffPageChange"
-      />
-    </DashboardFixedFooter>
 
     <!-- Bulk Delete Staff Modal -->
     <Modal
@@ -514,7 +513,6 @@ import {
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
-import Pagination from '~/components/ui/Pagination.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
 import {
@@ -522,7 +520,6 @@ import {
   staffRoleBadgeClass,
   staffStatusBadgeClass,
 } from '~/utils/table-badge-styles'
-import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
@@ -615,7 +612,6 @@ const departmentsListPath = computed(() =>
     storesStore.stores[0]?.id
   )
 )
-const sidebarCollapsed = ref(false)
 const isStaffFullscreen = ref(false)
 const openStaffMenuId = ref<string | null>(null)
 
@@ -643,41 +639,6 @@ watch(isStaffFullscreen, (fullscreen) => {
     }
   }
 })
-
-// Load sidebar state from localStorage
-if (import.meta.client) {
-  try {
-    const savedState = localStorage.getItem('sidebarCollapsed')
-    if (savedState !== null) {
-      sidebarCollapsed.value = savedState === 'true'
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// Watch for sidebar state changes
-if (import.meta.client) {
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
-      sidebarCollapsed.value = e.newValue === 'true'
-    }
-  })
-  // Also check periodically for changes (since storage event doesn't fire on same window)
-  setInterval(() => {
-    try {
-      const savedState = localStorage.getItem('sidebarCollapsed')
-      if (savedState !== null) {
-        const newValue = savedState === 'true'
-        if (newValue !== sidebarCollapsed.value) {
-          sidebarCollapsed.value = newValue
-        }
-      }
-    } catch (e) {
-      // Ignore
-    }
-  }, 100)
-}
 
 // Check if current user is staff (limited permissions)
 const isStaff = computed(() => userStore.userData?.role === 'staff')

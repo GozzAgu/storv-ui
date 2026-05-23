@@ -83,7 +83,8 @@
           No stock loans in this filter.
         </div>
 
-        <div v-else class="overflow-x-auto">
+        <div v-else class="flex min-h-0 flex-1 flex-col">
+          <div class="min-h-0 flex-1 overflow-x-auto">
           <table class="dashboard-table min-w-full">
             <thead>
               <tr>
@@ -95,7 +96,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="loan in filteredLoans" :key="loan.id">
+              <tr v-for="loan in paginatedLoans" :key="loan.id">
                 <td>
                   <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-50">{{ loan.partyName }}</p>
                   <p v-if="loan.partyPhone" class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">{{ loan.partyPhone }}</p>
@@ -163,6 +164,14 @@
               </tr>
             </tbody>
           </table>
+          </div>
+          <DashboardTablePagination
+            v-if="filteredLoans.length > 0"
+            :current-page="currentPage"
+            :items-per-page="itemsPerPage"
+            :total="filteredLoans.length"
+            @page-change="handlePageChange"
+          />
         </div>
       </div>
     </template>
@@ -325,6 +334,21 @@ const loanStatusTabs = [
 
 const statusFilter = ref<'active' | 'returned' | 'sold' | 'all'>('active')
 
+const getInitialPage = (): number => {
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem('seller-loans-page')
+      return saved ? parseInt(saved, 10) : 1
+    } catch {
+      return 1
+    }
+  }
+  return 1
+}
+
+const currentPage = ref(getInitialPage())
+const itemsPerPage = ref(100)
+
 const filteredLoans = computed(() => {
   const rows = sellerLoansStore.loans
   if (statusFilter.value === 'all') return rows
@@ -332,6 +356,45 @@ const filteredLoans = computed(() => {
   if (statusFilter.value === 'sold') return rows.filter((l) => l.status === 'sold')
   return rows.filter((l) => l.status === 'returned')
 })
+
+const paginatedLoans = computed(() => {
+  const list = filteredLoans.value
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  return list.slice(start, start + itemsPerPage.value)
+})
+
+function handlePageChange(page: number) {
+  currentPage.value = page
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('seller-loans-page', String(page))
+    } catch {
+      // ignore
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
+
+watch(statusFilter, () => {
+  currentPage.value = 1
+  if (import.meta.client) {
+    try {
+      localStorage.setItem('seller-loans-page', '1')
+    } catch {
+      // ignore
+    }
+  }
+})
+
+watch(
+  () => filteredLoans.value.length,
+  (total) => {
+    const maxPage = Math.max(1, Math.ceil(total / itemsPerPage.value) || 1)
+    if (currentPage.value > maxPage) {
+      currentPage.value = maxPage
+    }
+  }
+)
 
 function formatWhen(v: Date | undefined) {
   if (!v) return '-'
