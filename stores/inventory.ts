@@ -163,18 +163,9 @@ export interface InventoryItem {
   [key: string]: any // Dynamic fields based on template
   dateIn?: Date | string // Date when item was added (from createdAt)
   dateOut?: Date | string // Date when item was sold (from receipt generation)
-<<<<<<< HEAD
-  /** Set while a receipt is unpaid; cleared when payment completes and item is sold. */
-  outstandingReceiptId?: string
-  outstandingReceiptNumber?: string
-  outstandingAt?: Date | string
-  /** Bulk folders: units reserved on this row until payment completes. */
-  outstandingQtySold?: number
-=======
   /** Set while a balance-due receipt holds this unit; cleared when paid in full or order cancelled. */
   pendingSaleReceiptId?: string
   pendingSaleAt?: Date | string
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
   swapIn?: boolean // Indicates if this item was swapped in by a customer
   swapInReceiptId?: string // Receipt ID associated with this swap-in
   // Discount fields
@@ -1804,9 +1795,7 @@ export const useInventoryStore = defineStore('inventory', {
           folderItems.forEach(item => {
             const dateOutValue = item.dateOut
             const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
-            const onOutstanding =
-              item.outstandingReceiptId != null && `${item.outstandingReceiptId}`.trim() !== ''
-            if (!hasDateOut && !onOutstanding) {
+            if (!hasDateOut) {
               availableCount++
             }
           })
@@ -1822,9 +1811,6 @@ export const useInventoryStore = defineStore('inventory', {
             const dateOutValue = item.dateOut
             const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
             if (hasDateOut) return
-            const onOutstanding =
-              item.outstandingReceiptId != null && `${item.outstandingReceiptId}`.trim() !== ''
-            if (onOutstanding) return
 
             // For bulk items, check quantity field
             if (quantityField && item[quantityField] !== undefined) {
@@ -1876,25 +1862,11 @@ export const useInventoryStore = defineStore('inventory', {
     },
 
     /**
-<<<<<<< HEAD
-     * Credit / outstanding sale: reserve lines without marking sold (no dateOut, no stock decrement).
-     */
-    async markItemsOutstandingForReceipt(
-      folderId: string,
-      lines: { itemId: string; quantitySold: number }[],
-      options: {
-        hasSerialNumbers: boolean
-        receiptId: string
-        receiptNumber?: string
-        storeId?: string
-      },
-=======
      * Hold inventory for a balance-due receipt (not sold until paid in full).
      */
     async reserveInventoryForBalanceDue(
       receiptId: string,
       itemIds: string[],
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) throw new Error('Firestore not initialized')
@@ -1905,126 +1877,6 @@ export const useInventoryStore = defineStore('inventory', {
       const userId = await getQueryUserId()
       if (!userId) throw new Error('User ID not available')
 
-<<<<<<< HEAD
-      const storeId = options.storeId ?? (await getCurrentStoreId())
-      if (!storeId) throw new Error('No store selected')
-
-      const now = serverTimestamp()
-      const merged = new Map<string, number>()
-      for (const line of lines) {
-        merged.set(line.itemId, (merged.get(line.itemId) ?? 0) + line.quantitySold)
-      }
-
-      try {
-        for (const [itemId, qtySold] of merged) {
-          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
-          const snap = await getDoc(itemRef)
-          if (!snap.exists()) {
-            throw new Error(`Inventory item not found: ${itemId}`)
-          }
-          const existingOutstanding = (snap.data() as Record<string, unknown>)?.outstandingReceiptId
-          if (
-            existingOutstanding != null &&
-            `${existingOutstanding}`.trim() !== '' &&
-            `${existingOutstanding}`.trim() !== options.receiptId
-          ) {
-            throw new Error(`Item ${itemId} is already on another outstanding receipt.`)
-          }
-
-          const patch: Record<string, unknown> = {
-            outstandingReceiptId: options.receiptId,
-            outstandingReceiptNumber: options.receiptNumber ?? '',
-            outstandingAt: now,
-            updatedAt: now,
-          }
-          if (!options.hasSerialNumbers) {
-            patch.outstandingQtySold = qtySold
-          }
-
-          await updateDoc(itemRef, patch)
-
-          const folderItems = this.items[folderId]
-          if (folderItems) {
-            const index = folderItems.findIndex((item) => item.id === itemId)
-            if (index > -1 && folderItems[index]) {
-              const row = folderItems[index] as Record<string, unknown>
-              row.outstandingReceiptId = options.receiptId
-              row.outstandingReceiptNumber = options.receiptNumber ?? ''
-              row.outstandingAt = new Date()
-              if (!options.hasSerialNumbers) row.outstandingQtySold = qtySold
-              folderItems[index].updatedAt = new Date()
-            }
-          }
-        }
-
-        const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
-        await logActivity({
-          action: 'updated',
-          entityType: 'items_batch',
-          entityId: folderId,
-          entityName: `${merged.size} item${merged.size !== 1 ? 's' : ''} marked outstanding (${options.receiptNumber || options.receiptId})`,
-          storeId,
-          userId: authStore.currentUser!.uid,
-          userDisplayName,
-        }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
-      } catch (error: any) {
-        console.error('Error marking items outstanding:', error)
-        throw new Error(error.message || 'Failed to mark items outstanding')
-      }
-    },
-
-    /** Cancel outstanding hold (refund before paid, or void credit sale). */
-    async clearOutstandingForReceipt(
-      folderId: string,
-      lines: { itemId: string }[],
-      options: { receiptId: string; storeId?: string },
-    ) {
-      const db = useFirestore().getFirestoreInstance()
-      if (!db) throw new Error('Firestore not initialized')
-
-      const authStore = useAuthStore()
-      if (!authStore.currentUser) throw new Error('User must be authenticated')
-
-      const userId = await getQueryUserId()
-      if (!userId) throw new Error('User ID not available')
-
-      const storeId = options.storeId ?? (await getCurrentStoreId())
-      if (!storeId) throw new Error('No store selected')
-
-      const itemIds = [...new Set(lines.map((l) => l.itemId))]
-      try {
-        for (const itemId of itemIds) {
-          const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
-          const snap = await getDoc(itemRef)
-          if (!snap.exists()) continue
-          const data = snap.data() as Record<string, unknown>
-          if (`${data.outstandingReceiptId ?? ''}`.trim() !== options.receiptId) continue
-
-          await updateDoc(itemRef, {
-            outstandingReceiptId: deleteField(),
-            outstandingReceiptNumber: deleteField(),
-            outstandingAt: deleteField(),
-            outstandingQtySold: deleteField(),
-            updatedAt: serverTimestamp(),
-          })
-
-          const folderItems = this.items[folderId]
-          if (folderItems) {
-            const index = folderItems.findIndex((item) => item.id === itemId)
-            if (index > -1 && folderItems[index]) {
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptId
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptNumber
-              delete (folderItems[index] as Record<string, unknown>).outstandingAt
-              delete (folderItems[index] as Record<string, unknown>).outstandingQtySold
-              folderItems[index].updatedAt = new Date()
-            }
-          }
-        }
-      } catch (error: any) {
-        console.error('Error clearing outstanding flags:', error)
-        throw new Error(error.message || 'Failed to clear outstanding hold')
-      }
-=======
       const storeId = await getCurrentStoreId()
       if (!storeId) throw new Error('No store selected')
 
@@ -2093,7 +1945,6 @@ export const useInventoryStore = defineStore('inventory', {
       await this.applyReceiptSaleToInventory(folderId, lines, options)
       const itemIds = lines.map((l) => l.itemId)
       await this.releaseInventoryReservation(receiptId, itemIds)
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     },
 
     /**
@@ -2103,7 +1954,7 @@ export const useInventoryStore = defineStore('inventory', {
     async applyReceiptSaleToInventory(
       folderId: string,
       lines: { itemId: string; quantitySold: number }[],
-      options: { hasSerialNumbers: boolean; storeId?: string }
+      options: { hasSerialNumbers: boolean }
     ) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
@@ -2120,16 +1971,9 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('User ID not available')
       }
 
-      const storeId = options.storeId ?? (await getCurrentStoreId())
+      const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
-      }
-
-      const outstandingClearPatch = {
-        outstandingReceiptId: deleteField(),
-        outstandingReceiptNumber: deleteField(),
-        outstandingAt: deleteField(),
-        outstandingQtySold: deleteField(),
       }
 
       const itemIdsUnique = [...new Set(lines.map((l) => l.itemId))]
@@ -2187,12 +2031,8 @@ export const useInventoryStore = defineStore('inventory', {
           await updateDoc(itemRef, {
             [resolved.fieldKey]: newQty,
             dateOut: deleteField(),
-<<<<<<< HEAD
-            ...outstandingClearPatch,
-=======
             pendingSaleReceiptId: deleteField(),
             pendingSaleAt: deleteField(),
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
             updatedAt: serverTimestamp(),
           })
 
@@ -2203,10 +2043,6 @@ export const useInventoryStore = defineStore('inventory', {
               const row = folderItems[index] as Record<string, unknown>
               row[resolved.fieldKey] = newQty
               delete folderItems[index].dateOut
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptId
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptNumber
-              delete (folderItems[index] as Record<string, unknown>).outstandingAt
-              delete (folderItems[index] as Record<string, unknown>).outstandingQtySold
               folderItems[index].updatedAt = new Date()
             }
           }
@@ -2265,13 +2101,6 @@ export const useInventoryStore = defineStore('inventory', {
         throw new Error('No store selected')
       }
 
-      const outstandingClearPatch = {
-        outstandingReceiptId: deleteField(),
-        outstandingReceiptNumber: deleteField(),
-        outstandingAt: deleteField(),
-        outstandingQtySold: deleteField(),
-      }
-
       const now = new Date()
       const soldByLoan = new Map<string, Set<string>>()
       for (const itemId of itemIds) {
@@ -2305,12 +2134,8 @@ export const useInventoryStore = defineStore('inventory', {
           const itemRef = getInventoryItemDocument(db, userId, storeId, itemId)
           batch.update(itemRef, {
             dateOut: now,
-<<<<<<< HEAD
-            ...outstandingClearPatch,
-=======
             pendingSaleReceiptId: deleteField(),
             pendingSaleAt: deleteField(),
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
             sellerLoanOutId: deleteField(),
             sellerLoanPartyName: deleteField(),
             sellerLoanPartyPhone: deleteField(),
@@ -2346,10 +2171,6 @@ export const useInventoryStore = defineStore('inventory', {
             if (index > -1 && folderItems[index]) {
               folderItems[index].dateOut = now
               folderItems[index].updatedAt = now
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptId
-              delete (folderItems[index] as Record<string, unknown>).outstandingReceiptNumber
-              delete (folderItems[index] as Record<string, unknown>).outstandingAt
-              delete (folderItems[index] as Record<string, unknown>).outstandingQtySold
               delete folderItems[index].sellerLoanOutId
               delete folderItems[index].sellerLoanPartyName
               delete folderItems[index].sellerLoanPartyPhone

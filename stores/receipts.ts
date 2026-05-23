@@ -7,39 +7,23 @@ import { getReceiptsCollection, getReceiptDocument, getQueryUserId } from '~/com
 import { useStaffStore } from './staff'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
-import { useSellerLoanOutsStore } from './sellerLoanOuts'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 import {
-<<<<<<< HEAD
-  buildPaymentEntry,
-  isReceiptFullyPaid,
-  receiptAmountPaid,
-  receiptBalanceDue,
-} from '~/utils/receipt-outstanding'
-import { isInventoryItemOutstanding, isInventoryItemSold } from '~/utils/inventory-outstanding'
-=======
   computeBalanceDue,
   isBalanceFullyPaid,
   normalizePayments,
+  paymentsForFirestore,
   roundMoney,
 } from '~/utils/receipt-balance'
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
 
 /** Avoid duplicate concurrent fetchReceipts() (layout + dashboard home + watchers). */
 let fetchReceiptsInflight: Promise<void> | null = null
 
-<<<<<<< HEAD
-export interface ReceiptPaymentEntry {
-  amount: number
-  method: string
-  date: Date | any
-=======
 export interface ReceiptPayment {
   amount: number
   method: string
   paidAt: Date | any
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
   recordedBy?: string
 }
 
@@ -97,12 +81,6 @@ export interface Receipt {
   swapInCredit?: number
   /** When payment is split across methods; amounts should sum to `total` */
   splitPayments?: Array<{ method: string; amount: number }>
-  /** Sum of recorded payments (credit / outstanding sales). */
-  amountPaid?: number
-  /** Ledger of partial payments before the sale is fully paid. */
-  paymentHistory?: ReceiptPaymentEntry[]
-  /** False while inventory is held as outstanding; true after stock is finalized. */
-  inventoryApplied?: boolean
   createdAt: Date | any
   updatedAt?: Date | any
   createdBy: string // Super admin UID (for fetching/ownership)
@@ -281,17 +259,9 @@ export const useReceiptsStore = defineStore('receipts', {
             swapInItemId: data.swapInItemId || undefined,
             swapInCredit: typeof data.swapInCredit === 'number' ? data.swapInCredit : undefined,
             amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
-<<<<<<< HEAD
-            paymentHistory: data.paymentHistory || undefined,
-            inventoryApplied:
-              typeof data.inventoryApplied === 'boolean'
-                ? data.inventoryApplied
-                : (data.status || 'completed') === 'completed',
-=======
             balanceDue: typeof data.balanceDue === 'number' ? data.balanceDue : undefined,
             payments: data.payments || undefined,
             hasSerialNumbers: data.hasSerialNumbers === true,
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
           } as Receipt
         })
 
@@ -320,8 +290,8 @@ export const useReceiptsStore = defineStore('receipts', {
       return fetchReceiptsInflight
     },
 
-    // Fetch a single receipt (optional storeId when header branch differs from receipt branch)
-    async fetchReceipt(receiptId: string, options?: { storeId?: string }) {
+    // Fetch a single receipt
+    async fetchReceipt(receiptId: string) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -338,7 +308,7 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User ID not available')
       }
       
-      const storeId = options?.storeId ?? (await getCurrentStoreId())
+      const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
       }
@@ -365,12 +335,6 @@ export const useReceiptsStore = defineStore('receipts', {
           date: data.date?.toDate ? data.date.toDate() : new Date(data.date),
           createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
           updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : (data.updatedAt ? new Date(data.updatedAt) : undefined),
-          amountPaid: typeof data.amountPaid === 'number' ? data.amountPaid : undefined,
-          paymentHistory: data.paymentHistory || undefined,
-          inventoryApplied:
-            typeof data.inventoryApplied === 'boolean'
-              ? data.inventoryApplied
-              : (data.status || 'completed') === 'completed',
         } as Receipt
       } catch (error: any) {
         console.error('Error fetching receipt:', error)
@@ -489,11 +453,7 @@ export const useReceiptsStore = defineStore('receipts', {
     },
 
     // Update a receipt
-    async updateReceipt(
-      receiptId: string,
-      updates: Partial<Omit<Receipt, 'id' | 'createdAt' | 'createdBy'>>,
-      options?: { storeId?: string },
-    ) {
+    async updateReceipt(receiptId: string, updates: Partial<Omit<Receipt, 'id' | 'createdAt' | 'createdBy'>>) {
       const db = useFirestore().getFirestoreInstance()
       if (!db) {
         throw new Error('Firestore not initialized')
@@ -525,7 +485,7 @@ export const useReceiptsStore = defineStore('receipts', {
         throw new Error('User ID not available')
       }
       
-      const storeId = options?.storeId ?? (await getCurrentStoreId())
+      const storeId = await getCurrentStoreId()
       if (!storeId) {
         throw new Error('No store selected')
       }
@@ -544,11 +504,10 @@ export const useReceiptsStore = defineStore('receipts', {
           throw new Error('Access denied')
         }
 
-        const payload = Object.fromEntries(
-          Object.entries({ ...updates, updatedAt: serverTimestamp() }).filter(([, v]) => v !== undefined),
-        )
-
-        await updateDoc(receiptRef, payload)
+        await updateDoc(receiptRef, {
+          ...updates,
+          updatedAt: serverTimestamp(),
+        })
 
         // Update local state
         const index = this.receipts.findIndex(r => r.id === receiptId)
@@ -565,93 +524,6 @@ export const useReceiptsStore = defineStore('receipts', {
       }
     },
 
-<<<<<<< HEAD
-    /**
-     * Record a partial payment; when fully paid, finalize inventory (mark sold) and complete receipt.
-     */
-    async recordReceiptPayment(
-      receiptId: string,
-      payment: { amount: number; method: string },
-      options?: { storeId?: string },
-    ) {
-      const authStore = useAuthStore()
-      const userStore = useUserStore()
-      if (!authStore.currentUser) throw new Error('User must be authenticated')
-
-      if (!userStore.userData) {
-        await userStore.fetchUserData(authStore.currentUser.uid)
-      }
-      if (userStore.userData?.role === 'staff') {
-        const staffStore = useStaffStore()
-        const member = await staffStore.fetchCurrentStaffMember()
-        if (member?.role !== 'manager') {
-          throw new Error('Only managers and super admins can record payments.')
-        }
-      }
-
-      const receipt = await this.fetchReceipt(receiptId, options)
-      if (receipt.status === 'refunded') {
-        throw new Error('Cannot record payment on a refunded receipt.')
-      }
-
-      const amount = Number(payment.amount)
-      if (!Number.isFinite(amount) || amount <= 0) {
-        throw new Error('Payment amount must be greater than zero.')
-      }
-
-      const balanceBefore = receiptBalanceDue(receipt)
-      if (amount > balanceBefore + 0.01) {
-        throw new Error(`Payment cannot exceed the remaining balance (${balanceBefore.toFixed(2)}).`)
-      }
-
-      const newPaid = receiptAmountPaid(receipt) + amount
-      const history = [...(receipt.paymentHistory || []), buildPaymentEntry(amount, payment.method)]
-      const updates: Partial<Receipt> = {
-        amountPaid: newPaid,
-        paymentHistory: history,
-      }
-
-      const inventoryStore = useInventoryStore()
-      const storeId = receipt.storeId || options?.storeId
-
-      if (isReceiptFullyPaid({ ...receipt, amountPaid: newPaid })) {
-        if (!receipt.inventoryApplied && receipt.folderId && receipt.items?.length) {
-          const firstItemId = receipt.items[0]?.itemId
-          let needsInventoryApply = true
-          if (firstItemId) {
-            const sample = await inventoryStore.fetchInventoryItemById(firstItemId, { storeId })
-            if (
-              sample &&
-              isInventoryItemSold(sample) &&
-              !isInventoryItemOutstanding(sample)
-            ) {
-              needsInventoryApply = false
-            }
-          }
-          if (needsInventoryApply) {
-            let folder = inventoryStore.getFolderById(receipt.folderId)
-            if (!folder) {
-              folder = (await inventoryStore.fetchFolder(receipt.folderId)) ?? undefined
-            }
-            const hasSerialNumbers = folder?.hasSerialNumbers ?? true
-            const saleLines = receipt.items.map((line) => ({
-              itemId: line.itemId,
-              quantitySold: hasSerialNumbers ? 1 : (line.quantity ?? 1),
-            }))
-            await inventoryStore.applyReceiptSaleToInventory(receipt.folderId, saleLines, {
-              hasSerialNumbers,
-              storeId,
-            })
-            await useSellerLoanOutsStore().fetchSellerLoanOuts(true).catch(() => {})
-          }
-        }
-        updates.status = 'completed'
-        updates.inventoryApplied = true
-      }
-
-      await this.updateReceipt(receiptId, updates, { storeId })
-      return { ...receipt, ...updates, id: receiptId } as Receipt
-=======
     async recordBalancePayment(
       receiptId: string,
       payment: { amount: number; method: string }
@@ -696,6 +568,7 @@ export const useReceiptsStore = defineStore('receipts', {
         paidAt: new Date(),
         recordedBy: authStore.currentUser.uid,
       })
+      const paymentsPayload = paymentsForFirestore(payments)
 
       const inventoryStore = useInventoryStore()
       let completed = false
@@ -703,22 +576,30 @@ export const useReceiptsStore = defineStore('receipts', {
       if (isBalanceFullyPaid(total, newPaid)) {
         const folderId = String(data.folderId || '')
         const items = (data.items as ReceiptItem[]) || []
-        const hasSerialNumbers = data.hasSerialNumbers === true
-        const saleLines = items.map((i) => ({
-          itemId: i.itemId,
-          quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
-        }))
+        let hasSerialNumbers = data.hasSerialNumbers === true
+        if (!hasSerialNumbers && folderId) {
+          const folder = inventoryStore.getFolderById(folderId)
+          if (folder?.hasSerialNumbers) hasSerialNumbers = true
+        }
+        const saleLines = items
+          .filter((i) => i?.itemId)
+          .map((i) => ({
+            itemId: i.itemId,
+            quantitySold: hasSerialNumbers ? 1 : Number(i.quantity) || 1,
+          }))
         if (folderId && saleLines.length > 0) {
           await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
             hasSerialNumbers,
           })
         }
+        const paymentMethod =
+          payment.method.trim() || String(data.paymentMethod || '').trim() || 'Cash'
         await updateDoc(receiptRef, {
           status: 'completed',
           amountPaid: newPaid,
           balanceDue: 0,
-          payments,
-          paymentMethod: payment.method.trim() || data.paymentMethod || 'Cash',
+          payments: paymentsPayload,
+          paymentMethod,
           updatedAt: serverTimestamp(),
           completedAt: serverTimestamp(),
         })
@@ -727,7 +608,7 @@ export const useReceiptsStore = defineStore('receipts', {
         await updateDoc(receiptRef, {
           amountPaid: newPaid,
           balanceDue,
-          payments,
+          payments: paymentsPayload,
           updatedAt: serverTimestamp(),
         })
       }
@@ -794,7 +675,6 @@ export const useReceiptsStore = defineStore('receipts', {
           updatedAt: new Date(),
         }
       }
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     },
 
     // Optimistically remove receipt from local state (for undo flow)

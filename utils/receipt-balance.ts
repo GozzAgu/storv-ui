@@ -42,11 +42,40 @@ export function normalizePayments(raw: unknown): ReceiptPayment[] {
     } else {
       date = new Date(paidAt as string)
     }
-    return {
+    const entry: ReceiptPayment = {
       amount: Number(row.amount) || 0,
       method: String(row.method || ''),
       paidAt: date,
-      recordedBy: row.recordedBy ? String(row.recordedBy) : undefined,
     }
+    if (row.recordedBy) entry.recordedBy = String(row.recordedBy)
+    return entry
+  })
+}
+
+/** Firestore rejects `undefined` anywhere in update payloads (including nested payment rows). */
+export function paymentsForFirestore(payments: ReceiptPayment[]): Array<{
+  amount: number
+  method: string
+  paidAt: Date
+  recordedBy?: string
+}> {
+  return payments.map((p) => {
+    const row: {
+      amount: number
+      method: string
+      paidAt: Date
+      recordedBy?: string
+    } = {
+      amount: roundMoney(Number(p.amount) || 0),
+      method: String(p.method || 'Cash').trim() || 'Cash',
+      paidAt:
+        p.paidAt instanceof Date
+          ? p.paidAt
+          : p.paidAt && typeof p.paidAt === 'object' && 'toDate' in p.paidAt && typeof p.paidAt.toDate === 'function'
+            ? p.paidAt.toDate()
+            : new Date(p.paidAt as string),
+    }
+    if (p.recordedBy) row.recordedBy = p.recordedBy
+    return row
   })
 }

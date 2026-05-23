@@ -60,9 +60,6 @@
         :class="activeTab === 'outstanding' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
         @click="activeTab = 'outstanding'"
       >
-<<<<<<< HEAD
-        Outstanding payments
-=======
         <span class="inline-flex items-center gap-1.5">
           Outstanding
           <span
@@ -72,7 +69,6 @@
             {{ outstandingReceipts.length }}
           </span>
         </span>
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
         <span
           class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
           :class="activeTab === 'outstanding' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
@@ -863,13 +859,8 @@
       />
     </template>
 
-<<<<<<< HEAD
-    <!-- Outstanding payments tab -->
-    <template v-if="activeTab === 'outstanding'">
-=======
     <!-- Outstanding (balance due) tab -->
     <template v-else-if="activeTab === 'outstanding'">
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
       <div class="data-table-shell flex min-h-0 flex-1 flex-col">
         <DataTableToolbar v-if="!receiptsStore.loading">
           <template #heading>
@@ -878,54 +869,6 @@
                 Outstanding payments
               </h2>
               <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-<<<<<<< HEAD
-                <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">{{ outstandingReceipts.length }} open</span>
-                <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
-                <span class="tabular-nums">{{ formatCurrency(outstandingTotalBalance) }} balance due</span>
-              </p>
-            </div>
-          </template>
-        </DataTableToolbar>
-        <div
-          v-if="outstandingReceipts.length === 0 && !receiptsStore.loading"
-          class="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center"
-        >
-          <p class="text-sm text-gray-500 dark:text-gray-400">No outstanding payments for this branch.</p>
-        </div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full min-w-[640px] text-left text-xs">
-            <thead class="border-b border-gray-200/80 text-[10px] font-medium uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              <tr>
-                <th class="px-4 py-2.5 sm:px-5">Receipt</th>
-                <th class="px-4 py-2.5">Customer</th>
-                <th class="px-4 py-2.5 text-right">Total</th>
-                <th class="px-4 py-2.5 text-right">Paid</th>
-                <th class="px-4 py-2.5 text-right">Balance</th>
-                <th class="px-4 py-2.5 sm:px-5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800/80">
-              <tr
-                v-for="receipt in outstandingReceipts"
-                :key="receipt.id"
-                class="hover:bg-gray-50/80 dark:hover:bg-gray-800/30"
-              >
-                <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100 sm:px-5">{{ receipt.receiptNumber }}</td>
-                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ receipt.customerName }}</td>
-                <td class="px-4 py-3 text-right tabular-nums">{{ formatCurrency(receipt.total) }}</td>
-                <td class="px-4 py-3 text-right tabular-nums">{{ formatCurrency(outstandingAmountPaid(receipt)) }}</td>
-                <td class="px-4 py-3 text-right tabular-nums font-medium text-amber-800 dark:text-amber-200">
-                  {{ formatCurrency(outstandingBalanceDue(receipt)) }}
-                </td>
-                <td class="px-4 py-3 text-right sm:px-5">
-                  <button
-                    type="button"
-                    class="rounded-sm bg-primary-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-primary-500"
-                    @click="openRecordPayment(receipt)"
-                  >
-                    Record payment
-                  </button>
-=======
                 Deposits collected — stock reserved until the balance is paid. Completed orders move to Receipts.
               </p>
             </div>
@@ -1019,21 +962,12 @@
                       Cancel
                     </button>
                   </div>
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-<<<<<<< HEAD
-      <RecordPaymentModal
-        v-model="showRecordPaymentModal"
-        :receipt="receiptForPayment"
-        @recorded="handlePaymentRecorded"
-      />
-=======
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
     </template>
 
     <!-- Customers tab -->
@@ -1443,14 +1377,7 @@ import ReturnReceiptModal from '~/components/receipts/ReturnReceiptModal.vue'
 import DeleteReceiptModal from '~/components/receipts/DeleteReceiptModal.vue'
 // @ts-ignore
 import ReceiptTimelineModal from '~/components/receipts/ReceiptTimelineModal.vue'
-// @ts-ignore
-import RecordPaymentModal from '~/components/receipts/RecordPaymentModal.vue'
 import { useReceiptsStore, type Receipt } from '~/stores/receipts'
-import {
-  isReceiptOutstanding,
-  receiptAmountPaid,
-  receiptBalanceDue,
-} from '~/utils/receipt-outstanding'
 import { useRecentItems } from '~/composables/useRecentItems'
 import { useAuthStore } from '~/stores/auth'
 import { useStoresStore } from '~/stores/stores'
@@ -1592,30 +1519,6 @@ function applyReceiptHighlight(receiptId: string) {
   }, 3500)
 }
 
-<<<<<<< HEAD
-const activeTab = ref<'receipts' | 'outstanding' | 'customers'>((route.query.tab as any) || 'receipts')
-const showRecordPaymentModal = ref(false)
-const receiptForPayment = ref<Receipt | null>(null)
-
-const outstandingReceipts = computed(() =>
-  receiptsStore.receipts.filter((r) => r.status !== 'refunded' && isReceiptOutstanding(r)),
-)
-const outstandingTotalBalance = computed(() =>
-  outstandingReceipts.value.reduce((sum, r) => sum + receiptBalanceDue(r), 0),
-)
-const outstandingAmountPaid = receiptAmountPaid
-const outstandingBalanceDue = receiptBalanceDue
-
-function openRecordPayment(receipt: Receipt) {
-  receiptForPayment.value = receipt
-  showRecordPaymentModal.value = true
-}
-
-function handlePaymentRecorded() {
-  toast.success('Payment recorded')
-  void receiptsStore.fetchReceipts({ force: true })
-}
-=======
 const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
   (['receipts', 'outstanding', 'customers'].includes(String(route.query.tab))
     ? route.query.tab
@@ -1624,7 +1527,6 @@ const activeTab = ref<'receipts' | 'outstanding' | 'customers'>(
 const outstandingSearchQuery = ref('')
 const showBalancePaymentModal = ref(false)
 const balancePaymentReceipt = ref<Receipt | null>(null)
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
 const isReceiptsFullscreen = ref(false)
 const isCustomersFullscreen = ref(false)
 const openReceiptMenuId = ref<string | null>(null)
@@ -1672,9 +1574,6 @@ watch(activeTab, (newTab) => {
     delete q.highlight
     clearReceiptHighlightTimer()
     flashReceiptId.value = null
-  }
-  if (newTab === 'outstanding') {
-    void receiptsStore.fetchReceipts({ force: true })
   }
   void router.replace({ query: q })
   if (newTab === 'customers' && hasBalanceFeature.value) {

@@ -2099,11 +2099,9 @@ const existingSerialProductKeysInFolder = computed(() => {
 // Folder aggregate from Firestore (correct across all pages; not just the loaded page).
 const totalInventoryValue = computed(() => folder.value?.totalValue ?? 0)
 
-// Check if an item has been sold (finalized — not merely outstanding on credit)
+// Check if an item has been sold
 const isItemSold = (item: InventoryItem) => {
-  const onOutstanding =
-    item.outstandingReceiptId != null && `${item.outstandingReceiptId}`.trim() !== '' && !item.dateOut
-  if (onOutstanding) return false
+  // Check if item has dateOut (was sold via receipt)
   if (item.dateOut) {
     const dateOutValue = item.dateOut
     const hasDateOut = dateOutValue !== null && dateOutValue !== undefined && dateOutValue !== ''
@@ -2112,28 +2110,14 @@ const isItemSold = (item: InventoryItem) => {
   return false
 }
 
-const isItemOutstanding = (item: InventoryItem) => {
-  const id = item.outstandingReceiptId
-  if (id == null || `${id}`.trim() === '') return false
-  const dateOutValue = item.dateOut
-  const hasDateOut = dateOutValue != null && dateOutValue !== ''
-  return !hasDateOut
-}
-
 const isItemOutOnSellerLoan = (item: InventoryItem) => {
   const id = item.sellerLoanOutId
   return id != null && String(id).trim() !== ''
 }
 
-<<<<<<< HEAD
-/** Sold, outstanding, or on a stock loan: block edits, discounts, deletion, bulk select. */
-const isInventoryItemLocked = (item: InventoryItem) =>
-  isItemSold(item) || isItemOutstanding(item) || isItemOutOnSellerLoan(item)
-=======
 /** Sold, on loan, or reserved for balance-due: block edits, discounts, deletion, bulk select. */
 const isInventoryItemLocked = (item: InventoryItem) =>
   isItemSold(item) || isItemOutOnSellerLoan(item) || isItemAwaitingPayment(item)
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
 
 const selectedItemsEligibleForSellerLoan = computed(() =>
   selectedItemsForBulk.value.filter((item) => !isInventoryItemLocked(item))
@@ -2200,16 +2184,6 @@ const getItemAvailability = (item: InventoryItem) => {
     return availabilityBadgeForAwaitingPayment(receipt?.receiptNumber)
   }
 
-  if (isItemOutstanding(item)) {
-    const ref = item.outstandingReceiptNumber || item.outstandingReceiptId
-    return {
-      status: 'outstanding',
-      label: ref ? `Outstanding · ${ref}` : 'Outstanding',
-      class:
-        'ring-1 ring-inset ring-sky-500/25 bg-sky-500/10 text-sky-900 dark:bg-sky-400/12 dark:text-sky-100 dark:ring-sky-400/35',
-    }
-  }
-
   if (isItemSold(item)) {
     return availabilityBadgeForSold()
   }
@@ -2246,11 +2220,7 @@ const doSort = (list: InventoryItem[]) => {
     if (currentSort.value.key === 'availability') {
       const aAvail = getItemAvailability(a).status
       const bAvail = getItemAvailability(b).status
-<<<<<<< HEAD
-      const order = ['available', 'outstanding', 'with_seller', 'sold', 'returned']
-=======
       const order = AVAILABILITY_SORT_ORDER
->>>>>>> e0ac9d268d585af80688164f7c2d3ef21be887df
       const aIndex = order.indexOf(aAvail)
       const bIndex = order.indexOf(bAvail)
       return currentSort.value.order === 'asc' ? aIndex - bIndex : bIndex - aIndex

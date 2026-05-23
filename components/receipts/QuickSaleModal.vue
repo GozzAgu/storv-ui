@@ -528,8 +528,8 @@ const searchByBarcode = async () => {
           manualBarcode.value = ''
           return
         }
-        if (foundItem.outstandingReceiptId) {
-          showErrorToast('This product is on an outstanding sale')
+        if (foundItem.pendingSaleReceiptId) {
+          showErrorToast('This product is reserved on an outstanding order')
           manualBarcode.value = ''
           return
         }
