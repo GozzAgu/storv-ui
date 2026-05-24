@@ -44,9 +44,9 @@ Plans unlock features and caps (stores, departments, staff counts). Summary:
 
 | Plan | Stores | Highlights |
 |------|--------|------------|
-| **Micro** | 1 | Core inventory, receipts, returns, customers |
-| **Medium** | Up to 2 | + Analytics, more departments and staff |
-| **Enterprise** | Unlimited | + Multi-store sync, copy folder templates between branches, seller loans |
+| **Micro** | 1 | Core inventory, receipts, returns, customers; WhatsApp (10/mo) |
+| **Medium** | Up to 2 | + Analytics, activity logs, customer balance, teams, unlimited WhatsApp, duplicate categories |
+| **Enterprise** | Unlimited | + Multi-store sync, copy templates across branches, stock loans, priority support |
 
 Billing uses **Paystack** (NGN). Plan details and implementation hooks are documented in [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md).
 

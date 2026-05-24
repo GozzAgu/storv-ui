@@ -1010,7 +1010,7 @@
           Plans that fit your size
           </h2>
         <p class="mt-4 text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto">
-          Start free with Micro for a single store; upgrade to Medium for multiple locations and analytics; choose Enterprise for unlimited scale, stock transfers between stores, and copying folder templates across branches.
+          Start free with Micro for a single store; upgrade to Medium for analytics, teams, and a second branch; choose Enterprise for unlimited scale, stock transfers, and copy-from-branch.
         </p>
         <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Showing prices in {{ pricing.currency }} based on your region.
@@ -1037,14 +1037,12 @@
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Single store, solo or very small team</p>
             <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 department, up to 2 staff</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Full inventory & folders</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Receipts, returns & customers</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard & notifications</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Settings & profile</li>
-              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No analytics; no multiple departments; no multi-store sync</li>
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store · 1 department · up to 2 staff</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Full inventory, receipts, returns & customers</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard, notifications & help center</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />WhatsApp receipts (10/month)</li>
+              <li class="flex items-start gap-2 text-gray-500 dark:text-gray-500"><span class="shrink-0">−</span> No analytics, activity logs, or multi-store tools</li>
                 </ul>
             <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
               </div>
@@ -1060,13 +1058,14 @@
               <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ mediumYearlyListPrice }}</span>
             </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 2 stores</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 10 departments, 25 staff per store</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics & reports</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate folders & products</li>
-              <li class="flex items-start gap-2 text-gray-500"><span class="shrink-0">-</span> No stock transfers between stores (Enterprise only)</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 2 stores · 10 departments · 25 staff</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics, activity logs & reports</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Customer balance / credit ledger</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited WhatsApp receipts</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Duplicate categories (same branch)</li>
+              <li class="flex items-start gap-2 text-gray-500 dark:text-gray-500"><span class="shrink-0">−</span> No stock transfers or copy-from-branch (Enterprise)</li>
                 </ul>
             <a :href="appOriginUrl" class="btn-primary mt-6 flex w-full justify-center py-2.5">Get Started</a>
               </div>
@@ -1079,12 +1078,12 @@
               <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ enterpriseYearlyListPrice }}</span>
               </div>
             <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
-            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600">
+            <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited departments & staff</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores, departments & staff</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
-              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Copy from branch: folder templates across stores</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Copy from branch (category templates)</li>
+              <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Stock loans for serial inventory</li>
               <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support</li>
                 </ul>
             <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
@@ -1493,9 +1492,9 @@
                 <div class="px-4 sm:px-5 pb-4 sm:pb-5">
                   <div class="pl-11 sm:pl-12">
                     <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard and notifications. No analytics, no multiple departments, no multi-store sync.<br><br>
-                      <strong>Medium:</strong> Everything in Micro plus up to 2 stores, up to 10 departments and 25 staff per store, analytics and reports, and duplicate folders/products. No stock transfers between stores.<br><br>
-                      <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync (transfer stock between locations); <strong>Copy from branch</strong> to copy selected inventory folder templates between branches without recreating fields; and priority support.
+                      <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard, notifications, and help center. WhatsApp receipts (10/month). No analytics, activity logs, customer balance, or multi-store tools.<br><br>
+                      <strong>Medium:</strong> Everything in Micro plus up to 2 stores, 10 departments and 25 staff per store, analytics and reports, activity logs, customer balance ledger, unlimited WhatsApp, and duplicate categories within a branch. No stock transfers or copy-from-branch.<br><br>
+                      <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync and stock transfers; <strong>Copy from branch</strong> for category templates across branches; <strong>Stock loans</strong> for serial inventory; and priority support.
                     </p>
                   </div>
                 </div>

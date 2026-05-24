@@ -496,9 +496,9 @@ const categories: Category[] = [
       {
         title: 'Plan tiers',
         body: [
-          'Storvv Micro: core dashboard, inventory, Sales (receipts + customers + refunds), notifications, Help center, Profile.',
-          'Storvv Medium adds Analytics, Activity Logs, Departments, and higher caps for stores, departments, and staff.',
-          'Storvv Enterprise adds Multi-Store Sync with unlimited-scale positioning for stores/departments/staff per marketing copy inside Settings, Copy from branch on Inventory Folders, and Stock loans for serial inventory lent to borrowers.',
+          'Storvv Micro: one store, one department, up to 2 staff. Core dashboard, inventory, Sales (receipts + customers + refunds), notifications, Help center, Profile. WhatsApp receipts capped at 10 per month.',
+          'Storvv Medium adds up to 2 stores, 10 departments and 25 staff per store, Analytics, Activity Logs, customer balance ledger, unlimited WhatsApp, and duplicate categories within the same branch.',
+          'Storvv Enterprise adds unlimited stores, departments, and staff; Multi-Store Sync and stock transfers; Copy from branch on Inventory (category templates across branches); Stock loans for serial inventory; and priority support.',
         ],
       },
     ],

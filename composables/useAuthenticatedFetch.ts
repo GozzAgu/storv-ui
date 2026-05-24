@@ -14,7 +14,7 @@ export function useAuthenticatedFetch() {
     options: Parameters<typeof $fetch>[1] = {}
   ): Promise<T> {
     const headers = await getAuthHeaders()
-    return (await $fetch(resolveApiPath(path), {
+    return (await $fetch(resolveApiPath(path) as string, {
       ...options,
       headers: {
         ...(options.headers as Record<string, string> | undefined),

@@ -574,7 +574,6 @@ import {
   isBillingDelinquentMessage,
 } from '~/utils/storage-billing-errors'
 import { isCloudinaryUrl, optimizeCloudinaryLogo } from '~/utils/cloudinary'
-import { resolveApiPath } from '~/utils/api-url'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -621,6 +620,7 @@ const { getFirestoreInstance } = useFirestore()
 const userStore = useUserStore()
 const storesStore = useStoresStore()
 const authStore = useAuthStore()
+const { authFetch } = useAuthenticatedFetch()
 const inventoryStore = useInventoryStore()
 const toast = useAppToast()
 const { limits } = useSubscriptionFeatures()
@@ -751,15 +751,13 @@ async function uploadAccountLogoWithFallback(
     if (import.meta.dev) {
       console.warn('[Account logo] Browser Storage upload failed; retrying via server…', err)
     }
-    const token = await authStore.currentUser!.getIdToken()
     const body = new FormData()
     body.append('file', file)
     try {
-      return (await $fetch(resolveApiPath('/api/storage/upload-account-logo'), {
+      return await authFetch<AccountLogoUploadResult>('/api/storage/upload-account-logo', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
         body,
-      })) as AccountLogoUploadResult
+      })
     } catch (apiErr: unknown) {
       const serverHint = extractUploadFailureMessage(apiErr)
       if (isBillingDelinquentMessage(serverHint)) {

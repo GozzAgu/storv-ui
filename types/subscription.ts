@@ -147,32 +147,28 @@ export function getEligibleStoresForPlan<T extends { id: string; createdAt?: unk
   return sorted.slice(0, max)
 }
 
-/** Human-readable feature summary per plan (for settings/landing). */
+/** Human-readable feature summary per plan (Settings “Compare plans”, upgrade copy). */
 export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = {
   storvv_micro: [
-    '1 store',
-    'Inventory & receipts',
-    'Returns & customers',
-    'Dashboard & notifications',
-    'Settings & profile',
+    '1 store · 1 department · up to 2 staff',
+    'Inventory, receipts, returns & customers',
+    'Dashboard, notifications & help center',
     'WhatsApp receipts (10/month)',
   ],
   storvv_medium: [
-    'Up to 2 stores',
     'Everything in Micro',
-    'Unlimited WhatsApp receipts & payment nudges',
-    'Customer balance ledger',
-    'Analytics & reports',
-    'Departments & teams (up to 10 depts, 25 staff per store)',
-    'Full receipts & returns',
+    'Up to 2 stores · 10 departments · 25 staff per store',
+    'Analytics, activity logs & reports',
+    'Customer balance / credit ledger',
+    'Unlimited WhatsApp receipts',
+    'Duplicate categories (same branch)',
   ],
   storvv_enterprise: [
-    'Unlimited stores',
     'Everything in Medium',
-    'Stock loans: lend serial inventory until sold or returned',
-    'Multi-store sync & transfers',
-    'Unlimited departments & staff',
+    'Unlimited stores, departments & staff',
+    'Multi-store sync & stock transfers',
+    'Copy from branch (category templates)',
+    'Stock loans for serial inventory',
     'Priority support',
-    'Customer balance ledger',
   ],
 }
