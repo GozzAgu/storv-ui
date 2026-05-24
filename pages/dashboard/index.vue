@@ -411,7 +411,7 @@
               class="flex gap-2 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/70"
             >
               <span
-                class="mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium leading-none"
+                class="self-start"
                 :class="activityActionBadgeClass(log.action)"
               >
                 {{ activityActionLabel(log.action) }}

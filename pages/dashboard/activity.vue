@@ -42,20 +42,21 @@
     <template v-else>
       <div
         v-if="!storeId && !loading"
-        class="rounded-sm bg-white/90 px-6 py-12 text-center dark:!bg-dashboard-card sm:px-10"
+        class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10"
       >
-        <div
-          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
-        >
-          <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-        </div>
-        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Select a store to view activity logs</p>
-        <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-          Choose a store from the selector in the top bar.
-        </p>
+        <DashboardTableEmptyState
+          :icon="BuildingStorefrontIcon"
+          title="Select a store to view activity logs"
+          description="Choose a store from the selector in the top bar."
+          :tips="[
+            'Activity is recorded per branch',
+            'Inventory changes appear here in near real time',
+          ]"
+          :fill="false"
+        />
       </div>
 
-      <div v-else class="data-table-shell overflow-hidden">
+      <div v-else class="data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
@@ -124,36 +125,35 @@
           </button>
         </div>
 
-        <div v-else-if="allLogs.length === 0" class="px-4 py-14 text-center sm:px-6">
-          <div
-            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
-          >
-            <ClipboardDocumentListIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-          </div>
-          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No activity recorded yet</p>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Create or edit inventory items to see logs here.
-          </p>
-        </div>
+        <DashboardTableEmptyState
+          v-else-if="allLogs.length === 0"
+          :icon="ClipboardDocumentListIcon"
+          title="No activity recorded yet"
+          description="Create or edit inventory items to see logs here."
+          :tips="[
+            'Product, folder, and stock changes appear as they happen',
+            'Each entry shows who made the change and when',
+          ]"
+        />
 
-        <div v-else-if="filteredLogs.length === 0" class="px-4 py-14 text-center sm:px-6">
-          <div
-            class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 dark:bg-gray-800/80"
-          >
-            <MagnifyingGlassIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-          </div>
-          <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No matching activity</p>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Try another name, item, action, or ID, or clear the search.
-          </p>
+        <DashboardTableEmptyState
+          v-else-if="filteredLogs.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No matching activity"
+          description="Try another name, item, action, or ID."
+          :tips="[
+            'Search matches user names, item titles, and record IDs',
+            'Clear the search to browse all recent events',
+          ]"
+        >
           <button
             type="button"
-            class="mt-4 text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-600 dark:hover:text-primary-300"
+            class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-600 dark:hover:text-primary-300"
             @click="searchQuery = ''"
           >
             Clear search
           </button>
-        </div>
+        </DashboardTableEmptyState>
 
         <div v-else class="flex flex-col">
           <div class="overflow-x-auto">

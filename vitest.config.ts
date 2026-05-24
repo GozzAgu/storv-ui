@@ -12,7 +12,12 @@ export default defineConfig({
   test: {
     /* happy-dom: supports Vue SFC component tests alongside pure Node-style unit tests */
     environment: 'happy-dom',
-    include: ['tests/server/**/*.spec.ts', 'tests/integration/**/*.spec.ts', 'tests/unit/**/*.spec.ts'],
+    include: [
+      'tests/server/**/*.spec.ts',
+      'tests/integration/**/*.spec.ts',
+      'tests/unit/**/*.spec.ts',
+      'tests/rules/**/*.spec.ts',
+    ],
     globals: true,
     restoreMocks: true,
     clearMocks: true,

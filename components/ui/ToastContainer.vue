@@ -3,7 +3,7 @@
     <TransitionGroup
       tag="div"
       name="toast"
-      class="pointer-events-none fixed right-0 top-0 z-9999 flex w-full max-w-[min(100vw-1.25rem,22rem)] flex-col gap-2 p-3 sm:right-1.5 sm:top-1.5 sm:max-w-88 sm:p-3"
+      class="pointer-events-none fixed right-0 top-0 z-9999 flex w-full max-w-[min(100vw-1.25rem,20rem)] flex-col gap-2.5 p-3 sm:right-4 sm:top-4 sm:max-w-[20rem]"
       :style="{
         paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
         paddingRight: 'max(0.75rem, env(safe-area-inset-right))',
@@ -13,56 +13,55 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'pointer-events-auto relative overflow-hidden rounded-xl border shadow-md',
-          'border-white/40 bg-linear-to-br backdrop-blur-xl backdrop-saturate-125 dark:border-white/10',
-          glassSurface,
-          getAccent(toast.type),
+          'toast-glass pointer-events-auto relative overflow-hidden rounded-xl',
+          'border border-white/50 bg-white/70 backdrop-blur-xl backdrop-saturate-150',
+          'dark:border-white/10 dark:bg-zinc-900/65',
         ]"
-        role="alert"
+        role="status"
+        :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
       >
-        <div
-          class="pointer-events-none absolute inset-0 bg-linear-to-br from-white/25 via-transparent to-transparent opacity-50 dark:from-white/4"
-        />
+        <div class="flex items-start gap-2.5 px-3.5 pb-2.5 pt-3">
+          <component
+            :is="getIcon(toast.type)"
+            :class="['mt-0.5 h-4 w-4 shrink-0', getIconClass(toast.type)]"
+            stroke-width="1.75"
+            aria-hidden="true"
+          />
 
-        <div class="relative flex items-start gap-2 pl-2.5 pr-1 py-2 sm:pl-3 sm:pr-1.5 sm:py-2">
-          <div
-            :class="[
-              'flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent',
-              getIconShell(toast.type),
-            ]"
-          >
-            <component
-              :is="getIcon(toast.type)"
-              :class="['h-3.5 w-3.5', getIconClasses(toast.type)]"
-              stroke-width="1.5"
-            />
-          </div>
-
-          <div class="min-w-0 flex-1 pt-px pr-0.5">
-            <p
-              class="text-[11px] font-normal leading-snug text-zinc-700 antialiased dark:text-zinc-300 sm:text-xs"
-            >
+          <div class="min-w-0 flex-1 pt-px">
+            <p class="text-[13px] font-medium leading-snug text-zinc-800 dark:text-zinc-100">
               {{ toast.message }}
             </p>
-            <template v-if="toast.action">
-              <button
-                type="button"
-                @click="toast.action.onClick()"
-                class="mt-1.5 inline-flex text-[11px] font-medium text-primary-600/90 transition-colors duration-200 hover:text-primary-600 dark:text-primary-400/90 dark:hover:text-primary-400"
-              >
-                {{ toast.action.label }}
-              </button>
-            </template>
+            <button
+              v-if="toast.action"
+              type="button"
+              class="mt-1.5 text-xs font-medium text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+              @click="toast.action.onClick()"
+            >
+              {{ toast.action.label }}
+            </button>
           </div>
 
           <button
             type="button"
+            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+            aria-label="Dismiss"
             @click="removeToast(toast.id)"
-            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors duration-200 hover:bg-black/4 hover:text-zinc-600 dark:text-zinc-500 dark:hover:bg-white/6 dark:hover:text-zinc-300"
-            aria-label="Close"
           >
             <XMarkIcon class="h-3.5 w-3.5" stroke-width="2" />
           </button>
+        </div>
+
+        <div
+          v-if="showsProgress(toast)"
+          class="h-[2px] w-full bg-zinc-900/5 dark:bg-white/8"
+          aria-hidden="true"
+        >
+          <div
+            class="toast-progress h-full origin-left"
+            :class="getProgressClass(toast.type)"
+            :style="{ animationDuration: `${toast.duration}ms` }"
+          />
         </div>
       </div>
     </TransitionGroup>
@@ -77,43 +76,12 @@ import {
   InformationCircleIcon,
   XCircleIcon,
 } from '@heroicons/vue/24/outline'
-import { useAppToast, type ToastType } from '~/composables/useAppToast'
+import { useAppToast, type Toast, type ToastType } from '~/composables/useAppToast'
 
 const { toasts, removeToast } = useAppToast()
 
-/** Mostly neutral glass; type cue is the slim left border + icon only */
-const glassSurface =
-  'from-white/88 to-zinc-50/78 dark:from-zinc-900/72 dark:to-zinc-950/78'
-
-/** Quiet depth + slim left accent instead of loud rings and stripes */
-const getAccent = (type: ToastType) => {
-  switch (type) {
-    case 'success':
-      return 'shadow-black/[0.04] ring-1 ring-inset ring-black/[0.03] dark:shadow-black/25 dark:ring-white/[0.06] pl-[2px] border-l-2 border-l-emerald-400/55 dark:border-l-emerald-500/45'
-    case 'error':
-      return 'shadow-black/[0.04] ring-1 ring-inset ring-black/[0.03] dark:shadow-black/25 dark:ring-white/[0.06] pl-[2px] border-l-2 border-l-red-400/50 dark:border-l-red-500/40'
-    case 'warning':
-      return 'shadow-black/[0.04] ring-1 ring-inset ring-black/[0.03] dark:shadow-black/25 dark:ring-white/[0.06] pl-[2px] border-l-2 border-l-amber-400/50 dark:border-l-amber-500/40'
-    case 'info':
-      return 'shadow-black/[0.04] ring-1 ring-inset ring-black/[0.03] dark:shadow-black/25 dark:ring-white/[0.06] pl-[2px] border-l-2 border-l-sky-400/50 dark:border-l-sky-500/40'
-    default:
-      return 'shadow-black/[0.04] ring-1 ring-inset ring-black/[0.03] dark:shadow-black/25 dark:ring-white/[0.06] pl-[2px] border-l-2 border-l-zinc-300/70 dark:border-l-zinc-600/60'
-  }
-}
-
-const getIconShell = (type: ToastType) => {
-  switch (type) {
-    case 'success':
-      return 'bg-emerald-500/[0.07] dark:bg-emerald-400/[0.08]'
-    case 'error':
-      return 'bg-red-500/[0.07] dark:bg-red-400/[0.08]'
-    case 'warning':
-      return 'bg-amber-500/[0.07] dark:bg-amber-400/[0.08]'
-    case 'info':
-      return 'bg-sky-500/[0.07] dark:bg-sky-400/[0.08]'
-    default:
-      return 'bg-zinc-500/[0.06] dark:bg-zinc-400/[0.08]'
-  }
+function showsProgress(toast: Toast) {
+  return (toast.duration ?? 0) > 0
 }
 
 const getIcon = (type: ToastType) => {
@@ -131,18 +99,33 @@ const getIcon = (type: ToastType) => {
   }
 }
 
-const getIconClasses = (type: ToastType) => {
+const getIconClass = (type: ToastType) => {
   switch (type) {
     case 'success':
-      return 'text-emerald-600/75 dark:text-emerald-400/80'
+      return 'text-emerald-600 dark:text-emerald-400'
     case 'error':
-      return 'text-red-600/75 dark:text-red-400/80'
+      return 'text-red-600 dark:text-red-400'
     case 'warning':
-      return 'text-amber-600/75 dark:text-amber-400/80'
+      return 'text-amber-600 dark:text-amber-400'
     case 'info':
-      return 'text-sky-600/75 dark:text-sky-400/80'
+      return 'text-sky-600 dark:text-sky-400'
     default:
       return 'text-zinc-500 dark:text-zinc-400'
+  }
+}
+
+const getProgressClass = (type: ToastType) => {
+  switch (type) {
+    case 'success':
+      return 'bg-emerald-500/80 dark:bg-emerald-400/90'
+    case 'error':
+      return 'bg-red-500/80 dark:bg-red-400/90'
+    case 'warning':
+      return 'bg-amber-500/80 dark:bg-amber-400/90'
+    case 'info':
+      return 'bg-sky-500/80 dark:bg-sky-400/90'
+    default:
+      return 'bg-zinc-400/80'
   }
 }
 </script>
@@ -150,34 +133,54 @@ const getIconClasses = (type: ToastType) => {
 <style scoped>
 .toast-enter-active {
   transition:
-    opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, opacity, filter;
+    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .toast-leave-active {
   transition:
-    opacity 0.3s cubic-bezier(0.4, 0, 1, 1),
-    transform 0.32s cubic-bezier(0.4, 0, 1, 1),
-    filter 0.24s cubic-bezier(0.4, 0, 1, 1);
-  will-change: transform, opacity, filter;
+    opacity 0.28s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.32s cubic-bezier(0.4, 0, 1, 1);
 }
 
+/* Slide in from the right */
 .toast-enter-from {
   opacity: 0;
-  filter: blur(4px);
-  transform: translate3d(16px, -6px, 0) scale(0.96);
+  transform: translate3d(100%, 0, 0);
 }
 
 .toast-leave-to {
   opacity: 0;
-  filter: blur(3px);
-  transform: translate3d(10px, -4px, 0) scale(0.97);
+  transform: translate3d(100%, 0, 0);
 }
 
 .toast-move {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast-progress {
+  animation-name: toast-progress-shrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes toast-progress-shrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .toast-glass {
+    background-color: rgb(255 255 255 / 0.95);
+  }
+
+  :global(.dark) .toast-glass {
+    background-color: rgb(24 24 27 / 0.95);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -189,8 +192,12 @@ const getIconClasses = (type: ToastType) => {
 
   .toast-enter-from,
   .toast-leave-to {
-    filter: none;
     transform: none;
+  }
+
+  .toast-progress {
+    animation: none;
+    transform: scaleX(0);
   }
 }
 </style>

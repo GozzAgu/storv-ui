@@ -326,34 +326,42 @@
     </Transition>
 
     <!-- Empty state -->
-    <div
+    <DashboardTableEmptyState
       v-if="!inventoryStore.loading && paginatedFolders.length === 0"
-      class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)] sm:px-6"
+      :icon="FolderIcon"
+      :title="
+        selectedDepartmentId
+          ? `No categories in ${getDepartmentName(selectedDepartmentId)}`
+          : searchQuery
+            ? 'No categories found'
+            : 'No categories yet'
+      "
+      :description="
+        selectedDepartmentId
+          ? 'Try another department or clear the filter to see all categories.'
+          : searchQuery
+            ? 'Try a different search term.'
+            : 'Categories group products so your team can find stock faster.'
+      "
+      :tips="
+        selectedDepartmentId
+          ? ['Categories can be shared across departments or restricted', 'Clear the department filter to browse everything']
+          : searchQuery
+            ? ['Search matches category names and descriptions', 'Create a new category if the one you need is missing']
+            : ['Open a category to add products and custom fields', 'Use departments to control who sees each category']
+      "
+      extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
     >
-      <div class="relative z-10">
-        <div
-          class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
-        >
-          <FolderIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
-        </div>
-        <h2 class="max-w-md break-words text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-          {{ selectedDepartmentId ? `No categories in ${getDepartmentName(selectedDepartmentId)}` : (searchQuery ? 'No categories found' : 'No categories yet') }}
-        </h2>
-        <p class="mx-auto mt-2 max-w-sm break-words text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          {{ selectedDepartmentId ? 'Try another department or clear the filter.' : (searchQuery ? 'Try a different search.' : 'Create a category to start organizing your inventory.') }}
-        </p>
-      </div>
-      <div v-if="selectedDepartmentId" class="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          extra-class="!text-xs !py-1.5 !px-3"
-          @click="selectedDepartmentId = ''"
-        >
-          Clear filter
-        </Button>
-      </div>
-    </div>
+      <Button
+        v-if="selectedDepartmentId"
+        variant="outline"
+        size="sm"
+        extra-class="!text-xs !py-1.5 !px-3"
+        @click="selectedDepartmentId = ''"
+      >
+        Clear filter
+      </Button>
+    </DashboardTableEmptyState>
 
     <DashboardFixedFooter v-if="filteredFolders.length > 0" :sidebar-collapsed="sidebarCollapsed">
       <Pagination

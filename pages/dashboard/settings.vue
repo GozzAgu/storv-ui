@@ -233,8 +233,40 @@
         </div>
       </DashboardSettingsPanel>
 
+      <!-- Staff assignment (read-only) -->
+      <DashboardSettingsPanel
+        v-if="isStaff"
+        title="Your assignment"
+        subtitle="Store and department linked to your account."
+      >
+        <div v-if="isLoadingStoreInfo" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div v-for="i in 4" :key="i" class="h-10 animate-pulse rounded-sm bg-gray-200/80 dark:bg-white/10" />
+        </div>
+        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label :class="labelClass">Branch</label>
+            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.name || '—' }}</p>
+          </div>
+          <div>
+            <label :class="labelClass">Department</label>
+            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">{{ staffWorkspace.departmentName || '—' }}</p>
+          </div>
+          <div v-if="staffWorkspace.position">
+            <label :class="labelClass">Position</label>
+            <p class="mt-1 text-xs text-gray-900 dark:text-gray-100">{{ staffWorkspace.position }}</p>
+          </div>
+          <div v-if="staffWorkspace.staffRole">
+            <label :class="labelClass">Team role</label>
+            <p class="mt-1 text-xs capitalize text-gray-900 dark:text-gray-100">{{ staffWorkspace.staffRole }}</p>
+          </div>
+        </div>
+      </DashboardSettingsPanel>
+
       <!-- Store information -->
-      <DashboardSettingsPanel title="Store information" subtitle="Business details for the active branch.">
+      <DashboardSettingsPanel
+        :title="isStaff ? 'Branch details' : 'Store information'"
+        :subtitle="isStaff ? 'Contact details for your assigned branch (view only).' : 'Business details for the active branch.'"
+      >
         <template #actions>
           <button v-if="canEditSettings && !isEditingStore" type="button" :class="editLinkClass" @click="enableEditing('store')">
             Edit
@@ -574,6 +606,12 @@ import {
   isBillingDelinquentMessage,
 } from '~/utils/storage-billing-errors'
 import { isCloudinaryUrl, optimizeCloudinaryLogo } from '~/utils/cloudinary'
+import {
+  resolveStaffWorkspaceContext,
+  applyWorkspaceToSettingsStoreInfo,
+  fillSettingsStoreInfoFromStore,
+  type StaffWorkspaceContext,
+} from '~/composables/useStaffWorkspaceContext'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -687,6 +725,20 @@ const storesLoading = computed(() => storesStore.loading)
 const storesError = computed(() => storesStore.error)
 const currentStore = computed(() => storesStore.currentStore)
 const isStaff = computed(() => userStore.userData?.role === 'staff')
+
+const staffWorkspace = ref<StaffWorkspaceContext>({
+  staff: null,
+  store: null,
+  storeName: '',
+  storeEmail: '',
+  storePhone: '',
+  storeAddress: '',
+  businessType: '',
+  departmentName: '',
+  departmentId: '',
+  staffRole: '',
+  position: '',
+})
 
 const canAddStore = computed(() => {
   const max = limits.value.maxStores
@@ -1017,17 +1069,32 @@ async function loadSettingsFromFirestore() {
     if (userStore.isSuperAdmin) {
       await storesStore.fetchStores()
       await storesStore.initializeCurrentStore()
+    } else if (isStaff.value) {
+      const ctx = await resolveStaffWorkspaceContext()
+      staffWorkspace.value = ctx
+      applyWorkspaceToSettingsStoreInfo(storeInfo, ctx)
+      fillSettingsStoreInfoFromStore(storeInfo, ctx.store || storesStore.currentStore)
+      Object.assign(backupStoreInfo, { ...storeInfo })
     }
     const targetUserId = await getTargetUserId()
     if (!targetUserId) return
     const userData = await getUserDocument(targetUserId)
-    if (userData?.storeDetails) {
-      storeInfo.name = userData.storeDetails.storeName || ''
-      storeInfo.email = userData.storeDetails.storeEmail || ''
-      storeInfo.phone = userData.storeDetails.storePhone || ''
-      storeInfo.address = userData.storeDetails.storeAddress || ''
-      storeInfo.businessType = userData.storeDetails.storeDescription || ''
-      Object.assign(backupStoreInfo, { ...storeInfo })
+      if (userData?.storeDetails) {
+      if (!isStaff.value) {
+        storeInfo.name = userData.storeDetails.storeName || ''
+        storeInfo.email = userData.storeDetails.storeEmail || ''
+        storeInfo.phone = userData.storeDetails.storePhone || ''
+        storeInfo.address = userData.storeDetails.storeAddress || ''
+        storeInfo.businessType = userData.storeDetails.storeDescription || ''
+        Object.assign(backupStoreInfo, { ...storeInfo })
+      } else if (!storeInfo.name) {
+        storeInfo.name = userData.storeDetails.storeName || ''
+        storeInfo.email = userData.storeDetails.storeEmail || storeInfo.email
+        storeInfo.phone = userData.storeDetails.storePhone || storeInfo.phone
+        storeInfo.address = userData.storeDetails.storeAddress || storeInfo.address
+        storeInfo.businessType = userData.storeDetails.storeDescription || storeInfo.businessType
+        Object.assign(backupStoreInfo, { ...storeInfo })
+      }
       if (userData.storeDetails.settings) {
         const settings = userData.storeDetails.settings
         if (settings.inventory) {

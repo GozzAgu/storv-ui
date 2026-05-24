@@ -1,62 +1,56 @@
 import { test, expect } from '@playwright/test'
-
-async function isLoginPage(page: import('@playwright/test').Page) {
-  return page.locator('input[type="email"]').first().isVisible()
-}
+import { gotoDashboard, isLoginPage } from './helpers/e2e'
 
 test.describe('Inventory Page', () => {
   test('loads inventory route', async ({ page }) => {
-    await page.goto('/dashboard/inventory')
-    await page.waitForLoadState('networkidle')
+    await gotoDashboard(page, '/dashboard/inventory')
 
-    // Either login (unauthenticated) or app shell
     const loginVisible = await isLoginPage(page)
-    const foldersHeading = page.getByRole('heading', { name: 'Folders', exact: true })
-    const foldersVisible = await foldersHeading.isVisible().catch(() => false)
+    const categoriesHeading = page.getByRole('heading', { name: 'Categories', exact: true })
+    const categoriesVisible = await categoriesHeading.isVisible().catch(() => false)
 
-    expect(loginVisible || foldersVisible).toBeTruthy()
+    expect(loginVisible || categoriesVisible).toBeTruthy()
   })
 
-  test('shows Folders heading when authenticated', async ({ page }) => {
-    await page.goto('/dashboard/inventory')
-    await page.waitForLoadState('networkidle')
+  test('shows Categories heading when authenticated', async ({ page }) => {
+    await gotoDashboard(page, '/dashboard/inventory')
 
     if (await isLoginPage(page)) {
       test.skip()
     }
 
-    await expect(page.getByRole('heading', { name: 'Folders', exact: true })).toBeVisible({
-      timeout: 15000,
+    await expect(page.getByRole('heading', { name: 'Categories', exact: true })).toBeVisible({
+      timeout: 15_000,
     })
   })
 
-  test('shows folder organization subtitle when authenticated', async ({ page }) => {
-    await page.goto('/dashboard/inventory')
-    await page.waitForLoadState('networkidle')
+  test('shows category organization subtitle when authenticated', async ({ page }) => {
+    await gotoDashboard(page, '/dashboard/inventory')
 
     if (await isLoginPage(page)) {
       test.skip()
     }
 
-    await expect(page.getByText(/organize products into folders/i)).toBeVisible({
-      timeout: 15000,
+    await expect(
+      page.getByText(/create a category to start organizing your inventory/i),
+    ).toBeVisible({
+      timeout: 15_000,
     })
   })
 
-  test('shows empty state or folder grid when authenticated', async ({ page }) => {
-    await page.goto('/dashboard/inventory')
-    await page.waitForLoadState('networkidle')
+  test('shows empty state or category grid when authenticated', async ({ page }) => {
+    await gotoDashboard(page, '/dashboard/inventory')
 
     if (await isLoginPage(page)) {
       test.skip()
     }
 
-    const emptyState = page.getByText(/no folders/i)
+    const emptyState = page.getByText(/no categories/i)
     const productCountLine = page.getByText(/\d+\s+Products?/i).first()
 
     const hasEmpty = await emptyState.isVisible().catch(() => false)
-    const hasFolders = await productCountLine.isVisible().catch(() => false)
+    const hasCategories = await productCountLine.isVisible().catch(() => false)
 
-    expect(hasEmpty || hasFolders).toBeTruthy()
+    expect(hasEmpty || hasCategories).toBeTruthy()
   })
 })

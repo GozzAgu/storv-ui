@@ -105,7 +105,7 @@
 
   /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
-    @apply overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
+    @apply flex flex-col overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
   }
 
   /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#12141c) */

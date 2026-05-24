@@ -1,5 +1,11 @@
 <template>
   <div class="max-w-md mx-auto">
+    <DashboardBackButton
+      to="/dashboard"
+      label="Back to dashboard"
+      variant="text"
+      class="mb-4"
+    />
     <div class="mb-6">
       <p class="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-gray-500">Security</p>
       <h1 class="mt-1 text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">Set your password</h1>

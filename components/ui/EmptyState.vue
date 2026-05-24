@@ -1,19 +1,53 @@
 <template>
-  <div class="text-center" :class="compact ? 'py-4 sm:py-6' : 'py-6 sm:py-8'">
-    <div
-      :class="[ 'mx-auto flex items-center justify-center rounded-sm mb-3 sm:mb-4', iconBgClass, compact ? 'w-14 h-14' : 'w-16 h-16 sm:w-20 sm:h-20' ]"
+  <div
+    :class="[
+      'flex flex-col items-center justify-center text-center',
+      compact ? 'py-4 sm:py-6' : 'py-6 sm:py-8',
+      fill ? 'min-h-[min(40vh,18rem)] flex-1' : '',
+    ]"
+  >
+    <component
+      :is="icon"
+      :class="[
+        'mb-3 shrink-0 text-gray-400 dark:text-gray-500',
+        compact ? 'h-7 w-7' : 'h-8 w-8',
+      ]"
+      stroke-width="1.5"
+      aria-hidden="true"
+    />
+    <p
+      v-if="eyebrow"
+      class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
     >
-      <component
-        :is="icon"
-        :class="[ 'text-gray-500 dark:text-gray-400', compact ? 'w-7 h-7' : 'w-8 h-8 sm:w-10 sm:h-10' ]"
-      />
-    </div>
-    <h3 :class="['font-semibold text-gray-900 dark:text-gray-100 mb-1.5', compact ? 'text-sm' : 'text-sm sm:text-base']">
+      {{ eyebrow }}
+    </p>
+    <h3
+      :class="[
+        'max-w-md font-semibold tracking-tight text-gray-900 dark:text-gray-100',
+        compact ? 'text-sm' : 'text-sm sm:text-base',
+        eyebrow ? 'mt-2' : 'mb-1.5',
+      ]"
+    >
       {{ title }}
     </h3>
-    <p v-if="description" :class="['text-gray-500 dark:text-gray-400 px-4', compact ? 'text-xs' : 'text-xs sm:text-sm', descriptionClass]">
+    <p
+      v-if="description"
+      :class="[
+        'mx-auto max-w-md leading-relaxed text-gray-500 dark:text-gray-400',
+        compact ? 'text-xs' : 'text-xs sm:text-sm',
+        descriptionClass,
+      ]"
+    >
       {{ description }}
     </p>
+    <ul
+      v-if="tips?.length"
+      class="mx-auto mt-3 max-w-md space-y-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400"
+    >
+      <li v-for="(tip, index) in tips" :key="index">
+        {{ tip }}
+      </li>
+    </ul>
     <div v-if="$slots.default" :class="compact ? 'mt-3' : 'mt-4'">
       <slot />
     </div>
@@ -21,18 +55,22 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
+
 withDefaults(
   defineProps<{
-    icon: any
+    icon: Component
     title: string
     description?: string
+    tips?: string[]
+    eyebrow?: string
     compact?: boolean
-    iconBgClass?: string
+    fill?: boolean
     descriptionClass?: string
   }>(),
   {
-    iconBgClass: 'bg-gray-100 dark:bg-gray-700/80',
     descriptionClass: '',
-  }
+    fill: false,
+  },
 )
 </script>

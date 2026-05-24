@@ -35,8 +35,14 @@
               <span
                 class="mt-2.5 inline-flex items-center rounded-full border border-primary-200/80 bg-primary-50/90 px-2.5 py-1 text-[10px] font-medium text-primary-700 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
               >
-                {{ profileData.role === 'staff' ? 'Staff' : profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User' }}
+                {{ isStaff ? 'Staff' : profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User' }}
               </span>
+              <p
+                v-if="leftCardBadgeExtra"
+                class="mt-2 text-[10px] font-medium text-gray-500 dark:text-gray-400"
+              >
+                {{ leftCardBadgeExtra }}
+              </p>
             </template>
 
             <div :class="profileStatBarClass">
@@ -115,6 +121,68 @@
               <textarea v-model="profileData.bio" rows="3" :disabled="!isEditingPersonalInfo" :class="[inputClass(isEditingPersonalInfo), 'min-h-[5rem] resize-y']" placeholder="Optional note" />
             </div>
           </div>
+        </DashboardSettingsPanel>
+
+        <DashboardSettingsPanel
+          v-if="showBusinessProfilePanel"
+          :title="isStaff ? 'Business profile' : 'Store information'"
+          :subtitle="isStaff ? 'Your assigned branch and department' : 'Branch details from onboarding.'"
+        >
+            <div v-if="isLoadingProfile" class="space-y-4">
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
+              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
+            </div>
+            <div v-else-if="hasBusinessProfileContent" class="space-y-4">
+              <div
+                v-if="isStaff && (businessProfileDisplay.departmentName || businessProfileDisplay.position || businessProfileDisplay.staffRole)"
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+              >
+                <div v-if="businessProfileDisplay.departmentName">
+                  <p :class="labelClass">Department</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.departmentName }}</p>
+                </div>
+                <div v-if="businessProfileDisplay.position">
+                  <p :class="labelClass">Position</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.position }}</p>
+                </div>
+                <div v-if="businessProfileDisplay.staffRole">
+                  <p :class="labelClass">Team role</p>
+                  <p class="text-xs capitalize text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.staffRole }}</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div v-if="businessProfileDisplay.storeName">
+                  <p :class="labelClass">Branch name</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.storeName }}</p>
+                </div>
+                <div v-if="businessProfileDisplay.storeDescription">
+                  <p :class="labelClass">Business type</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.storeDescription }}</p>
+                </div>
+                <div v-if="businessProfileDisplay.storeEmail">
+                  <p :class="labelClass">Store email</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.storeEmail }}</p>
+                </div>
+                <div v-if="businessProfileDisplay.storePhone">
+                  <p :class="labelClass">Store phone</p>
+                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.storePhone }}</p>
+                </div>
+              </div>
+              <div v-if="businessProfileDisplay.storeAddress">
+                <p :class="labelClass">Address</p>
+                <p class="text-xs text-gray-900 dark:text-gray-100">{{ businessProfileDisplay.storeAddress }}</p>
+              </div>
+              <div v-if="!isStaff" class="border-t border-gray-100/90 pt-4 dark:border-gray-800/70">
+                <NuxtLink to="/dashboard/settings" :class="editLinkClass">Manage store settings →</NuxtLink>
+              </div>
+            </div>
+            <div v-else class="py-6 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ isStaff ? 'Your branch details are not available yet. Contact your administrator.' : 'No store information available.' }}
+              </p>
+              <NuxtLink v-if="!isStaff" to="/dashboard/settings" class="mt-3 inline-flex" :class="editLinkClass">Set up store information</NuxtLink>
+            </div>
         </DashboardSettingsPanel>
 
         <DashboardSettingsPanel
@@ -211,95 +279,105 @@
         </DashboardSettingsPanel>
 
         <DashboardSettingsPanel
-          v-if="storeInfo.storeName || isLoadingProfile"
-          title="Store information"
-          subtitle="Branch details from onboarding."
-        >
-            <div v-if="isLoadingProfile" class="space-y-4">
-              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-3/4 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-1/2 animate-pulse"></div>
-              <div class="h-4 bg-gray-200 dark:bg-white/10 rounded-sm w-2/3 animate-pulse"></div>
-            </div>
-            <div v-else-if="storeInfo.storeName" class="space-y-4">
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <p :class="labelClass">Branch name</p>
-                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeName }}</p>
-                </div>
-                <div v-if="storeInfo.storeEmail">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store email</p>
-                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeEmail }}</p>
-                </div>
-                <div v-if="storeInfo.storePhone">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Store phone</p>
-                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storePhone }}</p>
-                </div>
-                <div v-if="storeInfo.storeDescription">
-                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</p>
-                  <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeDescription }}</p>
-                </div>
-              </div>
-              <div v-if="storeInfo.storeAddress">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Address</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">{{ storeInfo.storeAddress }}</p>
-              </div>
-              <div class="border-t border-gray-100/90 pt-4 dark:border-gray-800/70">
-                <NuxtLink to="/dashboard/settings" :class="editLinkClass">Manage store settings →</NuxtLink>
-              </div>
-            </div>
-            <div v-else class="py-6 text-center">
-              <p class="text-xs text-gray-500 dark:text-gray-400">No store information available.</p>
-              <NuxtLink to="/dashboard/settings" class="mt-3 inline-flex" :class="editLinkClass">Set up store information</NuxtLink>
-            </div>
-        </DashboardSettingsPanel>
-
-        <DashboardSettingsPanel
           title="Roles & permissions"
-          subtitle="Your current role and access permissions."
-          :badge="profileData.role === 'staff' ? 'Staff' : profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User'"
+          subtitle="Your role and what you can access."
         >
-            <div class="rounded-lg border border-primary-200/60 bg-primary-50/40 p-3 dark:border-primary-500/25 dark:bg-primary-950/20">
-              <p class="mb-1.5 text-xs font-medium text-gray-900 dark:text-gray-100">
-                {{ profileData.role === 'staff' ? 'Staff Member' : (profileData.role === 'superAdmin' ? 'Super Admin' : profileData.role || 'User') }}
-              </p>
-              <p class="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
-                <template v-if="profileData.role === 'staff'">
-                  As a Staff Member, you have access to view and manage inventory, receipts, and customer data within your assigned store and department. Your permissions are managed by your Super Admin.
-                </template>
-                <template v-else-if="profileData.role === 'superAdmin' || !profileData.role">
-                  As a Super Admin, you have full access to all features and settings in the system. You are the account owner and have complete control over your store operations.
-                </template>
-                <template v-else>
-                  Your role: {{ profileData.role }}. Contact your administrator for more information about your permissions.
-                </template>
-              </p>
-            </div>
-            <div>
-              <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1.5">Your permissions</p>
-              <div v-if="userPermissions.length === 0" class="text-xs text-gray-500 dark:text-gray-400 py-2">Loading permissions...</div>
-              <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div v-for="permission in userPermissions" :key="permission" class="flex items-center gap-2 rounded-sm border border-gray-200/70 bg-gray-50/50 p-2.5 dark:border-gray-700/60 dark:!bg-dashboard-card/30">
-                  <CheckCircleIcon class="w-3.5 h-3.5 text-green-500 dark:text-green-400 flex-shrink-0" />
-                  <span class="text-xs text-gray-700 dark:text-gray-100">{{ permission }}</span>
-                </div>
-              </div>
-            </div>
-            <div class="border-t border-gray-100/90 pt-3 dark:border-gray-800/60">
-              <div class="flex items-start gap-2.5 rounded-sm border border-gray-200/70 bg-gray-50/80 p-3 dark:border-gray-700/60 dark:!bg-dashboard-card/30">
-                <InformationCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
+          <div class="space-y-6">
+            <div class="flex gap-3">
+              <component
+                :is="roleHeaderIcon"
+                class="mt-0.5 h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500"
+                aria-hidden="true"
+              />
+              <div class="min-w-0 flex-1 space-y-2.5">
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">About your role</p>
-                  <p class="text-xs text-gray-600 dark:text-gray-200 leading-relaxed">
-                    <template v-if="profileData.role === 'staff'">
-                      You are a staff member with access to your assigned store and department. Contact your Super Admin if you need additional permissions or have questions about your access.
-                    </template>
-                    <template v-else>
-                      You created this account and are the primary administrator. You can manage all aspects of the system including team members, settings, and data management.
-                    </template>
+                  <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    {{ roleCardTitle }}
+                    <span
+                      v-if="roleBadgeLabel"
+                      class="font-normal text-gray-500 dark:text-gray-400"
+                    >
+                      · {{ roleBadgeLabel }}
+                    </span>
+                  </p>
+                  <p class="mt-1.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                    {{ roleCardDescription }}
                   </p>
                 </div>
+                <ul v-if="roleMetaItems.length > 0" class="space-y-1">
+                  <li
+                    v-for="meta in roleMetaItems"
+                    :key="meta.key"
+                    class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+                  >
+                    <component :is="meta.icon" class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                    {{ meta.text }}
+                  </li>
+                </ul>
               </div>
             </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center gap-2">
+                <ClipboardDocumentListIcon class="h-4 w-4 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+                <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Permissions</p>
+              </div>
+
+              <p v-if="userPermissions.length === 0" class="pl-6 text-xs text-gray-500 dark:text-gray-400">
+                Loading…
+              </p>
+
+              <div v-else class="space-y-4 pl-1">
+                <div v-for="group in permissionGroups" :key="group.id">
+                  <div
+                    v-if="permissionGroups.length > 1"
+                    class="mb-2 flex items-center gap-1.5 pl-1"
+                  >
+                    <component
+                      :is="group.icon"
+                      class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
+                      aria-hidden="true"
+                    />
+                    <p class="text-[11px] font-medium text-gray-600 dark:text-gray-400">
+                      {{ group.label }}
+                    </p>
+                  </div>
+                  <ul class="space-y-1.5">
+                    <li
+                      v-for="item in group.items"
+                      :key="item.id"
+                      class="flex items-start gap-2"
+                    >
+                      <ChevronRightIcon
+                        class="mt-0.5 h-3 w-3 shrink-0 text-primary-500 dark:text-primary-400"
+                        aria-hidden="true"
+                      />
+                      <component
+                        :is="item.icon"
+                        class="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+                        aria-hidden="true"
+                      />
+                      <span class="min-w-0 flex-1 text-xs leading-relaxed text-gray-700 dark:text-gray-300">
+                        {{ item.label }}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <p class="flex items-start gap-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+              <ChevronRightIcon class="mt-0.5 h-3 w-3 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+              <span>
+                <template v-if="isStaff">
+                  Contact your super admin in Settings if you need a different role or department.
+                </template>
+                <template v-else>
+                  Manage team access under Settings → Departments and staff.
+                </template>
+              </span>
+            </p>
+          </div>
         </DashboardSettingsPanel>
       </div>
     </div>
@@ -712,10 +790,19 @@ import {
   ShieldCheckIcon,
   DevicePhoneMobileIcon,
   CheckCircleIcon,
-  InformationCircleIcon,
   GlobeAltIcon,
   CurrencyDollarIcon,
+  ChevronRightIcon,
+  BuildingStorefrontIcon,
+  UserGroupIcon,
+  CubeIcon,
+  ReceiptPercentIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  EyeIcon,
+  ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/outline'
+import type { FunctionalComponent } from 'vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
 import { useUser, type StoreDetails } from '~/composables/useUser'
 import { useTheme } from '~/composables/useTheme'
@@ -730,6 +817,12 @@ import { useStaffStore } from '~/stores/staff'
 import { useStoresStore } from '~/stores/stores'
 import { useUserStore } from '~/stores/user'
 import type { Staff } from '~/composables/useStaff'
+import {
+  resolveStaffWorkspaceContext,
+  applyWorkspaceToProfileStoreInfo,
+  fillProfileStoreInfoFromStore,
+  type StaffWorkspaceContext,
+} from '~/composables/useStaffWorkspaceContext'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
 import TwoFactorSetup from '~/components/auth/TwoFactorSetup.vue'
@@ -820,6 +913,19 @@ const userStore = useUserStore()
 
 /** Resolved staff record for signed-in staff (department, store, etc.) */
 const currentStaffMember = ref<Staff | null>(null)
+const staffWorkspace = ref<StaffWorkspaceContext>({
+  staff: null,
+  store: null,
+  storeName: '',
+  storeEmail: '',
+  storePhone: '',
+  storeAddress: '',
+  businessType: '',
+  departmentName: '',
+  departmentId: '',
+  staffRole: '',
+  position: '',
+})
 
 // Function to load profile data
 const loadProfileData = async () => {
@@ -829,37 +935,66 @@ const loadProfileData = async () => {
   }
 
   try {
+    if (!userStore.userData) {
+      await userStore.fetchUserData(currentUser.value.uid)
+    }
+
     const userData = await getUserDocument(currentUser.value.uid)
+    const accountRole = userStore.userData?.role || userData?.role || 'User'
+    const staffAccount = accountRole === 'staff'
+
     currentStaffMember.value = null
     profileData.businessName = ''
+    staffWorkspace.value = {
+      staff: null,
+      store: null,
+      storeName: '',
+      storeEmail: '',
+      storePhone: '',
+      storeAddress: '',
+      businessType: '',
+      departmentName: '',
+      departmentId: '',
+      staffRole: '',
+      position: '',
+    }
 
-    if (userData) {
-      profileData.email = userData.email || currentUser.value.email || ''
-      profileData.role = userData.role || 'User'
+    if (userData || userStore.userData) {
+      profileData.email =
+        userStore.userData?.email || userData?.email || currentUser.value.email || ''
+      profileData.role = accountRole
 
-      if (userData.role === 'staff') {
+      if (staffAccount) {
         try {
           const sm = await staffStore.fetchCurrentStaffMember()
           currentStaffMember.value = sm
           if (sm) {
             profileData.firstName = sm.firstName || ''
             profileData.lastName = sm.lastName || ''
-            profileData.email = sm.email || userData.email || currentUser.value.email || ''
+            profileData.email = sm.email || profileData.email
             profileData.phone = sm.phone || ''
           }
+          const ctx = await resolveStaffWorkspaceContext()
+          staffWorkspace.value = ctx
+          if (!currentStaffMember.value && ctx.staff) {
+            currentStaffMember.value = ctx.staff
+          }
+          applyWorkspaceToProfileStoreInfo(storeInfo, ctx)
+          fillProfileStoreInfoFromStore(storeInfo, ctx.store || storesStore.currentStore)
         } catch (e) {
           console.warn('Could not load staff member profile:', e)
           profileData.firstName = currentUser.value.displayName?.split(' ')[0] || ''
           profileData.lastName = currentUser.value.displayName?.split(' ').slice(1).join(' ') || ''
+          fillProfileStoreInfoFromStore(storeInfo, storesStore.currentStore)
         }
-      } else {
+      } else if (userData) {
         profileData.businessName = (userData.name || '').trim()
         profileData.firstName = ''
         profileData.lastName = ''
       }
 
-      // Load store details if available (super admin; staff may inherit org store info)
-      if (userData.storeDetails) {
+      // Load store details for super admin (staff uses assigned branch document)
+      if (userData?.storeDetails && !staffAccount) {
         storeInfo.storeName = userData.storeDetails.storeName || ''
         storeInfo.storeAddress = userData.storeDetails.storeAddress || ''
         storeInfo.storePhone = userData.storeDetails.storePhone || ''
@@ -867,20 +1002,21 @@ const loadProfileData = async () => {
         storeInfo.storeDescription = userData.storeDetails.storeDescription || ''
       }
 
-      if (userData.role !== 'staff') {
-        const r = userData.storeDetails?.settings?.receipt
+      if (!staffAccount && userData?.storeDetails) {
+        const r = userData.storeDetails.settings?.receipt
         receiptPoliciesForm.salesTerms = r?.salesTerms || ''
         receiptPoliciesForm.refundPolicy = r?.refundPolicy || ''
         receiptPoliciesForm.warrantyPolicy = r?.warrantyPolicy || ''
         Object.assign(backupReceiptPolicies, { ...receiptPoliciesForm })
       }
 
-      if (userData.role === 'staff' && !storeInfo.storeName && storesStore.currentStore?.name) {
-        storeInfo.storeName = storesStore.currentStore.name
+      if (staffAccount) {
+        fillProfileStoreInfoFromStore(storeInfo, storesStore.currentStore)
       }
 
       // Load 2FA status from Firestore
-      if (userData.twoFactorEnabled) {
+      const twoFactorSource = userData || userStore.userData
+      if (twoFactorSource?.twoFactorEnabled) {
         securitySettings.twoFactor = true
         if (import.meta.client) {
           localStorage.setItem('twoFactorEnabled', 'true')
@@ -1043,6 +1179,15 @@ watch(currentUser, async (newUser) => {
   }
 }, { immediate: false })
 
+// Branch may load after profile fetch (staff store init); backfill business profile fields.
+watch(
+  () => storesStore.currentStore,
+  (store) => {
+    if (!isStaff.value || !store) return
+    fillProfileStoreInfoFromStore(storeInfo, store)
+  },
+)
+
 // Theme integration
 const { theme, setTheme, actualTheme } = useTheme()
 
@@ -1168,9 +1313,63 @@ const leftCardHeading = computed(() => {
 
 const leftCardLine2 = computed(() => {
   if (isStaff.value) {
-    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '-'
+    const dept = staffWorkspace.value.departmentName || currentStaffMember.value?.departmentName
+    if (dept) return dept
+    return storeInfo.storeEmail || storeInfo.storePhone || profileData.email || '—'
   }
   return profileData.email || 'No email'
+})
+
+const showBusinessProfilePanel = computed(
+  () => isLoadingProfile.value || !isStaff.value || isStaff.value,
+)
+
+const businessProfileDisplay = computed(() => ({
+  storeName:
+    storeInfo.storeName
+    || staffWorkspace.value.storeName
+    || storesStore.currentStore?.name
+    || '',
+  storeEmail:
+    storeInfo.storeEmail
+    || staffWorkspace.value.storeEmail
+    || storesStore.currentStore?.email
+    || '',
+  storePhone:
+    storeInfo.storePhone
+    || staffWorkspace.value.storePhone
+    || storesStore.currentStore?.phone
+    || '',
+  storeAddress:
+    storeInfo.storeAddress
+    || staffWorkspace.value.storeAddress
+    || storesStore.currentStore?.address
+    || '',
+  storeDescription:
+    storeInfo.storeDescription
+    || staffWorkspace.value.businessType
+    || storesStore.currentStore?.description
+    || '',
+  departmentName:
+    staffWorkspace.value.departmentName
+    || currentStaffMember.value?.departmentName
+    || '',
+  position: staffWorkspace.value.position || '',
+  staffRole: staffWorkspace.value.staffRole || '',
+}))
+
+const hasBusinessProfileContent = computed(() => {
+  const d = businessProfileDisplay.value
+  return Boolean(
+    d.storeName
+      || d.storeEmail
+      || d.storePhone
+      || d.storeAddress
+      || d.storeDescription
+      || d.departmentName
+      || d.position
+      || d.staffRole,
+  )
 })
 
 const leftCardBadgeExtra = computed(() => {
@@ -1194,51 +1393,171 @@ const profileAvatarInitials = computed(() => {
   return (s.slice(0, 2) || 'U').toUpperCase()
 })
 
-// Computed property for user's actual permissions
-const userPermissions = computed(() => {
-  const permissions: string[] = []
+type PermissionGroupId = 'view' | 'operations' | 'admin' | 'sales'
 
-  // Super Admin permissions
-  if (!isStaff.value) {
-    permissions.push('Full access to all features')
-    permissions.push('Manage store information and settings')
-    permissions.push('Manage team members and roles')
-    permissions.push('View and manage all inventory')
-    permissions.push('View and manage all customers')
-    permissions.push('View and manage all receipts and sales')
-    permissions.push('View and manage all returns')
-    permissions.push('Access all reports and analytics')
-    permissions.push('Manage departments and staff')
-    permissions.push('Configure payment settings')
-    permissions.push('Export and import all data')
-    permissions.push('Delete all data')
-    permissions.push('Manage leave requests')
-    permissions.push('Access system settings')
-    permissions.push('Manage user permissions')
-    permissions.push('Create inventory folders')
-    permissions.push('Create and process sales')
-  } else {
-    // Staff permissions (all staff can view and create)
-    permissions.push('View inventory products')
-    permissions.push('View receipts')
-    permissions.push('View customer information')
-    permissions.push('Create and process sales')
-    
-    // Manager-specific permissions
+interface PermissionListItem {
+  id: string
+  label: string
+  group: PermissionGroupId
+}
+
+const roleBadgeLabel = computed(() => {
+  if (isStaff.value) return isManager.value ? 'Manager' : 'Staff'
+  if (userStore.isSuperAdmin || profileData.role === 'superAdmin') return 'Super Admin'
+  return profileData.role || 'User'
+})
+
+const roleCardTitle = computed(() => {
+  if (isStaff.value) return isManager.value ? 'Store manager' : 'Staff member'
+  if (userStore.isSuperAdmin || profileData.role === 'superAdmin') return 'Super admin'
+  return profileData.role || 'User'
+})
+
+const roleHeaderIcon = computed((): FunctionalComponent => {
+  if (isStaff.value && isManager.value) return UserGroupIcon
+  return ShieldCheckIcon
+})
+
+const roleMetaItems = computed(() => {
+  if (!isStaff.value) return [] as Array<{ key: string; text: string; icon: FunctionalComponent }>
+  const items: Array<{ key: string; text: string; icon: FunctionalComponent }> = []
+  const branch = businessProfileDisplay.value.storeName
+  const dept = businessProfileDisplay.value.departmentName
+  if (branch) items.push({ key: 'branch', text: branch, icon: BuildingStorefrontIcon })
+  if (dept) items.push({ key: 'dept', text: dept, icon: UserGroupIcon })
+  return items
+})
+
+const roleCardDescription = computed(() => {
+  if (isStaff.value) {
     if (isManager.value) {
-      permissions.push('Manage inventory products')
-      permissions.push('Edit receipts')
-      permissions.push('Delete receipts')
-      permissions.push('Create inventory folders')
-      permissions.push('Manage department operations')
-    } else {
-      // Regular staff (read-only)
-      permissions.push('View inventory folders in assigned department')
-      permissions.push('Process returns and exchanges')
+      return 'You can manage day-to-day operations in your assigned branch and department, including inventory and receipts where enabled.'
     }
+    return 'You can view and work within your assigned branch and department. Your super admin controls what you can change.'
   }
-  
-  return permissions
+  if (userStore.isSuperAdmin || profileData.role === 'superAdmin') {
+    return 'Full access to branches, team, inventory, sales, and account settings across your organization.'
+  }
+  return 'Contact your administrator if you need clarification on your access level.'
+})
+
+function permissionIconFor(label: string): FunctionalComponent {
+  const lower = label.toLowerCase()
+  if (lower.includes('inventory') || lower.includes('folder')) return CubeIcon
+  if (lower.includes('receipt') || lower.includes('sales') || lower.includes('return')) return ReceiptPercentIcon
+  if (lower.includes('customer')) return UserGroupIcon
+  if (lower.includes('analytics') || lower.includes('report')) return ChartBarIcon
+  if (lower.includes('setting') || lower.includes('payment') || lower.includes('permission') || lower.includes('team')) {
+    return Cog6ToothIcon
+  }
+  if (lower.startsWith('view ') || lower.includes('view and')) return EyeIcon
+  return ChevronRightIcon
+}
+
+const permissionGroupIcons: Record<PermissionGroupId, FunctionalComponent> = {
+  view: EyeIcon,
+  sales: ReceiptPercentIcon,
+  operations: CubeIcon,
+  admin: Cog6ToothIcon,
+}
+
+function permissionGroupFor(label: string): PermissionGroupId {
+  const lower = label.toLowerCase()
+  if (lower.startsWith('view ') || lower.includes('view and')) return 'view'
+  if (
+    lower.includes('manage')
+    || lower.includes('edit')
+    || lower.includes('delete')
+    || lower.includes('configure')
+    || lower.includes('export')
+    || lower.includes('access system')
+    || lower.includes('full access')
+  ) {
+    return 'admin'
+  }
+  if (lower.includes('create') || lower.includes('process')) return 'sales'
+  return 'operations'
+}
+
+const permissionCatalog = computed((): PermissionListItem[] => {
+  const items: PermissionListItem[] = []
+
+  if (!isStaff.value) {
+    const labels = [
+      'Full access to all features',
+      'Manage store information and settings',
+      'Manage team members and roles',
+      'View and manage all inventory',
+      'View and manage all customers',
+      'View and manage all receipts and sales',
+      'View and manage all returns',
+      'Access all reports and analytics',
+      'Manage departments and staff',
+      'Configure payment settings',
+      'Export and import all data',
+      'Delete all data',
+      'Manage leave requests',
+      'Access system settings',
+      'Manage user permissions',
+      'Create inventory folders',
+      'Create and process sales',
+    ]
+    labels.forEach((label, i) => {
+      items.push({ id: `sa-${i}`, label, group: permissionGroupFor(label) })
+    })
+    return items
+  }
+
+  const labels = [
+    'View inventory products',
+    'View receipts',
+    'View customer information',
+    'Create and process sales',
+  ]
+  if (isManager.value) {
+    labels.push(
+      'Manage inventory products',
+      'Edit receipts',
+      'Delete receipts',
+      'Create inventory folders',
+      'Manage department operations',
+    )
+  } else {
+    labels.push('View inventory folders in assigned department', 'Process returns and exchanges')
+  }
+  labels.forEach((label, i) => {
+    items.push({ id: `st-${i}`, label, group: permissionGroupFor(label) })
+  })
+  return items
+})
+
+const userPermissions = computed(() => permissionCatalog.value.map((p) => p.label))
+
+const permissionGroupLabels: Record<PermissionGroupId, string> = {
+  view: 'View',
+  operations: 'Operations',
+  sales: 'Sales & checkout',
+  admin: 'Administration',
+}
+
+const permissionGroups = computed(() => {
+  const buckets = new Map<PermissionGroupId, Array<{ id: string; label: string; icon: FunctionalComponent }>>()
+  const order: PermissionGroupId[] = ['view', 'sales', 'operations', 'admin']
+
+  for (const item of permissionCatalog.value) {
+    const list = buckets.get(item.group) ?? []
+    list.push({ id: item.id, label: item.label, icon: permissionIconFor(item.label) })
+    buckets.set(item.group, list)
+  }
+
+  return order
+    .filter((id) => (buckets.get(id)?.length ?? 0) > 0)
+    .map((id) => ({
+      id,
+      label: permissionGroupLabels[id],
+      icon: permissionGroupIcons[id],
+      items: buckets.get(id) ?? [],
+    }))
 })
 
 // Modal states (simplified - would be actual modals in production)

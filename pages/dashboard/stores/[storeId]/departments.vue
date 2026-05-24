@@ -9,7 +9,15 @@
         <p :class="eyebrowClass">Settings</p>
       </template>
       <template #title>
-        <h1 :class="pageTitleClass">Departments in {{ store?.name || 'Store' }}</h1>
+        <div class="flex min-w-0 items-center gap-2">
+          <DashboardBackButton
+            to="/dashboard/settings"
+            label="Back to settings"
+          />
+          <h1 :class="[pageTitleClass, 'min-w-0 truncate']">
+            Departments in {{ store?.name || 'Store' }}
+          </h1>
+        </div>
       </template>
       <template #description>
         <p :class="descriptionClass">
@@ -169,24 +177,22 @@
         </DepartmentCard>
       </div>
 
-      <div
+      <DashboardTableEmptyState
         v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
-        class="relative flex min-h-[min(52vh,26rem)] w-full min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-sm bg-white px-4 py-14 text-center dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)] sm:px-6"
-      >
-        <div class="relative z-10">
-          <div
-            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
-          >
-            <BuildingOfficeIcon class="h-8 w-8 text-gray-500 dark:text-gray-400" stroke-width="1.2" />
-          </div>
-          <h2 class="max-w-md break-words text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-            {{ searchQuery ? 'No departments found' : 'No departments yet' }}
-          </h2>
-          <p class="mx-auto mt-2 max-w-sm break-words text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-            {{ searchQuery ? 'Try a different search.' : 'Create a department for this store.' }}
-          </p>
-        </div>
-      </div>
+        :icon="BuildingOfficeIcon"
+        :title="searchQuery ? 'No departments found' : 'No departments yet'"
+        :description="
+          searchQuery
+            ? 'Try a different search term.'
+            : 'Departments organize staff and can restrict which inventory categories they see.'
+        "
+        :tips="
+          searchQuery
+            ? ['Search matches department names', 'Clear search to see every department in this store']
+            : ['Each department can have its own staff roster', 'Open a department to add members and manage roles']
+        "
+        extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
+      />
     </div>
 
     <DashboardFixedFooter v-if="filteredDepartments.length > 0" :sidebar-collapsed="sidebarCollapsed">

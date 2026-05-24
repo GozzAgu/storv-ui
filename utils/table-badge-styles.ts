@@ -27,3 +27,21 @@ export function formatStaffStatusLabel(status: string): string {
   if (status === 'on_leave') return 'On leave'
   return status.charAt(0).toUpperCase() + status.slice(1)
 }
+
+export function sellerLoanStatusBadgeClass(status: string): string {
+  switch (status) {
+    case 'active':
+      return `${badgeBase} border-indigo-200/80 bg-indigo-50/90 text-indigo-800 ring-indigo-500/15 dark:border-indigo-500/25 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/20`
+    case 'sold':
+      return `${badgeBase} border-emerald-200/80 bg-emerald-50/90 text-emerald-800 ring-emerald-500/15 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-400/20`
+    default:
+      return `${badgeBase} border-gray-200/80 bg-gray-50/90 text-gray-700 ring-gray-500/10 dark:border-gray-600/40 dark:bg-gray-500/10 dark:text-gray-200 dark:ring-gray-500/15`
+  }
+}
+
+export function formatSellerLoanStatusLabel(status: string): string {
+  if (status === 'active') return 'On loan'
+  if (status === 'sold') return 'Sold'
+  if (status === 'returned') return 'Returned'
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}

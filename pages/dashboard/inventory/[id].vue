@@ -30,13 +30,11 @@
       <div
         class="flex items-start gap-1.5 rounded-sm border border-gray-200/70 bg-white px-2.5 py-2 shadow-none dark:border-gray-700/70 dark:!bg-dashboard-card"
       >
-        <button
-          type="button"
-          class="mt-px flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-          @click="navigateTo('/dashboard/inventory')"
-        >
-          <ArrowLeftIcon class="h-3.5 w-3.5" stroke-width="1.75" />
-        </button>
+        <DashboardBackButton
+          to="/dashboard/inventory"
+          label="Back to inventory"
+          class="mt-px shrink-0"
+        />
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
             <h2 class="truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50">
@@ -314,13 +312,11 @@
         <DataTableToolbar v-if="!isFullscreen" class="hidden lg:block">
           <template #heading>
             <div class="flex min-w-0 flex-1 items-start gap-2">
-              <button
-                type="button"
-                class="mt-0.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white lg:inline-flex"
-                @click="navigateTo('/dashboard/inventory')"
-              >
-                <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
-              </button>
+              <DashboardBackButton
+                to="/dashboard/inventory"
+                label="Back to inventory"
+                class="mt-0.5 hidden lg:inline-flex"
+              />
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <h2 class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
@@ -446,41 +442,35 @@
           </template>
         </DataTableToolbar>
       <!-- Empty state inside table card -->
-      <div
+      <DashboardTableEmptyState
         v-if="sortedFilteredItems.length === 0"
-        class="mx-3 mb-4 flex min-h-[220px] flex-col items-center justify-center rounded-sm bg-white px-5 py-14 text-center dark:!bg-dashboard-card sm:mx-5 sm:px-8"
+        :icon="CubeIcon"
+        :eyebrow="searchQuery ? 'No match' : 'Empty folder'"
+        :title="searchQuery ? 'No products found' : 'No products in this folder'"
+        :description="
+          searchQuery
+            ? 'Try a different term or reset filters to see everything in this folder.'
+            : 'Add your first product to start tracking stock, pricing, and serial numbers here.'
+        "
+        :tips="
+          searchQuery
+            ? ['Search matches name, SKU, and custom fields', 'Clear search to view all products in this category']
+            : ['Import from CSV or add items one at a time', 'Serialized items can be lent via Stock loans']
+        "
+        :fill="false"
+        extra-class="mx-3 mb-4 min-h-[min(50vh,22rem)] sm:mx-5"
       >
-        <div
-          class="mb-4 flex h-14 w-14 shrink-0 items-center justify-center rounded-sm bg-gray-50 dark:bg-gray-800"
-        >
-          <CubeIcon class="h-7 w-7 text-gray-400 dark:text-gray-500" stroke-width="1.35" />
-        </div>
-        <p
-          class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500"
-        >
-          {{ searchQuery ? 'No match' : 'Empty folder' }}
-        </p>
-        <h3 class="mt-2 max-w-md text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-          {{ searchQuery ? 'No products found' : 'No products in this folder' }}
-        </h3>
-        <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-          {{
-            searchQuery
-              ? 'Try a different term or reset filters to see everything in this folder.'
-              : 'Add your first product to start tracking inventory in this folder.'
-          }}
-        </p>
         <Button
-          v-if="canManageInventoryItems"
+          v-if="canManageInventoryItems && !searchQuery"
           variant="primary"
           size="sm"
           :icon="PlusIcon"
-          extra-class="!rounded-2xl mt-5"
+          extra-class="!rounded-2xl"
           @click="openAddItemModal"
         >
           Add product
         </Button>
-      </div>
+      </DashboardTableEmptyState>
       <template v-else>
       <div
         :class="isFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'flex min-h-0 flex-1 flex-col'"
@@ -1328,7 +1318,6 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  ArrowLeftIcon,
   PlusIcon,
   CubeIcon,
   FolderIcon,
@@ -1423,7 +1412,7 @@ const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')
 const folder = ref<InventoryFolder | null>(null)
 const isLoadingFolder = ref(true)
 const isLoadingItems = ref(false)
-const { headerBtnClass, iconBtnClass } = useDashboardPageChrome()
+const { headerBtnClass } = useDashboardPageChrome()
 
 const searchQuery = ref('')
 /** Full folder list for search filter (client-side); not stored in Pinia. */

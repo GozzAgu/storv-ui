@@ -12,6 +12,8 @@ export default defineNuxtConfig({
   // Optimize CSS loading to prevent FOUC
   experimental: {
     payloadExtraction: false,
+    // Avoid dev-time fetch to /_nuxt/builds/meta/dev.json (breaks E2E and static shells).
+    appManifest: false,
   },
   // For Capacitor: Generate static site
   ssr: false,

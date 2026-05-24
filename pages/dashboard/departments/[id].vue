@@ -98,13 +98,12 @@
         <DataTableToolbar v-if="!isLoadingStaff && !isStaffFullscreen">
           <template #heading>
             <div class="flex min-w-0 flex-1 items-start gap-2">
-              <button
-                type="button"
-                :class="[iconBtnClass, 'mt-0.5']"
-                @click="departmentsListPath && navigateTo(departmentsListPath)"
-              >
-                <ArrowLeftIcon class="h-4 w-4" stroke-width="1.75" />
-              </button>
+              <DashboardBackButton
+                v-if="departmentsListPath"
+                :to="departmentsListPath"
+                label="Back to departments"
+                class="mt-0.5"
+              />
               <div class="min-w-0 flex-1">
                 <h2 class="truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
                   {{ department?.name || 'Department' }}
@@ -159,39 +158,29 @@
           </div>
         </div>
 
-        <div
+        <DashboardTableEmptyState
           v-else-if="staff.length === 0"
-          class="flex min-h-[min(280px,calc(100svh-14rem))] flex-1 flex-col items-center justify-center px-4 py-14 text-center sm:px-6"
+          :icon="UsersIcon"
+          eyebrow="Empty roster"
+          title="No staff members yet"
+          description="Add people to this department to assign roles, track status, and control access."
+          :tips="[
+            'Managers can invite staff and set permissions',
+            'Staff sign in with the email and temporary password you provide',
+          ]"
+          extra-class="min-h-[min(280px,calc(100svh-14rem))]"
         >
-          <div
-            class="mx-3 max-w-md rounded-sm bg-white px-6 py-12 dark:!bg-dashboard-card sm:mx-6"
+          <Button
+            v-if="canCreateNewStaff"
+            variant="primary"
+            size="sm"
+            :icon="PlusIcon"
+            extra-class="!rounded-2xl"
+            @click="openCreateStaffModal"
           >
-            <div
-              class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-50 dark:bg-gray-800"
-            >
-              <UsersIcon class="h-7 w-7 text-primary-500 dark:text-primary-400" stroke-width="1.35" />
-            </div>
-            <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500">
-              Empty roster
-            </p>
-            <h2 class="mt-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-              No staff members yet
-            </h2>
-            <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Add people to this department to assign roles, track status, and control access.
-            </p>
-            <Button
-              v-if="canCreateNewStaff"
-              variant="primary"
-              size="sm"
-              :icon="PlusIcon"
-              extra-class="!rounded-2xl mt-6"
-              @click="openCreateStaffModal"
-            >
-              Add staff
-            </Button>
-          </div>
-        </div>
+            Add staff
+          </Button>
+        </DashboardTableEmptyState>
 
         <div
           v-else
@@ -497,7 +486,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
-  ArrowLeftIcon,
   PlusIcon,
   BuildingOfficeIcon,
   UsersIcon,
@@ -548,7 +536,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { headerBtnClass, iconBtnClass } = useDashboardPageChrome()
+const { headerBtnClass } = useDashboardPageChrome()
 const departmentId = computed(() => route.params.id as string)
 
 const departmentBreadcrumbs = computed(() => {

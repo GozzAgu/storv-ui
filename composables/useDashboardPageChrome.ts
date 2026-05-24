@@ -20,8 +20,9 @@ export function useDashboardPageChrome() {
   const headerBtnClass =
     '!inline-flex !h-8 !min-h-8 !items-center !justify-center !rounded-lg !px-3 !py-0 !text-xs shrink-0'
 
+  /** @deprecated Prefer `<DashboardBackButton />` for back navigation. */
   const iconBtnClass =
-    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200/90 bg-white text-gray-600 shadow-sm shadow-gray-900/[0.02] transition-colors hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-400 dark:shadow-none dark:hover:bg-gray-800 dark:hover:text-gray-200'
+    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100'
 
   const eyebrowClass =
     'text-[10px] font-medium tracking-wide text-gray-400 dark:text-gray-500'

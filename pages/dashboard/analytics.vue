@@ -77,24 +77,24 @@
 
     <!-- No store selected -->
     <template v-else-if="needsStoreSelection">
-      <div
-        class="rounded-sm bg-white/90 px-6 py-12 text-center dark:!bg-dashboard-card sm:px-10"
-      >
-        <div
-          class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
+      <div class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10">
+        <DashboardTableEmptyState
+          :icon="BuildingStorefrontIcon"
+          title="Select a store to view analytics"
+          description="Choose a store from the selector in the top bar to load charts and reports."
+          :tips="[
+            'Revenue and product insights are calculated per branch',
+            'Add or switch stores anytime from Settings',
+          ]"
+          :fill="false"
         >
-          <BuildingStorefrontIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-        </div>
-        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Select a store to view analytics</p>
-        <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-          Choose a store from the selector in the top bar, or go to Settings to manage your stores.
-        </p>
-        <NuxtLink
-          to="/dashboard/settings"
-          class="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 transition hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-600 dark:hover:text-white"
-        >
-          Go to Settings
-        </NuxtLink>
+          <NuxtLink
+            to="/dashboard/settings"
+            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 transition hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-600 dark:hover:text-white"
+          >
+            Go to Settings
+          </NuxtLink>
+        </DashboardTableEmptyState>
       </div>
     </template>
 

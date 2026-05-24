@@ -309,23 +309,22 @@
         </table>
       </div>
       <!-- Standalone empty state (same styling as customers empty state, no button) -->
-      <div
+      <DashboardTableEmptyState
         v-else-if="sortedFilteredReceipts.length === 0"
-        class="flex w-full min-w-0 flex-col items-center justify-center px-4 py-14 text-center sm:px-6"
-        :class="isReceiptsFullscreen ? 'min-h-0 flex-1 justify-center' : 'min-h-[min(50vh,22rem)] sm:min-h-[min(45vh,20rem)]'"
-      >
-        <div
-          class="mb-3 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
-        >
-          <ReceiptPercentIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-        </div>
-        <h3 class="max-w-full break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-          {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet' }}
-        </h3>
-        <p class="mx-auto mt-1 max-w-sm break-words text-xs text-gray-500 dark:text-gray-400">
-          {{ searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'Try adjusting your search or filters' : 'Create your first receipt to get started' }}
-        </p>
-      </div>
+        :icon="ReceiptPercentIcon"
+        :title="searchQuery || statusFilter !== 'all' || dateFilter !== 'all' ? 'No receipts found' : 'No receipts yet'"
+        :description="
+          searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
+            ? 'Try adjusting your search, status, or date filters.'
+            : 'Create your first receipt to record a sale and track payments.'
+        "
+        :tips="
+          searchQuery || statusFilter !== 'all' || dateFilter !== 'all'
+            ? ['Clear filters to see every receipt for this store', 'Receipt numbers and customer names are searchable']
+            : ['Add line items from inventory categories', 'Use Outstanding for deposits and balance due']
+        "
+        :extra-class="isReceiptsFullscreen ? 'min-h-0 flex-1' : ''"
+      />
       <template v-else>
       <div :class="isReceiptsFullscreen ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : 'contents'">
       <!-- Mobile: card list (no horizontal scroll) -->
@@ -858,16 +857,16 @@
           </template>
         </DataTableToolbar>
 
-        <div
+        <DashboardTableEmptyState
           v-if="filteredOutstandingReceipts.length === 0 && !receiptsStore.loading"
-          class="flex flex-col items-center justify-center px-4 py-16 text-center"
-        >
-          <ClockIcon class="mb-3 h-8 w-8 text-gray-400" stroke-width="1.5" />
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No outstanding payments</h3>
-          <p class="mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-            Create a receipt with “Balance due” when a customer pays a deposit. It will appear here until paid in full.
-          </p>
-        </div>
+          :icon="ClockIcon"
+          title="No outstanding payments"
+          description="Create a receipt with “Balance due” when a customer pays a deposit. It will appear here until paid in full."
+          :tips="[
+            'Record partial payments from the Actions menu on each row',
+            'The balance clears automatically when paid in full',
+          ]"
+        />
 
         <div v-else class="min-h-0 flex-1 overflow-x-auto">
           <table class="dashboard-table min-w-full">
@@ -992,22 +991,21 @@
             </div>
           </div>
         </div>
-        <div
+        <DashboardTableEmptyState
           v-else-if="filteredCustomers.length === 0"
-          class="flex min-h-[min(50vh,22rem)] w-full min-w-0 flex-col items-center justify-center px-4 py-14 text-center sm:min-h-[min(45vh,20rem)] sm:px-6"
-        >
-          <div
-            class="mb-3 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
-          >
-            <UsersIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-          </div>
-          <h3 class="max-w-full break-words text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-            {{ customersSearchQuery ? 'No customers found' : 'No customers yet' }}
-          </h3>
-          <p class="mx-auto mt-1 max-w-sm break-words text-xs text-gray-500 dark:text-gray-400">
-            {{ customersSearchQuery ? 'Try adjusting your search' : 'Customers will appear here once you create receipts' }}
-          </p>
-        </div>
+          :icon="UsersIcon"
+          :title="customersSearchQuery ? 'No customers found' : 'No customers yet'"
+          :description="
+            customersSearchQuery
+              ? 'Try another name, phone number, or email.'
+              : 'Customers are created automatically when you add them on a receipt.'
+          "
+          :tips="
+            customersSearchQuery
+              ? ['Search matches name, phone, and email fields', 'Clear search to see your full customer list']
+              : ['Each receipt links to a customer profile', 'Expand a row to see order history and totals']
+          "
+        />
         <div v-else class="flex min-h-0 flex-1 flex-col">
           <div class="min-h-0 flex-1 overflow-x-auto">
           <table class="dashboard-table min-w-full">

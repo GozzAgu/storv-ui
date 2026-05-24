@@ -26,139 +26,245 @@
     <template v-else-if="canAccessSellerLoansPlan">
       <div
         v-if="!storesStore.currentStoreId && !sellerLoansStore.loading"
-        class="rounded-sm bg-white/90 px-6 py-12 text-center dark:!bg-dashboard-card sm:px-10"
+        class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10"
       >
-        <BuildingStorefrontIcon class="mx-auto mb-3 h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">Select a store</p>
-        <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-          Use the store selector in the top bar.
-        </p>
+        <DashboardTableEmptyState
+          :icon="BuildingStorefrontIcon"
+          title="Select a store"
+          description="Use the store selector in the top bar to view stock loans for a branch."
+          :tips="[
+            'Loans are tracked per store',
+            'Only serialized inventory can be lent out',
+          ]"
+          :fill="false"
+        />
       </div>
 
-      <div v-else class="data-table-shell overflow-hidden">
-        <div class="border-b border-gray-100/90 bg-gradient-to-b from-gray-50/90 to-white px-4 py-3 dark:border-gray-800/70 dark:from-white/[0.03] dark:to-transparent sm:px-5">
-          <div class="flex flex-wrap items-center gap-2">
-            <div
-              class="flex h-8 shrink-0 items-center rounded-lg border border-gray-200/90 bg-gray-50/50 p-0.5 dark:border-gray-700/80 dark:bg-white/[0.03]"
-              role="group"
-              aria-label="Loan status"
-            >
-              <button
-                v-for="tab in loanStatusTabs"
-                :key="tab.value"
-                type="button"
-                class="rounded-md px-2.5 text-xs font-medium transition-colors"
-                :class="
-                  statusFilter === tab.value
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-                "
-                @click="statusFilter = tab.value"
+      <template v-else>
+        <nav
+          class="flex flex-wrap gap-8"
+          aria-label="Stock loan views"
+        >
+          <button
+            v-for="tab in loanStatusTabs"
+            :key="tab.value"
+            type="button"
+            role="tab"
+            :aria-selected="statusFilter === tab.value"
+            class="relative rounded-t pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900"
+            :class="
+              statusFilter === tab.value
+                ? 'font-semibold text-gray-900 dark:text-gray-100'
+                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+            "
+            @click="statusFilter = tab.value"
+          >
+            <span class="inline-flex items-center gap-1.5">
+              {{ tab.label }}
+              <span
+                v-if="tab.badgeCount"
+                class="min-w-[1.125rem] rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+                :class="tab.badgeClass"
               >
-                {{ tab.label }}
-              </button>
+                {{ tab.badgeCount }}
+              </span>
+            </span>
+            <span
+              class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+              :class="statusFilter === tab.value ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+              aria-hidden="true"
+            />
+          </button>
+        </nav>
+
+        <div class="data-table-shell mt-1 flex min-h-0 flex-1 flex-col overflow-hidden sm:mt-2">
+        <DataTableToolbar>
+          <template #heading>
+            <div class="min-w-0">
+              <h2 class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm">
+                Loans
+              </h2>
+              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+                Track units lent until they sell or return to stock
+              </p>
+              <div v-if="!sellerLoansStore.loading && sellerLoansStore.loans.length > 0" class="mt-2 flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  {{ filteredLoans.length }} shown
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300">
+                  {{ loanCountByStatus.active }} on loan
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  {{ loanCountByStatus.sold }} sold
+                </span>
+                <span class="inline-flex items-center rounded-sm bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                  {{ loanCountByStatus.returned }} returned
+                </span>
+              </div>
+            </div>
+          </template>
+        </DataTableToolbar>
+
+        <div v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0" class="p-6 sm:p-8">
+          <div class="space-y-3">
+            <div v-for="i in 6" :key="i" class="flex items-center gap-3">
+              <div class="h-9 w-9 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10" />
+              <div class="min-w-0 flex-1 space-y-2">
+                <div class="h-3 w-1/3 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+                <div class="h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+              </div>
             </div>
           </div>
         </div>
 
-        <div v-if="sellerLoansStore.loading && sellerLoansStore.loans.length === 0" class="p-8">
-          <div class="mx-auto flex max-w-[200px] flex-col gap-2">
-            <div v-for="i in 6" :key="i" class="h-3 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-          </div>
+        <div v-else-if="sellerLoansStore.error" class="px-4 py-10 text-center sm:px-6">
+          <p class="text-sm font-medium text-red-600 dark:text-red-400">Could not load stock loans.</p>
+          <p class="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">{{ sellerLoansStore.error }}</p>
         </div>
 
-        <div v-else-if="sellerLoansStore.error" class="px-5 py-8 text-center text-sm text-red-600 dark:text-red-400">
-          {{ sellerLoansStore.error }}
-        </div>
+        <DashboardTableEmptyState
+          v-else-if="sellerLoansStore.loans.length === 0"
+          :icon="ArchiveBoxIcon"
+          title="No stock loans yet"
+          description="Lend serialized inventory from a product page to track borrowers here."
+          :tips="[
+            'Only items with serial numbers can be lent out',
+            'Mark sold or returned when the borrower finishes',
+          ]"
+        />
 
-        <div v-else-if="filteredLoans.length === 0" class="px-5 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
-          No stock loans in this filter.
-        </div>
+        <DashboardTableEmptyState
+          v-else-if="filteredLoans.length === 0"
+          :icon="MagnifyingGlassIcon"
+          title="No loans in this filter"
+          description="Switch tabs to see loans in another status."
+          :tips="[
+            'Active loans are still with the borrower',
+            'Returned and sold loans stay in history for reference',
+          ]"
+        >
+          <button
+            type="button"
+            class="text-xs font-medium text-primary-600 underline decoration-primary-300 underline-offset-2 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-600 dark:hover:text-primary-300"
+            @click="statusFilter = 'all'"
+          >
+            View all
+          </button>
+        </DashboardTableEmptyState>
 
-        <div v-else class="flex min-h-0 flex-1 flex-col">
-          <div class="min-h-0 flex-1 overflow-x-auto">
-          <table class="dashboard-table min-w-full">
-            <thead>
-              <tr>
-                <th scope="col">Borrower</th>
-                <th scope="col">Units</th>
-                <th scope="col">Started</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="w-[1%] whitespace-nowrap text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="loan in paginatedLoans" :key="loan.id">
-                <td>
-                  <p class="text-[11px] font-semibold text-gray-900 dark:text-gray-50">{{ loan.partyName }}</p>
-                  <p v-if="loan.partyPhone" class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">{{ loan.partyPhone }}</p>
-                  <p v-if="loan.partyNotes && loan.status === 'active'" class="mt-1 max-w-xs truncate text-[10px] text-gray-600 dark:text-gray-300" :title="loan.partyNotes">
-                    {{ loan.partyNotes }}
-                  </p>
-                </td>
-                <td class="px-3 py-2.5 text-[11px] text-gray-800 dark:text-gray-200 sm:px-4">
-                  {{ loan.lines.length }}
-                  <details v-if="loan.lines.length && loan.lines.length <= 40" class="mt-1.5">
-                    <summary class="cursor-pointer text-[10px] text-primary-700 dark:text-primary-400">View products</summary>
-                    <ul class="mt-1 max-h-32 list-inside list-disc space-y-0.5 text-[10px] text-gray-600 dark:text-gray-400">
-                      <li v-for="(line, i) in loan.lines" :key="i">{{ line.itemSummary }}</li>
-                    </ul>
-                  </details>
-                </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-[11px] text-gray-700 dark:text-gray-300 sm:px-4">
-                  {{ formatWhen(loan.createdAt) }}
-                </td>
-                <td class="px-3 py-2.5 sm:px-4">
-                  <span
-                    :class="[
-                      'inline-flex rounded-full px-2 py-0.5 text-[9px] font-semibold tracking-wide ring-1 ring-inset',
-                      loan.status === 'active'
-                        ? 'bg-indigo-500/10 text-indigo-900 ring-indigo-500/20 dark:bg-indigo-400/10 dark:text-indigo-100 dark:ring-indigo-400/30'
-                        : loan.status === 'sold'
-                          ? 'bg-emerald-500/10 text-emerald-900 ring-emerald-500/20 dark:bg-emerald-400/12 dark:text-emerald-100 dark:ring-emerald-400/30'
-                          : 'bg-gray-500/10 text-gray-700 ring-gray-400/25 dark:bg-gray-500/15 dark:text-gray-300',
-                    ]"
-                  >
-                    {{
-                      loan.status === 'active' ? 'On loan' : loan.status === 'sold' ? 'Sold' : 'Returned'
-                    }}
-                  </span>
-                </td>
-                <td class="px-3 py-2.5 text-right sm:px-4">
-                  <template v-if="loan.status === 'active'">
-                    <div
-                      class="relative inline-flex justify-end"
-                      data-stock-loan-actions-menu
-                      @click.stop
+        <div v-else class="flex flex-col">
+          <div class="overflow-x-auto">
+            <table class="dashboard-table min-w-full">
+              <thead>
+                <tr>
+                  <th scope="col">Borrower</th>
+                  <th scope="col">Units</th>
+                  <th scope="col">Started</th>
+                  <th scope="col" class="dashboard-table__col-status">Status</th>
+                  <th scope="col" class="dashboard-table__col-actions">
+                    <span class="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="loan in paginatedLoans" :key="loan.id">
+                  <td class="max-w-[16rem] sm:max-w-xs">
+                    <span class="dashboard-table__primary block truncate" :title="loan.partyName">
+                      {{ loan.partyName }}
+                    </span>
+                    <span
+                      v-if="loan.partyPhone"
+                      class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
+                      :title="loan.partyPhone"
                     >
-                      <button
-                        type="button"
-                        :data-stock-loan-actions-anchor="loan.id"
-                        class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
-                        :disabled="loanActionBusyId === loan.id"
-                        :aria-expanded="openLoanMenuId === loan.id"
-                        aria-haspopup="menu"
-                        aria-label="Stock loan actions"
-                        @click="toggleLoanMenu(loan.id)"
+                      {{ loan.partyPhone }}
+                    </span>
+                    <span
+                      v-if="loan.partyNotes && loan.status === 'active'"
+                      class="dashboard-table__muted mt-1 block max-w-xs truncate text-[10px]"
+                      :title="loan.partyNotes"
+                    >
+                      {{ loan.partyNotes }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="dashboard-table__numeric">{{ loan.lines.length }}</span>
+                    <button
+                      v-if="loan.lines.length > 0 && loan.lines.length <= 40"
+                      type="button"
+                      class="mt-1 flex items-center gap-0.5 text-[10px] font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                      :aria-expanded="expandedLoanIds.has(loan.id)"
+                      @click="toggleLoanLines(loan.id)"
+                    >
+                      <ChevronRightIcon
+                        class="h-3 w-3 shrink-0 transition-transform"
+                        :class="expandedLoanIds.has(loan.id) ? 'rotate-90' : ''"
+                        stroke-width="2"
+                      />
+                      {{ expandedLoanIds.has(loan.id) ? 'Hide products' : 'View products' }}
+                    </button>
+                    <ul
+                      v-if="expandedLoanIds.has(loan.id) && loan.lines.length"
+                      class="mt-1.5 max-h-32 space-y-0.5 overflow-y-auto border-l border-gray-200/90 pl-2 dark:border-gray-700/80"
+                    >
+                      <li
+                        v-for="(line, i) in loan.lines"
+                        :key="i"
+                        class="dashboard-table__muted text-[10px] leading-snug"
                       >
-                        <EllipsisVerticalIcon class="h-4 w-4 shrink-0" stroke-width="2" />
-                      </button>
-                    </div>
-                  </template>
-                  <span v-else-if="loan.status === 'sold' && loan.soldAt" class="text-[10px] text-gray-500 dark:text-gray-400">
-                    Sold {{ formatWhen(loan.soldAt) }}
-                  </span>
-                  <span v-else-if="loan.returnedAt" class="text-[10px] text-gray-500 dark:text-gray-400">
-                    {{ formatWhen(loan.returnedAt) }}
-                  </span>
-                  <span v-else class="text-[10px] text-gray-400">-</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                        {{ line.itemSummary }}
+                      </li>
+                    </ul>
+                  </td>
+                  <td class="whitespace-nowrap">
+                    <span class="dashboard-table__muted">{{ formatWhen(loan.createdAt) }}</span>
+                  </td>
+                  <td class="dashboard-table__col-status">
+                    <DashboardTableBadge
+                      :badge-class="sellerLoanStatusBadgeClass(loan.status)"
+                      :label="formatSellerLoanStatusLabel(loan.status)"
+                    />
+                  </td>
+                  <td class="dashboard-table__col-actions">
+                    <template v-if="loan.status === 'active'">
+                      <div
+                        class="inline-flex justify-end"
+                        data-stock-loan-actions-menu
+                        @click.stop
+                      >
+                        <button
+                          type="button"
+                          :data-stock-loan-actions-anchor="loan.id"
+                          class="dashboard-table__action-btn"
+                          :disabled="loanActionBusyId === loan.id"
+                          :aria-expanded="openLoanMenuId === loan.id"
+                          aria-haspopup="menu"
+                          aria-label="Stock loan actions"
+                          @click="toggleLoanMenu(loan.id)"
+                        >
+                          <EllipsisVerticalIcon class="h-4 w-4 shrink-0" stroke-width="2" />
+                        </button>
+                      </div>
+                    </template>
+                    <span
+                      v-else-if="loan.status === 'sold' && loan.soldAt"
+                      class="dashboard-table__muted block text-right text-[10px] whitespace-nowrap"
+                    >
+                      {{ formatWhen(loan.soldAt) }}
+                    </span>
+                    <span
+                      v-else-if="loan.returnedAt"
+                      class="dashboard-table__muted block text-right text-[10px] whitespace-nowrap"
+                    >
+                      {{ formatWhen(loan.returnedAt) }}
+                    </span>
+                    <span v-else class="dashboard-table__muted text-[10px]">—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <DashboardTablePagination
-            v-if="filteredLoans.length > 0"
             :current-page="currentPage"
             :items-per-page="itemsPerPage"
             :total="filteredLoans.length"
@@ -166,6 +272,7 @@
           />
         </div>
       </div>
+      </template>
     </template>
 
     <div
@@ -292,9 +399,21 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, nextTick, onBeforeUnmount } from 'vue'
-import { BuildingStorefrontIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline'
+import {
+  ArchiveBoxIcon,
+  BuildingStorefrontIcon,
+  ChevronRightIcon,
+  EllipsisVerticalIcon,
+  MagnifyingGlassIcon,
+} from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import Button from '~/components/ui/Button.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
+import DashboardTableBadge from '~/components/ui/DashboardTableBadge.vue'
+import {
+  formatSellerLoanStatusLabel,
+  sellerLoanStatusBadgeClass,
+} from '~/utils/table-badge-styles'
 import { useSellerLoanOutsStore, type SellerLoanOut } from '~/stores/sellerLoanOuts'
 import { useStoresStore } from '~/stores/stores'
 import { usePermissions } from '~/composables/usePermissions'
@@ -317,14 +436,42 @@ const toast = useAppToast()
 const canAccessByRole = computed(() => canManage.value)
 const canAccessSellerLoansPlan = computed(() => canUseSubscriptionFeature('seller_loans'))
 
-const loanStatusTabs = [
-  { value: 'active' as const, label: 'Active' },
-  { value: 'returned' as const, label: 'Returned' },
-  { value: 'sold' as const, label: 'Sold (borrower)' },
-  { value: 'all' as const, label: 'All' },
-]
+type LoanStatusFilter = 'active' | 'returned' | 'sold' | 'all'
 
-const statusFilter = ref<'active' | 'returned' | 'sold' | 'all'>('active')
+const statusFilter = ref<LoanStatusFilter>('active')
+const expandedLoanIds = ref<Set<string>>(new Set())
+
+const loanCountByStatus = computed(() => {
+  const rows = sellerLoansStore.loans
+  return {
+    active: rows.filter((l) => l.status === 'active').length,
+    sold: rows.filter((l) => l.status === 'sold').length,
+    returned: rows.filter((l) => l.status === 'returned').length,
+  }
+})
+
+const loanStatusTabs = computed(() => {
+  const counts = loanCountByStatus.value
+  return [
+    {
+      value: 'active' as const,
+      label: 'Active',
+      badgeCount: counts.active > 0 ? counts.active : undefined,
+      badgeClass:
+        'bg-indigo-100 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200',
+    },
+    { value: 'returned' as const, label: 'Returned' },
+    { value: 'sold' as const, label: 'Sold (borrower)' },
+    { value: 'all' as const, label: 'All' },
+  ]
+})
+
+function toggleLoanLines(loanId: string) {
+  const next = new Set(expandedLoanIds.value)
+  if (next.has(loanId)) next.delete(loanId)
+  else next.add(loanId)
+  expandedLoanIds.value = next
+}
 
 const getInitialPage = (): number => {
   if (import.meta.client) {
@@ -368,6 +515,7 @@ function handlePageChange(page: number) {
 }
 
 watch(statusFilter, () => {
+  expandedLoanIds.value = new Set()
   currentPage.value = 1
   if (import.meta.client) {
     try {

@@ -54,13 +54,15 @@ export function activityEntityTypeLabel(type: ActivityEntityType): string {
 }
 
 export function activityActionBadgeClass(action: ActivityAction): string {
+  const base =
+    'inline-flex shrink-0 items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-medium leading-none'
   if (action === 'created') {
-    return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
+    return `${base} bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300`
   }
   if (action === 'deleted') {
-    return 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'
+    return `${base} bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300`
   }
-  return 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300'
+  return `${base} bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300`
 }
 
 /** Primary line for compact activity previews (dashboard, widgets). */

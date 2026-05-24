@@ -356,17 +356,18 @@
           </template>
         </DataTableToolbar>
         <div class="p-3 sm:p-4">
-          <div v-if="transferHistory.length === 0" class="py-10 text-center">
-            <div
-              class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-sm bg-gray-100 ring-1 ring-gray-200/80 dark:bg-gray-800/80 dark:ring-gray-700/60"
-            >
-              <ArrowsRightLeftIcon class="h-7 w-7 text-gray-500 dark:text-gray-400" stroke-width="1.5" />
-            </div>
-            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No transfer history</p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Create a transfer from the Transfer Items tab
-            </p>
-          </div>
+          <DashboardTableEmptyState
+            v-if="transferHistory.length === 0"
+            :icon="ArrowsRightLeftIcon"
+            title="No transfer history"
+            description="Completed and pending transfers between branches will appear here."
+            :tips="[
+              'Start a transfer from the Transfer Items tab',
+              'Approvals and item details are tracked per transfer',
+            ]"
+            :fill="false"
+            extra-class="py-10"
+          />
 
           <div v-else class="space-y-3">
             <div
