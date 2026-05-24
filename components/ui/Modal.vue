@@ -1,25 +1,26 @@
 <template>
   <Teleport to="body">
-    <!-- z above dashboard sidebar (55), fixed footer/pagination (50), and header (30); below SidePanel (1100) and toasts -->
     <div v-if="modelValue" class="fixed inset-0 z-[105] overflow-hidden" role="presentation">
-      <!-- Backdrop: receives clicks outside panel -->
       <div
-        :class="[ 'absolute inset-0 bg-slate-950/55 transition-opacity duration-300 dark:bg-black/65', blurBackdrop ? 'backdrop-blur-[2px]' : '', ]"
+        :class="[
+          'absolute inset-0 transition-opacity duration-300',
+          backdropClass,
+          blurBackdrop ? 'backdrop-blur-[3px]' : '',
+        ]"
         aria-hidden="true"
         @click="handleBackdropClick"
       />
 
-      <!-- Full-screen row passes clicks through to backdrop except on the dialog -->
       <div
-        class="pointer-events-none relative z-10 flex min-h-full items-end justify-center sm:items-center sm:p-3 md:p-5"
+        class="pointer-events-none relative z-10 flex min-h-full items-end justify-center sm:items-center sm:p-4 md:p-5"
       >
         <Transition
           enter-active-class="transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          enter-from-class="opacity-0 translate-y-6 sm:translate-y-4 sm:scale-[0.97]"
+          enter-from-class="opacity-0 translate-y-4 sm:translate-y-2 sm:scale-[0.98]"
           enter-to-class="opacity-100 translate-y-0 sm:scale-100"
           leave-active-class="transition duration-200 ease-in"
           leave-from-class="opacity-100 translate-y-0 sm:scale-100"
-          leave-to-class="opacity-0 translate-y-4 sm:scale-[0.98]"
+          leave-to-class="opacity-0 translate-y-3 sm:scale-[0.99]"
         >
           <div
             v-if="modelValue"
@@ -27,35 +28,28 @@
             aria-modal="true"
             :aria-labelledby="labelledBy"
             :aria-describedby="describedBy"
-            :class="[ 'frosted-glass pointer-events-auto relative flex max-h-[min(92dvh,calc(100dvh-1rem))] min-h-0 w-full flex-col overflow-hidden border border-gray-200/90 pb-[env(safe-area-inset-bottom,0)] text-gray-900 dark:border-gray-800 dark:text-gray-100', 'rounded-t-sm sm:rounded-sm', sizeClasses, ]"
+            :class="[
+              'pointer-events-auto relative max-h-[min(92dvh,calc(100dvh-1rem))]',
+              shellClass,
+              'rounded-t-xl sm:rounded-xl',
+              sizeClasses,
+            ]"
             @click.stop
           >
-            <!-- Header -->
             <div
               v-if="title || subtitle || $slots.header || showClose"
-              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-200/90 bg-transparent px-4 py-3.5 dark:border-gray-800 sm:px-5 sm:py-4"
+              :class="headerClass"
             >
               <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
                 <slot name="header">
                   <div v-if="title || subtitle" class="min-w-0">
-                    <p
-                      v-if="eyebrow"
-                      class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500"
-                    >
+                    <p v-if="eyebrow" :class="eyebrowClass">
                       {{ eyebrow }}
                     </p>
-                    <h3
-                      v-if="title"
-                      :id="titleId"
-                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-[1.0625rem]"
-                    >
+                    <h3 v-if="title" :id="titleId" :class="titleClass">
                       {{ title }}
                     </h3>
-                    <p
-                      v-if="subtitle"
-                      :id="subtitleId"
-                      class="mt-1 text-[13px] leading-snug text-gray-500 dark:text-gray-400"
-                    >
+                    <p v-if="subtitle" :id="subtitleId" :class="subtitleClass">
                       {{ subtitle }}
                     </p>
                   </div>
@@ -64,7 +58,7 @@
               <button
                 v-if="showClose"
                 type="button"
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-gray-200/90 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:border-gray-700 dark:bg-slate-900 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-100"
+                :class="closeButtonClass"
                 aria-label="Close modal"
                 @click="handleClose"
               >
@@ -72,19 +66,11 @@
               </button>
             </div>
 
-            <!-- Body -->
-            <div
-              class="modal-body-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain bg-transparent"
-              :class="contentPadding"
-            >
+            <div :class="[bodyClass, 'modal-body-scroll', contentPadding]">
               <slot />
             </div>
 
-            <!-- Footer -->
-            <div
-              v-if="$slots.footer"
-              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-200/90 bg-transparent px-4 py-3 dark:border-gray-800 sm:flex-row sm:items-center sm:px-5 sm:py-4"
-            >
+            <div v-if="$slots.footer" :class="footerClass">
               <slot name="footer" />
             </div>
           </div>
@@ -102,7 +88,6 @@ interface Props {
   modelValue: boolean
   title?: string
   subtitle?: string
-  /** Small label above the title (e.g. "Confirm action") */
   eyebrow?: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   showClose?: boolean
@@ -116,7 +101,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showClose: true,
   closeOnBackdrop: true,
-  contentPadding: 'p-4 sm:p-5',
+  contentPadding: 'px-4 py-4 sm:px-5 sm:py-5',
   blurBackdrop: false,
 })
 
@@ -124,6 +109,18 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   close: []
 }>()
+
+const {
+  backdropClass,
+  shellClass,
+  headerClass,
+  bodyClass,
+  footerClass,
+  closeButtonClass,
+  titleClass,
+  subtitleClass,
+  eyebrowClass,
+} = useDashboardOverlayChrome()
 
 const titleId = useId()
 const subtitleId = useId()
@@ -180,7 +177,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Prefer overlay scrollbars / thin gutter so wide modal content doesn’t shift */
 .modal-body-scroll {
   scrollbar-gutter: stable;
 }

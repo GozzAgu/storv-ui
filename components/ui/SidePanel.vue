@@ -16,7 +16,8 @@
       <div
         v-if="modelValue"
         :class="[
-          'fixed inset-0 z-[1100] bg-gray-900/40 dark:bg-black/55',
+          'fixed inset-0 z-[1100]',
+          backdropClass,
           blurBackdrop ? 'backdrop-blur-[3px]' : '',
         ]"
         aria-hidden="true"
@@ -140,6 +141,17 @@ const props = withDefaults(defineProps<Props>(), {
   contentPadding: 'px-4 py-4 sm:px-5 sm:py-5',
   blurBackdrop: false,
 })
+
+const {
+  backdropClass,
+  headerClass,
+  bodyClass,
+  footerClass,
+  closeButtonClass,
+  titleClass,
+  subtitleClass,
+  eyebrowClass,
+} = useDashboardOverlayChrome()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]

@@ -639,8 +639,8 @@
       </template>
     </SidePanel>
 
-    <!-- Duplicate Folder Modal (multiple folder names) -->
-    <Modal
+    <!-- Duplicate category -->
+    <SidePanel
       v-model="showDuplicateFolderModal"
       title="Duplicate category"
       subtitle="Create copies with the same template and settings. Enter one or more category names."
@@ -682,26 +682,26 @@
         <p v-if="duplicateFolderNamesError" class="text-xs text-red-600 dark:text-red-400">{{ duplicateFolderNamesError }}</p>
       </form>
       <template #footer>
-        <Button variant="outline" size="sm" type="button" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()" extra-class="!rounded-2xl">Cancel</Button>
-        <Button variant="primary" size="sm" type="button" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames" extra-class="!rounded-2xl">
-          {{ isDuplicatingFolder ? 'Duplicating...' : `Duplicate ${validDuplicateFolderNamesCount} ${validDuplicateFolderNamesCount === 1 ? 'category' : 'categories'}` }}
+        <Button variant="outline" size="sm" type="button" :class="footerBtnOutlineClass" @click="showDuplicateFolderModal = false; clearDuplicateFolderModal()">Cancel</Button>
+        <Button variant="primary" size="sm" type="button" :class="footerBtnPrimaryClass" @click="handleConfirmDuplicateFolder" :disabled="isDuplicatingFolder || !hasValidDuplicateFolderNames">
+          {{ isDuplicatingFolder ? 'Duplicating…' : `Duplicate ${validDuplicateFolderNamesCount} ${validDuplicateFolderNamesCount === 1 ? 'category' : 'categories'}` }}
         </Button>
       </template>
-    </Modal>
+    </SidePanel>
 
     <!-- Copy selected folder templates from another branch -->
-    <Modal
+    <SidePanel
       v-model="showCopyFolderTemplatesModal"
       title="Copy category templates from another branch"
-      subtitle="The checklist is always for the branch you choose in Source branch, not the branch shown in your inventory grid behind this window."
-      size="md"
+      subtitle="Pick a source branch, then select categories to copy into the branch you're viewing."
+      size="lg"
     >
-      <div class="space-y-4 text-left">
+      <div class="flex min-h-0 flex-col gap-4 text-left">
         <div>
-          <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Source branch</label>
+          <p :class="sectionLabelClass">Source branch</p>
           <select
             v-model="copyTemplatesSourceStoreId"
-            class="w-full rounded-sm border border-gray-200/90 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-600 dark:!bg-dashboard-card dark:text-gray-100 dark:focus:border-primary-500/40"
+            class="mt-1.5 w-full rounded-lg border border-gray-200/90 bg-white py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100"
           >
             <option value="" disabled>Select a branch…</option>
             <option
@@ -715,7 +715,7 @@
         </div>
         <div v-if="copyTemplatesSourceStoreId" class="space-y-2">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <label class="text-xs font-medium text-gray-700 dark:text-gray-300">Categories to copy</label>
+            <p :class="sectionLabelClass">Categories to copy</p>
             <div class="flex items-center gap-2">
               <span class="text-[10px] tabular-nums text-gray-500 dark:text-gray-400">
                 {{ copyTemplatesSelectedCount }} selected
@@ -739,15 +739,13 @@
               </button>
             </div>
           </div>
-          <div
-            class="max-h-[min(240px,calc(100vh-20rem))] overflow-y-auto overscroll-contain rounded-sm border border-gray-200/90 dark:border-gray-600"
-          >
-            <div v-if="loadingCopyTemplatesSourceFolders" class="px-3 py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+          <div :class="pickListClass">
+            <div v-if="loadingCopyTemplatesSourceFolders" class="px-3 py-8 text-center text-xs text-gray-500 dark:text-gray-400">
               Loading categories…
             </div>
             <div
               v-else-if="copyTemplatesSourceFoldersList.length === 0"
-              class="space-y-2 px-3 py-5 text-left text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+              :class="[emptyStateClass, '!items-start !py-6 !text-left']"
             >
               <p>
                 No category templates were found under
@@ -760,11 +758,11 @@
                 Switch &ldquo;Source branch&rdquo; to that branch if those are the categories you want to copy, or create categories first on {{ copyTemplatesSourceBranchLabel }}.
               </p>
             </div>
-            <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700/90">
+            <ul v-else :class="[pickListScrollClass, '!max-h-[min(40vh,22rem)]']">
               <li
                 v-for="f in copyTemplatesSourceFoldersList"
                 :key="f.id"
-                class="flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-gray-50/90 dark:hover:bg-gray-900/35"
+                :class="[pickRowClass, copyTemplatesSelectedFolderIds.includes(f.id) ? pickRowSelectedClass : '']"
               >
                 <Checkbox
                   :model-value="copyTemplatesSelectedFolderIds.includes(f.id)"
@@ -773,14 +771,14 @@
                   wrapper-class="min-w-0 flex-1"
                   label-class="!ml-2.5 min-w-0"
                 >
-                  <span class="block truncate text-sm text-gray-900 dark:text-gray-100">{{ f.name || 'Untitled' }}</span>
+                  <span :class="pickRowTitleClass">{{ f.name || 'Untitled' }}</span>
                 </Checkbox>
               </li>
             </ul>
           </div>
         </div>
         <fieldset class="space-y-2">
-          <legend class="text-xs font-medium text-gray-700 dark:text-gray-300">When a category name already exists here</legend>
+          <legend :class="sectionLabelClass">When a category name already exists here</legend>
           <label class="flex cursor-pointer items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
             <input v-model="copyTemplatesNameCollision" type="radio" value="skip" class="mt-0.5" />
             <span>Skip that category</span>
@@ -799,7 +797,7 @@
           variant="outline"
           size="sm"
           type="button"
-          extra-class="!rounded-2xl"
+          :class="footerBtnOutlineClass"
           @click="showCopyFolderTemplatesModal = false"
         >
           Cancel
@@ -808,7 +806,7 @@
           variant="primary"
           size="sm"
           type="button"
-          extra-class="!rounded-2xl"
+          :class="footerBtnPrimaryClass"
           :disabled="
             isCopyingFolderTemplates
               || !copyTemplatesSourceStoreId
@@ -825,7 +823,7 @@
           }}
         </Button>
       </template>
-    </Modal>
+    </SidePanel>
 
     <!-- Folder actions menu (teleported; not clipped by grid/card overflow) -->
     <Teleport to="body">
@@ -912,6 +910,17 @@ useHead({
 })
 
 const { eyebrowClass, titleClass, headerBtnClass, bulkActionsClass } = useDashboardPageChrome()
+const {
+  sectionLabelClass,
+  pickListClass,
+  pickListScrollClass,
+  pickRowClass,
+  pickRowSelectedClass,
+  pickRowTitleClass,
+  emptyStateClass,
+  footerBtnOutlineClass,
+  footerBtnPrimaryClass,
+} = useDashboardDrawerChrome()
 
 const searchQuery = ref('')
 const sortBy = ref('name')
