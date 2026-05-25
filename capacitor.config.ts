@@ -7,10 +7,14 @@ const config: CapacitorConfig = {
  server: {
  iosScheme: 'capacitor',
  },
- ios: {
- /** Let CSS env(safe-area-inset-*) handle insets — avoids double gap with our fixed top bar. */
- contentInset: 'automatic',
- },
+  ios: {
+    /**
+     * Edge-to-edge WebView; safe areas via CSS env(safe-area-inset-*).
+     * "automatic" shrinks the WebView and shows black letterboxing above/below the app.
+     */
+    contentInset: 'never',
+    backgroundColor: '#f3f4f6',
+  },
 }
 
 export default config

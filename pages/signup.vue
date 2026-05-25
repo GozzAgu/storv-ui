@@ -1,585 +1,474 @@
 <template>
- <AuthShell
- content-width-class="max-w-[440px]"
- mobile-line="Join Storvv: your store workspace, organized."
- panel-title="Open a workspace built for multi-branch retail."
- panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
- >
- <div
- :class="[authEntranceClass(40), 'mb-8 text-center lg:mb-9 lg:text-left']"
- >
- <a
- href="https://www.storvv.com"
- class="mb-4 inline-block rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-slate-950"
- >
- <img
- :src="logoSource"
- alt="Storvv"
- class="mx-auto h-6 w-auto max-w-[104px] shrink-0 object-contain sm:h-7"
- />
- </a>
- <template v-if="!registrationComplete">
- <p
- class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
- >
- Get started
- </p>
- <h1
- class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
- >
- Create your account
- </h1>
- <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
- Takes a minute. Already set up?
- <NuxtLink
- to="/signin"
- class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
- >
- Sign in instead
- </NuxtLink>
- </p>
- </template>
- <template v-else>
- <p
- class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
- >
- One more step
- </p>
- <h1
- class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
- >
- Check your email
- </h1>
- <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
- We need you to confirm your address before you sign in.
- </p>
- </template>
- </div>
+  <AuthShell
+    content-width-class="max-w-[440px]"
+    mobile-line="Join Storvv: your store workspace, organized."
+    panel-title="Open a workspace built for multi-branch retail."
+    panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
+  >
+    <AuthPageHeader
+      v-if="!registrationComplete"
+      eyebrow="Get started"
+      title="Create your account"
+    >
+      Takes a minute. Already set up?
+      <NuxtLink
+        to="/signin"
+        class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+      >
+        Sign in instead
+      </NuxtLink>
+    </AuthPageHeader>
 
- <div
- :class="[
- authEntranceClass(120),
- 'overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95',
- ]"
- >
- <div class="relative p-4 sm:p-5">
- <div
- class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent dark:via-primary-500/25"
- aria-hidden="true"
- />
- <div
- v-if="registrationComplete"
- class="space-y-4 text-left"
- role="status"
- >
- <div
- class="flex flex-col items-center rounded-sm border-0 bg-primary-50/90 px-4 py-5 text-center dark:border-primary-800/45 dark:bg-primary-950/35 sm:px-5"
- >
- <div
- class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500/15 ring-1 ring-primary-500/25 dark:bg-primary-500/12 dark:ring-primary-500/35"
- >
- <EnvelopeIcon class="h-6 w-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
- </div>
- <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
- <template v-if="registrationVerificationSent">
- Open the link we sent you
- </template>
- <template v-else>
- Account created
- </template>
- </p>
- <p class="mt-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
- <template v-if="registrationVerificationSent">
- We emailed
- <span class="font-medium text-gray-800 dark:text-gray-200">{{ registrationEmail }}</span>.
- Check your <strong>inbox</strong> and your <strong>Spam</strong> or
- <strong>Junk</strong> folder. Messages from new senders often land there.
- </template>
- <template v-else>
- We could not send a verification email automatically. You can still
- <NuxtLink
- :to="signInLinkWithEmail"
- class="font-semibold text-primary-600 underline decoration-primary-500/30 underline-offset-2 hover:text-primary-500 dark:text-primary-400"
- >sign in</NuxtLink
- >
- with the password you chose; verify your email from account settings when you can.
- </template>
- </p>
- <p
- v-if="registrationVerificationSent"
- class="mt-3 text-xs leading-relaxed text-gray-600 dark:text-gray-400"
- >
- Tap <strong>Verify email</strong> in that message, then come back here to sign in and finish
- setting up your store.
- </p>
- </div>
- </div>
+    <AuthPageHeader
+      v-else
+      eyebrow="One more step"
+      title="Check your email"
+      :show-mobile-logo="false"
+    >
+      We need you to confirm your address before you sign in.
+    </AuthPageHeader>
 
- <form v-else @submit.prevent="handleSignUp" class="space-y-4">
- <div class="space-y-1.5">
- <label for="business-name" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Business name
- </label>
- <input
- id="business-name"
- v-model="form.name"
- type="text"
- autocomplete="organization"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- placeholder="Your business or store name"
- />
- </div>
+    <AuthCard>
+      <div v-if="registrationComplete" class="space-y-4" role="status">
+        <AuthSuccessPanel :icon="EnvelopeIcon">
+          <template #title>
+            <template v-if="registrationVerificationSent">Open the link we sent you</template>
+            <template v-else>Account created</template>
+          </template>
+          <template v-if="registrationVerificationSent">
+            We emailed
+            <span class="font-medium text-gray-800 dark:text-gray-200">{{ registrationEmail }}</span
+            >. Check your <strong>inbox</strong> and your <strong>Spam</strong> or
+            <strong>Junk</strong> folder. Messages from new senders often land there.
+          </template>
+          <template v-else>
+            We could not send a verification email automatically. You can still
+            <NuxtLink
+              :to="signInLinkWithEmail"
+              class="font-semibold text-primary-600 underline decoration-primary-500/30 underline-offset-2 hover:text-primary-500 dark:text-primary-400"
+            >
+              sign in
+            </NuxtLink>
+            with the password you chose; verify your email from account settings when you can.
+          </template>
+          <template v-if="registrationVerificationSent" #footer>
+            Tap <strong>Verify email</strong> in that message, then come back here to sign in and
+            finish setting up your store.
+          </template>
+        </AuthSuccessPanel>
+      </div>
 
- <div class="space-y-1.5">
- <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Email address
- </label>
- <input
- id="email"
- v-model="form.email"
- type="email"
- autocomplete="email"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- placeholder="you@example.com"
- />
- </div>
+      <form v-else class="auth-form space-y-5" @submit.prevent="handleSignUp">
+        <AuthField
+          v-model="form.name"
+          input-id="business-name"
+          label="Business name"
+          type="text"
+          autocomplete="organization"
+          placeholder="Your business or store name"
+          required
+        />
 
- <div class="space-y-1.5">
- <label for="password" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Password
- </label>
- <div class="relative">
- <input
- id="password"
- v-model="form.password"
- :type="showPassword ? 'text' : 'password'"
- autocomplete="new-password"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- :minlength="PASSWORD_MIN_LENGTH"
- placeholder="At least 12 characters, with a number and capital letter"
- />
- <button
- type="button"
- @click="showPassword = !showPassword"
- class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
- aria-label="Toggle password visibility"
- >
- <EyeIcon v-if="!showPassword" class="w-3.5 h-3.5" />
- <EyeSlashIcon v-else class="w-3.5 h-3.5" />
- </button>
- </div>
+        <AuthField
+          v-model="form.email"
+          input-id="email"
+          label="Email address"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          required
+        />
 
- <!-- Strength meter -->
- <div
- v-if="form.password.length > 0"
- class="mt-2 space-y-1.5"
- aria-live="polite"
- >
- <div class="flex items-center justify-between gap-2">
- <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400">Password strength</span>
- <span class="text-[10px] font-semibold tabular-nums" :class="strengthLabelClass">
- {{ passwordStrength.label }}
- </span>
- </div>
- <div
- class="flex gap-1"
- role="meter"
- :aria-valuenow="passwordStrength.score"
- aria-valuemin="0"
- aria-valuemax="100"
- aria-label="Password strength score"
- >
- <div
- v-for="seg in 4"
- :key="seg"
- class="h-1.5 min-w-0 flex-1 rounded-full transition-colors duration-200"
- :class="seg <= passwordStrength.segments ? strengthSegmentClass : 'bg-gray-200 dark:bg-gray-700'"
- />
- </div>
- <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
- {{ strengthHint }}
- </p>
- </div>
+        <AuthField
+          v-model="form.password"
+          input-id="password"
+          label="Password"
+          autocomplete="new-password"
+          placeholder="At least 12 characters, with a number and capital letter"
+          password-toggle
+          :minlength="PASSWORD_MIN_LENGTH"
+          required
+        >
+          <template #hint>
+            <div v-if="form.password.length > 0" class="mt-2.5 space-y-1.5" aria-live="polite">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] font-medium text-gray-500 dark:text-gray-400"
+                  >Password strength</span
+                >
+                <span class="text-[10px] font-semibold tabular-nums" :class="strengthLabelClass">
+                  {{ passwordStrength.label }}
+                </span>
+              </div>
+              <div
+                class="flex gap-1"
+                role="meter"
+                :aria-valuenow="passwordStrength.score"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-label="Password strength score"
+              >
+                <div
+                  v-for="seg in 4"
+                  :key="seg"
+                  class="h-1.5 min-w-0 flex-1 rounded-full transition-colors duration-200"
+                  :class="
+                    seg <= passwordStrength.segments
+                      ? strengthSegmentClass
+                      : 'bg-gray-200 dark:bg-gray-700'
+                  "
+                />
+              </div>
+              <p class="text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+                {{ strengthHint }}
+              </p>
+            </div>
+            <p class="mt-1.5 text-[10px] leading-snug text-gray-500 dark:text-gray-400">
+              Required: at least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase
+              letter.
+            </p>
+            <ul
+              v-if="form.password.length > 0"
+              class="mt-2 space-y-1 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
+              aria-label="Password requirements"
+            >
+              <li
+                v-for="rule in passwordRuleChecks"
+                :key="rule.id"
+                class="flex items-center gap-1.5"
+              >
+                <span
+                  :class="
+                    rule.ok
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-gray-400 dark:text-gray-500'
+                  "
+                  aria-hidden="true"
+                  >{{ rule.ok ? '✓' : '○' }}</span
+                >
+                <span>{{ rule.label }}</span>
+              </li>
+            </ul>
+          </template>
+        </AuthField>
 
- <p class="mt-1.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
- Required: at least {{ PASSWORD_MIN_LENGTH }} characters, one number, and one uppercase letter.
- </p>
- <ul
- v-if="form.password.length > 0"
- class="mt-2 space-y-1 text-[10px] leading-tight text-gray-600 dark:text-gray-400"
- aria-label="Password requirements"
- >
- <li v-for="rule in passwordRuleChecks" :key="rule.id" class="flex items-center gap-1.5">
- <span
- :class="rule.ok ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'"
- aria-hidden="true"
- >{{ rule.ok ? '✓' : '○' }}</span
- >
- <span>{{ rule.label }}</span>
- </li>
- </ul>
- </div>
+        <AuthField
+          v-model="form.confirmPassword"
+          input-id="confirmPassword"
+          label="Confirm password"
+          autocomplete="new-password"
+          placeholder="Re-enter your password"
+          password-toggle
+          required
+        >
+          <template #hint>
+            <p
+              v-if="
+                form.password && form.confirmPassword && form.password !== form.confirmPassword
+              "
+              class="mt-1 text-xs text-red-500 dark:text-red-400"
+            >
+              Passwords do not match
+            </p>
+          </template>
+        </AuthField>
 
- <div class="space-y-1.5">
- <label for="confirmPassword" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Confirm password
- </label>
- <div class="relative">
- <input
- id="confirmPassword"
- v-model="form.confirmPassword"
- :type="showConfirmPassword ? 'text' : 'password'"
- autocomplete="new-password"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- placeholder="Re-enter your password"
- />
- <button
- type="button"
- @click="showConfirmPassword = !showConfirmPassword"
- class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
- aria-label="Toggle confirm password visibility"
- >
- <EyeIcon v-if="!showConfirmPassword" class="w-3.5 h-3.5" />
- <EyeSlashIcon v-else class="w-3.5 h-3.5" />
- </button>
- </div>
- <p
- v-if="form.password && form.confirmPassword && form.password !== form.confirmPassword"
- class="text-xs text-red-500"
- >
- Passwords do not match
- </p>
- </div>
+        <AuthAlert v-if="errorMessage" :message="errorMessage">
+          <template v-if="errorMessage.includes('Firestore')" #actions>
+            <a
+              href="https://console.firebase.google.com/project/storv-ux/firestore/rules"
+              target="_blank"
+              class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+            >
+              Open Firestore Rules in Firebase Console →
+            </a>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-gray-700"
+                @click="copyRulesToClipboard"
+              >
+                Copy Rules to Clipboard
+              </button>
+              <span v-if="rulesCopied" class="text-[11px] text-green-600 dark:text-green-400"
+                >Copied!</span
+              >
+            </div>
+          </template>
+        </AuthAlert>
 
- <div
- v-if="errorMessage"
- class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
- >
- <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
- <div class="text-xs text-red-700 dark:text-red-300 whitespace-pre-line text-left">
- {{ errorMessage }}
- </div>
- <div v-if="errorMessage.includes('Firestore')" class="mt-2 space-y-1.5">
- <a
- href="https://console.firebase.google.com/project/storv-ux/firestore/rules"
- target="_blank"
- class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-sm transition-colors"
- >
- 🔧 Open Firestore Rules in Firebase Console →
- </a>
- <div class="flex items-center gap-2">
- <button
- type="button"
- @click="copyRulesToClipboard"
- class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold rounded-sm transition-colors"
- >
- 📋 Copy Rules to Clipboard
- </button>
- <span v-if="rulesCopied" class="text-[11px] text-green-600 dark:text-green-400">✓ Copied!</span>
- </div>
- </div>
- </div>
+        <Checkbox
+          v-model="form.acceptTerms"
+          size="sm"
+          wrapper-class="!items-start"
+          label-class="!ml-2.5 !text-xs !font-normal !leading-snug !text-gray-600 dark:!text-gray-300"
+        >
+          I agree to the
+          <NuxtLink
+            to="/terms"
+            class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+            >Terms of Service</NuxtLink
+          >
+          and
+          <NuxtLink
+            to="/privacy"
+            class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+            >Privacy Policy</NuxtLink
+          >
+        </Checkbox>
 
- <div class="flex items-start">
- <input
- id="terms"
- v-model="form.acceptTerms"
- type="checkbox"
- required
- class="h-3.5 w-3.5 rounded border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800 mt-0.5 shrink-0"
- />
- <label for="terms" class="ml-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer select-none leading-snug">
- I agree to the
- <NuxtLink
- to="/terms"
- class="text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300"
- >Terms of Service</NuxtLink
- >
- and
- <NuxtLink
- to="/privacy"
- class="text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300"
- >Privacy Policy</NuxtLink
- >
- </label>
- </div>
+        <Button
+          type="submit"
+          :disabled="
+            isLoading ||
+            !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
+          "
+          :loading="isLoading"
+          variant="primary"
+          size="md"
+          :icon="ArrowRightIcon"
+          icon-right
+          extra-class="!w-full"
+        >
+          Create account
+        </Button>
+      </form>
 
- <Button
- type="submit"
- :disabled="
- isLoading || !!(form.password && form.confirmPassword && form.password !== form.confirmPassword)
- "
- :loading="isLoading"
- variant="primary"
- size="md"
- :icon="ArrowRightIcon"
- icon-right
- extra-class="!w-full"
- >
- Create account
- </Button>
- </form>
-
- <p
- v-if="!registrationComplete"
- class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400"
- >
- Questions?
- <a
- href="https://www.storvv.com"
- class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
- >
- Learn more on the homepage
- </a>
- </p>
- </div>
- </div>
- </AuthShell>
+      <template v-if="!registrationComplete" #footer>
+        Questions?
+        <a
+          href="https://www.storvv.com"
+          class="font-semibold text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+        >
+          Learn more on the homepage
+        </a>
+      </template>
+    </AuthCard>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
+import { ArrowRightIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
 import AuthShell from '~/components/auth/AuthShell.vue'
+import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
+import AuthCard from '~/components/auth/AuthCard.vue'
+import AuthField from '~/components/auth/AuthField.vue'
+import AuthAlert from '~/components/auth/AuthAlert.vue'
+import AuthSuccessPanel from '~/components/auth/AuthSuccessPanel.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
-import { useTheme } from '~/composables/useTheme'
 import { useUser } from '~/composables/useUser'
 import {
- PASSWORD_MIN_LENGTH,
- getPasswordRuleChecks,
- getPasswordPolicyErrors,
- isPasswordPolicyValid,
- getPasswordStrength,
+  PASSWORD_MIN_LENGTH,
+  getPasswordRuleChecks,
+  getPasswordPolicyErrors,
+  isPasswordPolicyValid,
+  getPasswordStrength,
 } from '~/utils/passwordPolicy'
-import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
 
 definePageMeta({
- layout: false,
- middleware: 'guest'
+  layout: false,
+  middleware: 'guest',
 })
 
-const { actualTheme } = useTheme()
-const logoSource = computed(() =>
- actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-)
-
 onMounted(() => {
- markCapacitorDocument()
+  markCapacitorDocument()
 })
 
 const form = ref({
- name: '',
- email: '',
- password: '',
- confirmPassword: '',
- acceptTerms: false
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  acceptTerms: false,
 })
 
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const rulesCopied = ref(false)
 
-/** After successful registration: show email instructions instead of routing away */
 const registrationComplete = ref(false)
 const registrationEmail = ref('')
 const registrationVerificationSent = ref(true)
 
 const signInLinkWithEmail = computed(() => {
- const e = registrationEmail.value.trim()
- if (!e) return '/signin'
- return `/signin?${new URLSearchParams({ email: e }).toString()}`
+  const e = registrationEmail.value.trim()
+  if (!e) return '/signin'
+  return `/signin?${new URLSearchParams({ email: e }).toString()}`
 })
 
 watch(registrationComplete, (done) => {
- if (import.meta.client && done) {
- window.scrollTo({ top: 0, behavior: 'smooth' })
- }
+  if (import.meta.client && done) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 })
 
 const { signUp, signOut } = useFirebaseAuth()
 const { createUserDocument } = useUser()
 
 const passwordRuleChecks = computed(() => getPasswordRuleChecks(form.value.password))
-
 const passwordStrength = computed(() => getPasswordStrength(form.value.password))
 
 const strengthLabelClass = computed(() => {
- const t = passwordStrength.value.tier
- return {
- 'text-gray-400 dark:text-gray-500': t === 'empty',
- 'text-red-600 dark:text-red-400': t === 'weak',
- 'text-orange-600 dark:text-orange-400': t === 'fair',
- 'text-amber-600 dark:text-amber-400': t === 'good',
- 'text-green-600 dark:text-green-400': t === 'strong',
- }
+  const t = passwordStrength.value.tier
+  return {
+    'text-gray-400 dark:text-gray-500': t === 'empty',
+    'text-red-600 dark:text-red-400': t === 'weak',
+    'text-orange-600 dark:text-orange-400': t === 'fair',
+    'text-amber-600 dark:text-amber-400': t === 'good',
+    'text-green-600 dark:text-green-400': t === 'strong',
+  }
 })
 
 const strengthSegmentClass = computed(() => {
- const t = passwordStrength.value.tier
- if (t === 'weak') return 'bg-red-500 dark:bg-red-500'
- if (t === 'fair') return 'bg-orange-500 dark:bg-orange-400'
- if (t === 'good') return 'bg-amber-500 dark:bg-amber-400'
- if (t === 'strong') return 'bg-green-500 dark:bg-green-500'
- return 'bg-gray-300 dark:bg-gray-600'
+  const t = passwordStrength.value.tier
+  if (t === 'weak') return 'bg-red-500 dark:bg-red-500'
+  if (t === 'fair') return 'bg-orange-500 dark:bg-orange-400'
+  if (t === 'good') return 'bg-amber-500 dark:bg-amber-400'
+  if (t === 'strong') return 'bg-green-500 dark:bg-green-500'
+  return 'bg-gray-300 dark:bg-gray-600'
 })
 
 const strengthHint = computed(() => {
- const s = passwordStrength.value
- const pwd = form.value.password
- if (!pwd.length) return ''
- if (!isPasswordPolicyValid(pwd)) {
- return 'Meet all required checks below to continue.'
- }
- if (s.tier === 'strong') {
- return 'Great! This password looks strong.'
- }
- if (s.tier === 'good') {
- return 'Good. Add variety or length to reach Strong.'
- }
- return 'Add lowercase letters, symbols, or more characters to increase strength.'
+  const s = passwordStrength.value
+  const pwd = form.value.password
+  if (!pwd.length) return ''
+  if (!isPasswordPolicyValid(pwd)) {
+    return 'Meet all required checks below to continue.'
+  }
+  if (s.tier === 'strong') {
+    return 'Great! This password looks strong.'
+  }
+  if (s.tier === 'good') {
+    return 'Good. Add variety or length to reach Strong.'
+  }
+  return 'Add lowercase letters, symbols, or more characters to increase strength.'
 })
 
-// Function to copy Firestore rules to clipboard
 const copyRulesToClipboard = async () => {
- const rules = `rules_version = '2';
+  const rules = `rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
- // Helper function to check if user is authenticated
  function isAuthenticated() {
  return request.auth != null;
  }
- 
- // Helper function to check if user owns the document
  function isOwner(userId) {
  return isAuthenticated() && request.auth.uid == userId;
  }
- 
- // Users collection - users can read/write their own document
  match /users/{userId} {
- // Allow read if user is authenticated
  allow read: if isAuthenticated();
- 
- // Allow create if user is creating their own document
  allow create: if isOwner(userId);
- 
- // Allow update if user is updating their own document
  allow update: if isOwner(userId);
- 
- // Only allow delete by the document owner
  allow delete: if isOwner(userId);
  }
- 
- // Deny all other access by default
  match /{document=**} {
  allow read, write: if false;
  }
  }
 }`
 
- try {
- await navigator.clipboard.writeText(rules)
- rulesCopied.value = true
- setTimeout(() => {
- rulesCopied.value = false
- }, 3000)
- } catch (err) {
- console.error('Failed to copy:', err)
- alert('Failed to copy rules. Please copy them manually from firestore.rules file.')
- }
+  try {
+    await navigator.clipboard.writeText(rules)
+    rulesCopied.value = true
+    setTimeout(() => {
+      rulesCopied.value = false
+    }, 3000)
+  } catch (err) {
+    console.error('Failed to copy:', err)
+    alert('Failed to copy rules. Please copy them manually from firestore.rules file.')
+  }
 }
 
 const handleSignUp = async () => {
- if (!form.value.name || !form.value.email || !form.value.password) {
- errorMessage.value = 'Please fill in all required fields'
- return
- }
+  if (!form.value.name || !form.value.email || !form.value.password) {
+    errorMessage.value = 'Please fill in all required fields'
+    return
+  }
 
- if (form.value.password !== form.value.confirmPassword) {
- errorMessage.value = 'Passwords do not match'
- return
- }
+  if (form.value.password !== form.value.confirmPassword) {
+    errorMessage.value = 'Passwords do not match'
+    return
+  }
 
- if (!isPasswordPolicyValid(form.value.password)) {
- const errs = getPasswordPolicyErrors(form.value.password)
- errorMessage.value =
- errs.length > 0 ? `Password requirements: ${errs.join('; ')}.` : 'Please choose a stronger password.'
- return
- }
+  if (!isPasswordPolicyValid(form.value.password)) {
+    const errs = getPasswordPolicyErrors(form.value.password)
+    errorMessage.value =
+      errs.length > 0
+        ? `Password requirements: ${errs.join('; ')}.`
+        : 'Please choose a stronger password.'
+    return
+  }
 
- if (!form.value.acceptTerms) {
- errorMessage.value = 'Please accept the terms and conditions'
- return
- }
+  if (!form.value.acceptTerms) {
+    errorMessage.value = 'Please accept the terms and conditions'
+    return
+  }
 
- isLoading.value = true
- errorMessage.value = ''
+  isLoading.value = true
+  errorMessage.value = ''
 
- try {
- const { user, verificationEmailSent } = await signUp(form.value.email, form.value.password, true)
+  try {
+    const { user, verificationEmailSent } = await signUp(
+      form.value.email,
+      form.value.password,
+      true
+    )
 
- if (user) {
- // Create user document in Firestore
- await createUserDocument(user.uid, {
- email: form.value.email,
- name: form.value.name,
- role: 'superAdmin',
- subscription: 'storvv_micro',
- hasCompletedOnboarding: false,
- hasCompletedTutorial: false
- })
+    if (user) {
+      await createUserDocument(user.uid, {
+        email: form.value.email,
+        name: form.value.name,
+        role: 'superAdmin',
+        subscription: 'storvv_micro',
+        hasCompletedOnboarding: false,
+        hasCompletedTutorial: false,
+      })
 
- try {
- await signOut()
- } catch (signOutErr) {
- console.warn('Sign out after registration:', signOutErr)
- }
+      try {
+        await signOut()
+      } catch (signOutErr) {
+        console.warn('Sign out after registration:', signOutErr)
+      }
 
- registrationEmail.value = form.value.email.trim()
- registrationVerificationSent.value = verificationEmailSent
- registrationComplete.value = true
+      registrationEmail.value = form.value.email.trim()
+      registrationVerificationSent.value = verificationEmailSent
+      registrationComplete.value = true
 
- const { useAppToast } = await import('~/composables/useAppToast')
- const toast = useAppToast()
- if (verificationEmailSent) {
- toast.success('Check your email for the verification link.')
- } else {
- toast.warning(
- 'We could not send the verification email. You can still sign in from this page when ready.'
- )
- }
- }
- } catch (error: any) {
- console.error('Sign up error:', error)
- // Handle Firebase Auth errors
- if (error.message.includes('email-already-in-use')) {
- errorMessage.value = 'An account with this email already exists'
- } else if (error.message.includes('invalid-email')) {
- errorMessage.value = 'Invalid email address'
- } else if (error.message.includes('weak-password')) {
- errorMessage.value = 'Password is too weak. Please use a stronger password'
- } else {
- errorMessage.value = error.message || 'Failed to create account. Please try again'
- }
- } finally {
- isLoading.value = false
- }
+      const { useAppToast } = await import('~/composables/useAppToast')
+      const toast = useAppToast()
+      if (verificationEmailSent) {
+        toast.success('Check your email for the verification link.')
+      } else {
+        toast.warning(
+          'We could not send the verification email. You can still sign in from this page when ready.'
+        )
+      }
+    }
+  } catch (error: any) {
+    console.error('Sign up error:', error)
+    if (error.message.includes('email-already-in-use')) {
+      errorMessage.value = 'An account with this email already exists'
+    } else if (error.message.includes('invalid-email')) {
+      errorMessage.value = 'Invalid email address'
+    } else if (error.message.includes('weak-password')) {
+      errorMessage.value = 'Password is too weak. Please use a stronger password'
+    } else {
+      errorMessage.value = error.message || 'Failed to create account. Please try again'
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 useHead({
- title: 'Sign Up - Storvv',
- meta: [
- {
- name: 'description',
- content: 'Create your Storvv account'
- }
- ]
+  title: 'Sign Up - Storvv',
+  meta: [
+    {
+      name: 'description',
+      content: 'Create your Storvv account',
+    },
+  ],
 })
 </script>

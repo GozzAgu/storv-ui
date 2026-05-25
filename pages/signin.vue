@@ -1,279 +1,321 @@
 <template>
- <AuthShell
- mobile-line="Storvv: inventory, receipts, and branches in one place."
- panel-title="Run your store with a calmer workflow."
- panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
- >
- <div
- :class="[authEntranceClass(40), 'mb-8 text-center lg:mb-9 lg:text-left']"
- >
- <a
- href="https://www.storvv.com"
- class="mb-4 inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden rounded-sm dark:focus-visible:ring-offset-slate-950"
- >
- <img
- :src="logoSource"
- alt="Storvv"
- class="mx-auto h-6 w-auto max-w-[104px] shrink-0 object-contain sm:h-7"
- />
- </a>
- <p
- class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
- >
- Welcome back
- </p>
- <h1
- class="mt-1.5 text-[1.35rem] font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
- >
- Sign in to your workspace
- </h1>
- <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
- Enter your credentials to open the dashboard. New here?
- <NuxtLink
- to="/signup"
- class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
- >
- Create an account
- </NuxtLink>
- </p>
- </div>
+  <AuthShell
+    mobile-line="Storvv: inventory, receipts, and branches in one place."
+    panel-title="Run your store with a calmer workflow."
+    panel-description="Sign in to manage stock, ring up activity, and keep every branch aligned without jumping between tools."
+  >
+    <AuthPageHeader eyebrow="Welcome back" title="Sign in to your workspace">
+      Enter your credentials to open the dashboard. New here?
+      <NuxtLink
+        to="/signup"
+        class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+      >
+        Create an account
+      </NuxtLink>
+    </AuthPageHeader>
 
- <div
- :class="[
- authEntranceClass(120),
- 'overflow-hidden rounded-sm bg-white/90 backdrop-blur-sm duration-500 ease-out dark:bg-slate-950/95',
- ]"
- >
- <div class="relative p-4 sm:p-5">
- <div
- class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/35 to-transparent dark:via-primary-500/25"
- aria-hidden="true"
- />
- <form @submit.prevent="handleSignIn" class="space-y-4">
- <div class="space-y-1.5">
- <label for="email" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Email address
- </label>
- <input
- id="email"
- v-model="form.email"
- type="email"
- autocomplete="email"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- placeholder="Enter your email"
- />
- </div>
+    <AuthCard>
+      <Button
+        v-if="hasSavedLogin && isSupported"
+        type="button"
+        variant="outline"
+        size="md"
+        :icon="FingerPrintIcon"
+        :disabled="isLoading || isBiometricLoading"
+        :loading="isBiometricLoading"
+        extra-class="!w-full"
+        @click="handleBiometricSignIn"
+      >
+        Sign in with {{ biometryLabel }}
+      </Button>
 
- <div class="space-y-1.5">
- <div class="flex items-center justify-between gap-2">
- <label for="password" class="block text-xs font-medium text-gray-700 dark:text-gray-300">
- Password
- </label>
- <NuxtLink
- to="/forgot-password"
- class="text-xs font-medium text-primary-500 dark:text-primary-400 hover:text-primary-400 dark:hover:text-primary-300 transition-colors shrink-0"
- >
- Forgot?
- </NuxtLink>
- </div>
- <div class="relative">
- <input
- id="password"
- v-model="form.password"
- :type="showPassword ? 'text' : 'password'"
- autocomplete="current-password"
- required
- class="w-full rounded-sm bg-white px-3 py-2.5 pr-10 text-xs text-gray-900 placeholder-gray-400 outline-none transition duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
- placeholder="Enter your password"
- />
- <button
- type="button"
- @click="showPassword = !showPassword"
- class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
- aria-label="Toggle password visibility"
- >
- <EyeIcon v-if="!showPassword" class="w-3.5 h-3.5" />
- <EyeSlashIcon v-else class="w-3.5 h-3.5" />
- </button>
- </div>
- </div>
+      <form class="auth-form space-y-5" :class="{ 'mt-5': hasSavedLogin && isSupported }" @submit.prevent="handleSignIn">
+        <AuthField
+          v-model="form.email"
+          input-id="email"
+          label="Email address"
+          type="email"
+          autocomplete="username"
+          placeholder="Enter your email"
+          required
+        />
 
- <div class="flex items-center">
- <input
- id="remember-me"
- v-model="form.rememberMe"
- type="checkbox"
- class="h-3.5 w-3.5 rounded border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-400/30 focus:ring-offset-0 cursor-pointer bg-white dark:bg-gray-800"
- />
- <label for="remember-me" class="ml-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer select-none">
- Remember me
- </label>
- </div>
+        <AuthField
+          v-model="form.password"
+          input-id="password"
+          label="Password"
+          autocomplete="current-password"
+          placeholder="Enter your password"
+          password-toggle
+          required
+        >
+          <template #label-right>
+            <NuxtLink
+              to="/forgot-password"
+              class="shrink-0 text-xs font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            >
+              Forgot?
+            </NuxtLink>
+          </template>
+        </AuthField>
 
- <div
- v-if="errorMessage"
- class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/80 dark:ring-red-800/50 p-3"
- >
- <p class="text-xs font-medium text-red-800 dark:text-red-200 mb-0.5">Error</p>
- <div class="text-xs text-red-700 dark:text-red-300 whitespace-pre-line text-left">{{ errorMessage }}</div>
- <NuxtLink
- v-if="errorMessage.includes('Firestore')"
- to="/QUICK_FIX.md"
- target="_blank"
- class="mt-2 inline-block text-[11px] font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 underline"
- >
- View Quick Fix Guide →
- </NuxtLink>
- </div>
+        <Checkbox
+          v-if="isSupported"
+          v-model="form.enableFaceId"
+          size="sm"
+          wrapper-class="!items-center"
+          label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
+        >
+          Use {{ biometryLabel }} next time on this device
+        </Checkbox>
 
- <Button
- type="submit"
- :disabled="isLoading"
- :loading="isLoading"
- variant="primary"
- size="md"
- :icon="ArrowRightIcon"
- icon-right
- extra-class="!w-full"
- >
- Sign in
- </Button>
- </form>
+        <Checkbox
+          v-model="form.rememberMe"
+          size="sm"
+          wrapper-class="!items-center"
+          label-class="!ml-2.5 !text-xs !font-normal !text-gray-600 dark:!text-gray-400"
+        >
+          Remember me
+        </Checkbox>
 
- <p class="mt-5 border-t border-gray-200/90 pt-4 text-center text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
- Prefer to explore first?
- <a
- href="https://www.storvv.com"
- class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors"
- >
- Back to home
- </a>
- </p>
- </div>
- </div>
- </AuthShell>
+        <AuthAlert
+          v-if="errorMessage"
+          :message="errorMessage"
+          :show-firestore-guide="errorMessage.includes('Firestore')"
+        />
+
+        <Button
+          type="submit"
+          :disabled="isLoading || isBiometricLoading"
+          :loading="isLoading"
+          variant="primary"
+          size="md"
+          :icon="ArrowRightIcon"
+          icon-right
+          extra-class="!w-full"
+        >
+          Sign in
+        </Button>
+      </form>
+
+      <template #footer>
+        Prefer to explore first?
+        <a
+          href="https://www.storvv.com"
+          class="font-semibold text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+        >
+          Back to home
+        </a>
+      </template>
+    </AuthCard>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { EyeIcon, EyeSlashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
+import { ref, onMounted } from 'vue'
+import { ArrowRightIcon, FingerPrintIcon } from '@heroicons/vue/24/outline'
+import { BiometryError } from '@aparajita/capacitor-biometric-auth'
 import AuthShell from '~/components/auth/AuthShell.vue'
+import AuthPageHeader from '~/components/auth/AuthPageHeader.vue'
+import AuthCard from '~/components/auth/AuthCard.vue'
+import AuthField from '~/components/auth/AuthField.vue'
+import AuthAlert from '~/components/auth/AuthAlert.vue'
 import Button from '~/components/ui/Button.vue'
+import Checkbox from '~/components/ui/Checkbox.vue'
 import { useFirebaseAuth } from '~/composables/useFirebaseAuth'
-import { useTheme } from '~/composables/useTheme'
 import { useAdminCredentials } from '~/composables/useAdminCredentials'
+import { useNativeBiometricLogin } from '~/composables/useNativeBiometricLogin'
 import { useUserStore } from '~/stores/user'
-import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
+import { getErrorMessage } from '~/utils/error-message'
 
 definePageMeta({
- layout: false,
- middleware: 'guest'
+  layout: false,
+  middleware: 'guest',
 })
-
-const { actualTheme } = useTheme()
-const logoSource = computed(() =>
- actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
-)
 
 const form = ref({
- email: '',
- password: '',
- rememberMe: false
+  email: '',
+  password: '',
+  rememberMe: false,
+  enableFaceId: false,
 })
 
-const showPassword = ref(false)
 const isLoading = ref(false)
+const isBiometricLoading = ref(false)
 const errorMessage = ref('')
 
 const route = useRoute()
 
+const {
+  isSupported,
+  hasSavedLogin,
+  biometryLabel,
+  saveLogin,
+  clearSavedLogin,
+  getLoginAfterBiometric,
+  refreshAvailability,
+} = useNativeBiometricLogin()
+
+const biometricStaleMessage =
+  'Saved Face ID login is out of date. Sign in with your password, keep "Use Face ID next time" checked, then try again.'
+
 onMounted(() => {
- markCapacitorDocument()
- const email = route.query.email
- if (typeof email === 'string' && email.trim()) {
- form.value.email = decodeURIComponent(email).trim()
- }
+  markCapacitorDocument()
+  const email = route.query.email
+  if (typeof email === 'string' && email.trim()) {
+    form.value.email = decodeURIComponent(email).trim()
+  }
+  void refreshAvailability().then(() => {
+    if (hasSavedLogin.value) {
+      form.value.enableFaceId = true
+    }
+  })
 })
 
 const { signIn } = useFirebaseAuth()
 const { storeCredentials } = useAdminCredentials()
 const userStore = useUserStore()
 
+async function persistBiometricLogin(email: string, password: string) {
+  if (!isSupported.value) return
+  try {
+    if (form.value.enableFaceId) {
+      const saved = await saveLogin(email, password)
+      if (!saved) {
+        console.warn('[SignIn] Face ID save failed — Keychain write or verify failed')
+      }
+    } else {
+      await clearSavedLogin()
+    }
+  } catch (error) {
+    console.warn('[SignIn] Face ID preference not saved:', getErrorMessage(error), error)
+  }
+}
+
+async function completeSignIn(email: string, password: string) {
+  const user = await signIn(email, password)
+
+  if (!user) return
+
+  try {
+    await userStore.fetchUserData(user.uid)
+  } catch (error) {
+    throw new Error(getErrorMessage(error) || 'Failed to load your account')
+  }
+
+  const userData = userStore.userData
+
+  if (!userData) {
+    errorMessage.value = 'Account not found. Please contact your administrator.'
+    return
+  }
+
+  if (userData.role === 'superAdmin') {
+    storeCredentials(email, password)
+  }
+
+  // Save to Keychain before leaving sign-in (async after navigate often never finishes on iOS)
+  await persistBiometricLogin(email, password)
+
+  let destination = '/dashboard'
+  if (userData.role === 'staff' && userData.mustChangePassword) {
+    destination = '/dashboard/change-password'
+  } else if (!userData.hasCompletedOnboarding) {
+    destination = '/dashboard/onboarding'
+  }
+
+  await navigateTo(destination)
+}
+
+function mapSignInError(error: unknown) {
+  const msg = getErrorMessage(error)
+  if (msg.includes('user-not-found') || msg.includes('No account found')) {
+    errorMessage.value = 'No account found with this email address'
+  } else if (msg.includes('wrong-password') || msg.includes('invalid-credential')) {
+    errorMessage.value = 'Incorrect password. Please try again'
+  } else if (msg.includes('invalid-email')) {
+    errorMessage.value = 'Invalid email address'
+  } else if (msg.includes('too-many-requests')) {
+    errorMessage.value = 'Too many failed attempts. Please try again later'
+  } else if (msg.includes('network')) {
+    errorMessage.value = 'Network error. Check your connection and try again'
+  } else {
+    errorMessage.value = msg || 'Failed to sign in. Please try again'
+  }
+}
+
 const handleSignIn = async () => {
- if (!form.value.email || !form.value.password) {
- errorMessage.value = 'Please fill in all fields'
- return
- }
+  if (!form.value.email || !form.value.password) {
+    errorMessage.value = 'Please fill in all fields'
+    return
+  }
 
- isLoading.value = true
- errorMessage.value = ''
+  isLoading.value = true
+  errorMessage.value = ''
 
- try {
- const user = await signIn(form.value.email, form.value.password)
- 
- if (user) {
- // Get user data - this will automatically check for staff members via authUid
- // fetchUserData checks:
- // 1. First, looks for user document in users/{userId}
- // 2. If not found, searches for staff member where authUid === userId using collection group query
- // This allows staff to login based on authUid even without a user document
- await userStore.fetchUserData(user.uid)
- const userData = userStore.userData
- 
- if (!userData) {
- // User document not found and staff member not found via authUid
- errorMessage.value = 'Account not found. Please contact your administrator.'
- return
- }
- 
- // If user is super admin, store credentials for staff creation
- if (userData.role === 'superAdmin') {
- storeCredentials(form.value.email, form.value.password)
- }
- 
- // Staff must change their temporary password before using the app
- if (userData.role === 'staff' && userData.mustChangePassword) {
- await navigateTo('/dashboard/change-password')
- return
- }
- 
- // Redirect based on onboarding status
- if (!userData.hasCompletedOnboarding) {
- await navigateTo('/dashboard/onboarding')
- } else if (!userData.hasCompletedTutorial) {
- await navigateTo('/dashboard')
- } else {
- await navigateTo('/dashboard')
- }
- }
- } catch (error: any) {
- console.error('Sign in error:', error)
- // Handle Firebase Auth errors
- if (error.message.includes('user-not-found')) {
- errorMessage.value = 'No account found with this email address'
- } else if (error.message.includes('wrong-password')) {
- errorMessage.value = 'Incorrect password. Please try again'
- } else if (error.message.includes('invalid-email')) {
- errorMessage.value = 'Invalid email address'
- } else if (error.message.includes('too-many-requests')) {
- errorMessage.value = 'Too many failed attempts. Please try again later'
- } else {
- errorMessage.value = error.message || 'Failed to sign in. Please try again'
- }
- } finally {
- isLoading.value = false
- }
+  try {
+    await completeSignIn(form.value.email, form.value.password)
+  } catch (error: unknown) {
+    console.error('Sign in error:', getErrorMessage(error) || error)
+    mapSignInError(error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleBiometricSignIn = async () => {
+  isBiometricLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const saved = await getLoginAfterBiometric()
+    if (!saved) {
+      errorMessage.value =
+        'No saved login found. Sign in with your password and enable Face ID for next time.'
+      await refreshAvailability()
+      return
+    }
+
+    form.value.email = saved.email
+    form.value.password = saved.password
+    form.value.enableFaceId = true
+
+    try {
+      await completeSignIn(saved.email, saved.password)
+    } catch (signInError: unknown) {
+      const msg = getErrorMessage(signInError)
+      if (
+        msg.includes('wrong-password') ||
+        msg.includes('invalid-credential') ||
+        msg.includes('Incorrect password')
+      ) {
+        await clearSavedLogin()
+        await refreshAvailability()
+        errorMessage.value = biometricStaleMessage
+        return
+      }
+      throw signInError
+    }
+  } catch (error: unknown) {
+    console.error('Biometric sign in error:', getErrorMessage(error) || error)
+    if (error instanceof BiometryError) {
+      errorMessage.value = error.message || 'Biometric sign in failed'
+    } else {
+      mapSignInError(error)
+    }
+  } finally {
+    isBiometricLoading.value = false
+  }
 }
 
 useHead({
- title: 'Sign In - Storvv',
- meta: [
- {
- name: 'description',
- content: 'Sign in to your Storvv account'
- }
- ]
+  title: 'Sign In - Storvv',
+  meta: [
+    {
+      name: 'description',
+      content: 'Sign in to your Storvv account',
+    },
+  ],
 })
 </script>

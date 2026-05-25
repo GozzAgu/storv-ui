@@ -8,7 +8,15 @@
  </div>
  
  <!-- Dashboard content (only shown if authenticated) -->
- <div v-else class="dashboard-layout-root min-h-screen bg-gray-100 dark:bg-[#07080c] w-full overflow-x-clip relative">
+ <div
+ v-else
+ :class="[
+ 'dashboard-layout-root w-full overflow-x-clip relative bg-gray-100 dark:bg-[#07080c]',
+ isNativeApp
+ ? 'dashboard-layout-root--native h-[100dvh] max-h-[100dvh] overflow-hidden'
+ : 'min-h-screen',
+ ]"
+ >
  <!-- Sidebar (web / tablet — native app uses bottom nav) -->
  <aside
  v-if="!isNativeApp"
@@ -320,10 +328,13 @@
  <!-- Main Content -->
  <div
  :class="[
- 'min-h-screen w-full',
+ 'w-full',
  isNativeApp
- ? 'dashboard-native-shell'
- : ['transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]', sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64'],
+ ? 'dashboard-native-shell flex h-full min-h-0 flex-col overflow-hidden'
+ : [
+ 'min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+ sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-64',
+ ],
  ]"
  style="min-width: 0; max-width: 100vw;"
  >
@@ -519,8 +530,10 @@
  <main
  data-dashboard-main
  :class="[
- 'w-full min-w-0 max-w-full overflow-x-clip overflow-y-visible px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
- isNativeApp && 'dashboard-native-main',
+ 'w-full min-w-0 max-w-full px-3 py-2.5 sm:px-4 sm:py-3 lg:px-5 lg:py-4',
+ isNativeApp
+ ? 'dashboard-native-main min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain'
+ : 'overflow-x-clip overflow-y-visible',
  ]"
  >
  <div
@@ -530,6 +543,14 @@
  <slot />
  </div>
  </main>
+
+ <!-- Native: forms/drawers render in-app (between top bar and bottom nav), not over the whole screen -->
+ <div
+ v-if="isNativeApp"
+ id="dashboard-native-overlay-host"
+ class="dashboard-native-overlay-host"
+ aria-hidden="true"
+ />
  </div>
  
  <!-- Toast Notifications -->

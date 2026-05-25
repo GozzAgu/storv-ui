@@ -1,6 +1,7 @@
 @config "../../tailwind.config.js";
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "./capacitor-native.css";
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
 @layer components {
@@ -1088,7 +1089,7 @@ html.capacitor-native.styles-loaded body {
 }
 
 html.capacitor-native {
-  background-color: #f4f6f9 !important;
+  background-color: rgb(249 250 251) !important;
 }
 
 html.capacitor-native.dark {
@@ -1116,15 +1117,18 @@ html.capacitor-native #__nuxt {
   padding-right: var(--cap-safe-right);
 }
 
-/* Auth (sign-in / sign-up) */
-html.capacitor-native .auth-shell-root {
-  min-height: 100dvh;
-  padding-top: var(--cap-safe-top);
-  padding-bottom: var(--cap-safe-bottom);
-}
-
+/* Auth safe-area + theme toggle — layout detail in capacitor-native.css */
 html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
   top: calc(1rem + var(--cap-safe-top));
+}
+
+/* Auth form card — elevated fields on dashboard canvas */
+.auth-card .auth-field-input {
+  min-height: 2.5rem;
+}
+
+html.dark .auth-shell-root .auth-card .auth-field-input {
+  background-color: rgb(255 255 255 / 0.04);
 }
 
 /** Slide-over drawers (`SidePanel`) — one width on desktop */
@@ -1276,9 +1280,7 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
   display: block !important;
 }
 
-html.capacitor-native .dashboard-native-main {
-  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
-}
+/* Native main scroll + padding: see assets/css/capacitor-native.css */
 
 /**
  * App-wide field borders — hairline primary tint (Storvv navy #143f8d).
@@ -1383,11 +1385,6 @@ html.capacitor-native .dashboard-native-bottom-nav {
 }
 
 /* ── iOS polish: cleaner surfaces, spacing, and tables ── */
-html.capacitor-native .dashboard-native-main {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
 html.capacitor-native .dashboard-page-header,
 html.capacitor-native [data-dashboard-main] > .space-y-5,
 html.capacitor-native [data-dashboard-main] > .space-y-6 {

@@ -43,4 +43,24 @@ export function markCapacitorDocument(): void {
  html.classList.add('capacitor-native', 'styles-loaded')
  html.style.removeProperty('display')
  document.body?.style.removeProperty('display')
+
+ // Match WebView chrome to dashboard canvas (reduces black letterboxing in light mode)
+ try {
+ const isDark = html.classList.contains('dark')
+ document.body.style.backgroundColor = isDark ? '#07080c' : '#f3f4f6'
+ } catch {
+ /* ignore */
+ }
+
+ try {
+ const platform = Capacitor.getPlatform()
+ if (platform === 'ios' || platform === 'android' || platform === 'web') {
+ html.classList.remove('capacitor-ios', 'capacitor-android', 'capacitor-platform-web')
+ if (platform === 'ios') html.classList.add('capacitor-ios')
+ if (platform === 'android') html.classList.add('capacitor-android')
+ if (platform === 'web') html.classList.add('capacitor-platform-web')
+ }
+ } catch {
+ /* ignore */
+ }
 }

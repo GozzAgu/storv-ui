@@ -83,6 +83,9 @@ export const useThemeStore = defineStore('theme', {
  // Native scrollbars / form controls follow the palette immediately (pairs with global CSS transition)
  html.style.colorScheme = isDark ? 'dark' : 'light'
  syncThemeColorMeta(isDark)
+ if (html.classList.contains('capacitor-native')) {
+ body.style.backgroundColor = isDark ? '#07080c' : '#f3f4f6'
+ }
  }
 
  const endThemeTransition = () => {

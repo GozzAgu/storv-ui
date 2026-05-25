@@ -94,6 +94,10 @@ export const useFirebaseAuth = () => {
 
  try {
  await firebaseSignOut(auth)
+ if (import.meta.client) {
+ const { clearNativeBiometricLogin } = await import('~/composables/useNativeBiometricLogin')
+ await clearNativeBiometricLogin()
+ }
  } catch (error: any) {
  throw new Error(error.message || 'Sign out failed')
  }

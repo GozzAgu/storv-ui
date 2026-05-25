@@ -1,0 +1,309 @@
+/**
+ * Capacitor iOS/Android shell — edge-to-edge layout, unified typography.
+ * Scoped to html.capacitor-native so the web app is unchanged.
+ */
+
+html.capacitor-native {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  --cap-canvas-bg: rgb(243 244 246);
+  --cap-surface-bg: rgb(255 255 255);
+
+  /* Uniform type scale */
+  --cap-text-2xs: 0.75rem; /* 12px — eyebrows, nav labels, captions */
+  --cap-text-xs: 0.8125rem; /* 13px — meta, table headers */
+  --cap-text-sm: 0.9375rem; /* 15px — default body in dashboard */
+  --cap-text-base: 1rem; /* 16px — inputs, emphasized values */
+  --cap-text-lg: 1.125rem; /* 18px — page titles */
+  --cap-text-xl: 1.25rem; /* 20px — rare emphasis only */
+
+  --cap-leading-tight: 1.3;
+  --cap-leading-normal: 1.45;
+  --cap-leading-relaxed: 1.55;
+
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+html.capacitor-native.dark {
+  --cap-canvas-bg: #07080c;
+  --cap-surface-bg: #12141c;
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+/* ── Edge-to-edge: no letterboxing / black bars ── */
+html.capacitor-native,
+html.capacitor-native body {
+  height: 100%;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+html.capacitor-native #__nuxt {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  padding-left: var(--cap-safe-left);
+  padding-right: var(--cap-safe-right);
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+html.capacitor-native #__nuxt > *,
+html.capacitor-native #__nuxt .u-app,
+html.capacitor-native #__nuxt [data-v-app] {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cap-canvas-bg);
+}
+
+html.capacitor-native .dashboard-layout-root--native {
+  flex: 1 1 auto;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+html.capacitor-native .dashboard-native-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  background-color: var(--cap-canvas-bg);
+}
+
+/* Drawers / full-screen forms sit between top bar and bottom nav (not over the whole app) */
+html.capacitor-native .dashboard-native-overlay-host {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--dashboard-native-top-chrome);
+  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
+  z-index: 52;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+html.capacitor-native .dashboard-native-overlay-host:has(.side-panel-native-shell),
+html.capacitor-native .dashboard-native-overlay-host:has(.modal-native-shell) {
+  pointer-events: auto;
+}
+
+html.capacitor-native .side-panel-native-dialog {
+  box-shadow: none;
+}
+
+html.capacitor-native .side-panel-native-dialog > :first-child {
+  border-top: 1px solid rgb(0 0 0 / 0.06);
+}
+
+html.capacitor-native.dark .side-panel-native-dialog > :first-child {
+  border-top-color: rgb(255 255 255 / 0.08);
+}
+
+html.capacitor-native[data-native-drawer-open] .dashboard-native-main {
+  overflow: hidden !important;
+}
+
+/* Only the page body scrolls — header + bottom nav stay fixed */
+html.capacitor-native .dashboard-native-main {
+  flex: 1 1 auto;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom)) !important;
+}
+
+html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.25rem) !important;
+}
+
+html.capacitor-native .dashboard-top-nav-spacer-native {
+  flex-shrink: 0;
+}
+
+/* Top / bottom chrome backgrounds fill safe areas (no black gaps) */
+html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
+  background-color: rgb(255 255 255 / 0.94) !important;
+}
+
+html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
+  background-color: rgb(7 8 12 / 0.94) !important;
+}
+
+html.capacitor-native .dashboard-native-bottom-nav {
+  background-color: rgb(255 255 255 / 0.98);
+}
+
+html.capacitor-native.dark .dashboard-native-bottom-nav {
+  background-color: #07080c;
+}
+
+/* ── Dashboard typography (one scale) ── */
+html.capacitor-native [data-dashboard-main] {
+  font-size: var(--cap-text-sm);
+  line-height: var(--cap-leading-normal);
+}
+
+html.capacitor-native .text-\[10px\],
+html.capacitor-native .text-\[11px\] {
+  font-size: var(--cap-text-2xs) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native .text-xs {
+  font-size: var(--cap-text-xs) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native .text-sm {
+  font-size: var(--cap-text-sm) !important;
+  line-height: var(--cap-leading-normal) !important;
+}
+
+html.capacitor-native .text-base {
+  font-size: var(--cap-text-base) !important;
+  line-height: var(--cap-leading-normal) !important;
+}
+
+html.capacitor-native .text-lg {
+  font-size: var(--cap-text-lg) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native .text-xl,
+html.capacitor-native .text-2xl,
+html.capacitor-native .text-\[1\.35rem\] {
+  font-size: var(--cap-text-lg) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native .dashboard-page-header h1,
+html.capacitor-native [data-dashboard-main] h1 {
+  font-size: var(--cap-text-lg) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native .dashboard-page-header p,
+html.capacitor-native [data-dashboard-main] .cap-native-description,
+html.capacitor-native [data-dashboard-main] header p {
+  font-size: var(--cap-text-xs) !important;
+}
+
+html.capacitor-native .data-table-shell th {
+  font-size: var(--cap-text-xs) !important;
+  font-weight: 600;
+}
+
+html.capacitor-native .data-table-shell td {
+  font-size: var(--cap-text-sm) !important;
+  line-height: var(--cap-leading-normal) !important;
+}
+
+html.capacitor-native .dashboard-native-bottom-nav .text-\[10px\],
+html.capacitor-native .dashboard-native-bottom-nav span {
+  font-size: var(--cap-text-2xs) !important;
+  line-height: var(--cap-leading-tight) !important;
+}
+
+html.capacitor-native button.text-xs,
+html.capacitor-native .btn-primary-sm {
+  font-size: var(--cap-text-xs) !important;
+}
+
+html.capacitor-native button.text-sm,
+html.capacitor-native .btn-primary {
+  font-size: var(--cap-text-sm) !important;
+}
+
+html.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-native select,
+html.capacitor-native textarea,
+html.capacitor-native .app-field {
+  font-size: var(--cap-text-base) !important;
+  line-height: var(--cap-leading-normal) !important;
+}
+
+html.capacitor-ios.capacitor-native .app-field,
+html.capacitor-ios.capacitor-native .auth-field-input {
+  min-height: 2.75rem !important;
+}
+
+/* ── Auth screens ── */
+html.capacitor-native [data-auth-shell] {
+  min-height: 100dvh;
+  padding-top: 0;
+  padding-bottom: var(--cap-safe-bottom);
+  background-color: var(--cap-canvas-bg);
+}
+
+html.capacitor-native [data-auth-shell] .auth-shell-mobile-strip {
+  padding-top: var(--cap-safe-top);
+  padding-bottom: 0.875rem;
+  padding-left: calc(1rem + var(--cap-safe-left));
+  padding-right: calc(1rem + var(--cap-safe-right));
+}
+
+html.capacitor-native [data-auth-shell] .auth-shell-mobile-strip p {
+  font-size: var(--cap-text-sm) !important;
+}
+
+html.capacitor-native [data-auth-shell] > div:last-child {
+  flex: 1;
+  width: 100%;
+  padding-left: calc(1rem + var(--cap-safe-left));
+  padding-right: calc(1rem + var(--cap-safe-right));
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+html.capacitor-native [data-auth-shell] .auth-shell-theme-toggle {
+  top: calc(0.75rem + var(--cap-safe-top));
+  right: calc(0.75rem + var(--cap-safe-right));
+}
+
+html.capacitor-native [data-auth-shell] .auth-page-header h1 {
+  font-size: var(--cap-text-xl) !important;
+}
+
+html.capacitor-native [data-auth-shell] .auth-page-header p {
+  font-size: var(--cap-text-sm) !important;
+}
+
+html.capacitor-native .auth-card {
+  border-radius: 1rem;
+}
+
+html.capacitor-native .auth-card label {
+  font-size: var(--cap-text-xs) !important;
+}
+
+html.capacitor-native .auth-card .auth-field-input {
+  font-size: var(--cap-text-base) !important;
+}
+
+html.capacitor-native [role='dialog'] .text-xs,
+html.capacitor-native [data-dashboard-teleport] .text-xs {
+  font-size: var(--cap-text-xs) !important;
+}
+
+html.capacitor-native [role='dialog'] .text-sm,
+html.capacitor-native [data-dashboard-teleport] .text-sm {
+  font-size: var(--cap-text-sm) !important;
+}

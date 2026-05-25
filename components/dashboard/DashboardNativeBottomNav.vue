@@ -31,7 +31,7 @@
  :stroke-width="isActive(item.href) ? undefined : 1.75"
  />
  <span
- class="max-w-full truncate text-[10px] font-medium leading-none tracking-tight"
+ class="max-w-full truncate text-xs font-medium leading-none tracking-tight"
  :class="isActive(item.href) ? 'font-semibold' : ''"
  >
  {{ shortLabel(item.name) }}
@@ -60,7 +60,7 @@
  :stroke-width="moreOpen || moreHasActive ? undefined : 1.75"
  />
  <span
- class="text-[10px] font-medium leading-none tracking-tight"
+ class="text-xs font-medium leading-none tracking-tight"
  :class="moreOpen || moreHasActive ? 'font-semibold' : ''"
  >
  More

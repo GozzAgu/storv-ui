@@ -64,5 +64,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Storvv uses Face ID to sign you in quickly and keep your saved login secure on this device.</string>
 </dict>
 </plist>
