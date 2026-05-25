@@ -94,7 +94,7 @@ async function writeStoredLogin(email: string, password: string): Promise<boolea
   } catch (error) {
     console.warn('[NativeBiometricLogin] writeStoredLogin failed:', error)
     try {
-      await SecureStorage.set(STORAGE_KEY, payload)
+      await SecureStorage.set(STORAGE_KEY, json)
       const verified = await readStoredLogin()
       return !!(
         verified &&
