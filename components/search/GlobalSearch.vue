@@ -15,6 +15,7 @@
  >
  <!-- Dismiss on overlay click -->
       <div
+        data-global-search-backdrop
         class="absolute inset-0 bg-gray-900/25 backdrop-blur-[2px] dark:bg-black/40"
         aria-hidden="true"
         @click="searchStore.closeSearch()"

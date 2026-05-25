@@ -1381,3 +1381,90 @@ html.capacitor-native .dashboard-native-bottom-nav {
   padding-left: var(--cap-safe-left);
   padding-right: var(--cap-safe-right);
 }
+
+/* ── iOS polish: cleaner surfaces, spacing, and tables ── */
+html.capacitor-native .dashboard-native-main {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+html.capacitor-native .dashboard-page-header,
+html.capacitor-native [data-dashboard-main] > .space-y-5,
+html.capacitor-native [data-dashboard-main] > .space-y-6 {
+  gap: 0.875rem;
+}
+
+html.capacitor-native .data-table-shell {
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+html.dark.capacitor-native .data-table-shell {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgb(229 231 235 / 0.7);
+}
+
+html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
+  border-bottom-color: rgb(55 65 81 / 0.55);
+}
+
+/* Inventory categories — grid on clear page bg */
+html.capacitor-native .inventory-categories-page {
+  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem) !important;
+  gap: 0.75rem;
+}
+
+html.capacitor-native .inventory-categories-shell--grid {
+  gap: 0.75rem !important;
+}
+
+html.capacitor-native .inventory-categories-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+@media (min-width: 480px) {
+  html.capacitor-native .inventory-categories-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+html.capacitor-native .inventory-categories-grid .inv-category-card {
+  border-radius: 0.75rem;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.05),
+    0 6px 16px rgb(15 23 42 / 0.04);
+}
+
+html.capacitor-native.dark .inventory-categories-grid .inv-category-card {
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+html.capacitor-native .inventory-categories-shell--table.data-table-shell {
+  min-height: min(62vh, calc(100dvh - 11rem));
+}
+
+html.capacitor-native .inventory-categories-page .dashboard-page-header {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Modals & search overlay */
+html.capacitor-native [data-global-search-backdrop] {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+html.capacitor-native .activity-log-shell.data-table-shell,
+html.capacitor-native .inventory-categories-shell--table.data-table-shell {
+  margin-left: 0;
+  margin-right: 0;
+}
