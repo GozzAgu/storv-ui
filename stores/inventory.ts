@@ -2019,7 +2019,7 @@ export const useInventoryStore = defineStore('inventory', {
  folderId: string,
  receiptId: string,
  lines: { itemId: string; quantitySold: number }[],
- options: { hasSerialNumbers: boolean },
+ options: { hasSerialNumbers: boolean; skipActivityLog?: boolean },
  ) {
  await this.applyReceiptSaleToInventory(folderId, lines, options)
  const itemIds = lines.map((l) => l.itemId)
@@ -2033,7 +2033,7 @@ export const useInventoryStore = defineStore('inventory', {
  async applyReceiptSaleToInventory(
  folderId: string,
  lines: { itemId: string; quantitySold: number }[],
- options: { hasSerialNumbers: boolean }
+ options: { hasSerialNumbers: boolean; skipActivityLog?: boolean },
  ) {
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
@@ -2072,7 +2072,9 @@ export const useInventoryStore = defineStore('inventory', {
 
  if (options.hasSerialNumbers) {
  const itemIds = lines.map((l) => l.itemId)
- await this.updateItemsDateOutWithLoanReconcile(folderId, itemIds, loanIdByItemId)
+ await this.updateItemsDateOutWithLoanReconcile(folderId, itemIds, loanIdByItemId, {
+ skipActivityLog: options.skipActivityLog,
+ })
  return
  }
 
@@ -2129,6 +2131,7 @@ export const useInventoryStore = defineStore('inventory', {
 
  await this.updateLowStockCount(folderId)
 
+ if (!options.skipActivityLog) {
  const userDisplayNameBulk = await getCurrentUserDisplayName().catch(() => 'Unknown')
  await logActivity({
  action: 'updated',
@@ -2139,6 +2142,7 @@ export const useInventoryStore = defineStore('inventory', {
  userId: authStore.currentUser!.uid,
  userDisplayName: userDisplayNameBulk,
  }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+ }
 
  const soldWithLoan = Array.from(merged.keys())
  .map((itemId) => ({ itemId, loanId: loanIdByItemId.get(itemId) }))
@@ -2159,6 +2163,7 @@ export const useInventoryStore = defineStore('inventory', {
  folderId: string,
  itemIds: string[],
  loanIdByItemId: Map<string, string>,
+ options?: { skipActivityLog?: boolean },
  ) {
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
@@ -2258,6 +2263,7 @@ export const useInventoryStore = defineStore('inventory', {
  })
  }
 
+ if (!options?.skipActivityLog) {
  const userDisplayNameDateOut = await getCurrentUserDisplayName().catch(() => 'Unknown')
  await logActivity({
  action: 'updated',
@@ -2268,6 +2274,7 @@ export const useInventoryStore = defineStore('inventory', {
  userId: authStore.currentUser!.uid,
  userDisplayName: userDisplayNameDateOut,
  }).catch((e) => console.warn('[inventory] Activity log write failed:', e))
+ }
  } catch (error: any) {
  console.error('Error updating dateOut (with stock loan reconcile):', error)
  throw new Error(error.message || 'Failed to update dateOut')

@@ -218,9 +218,7 @@
  <div class="space-y-0">
  <div v-for="pref in preferenceRows" :key="pref.key" :class="[settingRowClass, pref.key === 'timezone' ? '!border-0' : '']">
  <div class="flex min-w-0 flex-1 items-center gap-3">
- <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
- <component :is="pref.icon" class="h-4 w-4 text-gray-500 dark:text-gray-400" />
- </div>
+ <component :is="pref.icon" :class="settingRowIconClass" />
  <div class="min-w-0">
  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">{{ pref.label }}</p>
  <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ pref.value }}</p>
@@ -235,9 +233,7 @@
  <div class="space-y-0">
  <div :class="settingRowClass">
  <div class="flex min-w-0 flex-1 items-center gap-3">
- <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
- <KeyIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
- </div>
+ <KeyIcon :class="settingRowIconClass" />
  <div>
  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
  <p class="text-[11px] text-gray-500 dark:text-gray-400">Update your sign-in password</p>
@@ -247,9 +243,7 @@
  </div>
  <div :class="settingRowClass">
  <div class="flex min-w-0 flex-1 items-center gap-3">
- <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
- <ShieldCheckIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
- </div>
+ <ShieldCheckIcon :class="settingRowIconClass" />
  <div>
  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Two-factor authentication</p>
  <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}</p>
@@ -265,9 +259,7 @@
  </div>
  <div :class="[settingRowClass, '!border-0']">
  <div class="flex min-w-0 flex-1 items-center gap-3">
- <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]">
- <DevicePhoneMobileIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
- </div>
+ <DevicePhoneMobileIcon :class="settingRowIconClass" />
  <div>
  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Active sessions</p>
  <p class="text-[11px] text-gray-500 dark:text-gray-400">{{ securitySettings.activeSessions }} devices</p>
@@ -852,6 +844,7 @@ const {
  editLinkClass,
  cancelLinkClass,
  settingRowClass,
+ settingRowIconClass,
 } = useDashboardSettingsChrome()
 
 // Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person

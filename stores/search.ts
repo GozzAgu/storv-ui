@@ -4,13 +4,55 @@ import { useFirestore } from '~/composables/useFirestore'
 import { useAuthStore } from './auth'
 import { useUserStore } from './user'
 import { useReceiptsStore } from './receipts'
-import { useInventoryStore } from './inventory'
+import { useInventoryStore, type InventoryItem } from './inventory'
 import { useCustomersStore } from './customers'
 import { useDepartmentsStore } from './departments'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { useStaffStore } from './staff'
 
 export type SearchEntityType = 'all' | 'receipts' | 'inventory' | 'customers' | 'departments' | 'staff'
+
+/** Item-level inventory search needs typed text; avoids full-folder Firestore scans on filter-only. */
+const INVENTORY_ITEM_SEARCH_MIN_CHARS = 2
+const MAX_INVENTORY_ITEM_RESULTS = 40
+
+const INVENTORY_ITEM_SEARCH_KEYS = [
+  'name',
+  'itemName',
+  'serialNo',
+  'serialNumber',
+  'brand',
+  'model',
+  'sku',
+  'barcode',
+  'description',
+  'category',
+] as const
+
+function inventoryItemMatchesQuery(item: InventoryItem, searchQuery: string): boolean {
+  if (!searchQuery) return false
+  for (const key of INVENTORY_ITEM_SEARCH_KEYS) {
+    const value = item[key]
+    if (value != null && String(value).toLowerCase().includes(searchQuery)) return true
+  }
+  return false
+}
+
+function inventoryItemToSearchResult(item: InventoryItem, folderName: string, folderId: string): SearchResult {
+  const itemName = item.name || item.itemName || 'Unnamed Item'
+  return {
+    id: item.id,
+    type: 'inventory',
+    title: itemName,
+    subtitle: folderName,
+    description: `Serial: ${item.serialNo || item.serialNumber || 'N/A'}`,
+    icon: 'CubeIcon',
+    url: `/dashboard/inventory/${folderId}?item=${item.id}`,
+    metadata: { folderId, folderName },
+  }
+}
+
+let searchRunId = 0
 
 export interface SearchFilter {
  entityTypes: SearchEntityType[]
@@ -105,10 +147,11 @@ export const useSearchStore = defineStore('search', {
  return
  }
 
- this.loading = true
- this.results = []
+    const runId = ++searchRunId
+    this.loading = true
+    this.results = []
 
- const searchQuery = this.query.toLowerCase().trim()
+    const searchQuery = this.query.toLowerCase().trim()
  
  // Check if user is staff
  const authStore = useAuthStore()
@@ -204,9 +247,10 @@ export const useSearchStore = defineStore('search', {
 
  // Search folders
  inventoryStore.folders.forEach(folder => {
- const matchesQuery = !searchQuery ||
- folder.name.toLowerCase().includes(searchQuery) ||
- folder.description.toLowerCase().includes(searchQuery)
+          const matchesQuery =
+            !searchQuery ||
+            folder.name.toLowerCase().includes(searchQuery) ||
+            (folder.description?.toLowerCase().includes(searchQuery) ?? false)
 
  if (matchesQuery) {
  results.push({
@@ -225,35 +269,37 @@ export const useSearchStore = defineStore('search', {
  }
  })
 
- // Search items in folders (chunked + TTL cache; not stored in Pinia)
- for (const folder of inventoryStore.folders) {
- const items = await inventoryStore.fetchItemsAllChunked(folder.id)
- items.forEach(item => {
- const matchesQuery = !searchQuery ||
- Object.values(item).some(value => {
- const strValue = value?.toString().toLowerCase() || ''
- return strValue.includes(searchQuery)
- })
+        // Item-level search: parallel folder loads, only when user typed ≥2 chars (not on filter-only).
+        if (searchQuery.length >= INVENTORY_ITEM_SEARCH_MIN_CHARS) {
+          const itemHits: SearchResult[] = []
+          const foldersToScan = inventoryStore.folders
 
- if (matchesQuery) {
- const itemName = item.name || item.itemName || 'Unnamed Item'
- results.push({
- id: item.id,
- type: 'inventory',
- title: itemName,
- subtitle: folder.name,
- description: `Serial: ${item.serialNo || item.serialNumber || 'N/A'}`,
- icon: 'CubeIcon',
- url: `/dashboard/inventory/${folder.id}?item=${item.id}`,
- metadata: {
- folderId: folder.id,
- folderName: folder.name,
- },
- })
- }
- })
- }
- }
+          await Promise.all(
+            foldersToScan.map(async (folder) => {
+              if (itemHits.length >= MAX_INVENTORY_ITEM_RESULTS || runId !== searchRunId) return
+
+              let items: InventoryItem[]
+              const cached = inventoryStore.items[folder.id]
+              if (inventoryStore.itemsLoadedFully[folder.id] && cached?.length) {
+                items = cached
+              } else {
+                items = await inventoryStore.fetchItemsAllChunked(folder.id)
+              }
+
+              for (const item of items) {
+                if (itemHits.length >= MAX_INVENTORY_ITEM_RESULTS || runId !== searchRunId) return
+                if (inventoryItemMatchesQuery(item, searchQuery)) {
+                  itemHits.push(inventoryItemToSearchResult(item, folder.name, folder.id))
+                }
+              }
+            }),
+          )
+
+          if (runId === searchRunId) {
+            results.push(...itemHits.slice(0, MAX_INVENTORY_ITEM_RESULTS))
+          }
+        }
+      }
 
  // Search customers
  if (entityTypes.includes('customers')) {
@@ -380,12 +426,16 @@ export const useSearchStore = defineStore('search', {
  return a.title.localeCompare(b.title)
  })
 
- this.results = results
- } catch (error: any) {
- console.error('[SearchStore] Error performing search:', error)
- } finally {
- this.loading = false
- }
+        if (runId === searchRunId) {
+          this.results = results
+        }
+      } catch (error: any) {
+        console.error('[SearchStore] Error performing search:', error)
+      } finally {
+        if (runId === searchRunId) {
+          this.loading = false
+        }
+      }
  },
 
  // Save search

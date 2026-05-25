@@ -67,11 +67,41 @@ export function activityActionBadgeClass(action: ActivityAction): string {
 
 /** Primary line for compact activity previews (dashboard, widgets). */
 export function activityLogPreviewTitle(
- log: Pick<ActivityLog, 'action' | 'entityType' | 'entityName'>
+  log: Pick<ActivityLog, 'action' | 'entityType' | 'entityName'>
 ): string {
- const name = normalizeActivityLogText(log.entityName).trim()
- if (name && name !== '-') return name
- return `${activityActionLabel(log.action)} ${activityEntityTypeLabel(log.entityType).toLowerCase()}`
+  const name = normalizeActivityLogText(log.entityName).trim()
+  if (name && name !== '-') return name
+  return `${activityActionLabel(log.action)} ${activityEntityTypeLabel(log.entityType).toLowerCase()}`
+}
+
+/**
+ * Secondary detail for audit tables (no raw Firestore IDs).
+ * Pass `folderName` when entityId is a folder id (batch ops) for clearer context.
+ */
+export function activityLogDetailSubtitle(
+  log: Pick<ActivityLog, 'entityType' | 'entityName' | 'action'>,
+  options?: { folderName?: string | null }
+): string | null {
+  const name = normalizeActivityLogText(log.entityName).trim()
+  const folderName = options?.folderName?.trim()
+
+  if (log.entityType === 'items_batch') {
+    if (folderName) return folderName
+    if (name && name !== '-') return null
+    return 'Batch update'
+  }
+
+  if (log.entityType === 'folder') {
+    if (folderName && folderName !== name) return folderName
+    return null
+  }
+
+  if (log.entityType === 'item') {
+    if (name && name !== '-') return null
+    return `${activityActionLabel(log.action)} inventory item`
+  }
+
+  return null
 }
 
 /** Write an activity log (fire-and-forget; does not throw). */

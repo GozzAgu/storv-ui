@@ -13,7 +13,7 @@ export function useDashboardProfileMenuChrome() {
     'relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white shadow-sm shadow-primary-900/15 ring-1 ring-white/20 dark:ring-white/10'
 
   const panelClass =
-    'overflow-hidden rounded-xl border-0 bg-white/95 shadow-[0_8px_28px_-6px_rgb(15_23_42/0.14)] backdrop-blur-xl ring-1 ring-gray-900/[0.04] dark:!bg-[#12141c]/98 dark:shadow-[0_12px_36px_-8px_rgb(0_0_0/0.5)] dark:ring-white/[0.06]'
+    'overflow-hidden rounded-xl border-0 bg-white/95 shadow-[0_8px_28px_-6px_rgb(15_23_42/0.14)] backdrop-blur-xl dark:!bg-[#12141c]/98 dark:shadow-[0_12px_36px_-8px_rgb(0_0_0/0.5)]'
 
   const panelHeaderClass =
     'border-0 bg-linear-to-br from-primary-50/80 via-white to-white px-3 py-2.5 dark:from-primary-950/35 dark:via-[#12141c] dark:to-[#12141c]'
@@ -55,7 +55,7 @@ export function useDashboardProfileMenuChrome() {
   const menuBadgeClass =
     'ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold tabular-nums text-white'
 
-  const menuFooterClass = 'border-t border-gray-100/90 px-1.5 py-1 dark:border-white/[0.06]'
+  const menuFooterClass = 'px-1.5 py-1'
 
   const signOutRowClass =
     'group flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-xs font-medium text-gray-600 transition-colors duration-150 hover:bg-red-50/90 hover:text-red-700 active:bg-red-50 dark:text-gray-400 dark:hover:bg-red-500/10 dark:hover:text-red-400'

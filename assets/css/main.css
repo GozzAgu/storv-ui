@@ -1010,6 +1010,29 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     border-color: rgb(55 65 81 / 0.8);
     background-color: rgb(255 255 255 / 0.03);
   }
+
+  /* Activity Logs: slightly roomier audit table */
+  .activity-log-shell .dashboard-table thead th {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .activity-log-shell .dashboard-table tbody td {
+    font-size: 0.75rem;
+    padding-top: 0.8125rem;
+    padding-bottom: 0.8125rem;
+  }
+
+  .activity-log-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(249 250 251);
+  }
+
+  html.dark .activity-log-shell .dashboard-table tbody tr:hover {
+    background-color: rgb(255 255 255 / 0.03);
+  }
 }
 
 /*

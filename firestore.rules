@@ -117,6 +117,14 @@ service cloud.firestore {
         );
     }
 
+    // Staff POS: remove sold lines from stock-loan docs after a receipt sale (no other loan edits).
+    function sellerLoanSaleReconcileUpdate() {
+      let changed = request.resource.data.diff(resource.data).changedKeys();
+      return changed.hasOnly(['lines', 'updatedAt'])
+        || changed.hasOnly(['lines', 'status', 'returnedAt', 'updatedAt'])
+        || changed.hasOnly(['status', 'returnedAt', 'updatedAt']);
+    }
+
     // Legacy name kept for a few rules; prefer the helpers above.
     function canManageStoreData(userId, storeId) {
       return canManageNonInventoryOps(userId, storeId);
@@ -347,9 +355,13 @@ service cloud.firestore {
                            request.resource.data.lines is list &&
                            request.resource.data.lines.size() > 0;
 
-          allow update: if canManageNonInventoryOps(userId, storeId) &&
+          allow update: if (canManageNonInventoryOps(userId, storeId) &&
                            resourceMatchesStore(storeId) &&
-                           requestMatchesStore(storeId);
+                           requestMatchesStore(storeId))
+                        || (canCreateReceipt(userId, storeId) &&
+                           sellerLoanSaleReconcileUpdate() &&
+                           resourceMatchesStore(storeId) &&
+                           requestMatchesStore(storeId));
 
           allow delete: if false;
         }

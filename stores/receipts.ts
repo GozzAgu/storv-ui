@@ -7,6 +7,7 @@ import { getReceiptsCollection, getReceiptDocument, getQueryUserId } from '~/com
 import { useStaffStore } from './staff'
 import { useCustomersStore } from './customers'
 import { useInventoryStore } from './inventory'
+import { logActivity, getCurrentUserDisplayName } from '~/composables/useActivityLog'
 import { useNotificationsStore } from './notifications'
 import { usePreferences } from '~/composables/usePreferences'
 import {
@@ -549,6 +550,9 @@ export const useReceiptsStore = defineStore('receipts', {
  if (!snap.exists()) throw new Error('Receipt not found')
 
  const data = snap.data() as Record<string, unknown>
+ if (data.status === 'completed') {
+ return { completed: true }
+ }
  if (data.status !== 'balance_due') {
  throw new Error('This receipt is not awaiting payment')
  }
@@ -590,6 +594,7 @@ export const useReceiptsStore = defineStore('receipts', {
  if (folderId && saleLines.length > 0) {
  await inventoryStore.finalizeBalanceDueInventorySale(folderId, receiptId, saleLines, {
  hasSerialNumbers,
+ skipActivityLog: true,
  })
  }
  const paymentMethod =
@@ -604,6 +609,21 @@ export const useReceiptsStore = defineStore('receipts', {
  completedAt: serverTimestamp(),
  })
  completed = true
+
+ if (folderId && saleLines.length > 0) {
+ const receiptLabel = String(data.receiptNumber || receiptId)
+ const soldCount = saleLines.reduce((n, l) => n + (hasSerialNumbers ? 1 : Number(l.quantitySold) || 1), 0)
+ const userDisplayName = await getCurrentUserDisplayName().catch(() => 'Unknown')
+ await logActivity({
+ action: 'updated',
+ entityType: 'items_batch',
+ entityId: folderId,
+ entityName: `${soldCount} item${soldCount !== 1 ? 's' : ''} marked as sold · ${receiptLabel}`,
+ storeId,
+ userId: authStore.currentUser!.uid,
+ userDisplayName,
+ }).catch((e) => console.warn('[receipts] Activity log write failed:', e))
+ }
  } else {
  await updateDoc(receiptRef, {
  amountPaid: newPaid,

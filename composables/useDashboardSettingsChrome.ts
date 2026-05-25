@@ -37,8 +37,11 @@ export function useDashboardSettingsChrome() {
       : `${APP_FIELD_CLASS} cursor-not-allowed opacity-80 dark:!bg-dashboard-card/60`
   }
 
- const settingRowClass =
- 'flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 py-3 last:border-0 dark:border-gray-800/70'
+  const settingRowClass =
+    'flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 py-3 last:border-0 dark:border-gray-800/70'
+
+  /** List row icons (no background tile) */
+  const settingRowIconClass = 'h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400'
 
  /** Compact branch tile in Settings → Branches grid */
  const storeBranchCardClass =
@@ -64,8 +67,9 @@ export function useDashboardSettingsChrome() {
  cancelLinkClass,
  viewOnlyBadgeClass,
  inputClass,
- settingRowClass,
- storeBranchCardClass,
+    settingRowClass,
+    settingRowIconClass,
+    storeBranchCardClass,
  storeBranchCardActiveClass,
  profileStatBarClass,
  }

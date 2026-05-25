@@ -14,78 +14,85 @@
  role="presentation"
  >
  <!-- Dismiss on overlay click -->
- <div
- class="absolute inset-0 bg-slate-950/50 backdrop-blur-md dark:bg-black/70"
- aria-hidden="true"
- @click="searchStore.closeSearch()"
- />
+      <div
+        class="absolute inset-0 bg-gray-900/25 backdrop-blur-[2px] dark:bg-black/40"
+        aria-hidden="true"
+        @click="searchStore.closeSearch()"
+      />
 
- <div
- class="pointer-events-none fixed inset-0 flex justify-center overflow-y-auto px-2 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-4 sm:px-4 sm:pt-20 sm:pb-6 md:pt-24"
- >
- <div
- class="frosted-glass pointer-events-auto relative flex max-h-[min(70vh,calc(100dvh-2rem))] w-full max-w-2xl flex-col overflow-hidden rounded-sm text-gray-900 dark:border-gray-800 dark:text-gray-100 sm:max-h-[min(80vh,calc(100dvh-3rem))] sm:rounded-sm"
- @click.stop
- >
- <!-- Search Input -->
- <div class="border-b border-gray-200/90 bg-transparent p-3 dark:border-gray-800 sm:p-4">
- <div class="relative">
- <MagnifyingGlassIcon class="absolute left-3 top-1/2 w-4 -translate-y-1/2 transform text-gray-400 dark:text-gray-500" />
- <input
- ref="searchInput"
- v-model="searchStore.query"
- type="text"
- placeholder="Search receipts, inventory, customers..."
- class="w-full rounded-sm bg-gray-50 py-2 pl-9 pr-14 text-xs text-gray-900 placeholder-gray-400/40 focus:outline-none focus:ring-2 focus:ring-primary-500/25 dark:bg-slate-900 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-primary-500/35"
- @input="handleSearchInput"
- @keydown.esc="searchStore.closeSearch()"
- @keydown.enter="handleEnter"
- @keydown.down.prevent="navigateResults(1)"
- @keydown.up.prevent="navigateResults(-1)"
- />
- <div class="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1 sm:gap-2">
- <kbd
- class="hidden rounded-sm bg-gray-100/90 px-2 py-1 text-[10px] font-semibold text-gray-500 dark:bg-slate-800 dark:text-gray-400 sm:inline-block"
- >
- Esc
- </kbd>
- </div>
- </div>
+      <div
+        class="pointer-events-none fixed inset-0 flex justify-center overflow-y-auto px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-6 sm:px-4 sm:pt-[12vh]"
+      >
+        <div
+          class="pointer-events-auto relative flex max-h-[min(72vh,calc(100dvh-2.5rem))] w-full max-w-xl flex-col overflow-hidden rounded-2xl border-0 bg-white text-gray-900 shadow-[0_20px_60px_-20px_rgb(15_23_42/0.22)] dark:!bg-dashboard-card dark:text-gray-100 dark:shadow-[0_24px_70px_-20px_rgb(0_0_0/0.55)] sm:max-h-[min(78vh,calc(100dvh-3rem))]"
+          @click.stop
+        >
+          <!-- Search -->
+          <div class="shrink-0 px-4 pb-3 pt-4">
+            <div class="relative">
+              <MagnifyingGlassIcon
+                class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+              />
+              <input
+                ref="searchInput"
+                v-model="searchStore.query"
+                type="text"
+                placeholder="Search receipts, inventory, customers…"
+                class="app-field w-full rounded-lg py-0 pl-9 pr-12 text-sm placeholder:text-gray-400 dark:!bg-white/[0.04]"
+                @input="handleSearchInput"
+                @keydown.esc="searchStore.closeSearch()"
+                @keydown.enter="handleEnter"
+                @keydown.down.prevent="navigateResults(1)"
+                @keydown.up.prevent="navigateResults(-1)"
+              />
+              <kbd
+                class="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-white/[0.06] dark:text-gray-400 sm:inline-block"
+              >
+                Esc
+              </kbd>
+            </div>
 
- <!-- Quick Filters -->
- <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
- <button
- v-for="entityType in entityTypes"
- :key="entityType.value"
- @click="toggleEntityType(entityType.value)"
- :class="[ 'rounded-sm px-2.5 py-1 text-[11px] font-medium transition-colors', isEntityTypeSelected(entityType.value) ? 'bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300' : 'border border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700' ]"
- >
- <component :is="entityType.icon" class="w-3.5 h-3.5 inline-block mr-1" />
- <span>{{ entityType.label }}</span>
- </button>
- <button
- v-if="searchStore.hasActiveFilters"
- @click="searchStore.resetFilters()"
- class="px-2.5 py-1 text-[11px] font-medium rounded-sm bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
- >
- Clear Filters
- </button>
- </div>
- </div>
+            <div class="mt-3 flex flex-wrap items-center gap-1">
+              <button
+                v-for="entityType in entityTypes"
+                :key="entityType.value"
+                type="button"
+                class="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors duration-150"
+                :class="
+                  isEntityTypeSelected(entityType.value)
+                    ? 'bg-primary-500/10 text-primary-800 dark:bg-primary-400/15 dark:text-primary-200'
+                    : 'text-gray-600 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]'
+                "
+                @click="toggleEntityType(entityType.value)"
+              >
+                <component :is="entityType.icon" class="h-3.5 w-3.5 shrink-0 opacity-80" />
+                {{ entityType.label }}
+              </button>
+              <button
+                v-if="searchStore.hasActiveFilters"
+                type="button"
+                class="rounded-lg px-2 py-1 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50/90 dark:text-red-400 dark:hover:bg-red-500/10"
+                @click="searchStore.resetFilters()"
+              >
+                Clear
+              </button>
+            </div>
 
- <!-- Advanced Filters Toggle -->
- <div class="border-b border-gray-200/90 bg-transparent px-3 py-2 dark:border-gray-800 sm:px-4">
- <button
- @click="showAdvancedFilters = !showAdvancedFilters"
- class="flex items-center justify-between w-full text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
- >
- <span class="flex items-center gap-2">
- <FunnelIcon class="w-3.5 h-3.5" />
- Advanced Filters
- </span>
- <ChevronDownIcon :class="['w-3.5 h-3.5 transition-transform', showAdvancedFilters ? 'rotate-180' : '']" />
- </button>
- </div>
+            <button
+              type="button"
+              class="mt-2.5 flex w-full items-center justify-between rounded-lg px-1 py-1 text-[11px] font-medium text-gray-500 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+              @click="showAdvancedFilters = !showAdvancedFilters"
+            >
+              <span class="inline-flex items-center gap-1.5">
+                <FunnelIcon class="h-3.5 w-3.5" />
+                Filters
+              </span>
+              <ChevronDownIcon
+                class="h-3.5 w-3.5 transition-transform duration-200"
+                :class="showAdvancedFilters ? 'rotate-180' : ''"
+              />
+            </button>
+          </div>
 
  <!-- Advanced Filters -->
  <Transition
@@ -96,118 +103,137 @@
  leave-from-class="opacity-100 max-h-96"
  leave-to-class="opacity-0 max-h-0"
  >
- <div
- v-if="showAdvancedFilters"
- class="space-y-3 border-b border-gray-200/90 bg-transparent px-3 py-3 dark:border-gray-800 sm:px-4"
- >
- <!-- Date Range -->
- <div class="grid grid-cols-2 gap-3">
- <div>
- <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
- <input
- v-model="startDate"
- type="date"
- class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
- @change="updateDateRange"
- />
- </div>
- <div>
- <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
- <input
- v-model="endDate"
- type="date"
- class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
- @change="updateDateRange"
- />
- </div>
- </div>
+          <div
+            v-if="showAdvancedFilters"
+            class="shrink-0 space-y-3 border-0 bg-gray-50/60 px-4 py-3 dark:bg-white/[0.02]"
+          >
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="mb-1 block text-[11px] font-medium text-gray-600 dark:text-gray-400">Start</label>
+                <input
+                  v-model="startDate"
+                  type="date"
+                  class="app-field w-full rounded-lg text-xs"
+                  @change="updateDateRange"
+                />
+              </div>
+              <div>
+                <label class="mb-1 block text-[11px] font-medium text-gray-600 dark:text-gray-400">End</label>
+                <input
+                  v-model="endDate"
+                  type="date"
+                  class="app-field w-full rounded-lg text-xs"
+                  @change="updateDateRange"
+                />
+              </div>
+            </div>
 
- <!-- Status Filter (for receipts) -->
- <div v-if="searchStore.filters.entityTypes.includes('receipts') || searchStore.filters.entityTypes.includes('all')">
- <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
- <div class="flex flex-wrap gap-2">
- <button
- v-for="status in receiptStatuses"
- :key="status.value"
- @click="toggleStatus(status.value)"
- :class="[ 'px-2.5 py-1 text-[11px] font-medium rounded-sm transition-colors', isStatusSelected(status.value) ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600' ]"
- >
- {{ status.label }}
- </button>
- </div>
- </div>
+            <div
+              v-if="searchStore.filters.entityTypes.includes('receipts') || searchStore.filters.entityTypes.includes('all')"
+            >
+              <label class="mb-1.5 block text-[11px] font-medium text-gray-600 dark:text-gray-400">Status</label>
+              <div class="flex flex-wrap gap-1">
+                <button
+                  v-for="status in receiptStatuses"
+                  :key="status.value"
+                  type="button"
+                  class="rounded-lg px-2 py-1 text-[11px] font-medium transition-colors duration-150"
+                  :class="
+                    isStatusSelected(status.value)
+                      ? 'bg-primary-500/10 text-primary-800 dark:bg-primary-400/15 dark:text-primary-200'
+                      : 'text-gray-600 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]'
+                  "
+                  @click="toggleStatus(status.value)"
+                >
+                  {{ status.label }}
+                </button>
+              </div>
+            </div>
  </div>
  </Transition>
 
- <!-- Results -->
- <div class="min-h-0 flex-1 overflow-y-auto bg-transparent">
- <!-- Loading State -->
- <div v-if="searchStore.loading" class="p-6 text-center">
- <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
- <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Searching...</p>
+          <!-- Results -->
+          <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <!-- Loading State -->
+            <div v-if="searchStore.loading" class="flex flex-col items-center justify-center px-6 py-14">
+              <div class="h-5 w-5 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-600 dark:border-t-primary-400" />
+              <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Searching…</p>
+            </div>
+
+            <!-- No Results -->
+            <div
+              v-else-if="!searchStore.hasResults && searchStore.query.trim()"
+              class="flex flex-col items-center justify-center px-6 py-14 text-center"
+            >
+              <MagnifyingGlassIcon class="mb-3 h-8 w-8 text-gray-300 dark:text-gray-600" stroke-width="1.5" />
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100">No results found</p>
+              <p class="mt-1 max-w-[16rem] text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+                Try a different term or clear filters
+              </p>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="px-4 py-4 sm:py-5">
+              <div class="py-8 text-center">
+                <MagnifyingGlassIcon class="mx-auto mb-3 h-8 w-8 text-primary-500/70 dark:text-primary-400/80" stroke-width="1.5" />
+                <p class="text-sm font-medium tracking-tight text-gray-900 dark:text-gray-50">Search your workspace</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Receipts, inventory, customers, and more
+                </p>
+              </div>
+
+              <div v-if="savedSearches.length > 0" class="mt-2 space-y-0.5 border-0 pt-2">
+                <div class="mb-1.5 flex items-center justify-between px-1">
+                  <h3 class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Recent</h3>
+                  <button
+                    type="button"
+                    class="text-[11px] font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                    @click="showSavedSearchesModal = true"
+                  >
+                    Manage
+                  </button>
+                </div>
+                <button
+                  v-for="saved in savedSearches.slice(0, 5)"
+                  :key="saved.id"
+                  type="button"
+                  class="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50/90 dark:text-gray-300 dark:hover:bg-white/[0.04]"
+                  @click="loadSavedSearch(saved.id)"
+                >
+                  <div class="flex min-w-0 flex-1 items-center gap-2">
+                    <ClockIcon class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
+                    <span class="truncate">{{ saved.name }}</span>
+                  </div>
+                  <ArrowRightIcon
+                    class="h-3.5 w-3.5 shrink-0 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 dark:text-gray-500"
+                  />
+                </button>
+              </div>
  </div>
 
- <!-- No Results -->
- <div v-else-if="!searchStore.hasResults && searchStore.query.trim()" class="p-6 text-center">
- <div
- class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-sm bg-gray-100 dark:bg-slate-800"
- >
- <MagnifyingGlassIcon class="w-6 h-6 text-gray-400 dark:text-gray-500" />
- </div>
- <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</p>
- <p class="text-xs text-gray-500 dark:text-gray-400">Try adjusting your search query or filters</p>
- </div>
-
- <!-- Empty State -->
- <div v-else-if="!searchStore.query.trim() && !searchStore.hasActiveFilters" class="p-4 sm:p-6">
- <div class="mb-4 text-center">
- <div
- class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-sm bg-primary-100/80 dark:bg-primary-500/15"
- >
- <MagnifyingGlassIcon class="w-6 h-6 text-primary-500 dark:text-primary-400" />
- </div>
- <p class="text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">Start typing to search</p>
- <p class="text-xs text-gray-500 dark:text-gray-400">Search across receipts, inventory, customers & more</p>
- </div>
-
- <!-- Saved Searches -->
- <div v-if="savedSearches.length > 0" class="space-y-2">
- <div class="flex items-center justify-between px-2 mb-2">
- <h3 class="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Saved Searches</h3>
- <button
- @click="showSavedSearchesModal = true"
- class="text-xs text-primary-500 dark:text-primary-400 hover:underline"
- >
- Manage
- </button>
- </div>
- <button
- v-for="saved in savedSearches.slice(0, 5)"
- :key="saved.id"
- @click="loadSavedSearch(saved.id)"
- class="group flex w-full items-center justify-between rounded-sm px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-800/90"
- >
- <div class="flex items-center gap-2 flex-1 min-w-0">
- <ClockIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
- <span class="truncate">{{ saved.name }}</span>
- </div>
- <ArrowRightIcon class="w-4 h-4 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
- </button>
- </div>
- </div>
-
- <!-- Results List -->
- <div v-else class="divide-y divide-gray-100 dark:divide-gray-800/90">
- <button
- v-for="(result, index) in searchStore.results"
- :key="result.id"
- @click="handleResultClick(result)"
- :class="[ 'w-full px-3 py-2 text-left transition-colors sm:px-4 sm:py-3', selectedIndex === index ? 'bg-primary-50 dark:bg-primary-500/10' : 'hover:bg-gray-50 dark:hover:bg-slate-800/60' ]"
- >
- <div class="flex items-start gap-2 sm:gap-3">
- <div :class="[ 'w-8 h-8 sm:w-10 sm:h-10 rounded-sm flex items-center justify-center flex-shrink-0', getEntityTypeColor(result.type) ]">
- <component :is="getEntityIcon(result.icon)" class="w-4 h-4 sm:w-5 sm:h-5 text-white" />
- </div>
+            <!-- Results List -->
+            <div v-else class="px-2 pb-2">
+              <button
+                v-for="(result, index) in searchStore.results"
+                :key="result.id"
+                type="button"
+                class="flex w-full rounded-lg px-2 py-2 text-left transition-colors duration-150 sm:px-2.5 sm:py-2.5"
+                :class="
+                  selectedIndex === index
+                    ? 'bg-primary-500/8 dark:bg-primary-400/10'
+                    : 'hover:bg-gray-50/90 dark:hover:bg-white/[0.04]'
+                "
+                @click="handleResultClick(result)"
+              >
+                <div class="flex items-start gap-2.5 sm:gap-3">
+                  <div
+                    :class="[
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg sm:h-10 sm:w-10',
+                      getEntityTypeColor(result.type),
+                    ]"
+                  >
+                    <component :is="getEntityIcon(result.icon)" class="h-4 w-4 text-white sm:h-[1.125rem] sm:w-[1.125rem]" />
+                  </div>
  <div class="flex-1 min-w-0">
  <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
  <p class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
@@ -230,29 +256,29 @@
  </div>
  </div>
 
- <!-- Footer -->
- <div
- class="flex items-center justify-between border-t border-gray-200/90 bg-transparent px-3 py-2.5 dark:border-gray-800 sm:px-4"
- >
- <div class="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 dark:text-gray-400">
- <span class="hidden sm:flex items-center gap-1">
- <ArrowUpIcon class="w-3 h-3" />
- <ArrowDownIcon class="w-3 h-3" />
- Navigate
- </span>
- <span class="hidden sm:flex items-center gap-1">
- <span class="text-xs">↵</span>
- Select
- </span>
- <span class="hidden sm:flex items-center gap-1">
- <kbd class="rounded-sm bg-gray-200/90 px-1.5 py-0.5 dark:bg-slate-800 dark:text-gray-300">/</kbd>
- Save
- </span>
- </div>
- <div class="text-xs text-gray-500 dark:text-gray-400">
- {{ searchStore.results.length }} result{{ searchStore.results.length !== 1 ? 's' : '' }}
- </div>
- </div>
+          <!-- Footer -->
+          <div
+            class="flex shrink-0 items-center justify-between gap-3 bg-gray-50/70 px-4 py-2.5 dark:bg-white/[0.02]"
+          >
+            <div class="hidden items-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 sm:flex">
+              <span class="inline-flex items-center gap-0.5">
+                <ArrowUpIcon class="h-3 w-3" />
+                <ArrowDownIcon class="h-3 w-3" />
+                Navigate
+              </span>
+              <span class="text-gray-300 dark:text-gray-600">·</span>
+              <span>↵ Select</span>
+              <span class="text-gray-300 dark:text-gray-600">·</span>
+              <span class="inline-flex items-center gap-1">
+                <kbd class="rounded bg-white/80 px-1 py-px font-sans text-[9px] dark:bg-white/[0.06]">/</kbd>
+                Save
+              </span>
+            </div>
+            <p class="text-[11px] tabular-nums text-gray-500 dark:text-gray-400">
+              {{ searchStore.results.length }}
+              {{ searchStore.results.length === 1 ? 'result' : 'results' }}
+            </p>
+          </div>
  </div>
  </div>
  </div>
@@ -285,6 +311,7 @@ import {
  ArrowDownIcon,
 } from '@heroicons/vue/24/outline'
 import { useSearchStore, type SearchEntityType } from '~/stores/search'
+import { useInventoryStore } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
 import SavedSearchesModal from '~/components/search/SavedSearchesModal.vue'
 
@@ -470,11 +497,15 @@ const getEntityTypeLabel = (type: SearchEntityType) => {
 
 // Watch for modal open to focus input
 watch(() => searchStore.isOpen, async (isOpen) => {
- if (isOpen) {
- await nextTick()
- searchInput.value?.focus()
- await searchStore.loadSavedSearches()
- }
+  if (isOpen) {
+    const inventoryStore = useInventoryStore()
+    if (inventoryStore.folders.length === 0) {
+      void inventoryStore.fetchFolders()
+    }
+    await nextTick()
+    searchInput.value?.focus()
+    await searchStore.loadSavedSearches()
+  }
 })
 
 // Keyboard shortcut handler
