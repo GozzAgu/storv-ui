@@ -12,41 +12,41 @@ export type VisiblePageEntry = number
  * when there are more than 7 total pages.
  */
 export function getVisiblePageNumbers(currentPage: number, totalPages: number): VisiblePageEntry[] {
-  const pages: number[] = []
-  const total = totalPages
-  const current = currentPage
+ const pages: number[] = []
+ const total = totalPages
+ const current = currentPage
 
-  if (total <= 0) {
-    return []
-  }
+ if (total <= 0) {
+ return []
+ }
 
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-    return pages
-  }
+ if (total <= 7) {
+ for (let i = 1; i <= total; i++) {
+ pages.push(i)
+ }
+ return pages
+ }
 
-  pages.push(1)
-  if (current <= 3) {
-    for (let i = 2; i <= 4; i++) pages.push(i)
-    pages.push(PAGINATION_ELLIPSIS)
-    pages.push(total)
-  } else if (current >= total - 2) {
-    pages.push(PAGINATION_ELLIPSIS)
-    for (let i = total - 3; i <= total; i++) pages.push(i)
-  } else {
-    pages.push(PAGINATION_ELLIPSIS)
-    for (let i = current - 1; i <= current + 1; i++) pages.push(i)
-    pages.push(PAGINATION_ELLIPSIS)
-    pages.push(total)
-  }
-  return pages
+ pages.push(1)
+ if (current <= 3) {
+ for (let i = 2; i <= 4; i++) pages.push(i)
+ pages.push(PAGINATION_ELLIPSIS)
+ pages.push(total)
+ } else if (current >= total - 2) {
+ pages.push(PAGINATION_ELLIPSIS)
+ for (let i = total - 3; i <= total; i++) pages.push(i)
+ } else {
+ pages.push(PAGINATION_ELLIPSIS)
+ for (let i = current - 1; i <= current + 1; i++) pages.push(i)
+ pages.push(PAGINATION_ELLIPSIS)
+ pages.push(total)
+ }
+ return pages
 }
 
 export function getTotalPages(totalItems: number, itemsPerPage: number): number {
-  if (itemsPerPage <= 0) return 0
-  return Math.ceil(totalItems / itemsPerPage)
+ if (itemsPerPage <= 0) return 0
+ return Math.ceil(totalItems / itemsPerPage)
 }
 
 /**
@@ -54,12 +54,12 @@ export function getTotalPages(totalItems: number, itemsPerPage: number): number 
  * ("start-end of total").
  */
 export function getPaginationIndices(
-  currentPage: number,
-  itemsPerPage: number,
-  totalItems: number
+ currentPage: number,
+ itemsPerPage: number,
+ totalItems: number
 ): { startIndex: number; endIndex: number } {
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const end = startIndex + itemsPerPage
-  const endIndex = end > totalItems ? totalItems : end
-  return { startIndex, endIndex }
+ const startIndex = (currentPage - 1) * itemsPerPage
+ const end = startIndex + itemsPerPage
+ const endIndex = end > totalItems ? totalItems : end
+ return { startIndex, endIndex }
 }

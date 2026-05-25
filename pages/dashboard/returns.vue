@@ -3,15 +3,15 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 definePageMeta({
-  layout: 'dashboard'
+ layout: 'dashboard'
 })
 
 // Redirect to receipts page with returns tab
 const router = useRouter()
 onMounted(() => {
-  router.replace({ path: '/dashboard/receipts', query: { tab: 'returns' } })
+ router.replace({ path: '/dashboard/receipts', query: { tab: 'returns' } })
 })
 </script>
 <template>
-  <div></div>
+ <div></div>
 </template>

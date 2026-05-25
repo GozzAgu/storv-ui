@@ -3,15 +3,15 @@
  * Import these constants in templates and copy instead of hardcoding "folder".
  */
 export const INVENTORY_GROUP = {
-  singular: 'Category',
-  plural: 'Categories',
-  singularLower: 'category',
-  pluralLower: 'categories',
+ singular: 'Category',
+ plural: 'Categories',
+ singularLower: 'category',
+ pluralLower: 'categories',
 } as const
 
 export function inventoryGroupCount(count: number): string {
-  const n = Math.max(0, count)
-  return `${n} ${n === 1 ? INVENTORY_GROUP.singularLower : INVENTORY_GROUP.pluralLower}`
+ const n = Math.max(0, count)
+ return `${n} ${n === 1 ? INVENTORY_GROUP.singularLower : INVENTORY_GROUP.pluralLower}`
 }
 
 /** e.g. "Search categories…" */

@@ -103,9 +103,74 @@
     @apply px-3 py-1 text-xs font-semibold;
   }
 
+  /** Borderless elevated surfaces */
+  .app-card {
+    @apply rounded-xl border-0 bg-white dark:bg-dashboard-card;
+  }
+
+  .app-card-sm {
+    @apply rounded-lg border-0 bg-white dark:bg-dashboard-card;
+  }
+
+  /** Form controls — hairline brand border (see `--app-field-*` in base layer) */
+  .app-field {
+    @apply w-full min-h-9 h-9 rounded-lg bg-white px-2.5 py-0 text-xs leading-normal text-gray-900 shadow-none transition-[border-color,box-shadow,background-color] duration-200 ease-out placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:bg-white/[0.04] dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:ring-primary-400/20;
+    border-width: var(--app-field-border-width);
+    border-style: solid;
+    border-color: var(--app-field-border-color);
+  }
+
+  .app-field:focus,
+  .app-field:focus-visible {
+    border-color: var(--app-field-border-color-focus);
+  }
+
+  html.dark .app-field {
+    background-color: rgb(255 255 255 / 0.04);
+    border-color: var(--app-field-border-color-dark);
+  }
+
+  html.dark .app-field:focus,
+  html.dark .app-field:focus-visible {
+    border-color: var(--app-field-border-color-focus-dark);
+  }
+
+  /** Selects: same height, padding, and chevron as text inputs */
+  select.app-field,
+  .app-field:is(select) {
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 2.25rem;
+    height: 2.25rem;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-right: 2rem;
+    line-height: 1.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23143f8d' stroke-opacity='0.38'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 10l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem 1rem;
+    cursor: pointer;
+  }
+
+  html.dark select.app-field,
+  html.dark .app-field:is(select) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ab5e3' stroke-opacity='0.85'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 10l4 4 4-4'/%3E%3C/svg%3E");
+  }
+
+  input.app-field:not([type='checkbox']):not([type='radio']),
+  textarea.app-field {
+    min-height: 2.25rem;
+  }
+
+  textarea.app-field {
+    height: auto;
+    min-height: 2.25rem;
+  }
+
   /** Card wrapper for dashboard tables: same corner radius as cards/buttons (`rounded-sm`) */
   .data-table-shell {
-    @apply flex flex-col overflow-hidden rounded-sm bg-white dark:bg-dashboard-card;
+    @apply flex flex-col overflow-hidden rounded-sm border-0 bg-white dark:bg-dashboard-card;
   }
 
   /** `!` cannot be used with custom colors inside `@apply`; same as `theme.extend.colors.dashboard.card` (#12141c) */
@@ -1157,6 +1222,99 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
 
 html.capacitor-native .dashboard-native-main {
   padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom));
+}
+
+/**
+ * App-wide field borders — hairline primary tint (Storvv navy #143f8d).
+ */
+@layer base {
+  :root {
+    --app-field-border-width: 1px;
+    --app-field-border-color: rgb(20 63 141 / 0.1);
+    --app-field-border-color-focus: rgb(72 118 199 / 0.38);
+    --app-field-border-color-dark: rgb(154 181 227 / 0.14);
+    --app-field-border-color-focus-dark: rgb(110 148 214 / 0.44);
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']),
+  select,
+  textarea {
+    border-width: var(--app-field-border-width) !important;
+    border-style: solid !important;
+    border-color: var(--app-field-border-color) !important;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease !important;
+  }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus-visible,
+  select:focus,
+  select:focus-visible,
+  textarea:focus,
+  textarea:focus-visible {
+    border-color: var(--app-field-border-color-focus) !important;
+    outline: none;
+  }
+
+  html.dark
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']),
+  html.dark select,
+  html.dark textarea {
+    border-color: var(--app-field-border-color-dark) !important;
+  }
+
+  html.dark
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus,
+  html.dark
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus-visible,
+  html.dark select:focus,
+  html.dark select:focus-visible,
+  html.dark textarea:focus,
+  html.dark textarea:focus-visible {
+    border-color: var(--app-field-border-color-focus-dark) !important;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    border-width: 0 !important;
+    border-style: none !important;
+  }
+
+  select:not([multiple]):not([size]) {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    min-height: 2.25rem;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+    padding-left: 0.625rem;
+    padding-right: 2rem !important;
+    line-height: 1.25rem;
+    font-size: 0.75rem;
+    background-color: rgb(255 255 255);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23143f8d' stroke-opacity='0.38'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 10l4 4 4-4'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.5rem center !important;
+    background-size: 1rem 1rem !important;
+    cursor: pointer;
+  }
+
+  html.dark select:not([multiple]):not([size]) {
+    background-color: rgb(255 255 255 / 0.04);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ab5e3' stroke-opacity='0.85'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M8 10l4 4 4-4'/%3E%3C/svg%3E") !important;
+  }
+
+  /** Compact toolbar fields (h-8) */
+  select.h-8,
+  input.h-8:not([type='checkbox']):not([type='radio']) {
+    min-height: 2rem !important;
+    height: 2rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+  }
 }
 
 html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {

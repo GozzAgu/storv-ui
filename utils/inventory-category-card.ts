@@ -6,118 +6,118 @@ export const PRIMARY_ACCENT_DARK = '#0f357a'
 const LEGACY_DEFAULT_BLUE = '#3b82f6'
 
 const TYPE_LABELS: Record<string, string> = {
-  general: 'General',
-  electronics: 'Electronics',
-  clothing: 'Clothing & apparel',
-  automotive: 'Automotive',
-  food: 'Food & beverage',
-  office: 'Office supplies',
-  other: 'Other',
+ general: 'General',
+ electronics: 'Electronics',
+ clothing: 'Clothing & apparel',
+ automotive: 'Automotive',
+ food: 'Food & beverage',
+ office: 'Office supplies',
+ other: 'Other',
 }
 
 export type CategoryTrackingPill = {
-  label: string
-  dotClass: string
-  pillClass: string
+ label: string
+ dotClass: string
+ pillClass: string
 }
 
 /** Label for departments that can access this category. */
 export function categoryDepartmentAccessLabel(
-  allowedDepartmentIds: string[] | undefined,
-  resolveDepartmentName: (id: string) => string | undefined
+ allowedDepartmentIds: string[] | undefined,
+ resolveDepartmentName: (id: string) => string | undefined
 ): string {
-  if (!allowedDepartmentIds || allowedDepartmentIds.length === 0) {
-    return 'All departments'
-  }
-  const names = allowedDepartmentIds
-    .map((id) => resolveDepartmentName(id)?.trim())
-    .filter((n): n is string => Boolean(n))
-  if (names.length === 0) return 'All departments'
-  if (names.length === 1) return names[0]!
-  if (names.length === 2) return `${names[0]}, ${names[1]}`
-  return `${names[0]}, +${names.length - 1} more`
+ if (!allowedDepartmentIds || allowedDepartmentIds.length === 0) {
+ return 'All departments'
+ }
+ const names = allowedDepartmentIds
+ .map((id) => resolveDepartmentName(id)?.trim())
+ .filter((n): n is string => Boolean(n))
+ if (names.length === 0) return 'All departments'
+ if (names.length === 1) return names[0]!
+ if (names.length === 2) return `${names[0]}, ${names[1]}`
+ return `${names[0]}, +${names.length - 1} more`
 }
 
 /** Title-case each word for display (e.g. "acura" → "Acura", "alfa romeo" → "Alfa Romeo"). */
 export function formatCategoryDisplayName(name: string): string {
-  const trimmed = name?.trim()
-  if (!trimmed) return ''
-  return trimmed
-    .split(/\s+/)
-    .map((word) => {
-      if (!word) return word
-      return word.charAt(0).toUpperCase() + word.slice(1)
-    })
-    .join(' ')
+ const trimmed = name?.trim()
+ if (!trimmed) return ''
+ return trimmed
+ .split(/\s+/)
+ .map((word) => {
+ if (!word) return word
+ return word.charAt(0).toUpperCase() + word.slice(1)
+ })
+ .join(' ')
 }
 
 export function formatCategoryTypeLabel(type: string | undefined): string {
-  if (!type?.trim()) return 'General'
-  return TYPE_LABELS[type] ?? type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+ if (!type?.trim()) return 'General'
+ return TYPE_LABELS[type] ?? type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export function categoryDescriptionText(description: string | undefined): string {
-  const trimmed = description?.trim()
-  return trimmed || 'No description added yet.'
+ const trimmed = description?.trim()
+ return trimmed || 'No description added yet.'
 }
 
 export function categoryTrackingPill(
-  hasSerialNumbers: boolean,
-  lowStockCount: number
+ hasSerialNumbers: boolean,
+ lowStockCount: number
 ): CategoryTrackingPill {
-  if (lowStockCount > 0) {
-    return {
-      label: 'Low stock',
-      dotClass: 'bg-amber-500',
-      pillClass: 'bg-amber-50 text-amber-800 ring-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-800/50',
-    }
-  }
-  if (hasSerialNumbers) {
-    return {
-      label: 'Serial',
-      dotClass: 'bg-primary-500',
-      pillClass: 'bg-primary-50 text-primary-800 ring-primary-200/70 dark:bg-primary-950/35 dark:text-primary-300 dark:ring-primary-800/40',
-    }
-  }
-  return {
-    label: 'Quantity',
-    dotClass: 'bg-emerald-500',
-    pillClass: 'bg-emerald-50 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-800/40',
-  }
+ if (lowStockCount > 0) {
+ return {
+ label: 'Low stock',
+ dotClass: 'bg-amber-500',
+ pillClass: 'bg-amber-50 text-amber-800 ring-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-800/50',
+ }
+ }
+ if (hasSerialNumbers) {
+ return {
+ label: 'Serial',
+ dotClass: 'bg-primary-500',
+ pillClass: 'bg-primary-50 text-primary-800 ring-primary-200/70 dark:bg-primary-950/35 dark:text-primary-300 dark:ring-primary-800/40',
+ }
+ }
+ return {
+ label: 'Quantity',
+ dotClass: 'bg-emerald-500',
+ pillClass: 'bg-emerald-50 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-800/40',
+ }
 }
 
 export function formatCategoryDate(date: unknown): string | null {
-  if (!date) return null
-  try {
-    let dateObj: Date
-    if (date && typeof date === 'object' && typeof (date as { toDate?: () => Date }).toDate === 'function') {
-      dateObj = (date as { toDate: () => Date }).toDate()
-    } else if (date && typeof date === 'object' && 'seconds' in date) {
-      const ts = date as { seconds: number; nanoseconds?: number }
-      dateObj = new Date(ts.seconds * 1000 + (ts.nanoseconds || 0) / 1_000_000)
-    } else {
-      dateObj = new Date(date as string | number | Date)
-    }
-    if (Number.isNaN(dateObj.getTime())) return null
-    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  } catch {
-    return null
-  }
+ if (!date) return null
+ try {
+ let dateObj: Date
+ if (date && typeof date === 'object' && typeof (date as { toDate?: () => Date }).toDate === 'function') {
+ dateObj = (date as { toDate: () => Date }).toDate()
+ } else if (date && typeof date === 'object' && 'seconds' in date) {
+ const ts = date as { seconds: number; nanoseconds?: number }
+ dateObj = new Date(ts.seconds * 1000 + (ts.nanoseconds || 0) / 1_000_000)
+ } else {
+ dateObj = new Date(date as string | number | Date)
+ }
+ if (Number.isNaN(dateObj.getTime())) return null
+ return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+ } catch {
+ return null
+ }
 }
 
 export function parseHexColor(input: string | undefined): string | null {
-  if (!input) return null
-  const raw = input.trim()
-  const hex = raw.startsWith('#') ? raw.slice(1) : raw
-  if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null
-  return `#${hex.toLowerCase()}`
+ if (!input) return null
+ const raw = input.trim()
+ const hex = raw.startsWith('#') ? raw.slice(1) : raw
+ if (!/^[0-9a-fA-F]{6}$/.test(hex)) return null
+ return `#${hex.toLowerCase()}`
 }
 
 /** Maps stored folder colors (incl. legacy Tailwind blue) to Storvv dark primary. */
 export function normalizeAccentColor(input: string | undefined): string {
-  const parsed = parseHexColor(input)
-  if (!parsed || parsed === LEGACY_DEFAULT_BLUE) return PRIMARY_ACCENT
-  const lightBlues = new Set(['#4876c7', '#6e94d6', '#9ab5e3', '#3b82f6'])
-  if (lightBlues.has(parsed)) return PRIMARY_ACCENT
-  return parsed
+ const parsed = parseHexColor(input)
+ if (!parsed || parsed === LEGACY_DEFAULT_BLUE) return PRIMARY_ACCENT
+ const lightBlues = new Set(['#4876c7', '#6e94d6', '#9ab5e3', '#3b82f6'])
+ if (lightBlues.has(parsed)) return PRIMARY_ACCENT
+ return parsed
 }

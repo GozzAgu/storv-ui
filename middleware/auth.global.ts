@@ -4,47 +4,47 @@ import { isCapacitorNative } from '~/utils/capacitor-env'
 import { isCapacitorMarketingRoot } from '~/utils/capacitor-root-path'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  // Only run on client side (Firebase Auth is client-only)
-  if (import.meta.server) return
+ // Only run on client side (Firebase Auth is client-only)
+ if (import.meta.server) return
 
-  // // TEMPORARY: Block access to signin, signup, and dashboard routes
-  // const blockedRoutes = ['/signin', '/signup', '/dashboard']
-  // const isBlockedRoute = blockedRoutes.some(route => to.path.startsWith(route))
-  
-  // if (isBlockedRoute) {
-  //   return navigateTo('/')
-  // }
+ // // TEMPORARY: Block access to signin, signup, and dashboard routes
+ // const blockedRoutes = ['/signin', '/signup', '/dashboard']
+ // const isBlockedRoute = blockedRoutes.some(route => to.path.startsWith(route))
+ 
+ // if (isBlockedRoute) {
+ // return navigateTo('/')
+ // }
 
-  // Define route categories
-  const isDashboardRoute = to.path.startsWith('/dashboard')
-  const isAuthRoute = ['/signin', '/signup', '/forgot-password'].includes(to.path)
-  const isPublicRoute = ['/privacy', '/terms'].includes(to.path)
+ // Define route categories
+ const isDashboardRoute = to.path.startsWith('/dashboard')
+ const isAuthRoute = ['/signin', '/signup', '/forgot-password'].includes(to.path)
+ const isPublicRoute = ['/privacy', '/terms'].includes(to.path)
 
-  // Allow public routes
-  if (isPublicRoute) {
-    return
-  }
+ // Allow public routes
+ if (isPublicRoute) {
+ return
+ }
 
-  // Native shell: never load marketing `/` — go straight to sign-in (app.html + plugin also redirect).
-  if (isCapacitorNative() && isCapacitorMarketingRoot(to.path)) {
-    return navigateTo('/signin', { replace: true })
-  }
+ // Native shell: never load marketing `/` — go straight to sign-in (app.html + plugin also redirect).
+ if (isCapacitorNative() && isCapacitorMarketingRoot(to.path)) {
+ return navigateTo('/signin', { replace: true })
+ }
 
-  // For dashboard routes, check authentication
-  if (isDashboardRoute) {
-    try {
-      sessionStorage.removeItem(SIGNIN_ALLOW_WHILE_AUTHED_KEY)
-    } catch {
-      /* ignore */
-    }
+ // For dashboard routes, check authentication
+ if (isDashboardRoute) {
+ try {
+ sessionStorage.removeItem(SIGNIN_ALLOW_WHILE_AUTHED_KEY)
+ } catch {
+ /* ignore */
+ }
 
-    const authStore = useAuthStore()
+ const authStore = useAuthStore()
 
-    await waitForAuthStore(authStore, getAuthWaitMs())
+ await waitForAuthStore(authStore, getAuthWaitMs())
 
-    // Redirect to signin if not authenticated
-    if (!authStore.loading && !authStore.currentUser) {
-      return navigateTo('/signin')
-    }
-  }
+ // Redirect to signin if not authenticated
+ if (!authStore.loading && !authStore.currentUser) {
+ return navigateTo('/signin')
+ }
+ }
 })

@@ -3,32 +3,65 @@
  */
 export function useDashboardProfileMenuChrome() {
   const triggerClass =
-    'group flex h-8 items-center rounded-lg font-medium text-gray-700 transition-colors hover:bg-white dark:text-gray-200 dark:hover:bg-white/[0.06]'
+    'group flex h-8 items-center rounded-lg font-medium text-gray-700 transition-colors hover:bg-gray-100/90 dark:text-gray-200 dark:hover:bg-white/[0.06]'
 
   const triggerCompactClass = 'h-8 w-8 shrink-0 justify-center p-0'
   const triggerDefaultClass =
     'min-w-0 max-w-[9rem] gap-1.5 pl-0.5 pr-1 sm:max-w-[11rem] md:max-w-[12rem]'
 
   const avatarClass =
-    'relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white'
+    'relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white shadow-sm shadow-primary-900/15 ring-1 ring-white/20 dark:ring-white/10'
 
   const panelClass =
-    'overflow-hidden rounded-xl border border-gray-200/90 bg-white shadow-lg shadow-gray-900/8 dark:border-gray-800/90 dark:!bg-dashboard-card dark:shadow-black/35'
+    'overflow-hidden rounded-xl border-0 bg-white/95 shadow-[0_8px_28px_-6px_rgb(15_23_42/0.14)] backdrop-blur-xl ring-1 ring-gray-900/[0.04] dark:!bg-[#12141c]/98 dark:shadow-[0_12px_36px_-8px_rgb(0_0_0/0.5)] dark:ring-white/[0.06]'
 
   const panelHeaderClass =
-    'border-b border-gray-100/90 bg-gray-50/50 px-3 py-3 dark:border-gray-800/80 dark:bg-white/[0.02]'
+    'border-0 bg-linear-to-br from-primary-50/80 via-white to-white px-3 py-2.5 dark:from-primary-950/35 dark:via-[#12141c] dark:to-[#12141c]'
+
+  const panelHeaderNameClass =
+    'truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50'
+
+  const panelHeaderEmailClass =
+    'truncate text-[10px] font-normal leading-snug text-gray-500 dark:text-gray-400'
+
+  const metaBadgeClass =
+    'inline-flex max-w-full items-center truncate rounded-md bg-white/80 px-1.5 py-0.5 text-[9px] font-medium text-gray-600 ring-1 ring-gray-900/[0.05] dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/[0.08]'
+
+  const roleBadgeClass =
+    'inline-flex shrink-0 items-center rounded-md bg-primary-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-primary-800 dark:bg-primary-400/15 dark:text-primary-200'
+
+  const menuSectionLabelClass =
+    'px-2.5 pb-0.5 pt-1.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500'
+
+  const menuSectionClass = 'px-1.5 pb-1'
 
   const menuRowClass =
-    'flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium transition-colors hover:bg-gray-50/90 active:bg-gray-100/80 dark:hover:bg-white/[0.04] dark:active:bg-white/[0.06]'
+    'flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-xs font-medium leading-tight transition-colors duration-150'
 
-  const menuRowInactiveClass = 'text-gray-800 dark:text-gray-200'
-  const menuRowActiveClass = 'bg-primary-50/80 text-primary-700 dark:bg-primary-950/25 dark:text-primary-300'
+  const menuRowInactiveClass =
+    'text-gray-700 hover:bg-gray-100/90 active:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/[0.05] dark:active:bg-white/[0.07]'
 
-  const menuIconClass = 'h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400'
-  const menuIconActiveClass = 'text-primary-600 dark:text-primary-400'
+  const menuRowActiveClass =
+    'bg-primary-50/90 text-primary-800 dark:bg-primary-500/10 dark:text-primary-200'
+
+  const menuIconWrapClass =
+    'flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-100/90 text-gray-600 transition-colors dark:bg-white/[0.05] dark:text-gray-400'
+
+  const menuIconWrapActiveClass =
+    'bg-primary-100/90 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300'
+
+  const menuIconClass = 'h-4 w-4 shrink-0'
+
+  const menuBadgeClass =
+    'ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold tabular-nums text-white'
+
+  const menuFooterClass = 'border-t border-gray-100/90 px-1.5 py-1 dark:border-white/[0.06]'
 
   const signOutRowClass =
-    'flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs font-medium text-red-600 transition-colors hover:bg-red-50/80 active:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 dark:active:bg-red-500/15'
+    'group flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left text-xs font-medium text-gray-600 transition-colors duration-150 hover:bg-red-50/90 hover:text-red-700 active:bg-red-50 dark:text-gray-400 dark:hover:bg-red-500/10 dark:hover:text-red-400'
+
+  const signOutIconWrapClass =
+    'flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gray-100/80 text-gray-500 transition-colors group-hover:bg-red-100/90 group-hover:text-red-600 dark:bg-white/[0.04] dark:group-hover:bg-red-500/15 dark:group-hover:text-red-400'
 
   return {
     triggerClass,
@@ -37,11 +70,21 @@ export function useDashboardProfileMenuChrome() {
     avatarClass,
     panelClass,
     panelHeaderClass,
+    panelHeaderNameClass,
+    panelHeaderEmailClass,
+    metaBadgeClass,
+    roleBadgeClass,
+    menuSectionLabelClass,
+    menuSectionClass,
     menuRowClass,
     menuRowInactiveClass,
     menuRowActiveClass,
+    menuIconWrapClass,
+    menuIconWrapActiveClass,
     menuIconClass,
-    menuIconActiveClass,
+    menuBadgeClass,
+    menuFooterClass,
     signOutRowClass,
+    signOutIconWrapClass,
   }
 }

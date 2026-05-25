@@ -9,14 +9,14 @@ import type { Store } from '~/composables/useStores'
  * Staff still uses full `storesStore` assignment from their membership.
  */
 export function usePlanEligibleStores() {
-  const storesStore = useStoresStore()
-  const { plan } = useSubscriptionFeatures()
+ const storesStore = useStoresStore()
+ const { plan } = useSubscriptionFeatures()
 
-  const eligibleStores = computed<Store[]>(() => getEligibleStoresForPlan(storesStore.stores, plan.value))
+ const eligibleStores = computed<Store[]>(() => getEligibleStoresForPlan(storesStore.stores, plan.value))
 
-  const hiddenStoreCount = computed(() =>
-    Math.max(0, storesStore.stores.length - eligibleStores.value.length)
-  )
+ const hiddenStoreCount = computed(() =>
+ Math.max(0, storesStore.stores.length - eligibleStores.value.length)
+ )
 
-  return { eligibleStores, hiddenStoreCount, plan }
+ return { eligibleStores, hiddenStoreCount, plan }
 }

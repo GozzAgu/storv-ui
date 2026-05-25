@@ -1,13 +1,13 @@
 <template>
-  <span :class="badgeClass" :title="title">
-    <slot>{{ label }}</slot>
-  </span>
+ <span :class="badgeClass" :title="title">
+ <slot>{{ label }}</slot>
+ </span>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  badgeClass: string
-  label?: string
-  title?: string
+ badgeClass: string
+ label?: string
+ title?: string
 }>()
 </script>

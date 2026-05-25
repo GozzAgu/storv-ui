@@ -1,7 +1,7 @@
 <template>
-  <div :class="toolbarRowClass">
-    <slot />
-  </div>
+ <div :class="toolbarRowClass">
+ <slot />
+ </div>
 </template>
 
 <script setup lang="ts">

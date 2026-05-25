@@ -6,159 +6,159 @@ import { computeCustomerAfterReceiptDelete } from '~/server/utils/receipt-delete
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
 
 interface DeleteReceiptBody {
-  ownerUserId?: string
-  storeId?: string
-  receiptId?: string
+ ownerUserId?: string
+ storeId?: string
+ receiptId?: string
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireAuth(event)
-  const body = await readBody<DeleteReceiptBody>(event)
-  const ownerUserId = body.ownerUserId?.trim()
-  const storeId = body.storeId?.trim()
-  const receiptId = body.receiptId?.trim()
+ const auth = await requireAuth(event)
+ const body = await readBody<DeleteReceiptBody>(event)
+ const ownerUserId = body.ownerUserId?.trim()
+ const storeId = body.storeId?.trim()
+ const receiptId = body.receiptId?.trim()
 
-  if (!ownerUserId || !storeId || !receiptId) {
-    throw createError({ statusCode: 400, message: 'ownerUserId, storeId and receiptId are required' })
-  }
+ if (!ownerUserId || !storeId || !receiptId) {
+ throw createError({ statusCode: 400, message: 'ownerUserId, storeId and receiptId are required' })
+ }
 
-  // Keep delete strict: only owner can delete receipts.
-  if (auth.uid !== ownerUserId) {
-    throw createError({ statusCode: 403, message: 'Only super admins can delete receipts' })
-  }
+ // Keep delete strict: only owner can delete receipts.
+ if (auth.uid !== ownerUserId) {
+ throw createError({ statusCode: 403, message: 'Only super admins can delete receipts' })
+ }
 
-  await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
+ await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
 
-  const adminDb = getAdminFirestore()
-  const receiptRef = adminDb
-    .collection('users')
-    .doc(ownerUserId)
-    .collection('stores')
-    .doc(storeId)
-    .collection('receipts')
-    .doc(receiptId)
+ const adminDb = getAdminFirestore()
+ const receiptRef = adminDb
+ .collection('users')
+ .doc(ownerUserId)
+ .collection('stores')
+ .doc(storeId)
+ .collection('receipts')
+ .doc(receiptId)
 
-  const result = await adminDb.runTransaction(async (tx) => {
-    const receiptSnap = await tx.get(receiptRef)
-    if (!receiptSnap.exists) {
-      throw createError({ statusCode: 404, message: 'Receipt not found' })
-    }
+ const result = await adminDb.runTransaction(async (tx) => {
+ const receiptSnap = await tx.get(receiptRef)
+ if (!receiptSnap.exists) {
+ throw createError({ statusCode: 404, message: 'Receipt not found' })
+ }
 
-    const receipt = receiptSnap.data() as {
-      itemIds?: string[]
-      items?: Array<{ itemId?: string; quantity?: number }>
-      folderId?: string
-      total?: number
-      createdBy?: string
-      storeId?: string
-    }
+ const receipt = receiptSnap.data() as {
+ itemIds?: string[]
+ items?: Array<{ itemId?: string; quantity?: number }>
+ folderId?: string
+ total?: number
+ createdBy?: string
+ storeId?: string
+ }
 
-    if (receipt.storeId && receipt.storeId !== storeId) {
-      throw createError({ statusCode: 409, message: 'Receipt store mismatch' })
-    }
+ if (receipt.storeId && receipt.storeId !== storeId) {
+ throw createError({ statusCode: 409, message: 'Receipt store mismatch' })
+ }
 
-    const itemIds = Array.isArray(receipt.itemIds) ? receipt.itemIds : []
+ const itemIds = Array.isArray(receipt.itemIds) ? receipt.itemIds : []
 
-    let folderData: Record<string, unknown> | undefined
-    if (receipt.folderId) {
-      const folderRef = adminDb
-        .collection('users')
-        .doc(ownerUserId)
-        .collection('stores')
-        .doc(storeId)
-        .collection('inventoryFolders')
-        .doc(receipt.folderId)
-      const folderSnap = await tx.get(folderRef)
-      if (folderSnap.exists) {
-        folderData = folderSnap.data() as Record<string, unknown>
-      }
-    }
+ let folderData: Record<string, unknown> | undefined
+ if (receipt.folderId) {
+ const folderRef = adminDb
+ .collection('users')
+ .doc(ownerUserId)
+ .collection('stores')
+ .doc(storeId)
+ .collection('inventoryFolders')
+ .doc(receipt.folderId)
+ const folderSnap = await tx.get(folderRef)
+ if (folderSnap.exists) {
+ folderData = folderSnap.data() as Record<string, unknown>
+ }
+ }
 
-    const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)?.hasSerialNumbers
+ const usesSerialNumbers = !!(folderData as { hasSerialNumbers?: boolean } | undefined)?.hasSerialNumbers
 
-    const receiptLines = Array.isArray(receipt.items) ? receipt.items : []
-    const qtyRestoreByItem = new Map<string, number>()
-    for (const line of receiptLines) {
-      if (!line?.itemId) continue
-      const q = Number(line.quantity ?? 0)
-      if (q <= 0) continue
-      qtyRestoreByItem.set(line.itemId, (qtyRestoreByItem.get(line.itemId) ?? 0) + q)
-    }
+ const receiptLines = Array.isArray(receipt.items) ? receipt.items : []
+ const qtyRestoreByItem = new Map<string, number>()
+ for (const line of receiptLines) {
+ if (!line?.itemId) continue
+ const q = Number(line.quantity ?? 0)
+ if (q <= 0) continue
+ qtyRestoreByItem.set(line.itemId, (qtyRestoreByItem.get(line.itemId) ?? 0) + q)
+ }
 
-    const inventoryItemsCol = () =>
-      adminDb.collection('users').doc(ownerUserId).collection('stores').doc(storeId).collection('inventoryItems')
+ const inventoryItemsCol = () =>
+ adminDb.collection('users').doc(ownerUserId).collection('stores').doc(storeId).collection('inventoryItems')
 
-    const templateFields = (folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined)?.template
-      ?.fields
+ const templateFields = (folderData as { template?: { fields?: Array<{ name?: string }> } } | undefined)?.template
+ ?.fields
 
-    if (!usesSerialNumbers && qtyRestoreByItem.size > 0) {
-      for (const [invItemId, addQty] of qtyRestoreByItem) {
-        const itemRef = inventoryItemsCol().doc(invItemId)
-        const itemSnap = await tx.get(itemRef)
-        if (!itemSnap.exists) continue
-        const raw = itemSnap.data() as Record<string, unknown>
-        const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
-        if (!resolved) continue
-        tx.update(itemRef, {
-          [resolved.fieldKey]: resolved.value + addQty,
-          dateOut: FieldValue.delete(),
-          updatedAt: FieldValue.serverTimestamp(),
-        })
-      }
-    } else {
-      for (const itemId of itemIds) {
-        const itemRef = inventoryItemsCol().doc(itemId)
-        const itemSnap = await tx.get(itemRef)
-        if (!itemSnap.exists) continue
-        tx.update(itemRef, {
-          dateOut: FieldValue.delete(),
-          updatedAt: FieldValue.serverTimestamp(),
-        })
-      }
-    }
+ if (!usesSerialNumbers && qtyRestoreByItem.size > 0) {
+ for (const [invItemId, addQty] of qtyRestoreByItem) {
+ const itemRef = inventoryItemsCol().doc(invItemId)
+ const itemSnap = await tx.get(itemRef)
+ if (!itemSnap.exists) continue
+ const raw = itemSnap.data() as Record<string, unknown>
+ const resolved = resolveBulkStockFieldAndValueFromMap(raw, templateFields)
+ if (!resolved) continue
+ tx.update(itemRef, {
+ [resolved.fieldKey]: resolved.value + addQty,
+ dateOut: FieldValue.delete(),
+ updatedAt: FieldValue.serverTimestamp(),
+ })
+ }
+ } else {
+ for (const itemId of itemIds) {
+ const itemRef = inventoryItemsCol().doc(itemId)
+ const itemSnap = await tx.get(itemRef)
+ if (!itemSnap.exists) continue
+ tx.update(itemRef, {
+ dateOut: FieldValue.delete(),
+ updatedAt: FieldValue.serverTimestamp(),
+ })
+ }
+ }
 
-    const customersQuery = adminDb
-      .collection('users')
-      .doc(ownerUserId)
-      .collection('stores')
-      .doc(storeId)
-      .collection('customers')
-      .where('receipts', 'array-contains', receiptId)
-      .limit(1)
+ const customersQuery = adminDb
+ .collection('users')
+ .doc(ownerUserId)
+ .collection('stores')
+ .doc(storeId)
+ .collection('customers')
+ .where('receipts', 'array-contains', receiptId)
+ .limit(1)
 
-    const customersSnap = await tx.get(customersQuery)
-    if (!customersSnap.empty && customersSnap.docs[0]) {
-      const customerDoc = customersSnap.docs[0]
-      const customerData = customerDoc.data() as {
-        receipts?: string[]
-        totalOrders?: number
-        totalSpent?: number
-      }
-      const customerResult = computeCustomerAfterReceiptDelete(
-        customerData,
-        receiptId,
-        Number(receipt.total || 0)
-      )
+ const customersSnap = await tx.get(customersQuery)
+ if (!customersSnap.empty && customersSnap.docs[0]) {
+ const customerDoc = customersSnap.docs[0]
+ const customerData = customerDoc.data() as {
+ receipts?: string[]
+ totalOrders?: number
+ totalSpent?: number
+ }
+ const customerResult = computeCustomerAfterReceiptDelete(
+ customerData,
+ receiptId,
+ Number(receipt.total || 0)
+ )
 
-      if (customerResult.deleteCustomer) {
-        tx.delete(customerDoc.ref)
-      } else {
-        tx.update(customerDoc.ref, {
-          receipts: customerResult.receipts,
-          totalOrders: customerResult.totalOrders,
-          totalSpent: customerResult.totalSpent,
-          updatedAt: FieldValue.serverTimestamp(),
-        })
-      }
-    }
+ if (customerResult.deleteCustomer) {
+ tx.delete(customerDoc.ref)
+ } else {
+ tx.update(customerDoc.ref, {
+ receipts: customerResult.receipts,
+ totalOrders: customerResult.totalOrders,
+ totalSpent: customerResult.totalSpent,
+ updatedAt: FieldValue.serverTimestamp(),
+ })
+ }
+ }
 
-    tx.delete(receiptRef)
+ tx.delete(receiptRef)
 
-    return { deleted: true, itemCount: itemIds.length }
-  })
+ return { deleted: true, itemCount: itemIds.length }
+ })
 
-  return {
-    success: true,
-    ...result,
-  }
+ return {
+ success: true,
+ ...result,
+ }
 })

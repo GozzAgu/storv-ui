@@ -1,17 +1,17 @@
 <template>
-  <div class="relative shrink-0" ref="menuRootRef">
+  <div ref="menuRootRef" class="relative shrink-0">
     <button
       type="button"
-      :class="[
-        triggerClass,
-        compact ? triggerCompactClass : triggerDefaultClass,
-      ]"
+      :class="[triggerClass, compact ? triggerCompactClass : triggerDefaultClass]"
       :aria-expanded="open"
       aria-haspopup="true"
       @click="open = !open"
     >
       <div :class="[avatarClass, 'h-8 w-8 text-[11px]']">
-        <span class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 to-transparent" aria-hidden="true" />
+        <span
+          class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/12 to-transparent"
+          aria-hidden="true"
+        />
         <span class="relative">{{ userInitials }}</span>
       </div>
       <div v-if="!compact" class="hidden min-w-0 flex-1 text-left md:block">
@@ -32,12 +32,12 @@
 
     <Teleport to="body">
       <Transition
-        enter-active-class="transition-[opacity,transform] duration-200 ease-out"
-        enter-from-class="opacity-0 translate-y-1"
-        enter-to-class="opacity-100 translate-y-0"
+        enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
         leave-active-class="transition-[opacity,transform] duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 translate-y-1"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
       >
         <div
           v-if="open"
@@ -50,64 +50,69 @@
         >
           <div :class="panelHeaderClass">
             <div class="flex min-w-0 items-center gap-2.5">
-              <div :class="[avatarClass, 'h-9 w-9 text-xs']">
-                <span class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 to-transparent" aria-hidden="true" />
+              <div :class="[avatarClass, 'h-9 w-9 text-[10px]']">
+                <span
+                  class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/12 to-transparent"
+                  aria-hidden="true"
+                />
                 <span class="relative">{{ userInitials }}</span>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-                  {{ userName }}
-                </p>
-                <p class="mt-0.5 truncate text-[11px] leading-snug text-gray-500 dark:text-gray-400">
-                  {{ userEmail }}
-                </p>
+                <p :class="panelHeaderNameClass">{{ userName }}</p>
+                <p :class="panelHeaderEmailClass">{{ userEmail }}</p>
+                <div class="mt-1.5 flex flex-wrap items-center gap-1">
+                  <span v-if="storeLabel" :class="metaBadgeClass" :title="storeLabel">
+                    {{ storeLabel }}
+                  </span>
+                  <span :class="roleBadgeClass">{{ roleLabel }}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <nav class="py-1" aria-label="Account links">
-            <NuxtLink
-              to="/dashboard/profile"
-              role="menuitem"
-              :class="[
-                menuRowClass,
-                route.path.startsWith('/dashboard/profile') ? menuRowActiveClass : menuRowInactiveClass,
-              ]"
-              @click="open = false"
-            >
-              <UserCircleIcon
-                :class="[
-                  menuIconClass,
-                  route.path.startsWith('/dashboard/profile') ? menuIconActiveClass : '',
-                ]"
-                stroke-width="1.75"
-              />
-              Profile
-            </NuxtLink>
-            <NuxtLink
-              to="/dashboard/settings"
-              role="menuitem"
-              :class="[
-                menuRowClass,
-                route.path.startsWith('/dashboard/settings') ? menuRowActiveClass : menuRowInactiveClass,
-              ]"
-              @click="open = false"
-            >
-              <Cog6ToothIcon
-                :class="[
-                  menuIconClass,
-                  route.path.startsWith('/dashboard/settings') ? menuIconActiveClass : '',
-                ]"
-                stroke-width="1.75"
-              />
-              Settings
-            </NuxtLink>
+          <p :class="menuSectionLabelClass">Account</p>
+          <nav :class="menuSectionClass" aria-label="Account">
+            <template v-for="item in accountLinks" :key="item.to">
+              <NuxtLink
+                :to="item.to"
+                role="menuitem"
+                :class="[menuRowClass, isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass]"
+                @click="open = false"
+              >
+                <span :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']">
+                  <component :is="item.icon" :class="menuIconClass" stroke-width="1.75" />
+                </span>
+                <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+                <span v-if="item.badge && item.badge > 0" :class="menuBadgeClass">
+                  {{ item.badge > 9 ? '9+' : item.badge }}
+                </span>
+              </NuxtLink>
+            </template>
           </nav>
 
-          <div class="border-t border-gray-100/90 py-1 dark:border-gray-800/80">
-            <button type="button" role="menuitem" :class="signOutRowClass" @click="onSignOut">
-              <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0" stroke-width="1.75" />
-              Sign out
+          <p :class="menuSectionLabelClass">Support</p>
+          <nav :class="menuSectionClass" aria-label="Support">
+            <template v-for="item in supportLinks" :key="item.to">
+              <NuxtLink
+                :to="item.to"
+                role="menuitem"
+                :class="[menuRowClass, isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass]"
+                @click="open = false"
+              >
+                <span :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']">
+                  <component :is="item.icon" :class="menuIconClass" stroke-width="1.75" />
+                </span>
+                <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+              </NuxtLink>
+            </template>
+          </nav>
+
+          <div :class="menuFooterClass">
+            <button type="button" role="menuitem" class="group" :class="signOutRowClass" @click="onSignOut">
+              <span :class="signOutIconWrapClass">
+                <ArrowRightOnRectangleIcon :class="menuIconClass" stroke-width="1.75" />
+              </span>
+              <span class="min-w-0 flex-1">Sign out</span>
             </button>
           </div>
         </div>
@@ -117,14 +122,24 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import type { Component } from 'vue'
 import {
   ChevronDownIcon,
   UserCircleIcon,
   Cog6ToothIcon,
+  BellIcon,
+  KeyIcon,
+  BookOpenIcon,
+  ClipboardDocumentListIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/vue/24/outline'
+import { useStoresStore } from '~/stores/stores'
+import { useUserStore } from '~/stores/user'
+import { useStaffStore } from '~/stores/staff'
+import { useNotificationsStore } from '~/stores/notifications'
+import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 
 defineProps<{
   userName: string
@@ -144,19 +159,91 @@ const {
   avatarClass,
   panelClass,
   panelHeaderClass,
+  panelHeaderNameClass,
+  panelHeaderEmailClass,
+  metaBadgeClass,
+  roleBadgeClass,
+  menuSectionLabelClass,
+  menuSectionClass,
   menuRowClass,
   menuRowInactiveClass,
   menuRowActiveClass,
+  menuIconWrapClass,
+  menuIconWrapActiveClass,
   menuIconClass,
-  menuIconActiveClass,
+  menuBadgeClass,
+  menuFooterClass,
   signOutRowClass,
+  signOutIconWrapClass,
 } = useDashboardProfileMenuChrome()
 
 const route = useRoute()
+const storesStore = useStoresStore()
+const userStore = useUserStore()
+const staffStore = useStaffStore()
+const notificationsStore = useNotificationsStore()
+const { canUse } = useSubscriptionFeatures()
+
 const open = ref(false)
 const menuRootRef = ref<HTMLElement | null>(null)
 const menuPanelRef = ref<HTMLElement | null>(null)
 const panelStyle = ref<Record<string, string>>({})
+
+type MenuLink = {
+  to: string
+  label: string
+  icon: Component
+  match: string
+  badge?: number
+}
+
+const storeLabel = computed(() => {
+  const name = storesStore.currentStore?.name?.trim()
+  if (!name) return ''
+  return name.length > 22 ? `${name.slice(0, 21)}…` : name
+})
+
+const roleLabel = computed(() => {
+  if (userStore.isSuperAdmin) return 'Admin'
+  if (userStore.userData?.role === 'staff') {
+    return staffStore.getCurrentStaffMember?.role === 'manager' ? 'Manager' : 'Staff'
+  }
+  const role = userStore.userData?.role
+  if (role) return role.charAt(0).toUpperCase() + role.slice(1)
+  return 'User'
+})
+
+const accountLinks = computed<MenuLink[]>(() => [
+  { to: '/dashboard/profile', label: 'Profile', icon: UserCircleIcon, match: '/dashboard/profile' },
+  { to: '/dashboard/settings', label: 'Settings', icon: Cog6ToothIcon, match: '/dashboard/settings' },
+  {
+    to: '/dashboard/notifications',
+    label: 'Notifications',
+    icon: BellIcon,
+    match: '/dashboard/notifications',
+    badge: notificationsStore.unreadCount,
+  },
+  { to: '/dashboard/change-password', label: 'Password', icon: KeyIcon, match: '/dashboard/change-password' },
+])
+
+const supportLinks = computed<MenuLink[]>(() => {
+  const links: MenuLink[] = [
+    { to: '/dashboard/help', label: 'Help center', icon: BookOpenIcon, match: '/dashboard/help' },
+  ]
+  if (canUse('activity_logs')) {
+    links.push({
+      to: '/dashboard/activity',
+      label: 'Activity logs',
+      icon: ClipboardDocumentListIcon,
+      match: '/dashboard/activity',
+    })
+  }
+  return links
+})
+
+function isActive(match: string) {
+  return route.path === match || route.path.startsWith(`${match}/`)
+}
 
 function positionPanel() {
   if (!import.meta.client || !open.value || !menuRootRef.value) return
@@ -164,7 +251,7 @@ function positionPanel() {
   const rect = trigger.getBoundingClientRect()
   const gap = 6
   const margin = 12
-  const panelWidth = 15 * 16
+  const panelWidth = 14 * 16
   const widthPx = Math.min(panelWidth, window.innerWidth - margin * 2)
   let right = window.innerWidth - rect.right
   const leftEdge = window.innerWidth - right - widthPx
