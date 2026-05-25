@@ -1030,8 +1030,41 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     background-color: rgb(249 250 251);
   }
 
-  html.dark .activity-log-shell .dashboard-table tbody tr:hover {
+  html.dark   .activity-log-shell .dashboard-table tbody tr:hover {
     background-color: rgb(255 255 255 / 0.03);
+  }
+
+  /* Inventory categories */
+  .inventory-categories-shell--table.data-table-shell {
+    flex: 1 1 auto;
+    min-height: min(68vh, calc(100dvh - 13rem));
+  }
+
+  /* Grid mode: page background shows through; cards provide their own surfaces */
+  .inventory-categories-shell--grid {
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+  }
+
+  html.dark .inventory-categories-shell--grid {
+    background: transparent !important;
+  }
+
+  .inventory-categories-shell--grid .inventory-categories-grid {
+    background: transparent;
+  }
+
+  .inventory-categories-table .dashboard-table thead th {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .inventory-categories-table .dashboard-table tbody td {
+    font-size: 0.75rem;
+    padding-top: 0.8125rem;
+    padding-bottom: 0.8125rem;
   }
 }
 

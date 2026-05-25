@@ -20,6 +20,38 @@
  </div>
  </template>
  <template #actions>
+ <div
+ class="flex h-8 shrink-0 items-center rounded-lg bg-gray-100/80 p-0.5 dark:bg-white/[0.04]"
+ role="group"
+ aria-label="Category layout"
+ >
+ <button
+ type="button"
+ class="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150"
+ :class="
+ foldersViewMode === 'grid'
+ ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
+ : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+ "
+ :aria-pressed="foldersViewMode === 'grid'"
+ @click="foldersViewMode = 'grid'"
+ >
+ <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
+ </button>
+ <button
+ type="button"
+ class="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150"
+ :class="
+ foldersViewMode === 'table'
+ ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
+ : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+ "
+ :aria-pressed="foldersViewMode === 'table'"
+ @click="foldersViewMode = 'table'"
+ >
+ <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
+ </button>
+ </div>
  <template v-if="canCreateInventoryFolders">
  <Button
  v-if="canShowCopyFolderTemplatesFromBranch"
@@ -42,91 +74,6 @@
  New category
  </Button>
  </template>
- </template>
- <template v-if="!inventoryStore.loading" #toolbar>
- <DashboardToolbarSearch v-model="searchQuery" placeholder="Search categories…" />
- <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
- <DashboardToolbarSelect
- v-model="selectedDepartmentId"
- wrapper-class="min-w-[7.5rem] flex-1 sm:flex-none sm:min-w-[8.5rem]"
- >
- <option value="">All departments</option>
- <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
- {{ dept.name }}
- </option>
- </DashboardToolbarSelect>
- <DashboardToolbarSelect v-model="sortBy" min-width-class="min-w-[5.5rem]">
- <option value="name">Name</option>
- <option value="items">Products</option>
- <option value="date">Date</option>
- </DashboardToolbarSelect>
- <DashboardToolbarMeta>
- {{ filteredFolders.length }}
- {{ filteredFolders.length === 1 ? 'category' : 'categories' }}
- </DashboardToolbarMeta>
- <div
- class="flex h-8 shrink-0 items-center rounded-lg bg-gray-50/50 p-0.5 dark:bg-white/[0.03]"
- role="group"
- aria-label="Category layout"
- >
- <button
- type="button"
- class="flex h-7 w-7 items-center justify-center rounded-md transition-colors"
- :class="
- foldersViewMode === 'grid'
- ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
- : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
- "
- :aria-pressed="foldersViewMode === 'grid'"
- @click="foldersViewMode = 'grid'"
- >
- <Squares2X2Icon class="h-3.5 w-3.5" aria-hidden="true" />
- </button>
- <button
- type="button"
- class="flex h-7 w-7 items-center justify-center rounded-md transition-colors"
- :class="
- foldersViewMode === 'table'
- ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
- : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
- "
- :aria-pressed="foldersViewMode === 'table'"
- @click="foldersViewMode = 'table'"
- >
- <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
- </button>
- </div>
- </div>
- <div
- v-if="canCreateInventoryFolders && paginatedFolders.length > 0"
- :class="bulkActionsClass"
- >
- <Checkbox
- :model-value="allFoldersOnPageSelected"
- size="sm"
- wrapper-class="!h-8 items-center"
- label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
- @update:model-value="toggleSelectAllFolders"
- >
- {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
- </Checkbox>
- <template v-if="selectedFoldersForBulk.length > 0">
- <span
- class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
- >
- {{ selectedFoldersForBulk.length }} selected
- </span>
- <Button
- variant="outline"
- size="sm"
- :icon="TrashIcon"
- :extra-class="headerBtnClass + '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'"
- @click="openBulkDeleteFoldersModal"
- >
- Delete
- </Button>
- </template>
- </div>
  </template>
  </DashboardPageHeader>
 
@@ -160,12 +107,116 @@
  </div>
  </div>
 
- <Transition name="folders-view" mode="out-in">
+ <div
+ v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+ class="inventory-categories-shell flex min-h-0 flex-1 flex-col"
+ :class="
+ foldersViewMode === 'table'
+ ? 'data-table-shell inventory-categories-shell--table overflow-hidden'
+ : 'inventory-categories-shell--grid gap-3 overflow-visible sm:gap-4'
+ "
+ >
+ <div
+ class="shrink-0"
+ :class="foldersViewMode === 'grid' ? 'data-table-shell overflow-hidden rounded-xl' : ''"
+ >
+ <DataTableToolbar>
+ <template #heading>
+ <div class="min-w-0">
+ <h2 class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+ All categories
+ </h2>
+ <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+ Browse and manage product categories for this store
+ </p>
+ </div>
+ </template>
+ <template #filters>
+ <DashboardToolbarSearch v-model="searchQuery" placeholder="Search categories…" input-class="sm:w-52" />
+ <DashboardToolbarSelect
+ v-model="selectedDepartmentId"
+ wrapper-class="min-w-[8.5rem] flex-1 sm:flex-none"
+ >
+ <option value="">All departments</option>
+ <option v-for="dept in currentStoreDepartments" :key="dept.id" :value="dept.id">
+ {{ dept.name }}
+ </option>
+ </DashboardToolbarSelect>
+ <DashboardToolbarSelect v-model="sortBy" min-width-class="min-w-[5.5rem]">
+ <option value="name">Name</option>
+ <option value="items">Products</option>
+ <option value="date">Date</option>
+ </DashboardToolbarSelect>
+ <DashboardToolbarMeta>
+ {{ filteredFolders.length }}
+ {{ filteredFolders.length === 1 ? 'category' : 'categories' }}
+ </DashboardToolbarMeta>
+ </template>
+ <template v-if="canCreateInventoryFolders && paginatedFolders.length > 0" #bulk>
+ <Checkbox
+ :model-value="allFoldersOnPageSelected"
+ size="sm"
+ wrapper-class="!h-8 items-center"
+ label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+ @update:model-value="toggleSelectAllFolders"
+ >
+ {{ allFoldersOnPageSelected ? 'All selected' : 'Select all' }}
+ </Checkbox>
+ <template v-if="selectedFoldersForBulk.length > 0">
+ <span class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400">
+ {{ selectedFoldersForBulk.length }} selected
+ </span>
+ <Button
+ variant="outline"
+ size="sm"
+ :icon="TrashIcon"
+ :extra-class="headerBtnClass + ' !border-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'"
+ @click="openBulkDeleteFoldersModal"
+ >
+ Delete
+ </Button>
+ </template>
+ </template>
+ </DataTableToolbar>
+ </div>
+
+ <DashboardTableEmptyState
+ v-if="paginatedFolders.length === 0"
+ :icon="FolderIcon"
+ :title="
+ selectedDepartmentId
+ ? `No categories in ${getDepartmentName(selectedDepartmentId)}`
+ : searchQuery
+ ? 'No categories found'
+ : 'No categories on this page'
+ "
+ :description="
+ selectedDepartmentId
+ ? 'Try another department or clear the filter.'
+ : searchQuery
+ ? 'Try a different search term.'
+ : 'Adjust filters or go to another page.'
+ "
+ :tips="['Clear search or department filter to see more', 'Create a category with New category']"
+ :fill="false"
+ >
+ <Button
+ v-if="selectedDepartmentId"
+ variant="outline"
+ size="sm"
+ extra-class="!text-xs !py-1.5 !px-3"
+ @click="selectedDepartmentId = ''"
+ >
+ Clear filter
+ </Button>
+ </DashboardTableEmptyState>
+
+ <Transition v-else name="folders-view" mode="out-in">
  <!-- Folders grid -->
  <div
  v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
  key="grid"
- class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
+ class="inventory-categories-grid grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
  >
  <InventoryCategoryCard
  v-for="folder in paginatedFolders"
@@ -208,65 +259,31 @@
  </InventoryCategoryCard>
  </div>
 
- <!-- Folders table (styling aligned with folder item table on /inventory/[id]) -->
- <!-- `data-table-shell`: pairs with main.css so theme toggle doesn’t animate hundreds of row backgrounds (folders page-only lag). -->
+ <!-- Categories table -->
  <div
  v-else-if="paginatedFolders.length > 0 && foldersViewMode === 'table'"
  key="table"
- class="data-table-shell"
+ class="inventory-categories-table flex min-h-0 flex-1 flex-col"
  >
- <div class="overflow-x-auto">
+ <div class="min-h-0 flex-1 overflow-x-auto overscroll-contain">
  <table class="dashboard-table min-w-full">
  <thead>
  <tr>
- <th
- v-if="canCreateInventoryFolders"
- scope="col"
- class="px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
- >
+ <th v-if="canCreateInventoryFolders" scope="col" class="w-11 text-center">
  <Checkbox
  :model-value="allFoldersOnPageSelected"
- @update:model-value="toggleSelectAllFolders"
  size="sm"
  wrapper-class="justify-center"
+ @update:model-value="toggleSelectAllFolders"
  />
  </th>
- <th
- scope="col"
- class="px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4"
- >
- Category
- </th>
- <th
- scope="col"
- class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:table-cell sm:px-4"
- >
- Type
- </th>
- <th
- scope="col"
- class="px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:px-4 tabular-nums"
- >
- Products
- </th>
- <th
- scope="col"
- class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 md:table-cell md:px-4"
- >
- Tracking
- </th>
- <th
- scope="col"
- class="hidden px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 lg:table-cell lg:px-4"
- >
- Departments
- </th>
- <th
- v-if="canCreateInventoryFolders"
- scope="col"
- class="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400 sm:w-[4.5rem] sm:px-4"
- >
- Actions
+ <th scope="col">Category</th>
+ <th scope="col" class="hidden sm:table-cell">Type</th>
+ <th scope="col" class="text-right">Products</th>
+ <th scope="col" class="hidden md:table-cell dashboard-table__col-status">Tracking</th>
+ <th scope="col" class="hidden lg:table-cell">Departments</th>
+ <th v-if="canCreateInventoryFolders" scope="col" class="dashboard-table__col-actions">
+ <span class="sr-only">Actions</span>
  </th>
  </tr>
  </thead>
@@ -277,57 +294,112 @@
  class="cursor-pointer"
  @click="navigateToFolder(folder.id)"
  >
- <td v-if="canCreateInventoryFolders" class="px-3 py-2.5 text-center sm:px-4" @click.stop>
+ <td v-if="canCreateInventoryFolders" class="text-center" @click.stop>
  <Checkbox
- :model-value="selectedFoldersForBulk.some(f => f.id === folder.id)"
- @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
+ :model-value="selectedFoldersForBulk.some((f) => f.id === folder.id)"
  size="sm"
  wrapper-class="justify-center"
+ @update:model-value="(checked) => toggleFolderSelection(folder, checked)"
  />
  </td>
- <td class="px-3 py-2.5 sm:px-4 align-top">
- <span class="text-[10px] font-medium text-gray-900 dark:text-gray-100">{{ folder.name }}</span>
- </td>
- <td class="hidden px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 sm:table-cell sm:px-4">
- {{ formatFolderTypeLabel(folder.type) }}
- </td>
- <td
- class="px-3 py-2.5 text-right align-top text-[10px] tabular-nums text-gray-600 dark:text-gray-300 sm:px-4"
+ <td class="max-w-[min(16rem,32vw)]">
+ <div class="flex min-w-0 items-center gap-2.5">
+ <span
+ class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-500/10 text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
+ aria-hidden="true"
  >
- {{ folder.itemCount }}
+ <FolderIcon class="h-4 w-4" />
+ </span>
+ <div class="min-w-0">
+ <span class="dashboard-table__primary block truncate" :title="folder.name">
+ {{ folder.name }}
+ </span>
+ <span
+ v-if="folder.description?.trim()"
+ class="dashboard-table__muted mt-0.5 block truncate text-[10px]"
+ :title="folder.description"
+ >
+ {{ folder.description }}
+ </span>
+ </div>
+ </div>
  </td>
- <td class="hidden px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 md:table-cell md:px-4">
+ <td class="hidden sm:table-cell">
+ <span
+ class="inline-flex rounded-md bg-gray-100/90 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-white/[0.05] dark:text-gray-400"
+ >
+ {{ formatFolderTypeLabel(folder.type) }}
+ </span>
+ </td>
+ <td class="text-right">
+ <span class="dashboard-table__numeric">{{ folder.itemCount }}</span>
+ <span
+ v-if="folder.lowStockCount > 0"
+ class="dashboard-table__muted mt-0.5 block text-[10px] tabular-nums"
+ >
+ {{ folder.lowStockCount }} low stock
+ </span>
+ </td>
+ <td class="hidden md:table-cell dashboard-table__col-status">
+ <span
+ class="inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-medium"
+ :class="
+ folder.hasSerialNumbers
+ ? 'bg-violet-100/90 text-violet-800 dark:bg-violet-500/15 dark:text-violet-200'
+ : 'bg-sky-100/90 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200'
+ "
+ >
  {{ folder.hasSerialNumbers ? 'Serial' : 'Quantity' }}
+ </span>
  </td>
  <td
- class="hidden max-w-[11rem] truncate px-3 py-2.5 align-top text-[10px] text-gray-600 dark:text-gray-300 lg:table-cell lg:px-4"
+ class="hidden max-w-[12rem] lg:table-cell"
  :title="folderDepartmentsSummary(folder)"
  >
+ <span class="dashboard-table__muted block truncate text-xs">
  {{ folderDepartmentsSummary(folder) }}
+ </span>
  </td>
- <td v-if="canCreateInventoryFolders" class="px-3 py-2.5 text-right sm:px-4" @click.stop>
- <div class="relative inline-flex justify-end" data-inventory-folder-menu>
+ <td v-if="canCreateInventoryFolders" class="dashboard-table__col-actions" @click.stop>
  <button
  type="button"
+ class="dashboard-table__action-btn"
  :data-folder-actions-anchor="folder.id"
- class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-700/80 dark:hover:text-gray-200"
  aria-label="Category options"
  @click="toggleFolderMenu(folder.id)"
  >
  <EllipsisVerticalIcon class="h-4 w-4" stroke-width="2" />
  </button>
- </div>
  </td>
  </tr>
  </tbody>
  </table>
  </div>
+ <DashboardTablePagination
+ :current-page="currentPage"
+ :items-per-page="itemsPerPage"
+ :total="filteredFolders.length"
+ @page-change="handlePageChange"
+ />
  </div>
  </Transition>
 
- <!-- Empty state -->
+ <div
+ v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
+ class="inventory-categories-grid-footer data-table-shell shrink-0 overflow-hidden rounded-xl"
+ >
+ <DashboardTablePagination
+ :current-page="currentPage"
+ :items-per-page="itemsPerPage"
+ :total="filteredFolders.length"
+ @page-change="handlePageChange"
+ />
+ </div>
+ </div>
+
+ <!-- Empty state (no categories at all) -->
  <DashboardTableEmptyState
- v-if="!inventoryStore.loading && paginatedFolders.length === 0"
+ v-if="!inventoryStore.loading && inventoryStore.folders.length === 0"
  :icon="FolderIcon"
  :title="
  selectedDepartmentId
@@ -362,15 +434,6 @@
  Clear filter
  </Button>
  </DashboardTableEmptyState>
-
- <DashboardFixedFooter v-if="filteredFolders.length > 0" :sidebar-collapsed="sidebarCollapsed">
- <Pagination
- :current-page="currentPage"
- :items-per-page="itemsPerPage"
- :total="filteredFolders.length"
- @page-change="handlePageChange"
- />
- </DashboardFixedFooter>
 
  <!-- Bulk Delete Folders Modal -->
  <Modal
@@ -924,8 +987,8 @@ import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
-import Pagination from '~/components/ui/Pagination.vue'
-import DashboardFixedFooter from '~/components/ui/DashboardFixedFooter.vue'
+import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
+import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
 import { useInventoryStore, type InventoryFolder, type Template, type TemplateField } from '~/stores/inventory'
@@ -945,7 +1008,7 @@ useHead({
  title: 'Inventory categories - Storvv',
 })
 
-const { eyebrowClass, titleClass, headerBtnClass, bulkActionsClass } = useDashboardPageChrome()
+const { eyebrowClass, titleClass, headerBtnClass } = useDashboardPageChrome()
 const {
  sectionLabelClass,
  pickListClass,
