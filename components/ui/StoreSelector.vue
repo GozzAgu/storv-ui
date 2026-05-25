@@ -53,7 +53,7 @@
           </span>
           <span
             v-if="!switchingStore && currentStore"
-            class="store-switch-status-dot shrink-0"
+            class="status-dot status-dot--active shrink-0"
             aria-hidden="true"
           />
         </span>
@@ -157,14 +157,14 @@
                       v-if="currentStore?.id === store.id"
                       class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600/85 dark:text-emerald-400/90"
                     >
-                      <span class="store-switch-row-dot store-switch-row-dot--active" />
+                      <span class="status-dot status-dot--active" />
                       Active
                     </span>
                     <span
                       v-else
                       class="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700/85 dark:text-amber-400/90"
                     >
-                      <span class="store-switch-row-dot store-switch-row-dot--inactive" />
+                      <span class="status-dot status-dot--inactive" />
                       Inactive
                     </span>
                   </div>
@@ -302,30 +302,3 @@ const switchStore = async (storeId: string) => {
 }
 </script>
 
-<style scoped>
-.store-switch-status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 9999px;
-  background: rgb(16 185 129 / 0.95);
-  box-shadow: 0 0 0 1.5px rgb(255 255 255);
-}
-.dark .store-switch-status-dot {
-  box-shadow: 0 0 0 1.5px rgb(9 12 20);
-}
-
-.store-switch-row-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 9999px;
-  flex-shrink: 0;
-}
-
-.store-switch-row-dot--active {
-  background: rgb(16 185 129 / 0.9);
-}
-
-.store-switch-row-dot--inactive {
-  background: rgb(251 146 60 / 0.95);
-}
-</style>

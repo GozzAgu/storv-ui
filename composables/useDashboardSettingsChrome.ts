@@ -43,11 +43,12 @@ export function useDashboardSettingsChrome() {
   const settingRowClass =
     'flex flex-wrap items-center justify-between gap-3 border-b border-gray-100/90 py-3 last:border-0 dark:border-gray-800/70'
 
-  const storeRowClass =
-    'group relative flex items-center gap-3 rounded-lg border border-gray-100/90 px-3 py-2.5 transition-colors hover:border-gray-200/90 dark:border-white/[0.06] dark:hover:border-white/[0.1]'
+  /** Compact branch tile in Settings → Branches grid */
+  const storeBranchCardClass =
+    'group relative flex w-full min-w-0 flex-col rounded-lg border border-gray-100/90 p-2 text-left transition-colors hover:border-gray-200/80 hover:bg-gray-50/60 dark:border-white/[0.06] dark:hover:border-white/[0.1] dark:hover:bg-white/[0.02]'
 
-  const storeRowActiveClass =
-    'border-primary-200/80 bg-primary-50/50 dark:border-primary-500/30 dark:bg-primary-950/25'
+  const storeBranchCardActiveClass =
+    'border-primary-500/30 bg-primary-50/40 ring-1 ring-inset ring-primary-500/10 dark:border-primary-500/35 dark:bg-primary-950/25 dark:ring-primary-500/15'
 
   const profileStatBarClass =
     'mt-5 flex w-full items-stretch overflow-hidden rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]'
@@ -67,8 +68,8 @@ export function useDashboardSettingsChrome() {
     viewOnlyBadgeClass,
     inputClass,
     settingRowClass,
-    storeRowClass,
-    storeRowActiveClass,
+    storeBranchCardClass,
+    storeBranchCardActiveClass,
     profileStatBarClass,
   }
 }

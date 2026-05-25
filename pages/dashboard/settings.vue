@@ -126,14 +126,15 @@
         <template #actions>
           <Button
             v-if="!isStaff"
+            variant="outline"
             size="sm"
             :class="headerBtnClass"
+            :icon="PlusIcon"
             :title="canAddStore ? 'Create branch' : 'Upgrade to add more stores'"
-            aria-label="Create branch"
             :disabled="!canAddStore"
             @click="openCreateStoreModal"
           >
-            <PlusIcon class="h-4 w-4" />
+            <span class="hidden sm:inline">Add branch</span>
           </Button>
         </template>
 
@@ -152,81 +153,124 @@
         </p>
 
         <div class="relative">
-          <div v-if="storesLoading" class="text-center py-10">
-            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary-500/20 border-t-primary-500 animate-spin" />
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Loading stores...</p>
+          <div v-if="storesLoading" class="flex items-center gap-2 py-6 text-xs text-gray-500 dark:text-gray-400">
+            <div
+              class="h-4 w-4 animate-spin rounded-full border-2 border-primary-500/25 border-t-primary-500"
+              aria-hidden="true"
+            />
+            Loading branches…
           </div>
 
           <div v-else-if="storesError" class="rounded-sm bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 px-4 py-3">
             <p class="text-xs font-medium text-red-800 dark:text-red-200">{{ storesError }}</p>
           </div>
 
-          <div v-else-if="eligibleStores.length === 0" class="text-center py-10">
-            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-sm bg-white/80 dark:!bg-dashboard-card/40">
-              <BuildingStorefrontIcon class="h-8 w-8 text-gray-400 dark:text-gray-500" stroke-width="1.25" />
-            </div>
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">No stores yet</h3>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 max-w-xs mx-auto">Create your first store to get started.</p>
-            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl mt-5">Create branch</Button>
-          </div>
+          <DashboardTableEmptyState
+            v-else-if="eligibleStores.length === 0"
+            :icon="BuildingStorefrontIcon"
+            title="No branches yet"
+            description="Create your first branch to organize inventory, staff, and receipts by location."
+            :tips="[
+              'Each branch has its own departments and stock',
+              'Switch branches anytime from the sidebar or here',
+            ]"
+            :fill="false"
+            extra-class="py-8"
+          >
+            <Button size="sm" @click="openCreateStoreModal" extra-class="!rounded-2xl">Create branch</Button>
+          </DashboardTableEmptyState>
 
-          <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            v-else
+            class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            role="list"
+            aria-label="Branches"
+          >
             <div
               v-for="store in eligibleStores"
               :key="store.id"
-              :class="[storeRowClass, currentStore?.id === store.id ? storeRowActiveClass : '']"
+              role="listitem"
+              class="min-w-0"
             >
               <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-100/90 bg-gray-50/80 dark:border-white/[0.06] dark:bg-white/[0.03]"
+                :class="[
+                  storeBranchCardClass,
+                  currentStore?.id === store.id ? storeBranchCardActiveClass : '',
+                  currentStore?.id !== store.id ? 'cursor-pointer' : '',
+                ]"
+                :role="currentStore?.id !== store.id ? 'button' : undefined"
+                :tabindex="currentStore?.id !== store.id ? 0 : undefined"
+                @click="currentStore?.id !== store.id && switchStore(store.id)"
+                @keydown.enter.prevent="currentStore?.id !== store.id && switchStore(store.id)"
+                @keydown.space.prevent="currentStore?.id !== store.id && switchStore(store.id)"
               >
-                <img
-                  v-if="store.logoUrl || accountLogoUrl"
-                  :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)"
-                  :alt="store.name"
-                  class="h-full w-full object-cover"
-                />
-                <BuildingStorefrontIcon v-else class="h-5 w-5 text-gray-500 dark:text-gray-400" stroke-width="1.75" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <p class="truncate text-xs font-semibold text-gray-900 dark:text-gray-100" :title="store.name">
-                    {{ store.name }}
-                  </p>
+                <div class="flex items-start gap-2">
+                  <div
+                    class="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100/90 dark:bg-white/[0.06]"
+                  >
+                    <img
+                      v-if="store.logoUrl || accountLogoUrl"
+                      :src="optimizeCloudinaryLogo(store.logoUrl || accountLogoUrl)"
+                      :alt="store.name"
+                      class="h-full w-full object-cover"
+                    />
+                    <BuildingStorefrontIcon
+                      v-else
+                      class="h-3.5 w-3.5 text-gray-400 dark:text-gray-500"
+                      stroke-width="1.75"
+                    />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p
+                      class="truncate text-[11px] font-medium leading-tight text-gray-900 dark:text-gray-100"
+                      :title="store.name"
+                    >
+                      {{ store.name }}
+                    </p>
+                    <p
+                      v-if="store.address || store.description"
+                      class="mt-0.5 truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400"
+                      :title="store.address || store.description"
+                    >
+                      {{ store.address || store.description }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-1.5 flex items-center justify-between gap-1">
                   <span
                     v-if="currentStore?.id === store.id"
-                    class="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                    class="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400"
                   >
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
                     Current
                   </span>
                   <span
                     v-else-if="!store.isActive"
-                    class="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                    class="text-[10px] text-gray-400 dark:text-gray-500"
                   >
                     Inactive
                   </span>
+                  <span v-else aria-hidden="true" class="block h-px w-px" />
+                  <div class="flex shrink-0 items-center gap-0.5" @click.stop>
+                    <button
+                      type="button"
+                      class="rounded-md p-0.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
+                      aria-label="Edit branch"
+                      @click="editStore(store)"
+                    >
+                      <PencilSquareIcon class="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      class="rounded-md p-0.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                      :disabled="currentStore?.id === store.id"
+                      aria-label="Delete branch"
+                      @click="confirmDelete(store)"
+                    >
+                      <TrashIcon class="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
-                <p class="mt-0.5 truncate text-[10px] text-gray-500 dark:text-gray-400">
-                  {{ store.address || store.description || 'No address' }}
-                </p>
-              </div>
-              <div class="flex shrink-0 items-center gap-0.5 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
-                <button
-                  type="button"
-                  class="rounded-lg p-1.5 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100"
-                  aria-label="Edit store"
-                  @click.stop="editStore(store)"
-                >
-                  <PencilSquareIcon class="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  class="rounded-lg p-1.5 text-gray-500 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-red-950/30 dark:hover:text-red-400"
-                  :disabled="currentStore?.id === store.id"
-                  aria-label="Delete store"
-                  @click.stop="confirmDelete(store)"
-                >
-                  <TrashIcon class="h-3.5 w-3.5" />
-                </button>
               </div>
             </div>
           </div>
@@ -634,8 +678,8 @@ const {
   cancelLinkClass,
   viewOnlyBadgeClass,
   settingRowClass,
-  storeRowClass,
-  storeRowActiveClass,
+  storeBranchCardClass,
+  storeBranchCardActiveClass,
 } = useDashboardSettingsChrome()
 
 // Store information

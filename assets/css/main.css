@@ -113,6 +113,35 @@
     background-color: #12141c !important;
   }
 
+  /** Rounded bullets — matches store switch status dots */
+  .status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+  }
+
+  .status-dot--active {
+    background: rgb(16 185 129 / 0.95);
+    box-shadow: 0 0 0 1.5px rgb(255 255 255);
+  }
+
+  html.dark .status-dot--active {
+    box-shadow: 0 0 0 1.5px rgb(9 12 20);
+  }
+
+  .status-dot--muted {
+    background: rgb(148 163 184 / 0.9);
+  }
+
+  html.dark .status-dot--muted {
+    background: rgb(100 116 139 / 0.95);
+  }
+
+  .status-dot--inactive {
+    background: rgb(251 146 60 / 0.95);
+  }
+
   .frosted-glass {
     background-color: rgba(255, 255, 255, 0.93);
     backdrop-filter: blur(20px);

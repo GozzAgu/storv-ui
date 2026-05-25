@@ -348,8 +348,8 @@
                       :key="item.id"
                       class="flex items-start gap-2"
                     >
-                      <ChevronRightIcon
-                        class="mt-0.5 h-3 w-3 shrink-0 text-primary-500 dark:text-primary-400"
+                      <span
+                        class="status-dot status-dot--muted mt-1.5"
                         aria-hidden="true"
                       />
                       <component
@@ -367,7 +367,7 @@
             </div>
 
             <p class="flex items-start gap-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              <ChevronRightIcon class="mt-0.5 h-3 w-3 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden="true" />
+              <span class="status-dot status-dot--muted mt-1.5" aria-hidden="true" />
               <span>
                 <template v-if="isStaff">
                   Contact your super admin in Settings if you need a different role or department.
