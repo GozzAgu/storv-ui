@@ -53,7 +53,10 @@
             <!-- Header -->
             <div
               v-if="title || subtitle || $slots.header || showClose"
-              class="flex shrink-0 items-start justify-between gap-3 border-b border-gray-100/90 bg-gray-50/50 px-4 py-3.5 dark:border-gray-800/80 dark:bg-white/[0.02] sm:px-5 sm:py-4"
+              :class="[
+                'flex shrink-0 items-start justify-between gap-2.5 border-b border-gray-100/90 bg-white dark:border-gray-800/80 dark:bg-white/[0.02]',
+                dense ? 'px-3 py-2.5 sm:px-4' : 'bg-gray-50/50 px-4 py-3.5 sm:px-5 sm:py-4 dark:bg-white/[0.02]',
+              ]"
             >
               <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
                 <slot name="header">
@@ -67,14 +70,20 @@
                     <h3
                       v-if="title"
                       :id="titleId"
-                      class="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-50"
+                      :class="[
+                        'font-semibold tracking-tight text-gray-900 dark:text-gray-50',
+                        dense ? 'text-sm' : 'text-base',
+                      ]"
                     >
                       {{ title }}
                     </h3>
                     <p
                       v-if="subtitle"
                       :id="subtitleId"
-                      class="mt-1 text-[13px] leading-snug text-gray-500 dark:text-gray-400"
+                      :class="[
+                        'leading-snug text-gray-500 dark:text-gray-400',
+                        dense ? 'mt-0.5 text-[11px]' : 'mt-1 text-[13px]',
+                      ]"
                     >
                       {{ subtitle }}
                     </p>
@@ -95,7 +104,7 @@
             <!-- Body -->
             <div
               class="side-panel-body-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-white dark:!bg-dashboard-card"
-              :class="contentPadding"
+              :class="resolvedContentPadding"
             >
               <slot />
             </div>
@@ -103,7 +112,10 @@
             <!-- Footer -->
             <div
               v-if="$slots.footer"
-              class="flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-100/90 bg-gray-50/60 px-4 py-3 dark:border-gray-800/80 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-5 sm:py-3.5"
+              :class="[
+                'flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-100/90 bg-white dark:border-gray-800/80 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-end sm:gap-2',
+                dense ? 'px-3 py-2.5 sm:px-4' : 'bg-gray-50/60 px-4 py-3 sm:gap-3 sm:px-5 sm:py-3.5',
+              ]"
             >
               <slot name="footer" />
             </div>
@@ -123,14 +135,16 @@ interface Props {
   subtitle?: string
   eyebrow?: string
   /**
-   * Width: below `sm`, panel is full width. From `sm` up: `xl` = wide column; else 35% viewport.
-   * Height is always full viewport (`100dvh`) so the shell doesn’t stop mid-screen.
+   * Kept for API compatibility; all drawers share the same width on desktop (`--dashboard-drawer-width`).
+   * Below `lg`, the panel is full width.
    */
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'drawer'
   showClose?: boolean
   closeOnBackdrop?: boolean
   contentPadding?: string
   blurBackdrop?: boolean
+  /** Tighter header, body, and footer padding */
+  dense?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -138,8 +152,14 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   showClose: true,
   closeOnBackdrop: true,
-  contentPadding: 'px-4 py-4 sm:px-5 sm:py-5',
+  contentPadding: '',
   blurBackdrop: false,
+  dense: false,
+})
+
+const resolvedContentPadding = computed(() => {
+  if (props.contentPadding) return props.contentPadding
+  return props.dense ? 'p-0' : 'px-4 py-4 sm:px-5 sm:py-5'
 })
 
 const {
@@ -164,16 +184,8 @@ const subtitleId = useId()
 const labelledBy = computed(() => (props.title ? titleId : undefined))
 const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
-const panelWidthClasses = computed(() => {
-  // Full width through tablet (`lg`); partial-width drawer on desktop only
-  if (props.size === 'xl') {
-    return 'max-lg:w-full lg:w-[min(92vw,42rem)]'
-  }
-  if (props.size === 'lg') {
-    return 'max-lg:w-full lg:w-[min(92vw,32rem)]'
-  }
-  return 'max-lg:w-full lg:w-[min(92vw,28rem)]'
-})
+/** One width for every drawer on desktop; full width on smaller viewports. */
+const panelWidthClasses = 'max-lg:w-full lg:w-[min(92vw,var(--dashboard-drawer-width))]'
 
 const handleClose = () => {
   emit('update:modelValue', false)

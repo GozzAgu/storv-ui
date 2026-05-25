@@ -427,172 +427,183 @@
     <!-- Create Folder (slide-over) -->
     <SidePanel
       v-model="showCreateFolderModal"
+      size="xl"
+      dense
+      eyebrow="Inventory"
       :title="editingFolder ? 'Edit category' : 'Create new category'"
-      :subtitle="editingFolder ? 'Update category details and template.' : 'Add a new inventory category and define its table columns.'"
+      :subtitle="editingFolder ? 'Update details and column template.' : 'Name the category and define table columns.'"
     >
-      <div class="min-h-0">
-        <form @submit.prevent="handleSaveFolder" class="bg-transparent">
-          <!-- Basic info -->
-          <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
-            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Basic info</h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-3">Name, type, and description</p>
-            <div class="space-y-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Category name *</label>
-            <input
-              v-model="folderForm.name"
-              type="text"
-              required
-                    class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-              placeholder="Enter category name"
+      <form
+        id="folder-drawer-form"
+        class="divide-y divide-gray-100/90 dark:divide-gray-800/80"
+        @submit.prevent="handleSaveFolder"
+      >
+        <section :class="drawerSectionClass">
+          <p :class="sectionLabelClass">Basic info</p>
+          <div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <div>
+              <label :class="drawerLabelClass">Category name *</label>
+              <input
+                v-model="folderForm.name"
+                type="text"
+                required
+                :class="drawerInputClass"
+                placeholder="e.g. Chairs"
+              />
+            </div>
+            <div>
+              <label :class="drawerLabelClass">Type *</label>
+              <select v-model="folderForm.type" required :class="[drawerInputClass, 'cursor-pointer']">
+                <option value="">Select type</option>
+                <option value="general">General</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothing">Clothing & Apparel</option>
+                <option value="automotive">Automotive</option>
+                <option value="food">Food & Beverage</option>
+                <option value="office">Office Supplies</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-2.5">
+            <label :class="drawerLabelClass">Description</label>
+            <textarea
+              v-model="folderForm.description"
+              rows="2"
+              :class="[drawerInputClass, 'resize-none']"
+              placeholder="Optional — purpose of this category"
             />
           </div>
-                <div>
-                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
-            <select
-              v-model="folderForm.type"
-              required
-                    class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 cursor-pointer"
-            >
-              <option value="">Select type</option>
-              <option value="general">General</option>
-              <option value="electronics">Electronics</option>
-              <option value="clothing">Clothing & Apparel</option>
-              <option value="automotive">Automotive</option>
-              <option value="food">Food & Beverage</option>
-              <option value="office">Office Supplies</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">Description</label>
-          <textarea
-            v-model="folderForm.description"
-            rows="3"
-                  class="w-full px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-            placeholder="Describe the category's purpose"
-                />
-        </div>
-          </div>
-        </div>
+        </section>
 
-          <!-- Serial numbers -->
-          <div class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
-            <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start">
-            <div class="flex-1">
-                <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Use serial numbers for products</span>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
-                  When on: one row per unit with a serial; no quantity field. When off: quantity on each row counts stock for that product.
+        <section :class="drawerSectionClass">
+          <Checkbox v-model="folderForm.hasSerialNumbers" size="sm" wrapper-class="items-start gap-2.5">
+            <div class="min-w-0 flex-1">
+              <span class="text-xs font-medium text-gray-800 dark:text-gray-200">Use serial numbers</span>
+              <p :class="[drawerHintClass, 'mt-0.5']">
+                On: one row per serial. Off: quantity field tracks stock.
               </p>
             </div>
           </Checkbox>
-        </div>
+        </section>
 
-          <!-- Department access (optional; folders work without departments; restrict later) -->
-          <div v-if="canCreateInventoryFolders" class="p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700/60">
-            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Department access <span class="font-normal text-gray-500 dark:text-gray-400">(optional)</span></h4>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 mb-2">
-              Leave all unchecked for <span class="font-medium text-gray-700 dark:text-gray-300">all departments</span> in this store.
-              Check specific departments to limit who can use this category. You can change this anytime by editing the category.
+        <section v-if="canCreateInventoryFolders" :class="drawerSectionClass">
+          <p :class="sectionLabelClass">
+            Department access
+            <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+          </p>
+          <p :class="[drawerHintClass, 'mt-1']">
+            Leave all unchecked for every department. Check to limit access.
+          </p>
+          <div v-if="departmentsStore.loading" :class="[drawerHintClass, 'mt-2']">Loading departments…</div>
+          <div
+            v-else-if="currentStoreDepartments.length === 0"
+            class="mt-2 rounded-lg border border-dashed border-gray-200/80 bg-gray-50/50 px-2.5 py-2 dark:border-gray-700/70 dark:bg-white/[0.02]"
+          >
+            <p :class="drawerHintClass">
+              No departments yet — category stays open to everyone.
             </p>
-            <div v-if="departmentsStore.loading" class="text-xs text-gray-500 dark:text-gray-400 py-1.5">Loading departments…</div>
-            <div
-              v-else-if="currentStoreDepartments.length === 0"
-              class="rounded-sm bg-gray-50 dark:!bg-dashboard-card/40 ring-1 ring-gray-200/80 dark:ring-gray-600/60 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-400 leading-relaxed"
+            <NuxtLink
+              v-if="currentStoreId"
+              :to="`/dashboard/stores/${currentStoreId}/departments`"
+              class="mt-1.5 inline-block text-[11px] font-medium text-primary-600 hover:underline dark:text-primary-400"
             >
-              <p>No departments in this store yet. You can still create this category. It will be available to everyone until you add departments and optionally restrict access here.</p>
-              <NuxtLink
-                v-if="currentStoreId"
-                :to="`/dashboard/stores/${currentStoreId}/departments`"
-                class="inline-flex mt-2 text-primary-600 dark:text-primary-400 font-medium hover:underline"
-              >
-                Add departments →
-              </NuxtLink>
+              Add departments →
+            </NuxtLink>
+          </div>
+          <div
+            v-else
+            :class="[pickListClass, 'mt-2 max-h-36']"
+          >
+            <ul :class="pickListScrollClass">
+              <li v-for="dept in currentStoreDepartments" :key="dept.id">
+                <label :class="[pickRowClass, 'cursor-pointer gap-2.5 !py-2']">
+                  <input
+                    type="checkbox"
+                    :checked="folderForm.allowedDepartments.includes(dept.id)"
+                    class="h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-primary-600 focus:ring-primary-500/20 dark:border-gray-600"
+                    @change="toggleDepartmentAccess(dept.id, ($event.target as HTMLInputElement).checked)"
+                  />
+                  <span class="min-w-0 flex-1">
+                    <span :class="pickRowTitleClass">{{ dept.name }}</span>
+                    <span v-if="dept.description" :class="[pickRowMetaClass, 'mt-0.5 block truncate']">{{ dept.description }}</span>
+                  </span>
+                </label>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section :class="drawerSectionClass">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p :class="sectionLabelClass">Table template</p>
+              <p :class="[drawerHintClass, 'mt-0.5']">Columns for products in this category.</p>
             </div>
-            <div v-else class="space-y-0 max-h-40 overflow-y-auto">
-              <label
-              v-for="dept in currentStoreDepartments"
-              :key="dept.id"
-                class="flex items-center gap-2.5 py-2 border-b border-gray-100 dark:border-gray-700/80 last:border-b-0 cursor-pointer"
+            <div v-if="selectedTemplate" class="flex flex-wrap items-center gap-1.5">
+              <input
+                ref="folderTemplateExcelInput"
+                type="file"
+                accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                class="sr-only"
+                :disabled="importingFolderTemplate"
+                @change="handleImportFolderTemplateExcel"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                :icon="ArrowUpTrayIcon"
+                :loading="importingFolderTemplate"
+                :disabled="importingFolderTemplate"
+                :extra-class="headerBtnClass"
+                @click="triggerFolderTemplateExcelPicker"
               >
-                <input
-                  type="checkbox"
-                  :checked="folderForm.allowedDepartments.includes(dept.id)"
-                  @change="toggleDepartmentAccess(dept.id, ($event.target as HTMLInputElement).checked)"
-                  class="w-3.5 h-3.5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
-                />
-                <div class="flex-1 min-w-0">
-                  <span class="text-xs font-medium text-gray-900 dark:text-gray-100 block truncate">{{ dept.name }}</span>
-                  <span v-if="dept.description" class="text-xs text-gray-500 dark:text-gray-400 block truncate mt-0.5">{{ dept.description }}</span>
-                </div>
-          </label>
+                Import Excel
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                :extra-class="headerBtnClass"
+                @click="handleAddField"
+              >
+                Add field
+              </Button>
+            </div>
           </div>
-        </div>
 
-          <!-- Table template -->
-          <div class="p-3 sm:p-4">
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              <div class="flex items-center gap-1.5">
-                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">Table template</h4>
-                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300">Custom</span>
-              </div>
-              <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
-                <input
-                  ref="folderTemplateExcelInput"
-                  type="file"
-                  accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  class="sr-only"
-                  :disabled="importingFolderTemplate"
-                  @change="handleImportFolderTemplateExcel"
-                />
-                <Button
-                  v-if="selectedTemplate"
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  :icon="ArrowUpTrayIcon"
-                  :loading="importingFolderTemplate"
-                  :disabled="importingFolderTemplate"
-                  extra-class="!rounded-2xl"
-                  @click="triggerFolderTemplateExcelPicker"
-                >
-                  Import from Excel
-                </Button>
-                <Button v-if="selectedTemplate" variant="outline" size="sm" @click="handleAddField" extra-class="!rounded-2xl">
-                  + Add field
-                </Button>
-              </div>
-          </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-              Define columns for this category’s table, or import row 1 of a sheet as column headers. Types are guessed from sample rows when possible.
-            </p>
-            <div v-if="selectedTemplate" class="space-y-0 max-h-56 overflow-y-auto px-1 py-1">
+          <div
+            v-if="selectedTemplate && editableFields.length > 0"
+            class="mt-2.5 overflow-hidden rounded-lg border border-gray-200/80 dark:border-white/[0.06]"
+          >
             <div
-              v-for="(field, index) in editableFields"
-              :key="field.id"
-                class="py-3 border-b border-gray-100 dark:border-gray-700/60 last:border-b-0"
+              class="hidden grid-cols-12 gap-2 border-b border-gray-100/90 bg-gray-50/80 px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:border-gray-800/80 dark:bg-white/[0.03] dark:text-gray-500 sm:grid"
             >
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 items-end min-w-0">
-                <div class="sm:col-span-6 min-w-0">
-                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Label *</label>
+              <span class="col-span-5">Label</span>
+              <span class="col-span-3">Type</span>
+              <span class="col-span-4 text-right">Options</span>
+            </div>
+            <div class="max-h-52 divide-y divide-gray-100/90 overflow-y-auto dark:divide-gray-800/80">
+              <div
+                v-for="(field, index) in editableFields"
+                :key="field.id"
+                class="grid grid-cols-1 items-center gap-2 px-2.5 py-2 sm:grid-cols-12 sm:gap-2"
+              >
+                <div class="min-w-0 sm:col-span-5">
+                  <label :class="[drawerLabelClass, 'sm:sr-only']">Label</label>
                   <input
                     v-model="field.label"
                     type="text"
                     required
-                        class="w-full min-w-0 px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0"
-                        placeholder="Column title"
-                        @input="syncTemplateFieldNameFromLabel(field)"
+                    :class="drawerInputClass"
+                    placeholder="Column title"
+                    @input="syncTemplateFieldNameFromLabel(field)"
                   />
                 </div>
-                <div class="sm:col-span-3 min-w-0">
-                      <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Type *</label>
-                  <select
-                    v-model="field.type"
-                    required
-                        class="w-full min-w-0 px-3 py-2 text-xs rounded-sm ring-1 ring-gray-200/70 dark:ring-gray-600/70 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:ring-offset-0 cursor-pointer"
-                  >
+                <div class="min-w-0 sm:col-span-3">
+                  <label :class="[drawerLabelClass, 'sm:sr-only']">Type</label>
+                  <select v-model="field.type" required :class="[drawerInputClass, 'cursor-pointer']">
                     <option value="text">Text</option>
                     <option value="number">Number</option>
                     <option value="date">Date</option>
@@ -601,46 +612,63 @@
                     <option value="currency">Currency</option>
                   </select>
                 </div>
-                    <div class="sm:col-span-3 flex items-center gap-3 justify-end flex-wrap">
-                      <label class="flex items-center gap-2 cursor-pointer select-none">
+                <div class="flex items-center justify-between gap-2 sm:col-span-4 sm:justify-end">
+                  <label class="flex cursor-pointer items-center gap-1.5">
                     <input
                       v-model="field.required"
                       type="checkbox"
-                          class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500/20 cursor-pointer"
+                      class="h-3.5 w-3.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/20 dark:border-gray-600"
                     />
-                        <span class="text-xs text-gray-600 dark:text-gray-400">Required</span>
+                    <span class="text-[11px] text-gray-500 dark:text-gray-400">Required</span>
                   </label>
                   <button
                     v-if="!isLockedTemplateField(field)"
                     type="button"
+                    class="rounded-md p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                    aria-label="Remove field"
                     @click="handleRemoveField(index)"
-                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-sm transition-colors"
                   >
-                    <TrashIcon class="w-4 h-4" />
+                    <TrashIcon class="h-3.5 w-3.5" />
                   </button>
-                      <span v-else class="px-2 py-1 text-[10px] font-medium rounded-sm bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" title="Built-in column">Default</span>
+                  <span
+                    v-else
+                    class="text-[10px] font-medium text-gray-400 dark:text-gray-500"
+                    title="Built-in column"
+                  >
+                    Default
+                  </span>
                 </div>
               </div>
             </div>
-              </div>
-              <div v-if="editableFields.length === 0" class="text-center py-10 px-5 border border-dashed border-gray-200 dark:border-gray-600">
-                <Squares2X2Icon class="w-9 h-9 mx-auto mb-3 text-gray-400 dark:text-gray-500" />
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Click “Add field” to define columns</p>
           </div>
-        </div>
-        </form>
-      </div>
+          <div
+            v-else-if="selectedTemplate"
+            :class="[emptyStateClass, '!py-6']"
+          >
+            <Squares2X2Icon class="mb-2 h-7 w-7 text-gray-400 dark:text-gray-500" />
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300">No fields yet</p>
+            <p :class="[drawerHintClass, 'mt-0.5']">Add a field or import from Excel</p>
+          </div>
+        </section>
+      </form>
 
       <template #footer>
-        <Button variant="outline" size="sm" @click="handleCancelFolder" extra-class="!rounded-2xl">Cancel</Button>
+        <Button
+          variant="outline"
+          size="sm"
+          :extra-class="footerBtnOutlineClass"
+          @click="handleCancelFolder"
+        >
+          Cancel
+        </Button>
         <Button
           variant="primary"
           size="sm"
           type="submit"
+          form="folder-drawer-form"
           :disabled="!isFolderDrawerValid"
+          :extra-class="footerBtnPrimaryClass"
           @click="handleSaveFolder"
-          extra-class="!rounded-2xl"
         >
           {{ editingFolder ? 'Update' : 'Create' }} category
         </Button>
@@ -925,7 +953,12 @@ const {
   pickRowClass,
   pickRowSelectedClass,
   pickRowTitleClass,
+  pickRowMetaClass,
   emptyStateClass,
+  drawerSectionClass,
+  drawerLabelClass,
+  drawerInputClass,
+  drawerHintClass,
   footerBtnOutlineClass,
   footerBtnPrimaryClass,
 } = useDashboardDrawerChrome()

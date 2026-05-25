@@ -24,6 +24,15 @@ export function useDashboardDrawerChrome() {
 
   const sectionLabelClass = 'text-[11px] font-medium text-gray-600 dark:text-gray-400'
 
+  const drawerSectionClass = 'px-3 py-3 sm:px-4'
+
+  const drawerLabelClass = 'mb-1 block text-[11px] font-medium text-gray-600 dark:text-gray-400'
+
+  const drawerInputClass =
+    'w-full rounded-lg border border-gray-200/90 bg-white px-2.5 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:border-primary-400/50 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:placeholder:text-gray-500'
+
+  const drawerHintClass = 'text-[11px] leading-snug text-gray-500 dark:text-gray-400'
+
   const footerBtnOutlineClass =
     '!inline-flex !h-9 !min-h-9 !items-center !justify-center !rounded-lg !px-4 !py-0 !text-xs !font-medium'
 
@@ -39,6 +48,10 @@ export function useDashboardDrawerChrome() {
     pickRowMetaClass,
     emptyStateClass,
     sectionLabelClass,
+    drawerSectionClass,
+    drawerLabelClass,
+    drawerInputClass,
+    drawerHintClass,
     footerBtnOutlineClass,
     footerBtnPrimaryClass,
   }

@@ -3,11 +3,11 @@
  */
 export function useDashboardProfileMenuChrome() {
   const triggerClass =
-    'group flex items-center rounded-lg border border-gray-200/90 bg-white font-medium text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-700/80 dark:!bg-dashboard-card dark:text-gray-100 dark:hover:bg-white/[0.04]'
+    'group flex h-8 items-center rounded-lg font-medium text-gray-700 transition-colors hover:bg-white dark:text-gray-200 dark:hover:bg-white/[0.06]'
 
-  const triggerCompactClass = 'h-9 w-9 shrink-0 justify-center p-0'
+  const triggerCompactClass = 'h-8 w-8 shrink-0 justify-center p-0'
   const triggerDefaultClass =
-    'min-w-0 max-w-[11rem] gap-2 py-1 pl-1 pr-1.5 sm:max-w-[14rem] sm:pr-2 md:max-w-[17rem] md:pr-2.5'
+    'min-w-0 max-w-[9rem] gap-1.5 pl-0.5 pr-1 sm:max-w-[11rem] md:max-w-[12rem]'
 
   const avatarClass =
     'relative flex shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white'

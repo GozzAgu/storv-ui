@@ -72,7 +72,7 @@
             <!-- Inventory (expandable) -->
             <div v-if="item.name === 'Inventory' && !effectiveSidebarCollapsed" class="space-y-0.5">
               <div
-                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2.5 py-2 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
+                :class="[ 'group relative mx-0.5 flex w-full max-w-full items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-200', !isActive(item.href) ? 'hover:bg-gray-100/90 dark:hover:bg-white/[0.05]' : '' ]"
               >
                 <NuxtLink
                   :to="item.href"
@@ -124,7 +124,7 @@
               v-else-if="(item.name !== 'Inventory' && item.name !== 'Departments') || effectiveSidebarCollapsed"
               :to="item.href"
               :data-tutorial="item.name.toLowerCase().replace(/\s+/g, '-')"
-              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-2 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2.5 rounded-lg px-2.5 py-2', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
+              :class="[ 'group relative flex items-center transition-[transform,color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]', effectiveSidebarCollapsed ? 'mx-0.5 w-full justify-center rounded-lg py-1.5 active:scale-[0.98] motion-reduce:active:scale-100' : 'mx-0.5 gap-2 rounded-lg px-2 py-1.5', !isActive(item.href) && effectiveSidebarCollapsed ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.06]' : !isActive(item.href) ? 'text-gray-500 hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100' : 'text-gray-900 dark:text-gray-100', { 'pointer-events-none opacity-50': switchingStore } ]"
             >
               <component
                 :is="isActive(item.href) ? item.iconSolid : item.icon"
@@ -229,13 +229,13 @@
                           v-for="member in getStaffForDepartment(department.id)"
                           :key="member.id"
                           :to="`/dashboard/departments/${department.id}`"
-                          class="group relative flex items-center gap-2 rounded-md px-2 py-2 text-[12px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
+                          class="group relative flex items-center gap-2 rounded-md px-2 py-2 text-[13px] text-gray-500 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.05] dark:hover:text-gray-100"
                         >
                           <span class="h-1 w-1 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500"></span>
                           <span class="truncate">{{ (member.firstName && member.lastName) ? `${member.firstName} ${member.lastName}` : (member.email || 'Staff') }}</span>
                         </NuxtLink>
                       </template>
-                      <p v-else class="rounded-md px-2 py-2 text-[12px] text-gray-400 dark:text-gray-500">No staff</p>
+                      <p v-else class="rounded-md px-2 py-2 text-[13px] text-gray-400 dark:text-gray-500">No staff</p>
                     </div>
                   </template>
                   <NuxtLink
@@ -330,7 +330,7 @@
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'dashboard-top-nav fixed top-0 right-0 isolate border-b border-gray-200/35 bg-white/70 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#07080c]/70',
+          'dashboard-top-nav fixed top-0 right-0 isolate border-b border-gray-200/45 bg-white/92 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0c12]/92',
           isNativeApp
             ? 'dashboard-top-nav-native left-0 z-[54]'
             : [
@@ -341,29 +341,25 @@
         ]"
       >
         <div
-          class="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/50 to-transparent dark:via-white/10"
-          aria-hidden="true"
-        />
-        <div
           :class="[
-            'relative flex w-full items-center gap-2 px-3 sm:gap-2.5 sm:px-4 lg:gap-3 lg:px-6',
-            isNativeApp ? 'dashboard-top-nav-native-row h-11' : 'h-12 sm:h-14',
+            'relative flex w-full items-center gap-2.5 px-3 sm:px-4 lg:gap-3 lg:px-5',
+            isNativeApp ? 'dashboard-top-nav-native-row h-11' : 'h-11 sm:h-12',
           ]"
         >
           <!-- Mobile nav trigger (web drawer) -->
           <button
             v-if="!isNativeApp"
             type="button"
-            class="dashboard-sidebar-open-trigger group flex h-9 shrink-0 items-center gap-0.5 rounded-xl bg-gray-100/90 py-1 pl-1.5 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/60 transition-colors hover:bg-gray-100 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:hidden"
+            class="dashboard-sidebar-open-trigger group flex h-8 shrink-0 items-center gap-0.5 rounded-lg border border-gray-200/55 bg-white/90 py-1 pl-1.5 pr-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08] lg:hidden"
             aria-label="Open menu"
             @click="sidebarOpen = true"
           >
             <img
               src="/storvv logo mobile.png"
               alt=""
-              class="h-7 w-7 shrink-0 object-contain"
-              width="28"
-              height="28"
+              class="h-6 w-6 shrink-0 object-contain"
+              width="24"
+              height="24"
               decoding="async"
             />
             <ChevronRightIcon
@@ -391,88 +387,88 @@
             </NuxtLink>
           </div>
 
-          <!-- Page title (shrinks / truncates; not coupled to logo) -->
-          <div v-else class="hidden min-w-0 flex-1 items-center md:flex">
-            <div
-              class="flex min-w-0 items-center gap-2.5 rounded-xl bg-gray-50/90 py-1.5 pl-2 pr-3 ring-1 ring-inset ring-gray-200/50 backdrop-blur-sm dark:bg-white/[0.04] dark:ring-white/[0.08]"
-            >
-              <div
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/90 ring-1 ring-inset ring-gray-200/55 dark:bg-white/[0.06] dark:ring-white/10"
-              >
-                <component
-                  :is="currentPageIcon"
-                  class="h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400"
-                  stroke-width="1.75"
-                />
-              </div>
-              <h1 class="min-w-0 truncate text-[13px] font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
+          <!-- Page title -->
+          <div v-else class="hidden min-w-0 shrink-0 md:block lg:min-w-[7.5rem]">
+            <p class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
+              Workspace
+            </p>
+            <div class="mt-0.5 flex min-w-0 items-center gap-1.5">
+              <component
+                :is="currentPageIcon"
+                class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+                stroke-width="1.75"
+                aria-hidden="true"
+              />
+              <h1 class="min-w-0 truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100">
                 {{ currentPageName }}
               </h1>
             </div>
           </div>
 
-          <div
-            class="relative z-10 ml-auto flex min-w-0 shrink-0 items-center gap-1 sm:gap-1.5"
+          <!-- Desktop search -->
+          <button
+            v-if="!isNativeApp"
+            type="button"
+            class="dashboard-topnav-search group relative hidden h-8 min-w-0 flex-1 items-center gap-2 rounded-lg border border-transparent bg-gray-100/70 px-2.5 text-gray-600 transition-colors hover:border-gray-200/60 hover:bg-white focus:outline-none focus-visible:border-primary-500/30 focus-visible:ring-2 focus-visible:ring-primary-500/20 dark:bg-white/[0.04] dark:text-gray-300 dark:hover:border-white/[0.08] dark:hover:bg-white/[0.06] md:flex md:max-w-[16rem] lg:max-w-[18rem] xl:max-w-[20rem]"
+            @click="searchStore.openSearch()"
           >
-            <!-- Global search (width-capped wrapper avoids w-full flex growth overlapping sibling controls) -->
-            <div
-              class="hidden min-w-0 max-w-[11.5rem] shrink sm:max-w-[13rem] lg:max-w-[15rem] md:block"
+            <MagnifyingGlassIcon
+              class="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500"
+              stroke-width="1.75"
+            />
+            <span class="flex-1 truncate text-left text-[11px] font-medium text-gray-500 dark:text-gray-400">
+              Search workspace
+            </span>
+            <kbd
+              class="hidden shrink-0 rounded border border-gray-200/70 bg-white/90 px-1.5 py-px font-mono text-[9px] font-medium text-gray-400 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-500 lg:inline"
             >
-            <button
-              type="button"
-              @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-full min-w-0 max-w-full items-center gap-2 rounded-full border-0 bg-white/90 py-1.5 pl-3 pr-2 text-gray-600 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] lg:pr-2.5"
-            >
-              <MagnifyingGlassIcon
-                class="h-4 w-4 shrink-0 text-gray-500 opacity-80 dark:text-gray-400"
-                stroke-width="1.75"
-              />
-              <span class="flex-1 truncate text-left text-[11px] font-medium text-gray-600 dark:text-gray-400">
-                Search workspace
-              </span>
-              <kbd
-                class="hidden items-center gap-0.5 rounded-md bg-gray-100/95 px-1.5 py-0.5 font-mono text-[10px] font-medium text-gray-500 ring-1 ring-inset ring-gray-200/60 dark:bg-white/[0.08] dark:text-gray-400 dark:ring-white/10 lg:inline-flex"
-              >
-                ⌘K
-              </kbd>
-            </button>
-            </div>
+              ⌘K
+            </kbd>
+          </button>
 
-            <!-- Mobile search -->
+          <div class="flex-1 md:hidden" aria-hidden="true" />
+
+          <!-- Actions toolbar -->
+          <div
+            class="dashboard-topnav-actions relative z-10 ml-auto flex shrink-0 items-center gap-1 rounded-xl border border-gray-200/50 bg-gray-50/80 p-0.5 backdrop-blur-sm dark:border-white/[0.07] dark:bg-white/[0.03] sm:gap-0.5 sm:p-1"
+          >
             <button
               type="button"
-              @click="searchStore.openSearch()"
-              class="group relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-white/90 text-gray-600 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white dark:bg-white/[0.06] dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.1] md:hidden"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200 md:hidden"
               aria-label="Search"
+              @click="searchStore.openSearch()"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
             </button>
 
-            <StoreSelector
-              v-if="userStore.userData?.role === 'superAdmin'"
-              :class="isNativeApp ? 'max-w-[5.25rem] shrink' : ''"
+            <span
+              class="hidden h-4 w-px shrink-0 bg-gray-200/70 dark:bg-white/10 md:block"
+              aria-hidden="true"
             />
 
-            <div
-              class="group relative flex h-9 shrink-0 items-center justify-center rounded-full bg-white/90 px-1.5 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm dark:bg-white/[0.06] dark:ring-white/10"
-            >
-              <ThemeToggle />
-            </div>
+            <StoreSelector
+              v-if="userStore.userData?.role === 'superAdmin'"
+              :class="isNativeApp ? 'max-w-[5.25rem] shrink' : 'shrink-0'"
+            />
 
-            <!-- Notifications dropdown -->
-            <div class="relative z-[130] h-9 w-9 shrink-0" ref="notificationsRef">
+            <ThemeToggle class="shrink-0" />
+
+            <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
               <button
                 type="button"
-                class="group absolute inset-0 inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-white/90 ring-1 ring-inset ring-gray-200/55 backdrop-blur-sm transition-colors hover:bg-white dark:bg-white/[0.06] dark:ring-white/10 dark:hover:bg-white/[0.1]"
+                class="group relative inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
                 @click.stop.prevent="toggleNotifications"
               >
-                <BellIcon class="pointer-events-none block h-[0.95rem] w-[0.95rem] text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100" stroke-width="2" />
+                <BellIcon
+                  class="h-4 w-4 text-gray-600 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100"
+                  stroke-width="1.75"
+                />
                 <span
                   v-if="unreadNotificationCount > 0"
-                  class="pointer-events-none absolute -right-0.5 -top-0.5 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white ring-2 ring-white dark:ring-[#0a0c12]"
+                  class="pointer-events-none absolute right-0.5 top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-red-500 px-0.5 text-[8px] font-bold leading-none text-white ring-2 ring-gray-50 dark:ring-[#0a0c12]"
                 >
                   {{ unreadNotificationCount > 99 ? '99+' : unreadNotificationCount }}
                 </span>
@@ -496,7 +492,11 @@
               </Transition>
             </div>
 
-            <!-- Profile -->
+            <span
+              class="hidden h-4 w-px shrink-0 bg-gray-200/70 dark:bg-white/10 sm:block"
+              aria-hidden="true"
+            />
+
             <DashboardProfileMenu
               :user-name="userName"
               :user-email="userEmail"
@@ -511,7 +511,7 @@
       <!-- Spacer so fixed nav never overlaps page content -->
       <div
         class="dashboard-top-nav-spacer shrink-0"
-        :class="isNativeApp ? 'dashboard-top-nav-spacer-native' : 'h-12 sm:h-14'"
+        :class="isNativeApp ? 'dashboard-top-nav-spacer-native' : 'h-11 sm:h-12'"
         aria-hidden="true"
       />
 

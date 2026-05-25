@@ -1006,6 +1006,44 @@ html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
   top: calc(1rem + var(--cap-safe-top));
 }
 
+/** Slide-over drawers (`SidePanel`) — one width on desktop */
+html {
+  --dashboard-drawer-width: 32rem;
+}
+
+/* Dashboard top bar — unified actions cluster */
+.dashboard-topnav-actions .store-switch-trigger {
+  height: 2rem;
+  max-width: 8.25rem;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+@media (min-width: 640px) {
+  .dashboard-topnav-actions .store-switch-trigger {
+    max-width: 9.5rem;
+  }
+}
+
+.dashboard-topnav-actions .store-switch-trigger:hover {
+  background-color: rgb(255 255 255);
+}
+
+html.dark .dashboard-topnav-actions .store-switch-trigger:hover {
+  background-color: rgb(255 255 255 / 0.06);
+}
+
+.dashboard-topnav-actions .store-switch-icon-wrap {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.dashboard-topnav-actions .store-switch-icon-wrap .h-4 {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
 /* Dashboard shell (web sidebar — hidden on native) */
 html.capacitor-native .dashboard-layout-root > aside.fixed {
   top: var(--cap-safe-top);

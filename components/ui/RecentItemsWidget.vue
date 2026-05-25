@@ -14,6 +14,7 @@ import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 
 const { recentItems, removeRecentItem } = useRecentItems()
 const router = useRouter()
+const { sectionLabelClass, sublinkClass } = useDashboardSidebarChrome()
 
 const getIcon = (type: RecentItem['type']) => {
   switch (type) {
@@ -70,16 +71,16 @@ const formatTime = (timestamp: number) => {
 </script>
 
 <template>
-  <div v-if="recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').length > 0" class="space-y-1">
-    <p class="px-2.5 py-1 text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+  <div v-if="recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').length > 0" class="space-y-px">
+    <p :class="sectionLabelClass">
       Recent
     </p>
-    <div class="space-y-0.5 max-h-48 overflow-y-auto">
+    <div class="max-h-40 space-y-px overflow-y-auto">
       <button
         v-for="item in recentItems.filter(i => i.type === 'folder' || i.type === 'inventory').slice(0, 5)"
         :key="`${item.type}-${item.id}`"
+        :class="sublinkClass"
         @click="handleItemClick(item)"
-        class="w-full px-2.5 py-1.5 text-left rounded-sm hover:bg-white/60 dark:hover:bg-white/[0.05] transition-colors group flex items-center gap-1.5"
       >
         <component
           :is="getIcon(item.type)"
