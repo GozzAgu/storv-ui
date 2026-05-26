@@ -378,7 +378,10 @@ export const usePreferences = () => {
  // Initialize preferences
  const initialize = async () => {
  loadFromLocalStorage()
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (!isDemoModeActive()) {
  await loadFromFirestore()
+ }
 
  // Initialize currency conversion with base currency
  if (import.meta.client) {

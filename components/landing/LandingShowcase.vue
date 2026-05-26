@@ -46,6 +46,9 @@
             <a :href="appUrl" class="landing-pill-cta landing-pill-cta--hero">
               Free for 6 months
             </a>
+            <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--outline">
+              Try the demo
+            </NuxtLink>
             <a :href="appUrl" class="landing-hero__link">
               <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
               {{ appHost }}
@@ -53,7 +56,14 @@
           </div>
           <ul class="landing-hero__chips landing-hero__reveal" style="--hero-i: 6" aria-label="Core capabilities">
             <li v-for="chip in heroChips" :key="chip.label">
-              <a :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
+              <NuxtLink
+                v-if="chip.href.startsWith('/')"
+                :to="chip.href"
+                class="landing-hero__chip"
+              >
+                {{ chip.label }}
+              </NuxtLink>
+              <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
             </li>
           </ul>
         </div>
@@ -339,6 +349,7 @@ import { computed, ref } from 'vue'
 const heroSectionRef = ref<HTMLElement | null>(null)
 
 const heroChips = [
+  { label: 'Try demo', href: '/demo/dashboard' },
   { label: 'Inventory', href: '#features' },
   { label: 'Receipts', href: '#features' },
   { label: 'Returns', href: '#features' },

@@ -120,5 +120,20 @@ export default defineNuxtConfig({
  }
  ]
  }
- }
+ },
+ hooks: {
+  'pages:extend'(pages) {
+   const mirrored: typeof pages = []
+   for (const page of pages) {
+    if (page.path?.startsWith('/dashboard')) {
+     mirrored.push({
+      ...page,
+      name: page.name ? `demo-${String(page.name)}` : undefined,
+      path: page.path.replace(/^\/dashboard/, '/demo/dashboard'),
+     })
+    }
+   }
+   pages.push(...mirrored)
+  },
+ },
 })

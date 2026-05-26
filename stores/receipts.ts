@@ -130,6 +130,15 @@ export const useReceiptsStore = defineStore('receipts', {
  }
 
  const run = (async () => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ this.loading = true
+ await syncDemoToPinia()
+ this.loading = false
+ return
+ }
+
  this.loading = true
  this.error = null
 
@@ -293,6 +302,12 @@ export const useReceiptsStore = defineStore('receipts', {
 
  // Fetch a single receipt
  async fetchReceipt(receiptId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await this.fetchReceipts()
+ return this.receipts.find((r) => r.id === receiptId) ?? null
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -345,6 +360,12 @@ export const useReceiptsStore = defineStore('receipts', {
 
  // Create a new receipt
  async createReceipt(receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoCreateReceipt } = await import('~/utils/demo-bridge')
+ return applyDemoCreateReceipt(receiptData)
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -455,6 +476,13 @@ export const useReceiptsStore = defineStore('receipts', {
 
  // Update a receipt
  async updateReceipt(receiptId: string, updates: Partial<Omit<Receipt, 'id' | 'createdAt' | 'createdBy'>>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoReceiptUpdate } = await import('~/utils/demo-bridge')
+ await applyDemoReceiptUpdate(receiptId, updates as Partial<Receipt>)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

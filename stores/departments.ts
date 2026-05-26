@@ -31,6 +31,15 @@ export const useDepartmentsStore = defineStore('departments', {
  actions: {
  // Get all departments
  async fetchDepartments() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ this.loading = true
+ await syncDemoToPinia()
+ this.loading = false
+ return
+ }
+
  this.loading = true
  this.error = null
 

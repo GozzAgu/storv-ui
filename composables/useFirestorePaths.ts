@@ -162,6 +162,9 @@ export function getActivityLogsCollection(db: Firestore, userId: string, storeId
 export async function getQueryUserId(): Promise<string | null> {
  if (import.meta.server) return null
 
+ const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return DEMO_USER_UID
+
  const { useAuthStore } = await import('~/stores/auth')
  const { useUserStore } = await import('~/stores/user')
  const authStore = useAuthStore()

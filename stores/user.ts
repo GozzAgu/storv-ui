@@ -22,6 +22,14 @@ export const useUserStore = defineStore('user', {
  actions: {
  // Fetch user data from Firestore
  async fetchUserData(userId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ this.loading = false
+ return
+ }
+
  // Check if staff creation is in progress - don't update userData during staff creation
  // This prevents the profile card from showing staff name instead of super admin name
  const isStaffCreationInProgress = typeof window !== 'undefined' 

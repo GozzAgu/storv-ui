@@ -3,9 +3,16 @@ import { watch } from 'vue'
 import { useFirebase } from '~/composables/useFirebase'
 import { useAuthStore } from '~/stores/auth'
 import { getFirebaseClientAuth, isCapacitorNative } from '~/utils/firebase-client-auth'
+import { isDemoModeActive } from '~/utils/demo-mode'
+import { initDemoAuth } from '~/utils/demo-bridge'
 
 export default defineNuxtPlugin(() => {
  if (import.meta.server) return
+
+ if (isDemoModeActive()) {
+ initDemoAuth()
+ return
+ }
 
  const AUTH_INIT_TIMEOUT_MS = isCapacitorNative() ? 2500 : 5000
  const authStore = useAuthStore()
@@ -15,6 +22,7 @@ export default defineNuxtPlugin(() => {
  const loading = useState<boolean>('firebase-auth-loading', () => true)
 
  const setResolved = (user: User | null) => {
+ if (isDemoModeActive() && !user) return
  currentUser.value = user
  authStore.currentUser = user
  loading.value = false

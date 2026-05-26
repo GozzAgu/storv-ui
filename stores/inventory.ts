@@ -212,6 +212,15 @@ export const useInventoryStore = defineStore('inventory', {
  actions: {
  // Get all inventory folders
  async fetchFolders() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ this.loading = true
+ await syncDemoToPinia()
+ this.loading = false
+ return
+ }
+
  this.loading = true
  this.error = null
 
@@ -680,6 +689,12 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Get a single folder
  async fetchFolder(folderId: string): Promise<InventoryFolder | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await this.fetchFolders()
+ return this.folders.find((f) => f.id === folderId) ?? null
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -1135,6 +1150,17 @@ export const useInventoryStore = defineStore('inventory', {
  pageSize: number = INVENTORY_FIRESTORE_PAGE_SIZE,
  options?: { force?: boolean }
  ) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ const list = this.items[folderId] ?? []
+ this.itemsPagination[folderId] = { page: 1, pageSize: list.length || pageSize, total: list.length }
+ this.itemsLoadedFully[folderId] = true
+ this.itemsLoading[folderId] = false
+ return list
+ }
+
  const force = options?.force === true
  const inflightKey = `${folderId}:${page}:${pageSize}`
  if (!force) {
@@ -1188,6 +1214,12 @@ export const useInventoryStore = defineStore('inventory', {
  * Use for receipts, export, analytics, not the folder table.
  */
  async fetchItemsAllChunked(folderId: string, options?: { force?: boolean }) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await this.fetchItemsPage(folderId, 1, INVENTORY_FIRESTORE_PAGE_SIZE, { force: true })
+ return this.items[folderId] ?? []
+ }
+
  const force = options?.force === true
  if (!force) {
  const ex = inventoryItemsAllInflight.get(folderId)
@@ -1264,6 +1296,14 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Create a new item
  async createItem(folderId: string, itemData: Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoInventoryItemCreate } = await import('~/utils/demo-bridge')
+ await applyDemoInventoryItemCreate(folderId, itemData)
+ const list = this.items[folderId] ?? []
+ return list[list.length - 1]?.id ?? ''
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -1551,6 +1591,13 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Update an item
  async updateItem(folderId: string, itemId: string, updates: Partial<Omit<InventoryItem, 'id' | 'createdAt' | 'createdBy' | 'folderId'>>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoInventoryItemUpdate } = await import('~/utils/demo-bridge')
+ await applyDemoInventoryItemUpdate(itemId, updates)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -1722,6 +1769,11 @@ export const useInventoryStore = defineStore('inventory', {
 
  /** Exact item count in Firestore for this folder (same filters as fetchItems). Uses aggregation, not loaded rows. */
  async getFolderItemCountFromServer(folderId: string): Promise<number> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ return (this.items[folderId] ?? []).length
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) throw new Error('Firestore not initialized')
 
@@ -2035,6 +2087,13 @@ export const useInventoryStore = defineStore('inventory', {
  lines: { itemId: string; quantitySold: number }[],
  options: { hasSerialNumbers: boolean; skipActivityLog?: boolean },
  ) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoReceiptSale } = await import('~/utils/demo-bridge')
+ await applyDemoReceiptSale(lines)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

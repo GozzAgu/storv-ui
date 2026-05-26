@@ -107,6 +107,9 @@ export function activityLogDetailSubtitle(
 /** Write an activity log (fire-and-forget; does not throw). */
 export async function logActivity(params: LogActivityParams): Promise<void> {
  if (import.meta.server) return
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) return
  try {
@@ -142,6 +145,14 @@ export const ACTIVITY_LOGS_FETCH_LIMIT = 500
 
 /** Fetch recent activity logs for the current store. */
 export async function fetchActivityLogs(limitCount: number = ACTIVITY_LOGS_FETCH_LIMIT): Promise<ActivityLog[]> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoActivityLogs } = await import('~/utils/demo-bridge')
+ const { getCurrentStoreId } = await import('~/composables/useCurrentStore')
+ const storeId = (await getCurrentStoreId()) ?? ''
+ return getDemoActivityLogs(storeId).slice(0, limitCount)
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) return []
  let userId = await getQueryUserId()

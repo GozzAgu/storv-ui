@@ -12,6 +12,7 @@
  <div class="landing-header__desktop">
  <nav class="landing-header__links" aria-label="Primary">
  <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
+ <NuxtLink to="/demo/dashboard" class="landing-nav-link">Try demo</NuxtLink>
  <a href="#how-it-works" class="landing-nav-link" @click.prevent="scrollToSection('how-it-works')">How it works</a>
  <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
  <a href="#faq" class="landing-nav-link" @click.prevent="scrollToSection('faq')">FAQ</a>
@@ -58,6 +59,11 @@
  class="landing-mobile-nav-link"
  @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
  >Features</a>
+ <NuxtLink
+ to="/demo/dashboard"
+ class="landing-mobile-nav-link"
+ @click="mobileMenuOpen = false"
+ >Try demo</NuxtLink>
  <a
  href="#how-it-works"
  class="landing-mobile-nav-link"
@@ -113,6 +119,8 @@
 
  <!-- Marketing showcase: hero → who → problems → features → setup → multi-store -->
  <LandingShowcase :logo-src="marketingLogoSrc" :app-url="appOriginUrl" />
+
+ <LandingDemo :app-url="appOriginUrl" />
 
  <!-- How it works: product walkthrough -->
  <section

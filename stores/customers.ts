@@ -38,6 +38,16 @@ export const useCustomersStore = defineStore('customers', {
  actions: {
  // Find customer by email, phone, or address
  async findCustomerByContact(email?: string, phone?: string, address?: string): Promise<Customer | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const nameMatch = this.customers.find((c) => {
+ if (phone && c.phone === phone) return true
+ if (email && c.email?.toLowerCase() === email.toLowerCase().trim()) return true
+ return false
+ })
+ return nameMatch ?? null
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  return null
@@ -145,6 +155,17 @@ export const useCustomersStore = defineStore('customers', {
  date: Date
  }
  ): Promise<string> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoCustomerFromReceipt } = await import('~/utils/demo-bridge')
+ return applyDemoCustomerFromReceipt(receiptId, {
+ customerName: receiptData.customerName,
+ customerEmail: receiptData.customerEmail,
+ customerPhone: receiptData.customerPhone,
+ total: receiptData.total,
+ })
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -269,6 +290,15 @@ export const useCustomersStore = defineStore('customers', {
 
  // Fetch all customers
  async fetchCustomers() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ this.loading = true
+ await syncDemoToPinia()
+ this.loading = false
+ return
+ }
+
  this.loading = true
  this.error = null
 

@@ -86,6 +86,14 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  },
 
  async fetchSellerLoanOuts(force = false) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ this.loans = []
+ this.loading = false
+ this.error = null
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  const authStore = useAuthStore()
  if (!db || !authStore.currentUser) {

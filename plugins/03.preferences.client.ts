@@ -1,9 +1,18 @@
 import { watch } from 'vue'
 import { isCapacitorNative } from '~/utils/capacitor-env'
 import { withTimeout } from '~/utils/with-timeout'
+import { isDemoModeActive } from '~/utils/demo-mode'
 
 export default defineNuxtPlugin(() => {
  if (import.meta.server) return
+
+ if (isDemoModeActive()) {
+ void (async () => {
+ const { usePreferences } = await import('~/composables/usePreferences')
+ usePreferences().initializeLocalOnly()
+ })()
+ return
+ }
 
  const runInitialize = async (label: string) => {
  const { usePreferences } = await import('~/composables/usePreferences')

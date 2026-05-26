@@ -7,6 +7,14 @@
 export async function getCurrentStoreId(): Promise<string | null> {
  if (import.meta.server) return null
 
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { useDemoAppStore } = await import('~/stores/demoApp')
+ const demo = useDemoAppStore()
+ demo.hydrate()
+ return demo.state.currentStoreId
+ }
+
  const { useAuthStore } = await import('~/stores/auth')
  const { useUserStore } = await import('~/stores/user')
  const authStore = useAuthStore()

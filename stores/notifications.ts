@@ -112,6 +112,9 @@ export const useNotificationsStore = defineStore('notifications', {
  metadata?: Notification['metadata'],
  actorId?: string
  ) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return null
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  console.error('Firestore not initialized')
@@ -175,6 +178,17 @@ export const useNotificationsStore = defineStore('notifications', {
 
  // Fetch notifications
  async fetchNotifications(loadMore = false) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoSampleNotifications } = await import('~/utils/demo-bridge')
+ const sample = getDemoSampleNotifications()
+ this.notifications = sample
+ this.unreadCount = sample.filter((n) => !n.read).length
+ this.loading = false
+ this.error = null
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  this.error = 'Firestore not initialized'

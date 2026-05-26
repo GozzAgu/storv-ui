@@ -31,6 +31,13 @@ export const useStoresStore = defineStore('stores', {
  async initializeCurrentStore() {
  if (import.meta.server) return
 
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ return
+ }
+
  const authStore = useAuthStore()
  if (!authStore.currentUser) return
 
@@ -197,6 +204,17 @@ export const useStoresStore = defineStore('stores', {
 
  // Set current store and refresh all data
  async setCurrentStore(storeId: string | null) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ if (!storeId) {
+ this.currentStoreId = null
+ return
+ }
+ const { applyDemoSetCurrentStore } = await import('~/utils/demo-bridge')
+ await applyDemoSetCurrentStore(storeId)
+ return
+ }
+
  if (storeId && !this.getStoreById(storeId)) {
  throw new Error('Store not found')
  }
@@ -298,6 +316,13 @@ export const useStoresStore = defineStore('stores', {
  if (import.meta.server) return
  if (!this.currentStoreId) return
 
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ return
+ }
+
  // console.log('[StoresStore] Refreshing all data for store:', this.currentStoreId)
 
  try {
@@ -360,6 +385,13 @@ export const useStoresStore = defineStore('stores', {
 
  // Fetch all stores for current super admin
  async fetchStores() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ return
+ }
+
  this.loading = true
  this.error = null
 

@@ -418,6 +418,22 @@ html.dark .landing-about-section .landing-label--blue {
   transform: translateY(0) scale(0.98);
 }
 
+.landing-pill-cta--outline {
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  box-shadow: none;
+}
+
+.landing-pill-cta--outline:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.landing-pill-cta--outline::after {
+  display: none;
+}
+
 .landing-hero__link {
   display: inline-flex;
   align-items: center;

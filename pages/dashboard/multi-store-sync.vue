@@ -735,6 +735,40 @@ const requestTransfer = async () => {
  
  isTransferring.value = true
  try {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const sourceFolder = sourceFolders.value.find((f) => f.id === transferForm.value.folderId)
+ const transferredItems: any[] = []
+ for (const [itemId, qty] of Object.entries(transferForm.value.items)) {
+ const quantity = Number(qty)
+ if (quantity <= 0) continue
+ const item = availableItems.value.find((i) => i.id === itemId)
+ transferredItems.push({
+ itemId,
+ quantity,
+ itemName: item?.name || item?.itemName || 'Unnamed Item',
+ })
+ }
+ const { addDemoTransferRequest } = await import('~/utils/demo-multi-store')
+ await addDemoTransferRequest({
+ sourceStoreId: transferForm.value.sourceStoreId,
+ destinationStoreId: transferForm.value.destinationStoreId,
+ folderId: transferForm.value.folderId,
+ destinationFolderId: transferForm.value.destinationFolderId,
+ items: transferredItems,
+ itemsCount: transferredItems.length,
+ hasSerialNumbers: sourceFolder?.hasSerialNumbers || false,
+ notes: transferForm.value.notes || '',
+ })
+ toast.success('Transfer requested. Approve it from Transfer History, then complete when stock arrives.')
+ transferForm.value = { sourceStoreId: '', destinationStoreId: '', folderId: '', destinationFolderId: '', items: {}, notes: '' }
+ availableItems.value = []
+ sourceFolders.value = []
+ destinationFolders.value = []
+ await loadTransferHistory()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  if (!userId) throw new Error('User not authenticated')
@@ -806,6 +840,15 @@ const requestTransfer = async () => {
 
 // Execute the actual stock move (used when completing an in_transit transfer).
 const executeTransfer = async (transfer: any) => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { executeDemoTransfer } = await import('~/utils/demo-multi-store')
+ await executeDemoTransfer(transfer)
+ toast.success(`Stock updated: transfer completed in demo.`)
+ await loadTransferHistory()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  if (!userId) throw new Error('User not authenticated')
@@ -966,6 +1009,15 @@ const executeTransfer = async (transfer: any) => {
 }
 
 const approveTransfer = async (transfer: any) => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
+ await updateDemoTransferStatus(transfer.id, 'in_transit')
+ toast.success('Transfer approved. Stock is in transit.')
+ await loadTransferHistory()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  if (!userId) return
@@ -980,6 +1032,15 @@ const approveTransfer = async (transfer: any) => {
 }
 
 const cancelTransfer = async (transfer: any) => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
+ await updateDemoTransferStatus(transfer.id, 'cancelled')
+ toast.success('Transfer cancelled.')
+ await loadTransferHistory()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  if (!userId) return
@@ -1002,6 +1063,22 @@ const openTrackingModal = (t: any) => {
 const saveTracking = async () => {
  const t = selectedTransferForTracking.value
  if (!t) return
+
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { updateDemoTransferStatus } = await import('~/utils/demo-multi-store')
+ await updateDemoTransferStatus(t.id, t.status, {
+ carrier: trackingForm.value.carrier || undefined,
+ trackingNumber: trackingForm.value.trackingNumber || undefined,
+ })
+ showTrackingModal.value = false
+ selectedTransferForTracking.value = null
+ trackingForm.value = { carrier: '', trackingNumber: '' }
+ toast.success('Tracking info saved.')
+ await loadTransferHistory()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  if (!userId) return
@@ -1031,6 +1108,13 @@ const completeTransfer = async (transfer: any) => {
 
 const loadTransferHistory = async () => {
  try {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoTransfers } = await import('~/utils/demo-multi-store')
+ transferHistory.value = getDemoTransfers()
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  

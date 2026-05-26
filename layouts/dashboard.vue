@@ -33,7 +33,7 @@
  :class="sidebarLogoBarClass"
  >
  <NuxtLink
- to="/dashboard"
+ :to="dashPath('')"
  :class="[
  'flex items-center transition-all duration-300',
  effectiveSidebarCollapsed ? 'relative group justify-center w-full' : 'gap-1.5 min-w-0 flex-1',
@@ -113,7 +113,7 @@
  <NuxtLink
  v-for="folder in recentFolders.slice(0, 5)"
  :key="folder.id"
- :to="`/dashboard/inventory/${folder.id}`"
+ :to="dashPath(`/inventory/${folder.id}`)"
  :class="[ 'group relative flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-colors', route.params.id !== folder.id ? 'text-gray-500 hover:bg-gray-100/90 dark:text-gray-400 dark:hover:bg-white/[0.05]' : '', { 'pointer-events-none opacity-50': switchingStore } ]"
  >
  <FolderIcon
@@ -383,7 +383,7 @@
  <!-- Native: Storvv logo (links home) -->
  <div v-if="isNativeApp" class="flex min-w-0 flex-1 items-center">
  <NuxtLink
- to="/dashboard"
+ :to="dashPath('')"
  class="flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/35"
  aria-label="Storv home"
  >
@@ -540,6 +540,7 @@
  :key="route.path"
  class="min-w-0 opacity-0 motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:transform-none animate-auth-fade-up [animation-delay:40ms]"
  >
+ <DemoModeBanner v-if="isDemoDashboard" />
  <slot />
  </div>
  </main>
@@ -611,6 +612,7 @@ import {
 } from '@heroicons/vue/24/solid'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
+import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
 import { splitNativeBottomNav } from '~/utils/dashboard-native-nav'
@@ -746,41 +748,48 @@ const sidebarLogoImgClass = computed(() => {
 
 const navigation: Array<{
  name: string
- href: string
+ segment: string
+ href?: string
  icon: any
  iconSolid: any
  requiresSuperAdmin?: boolean
  requiresManagerOrSuperAdmin?: boolean
  subscriptionFeature?: SubscriptionFeature
 }> = [
- { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
- { name: 'Inventory', href: '/dashboard/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
- { name: 'Stock loans', href: '/dashboard/seller-loans', icon: BanknotesIcon, iconSolid: BanknotesIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
- { name: 'Receipts', href: '/dashboard/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
- { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
-  { name: 'Activity Logs', href: '/dashboard/activity', icon: ClipboardDocumentListIcon, iconSolid: ClipboardDocumentListIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
- { name: 'Multi-Store Sync', href: '/dashboard/multi-store-sync', icon: ArrowsRightLeftIcon, iconSolid: ArrowsRightLeftIconSolid, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
- { name: 'Help center', href: '/dashboard/help', icon: BookOpenIcon, iconSolid: BookOpenIconSolid },
- { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, iconSolid: Cog6ToothIconSolid, subscriptionFeature: 'settings' },
- { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon, iconSolid: UserCircleIconSolid, subscriptionFeature: 'profile' },
+ { name: 'Dashboard', segment: '', icon: HomeIcon, iconSolid: HomeIconSolid, subscriptionFeature: 'dashboard' },
+ { name: 'Inventory', segment: '/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
+ { name: 'Stock loans', segment: '/seller-loans', icon: BanknotesIcon, iconSolid: BanknotesIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
+ { name: 'Receipts', segment: '/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
+ { name: 'Analytics', segment: '/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
+  { name: 'Activity Logs', segment: '/activity', icon: ClipboardDocumentListIcon, iconSolid: ClipboardDocumentListIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
+ { name: 'Multi-Store Sync', segment: '/multi-store-sync', icon: ArrowsRightLeftIcon, iconSolid: ArrowsRightLeftIconSolid, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
+ { name: 'Help center', segment: '/help', icon: BookOpenIcon, iconSolid: BookOpenIconSolid },
+ { name: 'Settings', segment: '/settings', icon: Cog6ToothIcon, iconSolid: Cog6ToothIconSolid, subscriptionFeature: 'settings' },
+ { name: 'Profile', segment: '/profile', icon: UserCircleIcon, iconSolid: UserCircleIconSolid, subscriptionFeature: 'profile' },
 ]
 
 // Filter navigation based on user role and subscription plan
 const filteredNavigation = computed(() => {
  const isManager = userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
  const canSeeManagerOnlyFeatures = userStore.isSuperAdmin || isManager
- return navigation.filter(item => {
+ return navigation
+ .filter(item => {
  if (item.requiresSuperAdmin && !userStore.isSuperAdmin) return false
  if (item.requiresManagerOrSuperAdmin && !canSeeManagerOnlyFeatures) return false
  if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature)) return false
  return true
  })
+ .map(item => ({
+ ...item,
+ href: dashPath(item.segment),
+ }))
 })
 
 const nativePrimaryNav = computed(() => splitNativeBottomNav(filteredNavigation.value).primary)
 const nativeMoreNav = computed(() => splitNativeBottomNav(filteredNavigation.value).more)
 
 const route = useRoute()
+const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
 
 const isActive = (href: string) => {
  const currentPath = route.path
@@ -803,9 +812,8 @@ const isActive = (href: string) => {
  return true
  }
  
- // For routes other than /dashboard, allow matching child routes
- // This allows /dashboard/inventory to be active when on /dashboard/inventory/items
- if (href !== '/dashboard' && currentPath.startsWith(href + '/')) {
+ // For routes other than dashboard home, allow matching child routes
+ if (href !== dashPath('') && currentPath.startsWith(href + '/')) {
  return true
  }
  
@@ -813,7 +821,7 @@ const isActive = (href: string) => {
 }
 
 const currentPage = computed(() => {
- return navigation.find(item => isActive(item.href)) || navigation[0]
+ return filteredNavigation.value.find(item => isActive(item.href)) || filteredNavigation.value[0]
 })
 
 const currentPageName = computed(() => {
@@ -825,9 +833,7 @@ const currentPageIcon = computed(() => {
 })
 
 // Folder navigation for Inventory
-const isInventoryRoute = computed(() => {
- return route.path.startsWith('/dashboard/inventory')
-})
+const isInventoryRoute = computed(() => matchesDashboardPath(route.path, '/inventory'))
 
 // Expanded state for Inventory folders: open on inventory routes; closed elsewhere (see watch below)
 const inventoryExpanded = ref(false)
@@ -1403,6 +1409,11 @@ const userInitials = computed(() => {
 })
 
 const handleSignOut = async () => {
+ if (isDemoDashboard.value) {
+ const { clearDemoSession } = await import('~/utils/demo-mode')
+ clearDemoSession()
+ return navigateTo('/')
+ }
  const { signOut } = useFirebaseAuth()
  try {
  userStore.clearUserData()
@@ -1563,6 +1574,7 @@ watch(() => authStore.currentUser, async (user, oldUser) => {
  
  // Redirect to signin if user logs out (but not during staff creation)
  if (import.meta.client && !authStore.loading && !user && !isStaffCreationInProgress) {
+ if (isDemoDashboard.value) return
  // Prevent redirect loops
  const redirectKey = 'dashboard_watch_redirect'
  if (sessionStorage.getItem(redirectKey) === 'true') {

@@ -46,6 +46,14 @@ export const useStaffStore = defineStore('staff', {
  actions: {
  // Get all staff
  async fetchStaff() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ this.staff = []
+ this.loading = false
+ this.error = null
+ return
+ }
+
  this.loading = true
  this.error = null
 
@@ -182,6 +190,14 @@ export const useStaffStore = defineStore('staff', {
 
  // Get staff by department
  async fetchStaffByDepartment(departmentId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ this.staff = []
+ this.loading = false
+ this.error = null
+ return
+ }
+
  this.loading = true
  this.error = null
 
