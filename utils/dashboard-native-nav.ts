@@ -1,11 +1,13 @@
+import { isDepartmentsAreaPath, isDepartmentsNavHref } from '~/utils/department-routes'
+
 export type DashboardNavItem = {
- name: string
- href: string
- icon: unknown
- iconSolid: unknown
+  name: string
+  href: string
+  icon: unknown
+  iconSolid: unknown
 }
 
-const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Analytics'] as const
+const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Departments'] as const
 
 export function splitNativeBottomNav(items: DashboardNavItem[]) {
  const primary: DashboardNavItem[] = []
@@ -27,8 +29,9 @@ export function nativeNavShortLabel(name: string): string {
  const labels: Record<string, string> = {
  Dashboard: 'Home',
  Inventory: 'Stock',
- Receipts: 'Sales',
- Analytics: 'Insights',
+    Receipts: 'Sales',
+    Departments: 'Teams',
+    Analytics: 'Insights',
  'Stock loans': 'Loans',
  'Activity Logs': 'Activity',
  'Multi-Store Sync': 'Sync',
@@ -38,7 +41,11 @@ export function nativeNavShortLabel(name: string): string {
 }
 
 export function isDashboardNavActive(currentPath: string, href: string, visibleHrefs: string[]) {
- const hasLongerMatch = visibleHrefs.some((otherHref) => {
+  if (isDepartmentsNavHref(href) && isDepartmentsAreaPath(currentPath)) {
+    return true
+  }
+
+  const hasLongerMatch = visibleHrefs.some((otherHref) => {
  if (otherHref === href) return false
  if (otherHref.length <= href.length) return false
  return currentPath.startsWith(otherHref)

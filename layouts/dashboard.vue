@@ -615,7 +615,8 @@ import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
-import { splitNativeBottomNav } from '~/utils/dashboard-native-nav'
+import { splitNativeBottomNav, isDashboardNavActive } from '~/utils/dashboard-native-nav'
+import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
 import GlobalSearch from '~/components/search/GlobalSearch.vue'
@@ -760,6 +761,14 @@ const navigation: Array<{
  { name: 'Inventory', segment: '/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
  { name: 'Stock loans', segment: '/seller-loans', icon: BanknotesIcon, iconSolid: BanknotesIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
  { name: 'Receipts', segment: '/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
+ {
+ name: 'Departments',
+ segment: '/departments',
+ icon: BuildingOfficeIcon,
+ iconSolid: BuildingOfficeIconSolid,
+ requiresManagerOrSuperAdmin: true,
+ subscriptionFeature: 'departments',
+ },
  { name: 'Analytics', segment: '/analytics', icon: ChartBarIcon, iconSolid: ChartBarIconSolid, subscriptionFeature: 'analytics' },
   { name: 'Activity Logs', segment: '/activity', icon: ClipboardDocumentListIcon, iconSolid: ClipboardDocumentListIconSolid, subscriptionFeature: 'activity_logs', requiresManagerOrSuperAdmin: true },
  { name: 'Multi-Store Sync', segment: '/multi-store-sync', icon: ArrowsRightLeftIcon, iconSolid: ArrowsRightLeftIconSolid, requiresSuperAdmin: true, subscriptionFeature: 'multi_store_sync' },
@@ -779,9 +788,15 @@ const filteredNavigation = computed(() => {
  if (item.subscriptionFeature && !canUseSubscriptionFeature(item.subscriptionFeature)) return false
  return true
  })
- .map(item => ({
+ .map((item) => ({
  ...item,
- href: dashPath(item.segment),
+ href:
+ item.name === 'Departments'
+ ? resolveStoreDepartmentsPath(
+ storesStore.currentStoreId,
+ storesStore.stores[0]?.id
+ ) ?? dashPath('/departments')
+ : dashPath(item.segment),
  }))
 })
 
@@ -792,32 +807,8 @@ const route = useRoute()
 const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
 
 const isActive = (href: string) => {
- const currentPath = route.path
- 
- // Only consider nav items the user actually sees (same list as the sidebar).
- const hasLongerMatch = filteredNavigation.value.some(item => {
- const otherHref = item.href
- if (otherHref === href) return false
- if (otherHref.length <= href.length) return false
- return currentPath.startsWith(otherHref)
- })
- 
- // If there's a longer match, this route shouldn't be active
- if (hasLongerMatch) {
- return false
- }
- 
- // Exact match
- if (currentPath === href) {
- return true
- }
- 
- // For routes other than dashboard home, allow matching child routes
- if (href !== dashPath('') && currentPath.startsWith(href + '/')) {
- return true
- }
- 
- return false
+ const visibleHrefs = filteredNavigation.value.map((item) => item.href)
+ return isDashboardNavActive(route.path, href, visibleHrefs)
 }
 
 const currentPage = computed(() => {

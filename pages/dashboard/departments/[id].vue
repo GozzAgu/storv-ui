@@ -549,12 +549,15 @@
  />
 
  <!-- Staff ⋮ menu (teleported so table overflow does not clip it) -->
- <Teleport to="body">
+ <Teleport :to="menuTeleportTarget">
  <div
  v-if="openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle"
  data-staff-menu
  role="menu"
- class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
+ :class="[
+ 'fixed min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95',
+ isNativeApp ? 'z-[1100]' : 'z-[1000]',
+ ]"
  :style="staffMenuFixedStyle"
  @click.stop
  >
@@ -663,6 +666,7 @@ import { usePermissions } from '~/composables/usePermissions'
 import { useAppToast } from '~/composables/useAppToast'
 import { useStoresStore } from '~/stores/stores'
 import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
+import { useDashboardFloatingMenu } from '~/composables/useDashboardFloatingMenu'
 import {
  departmentDetailPath,
  resolveStoreDepartmentsPath,
@@ -737,6 +741,8 @@ const staffPendingMove = ref<Staff | null>(null)
 const isMovingStaff = ref(false)
 const toast = useAppToast()
 
+const { isNativeApp, menuViewportPadding, menuTeleportTarget } = useDashboardFloatingMenu()
+
 const departmentsStore = useDepartmentsStore()
 const staffStore = useStaffStore()
 const authStore = useAuthStore()
@@ -784,7 +790,7 @@ function updateStaffMenuPosition() {
  menuWidth: 160,
  estimatedMenuHeight: itemCount * 40 + 8,
  margin: 4,
- viewportPadding: 8,
+ viewportPadding: menuViewportPadding.value,
  })
 }
 

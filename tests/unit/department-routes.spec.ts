@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
  departmentDetailPath,
+ isDepartmentsAreaPath,
  resolveStoreDepartmentsPath,
  storeDepartmentsPath,
 } from '~/utils/department-routes'
@@ -17,5 +18,11 @@ describe('department-routes', () => {
  it('resolves store path with fallbacks', () => {
  expect(resolveStoreDepartmentsPath(null, 'b', 'c')).toBe('/dashboard/stores/b/departments')
  expect(resolveStoreDepartmentsPath(null)).toBeNull()
+ })
+
+ it('detects departments area paths', () => {
+ expect(isDepartmentsAreaPath('/dashboard/stores/s1/departments')).toBe(true)
+ expect(isDepartmentsAreaPath('/dashboard/departments/d1')).toBe(true)
+ expect(isDepartmentsAreaPath('/dashboard/receipts')).toBe(false)
  })
 })

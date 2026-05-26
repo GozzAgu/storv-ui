@@ -9,6 +9,12 @@ const items = [
  { name: 'Dashboard', href: '/dashboard', icon: null, iconSolid: null },
  { name: 'Inventory', href: '/dashboard/inventory', icon: null, iconSolid: null },
  { name: 'Receipts', href: '/dashboard/receipts', icon: null, iconSolid: null },
+ {
+ name: 'Departments',
+ href: '/dashboard/stores/store-1/departments',
+ icon: null,
+ iconSolid: null,
+ },
  { name: 'Analytics', href: '/dashboard/analytics', icon: null, iconSolid: null },
  { name: 'Settings', href: '/dashboard/settings', icon: null, iconSolid: null },
 ]
@@ -16,8 +22,13 @@ const items = [
 describe('splitNativeBottomNav', () => {
  it('puts primary tabs in order and remainder in more', () => {
  const { primary, more } = splitNativeBottomNav(items)
- expect(primary.map((i) => i.name)).toEqual(['Dashboard', 'Inventory', 'Receipts', 'Analytics'])
- expect(more.map((i) => i.name)).toEqual(['Settings'])
+ expect(primary.map((i) => i.name)).toEqual([
+ 'Dashboard',
+ 'Inventory',
+ 'Receipts',
+ 'Departments',
+ ])
+ expect(more.map((i) => i.name)).toEqual(['Analytics', 'Settings'])
  })
 })
 
@@ -27,11 +38,22 @@ describe('isDashboardNavActive', () => {
  expect(isDashboardNavActive('/dashboard/inventory/abc', '/dashboard/inventory', hrefs)).toBe(true)
  expect(isDashboardNavActive('/dashboard/inventory/abc', '/dashboard', hrefs)).toBe(false)
  })
+
+ it('highlights departments tab on store list and department detail routes', () => {
+ const hrefs = items.map((i) => i.href)
+ const deptHref = '/dashboard/stores/store-1/departments'
+ expect(isDashboardNavActive('/dashboard/stores/store-1/departments', deptHref, hrefs)).toBe(
+ true
+ )
+ expect(isDashboardNavActive('/dashboard/departments/dept-9', deptHref, hrefs)).toBe(true)
+ expect(isDashboardNavActive('/dashboard/receipts', deptHref, hrefs)).toBe(false)
+ })
 })
 
 describe('nativeNavShortLabel', () => {
  it('shortens known labels', () => {
  expect(nativeNavShortLabel('Dashboard')).toBe('Home')
+ expect(nativeNavShortLabel('Departments')).toBe('Teams')
  expect(nativeNavShortLabel('Multi-Store Sync')).toBe('Sync')
  })
 })
