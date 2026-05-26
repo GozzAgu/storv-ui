@@ -61,6 +61,22 @@ export const useUser = () => {
  
  // Create or update user document
  const createUserDocument = async (uid: string, userData: Partial<UserData>) => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoUserDocument } = await import('~/utils/demo-bridge')
+ return getDemoUserDocument(uid) ?? {
+ uid,
+ email: userData.email || 'demo@storvv.app',
+ name: userData.name || 'Demo User',
+ role: 'superAdmin',
+ subscription: 'storvv_enterprise',
+ hasCompletedOnboarding: true,
+ hasCompletedTutorial: true,
+ createdAt: new Date(),
+ updatedAt: new Date(),
+ } as UserData
+ }
+
  const db = getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized. Please ensure Firebase is properly configured.')
@@ -113,6 +129,12 @@ export const useUser = () => {
 
  // Get user document
  const getUserDocument = async (uid: string): Promise<UserData | null> => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoUserDocument } = await import('~/utils/demo-bridge')
+ return getDemoUserDocument(uid)
+ }
+
  const db = getFirestoreInstance()
  if (!db) {
  console.warn('Firestore not initialized')
@@ -140,6 +162,16 @@ export const useUser = () => {
 
  // Update user document
  const updateUserDocument = async (uid: string, updates: Partial<UserData>) => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+ await syncDemoToPinia()
+ const { useUserStore } = await import('~/stores/user')
+ const current = useUserStore().userData
+ if (!current) return null
+ return { ...current, ...updates, updatedAt: new Date() } as UserData
+ }
+
  const db = getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

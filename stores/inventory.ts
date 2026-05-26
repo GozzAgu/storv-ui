@@ -799,6 +799,13 @@ export const useInventoryStore = defineStore('inventory', {
 
  /** Single-item fetch (e.g. swap-in trade-in row on receipts). Uses receipt.storeId when provided. */
  async fetchInventoryItemById(itemId: string, options?: { storeId?: string }): Promise<InventoryItem | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await this.fetchFolders()
+ const list = Object.values(this.items).flat()
+ return list.find((i) => i.id === itemId) ?? null
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) return null
 
@@ -826,6 +833,12 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Create a new inventory folder
  async createFolder(folderData: Omit<InventoryFolder, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'itemCount' | 'totalValue' | 'lowStockCount' | 'storeId'>): Promise<string> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoCreateFolder } = await import('~/utils/demo-bridge')
+ return applyDemoCreateFolder(folderData)
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -983,6 +996,13 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Delete a folder
  async deleteFolder(folderId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoDeleteFolder } = await import('~/utils/demo-bridge')
+ await applyDemoDeleteFolder(folderId)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -1442,6 +1462,16 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Create multiple items in a batch (much faster than individual creates)
  async createItemsBatch(folderId: string, itemsData: Array<Omit<InventoryItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'folderId'>>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoInventoryItemCreate } = await import('~/utils/demo-bridge')
+ const ids: string[] = []
+ for (const row of itemsData) {
+ ids.push(await applyDemoInventoryItemCreate(folderId, row))
+ }
+ return ids
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -1699,6 +1729,13 @@ export const useInventoryStore = defineStore('inventory', {
 
  // Delete an item
  async deleteItem(folderId: string, itemId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { applyDemoDeleteItem } = await import('~/utils/demo-bridge')
+ await applyDemoDeleteItem(itemId)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

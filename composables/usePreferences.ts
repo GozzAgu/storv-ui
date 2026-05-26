@@ -218,6 +218,8 @@ export const usePreferences = () => {
  // Save preferences to Firestore
  const saveToFirestore = async (prefs: UserPreferences) => {
  if (!authStore.currentUser) return
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return
 
  try {
  // Save preferences on owner user doc (super admin doc for staff/manager).

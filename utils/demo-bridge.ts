@@ -8,6 +8,9 @@ import type { Store } from '~/composables/useStores'
 import type { Department } from '~/composables/useDepartments'
 import type { ActivityLog } from '~/composables/useActivityLog'
 import type { Notification } from '~/stores/notifications'
+import type { SavedSearch } from '~/stores/search'
+import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
+import { demoId } from '~/utils/demo-seed'
 import {
   DEMO_USER_UID,
   isDemoModeActive,
@@ -398,9 +401,9 @@ export async function syncDemoToPinia() {
 export async function applyDemoInventoryItemCreate(
   folderId: string,
   itemData: Partial<InventoryItem>,
-) {
+): Promise<string> {
   const demo = useDemoAppStore()
-  demo.addInventoryItem({
+  const item = demo.addInventoryItem({
     folderId,
     name: String(itemData.name ?? 'New item'),
     price: Number(itemData.price ?? 0),
@@ -408,6 +411,7 @@ export async function applyDemoInventoryItemCreate(
     sku: itemData.sku ? String(itemData.sku) : undefined,
   })
   await syncDemoToPinia()
+  return item.id
 }
 
 export async function applyDemoInventoryItemUpdate(itemId: string, updates: Partial<InventoryItem>) {
@@ -475,4 +479,70 @@ export async function applyDemoReceiptUpdate(
 export async function applyDemoSetCurrentStore(storeId: string) {
   useDemoAppStore().setCurrentStore(storeId)
   await syncDemoToPinia()
+}
+
+export function getDemoUserDocument(uid?: string): UserData | null {
+  if (uid && uid !== DEMO_USER_UID) return null
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  return getDemoUserData(demo.state)
+}
+
+export async function applyDemoCreateFolder(
+  folderData: Pick<InventoryFolder, 'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template'>,
+): Promise<string> {
+  const id = useDemoAppStore().addFolder(folderData.name)
+  await syncDemoToPinia()
+  return id
+}
+
+export async function applyDemoDeleteItem(itemId: string) {
+  useDemoAppStore().deleteInventoryItem(itemId)
+  await syncDemoToPinia()
+}
+
+export async function applyDemoDeleteFolder(folderId: string) {
+  useDemoAppStore().deleteFolder(folderId)
+  await syncDemoToPinia()
+}
+
+function loadDemoSavedSearches(): SavedSearch[] {
+  if (!import.meta.client) return []
+  try {
+    const raw = localStorage.getItem(DEMO_SAVED_SEARCHES_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as SavedSearch[]
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+function persistDemoSavedSearches(searches: SavedSearch[]) {
+  if (!import.meta.client) return
+  localStorage.setItem(DEMO_SAVED_SEARCHES_KEY, JSON.stringify(searches))
+}
+
+export function getDemoSavedSearches(): SavedSearch[] {
+  return loadDemoSavedSearches()
+}
+
+export function saveDemoSearch(name: string, query: string, filters: SavedSearch['filters']): string {
+  const id = demoId('search')
+  const entry: SavedSearch = {
+    id,
+    name: name.trim(),
+    query,
+    filters: { ...filters },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: DEMO_USER_UID,
+  }
+  const list = [entry, ...loadDemoSavedSearches()]
+  persistDemoSavedSearches(list)
+  return id
+}
+
+export function deleteDemoSavedSearch(searchId: string) {
+  persistDemoSavedSearches(loadDemoSavedSearches().filter((s) => s.id !== searchId))
 }

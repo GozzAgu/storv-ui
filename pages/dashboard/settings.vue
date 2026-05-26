@@ -1107,6 +1107,33 @@ async function loadSettingsFromFirestore() {
  }
  isLoadingStoreInfo.value = true
  try {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await userStore.fetchUserData(currentUser.value.uid)
+ await storesStore.fetchStores()
+ await storesStore.initializeCurrentStore()
+ const userData = userStore.userData
+ if (userData?.storeDetails) {
+ storeInfo.name = userData.storeDetails.storeName || storeInfo.name
+ storeInfo.email = userData.storeDetails.storeEmail || storeInfo.email
+ storeInfo.phone = userData.storeDetails.storePhone || storeInfo.phone
+ storeInfo.address = userData.storeDetails.storeAddress || storeInfo.address
+ storeInfo.businessType = userData.storeDetails.storeDescription || storeInfo.businessType
+ const settings = userData.storeDetails.settings
+ if (settings?.inventory) {
+ inventorySettings.lowStockThreshold = settings.inventory.lowStockThreshold ?? inventorySettings.lowStockThreshold
+ inventorySettings.autoReorder = settings.inventory.autoReorder ?? inventorySettings.autoReorder
+ inventorySettings.defaultCategory = settings.inventory.defaultCategory || inventorySettings.defaultCategory
+ }
+ if (settings?.receipt) {
+ receiptSettings.prefix = settings.receipt.prefix || receiptSettings.prefix
+ receiptSettings.nextNumber = settings.receipt.nextNumber ?? receiptSettings.nextNumber
+ receiptSettings.autoPrint = settings.receipt.autoPrint ?? receiptSettings.autoPrint
+ }
+ Object.assign(backupStoreInfo, { ...storeInfo })
+ }
+ return
+ }
  if (!userStore.userData) {
  await userStore.fetchUserData(currentUser.value.uid)
  }

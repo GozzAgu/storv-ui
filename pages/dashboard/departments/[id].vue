@@ -249,8 +249,8 @@
  class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
  @click="handleToggleStaffRole(member); openStaffMenuId = null"
  >
- <UserGroupIcon class="h-4 w-4 shrink-0" />
- Toggle role
+ <ArrowPathIcon class="h-4 w-4 shrink-0" />
+ Switch to {{ getNextStaffRoleLabel(member.role) }}
  </button>
  <button
  type="button"
@@ -340,13 +340,12 @@
  </td>
  <td v-if="canManageDepartments" class="dashboard-table__col-actions">
  <div class="dashboard-table__action-group hidden sm:inline-flex" @click.stop>
- <button
- type="button"
- class="dashboard-table__action-btn hover:!text-primary-600 dark:hover:!text-primary-400"
+ <StaffRoleCycleButton
+ :role="member.role"
+ :loading="roleToggleBusyId === member.id"
+ :disabled="!!roleToggleBusyId && roleToggleBusyId !== member.id"
  @click="handleToggleStaffRole(member)"
- >
- <UserGroupIcon class="h-3.5 w-3.5 shrink-0" />
- </button>
+ />
  <button
  type="button"
  class="dashboard-table__action-btn"
@@ -377,9 +376,10 @@
  <button
  type="button"
  class="flex w-full items-center justify-center px-3 py-2.5 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
+ :title="`Switch to ${getNextStaffRoleLabel(member.role)}`"
  @click="handleToggleStaffRole(member); openStaffMenuId = null"
  >
- <UserGroupIcon class="h-5 w-5" />
+ <ArrowPathIcon class="h-5 w-5" />
  </button>
  <button
  type="button"
@@ -489,7 +489,7 @@ import {
  PlusIcon,
  BuildingOfficeIcon,
  UsersIcon,
- UserGroupIcon,
+ ArrowPathIcon,
  CheckCircleIcon,
  ClockIcon,
  PencilSquareIcon,
@@ -511,6 +511,8 @@ import {
 import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
+import StaffRoleCycleButton from '~/components/departments/StaffRoleCycleButton.vue'
+import { getNextStaffRole, getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -602,6 +604,7 @@ const departmentsListPath = computed(() =>
 )
 const isStaffFullscreen = ref(false)
 const openStaffMenuId = ref<string | null>(null)
+const roleToggleBusyId = ref<string | null>(null)
 
 const toggleStaffMenu = (staffId: string) => {
  openStaffMenuId.value = openStaffMenuId.value === staffId ? null : staffId
@@ -788,62 +791,41 @@ const handleEditStaff = (staffMember: Staff) => {
  showStaffModal.value = true
 }
 
-// Cycle through roles: Intern → Staff → Manager → Intern
-const ROLE_ORDER: ('intern' | 'staff' | 'manager')[] = ['intern', 'staff', 'manager']
-function getNextRole(current: 'intern' | 'staff' | 'manager'): 'intern' | 'staff' | 'manager' {
- const idx = ROLE_ORDER.indexOf(current)
- const nextIdx = idx < 0 ? 1 : (idx + 1) % ROLE_ORDER.length
- return ROLE_ORDER[nextIdx]!
-}
-function getNextRoleLabel(current: 'intern' | 'staff' | 'manager'): string {
- const next = getNextRole(current)
- return next.charAt(0).toUpperCase() + next.slice(1)
+function syncDepartmentManagerFromStaff() {
+ if (!department.value) return
+ const manager = staff.value.find((m) => m.role === 'manager')
+ department.value.manager = manager
+ ? `${manager.firstName} ${manager.lastName}`
+ : 'Not assigned'
 }
 
 const handleToggleStaffRole = async (staffMember: Staff) => {
- const { useAppToast } = await import('~/composables/useAppToast')
- const toast = useAppToast()
- 
- const newRole = getNextRole(staffMember.role)
- const roleLabel = getNextRoleLabel(staffMember.role)
- 
- // Optimistically update the UI
- const staffIndex = staff.value.findIndex(s => s.id === staffMember.id)
- let originalRole: 'manager' | 'staff' | 'intern' | null = null
- 
- if (staffIndex > -1 && staff.value[staffIndex]) {
- originalRole = staff.value[staffIndex].role
- staff.value[staffIndex].role = newRole
- }
- 
+ if (roleToggleBusyId.value) return
+
+ const currentRole = normalizeStaffRole(staffMember.role)
+ const newRole = getNextStaffRole(currentRole)
+ const nextLabel = getNextStaffRoleLabel(currentRole)
+
+ roleToggleBusyId.value = staffMember.id
+
+ const staffIndex = staff.value.findIndex((s) => s.id === staffMember.id)
+ const storeIndex = staffStore.staff.findIndex((s) => s.id === staffMember.id)
+ const originalRole = staffIndex > -1 ? staff.value[staffIndex]!.role : staffMember.role
+
+ if (staffIndex > -1) staff.value[staffIndex]!.role = newRole
+ if (storeIndex > -1) staffStore.staff[storeIndex]!.role = newRole
+
  try {
- await staffStore.updateStaff(staffMember.id, {
- role: newRole,
- })
- 
- if (department.value) {
- const manager = staff.value.find(m => m.role === 'manager')
- if (manager) {
- department.value.manager = `${manager.firstName} ${manager.lastName}`
- } else {
- department.value.manager = 'Not assigned'
- }
- }
- 
- staffStore.fetchStaffByDepartment(departmentId.value).then(() => {
- staff.value = staffStore.getStaffByDepartment(departmentId.value)
- departmentsStore.fetchDepartment(departmentId.value).then(() => {
- const updatedDept = departmentsStore.getDepartmentById(departmentId.value)
- if (updatedDept) department.value = updatedDept
- }).catch(console.error)
- }).catch(console.error)
- 
- toast.success(`${staffMember.firstName} ${staffMember.lastName} set to ${roleLabel}`)
- } catch (error: any) {
- if (staffIndex > -1 && originalRole !== null && staff.value[staffIndex]) {
- staff.value[staffIndex].role = originalRole
- }
- toast.error(error.message || 'Failed to update staff role')
+ await staffStore.updateStaff(staffMember.id, { role: newRole })
+ syncDepartmentManagerFromStaff()
+ toast.success(`${staffMember.firstName} is now ${nextLabel}`)
+ } catch (error: unknown) {
+ if (staffIndex > -1) staff.value[staffIndex]!.role = originalRole
+ if (storeIndex > -1) staffStore.staff[storeIndex]!.role = originalRole
+ const message = error instanceof Error ? error.message : 'Failed to update role'
+ toast.error(message)
+ } finally {
+ roleToggleBusyId.value = null
  }
 }
 

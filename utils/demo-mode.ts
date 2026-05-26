@@ -8,6 +8,7 @@ export const DEMO_STORE_ID = DEMO_STORE_LAGOS
 
 export const DEMO_SESSION_KEY = 'storvv-demo-session'
 export const DEMO_STORAGE_KEY = 'storvv-demo-v2'
+export const DEMO_SAVED_SEARCHES_KEY = 'storvv-demo-saved-searches'
 
 /** True when the current route is under `/demo` (including `/demo/dashboard`). */
 export function isDemoRoutePath(path: string): boolean {

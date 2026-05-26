@@ -40,6 +40,14 @@ export const useDepartments = () => {
 
  // Get all departments
  const getDepartments = async (): Promise<Department[]> => {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { useDepartmentsStore } = await import('~/stores/departments')
+ const store = useDepartmentsStore()
+ await store.fetchDepartments()
+ return store.departments
+ }
+
  const db = getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

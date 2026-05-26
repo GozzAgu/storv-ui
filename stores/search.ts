@@ -440,6 +440,23 @@ export const useSearchStore = defineStore('search', {
 
  // Save search
  async saveSearch(name: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { saveDemoSearch } = await import('~/utils/demo-bridge')
+ const id = saveDemoSearch(name, this.query, this.filters)
+ const entry: SavedSearch = {
+ id,
+ name: name.trim(),
+ query: this.query,
+ filters: { ...this.filters },
+ createdAt: new Date(),
+ updatedAt: new Date(),
+ createdBy: 'storvv-demo-user',
+ }
+ this.savedSearches.unshift(entry)
+ return id
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -511,6 +528,13 @@ export const useSearchStore = defineStore('search', {
 
  // Load saved searches
  async loadSavedSearches() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoSavedSearches } = await import('~/utils/demo-bridge')
+ this.savedSearches = getDemoSavedSearches()
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  return
@@ -604,6 +628,14 @@ export const useSearchStore = defineStore('search', {
 
  // Delete saved search
  async deleteSavedSearch(searchId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { deleteDemoSavedSearch } = await import('~/utils/demo-bridge')
+ deleteDemoSavedSearch(searchId)
+ this.savedSearches = this.savedSearches.filter((s) => s.id !== searchId)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

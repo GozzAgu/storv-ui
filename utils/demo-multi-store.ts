@@ -4,6 +4,75 @@ import { useDemoAppStore } from '~/stores/demoApp'
 import { demoId } from '~/utils/demo-seed'
 import { syncDemoToPinia } from '~/utils/demo-bridge'
 
+export interface DemoConsolidatedReport {
+  totalRevenue: number
+  totalSales: number
+  totalItems: number
+  avgOrderValue: number
+  storeBreakdown: Array<{
+    id: string
+    name: string
+    revenue: number
+    sales: number
+    items: number
+  }>
+}
+
+export function getDemoConsolidatedReport(
+  dateRange: string,
+  storeFilter: string,
+): DemoConsolidatedReport {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+
+  const days = dateRange === 'all' ? null : Number.parseInt(dateRange, 10)
+  const startMs = days && Number.isFinite(days) ? Date.now() - days * 24 * 60 * 60 * 1000 : null
+
+  let stores = demo.state.stores
+  if (storeFilter !== 'all') {
+    stores = stores.filter((s) => s.id === storeFilter)
+  }
+
+  let totalRevenue = 0
+  let totalSales = 0
+  let totalItems = 0
+  const storeBreakdown: DemoConsolidatedReport['storeBreakdown'] = []
+
+  for (const store of stores) {
+    let receipts = store.receipts.filter((r) => r.status === 'completed')
+    if (startMs) {
+      receipts = receipts.filter((r) => new Date(r.date).getTime() >= startMs)
+    }
+
+    const revenue = receipts.reduce((sum, r) => sum + r.total, 0)
+    const sales = receipts.length
+    const items = receipts.reduce(
+      (sum, r) => sum + r.items.reduce((n, line) => n + line.quantity, 0),
+      0,
+    )
+
+    totalRevenue += revenue
+    totalSales += sales
+    totalItems += items
+
+    storeBreakdown.push({
+      id: store.id,
+      name: store.name,
+      revenue,
+      sales,
+      items,
+    })
+  }
+
+  return {
+    totalRevenue,
+    totalSales,
+    totalItems,
+    avgOrderValue: totalSales > 0 ? totalRevenue / totalSales : 0,
+    storeBreakdown,
+  }
+}
+
 export function getDemoTransfers(): DemoTransfer[] {
   const demo = useDemoAppStore()
   demo.hydrate()

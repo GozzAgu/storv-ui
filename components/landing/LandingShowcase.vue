@@ -30,25 +30,26 @@
         <div class="landing-hero__center">
         <div class="landing-hero__content">
           <p class="landing-label landing-label--blue landing-hero__reveal" style="--hero-i: 0">
-            Retail operations platform
+            Retail, sales, and inventory in one workspace
           </p>
           <h1 id="landing-hero-title" class="landing-hero__title">
-            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1">Run your</span>
+            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1">Stop losing</span>
             <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
-              <span class="landing-hero__accent">store.</span>
+              <span class="landing-hero__accent">money</span>
             </span>
-            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">Not sheets.</span>
+            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">on stock.</span>
           </h1>
           <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
-            Stock, sales, returns, and customers in one live workspace.
+            Know what’s in each branch, what sold, and what’s running low. Receipts and customers in
+            one dashboard, not Excel or WhatsApp threads.
           </p>
           <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 5">
-            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--hero">
-              Free for 6 months
-            </a>
-            <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--outline">
-              Try the demo
+            <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
+              Try the demo (no signup)
             </NuxtLink>
+            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">
+              Start free on Micro
+            </a>
             <a :href="appUrl" class="landing-hero__link">
               <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
               {{ appHost }}
@@ -89,10 +90,11 @@
           <div class="landing-who-copy">
             <p class="landing-label landing-label--blue">Who it is for</p>
             <h2 id="landing-who-heading" class="landing-who-heading">
-              Built for <span class="landing-who-heading-accent">any business</span> that sells
+              Built for <span class="landing-who-heading-accent">retail, sales,</span> and operations
             </h2>
             <p class="landing-who-lede">
-              Boutiques, workshops, showrooms, and general stores use the same simple system.
+              Shops, showrooms, procurement-led teams, and multi-branch operators who need one system
+              for stock, selling, and customer records.
             </p>
 
             <ul class="landing-who-points">
@@ -153,17 +155,17 @@
         <div class="landing-problems__answer">
           <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
           <p class="landing-label landing-label--blue">The fix</p>
-          <h2 class="landing-problems__headline">One place for every store task.</h2>
+          <h2 class="landing-problems__headline">One dashboard. Every branch.</h2>
           <p class="landing-problems__lede">
-            Live stock, saved receipts, and clear sales, without spreadsheets or guesswork.
+            Live stock per location, saved receipts, and customer history. Less spreadsheet chaos.
           </p>
           <div class="landing-problems__cta-box">
             <span class="landing-problems__cta-icon" aria-hidden="true">
               <CheckIcon class="h-5 w-5 text-white" stroke-width="2.5" />
             </span>
             <div>
-              <p class="landing-problems__cta-title">Free for 6 months</p>
-              <p class="landing-problems__cta-sub">Any business. No card needed.</p>
+              <p class="landing-problems__cta-title">Try the interactive demo</p>
+              <p class="landing-problems__cta-sub">Sample multi-branch data. No account.</p>
             </div>
           </div>
         </div>
@@ -183,7 +185,7 @@
           <div>
             <p class="landing-label landing-label--blue">What you get</p>
             <h2 id="landing-features-title" class="landing-core__title">
-              Four tools you use <span class="landing-hero__accent">every day.</span>
+              Stock, sales & customers <span class="landing-hero__accent">in sync.</span>
             </h2>
           </div>
           <p class="landing-label landing-label--muted hidden sm:block">All linked together</p>
@@ -239,7 +241,10 @@
             <p class="landing-setup__step-desc">{{ step.description }}</p>
           </li>
         </ol>
-        <a :href="appUrl" class="landing-pill-cta mt-8 inline-flex">Get started free</a>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <NuxtLink to="/demo/dashboard" class="landing-pill-cta inline-flex">Try the demo</NuxtLink>
+          <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline inline-flex">Start free on Micro</a>
+        </div>
       </div>
     </section>
 
@@ -263,7 +268,8 @@
             branch.
           </h2>
           <p class="landing-multistore__lede">
-            One or five locations: separate data per branch, full visibility from one login.
+            Separate data per branch, consolidated reports when you need the full picture. One login
+            for owners and ops leads.
           </p>
 
           <ul class="landing-multistore__features m-0 list-none p-0">
@@ -281,14 +287,15 @@
           </ul>
 
           <div class="landing-multistore__footer-cta">
-            <a :href="appUrl" class="landing-pill-cta">Free for 6 months</a>
+            <NuxtLink to="/demo/dashboard" class="landing-pill-cta">Try multi-store demo</NuxtLink>
+            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">Start free on Micro</a>
           </div>
         </div>
 
         <div class="landing-multistore__cards" aria-label="Example store branches">
           <article class="landing-store-card landing-store-card--primary">
             <div class="landing-store-card__head">
-              <span class="landing-store-card__name">Lagos, Main Store</span>
+              <span class="landing-store-card__name">Main store</span>
               <span class="landing-store-card__tag landing-store-card__tag--active">Active</span>
             </div>
             <div class="landing-store-card__stats">
@@ -305,7 +312,7 @@
 
           <article class="landing-store-card landing-store-card--dim">
             <div class="landing-store-card__head">
-              <span class="landing-store-card__name">Abuja, Branch 2</span>
+              <span class="landing-store-card__name">Branch 2</span>
               <span class="landing-store-card__tag landing-store-card__tag--muted">Separate data</span>
             </div>
             <div class="landing-store-card__stats">
@@ -321,7 +328,7 @@
               <span class="landing-store-card__name">+ Add another location</span>
               <span class="landing-store-card__tag landing-store-card__tag--muted">Enterprise</span>
             </div>
-            <p class="landing-store-card__ghost-note">Unlimited stores with synced reporting</p>
+            <p class="landing-store-card__ghost-note">Add more branches on Enterprise</p>
           </article>
         </div>
       </div>
@@ -349,11 +356,11 @@ import { computed, ref } from 'vue'
 const heroSectionRef = ref<HTMLElement | null>(null)
 
 const heroChips = [
-  { label: 'Try demo', href: '/demo/dashboard' },
-  { label: 'Inventory', href: '#features' },
+  { label: 'Live stock', href: '#features' },
+  { label: 'Multi-branch', href: '#multi-store' },
   { label: 'Receipts', href: '#features' },
-  { label: 'Returns', href: '#features' },
   { label: 'Customers', href: '#features' },
+  { label: 'See outcomes', href: '#proof' },
 ] as const
 
 const heroFloatIcons = [
@@ -398,64 +405,64 @@ const appHost = computed(() => {
 const whoUsesCards = [
   {
     icon: CubeIcon,
-    title: 'Your catalog, your fields',
-    description: 'Sizes, brands, colours, serials, or simple counts. Stock updates on every sale and return.',
+    title: 'Stock you can trust',
+    description: 'Per-branch counts update on every sale and return. See low stock before you lose the sale.',
   },
   {
     icon: TagIcon,
-    title: 'Sell from any counter',
-    description: 'Receipts, discounts, and returns in one flow, shop, depot, or showroom.',
+    title: 'Receipts in one place',
+    description: 'Every transaction saved. Search by customer, item, or receipt number without digging through chats.',
   },
   {
     icon: UserGroupIcon,
-    title: 'Team access that fits',
-    description: 'Each role sees what they need. No shared passwords or spreadsheet handoffs.',
+    title: 'Roles per branch',
+    description: 'Owners, managers, and floor staff each see what they need. No shared passwords.',
   },
 ] as const
 
 const whoUsesPoints = [
   {
     num: '01',
-    title: 'Any product type',
-    description: 'Clothing, parts, furniture, electronics, groceries, or a mix.',
+    title: '2+ branches',
+    description: 'Switch stores without logging out. Compare branches side by side.',
   },
   {
     num: '02',
-    title: 'One shop or many',
-    description: 'Start with one location. Add branches when you grow.',
+    title: 'Any product type',
+    description: 'Serials, SKUs, bundles, or simple quantity. Match how you buy and sell.',
   },
   {
     num: '03',
-    title: 'No custom build',
-    description: 'Stock, sales, returns, and customers work the same for every trade.',
+    title: 'Plans that scale',
+    description: 'Start free on Micro. WhatsApp receipt sharing on eligible plans.',
   },
   {
     num: '04',
-    title: 'Clear roles',
-    description: 'Owners, managers, and staff each get the right view.',
+    title: 'Start on Micro free',
+    description: 'One store free forever. Upgrade when you add branches or need analytics.',
   },
 ] as const
 
 const painPoints = [
   {
     num: '01',
-    title: 'Stock counts drift',
-    description: 'You learn what is missing only when a customer asks.',
+    title: 'Stock “finished” at the wrong branch',
+    description: 'You only find out when the customer is already at the counter.',
   },
   {
     num: '02',
-    title: 'Receipts go missing',
-    description: 'Returns stall because you cannot prove what was paid.',
+    title: 'Receipts lost in chats',
+    description: 'Returns and disputes stall because proof lives in screenshots.',
   },
   {
     num: '03',
-    title: 'No daily sales picture',
-    description: 'Yesterday’s numbers take manual digging to find.',
+    title: 'No sales by location',
+    description: 'You cannot compare branches without manual merges.',
   },
   {
     num: '04',
-    title: 'Spreadsheets multiply',
-    description: 'Each file updates differently and never fully matches.',
+    title: 'Excel does not scale',
+    description: 'Every branch has its own sheet and none of them match.',
   },
 ] as const
 
@@ -464,29 +471,29 @@ const coreFeatures = [
     num: '01',
     icon: ArchiveBoxIcon,
     title: 'Inventory',
-    description: 'Live counts update with every sale and return. No manual stock sheets.',
-    badge: 'Always in sync',
+    description: 'Live stock per branch. Low-stock signals so you reorder before you lose margin.',
+    badge: 'Stop stockouts',
   },
   {
     num: '02',
     icon: DocumentTextIcon,
-    title: 'Sales receipts',
-    description: 'Every sale saved with items, price, and payment. Find any receipt fast.',
-    badge: 'Full history',
+    title: 'Receipts',
+    description: 'Sales, payments, and history in one search, not scattered across WhatsApp.',
+    badge: 'One record',
   },
   {
     num: '03',
     icon: ArrowPathIcon,
     title: 'Returns',
-    description: 'Open the original receipt, pick items, confirm. Stock restores right away.',
+    description: 'Refund against the original receipt. Stock restores automatically.',
     badge: 'Stock restored',
   },
   {
     num: '04',
     icon: UserIcon,
     title: 'Customers',
-    description: 'Names, contacts, and purchase history in one profile for faster service.',
-    badge: 'Know your buyers',
+    description: 'Names, phones, and spend history linked to receipts at every branch.',
+    badge: 'Know buyers',
   },
 ] as const
 

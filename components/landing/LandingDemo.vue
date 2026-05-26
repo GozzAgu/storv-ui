@@ -7,22 +7,22 @@
   >
     <div class="landing-demo__inner">
       <div class="landing-demo__copy">
-        <p class="landing-label landing-label--blue">Try before you sign up</p>
+        <p class="landing-label landing-label--blue">Demo-first</p>
         <h2 id="landing-demo-heading" class="landing-demo__title">
-          Use Storvv <span class="landing-demo__accent">right in your browser</span>
+          Try the <span class="landing-demo__accent">real dashboard</span> (no signup)
         </h2>
         <p class="landing-demo__lede">
-          Record a sale, check stock, and browse receipts in a live demo. Everything saves locally on your
-          device — no Firebase account needed.
+          Walk through inventory, receipts, multi-branch switching, and reports with sample store
+          data. Everything stays in your browser. No account required.
         </p>
         <ul class="landing-demo__points">
           <li v-for="point in points" :key="point">{{ point }}</li>
         </ul>
         <div class="landing-demo__actions">
-          <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
+          <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-demo__cta">
             Open interactive demo
           </NuxtLink>
-          <a :href="appUrl" class="landing-demo__secondary">Or start your free account →</a>
+          <a :href="appUrl" class="landing-demo__secondary">Ready to go live? Start free on Micro →</a>
         </div>
       </div>
       <div class="landing-demo__preview" aria-hidden="true">
@@ -67,10 +67,10 @@ defineProps<{
 }>()
 
 const points = [
-  'Full sale flow with cart and receipts',
-  'Inventory folders and stock counts',
-  'Returns restore stock automatically',
-  'Reset anytime to sample data',
+  'Three sample branches with realistic stock and sales',
+  'Record sales, check low stock, browse receipts',
+  'Multi-store sync and consolidated reports (Enterprise preview)',
+  'Reset sample data anytime',
 ]
 </script>
 
@@ -96,9 +96,15 @@ const points = [
   }
 }
 
+.landing-demo .landing-label {
+  font-size: 1.1875rem;
+  font-weight: 600;
+  color: #143f8d;
+}
+
 .landing-demo__title {
   margin-top: 0.5rem;
-  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-size: clamp(1.875rem, 4.5vw, 2.5rem);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -107,22 +113,27 @@ const points = [
 
 .landing-demo__accent {
   color: #143f8d;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
 }
 
 .landing-demo__lede {
   margin-top: 0.75rem;
   max-width: 32rem;
-  font-size: 1.0625rem;
-  line-height: 1.6;
-  color: #475569;
+  font-size: 1.125rem;
+  line-height: 1.65;
+  color: #334155;
 }
 
 .landing-demo__points {
   margin-top: 1.25rem;
   display: grid;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  color: #334155;
+  gap: 0.625rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: #1e293b;
 }
 
 .landing-demo__points li {
@@ -146,8 +157,22 @@ const points = [
   gap: 0.75rem;
 }
 
+.landing-demo__cta {
+  padding: 0.875rem 1.75rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #fff !important;
+  background: #143f8d !important;
+  box-shadow: 0 4px 20px rgba(20, 63, 141, 0.25);
+}
+
+.landing-demo__cta:hover {
+  background: #0f357a !important;
+  color: #fff !important;
+}
+
 .landing-demo__secondary {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #143f8d;
 }
@@ -184,9 +209,9 @@ const points = [
 
 .landing-demo__window-title {
   margin-left: auto;
-  font-size: 0.6875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: #64748b;
+  color: #475569;
 }
 
 .landing-demo__window-body {
@@ -197,7 +222,7 @@ const points = [
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -220,14 +245,15 @@ const points = [
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.9375rem;
   padding: 0.5rem;
   border-radius: 0.375rem;
   background: #f8fafc;
+  color: #0f172a;
 }
 
 .landing-demo__pill {
-  font-size: 0.625rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;

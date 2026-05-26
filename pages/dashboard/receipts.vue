@@ -2445,6 +2445,16 @@ const loadCreatorNames = async () => {
  if (loadingCreators.value || receipts.value.length === 0) return
  
  loadingCreators.value = true
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const uniqueCreatorUids = [...new Set(receipts.value.map(r => (r as any).actualCreator || r.createdBy).filter(Boolean))]
+ for (const uid of uniqueCreatorUids) {
+ creatorNames.value[uid] = 'Demo User'
+ }
+ loadingCreators.value = false
+ return
+ }
+
  const db = getFirestoreInstance()
  if (!db) {
  loadingCreators.value = false

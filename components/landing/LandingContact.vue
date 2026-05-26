@@ -10,7 +10,8 @@
         <p class="landing-label landing-label--blue">Contact</p>
         <h2 id="landing-contact-title" class="landing-contact__title">Get in touch</h2>
         <p class="landing-contact__lede">
-          Questions, feedback, or partnership ideas. We read every message and reply as soon as we can.
+          Questions, founding-store applications (multi-branch retail, sales, or procurement teams),
+          partnerships with accountants or POS resellers. We read every message.
         </p>
       </header>
 
@@ -22,7 +23,8 @@
           </div>
           <h3 class="landing-contact__card-title">Say hello</h3>
           <p class="landing-contact__card-desc">
-            Tell us what you are solving, your store type, or what would make Storvv a better fit.
+            Applying for founding onboarding? Include branch count, city, and whether you sell phones,
+            accessories, or general retail.
           </p>
         </article>
 

@@ -1,5 +1,6 @@
 /* Marketing showcase + who-uses: Storvv logo blues (tailwind primary scale) */
 
+.landing-page,
 .landing-showcase,
 .landing-who-uses-section,
 .landing-about-section {
@@ -13,14 +14,20 @@
   --storvv-blue-rgb: 20, 63, 141;
   --storvv-blue-mid-rgb: 72, 118, 199;
   --storvv-blue-light-rgb: 110, 148, 214;
-  /* Shared readable type scale (16px minimum) */
-  --landing-text-min: 1rem;
-  --landing-text-body: 1.0625rem;
-  --landing-text-lead: 1.125rem;
-  --landing-text-lg: 1.25rem;
-  --landing-text-xl: 1.375rem;
+  /* Shared readable type scale (17px+ minimum) */
+  --landing-text-min: 1.0625rem;
+  --landing-text-body: 1.125rem;
+  --landing-text-lead: 1.1875rem;
+  --landing-text-lg: 1.3125rem;
+  --landing-text-xl: 1.4375rem;
   font-size: var(--landing-text-body);
   font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+.landing-page {
+  --landing-blue: var(--storvv-blue);
+  --landing-blue-hover: var(--storvv-blue-hover);
+  font-size: var(--landing-text-body);
 }
 
 .landing-showcase {
@@ -432,6 +439,45 @@ html.dark .landing-about-section .landing-label--blue {
 
 .landing-pill-cta--outline::after {
   display: none;
+}
+
+/* Outline CTA on light sections (demo, proof, contact) */
+.landing-pill-cta--outline-light {
+  background: transparent;
+  color: var(--storvv-blue);
+  border: 1.5px solid rgba(var(--storvv-blue-rgb), 0.35);
+  box-shadow: none;
+}
+
+.landing-pill-cta--outline-light:hover {
+  background: rgba(var(--storvv-blue-rgb), 0.06);
+  border-color: var(--storvv-blue);
+}
+
+.landing-pill-cta--outline-light::after {
+  display: none;
+}
+
+/* Light marketing sections outside .landing-showcase */
+.landing-demo .landing-label--blue,
+.landing-proof .landing-label--blue,
+.landing-contact .landing-label--blue {
+  color: var(--storvv-blue);
+  font-size: var(--landing-text-lead);
+}
+
+.landing-demo .landing-pill-cta,
+.landing-proof .landing-pill-cta,
+.landing-contact .landing-pill-cta {
+  color: #fff;
+  background: var(--landing-blue);
+}
+
+.landing-demo .landing-pill-cta:hover,
+.landing-proof .landing-pill-cta:hover,
+.landing-contact .landing-pill-cta:hover {
+  background: var(--landing-blue-hover);
+  color: #fff;
 }
 
 .landing-hero__link {
@@ -1247,6 +1293,10 @@ html.dark .landing-about-section .landing-label--blue {
 
 .landing-multistore__footer-cta {
   margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 /* Floor: body copy never below 16px */
@@ -1517,6 +1567,9 @@ html.dark .landing-about-title {
 }
 
 /* App-wide span { font-size: 15px } must not shrink words inside marketing headings */
+.landing-page h1 span,
+.landing-page h2 span,
+.landing-page h3 span,
 .landing-about-title span,
 .landing-showcase h1 span,
 .landing-showcase h2 span,
@@ -1572,6 +1625,12 @@ html.dark .landing-about-lede {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .landing-about-highlights {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1772,8 +1831,9 @@ html.dark .landing-about-link:hover {
 /* ── Mobile: clean spacing, touch targets, readable type ── */
 @media (max-width: 767px) {
   .landing-showcase {
-    --landing-text-body: 1rem;
-    --landing-text-lead: 1.0625rem;
+    --landing-text-body: 1.0625rem;
+    --landing-text-lead: 1.125rem;
+    --landing-text-min: 1.0625rem;
   }
 
   .landing-showcase .landing-label {
@@ -1881,7 +1941,7 @@ html.dark .landing-about-link:hover {
 
   .landing-hero__scroll-hint {
     padding-top: 1.75rem;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
   }
 
   .landing-hero__scroll-hint-icon {
@@ -2277,9 +2337,9 @@ html.dark .landing-about-link:hover {
 
 .landing-capabilities__tabs-label {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--storvv-blue-light, #6e94d6);
 }
@@ -2385,7 +2445,7 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-capabilities__tab-count {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: #64748b;
@@ -2439,7 +2499,7 @@ html.dark .landing-about-link:hover {
 .landing-capabilities__viewing-badge {
   display: inline-block;
   margin-bottom: 0.35rem;
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2493,7 +2553,7 @@ html.dark .landing-about-link:hover {
 
 .landing-capabilities__subtabs-hint {
   margin: 0 0 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2612,7 +2672,7 @@ html.dark .landing-about-link:hover {
 
 .landing-capabilities__also-label {
   margin: 0 0 0.5rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2653,7 +2713,7 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-capabilities__also-count {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--storvv-blue-pale, #9ab5e3);

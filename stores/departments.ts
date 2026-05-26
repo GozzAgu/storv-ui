@@ -197,6 +197,12 @@ export const useDepartmentsStore = defineStore('departments', {
 
  // Get a single department
  async fetchDepartment(departmentId: string, storeId?: string): Promise<Department | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ await this.fetchDepartments()
+ return this.getDepartmentById(departmentId) ?? null
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -268,6 +274,24 @@ export const useDepartmentsStore = defineStore('departments', {
 
  // Create a new department
  async createDepartment(departmentData: Omit<Department, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'staffCount' | 'storeId'>): Promise<string> {
+ const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const storeId = (await getCurrentStoreId()) ?? ''
+ const { demoId } = await import('~/utils/demo-seed')
+ const id = demoId('dept')
+ const dept: Department = {
+ id,
+ ...departmentData,
+ staffCount: 0,
+ storeId,
+ createdAt: new Date(),
+ updatedAt: new Date(),
+ createdBy: DEMO_USER_UID,
+ }
+ this.departments.push(dept)
+ return id
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -339,6 +363,15 @@ export const useDepartmentsStore = defineStore('departments', {
 
  // Update a department
  async updateDepartment(departmentId: string, updates: Partial<Omit<Department, 'id' | 'createdAt' | 'createdBy' | 'storeId'>>) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const index = this.departments.findIndex((d) => d.id === departmentId)
+ if (index > -1) {
+ this.departments[index] = { ...this.departments[index], ...updates, updatedAt: new Date() } as Department
+ }
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -397,6 +430,12 @@ export const useDepartmentsStore = defineStore('departments', {
  // Delete a department
  // When on a store's departments page, pass storeId so the correct path is used
  async deleteDepartment(departmentId: string, storeIdParam?: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ this.departments = this.departments.filter((d) => d.id !== departmentId)
+ return
+ }
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')

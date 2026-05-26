@@ -162,6 +162,31 @@ export const useDemoAppStore = defineStore('demoApp', {
       return customer
     },
 
+    addFolder(name: string) {
+      const folder = {
+        id: demoId('folder'),
+        name: name.trim() || 'New folder',
+        description: '',
+      }
+      this.currentStore.folders.push(folder)
+      this.persist()
+      return folder.id
+    },
+
+    deleteInventoryItem(itemId: string) {
+      const idx = this.currentStore.items.findIndex((i) => i.id === itemId)
+      if (idx >= 0) {
+        this.currentStore.items.splice(idx, 1)
+        this.persist()
+      }
+    },
+
+    deleteFolder(folderId: string) {
+      this.currentStore.folders = this.currentStore.folders.filter((f) => f.id !== folderId)
+      this.currentStore.items = this.currentStore.items.filter((i) => i.folderId !== folderId)
+      this.persist()
+    },
+
     addInventoryItem(payload: {
       folderId: string
       name: string

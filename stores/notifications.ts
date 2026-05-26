@@ -78,6 +78,9 @@ export const useNotificationsStore = defineStore('notifications', {
  },
 
  async clearExpiredNotifications(userId: string, storeId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) return
 

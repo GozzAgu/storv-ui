@@ -135,6 +135,11 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  partyNotes?: string
  lines: SellerLoanLineSnapshot[]
  }) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ throw new Error('Stock loans are not available in the interactive demo.')
+ }
+
  const db = useFirestore().getFirestoreInstance()
  const authStore = useAuthStore()
  if (!db || !authStore.currentUser) {
@@ -210,6 +215,11 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  },
 
  async returnSellerLoanOut(loanId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ throw new Error('Stock loans are not available in the interactive demo.')
+ }
+
  const db = useFirestore().getFirestoreInstance()
  const authStore = useAuthStore()
  if (!db || !authStore.currentUser) {
@@ -281,6 +291,11 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
 
  /** Borrower sold all units off‑POS: mark inventory sold (dateOut), clear loan fields, close loan as sold. */
  async markSellerLoanOutSold(loanId: string) {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ throw new Error('Stock loans are not available in the interactive demo.')
+ }
+
  const db = useFirestore().getFirestoreInstance()
  const authStore = useAuthStore()
  if (!db || !authStore.currentUser) {

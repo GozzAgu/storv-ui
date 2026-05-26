@@ -291,6 +291,9 @@ export const useStaffStore = defineStore('staff', {
 
  // Get a single staff member
  async fetchStaffMember(staffId: string): Promise<Staff | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return null
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
  throw new Error('Firestore not initialized')
@@ -535,14 +538,18 @@ export const useStaffStore = defineStore('staff', {
  }
 
  try {
- // First verify the staff belongs to this user
+ const userId = await getQueryUserId()
+ if (!userId) {
+ throw new Error('User ID not available')
+ }
+
+ // First verify the staff belongs to this account (super admin path for managers)
  const staffMember = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
- if (!staffMember || staffMember.createdBy !== authStore.currentUser.uid) {
+ if (!staffMember || staffMember.createdBy !== userId) {
  throw new Error('Staff member not found or access denied')
  }
 
- // Get userId, storeId, and departmentId for hierarchical path
- const userId = authStore.currentUser.uid
+ // Get storeId and departmentId for hierarchical path
  const storeId = await getCurrentStoreId()
  if (!storeId) {
  throw new Error('No store selected')
@@ -636,7 +643,7 @@ export const useStaffStore = defineStore('staff', {
  const departmentsStore = useDepartmentsStore()
  const dept = departmentsStore.getDepartmentById(staffMember.departmentId)
  
- if (dept && dept.createdBy === authStore.currentUser.uid) {
+ if (dept && dept.createdBy === userId) {
  // If role changed to manager, set as manager
  if (newRole === 'manager') {
  const updatedStaff = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
@@ -753,9 +760,12 @@ export const useStaffStore = defineStore('staff', {
 
  // Get current logged-in staff member's data
  async fetchCurrentStaffMember(): Promise<Staff | null> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return null
+
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
- throw new Error('Firestore not initialized')
+ return null
  }
 
  const authStore = useAuthStore()

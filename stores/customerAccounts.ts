@@ -82,6 +82,14 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
 
  actions: {
  async fetchAccountsForStore() {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ this.accountsByContactKey = {}
+ this.loading = false
+ this.error = null
+ return
+ }
+
  this.loading = true
  this.error = null
  const db = useFirestore().getFirestoreInstance()
@@ -143,6 +151,24 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
  const contactKey = getCustomerContactKey(params)
  const existing = this.accountsByContactKey[contactKey]
  if (existing) return existing
+
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const storeId = (await getCurrentStoreId()) ?? ''
+ const accountId = customerAccountDocId(contactKey)
+ const account: CustomerAccount = {
+ id: accountId,
+ contactKey,
+ customerName: params.customerName,
+ email: params.email?.toLowerCase().trim(),
+ phone: params.phone?.trim(),
+ accountBalance: 0,
+ balanceLedger: [],
+ storeId,
+ }
+ this.accountsByContactKey[contactKey] = account
+ return account
+ }
 
  const db = useFirestore().getFirestoreInstance()
  if (!db) throw new Error('Firestore not initialized')
@@ -209,6 +235,33 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
  note?: string
  receiptId?: string
  }): Promise<CustomerAccount> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const authStore = useAuthStore()
+ if (!authStore.currentUser) throw new Error('Not authenticated')
+ const userId = authStore.currentUser.uid
+ const account = await this.ensureAccount({
+ customerName: params.customerName,
+ email: params.email,
+ phone: params.phone,
+ })
+ const entryId = `le_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+ const entry: BalanceLedgerEntry = {
+ id: entryId,
+ type: params.type,
+ amount: params.amount,
+ note: params.note?.trim() || undefined,
+ receiptId: params.receiptId,
+ createdAt: new Date(),
+ createdBy: userId,
+ }
+ const newBalance = Math.max(0, (account.accountBalance || 0) + params.amount)
+ account.accountBalance = newBalance
+ account.balanceLedger = [entry, ...account.balanceLedger].slice(0, MAX_LEDGER_ENTRIES)
+ this.accountsByContactKey[account.contactKey] = account
+ return account
+ }
+
  const authStore = useAuthStore()
  if (!authStore.currentUser) throw new Error('Not authenticated')
 

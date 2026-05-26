@@ -130,7 +130,6 @@ import {
   UserCircleIcon,
   Cog6ToothIcon,
   BellIcon,
-  KeyIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
   ArrowRightOnRectangleIcon,
@@ -223,7 +222,6 @@ const accountLinks = computed<MenuLink[]>(() => [
     match: '/dashboard/notifications',
     badge: notificationsStore.unreadCount,
   },
-  { to: '/dashboard/change-password', label: 'Password', icon: KeyIcon, match: '/dashboard/change-password' },
 ])
 
 const supportLinks = computed<MenuLink[]>(() => {

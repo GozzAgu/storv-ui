@@ -12,17 +12,19 @@
  <div class="landing-header__desktop">
  <nav class="landing-header__links" aria-label="Primary">
  <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
+ <a href="#proof" class="landing-nav-link" @click.prevent="scrollToSection('proof')">Outcomes</a>
  <NuxtLink to="/demo/dashboard" class="landing-nav-link">Try demo</NuxtLink>
  <a href="#how-it-works" class="landing-nav-link" @click.prevent="scrollToSection('how-it-works')">How it works</a>
  <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
  <a href="#faq" class="landing-nav-link" @click.prevent="scrollToSection('faq')">FAQ</a>
  <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
  </nav>
- <a :href="appOriginUrl" class="landing-header__cta">Get started</a>
+ <NuxtLink to="/demo/dashboard" class="landing-header__cta">Try demo</NuxtLink>
+ <a :href="appOriginUrl" class="landing-nav-link landing-header__start-link">Start free</a>
  </div>
 
  <div class="landing-header__mobile">
- <a :href="appOriginUrl" class="landing-header__cta landing-header__cta--compact">Start</a>
+ <NuxtLink to="/demo/dashboard" class="landing-header__cta landing-header__cta--compact">Demo</NuxtLink>
  <button
  type="button"
  class="landing-header__menu-btn"
@@ -60,6 +62,11 @@
  @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
  >Features</a>
  <a
+ href="#proof"
+ class="landing-mobile-nav-link"
+ @click.prevent="scrollToSection('proof'); mobileMenuOpen = false"
+ >Outcomes</a>
+ <a
  href="/demo/dashboard"
  class="landing-mobile-nav-link"
  @click.prevent="navigateFromMobileMenu('/demo/dashboard')"
@@ -86,12 +93,19 @@
  >Contact</a>
  </nav>
  <div class="landing-mobile-panel__cta-wrap">
- <a
- :href="appOriginUrl"
+ <NuxtLink
+ to="/demo/dashboard"
  class="landing-header__cta landing-mobile-panel__cta"
  @click="mobileMenuOpen = false"
  >
- Get started free
+ Try demo (no signup)
+ </NuxtLink>
+ <a
+ :href="appOriginUrl"
+ class="landing-mobile-panel__secondary-cta"
+ @click="mobileMenuOpen = false"
+ >
+ Start free on Micro
  </a>
  </div>
  </div>
@@ -122,6 +136,8 @@
 
  <LandingDemo :app-url="appOriginUrl" />
 
+ <LandingProof @navigate="scrollToSection" />
+
  <!-- How it works: product walkthrough -->
  <section
  id="how-it-works"
@@ -142,7 +158,7 @@
  />
  <div class="pointer-events-none absolute -left-24 top-1/3 h-48 w-48 rounded-full bg-primary-500/12 blur-3xl" />
  <div class="relative mx-auto max-w-lg lg:mx-0">
- <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary-400 sm:text-sm">
+ <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-400 sm:text-base">
  How it works
  </p>
  <h2
@@ -291,10 +307,11 @@
  <header class="landing-about-header">
  <p class="landing-label landing-label--blue landing-about-label">Why Storvv</p>
  <h2 id="landing-about-heading" class="landing-about-title">
- Software that fits how <span class="landing-about-title-accent">your business</span> runs
+ Three pillars for <span class="landing-about-title-accent">retail & operations</span>
  </h2>
  <p class="landing-about-lede">
- Fewer tabs, fewer surprises, and a layout your team learns in days, not weeks.
+ Stop stock surprises, run every branch from one login, and keep receipts and customers out of
+ Excel and WhatsApp.
  </p>
  </header>
 
@@ -348,9 +365,14 @@
  Plans that match your stage
  </h2>
  <p class="mt-4 text-base text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto leading-relaxed">
- Micro is free for one store. Medium adds analytics, teams, and a second branch. Enterprise covers unlimited scale and multi-store tools.
+ Start on <strong class="font-semibold text-gray-800 dark:text-gray-200">Micro</strong> (free, one store).
+ Medium adds analytics and a second branch. Enterprise is for multi-store operators who need sync and transfers.
  </p>
- <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+ <p class="mt-3 text-center text-base text-primary-700 dark:text-primary-300">
+ <NuxtLink to="/demo/dashboard" class="font-semibold underline-offset-2 hover:underline">Try the demo first</NuxtLink>
+ (no signup required).
+ </p>
+ <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
  Showing prices in {{ pricing.currency }} based on your region.
  </p>
  <div class="flex items-center justify-center gap-3 mt-7">
@@ -372,17 +394,18 @@
  <!-- Micro: single store, 1 dept, 2 staff. No analytics, no multi-store sync. -->
  <div data-section-id="pricing-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Micro</h3>
- <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Single store, solo or very small team</p>
+ <p class="mt-1 text-base text-gray-600 dark:text-gray-400">Single store, solo or very small team</p>
  <p class="mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100">FREE</p>
  <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
- <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
+ <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />1 store · 1 department · up to 2 staff</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Full inventory, receipts, returns & customers</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Dashboard, notifications & help center</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />WhatsApp receipts (10/month)</li>
  <li class="flex items-start gap-2 text-gray-500 dark:text-gray-500"><span class="shrink-0">−</span> No analytics, activity logs, or multi-store tools</li>
  </ul>
- <a :href="appOriginUrl" class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Get Started</a>
+ <NuxtLink to="/demo/dashboard" class="mt-4 flex w-full items-center justify-center rounded-sm border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800">Try demo</NuxtLink>
+ <a :href="appOriginUrl" class="mt-2 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800">Start free</a>
  </div>
  <!-- Medium: 2 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
  <div data-section-id="pricing-2" class="scroll-animate scroll-animate-scale stagger-2 relative rounded-3xl bg-primary-50/35 p-6 flex flex-col dark:bg-slate-900">
@@ -390,13 +413,13 @@
  Most popular
  </p>
  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Medium</h3>
- <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Growing business, multiple locations or teams</p>
+ <p class="mt-1 text-base text-gray-600 dark:text-gray-400">Growing business, multiple locations or teams</p>
  <div class="mt-4 flex items-baseline gap-2">
  <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ isYearly ? mediumYearlyPrice : mediumMonthlyPrice }}</span>
  <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ mediumYearlyListPrice }}</span>
  </div>
  <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
- <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
+ <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Micro</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Up to 2 stores · 10 departments · 25 staff</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Analytics, activity logs & reports</li>
@@ -410,13 +433,13 @@
  <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
  <div data-section-id="pricing-3" class="scroll-animate scroll-animate-scale stagger-3 rounded-3xl bg-white dark:bg-slate-900 p-6 flex flex-col transition duration-200 ease-out">
  <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Storvv Enterprise</h3>
- <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Larger operations, central management</p>
+ <p class="mt-1 text-base text-gray-600 dark:text-gray-400">Larger operations, central management</p>
  <div class="mt-4 flex items-baseline gap-2">
  <span class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ isYearly ? enterpriseYearlyPrice : enterpriseMonthlyPrice }}</span>
  <span v-if="isYearly" class="text-sm text-gray-400 line-through">{{ enterpriseYearlyListPrice }}</span>
  </div>
  <p class="text-sm text-gray-500">{{ isYearly ? '/ year' : '/ month' }}</p>
- <ul class="mt-6 space-y-2 flex-1 text-sm text-gray-600 dark:text-gray-400">
+ <ul class="mt-6 space-y-2 flex-1 text-base text-gray-600 dark:text-gray-400">
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Everything in Medium</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Unlimited stores, departments & staff</li>
  <li class="flex items-center gap-2"><CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Multi-store sync & stock transfers</li>
@@ -430,15 +453,24 @@
  </div>
 
  <div class="mx-auto mt-10 max-w-2xl border-t border-gray-200/90 pt-8 text-center dark:border-gray-800/80 sm:mt-12">
- <p class="text-sm text-gray-600 dark:text-gray-400">
- Ready to try the workspace? You can start on Micro and move up when your team is ready.
+ <p class="text-base text-gray-600 dark:text-gray-400">
+ Running 2+ branches? We onboard a small founding cohort with hands-on setup.
+ <a href="#contact" class="font-semibold text-primary-700 underline-offset-2 hover:underline dark:text-primary-300" @click.prevent="scrollToSection('contact')">Apply via contact</a>.
  </p>
+ <div class="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+ <NuxtLink
+ to="/demo/dashboard"
+ class="inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-500 sm:w-auto"
+ >
+ Try the demo
+ </NuxtLink>
  <a
  :href="appOriginUrl"
- class="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 sm:w-auto dark:bg-primary-600 dark:hover:bg-primary-500"
+ class="inline-flex w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 sm:w-auto dark:border-gray-600 dark:bg-slate-900 dark:text-gray-100 dark:hover:bg-slate-800"
  >
- Get Started
+ Start free on Micro
  </a>
+ </div>
  </div>
  </section>
 
@@ -447,7 +479,7 @@
  <!-- FAQ -->
  <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-20 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-28 sm:py-24">
  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
- <p class="text-sm uppercase tracking-[0.12em] font-semibold text-gray-600 dark:text-gray-300 text-center">Frequently asked questions</p>
+ <p class="text-base uppercase tracking-[0.12em] font-semibold text-gray-600 dark:text-gray-300 text-center">Frequently asked questions</p>
  <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Quick answers</h2>
  <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">Setup, plans, and how Storvv fits your store.</p>
  <div class="mt-10 space-y-3">
@@ -473,7 +505,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Most stores are up and running within minutes. Create your store profile, set up your first inventory folder, and you're ready to start managing sales. No coding or technical expertise needed.</p>
  </div>
  </div>
  </div>
@@ -497,7 +529,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward: if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Not at all. Storvv is built with simplicity in mind. The interface is intuitive and straightforward: if you can use a smartphone, you can use Storvv. We've designed it specifically for store owners and managers.</p>
  </div>
  </div>
  </div>
@@ -521,7 +553,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Absolutely. Storvv provides a unified view of all your sales channels. Whether transactions happen at your physical location or through other channels, everything is consolidated in one dashboard for complete visibility.</p>
  </div>
  </div>
  </div>
@@ -545,7 +577,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Create unlimited inventory folders with custom templates. Define dynamic fields (text, numbers, dates, currency, select, boolean) that match your products. Each folder can have its own template, and you can enable serial number tracking for individual items.</p>
  </div>
  </div>
  </div>
@@ -569,7 +601,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Storvv supports bulk import from Excel spreadsheets. Simply upload your Excel file, and items will be automatically added to your inventory folders. You can also export your inventory data to Excel for backup or analysis.</p>
  </div>
  </div>
  </div>
@@ -593,7 +625,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer, all without manual data entry.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Customers are automatically created when you generate receipts. They're tracked by email, phone, or address. View complete purchase history, total spending, and order counts for each customer, all without manual data entry.</p>
  </div>
  </div>
  </div>
@@ -617,7 +649,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Swap-in transactions allow customers to exchange items. When a customer swaps in an item, it's automatically added back to your inventory, and the transaction is tracked. Perfect for device exchanges, trade-ins, or returns.</p>
  </div>
  </div>
  </div>
@@ -641,7 +673,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Storvv supports three roles: Super Admin (full access), Manager (can manage assigned folders and staff), and Staff (limited access based on department). You can control folder access at the department level, ensuring staff only see relevant inventory.</p>
  </div>
  </div>
  </div>
@@ -665,7 +697,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Storvv automatically tracks low stock items based on your configured threshold. For serial number folders, it alerts when available items fall below the threshold. For bulk items, it counts individual items with low quantities. Get notified on your dashboard.</p>
  </div>
  </div>
  </div>
@@ -689,7 +721,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Yes! Premium plans support multiple store locations. Each store has its own inventory folders, receipts, and staff. Manage everything from one centralized dashboard while keeping store data separate.</p>
  </div>
  </div>
  </div>
@@ -713,7 +745,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">Yes, absolutely. Storvv uses enterprise-grade security to protect all your data. Your information is encrypted, and we never share your data without your explicit permission.</p>
  </div>
  </div>
  </div>
@@ -737,7 +769,7 @@
  <div class="min-h-0 overflow-hidden">
  <div class="px-4 sm:px-5 pb-4 sm:pb-5">
  <div class="pl-11 sm:pl-12">
- <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+ <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
  <strong>Micro (free):</strong> One store, one department, up to 2 staff. Full inventory, receipts, returns, and customers; dashboard, notifications, and help center. WhatsApp receipts (10/month). No analytics, activity logs, customer balance, or multi-store tools.<br><br>
  <strong>Medium:</strong> Everything in Micro plus up to 2 stores, 10 departments and 25 staff per store, analytics and reports, activity logs, customer balance ledger, unlimited WhatsApp, and duplicate categories within a branch. No stock transfers or copy-from-branch.<br><br>
  <strong>Enterprise:</strong> Everything in Medium plus unlimited stores, departments, and staff; multi-store sync and stock transfers; <strong>Copy from branch</strong> for category templates across branches; <strong>Stock loans</strong> for serial inventory; and priority support.
@@ -1025,8 +1057,8 @@ const howStorvvWorksSteps = [
  sectionId: 'step-1',
  num: '01',
  icon: markRaw(Cog6ToothSolidIcon),
- title: 'Set up your store',
- html: 'Name, currency, taxes, receipts, and payments. Everyone shares the same defaults.',
+ title: 'Try the demo or sign up',
+ html: 'Explore with sample branches first, then create your store on <span class="font-medium text-primary-100">Micro (free)</span>.',
  },
  {
  sectionId: 'step-2',
@@ -1213,33 +1245,40 @@ const aboutHighlights = [
   {
     num: '01',
     icon: CubeIcon,
-    title: 'One workspace',
-    description: 'Inventory, sales, customers, and team access together.',
-    detail: 'Counts stay honest after every sale and return.',
+    title: 'Stop losing money on stock',
+    description: 'Live inventory per branch with low-stock visibility.',
+    detail: 'Know what sold and what’s left before a customer walks away.',
   },
   {
     num: '02',
+    icon: BuildingOfficeIcon,
+    title: 'One dashboard, many branches',
+    description: 'Switch stores in one click. Compare branches without merged spreadsheets.',
+    detail: 'Enterprise: transfers, consolidated reports, central oversight.',
+  },
+  {
+    num: '03',
     icon: SparklesIcon,
-    title: 'Clear for every role',
-    description: 'Owners see the full picture. Staff stay in their lane.',
-    detail: 'Add branches and analytics when you are ready.',
+    title: 'Receipts & customers together',
+    description: 'Sales history and buyer profiles in one search.',
+    detail: 'WhatsApp receipts and customer history on eligible plans.',
   },
 ] as const
 
 const aboutPillars = [
  {
- title: 'Focus',
- body: 'Stock, sales, and customers linked the way your books expect.',
+ title: 'Retail to procurement',
+ body: 'Stock, sales, and buying workflows in one place, from shop floor to back office.',
  icon: Square2StackIcon,
  },
  {
- title: 'Team',
- body: 'Roles that match how shops delegate day to day.',
+ title: 'Demo-first',
+ body: 'Try the full dashboard with sample data before you create an account.',
  icon: UserGroupIcon,
  },
  {
- title: 'Scale',
- body: 'Grow from one branch to many without starting over.',
+ title: 'Start free',
+ body: 'Micro stays free for one store. Upgrade when you add branches or need analytics.',
  icon: BuildingOfficeIcon,
  },
 ] as const

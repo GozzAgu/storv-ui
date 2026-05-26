@@ -1321,6 +1321,16 @@ const loadTransferHistory = async () => {
 
 const loadConsolidatedReports = async () => {
  try {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const { getDemoConsolidatedReport } = await import('~/utils/demo-multi-store')
+ consolidatedReport.value = getDemoConsolidatedReport(
+ reportFilters.value.dateRange,
+ reportFilters.value.storeIds,
+ )
+ return
+ }
+
  const authStore = useAuthStore()
  const userId = authStore.currentUser?.uid
  
