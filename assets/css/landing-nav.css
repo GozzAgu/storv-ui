@@ -287,6 +287,7 @@
   font-size: 0.875rem;
   font-weight: 400;
   color: rgb(100 116 139 / 0.55);
+  pointer-events: none;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 

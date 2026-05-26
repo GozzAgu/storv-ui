@@ -59,11 +59,11 @@
  class="landing-mobile-nav-link"
  @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
  >Features</a>
- <NuxtLink
- to="/demo/dashboard"
+ <a
+ href="/demo/dashboard"
  class="landing-mobile-nav-link"
- @click="mobileMenuOpen = false"
- >Try demo</NuxtLink>
+ @click.prevent="navigateFromMobileMenu('/demo/dashboard')"
+ >Try demo</a>
  <a
  href="#how-it-works"
  class="landing-mobile-nav-link"
@@ -1075,11 +1075,24 @@ function applyLandingLightDocument() {
 }
 
 const mobileMenuOpen = ref(false)
+const route = useRoute()
 
 let mobileMenuMql: MediaQueryList | null = null
 function closeMobileMenuIfDesktop() {
  if (mobileMenuMql?.matches) mobileMenuOpen.value = false
 }
+
+async function navigateFromMobileMenu(path: string) {
+ await navigateTo(path)
+ mobileMenuOpen.value = false
+}
+
+watch(
+ () => route.path,
+ () => {
+ mobileMenuOpen.value = false
+ },
+)
 
 watch(mobileMenuOpen, (open) => {
  if (!import.meta.client) return
