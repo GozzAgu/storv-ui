@@ -77,7 +77,7 @@
  ]"
  >
  <div
- v-if="canManageDepartments && selectedStaffForBulk.length > 0"
+ v-if="canRemoveStaff && rosterTab === 'active' && selectedStaffForBulk.length > 0"
  class="flex flex-wrap items-center gap-2 border-b border-gray-100/90 bg-primary-50/60 px-4 py-2.5 dark:border-gray-800/80 dark:bg-primary-900/15 sm:px-5"
  >
  <span class="text-xs font-medium text-gray-700 dark:text-gray-300"
@@ -143,6 +143,46 @@
  </template>
  </DataTableToolbar>
 
+ <nav
+ v-if="canRemoveStaff && !isLoadingStaff && !isStaffFullscreen"
+ class="flex gap-6 border-b border-gray-100/90 px-4 dark:border-gray-800/80 sm:gap-8 sm:px-5"
+ role="tablist"
+ aria-label="Staff roster"
+ >
+ <button
+ type="button"
+ role="tab"
+ :aria-selected="rosterTab === 'active'"
+ class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+ :class="rosterTab === 'active' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
+ @click="rosterTab = 'active'"
+ >
+ Active
+ <span class="tabular-nums">({{ staff.length }})</span>
+ <span
+ class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+ :class="rosterTab === 'active' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+ aria-hidden="true"
+ />
+ </button>
+ <button
+ type="button"
+ role="tab"
+ :aria-selected="rosterTab === 'removed'"
+ class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
+ :class="rosterTab === 'removed' ? 'text-gray-900 dark:text-gray-100 font-semibold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'"
+ @click="rosterTab = 'removed'"
+ >
+ Removed
+ <span class="tabular-nums">({{ removedStaff.length }})</span>
+ <span
+ class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
+ :class="rosterTab === 'removed' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'"
+ aria-hidden="true"
+ />
+ </button>
+ </nav>
+
  <div
  v-if="isLoadingStaff"
  class="min-h-[min(420px,calc(100svh-16rem))] flex-1 overflow-x-auto"
@@ -159,7 +199,7 @@
  </div>
 
  <DashboardTableEmptyState
- v-else-if="staff.length === 0"
+ v-else-if="rosterTab === 'active' && staff.length === 0"
  :icon="UsersIcon"
  eyebrow="Empty roster"
  title="No staff members yet"
@@ -182,6 +222,24 @@
  </Button>
  </DashboardTableEmptyState>
 
+ <DashboardTableEmptyState
+ v-else-if="rosterTab === 'removed' && removedStaff.length === 0"
+ :icon="UsersIcon"
+ eyebrow="Removed staff"
+ title="No removed staff"
+ description="When you remove someone from this department, they appear here. You can reactivate them to restore sign-in access."
+ extra-class="min-h-[min(280px,calc(100svh-14rem))]"
+ >
+ <Button
+ variant="outline"
+ size="sm"
+ extra-class="!rounded-2xl"
+ @click="rosterTab = 'active'"
+ >
+ View active staff
+ </Button>
+ </DashboardTableEmptyState>
+
  <div
  v-else
  :class="[
@@ -189,6 +247,7 @@
  isStaffFullscreen ? 'overflow-auto px-4 pb-2 pt-2 lg:px-8' : '',
  ]"
  >
+ <template v-if="rosterTab === 'active'">
  <div
  v-if="!isStaffFullscreen"
  class="space-y-2.5 px-0.5 md:hidden"
@@ -199,7 +258,7 @@
  class="rounded-xl bg-white/95 p-3 shadow-none backdrop-blur-sm dark:bg-white/[0.04]"
  >
  <div class="flex items-start justify-between gap-2">
- <div v-if="canManageDepartments" class="pt-0.5" @click.stop>
+ <div v-if="canRemoveStaff" class="pt-0.5" @click.stop>
  <Checkbox
  :model-value="selectedStaffForBulk.some(s => s.id === member.id)"
  @update:model-value="(checked) => toggleStaffSelection(member, checked)"
@@ -261,9 +320,10 @@
  Edit
  </button>
  <button
+ v-if="canRemoveStaff"
  type="button"
  class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
- @click="handleDeleteStaff(member); openStaffMenuId = null"
+ @click="openDeactivateStaffModal(member); openStaffMenuId = null"
  >
  <TrashIcon class="h-4 w-4 shrink-0" />
  Remove
@@ -282,7 +342,7 @@
  <table class="dashboard-table min-w-full">
  <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
  <tr>
- <th v-if="canManageDepartments" class="w-10 text-center">
+ <th v-if="canRemoveStaff" class="w-10 text-center">
  <Checkbox
  :model-value="paginatedStaff.length > 0 && selectedStaffForBulk.length === paginatedStaff.length"
  @update:model-value="toggleSelectAllStaff"
@@ -308,7 +368,7 @@
  v-for="member in paginatedStaff"
  :key="member.id"
  >
- <td v-if="canManageDepartments" class="text-center">
+ <td v-if="canRemoveStaff" class="text-center">
  <Checkbox
  :model-value="selectedStaffForBulk.some(s => s.id === member.id)"
  @update:model-value="(checked) => toggleStaffSelection(member, checked)"
@@ -354,9 +414,10 @@
  <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
  </button>
  <button
+ v-if="canRemoveStaff"
  type="button"
  class="dashboard-table__action-btn hover:!text-red-600 dark:hover:!text-red-400"
- @click="handleDeleteStaff(member)"
+ @click="openDeactivateStaffModal(member)"
  >
  <TrashIcon class="h-3.5 w-3.5 shrink-0" />
  </button>
@@ -391,7 +452,7 @@
  <button
  type="button"
  class="flex w-full items-center justify-center px-3 py-2.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
- @click="handleDeleteStaff(member); openStaffMenuId = null"
+ @click="openDeactivateStaffModal(member); openStaffMenuId = null"
  >
  <TrashIcon class="h-5 w-5" />
  </button>
@@ -402,77 +463,152 @@
  </tbody>
  </table>
  </div>
+ </template>
+
+ <template v-else>
+ <div
+ v-if="!isStaffFullscreen"
+ class="space-y-2.5 px-0.5 md:hidden"
+ >
+ <div
+ v-for="member in paginatedRemovedStaff"
+ :key="`removed-mobile-${member.id}`"
+ class="rounded-xl bg-white/95 p-3 shadow-none backdrop-blur-sm dark:bg-white/[0.04]"
+ >
+ <div class="flex items-start justify-between gap-2">
+ <div class="min-w-0 flex-1">
+ <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
+ {{ member.firstName }} {{ member.lastName }}
+ </p>
+ <p v-if="member.position" class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+ {{ member.position }}
+ </p>
+ <p class="mt-1 truncate text-[11px] text-gray-500 dark:text-gray-500">
+ {{ member.email }}
+ </p>
+ <div class="mt-2 flex flex-wrap items-center gap-1.5">
+ <span
+ class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset"
+ :class="[ member.role === 'manager' ? 'bg-primary-500/10 text-primary-700 ring-primary-500/20 dark:bg-primary-400/10 dark:text-primary-300 dark:ring-primary-400/25' : member.role === 'intern' ? 'bg-blue-500/10 text-blue-700 ring-blue-500/20 dark:bg-blue-400/10 dark:text-blue-300 dark:ring-blue-400/25' : 'bg-gray-500/10 text-gray-700 ring-gray-500/15 dark:bg-gray-400/10 dark:text-gray-300 dark:ring-gray-500/20', ]"
+ >
+ {{ member.role }}
+ </span>
+ <span
+ class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize tracking-wide ring-1 ring-inset bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25"
+ >
+ Removed
+ </span>
+ </div>
+ </div>
+ <button
+ type="button"
+ class="shrink-0 rounded-lg p-1.5 text-primary-600 transition-colors hover:bg-primary-50 disabled:opacity-50 dark:text-primary-400 dark:hover:bg-primary-900/25"
+ :disabled="reactivateBusyId === member.id"
+ :title="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
+ @click="openReactivateStaffModal(member)"
+ >
+ <ArrowUturnLeftIcon class="h-5 w-5" />
+ </button>
+ </div>
+ </div>
  </div>
 
+ <div
+ :class="[
+ isStaffFullscreen ? 'min-h-0 overflow-auto' : 'hidden min-h-0 overflow-x-auto md:block',
+ ]"
+ >
+ <table class="dashboard-table min-w-full">
+ <thead :class="isStaffFullscreen ? 'sticky top-0 z-10' : ''">
+ <tr>
+ <th>Name</th>
+ <th class="hidden sm:table-cell">Position</th>
+ <th>Role</th>
+ <th class="hidden md:table-cell">Email</th>
+ <th class="dashboard-table__col-status">Status</th>
+ <th class="dashboard-table__col-actions">
+ <span class="sr-only">Actions</span>
+ </th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr v-for="member in paginatedRemovedStaff" :key="member.id">
+ <td>
+ <span class="dashboard-table__primary">{{ member.firstName }} {{ member.lastName }}</span>
+ </td>
+ <td class="hidden sm:table-cell">
+ <span class="dashboard-table__muted">{{ member.position || EMPTY_CELL }}</span>
+ </td>
+ <td>
+ <DashboardTableBadge
+ :badge-class="staffRoleBadgeClass(member.role)"
+ :label="member.role"
+ />
+ </td>
+ <td class="hidden md:table-cell">
+ <span class="dashboard-table__muted block max-w-[12rem] truncate" :title="member.email">{{ member.email }}</span>
+ </td>
+ <td class="dashboard-table__col-status">
+ <DashboardTableBadge
+ badge-class="bg-red-500/10 text-red-800 ring-red-500/20 dark:bg-red-400/10 dark:text-red-300 dark:ring-red-400/25"
+ label="Removed"
+ />
+ </td>
+ <td class="dashboard-table__col-actions">
+ <div class="dashboard-table__action-group" @click.stop>
+ <button
+ type="button"
+ class="dashboard-table__action-btn text-primary-600 hover:!text-primary-700 dark:text-primary-400 dark:hover:!text-primary-300"
+ :disabled="reactivateBusyId === member.id"
+ :title="reactivateBusyId === member.id ? 'Reactivating…' : 'Reactivate'"
+ @click="openReactivateStaffModal(member)"
+ >
+ <ArrowUturnLeftIcon class="h-3.5 w-3.5 shrink-0" />
+ </button>
+ </div>
+ </td>
+ </tr>
+ </tbody>
+ </table>
+ </div>
+ </template>
+
  <DashboardTablePagination
- v-if="staff.length > 0 && !isStaffFullscreen"
+ v-if="rosterPaginationTotal > 0 && !isStaffFullscreen"
  :current-page="staffCurrentPage"
  :items-per-page="staffItemsPerPage"
- :total="staff.length"
+ :total="rosterPaginationTotal"
  @page-change="handleStaffPageChange"
  />
 
  <!-- Fullscreen: pagination pinned inside overlay -->
  <DashboardTablePagination
- v-if="isStaffFullscreen && staff.length > 0"
+ v-if="isStaffFullscreen && rosterPaginationTotal > 0"
  class="shrink-0"
  style="padding-bottom: env(safe-area-inset-bottom, 0px)"
  :current-page="staffCurrentPage"
  :items-per-page="staffItemsPerPage"
- :total="staff.length"
+ :total="rosterPaginationTotal"
  @page-change="handleStaffPageChange"
  />
  </div>
  </div>
+ </div>
  </Teleport>
 
- <!-- Bulk Delete Staff Modal -->
- <Modal
- v-model="showBulkDeleteStaffModal"
- @update:model-value="(v: boolean) => { showBulkDeleteStaffModal = v; if (!v) bulkDeleteStaffConfirmed = false }"
- size="md"
- >
- <template #header>
- <div class="flex items-center gap-2.5">
- <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
- <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
- </div>
- <div class="min-w-0">
- <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Remove selected staff</h3>
- <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedStaffForBulk.length }} staff member{{ selectedStaffForBulk.length !== 1 ? 's' : '' }} selected</p>
- </div>
- </div>
- </template>
- <div class="space-y-3">
- <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
- <p class="text-xs text-red-800 dark:text-red-200">
- They will be removed from your team and will not be able to sign in. Past receipts and activity logs will still show their name.
- </p>
- </div>
- <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
- <Checkbox
- v-model="bulkDeleteStaffConfirmed"
- label="I understand these staff members will be removed and cannot sign in."
- size="sm"
- wrapper-class="items-start"
- label-class="text-xs text-gray-700 dark:text-gray-300"
+ <DeactivateStaffModal
+ v-model="showDeactivateStaffModal"
+ :staff="staffPendingDeactivation"
+ :is-processing="isDeactivatingStaff"
+ @confirm="handleConfirmDeactivateStaff"
  />
- </div>
- </div>
- <template #footer>
- <Button variant="outline" size="sm" @click="showBulkDeleteStaffModal = false; bulkDeleteStaffConfirmed = false" class="!rounded-2xl">Cancel</Button>
- <Button
- variant="danger"
- size="sm"
- :disabled="!bulkDeleteStaffConfirmed || isBulkDeletingStaff"
- :icon="TrashIcon"
- class="!rounded-2xl"
- @click="handleConfirmBulkDeleteStaff"
- >
- {{ isBulkDeletingStaff ? 'Removing...' : `Remove ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}
- </Button>
- </template>
- </Modal>
+
+ <ReactivateStaffModal
+ v-model="showReactivateStaffModal"
+ :staff="staffPendingReactivation"
+ :is-processing="!!reactivateBusyId"
+ @confirm="handleConfirmReactivateStaff"
+ />
  <!-- Staff Modal -->
  <StaffModal
  v-if="departmentId"
@@ -496,6 +632,7 @@ import {
  ClockIcon,
  PencilSquareIcon,
  TrashIcon,
+ ArrowUturnLeftIcon,
  ArrowsPointingOutIcon,
  XMarkIcon,
  EllipsisVerticalIcon,
@@ -510,9 +647,10 @@ import {
  staffRoleBadgeClass,
  staffStatusBadgeClass,
 } from '~/utils/table-badge-styles'
-import Modal from '~/components/ui/Modal.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
+import DeactivateStaffModal from '~/components/departments/DeactivateStaffModal.vue'
+import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.vue'
 import StaffRoleCycleButton from '~/components/departments/StaffRoleCycleButton.vue'
 import { getNextStaffRole, getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
@@ -560,7 +698,11 @@ const departmentBreadcrumbs = computed(() => {
 
 const department = ref<Department | null>(null)
 const staff = ref<Staff[]>([])
+const removedStaff = ref<Staff[]>([])
+type StaffRosterTab = 'active' | 'removed'
+const rosterTab = ref<StaffRosterTab>('active')
 const isLoadingStaff = ref(true)
+const reactivateBusyId = ref<string | null>(null)
 
 // Staff pagination - load from localStorage per department
 const getStaffInitialPage = (): number => {
@@ -584,11 +726,13 @@ const staffItemsPerPage = ref(100)
 const showStaffModal = ref(false)
 const editingStaff = ref<Staff | null>(null)
 
-// Bulk delete staff
+// Bulk remove / lifecycle modals
 const selectedStaffForBulk = ref<Staff[]>([])
-const showBulkDeleteStaffModal = ref(false)
-const bulkDeleteStaffConfirmed = ref(false)
-const isBulkDeletingStaff = ref(false)
+const showDeactivateStaffModal = ref(false)
+const staffPendingDeactivation = ref<Staff | Staff[] | null>(null)
+const isDeactivatingStaff = ref(false)
+const showReactivateStaffModal = ref(false)
+const staffPendingReactivation = ref<Staff | null>(null)
 const toast = useAppToast()
 
 const departmentsStore = useDepartmentsStore()
@@ -642,9 +786,8 @@ const isManager = computed(() => {
  currentStaffMember.value.departmentId === department.value.id
 })
 // Get permissions
-const { canCreateStaff, canManage } = usePermissions()
-// Only super admins can create staff (managers cannot create staff)
-// Managers can edit/delete staff but not create new staff
+const { canCreateStaff, canManage, canRemoveStaff } = usePermissions()
+// Only super admins can create or remove staff (managers can edit roles/details)
 const canManageDepartments = computed(() => canManage.value)
 const canCreateNewStaff = computed(() => canCreateStaff.value)
 
@@ -657,6 +800,65 @@ const paginatedStaff = computed(() => {
  return staff.value.slice(start, end)
 })
 
+const paginatedRemovedStaff = computed(() => {
+ const start = (staffCurrentPage.value - 1) * staffItemsPerPage.value
+ const end = start + staffItemsPerPage.value
+ return removedStaff.value.slice(start, end)
+})
+
+const rosterPaginationTotal = computed(() =>
+ rosterTab.value === 'active' ? staff.value.length : removedStaff.value.length
+)
+
+watch(rosterTab, () => {
+ staffCurrentPage.value = 1
+ selectedStaffForBulk.value = []
+ openStaffMenuId.value = null
+})
+
+watch(showDeactivateStaffModal, (open) => {
+ if (!open) staffPendingDeactivation.value = null
+})
+
+watch(showReactivateStaffModal, (open) => {
+ if (!open) staffPendingReactivation.value = null
+})
+
+function syncDepartmentFromStore() {
+ const updated = departmentsStore.getDepartmentById(departmentId.value)
+ if (updated) department.value = { ...updated }
+}
+
+function applyStaffRemoved(member: Staff) {
+ staff.value = staff.value.filter((s) => s.id !== member.id)
+ const removed: Staff = { ...member, status: 'inactive' }
+ const existing = removedStaff.value.findIndex((s) => s.id === member.id)
+ if (existing === -1) {
+ removedStaff.value = [removed, ...removedStaff.value]
+ } else {
+ removedStaff.value[existing] = removed
+ }
+ selectedStaffForBulk.value = selectedStaffForBulk.value.filter((s) => s.id !== member.id)
+ syncDepartmentManagerFromStaff()
+ syncDepartmentFromStore()
+}
+
+function applyStaffReactivated(member: Staff) {
+ removedStaff.value = removedStaff.value.filter((s) => s.id !== member.id)
+ const active: Staff = {
+ ...member,
+ status: 'active',
+ removedAt: undefined,
+ removedBy: undefined,
+ }
+ if (!staff.value.some((s) => s.id === member.id)) {
+ staff.value = [active, ...staff.value]
+ }
+ syncDepartmentManagerFromStaff()
+ syncDepartmentFromStore()
+ rosterTab.value = 'active'
+}
+
 const toggleStaffSelection = (member: Staff, checked: boolean) => {
  const idx = selectedStaffForBulk.value.findIndex(s => s.id === member.id)
  if (checked && idx === -1) selectedStaffForBulk.value.push(member)
@@ -666,28 +868,66 @@ const toggleSelectAllStaff = (checked: boolean) => {
  if (checked) selectedStaffForBulk.value = [...paginatedStaff.value]
  else selectedStaffForBulk.value = []
 }
-const openBulkDeleteStaffModal = () => {
- bulkDeleteStaffConfirmed.value = false
- showBulkDeleteStaffModal.value = true
+function openDeactivateStaffModal(target: Staff | Staff[]) {
+ staffPendingDeactivation.value = target
+ showDeactivateStaffModal.value = true
 }
-const handleConfirmBulkDeleteStaff = async () => {
- if (!bulkDeleteStaffConfirmed.value || selectedStaffForBulk.value.length === 0) return
- isBulkDeletingStaff.value = true
- const ids = selectedStaffForBulk.value.map(s => s.id)
- const count = ids.length
+
+const openBulkDeleteStaffModal = () => {
+ if (selectedStaffForBulk.value.length === 0) return
+ openDeactivateStaffModal([...selectedStaffForBulk.value])
+}
+
+async function handleConfirmDeactivateStaff() {
+ const pending = staffPendingDeactivation.value
+ if (!pending) return
+
+ const targets = Array.isArray(pending) ? pending : [pending]
+ if (!targets.length) return
+
+ isDeactivatingStaff.value = true
+ const count = targets.length
+
  try {
- for (const id of ids) {
- await staffStore.deleteStaff(id)
+ for (const member of targets) {
+ const removed = await staffStore.deleteStaff(member.id)
+ applyStaffRemoved(removed)
  }
  selectedStaffForBulk.value = []
- showBulkDeleteStaffModal.value = false
- bulkDeleteStaffConfirmed.value = false
- await loadDepartmentData()
+ showDeactivateStaffModal.value = false
+ staffPendingDeactivation.value = null
  toast.success(`${count} staff member${count !== 1 ? 's' : ''} removed`)
- } catch (error: any) {
- toast.error(error.message || 'Failed to remove some staff members')
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Failed to remove staff member'
+ toast.error(message)
  } finally {
- isBulkDeletingStaff.value = false
+ isDeactivatingStaff.value = false
+ }
+}
+
+function openReactivateStaffModal(member: Staff) {
+ staffPendingReactivation.value = member
+ showReactivateStaffModal.value = true
+}
+
+async function handleConfirmReactivateStaff() {
+ const member = staffPendingReactivation.value
+ if (!member) return
+
+ reactivateBusyId.value = member.id
+ const name = `${member.firstName} ${member.lastName}`.trim()
+
+ try {
+ const reactivated = await staffStore.reactivateStaff(member.id)
+ applyStaffReactivated(reactivated)
+ showReactivateStaffModal.value = false
+ staffPendingReactivation.value = null
+ toast.success(`${name} was reactivated`)
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Failed to reactivate staff member'
+ toast.error(message)
+ } finally {
+ reactivateBusyId.value = null
  }
 }
 
@@ -755,6 +995,12 @@ const loadDepartmentData = async () => {
  await staffStore.fetchStaffByDepartment(departmentId.value)
  // Get staff from store getter (it's a function that takes departmentId)
  staff.value = staffStore.getStaffByDepartment(departmentId.value)
+
+ if (canRemoveStaff.value) {
+ removedStaff.value = await staffStore.fetchInactiveStaffByDepartment(departmentId.value)
+ } else {
+ removedStaff.value = []
+ }
 
  // Get current staff member data (for staff users and to check if user is a manager)
  // This helps determine if a super admin is also a manager in this department
@@ -828,24 +1074,6 @@ const handleToggleStaffRole = async (staffMember: Staff) => {
  toast.error(message)
  } finally {
  roleToggleBusyId.value = null
- }
-}
-
-const handleDeleteStaff = async (staffMember: Staff) => {
- const name = `${staffMember.firstName} ${staffMember.lastName}`.trim()
- if (
- !confirm(
- `${name} will be removed from your team and will not be able to sign in. Past receipts and activity logs will still show their name. Continue?`
- )
- ) {
- return
- }
- try {
- await staffStore.deleteStaff(staffMember.id)
- await loadDepartmentData()
- toast.success(`${name} was removed`)
- } catch (error: any) {
- toast.error(error.message || 'Failed to remove staff member')
  }
 }
 

@@ -15,6 +15,56 @@ import type { Staff } from '~/composables/useStaff'
 import type { Department } from '~/composables/useDepartments'
 import { getFirebaseConfig } from '~/config/firebase.config'
 import { sendUserEmailVerification } from '~/utils/emailVerification'
+import { resolveApiPath } from '~/utils/api-url'
+
+function isActiveStaffStatus(status: Staff['status'] | undefined): boolean {
+ return (status || 'active') === 'active'
+}
+
+function isRemovedStaffStatus(status: Staff['status'] | undefined): boolean {
+ return status === 'inactive'
+}
+
+function parseStaffLifecycleApiError(error: any, fallback: string): Error {
+ const dataMessage =
+ error?.data?.message ||
+ error?.data?.statusMessage ||
+ (typeof error?.response?._data?.message === 'string' ? error.response._data.message : undefined)
+ const status = error?.statusCode ?? error?.status ?? error?.response?.status
+ if (status === 503) {
+ return new Error(
+ dataMessage ||
+ 'This action requires Firebase Admin on the server. Set FIREBASE_SERVICE_ACCOUNT_JSON in .env and restart.'
+ )
+ }
+ if (status === 403) {
+ return new Error(dataMessage || 'Only the store owner can manage staff access')
+ }
+ return new Error(dataMessage || error?.message || fallback)
+}
+
+async function assertStaffPlanCapacity(storeId: string): Promise<void> {
+ const userStore = useUserStore()
+ if (!userStore.userData) {
+ const authStore = useAuthStore()
+ if (authStore.currentUser) {
+ await userStore.fetchUserData(authStore.currentUser.uid)
+ }
+ }
+ const plan = (userStore.userData?.subscription as SubscriptionPlan) || 'storvv_micro'
+ const limits = getPlanLimits(plan)
+ const departmentsStore = useDepartmentsStore()
+ const staffCountInStore = departmentsStore.departments
+ .filter((d) => d.storeId === storeId)
+ .reduce((sum, d) => sum + (d.staffCount || 0), 0)
+ if (limits.maxStaffPerStore >= 0 && staffCountInStore >= limits.maxStaffPerStore) {
+ const msg =
+ plan === 'storvv_micro'
+ ? 'Storvv Micro allows up to 2 staff per store. Upgrade to Medium or Enterprise for more.'
+ : `Your plan allows up to ${limits.maxStaffPerStore} staff per store. Upgrade to Enterprise for unlimited.`
+ throw new Error(msg)
+ }
+}
 
 const getStoreMemberDoc = (
  db: Firestore,
@@ -32,14 +82,20 @@ export const useStaffStore = defineStore('staff', {
 
  getters: {
  totalStaff: (state) => state.staff.length,
- getStaffByDepartment: (state) => (departmentId: string) => 
- state.staff.filter(s => s.departmentId === departmentId),
+ getStaffByDepartment: (state) => (departmentId: string) =>
+ state.staff.filter(
+ (s) => s.departmentId === departmentId && (s.status || 'active') === 'active'
+ ),
  getStaffMember: (state) => (staffId: string) => 
  state.staff.find(s => s.id === staffId),
  getCurrentStaffMember: (state) => {
  const authStore = useAuthStore()
  if (!authStore.currentUser) return null
- return state.staff.find(s => s.authUid === authStore.currentUser?.uid) || null
+ return (
+ state.staff.find(
+ (s) => s.authUid === authStore.currentUser?.uid && isActiveStaffStatus(s.status)
+ ) || null
+ )
  },
  },
 
@@ -132,11 +188,13 @@ export const useStaffStore = defineStore('staff', {
  return dateB - dateA
  })
 
+ const activeStaff = allStaff.filter((s) => isActiveStaffStatus(s.status))
+
  // Security rules now rely on members docs for store-level authorization.
  // Backfill missing membership docs when super admin fetches staff.
  if (authStore.currentUser.uid === userId) {
  await Promise.allSettled(
- allStaff
+ activeStaff
  .filter((s) => s.authUid)
  .map((s) =>
  setDoc(
@@ -157,8 +215,6 @@ export const useStaffStore = defineStore('staff', {
  )
  }
 
- const staff = allStaff
-
  // Populate department names
  const departmentsStore = useDepartmentsStore()
  const departmentMap = new Map<string, string>()
@@ -176,7 +232,7 @@ export const useStaffStore = defineStore('staff', {
  departmentMap.set(d.id, d.name)
  })
 
- this.staff = staff.map(s => ({
+ this.staff = activeStaff.map(s => ({
  ...s,
  departmentName: departmentMap.get(s.departmentId) || 'Unknown',
  }))
@@ -272,7 +328,8 @@ export const useStaffStore = defineStore('staff', {
  this.staff = this.staff.filter(s => s.departmentId !== departmentId)
  
  // Add newly fetched staff for this department
- const staffWithDepartmentName = staff.map(s => ({
+ const activeDepartmentStaff = staff.filter((s) => isActiveStaffStatus(s.status))
+ const staffWithDepartmentName = activeDepartmentStaff.map(s => ({
  ...s,
  departmentName: department?.name || 'Unknown',
  }))
@@ -286,6 +343,62 @@ export const useStaffStore = defineStore('staff', {
  return []
  } finally {
  this.loading = false
+ }
+ },
+
+ /** Inactive (removed) staff for a department — owner roster / reactivation */
+ async fetchInactiveStaffByDepartment(departmentId: string): Promise<Staff[]> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) return []
+
+ const db = useFirestore().getFirestoreInstance()
+ if (!db) return []
+
+ const authStore = useAuthStore()
+ if (!authStore.currentUser) return []
+
+ const storeId = await getCurrentStoreId()
+ if (!storeId) return []
+
+ const userId = await getQueryUserId()
+ if (!userId) return []
+
+ try {
+ const staffRef = getStaffCollection(db, userId, storeId, departmentId)
+ const querySnapshot = await getDocs(staffRef)
+ const inactive: Staff[] = []
+
+ querySnapshot.forEach((docSnapshot) => {
+ const data = docSnapshot.data()
+ if (data.createdBy === userId && isRemovedStaffStatus(data.status as Staff['status'])) {
+ inactive.push({
+ id: docSnapshot.id,
+ ...data,
+ departmentId,
+ storeId,
+ } as Staff)
+ }
+ })
+
+ inactive.sort((a, b) => {
+ const sortKey = (s: Staff) => {
+ const removed = s.removedAt as { toMillis?: () => number } | undefined
+ const updated = s.updatedAt as { toMillis?: () => number } | undefined
+ return removed?.toMillis?.() || updated?.toMillis?.() || 0
+ }
+ return sortKey(b) - sortKey(a)
+ })
+
+ const departmentsStore = useDepartmentsStore()
+ const department =
+ departmentsStore.getDepartmentById(departmentId) ||
+ (await departmentsStore.fetchDepartment(departmentId))
+ const departmentName = department?.name || 'Unknown'
+
+ return inactive.map((s) => ({ ...s, departmentName }))
+ } catch (error: any) {
+ console.error('Error fetching removed staff:', error)
+ return []
  }
  },
 
@@ -689,11 +802,14 @@ export const useStaffStore = defineStore('staff', {
  }
  },
 
- // Delete a staff member
- async deleteStaff(staffId: string) {
- const db = useFirestore().getFirestoreInstance()
- if (!db) {
- throw new Error('Firestore not initialized')
+ // Deactivate staff (soft-delete roster + disable Firebase Auth login)
+ async deleteStaff(staffId: string): Promise<Staff> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const member = this.getStaffMember(staffId) || (await this.fetchStaffMember(staffId))
+ if (!member) throw new Error('Staff member not found')
+ this.staff = this.staff.filter((s) => s.id !== staffId)
+ return { ...member, status: 'inactive' as const }
  }
 
  const authStore = useAuthStore()
@@ -707,54 +823,133 @@ export const useStaffStore = defineStore('staff', {
  throw new Error('Staff member not found or access denied')
  }
 
- // Get userId, storeId, and departmentId for hierarchical path
- const userId = authStore.currentUser.uid
- const storeId = await getCurrentStoreId()
+ const ownerUserId = authStore.currentUser.uid
+ const storeId = staffMember.storeId || (await getCurrentStoreId())
  if (!storeId) {
  throw new Error('No store selected')
  }
  const departmentId = staffMember.departmentId
- 
- // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
- const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
- await deleteDoc(staffRef)
- if (staffMember.authUid) {
- await deleteDoc(getStoreMemberDoc(db, userId, storeId, staffMember.authUid))
- }
 
- // Update department staff count (verify department belongs to user)
+ const token = await authStore.currentUser.getIdToken()
+ await $fetch(resolveApiPath('/api/staff/deactivate'), {
+ method: 'POST',
+ headers: { Authorization: `Bearer ${token}` },
+ body: {
+ ownerUserId,
+ storeId,
+ departmentId,
+ staffId,
+ },
+ })
+
  const departmentsStore = useDepartmentsStore()
  const department = departmentsStore.getDepartmentById(staffMember.departmentId)
- if (department && department.createdBy === authStore.currentUser.uid) {
- // Pass storeId from department to avoid "No store selected" error
- await departmentsStore.updateStaffCount(staffMember.departmentId, Math.max(0, department.staffCount - 1), department.storeId)
- 
- // If this staff member was the manager, clear the manager fields (set to "not assigned")
+ if (department && department.createdBy === ownerUserId) {
+ const newCount = Math.max(0, (department.staffCount || 0) - 1)
+ const deptPatch: Partial<Department> = { staffCount: newCount }
  if (staffMember.role === 'manager' && department.managerId === staffId) {
- const departmentRef = getDepartmentDocument(db, userId, storeId, staffMember.departmentId)
- await updateDoc(departmentRef, {
- manager: deleteField(),
- managerId: deleteField(),
- updatedAt: serverTimestamp(),
- })
- 
- // Update local state to reflect the change immediately (set to undefined so UI shows "Not assigned")
+ deptPatch.manager = undefined
+ deptPatch.managerId = undefined
+ }
  const deptIndex = departmentsStore.departments.findIndex(d => d.id === staffMember.departmentId)
  if (deptIndex > -1) {
  departmentsStore.departments[deptIndex] = {
  ...departmentsStore.departments[deptIndex],
- manager: undefined,
- managerId: undefined,
+ ...deptPatch,
  } as Department
  }
  }
+
+ this.staff = this.staff.filter(s => s.id !== staffId)
+ return { ...staffMember, status: 'inactive' as const }
+ } catch (error: any) {
+ console.error('Error deactivating staff:', error)
+ throw parseStaffLifecycleApiError(error, 'Failed to remove staff')
+ }
+ },
+
+ // Reactivate removed staff (restore Firestore + enable Auth)
+ async reactivateStaff(staffId: string): Promise<Staff> {
+ const { isDemoModeActive } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const member = await this.fetchStaffMember(staffId)
+ if (!member) throw new Error('Staff member not found')
+ const reactivated = { ...member, status: 'active' as const, removedAt: undefined, removedBy: undefined }
+ if (!this.staff.some((s) => s.id === staffId)) this.staff.unshift(reactivated)
+ return reactivated
  }
 
- // Remove from local state
- this.staff = this.staff.filter(s => s.id !== staffId)
+ const authStore = useAuthStore()
+ if (!authStore.currentUser) {
+ throw new Error('User must be authenticated')
+ }
+
+ try {
+ const staffMember = await this.fetchStaffMember(staffId)
+ if (!staffMember || staffMember.createdBy !== authStore.currentUser.uid) {
+ throw new Error('Staff member not found or access denied')
+ }
+ if (!isRemovedStaffStatus(staffMember.status)) {
+ throw new Error('Only removed staff can be reactivated')
+ }
+
+ const ownerUserId = authStore.currentUser.uid
+ const storeId = staffMember.storeId || (await getCurrentStoreId())
+ if (!storeId) {
+ throw new Error('No store selected')
+ }
+
+ await assertStaffPlanCapacity(storeId)
+
+ const token = await authStore.currentUser.getIdToken()
+ await $fetch(resolveApiPath('/api/staff/reactivate'), {
+ method: 'POST',
+ headers: { Authorization: `Bearer ${token}` },
+ body: {
+ ownerUserId,
+ storeId,
+ departmentId: staffMember.departmentId,
+ staffId,
+ },
+ })
+
+ const departmentsStore = useDepartmentsStore()
+ const department = departmentsStore.getDepartmentById(staffMember.departmentId)
+ if (department && department.createdBy === ownerUserId) {
+ const newCount = (department.staffCount || 0) + 1
+ const deptPatch: Partial<Department> = { staffCount: newCount }
+ if (
+ staffMember.role === 'manager' &&
+ !department.managerId &&
+ staffMember.firstName
+ ) {
+ deptPatch.manager = `${staffMember.firstName} ${staffMember.lastName}`.trim()
+ deptPatch.managerId = staffId
+ }
+ const deptIndex = departmentsStore.departments.findIndex(
+ (d) => d.id === staffMember.departmentId
+ )
+ if (deptIndex > -1) {
+ departmentsStore.departments[deptIndex] = {
+ ...departmentsStore.departments[deptIndex],
+ ...deptPatch,
+ } as Department
+ }
+ }
+
+ const reactivated: Staff = {
+ ...staffMember,
+ status: 'active',
+ removedAt: undefined,
+ removedBy: undefined,
+ }
+ if (!this.staff.some((s) => s.id === staffId)) {
+ this.staff.unshift(reactivated)
+ }
+ return reactivated
  } catch (error: any) {
- console.error('Error deleting staff:', error)
- throw new Error(error.message || 'Failed to delete staff')
+ console.error('Error reactivating staff:', error)
+ throw parseStaffLifecycleApiError(error, 'Failed to reactivate staff')
  }
  },
 
@@ -782,8 +977,7 @@ export const useStaffStore = defineStore('staff', {
  if (userStore.userData?.role === 'staff') {
  // First check if staff member is already in local state (from fetchStaff)
  const cachedStaff = this.getCurrentStaffMember
- if (cachedStaff && cachedStaff.storeId) {
- // console.log('[StaffStore] Found staff member in cache:', cachedStaff.storeId)
+ if (cachedStaff?.storeId && isActiveStaffStatus(cachedStaff.status)) {
  return cachedStaff
  }
 
@@ -906,6 +1100,10 @@ export const useStaffStore = defineStore('staff', {
  createdAt: staffData.createdAt,
  updatedAt: staffData.updatedAt,
  createdBy: staffData.createdBy || superadminUserId,
+ }
+
+ if (!isActiveStaffStatus(foundStaff.status)) {
+ return null
  }
  
  // Get department name if available

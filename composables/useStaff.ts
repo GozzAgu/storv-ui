@@ -1,7 +1,8 @@
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, updateDoc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
 import { useFirestore } from './useFirestore'
 import { useFirebaseAuth } from './useFirebaseAuth'
 import { useDepartments } from './useDepartments'
+import { useStaffStore } from '~/stores/staff'
 
 export interface Staff {
  id: string
@@ -16,8 +17,10 @@ export interface Staff {
  role: 'manager' | 'staff' | 'intern'
  hireDate: string
  salary?: number
- status: 'active' | 'inactive' | 'on_leave'
- authUid?: string // Firebase Auth UID
+  status: 'active' | 'inactive' | 'on_leave'
+  removedAt?: unknown
+  removedBy?: string
+  authUid?: string // Firebase Auth UID
  mustChangePassword?: boolean // When true, staff must set a new password on next login
  createdAt: any
  updatedAt: any
@@ -225,30 +228,15 @@ export const useStaff = () => {
  }
  }
 
- // Delete a staff member
- const deleteStaff = async (staffId: string): Promise<void> => {
- const db = getFirestoreInstance()
- if (!db) {
- throw new Error('Firestore not initialized')
+ // Deactivate staff (use Pinia staff store — soft-delete + disable Auth)
+ const deleteStaff = async (staffId: string): Promise<Staff> => {
+ const staffStore = useStaffStore()
+ return staffStore.deleteStaff(staffId)
  }
 
- try {
- const staffMember = await getStaffMember(staffId)
- if (!staffMember) {
- throw new Error('Staff member not found')
- }
-
- const staffRef = doc(db, 'staff', staffId)
- await deleteDoc(staffRef)
-
- // Update department staff count
- const { updateStaffCount } = useDepartments()
- const currentCount = await getDepartmentStaffCount(staffMember.departmentId)
- await updateStaffCount(staffMember.departmentId, Math.max(0, currentCount - 1))
- } catch (error: any) {
- console.error('Error deleting staff:', error)
- throw new Error(error.message || 'Failed to delete staff')
- }
+ const reactivateStaff = async (staffId: string): Promise<Staff> => {
+ const staffStore = useStaffStore()
+ return staffStore.reactivateStaff(staffId)
  }
 
  // Helper function to get department staff count
@@ -272,6 +260,7 @@ export const useStaff = () => {
  createStaff,
  updateStaff,
  deleteStaff,
+ reactivateStaff,
  }
 }
 

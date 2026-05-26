@@ -63,6 +63,9 @@ export const usePermissions = () => {
  return !isStaff.value
  })
 
+ // Remove staff (deactivate + disable Auth): store owner only (matches POST /api/staff/deactivate)
+ const canRemoveStaff = computed(() => userStore.isSuperAdmin)
+
  return {
  isStaff,
  isManager,
@@ -74,6 +77,7 @@ export const usePermissions = () => {
  canManageInventoryItems,
  canCreateInventoryFolders,
  canCreateStaff,
+ canRemoveStaff,
  }
 }
 

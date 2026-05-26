@@ -38,6 +38,8 @@ function formatFirebaseOrPluginCode(code: string, fallback: string): string {
     'auth/too-many-requests': 'Too many failed attempts. Please try again later',
     'auth/network-request-failed': 'Network error. Check your connection and try again',
     'auth/invalid-credential': 'Incorrect email or password',
+    'auth/user-disabled':
+      'This account has been deactivated and cannot sign in. Contact your store owner if you need access restored.',
     'permission-denied': 'Permission denied. Please contact your administrator',
     missingKey: 'Secure storage error (missing key)',
     osError: 'Could not access secure storage on this device',
