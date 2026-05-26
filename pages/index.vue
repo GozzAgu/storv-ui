@@ -15,9 +15,9 @@
  </NuxtLink>
  <div class="hidden md:flex items-center gap-6 lg:gap-8">
  <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
- <a href="#setup" class="landing-nav-link hidden lg:inline-block" @click.prevent="scrollToSection('setup')">Setup</a>
+ <a href="#how-it-works" class="landing-nav-link hidden lg:inline-block" @click.prevent="scrollToSection('how-it-works')">How it works</a>
  <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
- <a href="#about" class="landing-nav-link" @click.prevent="scrollToSection('about')">About</a>
+ <a href="#faq" class="landing-nav-link hidden xl:inline-block" @click.prevent="scrollToSection('faq')">FAQ</a>
  <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
  <a
  :href="appOriginUrl"
@@ -92,20 +92,20 @@
  @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
  >Features</a>
  <a
- href="#setup"
+ href="#how-it-works"
  class="landing-mobile-nav-link"
- @click.prevent="scrollToSection('setup'); mobileMenuOpen = false"
- >Setup</a>
+ @click.prevent="scrollToSection('how-it-works'); mobileMenuOpen = false"
+ >How it works</a>
  <a
  href="#pricing"
  class="landing-mobile-nav-link"
  @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false"
  >Plans</a>
  <a
- href="#about"
+ href="#faq"
  class="landing-mobile-nav-link"
- @click.prevent="scrollToSection('about'); mobileMenuOpen = false"
- >About</a>
+ @click.prevent="scrollToSection('faq'); mobileMenuOpen = false"
+ >FAQ</a>
  <a
  href="#contact"
  class="landing-mobile-nav-link landing-mobile-nav-link--last"
@@ -126,124 +126,10 @@
  </Transition>
  </Teleport>
 
- <!-- Marketing showcase: hero, pain points, core features, setup, multi-store -->
+ <!-- Marketing showcase: hero → who → problems → features → setup → multi-store -->
  <LandingShowcase :logo-src="marketingLogoSrc" :app-url="appOriginUrl" />
 
-
- <!-- Who uses Storvv -->
- <section
- id="use-cases"
- data-section-id="use-cases"
- class="landing-who-uses-section scroll-animate scroll-animate-up"
- aria-labelledby="landing-who-heading"
- >
- <div class="landing-who-bg" aria-hidden="true" />
-
- <div class="landing-who-inner">
- <div class="landing-who-layout">
- <div class="landing-who-copy">
- <p class="landing-label landing-label--blue">For any business that sells</p>
- <h2 id="landing-who-heading" class="landing-who-heading">
- Any business can use <span class="landing-who-heading-accent">Storvv</span>
- </h2>
- <p class="landing-who-lede">
- If you sell products and need reliable stock, receipts, and customer records, Storvv fits. Boutiques, workshops, showrooms, and general stores all run on the same simple system.
- </p>
-
- <ul class="landing-who-points">
- <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
- <span class="landing-who-point-num">{{ point.num }}</span>
- <div class="landing-who-point-body">
- <p class="landing-who-point-title">{{ point.title }}</p>
- <p class="landing-who-point-desc">{{ point.description }}</p>
- </div>
- </li>
- </ul>
- </div>
-
- <div class="landing-who-cards">
- <article
- v-for="card in whoUsesCards"
- :key="card.title"
- class="landing-who-card"
- >
- <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" aria-hidden="true" />
- <div class="landing-who-card-content">
- <h3 class="landing-who-card-title">{{ card.title }}</h3>
- <p class="landing-who-card-desc">{{ card.description }}</p>
- </div>
- </article>
- </div>
- </div>
- </div>
- </section>
-
- <!-- About -->
- <section
- id="about"
- data-section-id="about"
- class="landing-about-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
- aria-labelledby="landing-about-heading"
- >
- <div class="landing-about-bg" aria-hidden="true" />
-
- <div class="landing-about-inner">
- <header class="landing-about-header">
- <p class="landing-label landing-label--blue landing-about-label">About Storvv</p>
- <h2 id="landing-about-heading" class="landing-about-title">
- Software that respects how <span class="landing-about-title-accent">your business</span> runs
- </h2>
- <p class="landing-about-lede">
- Clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
- </p>
- </header>
-
- <div class="landing-about-grid">
- <div class="landing-about-highlights">
- <article
- v-for="item in aboutHighlights"
- :key="item.num"
- class="landing-about-card landing-about-card--feature landing-about-animate"
- >
- <div class="landing-about-card-top">
- <span class="landing-about-num">{{ item.num }}</span>
- <component :is="item.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
- </div>
- <h3 class="landing-about-card-title">{{ item.title }}</h3>
- <p class="landing-about-card-desc">{{ item.description }}</p>
- <p class="landing-about-card-detail">{{ item.detail }}</p>
- </article>
- </div>
-
- <div class="landing-about-pillars">
- <article
- v-for="pillar in aboutPillars"
- :key="pillar.title"
- class="landing-about-card landing-about-card--pillar landing-about-animate"
- >
- <component :is="pillar.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
- <div class="landing-about-pillar-body">
- <p class="landing-about-pillar-label">{{ pillar.title }}</p>
- <p class="landing-about-card-desc">{{ pillar.body }}</p>
- </div>
- </article>
- </div>
- </div>
-
- <p class="landing-about-footer">
- See the walkthrough with screenshots in
- <a href="#how-it-works" class="landing-about-link" @click.prevent="scrollToSection('how-it-works')">
- How Storvv works
- </a>
- or
- <a href="#contact" class="landing-about-link" @click.prevent="scrollToSection('contact')">
- talk to us
- </a>.
- </p>
- </div>
- </section>
-
- <!-- How it works: high-impact timeline + gradient preview strip -->
+ <!-- How it works: product walkthrough -->
  <section
  id="how-it-works"
  data-section-id="how-it-works"
@@ -263,16 +149,16 @@
  />
  <div class="pointer-events-none absolute -left-24 top-1/3 h-48 w-48 rounded-full bg-primary-500/12 blur-3xl" />
  <div class="relative mx-auto max-w-lg lg:mx-0">
- <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-primary-400 sm:text-[11px]">
- The playbook
+ <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary-400 sm:text-sm">
+ How it works
  </p>
  <h2
- class="mt-1.5 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl"
+ class="mt-2 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl"
  >
- How Storvv works
+ From signup to a calmer floor
  </h2>
- <p class="mt-2 max-w-md text-[11px] font-medium leading-relaxed text-slate-400 sm:text-xs sm:leading-relaxed">
- Five crisp steps from a fresh account to a floor that runs calmer, every day.
+ <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
+ Five steps. Same flow whether you run one shop or several.
  </p>
 
  <div class="mt-7 space-y-2 sm:mt-8 sm:space-y-2.5">
@@ -306,11 +192,11 @@
  <component :is="step.icon" class="h-4 w-4" aria-hidden="true" />
  </div>
  <div class="min-w-0 pb-0.5 pt-0.5">
- <h3 class="text-[12px] font-semibold leading-snug text-white sm:text-[13px]">
+ <h3 class="text-sm font-semibold leading-snug text-white sm:text-base">
  {{ step.title }}
  </h3>
  <div
- class="mt-1 text-[11px] leading-[1.55] text-slate-400 sm:text-xs sm:leading-relaxed [&_span]:font-medium [&_span]:text-primary-100"
+ class="mt-1.5 text-sm leading-relaxed text-slate-400 [&_span]:font-medium [&_span]:text-primary-100"
  v-html="step.html"
  />
  </div>
@@ -399,7 +285,68 @@
  </div>
  </section>
 
- <!-- Product: core → supporting → enterprise → more features (tabs) -->
+ <!-- About -->
+ <section
+ id="about"
+ data-section-id="about"
+ class="landing-about-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+ aria-labelledby="landing-about-heading"
+ >
+ <div class="landing-about-bg" aria-hidden="true" />
+
+ <div class="landing-about-inner">
+ <header class="landing-about-header">
+ <p class="landing-label landing-label--blue landing-about-label">Why Storvv</p>
+ <h2 id="landing-about-heading" class="landing-about-title">
+ Software that fits how <span class="landing-about-title-accent">your business</span> runs
+ </h2>
+ <p class="landing-about-lede">
+ Fewer tabs, fewer surprises, and a layout your team learns in days, not weeks.
+ </p>
+ </header>
+
+ <div class="landing-about-grid">
+ <div class="landing-about-highlights">
+ <article
+ v-for="item in aboutHighlights"
+ :key="item.num"
+ class="landing-about-card landing-about-card--feature landing-about-animate"
+ >
+ <div class="landing-about-card-top">
+ <span class="landing-about-num">{{ item.num }}</span>
+ <component :is="item.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
+ </div>
+ <h3 class="landing-about-card-title">{{ item.title }}</h3>
+ <p class="landing-about-card-desc">{{ item.description }}</p>
+ <p class="landing-about-card-detail">{{ item.detail }}</p>
+ </article>
+ </div>
+
+ <div class="landing-about-pillars">
+ <article
+ v-for="pillar in aboutPillars"
+ :key="pillar.title"
+ class="landing-about-card landing-about-card--pillar landing-about-animate"
+ >
+ <component :is="pillar.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
+ <div class="landing-about-pillar-body">
+ <p class="landing-about-pillar-label">{{ pillar.title }}</p>
+ <p class="landing-about-card-desc">{{ pillar.body }}</p>
+ </div>
+ </article>
+ </div>
+ </div>
+
+ <p class="landing-about-footer">
+ Compare plans in
+ <a href="#pricing" class="landing-about-link" @click.prevent="scrollToSection('pricing')">Pricing</a>
+ or
+ <a href="#contact" class="landing-about-link" @click.prevent="scrollToSection('contact')">contact us</a>.
+ </p>
+ </div>
+ </section>
+
+ <!-- Product depth: core → supporting → enterprise → more features -->
  <section
  id="capabilities-grid"
  data-section-id="capabilities-grid"
@@ -413,13 +360,13 @@
  style="background-image: radial-gradient(ellipse 72% 55% at 18% 0%, rgb(59 130 246 / 0.07), transparent 50%)"
  />
  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
- <p class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-600 dark:text-primary-400">Product</p>
+ <p class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-600 dark:text-primary-400">Full product</p>
  <h2 class="mt-2 max-w-3xl text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl lg:text-4xl">
- Built for scanning: three big ideas first, then everything else.
+ Everything else Storvv includes
  </h2>
- <p class="mt-3 max-w-2xl text-sm leading-snug text-gray-600 dark:text-gray-400">
- Core differentiators up front. Compact add-ons next. Enterprise lifts the ceiling. Dive into tabs for the rest.</p>
- <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
+ <p class="mt-3 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
+ Core tools first above. Here are add-ons, enterprise options, and more features by category.</p>
+ <p class="mt-2 text-sm text-gray-500 dark:text-gray-500">
  Questions?
  <a
  href="#faq"
@@ -434,9 +381,9 @@
  <!-- Band 1: Core props (classic gap-px grid) -->
  <div id="core-highlights" class="relative border-b border-gray-100 bg-white py-12 dark:border-gray-800 dark:bg-slate-950 sm:py-16">
  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
- <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 sm:text-xl">Core value props</h3>
- <p class="mt-1 max-w-2xl text-sm leading-snug text-gray-600 dark:text-gray-400">
- Inventory, receipts, and team structure: the three things scanners should remember.</p>
+ <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 sm:text-xl">Core strengths</h3>
+ <p class="mt-1 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
+ Inventory, receipts, and how your team is organized.</p>
  </div>
  <div class="relative mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
  <div
@@ -465,9 +412,9 @@
  <!-- Band 2: Supporting -->
  <div class="relative border-b border-gray-100 bg-neutral-50/95 py-12 dark:border-gray-800 dark:bg-slate-900/85 sm:py-16">
  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
- <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 sm:text-xl">Supporting features</h3>
- <p class="mt-1 max-w-2xl text-sm leading-snug text-gray-600 dark:text-gray-400">
- Same airy grid styling as above, with dense copy tightened to ~two lines.</p>
+ <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 sm:text-xl">Supporting tools</h3>
+ <p class="mt-1 max-w-2xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
+ Helpful extras that sit alongside the core workflow.</p>
  </div>
  <div class="relative mx-auto mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
  <div
@@ -596,10 +543,10 @@
  <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-gradient-to-b from-white to-slate-50/65 py-20 dark:from-slate-950 dark:to-slate-900/80 lg:scroll-mt-28 lg:py-28 sm:py-24">
  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
  <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">
- Plans that fit your size
+ Plans that match your stage
  </h2>
- <p class="mt-4 text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto">
- Start free with Micro for a single store; upgrade to Medium for analytics, teams, and a second branch; choose Enterprise for unlimited scale, stock transfers, and copy-from-branch.
+ <p class="mt-4 text-base text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto leading-relaxed">
+ Micro is free for one store. Medium adds analytics, teams, and a second branch. Enterprise covers unlimited scale and multi-store tools.
  </p>
  <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
  Showing prices in {{ pricing.currency }} based on your region.
@@ -720,10 +667,10 @@
  <div class="mx-auto max-w-2xl text-center">
  <p class="text-sm font-semibold uppercase tracking-[0.14em] text-slate-300">Trust</p>
  <h2 class="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
- Security you can trust
+ Built for everyday trust
  </h2>
- <p class="mt-3 text-[15px] leading-relaxed text-slate-300 sm:text-base">
- Sensible safeguards for inventory, receipts, and team access. No flashy stock-photo clutter, just what matters for everyday operations.
+ <p class="mt-3 text-base leading-relaxed text-slate-300">
+ HTTPS sessions, role-based access, and cloud hosting built for uptime.
  </p>
  </div>
 
@@ -791,8 +738,8 @@
  <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-20 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-28 sm:py-24">
  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
  <p class="text-sm uppercase tracking-[0.12em] font-semibold text-gray-600 dark:text-gray-300 text-center">Frequently asked questions</p>
- <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Common questions</h2>
- <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">Answers to help you understand Storvv and billing.</p>
+ <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Quick answers</h2>
+ <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">Setup, plans, and how Storvv fits your store.</p>
  <div class="mt-10 space-y-3">
  <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden">
  <button
@@ -1485,35 +1432,35 @@ const howStorvvWorksSteps = [
  num: '01',
  icon: markRaw(Cog6ToothSolidIcon),
  title: 'Set up your store',
- html: 'Name, currency, timezone, receipts, taxes, and payments your team uses. Everyone sees the same clean defaults.',
+ html: 'Name, currency, taxes, receipts, and payments. Everyone shares the same defaults.',
  },
  {
  sectionId: 'step-2',
  num: '02',
  icon: markRaw(UsersSolidIcon),
- title: 'Departments & staff',
- html: 'Invite people with roles, then tighten folder access so staff only touches what matters.',
+ title: 'Add your team',
+ html: 'Invite staff with roles. Limit folder access so people only see what they need.',
  },
  {
  sectionId: 'step-3',
  num: '03',
  icon: markRaw(RectangleStackSolidIcon),
- title: 'Organize inventory',
- html: 'Templates, Excel imports, SKU and serial-ready fields.<br /><span class="text-slate-500">Enterprise: <span class="font-medium text-primary-100">Copy from branch</span> for layouts without rebuilding stock.</span>',
+ title: 'Load inventory',
+ html: 'Import from Excel or build folders with SKUs and serials.<br /><span class="text-slate-500">Enterprise: <span class="font-medium text-primary-100">copy layouts from another branch</span>.</span>',
  },
  {
  sectionId: 'step-4',
  num: '04',
  icon: markRaw(ReceiptPercentSolidIcon),
- title: 'Sales & receipts',
- html: 'Sell fast with discounts, swaps, returns, multi-pay receipts, light CRM capture as you go.',
+ title: 'Sell and receipt',
+ html: 'Ring sales, discounts, returns, and split payments. Capture customers as you go.',
  },
  {
  sectionId: 'step-5',
  num: '05',
  icon: markRaw(PresentationChartLineSolidIcon),
- title: 'Monitor & analyze',
- html: 'Dashboards, bestselling lines, lows, pacing. Upgrade when you want deeper exports.',
+ title: 'Track performance',
+ html: 'Dashboards for bestsellers, low stock, and daily pace. Export more on higher plans.',
  },
 ]
 
@@ -1808,68 +1755,20 @@ const landingMoreFeaturesPanelModel = computed(() => {
  return { icon: tab.gridIcon, rows: tab.items }
 })
 
-const whoUsesCards = [
-  {
-    icon: CubeIcon,
-    title: 'Inventory your way',
-    description:
-      'Organize by category with the fields you need: sizes, brands, colours, serial numbers, or simple quantities. Every sale and return updates stock automatically.',
-  },
-  {
-    icon: TagIcon,
-    title: 'Sell from any counter',
-    description:
-      'Ring up sales, apply discounts, process returns, and keep customer history whether you are in a shop, depot, or showroom.',
-  },
-  {
-    icon: UserGroupIcon,
-    title: 'Branch-grade access',
-    description:
-      'Permissions match floor and HQ separately, without fragile shared master logins.',
-  },
-] as const
-
-const whoUsesPoints = [
-  {
-    num: '01',
-    title: 'Any product catalog',
-    description:
-      'Clothing, spare parts, furniture, electronics, groceries, or your own mix. Set up categories and fields that match what you actually sell.',
-  },
-  {
-    num: '02',
-    title: 'One shop or many',
-    description:
-      'Start with a single location and add branches when you grow. Each store can stay separate or share what you choose.',
-  },
-  {
-    num: '03',
-    title: 'No special industry required',
-    description:
-      'You do not need custom software per trade. Stock, sales, returns, and customers work the same way for every business type.',
-  },
-  {
-    num: '04',
-    title: 'Your team, your rules',
-    description:
-      'Owners, managers, and floor staff each see what they need. No shared passwords or fragile spreadsheet handoffs.',
-  },
-] as const
-
 const aboutHighlights = [
   {
     num: '01',
     icon: CubeIcon,
-    title: 'One calm system for your business',
-    description: 'Inventory, sales, customers, and team access in one workspace.',
-    detail: 'Set up categories your way and keep counts honest after every transaction.',
+    title: 'One workspace',
+    description: 'Inventory, sales, customers, and team access together.',
+    detail: 'Counts stay honest after every sale and return.',
   },
   {
     num: '02',
     icon: SparklesIcon,
-    title: 'Tools that feel obvious',
-    description: 'Owners keep the overview; managers and staff stay inside clear guardrails.',
-    detail: 'Add branches and analytics when you are ready to grow.',
+    title: 'Clear for every role',
+    description: 'Owners see the full picture. Staff stay in their lane.',
+    detail: 'Add branches and analytics when you are ready.',
   },
 ] as const
 
@@ -1881,12 +1780,12 @@ const aboutPillars = [
  },
  {
  title: 'Team',
- body: 'Roles and permissions that match how shops delegate day to day.',
+ body: 'Roles that match how shops delegate day to day.',
  icon: UserGroupIcon,
  },
  {
  title: 'Scale',
- body: 'From one branch to several, without starting your setup from zero.',
+ body: 'Grow from one branch to many without starting over.',
  icon: BuildingOfficeIcon,
  },
 ] as const

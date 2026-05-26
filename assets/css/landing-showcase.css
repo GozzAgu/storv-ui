@@ -514,6 +514,25 @@ html.dark .landing-about-section .landing-label--blue {
   margin-bottom: 1.5rem;
 }
 
+.landing-problems__pains {
+  margin-bottom: 0.5rem;
+}
+
+.landing-problems__headline--pains {
+  margin-top: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.landing-problems__answer {
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .landing-problems__answer {
+    margin-top: 0;
+  }
+}
+
 .landing-problems__headline {
   font-size: clamp(2rem, 4.5vw, 2.75rem);
   font-weight: 700;

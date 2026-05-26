@@ -29,7 +29,7 @@
             <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">Not sheets.</span>
           </h1>
           <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
-            Inventory, sales, returns and customers, all in one place, always live.
+            Stock, sales, returns, and customers in one live workspace.
           </p>
           <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 5">
             <a :href="appUrl" class="landing-pill-cta landing-pill-cta--hero">
@@ -46,14 +46,62 @@
             </li>
           </ul>
         </div>
-        <a href="#features" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
-          <span class="landing-hero__scroll-hint-text">Explore features</span>
+        <a href="#use-cases" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
+          <span class="landing-hero__scroll-hint-text">See who it is for</span>
           <span class="landing-hero__scroll-hint-icon" aria-hidden="true">↓</span>
         </a>
       </div>
     </section>
 
-    <!-- 2. Problems -->
+    <!-- 2. Who it is for -->
+    <section
+      id="use-cases"
+      data-section-id="use-cases"
+      class="landing-who-uses-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+      aria-labelledby="landing-who-heading"
+    >
+      <div class="landing-who-bg" aria-hidden="true" />
+
+      <div class="landing-who-inner">
+        <div class="landing-who-layout">
+          <div class="landing-who-copy">
+            <p class="landing-label landing-label--blue">Who it is for</p>
+            <h2 id="landing-who-heading" class="landing-who-heading">
+              Built for <span class="landing-who-heading-accent">any business</span> that sells
+            </h2>
+            <p class="landing-who-lede">
+              Boutiques, workshops, showrooms, and general stores use the same simple system.
+            </p>
+
+            <ul class="landing-who-points">
+              <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
+                <span class="landing-who-point-num">{{ point.num }}</span>
+                <div class="landing-who-point-body">
+                  <p class="landing-who-point-title">{{ point.title }}</p>
+                  <p class="landing-who-point-desc">{{ point.description }}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="landing-who-cards">
+            <article
+              v-for="card in whoUsesCards"
+              :key="card.title"
+              class="landing-who-card"
+            >
+              <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" aria-hidden="true" />
+              <div class="landing-who-card-content">
+                <h3 class="landing-who-card-title">{{ card.title }}</h3>
+                <p class="landing-who-card-desc">{{ card.description }}</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Problems -->
     <section
       id="problems"
       data-section-id="landing-problems"
@@ -62,26 +110,11 @@
     >
       <div class="landing-problems__dots landing-dot-grid" aria-hidden="true" />
       <div class="landing-problems__inner">
-        <div>
-          <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
-          <p class="landing-label landing-label--blue">Built for store owners</p>
-          <h2 id="landing-problems-title" class="landing-problems__headline">Storvv fixes all of this.</h2>
-          <p class="landing-problems__lede">
-            One platform. Every store task. Real time. No spreadsheets, no guesswork.
-          </p>
-          <div class="landing-problems__cta-box">
-            <span class="landing-problems__cta-icon" aria-hidden="true">
-              <CheckIcon class="h-5 w-5 text-white" stroke-width="2.5" />
-            </span>
-            <div>
-              <p class="landing-problems__cta-title">Free for 6 months</p>
-              <p class="landing-problems__cta-sub">Any business. No card required.</p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p class="landing-problems__list-label landing-label landing-label--muted">Sound familiar?</p>
+        <div class="landing-problems__pains">
+          <p class="landing-label landing-label--muted">Sound familiar?</p>
+          <h2 id="landing-problems-title" class="landing-problems__headline landing-problems__headline--pains">
+            Store work should not live in chaos.
+          </h2>
           <ul class="m-0 list-none p-0">
             <li
               v-for="item in painPoints"
@@ -94,10 +127,28 @@
             </li>
           </ul>
         </div>
+
+        <div class="landing-problems__answer">
+          <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
+          <p class="landing-label landing-label--blue">The fix</p>
+          <h2 class="landing-problems__headline">One place for every store task.</h2>
+          <p class="landing-problems__lede">
+            Live stock, saved receipts, and clear sales, without spreadsheets or guesswork.
+          </p>
+          <div class="landing-problems__cta-box">
+            <span class="landing-problems__cta-icon" aria-hidden="true">
+              <CheckIcon class="h-5 w-5 text-white" stroke-width="2.5" />
+            </span>
+            <div>
+              <p class="landing-problems__cta-title">Free for 6 months</p>
+              <p class="landing-problems__cta-sub">Any business. No card needed.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 3. Core features -->
+    <!-- 4. Core features -->
     <section
       id="features"
       data-section-id="landing-features"
@@ -108,12 +159,12 @@
       <div class="landing-core__inner">
         <header class="landing-core__header">
           <div>
-            <p class="landing-label landing-label--blue">Core features</p>
+            <p class="landing-label landing-label--blue">What you get</p>
             <h2 id="landing-features-title" class="landing-core__title">
-              Four things your store needs <span class="landing-hero__accent">daily.</span>
+              Four tools you use <span class="landing-hero__accent">every day.</span>
             </h2>
           </div>
-          <p class="landing-label landing-label--muted hidden sm:block">Everything in one place</p>
+          <p class="landing-label landing-label--muted hidden sm:block">All linked together</p>
         </header>
 
         <div class="landing-core__grid">
@@ -136,7 +187,7 @@
       </div>
     </section>
 
-    <!-- 4. Setup -->
+    <!-- 5. Setup -->
     <section
       id="setup"
       data-section-id="landing-setup"
@@ -147,15 +198,15 @@
         <div class="landing-setup__rings" aria-hidden="true" />
         <p class="landing-setup__minutes">15</p>
         <p class="landing-setup__minutes-label">minutes</p>
-        <p class="landing-setup__minutes-caption">From signup to first sale</p>
+        <p class="landing-setup__minutes-caption">Sign up to first sale</p>
       </div>
 
       <div class="landing-setup__content">
         <img :src="logoSrc" alt="" class="landing-setup__logo" width="88" height="36" aria-hidden="true" />
-        <p class="landing-label landing-label--blue">Ridiculously fast setup</p>
+        <p class="landing-label landing-label--blue">Quick setup</p>
         <h2 id="landing-setup-title" class="landing-setup__headline">
-          Your store.<br />
-          Live today.
+          Go live<br />
+          the same day.
         </h2>
         <ol class="landing-setup__steps">
           <li v-for="step in setupSteps" :key="step.num" class="landing-setup__step">
@@ -170,7 +221,7 @@
       </div>
     </section>
 
-    <!-- 5. Multi-store -->
+    <!-- 6. Multi-store (growth) -->
     <section
       id="multi-store"
       data-section-id="landing-multistore"
@@ -190,8 +241,7 @@
             branch.
           </h2>
           <p class="landing-multistore__lede">
-            Whether you have one store or five, Storvv keeps each location completely separate,
-            and gives you full visibility from a single account.
+            One or five locations: separate data per branch, full visibility from one login.
           </p>
 
           <ul class="landing-multistore__features m-0 list-none p-0">
@@ -264,8 +314,11 @@ import {
   ArrowRightIcon,
   ChartBarIcon,
   CheckIcon,
+  CubeIcon,
   DocumentTextIcon,
   PlusIcon,
+  TagIcon,
+  UserGroupIcon,
   UserIcon,
 } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
@@ -274,7 +327,7 @@ const heroSectionRef = ref<HTMLElement | null>(null)
 
 const heroChips = [
   { label: 'Inventory', href: '#features' },
-  { label: 'Sales', href: '#features' },
+  { label: 'Receipts', href: '#features' },
   { label: 'Returns', href: '#features' },
   { label: 'Customers', href: '#features' },
 ] as const
@@ -309,26 +362,67 @@ const appHost = computed(() => {
   }
 })
 
-const painPoints = [
+const whoUsesCards = [
+  {
+    icon: CubeIcon,
+    title: 'Your catalog, your fields',
+    description: 'Sizes, brands, colours, serials, or simple counts. Stock updates on every sale and return.',
+  },
+  {
+    icon: TagIcon,
+    title: 'Sell from any counter',
+    description: 'Receipts, discounts, and returns in one flow, shop, depot, or showroom.',
+  },
+  {
+    icon: UserGroupIcon,
+    title: 'Team access that fits',
+    description: 'Each role sees what they need. No shared passwords or spreadsheet handoffs.',
+  },
+] as const
+
+const whoUsesPoints = [
   {
     num: '01',
-    title: 'Stock counts are always wrong',
-    description: "You find out when a customer asks for something you don't have",
+    title: 'Any product type',
+    description: 'Clothing, parts, furniture, electronics, groceries, or a mix.',
   },
   {
     num: '02',
-    title: 'Receipts disappear',
-    description: "A customer wants a return and you can't prove what they paid",
+    title: 'One shop or many',
+    description: 'Start with one location. Add branches when you grow.',
   },
   {
     num: '03',
-    title: 'No visibility into daily sales',
-    description: 'Nobody can tell you what sold yesterday without checking manually',
+    title: 'No custom build',
+    description: 'Stock, sales, returns, and customers work the same for every trade.',
   },
   {
     num: '04',
-    title: 'Three different spreadsheets',
-    description: 'Each updated differently, never fully in sync',
+    title: 'Clear roles',
+    description: 'Owners, managers, and staff each get the right view.',
+  },
+] as const
+
+const painPoints = [
+  {
+    num: '01',
+    title: 'Stock counts drift',
+    description: 'You learn what is missing only when a customer asks.',
+  },
+  {
+    num: '02',
+    title: 'Receipts go missing',
+    description: 'Returns stall because you cannot prove what was paid.',
+  },
+  {
+    num: '03',
+    title: 'No daily sales picture',
+    description: 'Yesterday’s numbers take manual digging to find.',
+  },
+  {
+    num: '04',
+    title: 'Spreadsheets multiply',
+    description: 'Each file updates differently and never fully matches.',
   },
 ] as const
 
@@ -337,33 +431,29 @@ const coreFeatures = [
     num: '01',
     icon: ArchiveBoxIcon,
     title: 'Inventory',
-    description:
-      'Live stock counts that update automatically with every sale and return. No manual entry ever.',
-    badge: 'Always accurate',
+    description: 'Live counts update with every sale and return. No manual stock sheets.',
+    badge: 'Always in sync',
   },
   {
     num: '02',
     icon: DocumentTextIcon,
     title: 'Sales receipts',
-    description:
-      'Every transaction saved with a date, items, price and payment method. Look up any past sale instantly.',
-    badge: 'Every transaction logged',
+    description: 'Every sale saved with items, price, and payment. Find any receipt fast.',
+    badge: 'Full history',
   },
   {
     num: '03',
     icon: ArrowPathIcon,
     title: 'Returns',
-    description:
-      'Find the original receipt, select items, confirm. Stock restores instantly. No spreadsheet update needed.',
-    badge: 'Stock restored instantly',
+    description: 'Open the original receipt, pick items, confirm. Stock restores right away.',
+    badge: 'Stock restored',
   },
   {
     num: '04',
     icon: UserIcon,
     title: 'Customers',
-    description:
-      'Save names and contact details. View full purchase history. Make returns faster and service more personal.',
-    badge: 'Full purchase history',
+    description: 'Names, contacts, and purchase history in one profile for faster service.',
+    badge: 'Know your buyers',
   },
 ] as const
 
@@ -371,40 +461,40 @@ const setupSteps = [
   {
     num: 1,
     title: '',
-    description: 'No download. Just a browser. Works on phone, tablet, or laptop.',
+    description: 'Works in the browser on phone, tablet, or laptop. Nothing to install.',
   },
   {
     num: 2,
-    title: 'Set your currency and store name',
-    description: 'Quick onboarding takes under 2 minutes.',
+    title: 'Set currency and store name',
+    description: 'Takes about two minutes.',
   },
   {
     num: 3,
-    title: 'Add your products',
-    description: 'Create folders, add items with sizes, brands, colours, your way.',
+    title: 'Add products',
+    description: 'Folders and fields that match how you sell.',
   },
   {
     num: 4,
-    title: 'Invite your team and sell',
-    description: 'Each person sees only what they need. No training required.',
+    title: 'Invite staff and sell',
+    description: 'Each person sees only what their role needs.',
   },
 ] as const
 
 const multiStoreFeatures = [
   {
     icon: PlusIcon,
-    title: 'Separate data per location',
-    description: 'Inventory and sales never mix between branches',
+    title: 'Separate data per branch',
+    description: 'Inventory and sales never mix between locations.',
   },
   {
     icon: ArrowRightIcon,
-    title: 'Switch between stores instantly',
-    description: 'One login, full visibility across all your locations',
+    title: 'Switch stores in one click',
+    description: 'One login across every location you run.',
   },
   {
     icon: ChartBarIcon,
     title: 'Reports per branch',
-    description: 'Know exactly where your business stands, store by store',
+    description: 'See performance store by store.',
   },
 ] as const
 
