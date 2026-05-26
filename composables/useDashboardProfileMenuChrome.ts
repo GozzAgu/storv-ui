@@ -10,7 +10,7 @@ export function useDashboardProfileMenuChrome() {
     'min-w-0 max-w-[9rem] gap-1.5 pl-0.5 pr-1 sm:max-w-[11rem] md:max-w-[12rem]'
 
   const avatarClass =
-    'relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white shadow-sm shadow-primary-900/15 ring-1 ring-white/20 dark:ring-white/10'
+    'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 font-bold text-white shadow-sm shadow-primary-900/15 ring-1 ring-white/20 dark:ring-white/10'
 
   const panelClass =
     'overflow-hidden rounded-xl border-0 bg-white/95 shadow-[0_8px_28px_-6px_rgb(15_23_42/0.14)] backdrop-blur-xl dark:!bg-[#12141c]/98 dark:shadow-[0_12px_36px_-8px_rgb(0_0_0/0.5)]'

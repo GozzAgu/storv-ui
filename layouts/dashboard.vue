@@ -277,7 +277,7 @@
  >
  <div class="flex items-center gap-2.5" :class="effectiveSidebarCollapsed ? 'relative justify-center group' : ''">
  <div
- class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-[11px] font-bold text-white ring-1 ring-inset ring-white/25 dark:ring-white/15"
+ class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-[11px] font-bold text-white ring-1 ring-inset ring-white/25 dark:ring-white/15"
  >
  <span class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 to-transparent" aria-hidden="true" />
  <span class="relative">{{ userInitials }}</span>
