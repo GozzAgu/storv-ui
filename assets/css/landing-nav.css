@@ -17,21 +17,43 @@
   right: 0;
   z-index: 50;
   padding-top: env(safe-area-inset-top, 0);
-  border-bottom: 1px solid var(--landing-nav-border);
-  background: var(--landing-nav-surface);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: transparent;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-.landing-header--menu-open {
+/* Glass effect on the top bar only — backdrop-filter on the whole header blurs the mobile menu */
+.landing-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--landing-header-h) + env(safe-area-inset-top, 0px));
+  z-index: -1;
+  border-bottom: 1px solid var(--landing-nav-border);
+  background: var(--landing-nav-surface);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  pointer-events: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.landing-header--menu-open::before {
   border-bottom-color: transparent;
   box-shadow: none;
 }
 
+.landing-header--menu-open {
+  box-shadow: none;
+}
+
 .landing-header__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -223,11 +245,16 @@
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 49;
+  z-index: 1;
   overflow: hidden;
   border-bottom: 1px solid var(--landing-nav-border);
   background: #fff;
   box-shadow: 0 12px 40px rgb(15 23 42 / 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  isolation: isolate;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .landing-mobile-panel__nav {
@@ -290,14 +317,12 @@
   box-shadow: none;
 }
 
-/* Backdrop when menu open */
+/* Backdrop when menu open — dim only (blur on backdrop also softens the menu on iOS) */
 .landing-mobile-backdrop {
   position: fixed;
   inset: 0;
   z-index: 48;
-  background: rgb(15 23 42 / 0.25);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  background: rgb(15 23 42 / 0.35);
 }
 
 /* Scroll offset for in-page anchors */
