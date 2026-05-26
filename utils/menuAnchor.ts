@@ -11,6 +11,7 @@ export function getVisibleMenuAnchorElement(
  | 'data-customer-actions-anchor'
  | 'data-folder-actions-anchor'
  | 'data-department-actions-anchor'
+ | 'data-staff-actions-anchor'
  | 'data-stock-loan-actions-anchor',
  id: string
 ): HTMLElement | null {

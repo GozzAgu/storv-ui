@@ -707,6 +707,24 @@ export const useStaffStore = defineStore('staff', {
  // Delete from old department
  await deleteDoc(oldStaffRef)
  }
+
+ // No longer manage the department they left
+ if (oldDept?.managerId === staffId) {
+ const departmentRef = getDepartmentDocument(db, userId, storeId, departmentId)
+ await updateDoc(departmentRef, {
+ manager: deleteField(),
+ managerId: deleteField(),
+ updatedAt: serverTimestamp(),
+ })
+ const deptIndex = departmentsStore.departments.findIndex((d) => d.id === departmentId)
+ if (deptIndex > -1) {
+ departmentsStore.departments[deptIndex] = {
+ ...departmentsStore.departments[deptIndex],
+ manager: undefined,
+ managerId: undefined,
+ } as Department
+ }
+ }
  } else {
  // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
  const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
@@ -739,12 +757,23 @@ export const useStaffStore = defineStore('staff', {
  )
 
  // Update in local state
+ const departmentsStoreForName = useDepartmentsStore()
+ const deptForName =
+ departmentsStoreForName.getDepartmentById(mergedDepartmentId) ||
+ (await departmentsStoreForName.fetchDepartment(mergedDepartmentId).catch(() => null))
  const index = this.staff.findIndex(s => s.id === staffId)
  if (index > -1) {
+ const existing = this.staff[index]
  this.staff[index] = {
- ...this.staff[index],
+ ...existing,
  ...updates,
+ departmentId: mergedDepartmentId,
+ departmentName: deptForName?.name ?? existing?.departmentName,
  } as Staff
+ }
+
+ if (staffMember.authUid === authStore.currentUser?.uid) {
+ await this.fetchCurrentStaffMember().catch(() => {})
  }
 
  // Handle role changes that affect department manager assignment
@@ -754,14 +783,14 @@ export const useStaffStore = defineStore('staff', {
  const newRole = updates.role
  
  const departmentsStore = useDepartmentsStore()
- const dept = departmentsStore.getDepartmentById(staffMember.departmentId)
+ const dept = departmentsStore.getDepartmentById(mergedDepartmentId)
  
  if (dept && dept.createdBy === userId) {
  // If role changed to manager, set as manager
  if (newRole === 'manager') {
  const updatedStaff = this.getStaffMember(staffId) || await this.fetchStaffMember(staffId)
  if (updatedStaff) {
- await departmentsStore.updateDepartment(staffMember.departmentId, {
+ await departmentsStore.updateDepartment(mergedDepartmentId, {
  manager: `${updatedStaff.firstName} ${updatedStaff.lastName}`,
  managerId: staffId,
  } as Partial<import('~/composables/useDepartments').Department>)
@@ -775,7 +804,7 @@ export const useStaffStore = defineStore('staff', {
  const db = useFirestore().getFirestoreInstance()
  if (db) {
  // Use hierarchical path for department update
- const departmentRef = getDepartmentDocument(db, userId, storeId, staffMember.departmentId)
+ const departmentRef = getDepartmentDocument(db, userId, storeId, mergedDepartmentId)
  await updateDoc(departmentRef, {
  manager: deleteField(),
  managerId: deleteField(),
@@ -783,7 +812,7 @@ export const useStaffStore = defineStore('staff', {
  })
  
  // Update local state to reflect the change immediately (set to undefined so UI shows "Not assigned")
- const deptIndex = departmentsStore.departments.findIndex(d => d.id === staffMember.departmentId)
+ const deptIndex = departmentsStore.departments.findIndex(d => d.id === mergedDepartmentId)
  if (deptIndex > -1) {
  departmentsStore.departments[deptIndex] = {
  ...departmentsStore.departments[deptIndex],

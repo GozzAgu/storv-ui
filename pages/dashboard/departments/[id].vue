@@ -291,44 +291,18 @@
  </span>
  </div>
  </div>
- <div v-if="canManageDepartments" class="relative shrink-0" @click.stop>
+ <div v-if="canManageDepartments" class="shrink-0" @click.stop>
  <button
  type="button"
+ :data-staff-actions-anchor="member.id"
  class="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80"
+ :aria-expanded="openStaffMenuId === member.id"
+ aria-haspopup="menu"
+ :aria-label="`Actions for ${member.firstName} ${member.lastName}`"
  @click="toggleStaffMenu(member.id)"
  >
  <EllipsisVerticalIcon class="h-5 w-5" />
  </button>
- <div
- v-if="openStaffMenuId === member.id"
- class="absolute right-0 top-10 z-50 min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
- >
- <button
- type="button"
- class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
- @click="handleToggleStaffRole(member); openStaffMenuId = null"
- >
- <ArrowPathIcon class="h-4 w-4 shrink-0" />
- Switch to {{ getNextStaffRoleLabel(member.role) }}
- </button>
- <button
- type="button"
- class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
- @click="handleEditStaff(member); openStaffMenuId = null"
- >
- <PencilSquareIcon class="h-4 w-4 shrink-0" />
- Edit
- </button>
- <button
- v-if="canRemoveStaff"
- type="button"
- class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
- @click="openDeactivateStaffModal(member); openStaffMenuId = null"
- >
- <TrashIcon class="h-4 w-4 shrink-0" />
- Remove
- </button>
- </div>
  </div>
  </div>
  </div>
@@ -399,64 +373,18 @@
  />
  </td>
  <td v-if="canManageDepartments" class="dashboard-table__col-actions">
- <div class="dashboard-table__action-group hidden sm:inline-flex" @click.stop>
- <StaffRoleCycleButton
- :role="member.role"
- :loading="roleToggleBusyId === member.id"
- :disabled="!!roleToggleBusyId && roleToggleBusyId !== member.id"
- @click="handleToggleStaffRole(member)"
- />
+ <div class="flex justify-end" @click.stop>
  <button
  type="button"
+ :data-staff-actions-anchor="member.id"
  class="dashboard-table__action-btn"
- @click="handleEditStaff(member)"
- >
- <PencilSquareIcon class="h-3.5 w-3.5 shrink-0" />
- </button>
- <button
- v-if="canRemoveStaff"
- type="button"
- class="dashboard-table__action-btn hover:!text-red-600 dark:hover:!text-red-400"
- @click="openDeactivateStaffModal(member)"
- >
- <TrashIcon class="h-3.5 w-3.5 shrink-0" />
- </button>
- </div>
- <div class="relative sm:hidden" @click.stop>
- <button
- type="button"
- class="shrink-0 rounded-sm border border-transparent p-1.5 text-gray-500 transition-colors hover:border-gray-200/90 hover:bg-gray-50 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:bg-gray-900/60"
+ :aria-expanded="openStaffMenuId === member.id"
+ aria-haspopup="menu"
+ :aria-label="`Actions for ${member.firstName} ${member.lastName}`"
  @click="toggleStaffMenu(member.id)"
  >
  <EllipsisVerticalIcon class="h-4 w-4 shrink-0" />
  </button>
- <div
- v-if="openStaffMenuId === member.id"
- class="absolute right-0 top-9 z-50 min-w-[44px] overflow-hidden rounded-sm bg-white/95 py-1 backdrop-blur-xl dark:bg-slate-950/95"
- >
- <button
- type="button"
- class="flex w-full items-center justify-center px-3 py-2.5 text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
- :title="`Switch to ${getNextStaffRoleLabel(member.role)}`"
- @click="handleToggleStaffRole(member); openStaffMenuId = null"
- >
- <ArrowPathIcon class="h-5 w-5" />
- </button>
- <button
- type="button"
- class="flex w-full items-center justify-center px-3 py-2.5 text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
- @click="handleEditStaff(member); openStaffMenuId = null"
- >
- <PencilSquareIcon class="h-5 w-5" />
- </button>
- <button
- type="button"
- class="flex w-full items-center justify-center px-3 py-2.5 text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
- @click="openDeactivateStaffModal(member); openStaffMenuId = null"
- >
- <TrashIcon class="h-5 w-5" />
- </button>
- </div>
  </div>
  </td>
  </tr>
@@ -609,6 +537,75 @@
  :is-processing="!!reactivateBusyId"
  @confirm="handleConfirmReactivateStaff"
  />
+
+ <MoveStaffModal
+ v-model="showMoveStaffModal"
+ :staff="staffPendingMove"
+ :current-department-id="departmentId"
+ :current-department-name="department?.name || 'This department'"
+ :departments="departmentsStore.departments"
+ :is-processing="isMovingStaff"
+ @confirm="handleConfirmMoveStaff"
+ />
+
+ <!-- Staff ⋮ menu (teleported so table overflow does not clip it) -->
+ <Teleport to="body">
+ <div
+ v-if="openStaffMenuId && staffForOpenMenu && staffMenuFixedStyle"
+ data-staff-menu
+ role="menu"
+ class="fixed z-[1000] min-w-[10rem] overflow-hidden rounded-lg bg-white/95 py-1 shadow-lg backdrop-blur-xl dark:bg-slate-950/95"
+ :style="staffMenuFixedStyle"
+ @click.stop
+ >
+ <button
+ type="button"
+ role="menuitem"
+ class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
+ :disabled="!!roleToggleBusyId && roleToggleBusyId !== staffForOpenMenu.id"
+ @click="handleToggleStaffRole(staffForOpenMenu); openStaffMenuId = null"
+ >
+ <ArrowPathIcon
+ class="h-4 w-4 shrink-0"
+ :class="{ 'animate-spin': roleToggleBusyId === staffForOpenMenu.id }"
+ />
+ {{
+ roleToggleBusyId === staffForOpenMenu.id
+ ? 'Updating…'
+ : `Switch to ${getNextStaffRoleLabel(staffForOpenMenu.role)}`
+ }}
+ </button>
+ <button
+ type="button"
+ role="menuitem"
+ class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
+ @click="handleEditStaff(staffForOpenMenu); openStaffMenuId = null"
+ >
+ <PencilSquareIcon class="h-4 w-4 shrink-0" />
+ Edit
+ </button>
+ <button
+ v-if="canMoveStaff"
+ type="button"
+ role="menuitem"
+ class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-950/35"
+ @click="openMoveStaffModal(staffForOpenMenu); openStaffMenuId = null"
+ >
+ <ArrowsRightLeftIcon class="h-4 w-4 shrink-0" />
+ Move department
+ </button>
+ <button
+ v-if="canRemoveStaff"
+ type="button"
+ role="menuitem"
+ class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
+ @click="openDeactivateStaffModal(staffForOpenMenu); openStaffMenuId = null"
+ >
+ <TrashIcon class="h-4 w-4 shrink-0" />
+ Remove
+ </button>
+ </div>
+ </Teleport>
  <!-- Staff Modal -->
  <StaffModal
  v-if="departmentId"
@@ -634,6 +631,7 @@ import {
  TrashIcon,
  ArrowUturnLeftIcon,
  ArrowsPointingOutIcon,
+ ArrowsRightLeftIcon,
  XMarkIcon,
  EllipsisVerticalIcon,
  ClipboardDocumentIcon,
@@ -651,7 +649,7 @@ import Checkbox from '~/components/ui/Checkbox.vue'
 import StaffModal from '~/components/departments/StaffModal.vue'
 import DeactivateStaffModal from '~/components/departments/DeactivateStaffModal.vue'
 import ReactivateStaffModal from '~/components/departments/ReactivateStaffModal.vue'
-import StaffRoleCycleButton from '~/components/departments/StaffRoleCycleButton.vue'
+import MoveStaffModal from '~/components/departments/MoveStaffModal.vue'
 import { getNextStaffRole, getNextStaffRoleLabel, normalizeStaffRole } from '~/utils/staff-role'
 import StaffInvitePasswordsPanel from '~/components/departments/StaffInvitePasswordsPanel.vue'
 import { EMPTY_CELL } from '~/utils/ui-empty'
@@ -664,6 +662,7 @@ import type { Staff } from '~/composables/useStaff'
 import { usePermissions } from '~/composables/usePermissions'
 import { useAppToast } from '~/composables/useAppToast'
 import { useStoresStore } from '~/stores/stores'
+import { getVisibleMenuAnchorElement, computeFixedAnchoredMenuStyle } from '~/utils/menuAnchor'
 import {
  departmentDetailPath,
  resolveStoreDepartmentsPath,
@@ -733,6 +732,9 @@ const staffPendingDeactivation = ref<Staff | Staff[] | null>(null)
 const isDeactivatingStaff = ref(false)
 const showReactivateStaffModal = ref(false)
 const staffPendingReactivation = ref<Staff | null>(null)
+const showMoveStaffModal = ref(false)
+const staffPendingMove = ref<Staff | null>(null)
+const isMovingStaff = ref(false)
 const toast = useAppToast()
 
 const departmentsStore = useDepartmentsStore()
@@ -755,6 +757,85 @@ const roleToggleBusyId = ref<string | null>(null)
 const toggleStaffMenu = (staffId: string) => {
  openStaffMenuId.value = openStaffMenuId.value === staffId ? null : staffId
 }
+
+const staffForOpenMenu = computed(() => {
+ const id = openStaffMenuId.value
+ if (!id) return null
+ return paginatedStaff.value.find((s) => s.id === id) ?? null
+})
+
+const staffMenuFixedStyle = ref<Record<string, string> | null>(null)
+
+function updateStaffMenuPosition() {
+ const id = openStaffMenuId.value
+ if (!id || !import.meta.client) {
+ staffMenuFixedStyle.value = null
+ return
+ }
+ const el = getVisibleMenuAnchorElement('data-staff-actions-anchor', id)
+ if (!el) {
+ staffMenuFixedStyle.value = null
+ return
+ }
+ const r = el.getBoundingClientRect()
+ const itemCount =
+ 2 + (canMoveStaff.value ? 1 : 0) + (canRemoveStaff.value ? 1 : 0)
+ staffMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+ menuWidth: 160,
+ estimatedMenuHeight: itemCount * 40 + 8,
+ margin: 4,
+ viewportPadding: 8,
+ })
+}
+
+function addStaffMenuPositionListeners() {
+ if (!import.meta.client) return
+ window.addEventListener('scroll', updateStaffMenuPosition, true)
+ window.addEventListener('resize', updateStaffMenuPosition)
+}
+
+function removeStaffMenuPositionListeners() {
+ if (!import.meta.client) return
+ window.removeEventListener('scroll', updateStaffMenuPosition, true)
+ window.removeEventListener('resize', updateStaffMenuPosition)
+}
+
+let staffMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
+
+function removeStaffMenuOutsideListener() {
+ if (staffMenuOutsideHandler && import.meta.client) {
+ document.removeEventListener('click', staffMenuOutsideHandler, true)
+ staffMenuOutsideHandler = null
+ }
+}
+
+watch(openStaffMenuId, (id) => {
+ removeStaffMenuOutsideListener()
+ removeStaffMenuPositionListeners()
+ staffMenuFixedStyle.value = null
+ if (!id || !import.meta.client) return
+
+ nextTick(() => {
+ updateStaffMenuPosition()
+ addStaffMenuPositionListeners()
+ })
+
+ staffMenuOutsideHandler = (e: MouseEvent) => {
+ const t = e.target as HTMLElement | null
+ if (t?.closest?.('[data-staff-menu]')) return
+ if (t?.closest?.('[data-staff-actions-anchor]')) return
+ openStaffMenuId.value = null
+ removeStaffMenuOutsideListener()
+ }
+
+ nextTick(() => {
+ setTimeout(() => {
+ if (openStaffMenuId.value && staffMenuOutsideHandler) {
+ document.addEventListener('click', staffMenuOutsideHandler, true)
+ }
+ }, 0)
+ })
+})
 
 // Handle ESC key to exit fullscreen and close menus
 const handleKeyDown = (e: KeyboardEvent) => {
@@ -786,7 +867,7 @@ const isManager = computed(() => {
  currentStaffMember.value.departmentId === department.value.id
 })
 // Get permissions
-const { canCreateStaff, canManage, canRemoveStaff } = usePermissions()
+const { canCreateStaff, canManage, canRemoveStaff, canMoveStaff } = usePermissions()
 // Only super admins can create or remove staff (managers can edit roles/details)
 const canManageDepartments = computed(() => canManage.value)
 const canCreateNewStaff = computed(() => canCreateStaff.value)
@@ -824,6 +905,10 @@ watch(showReactivateStaffModal, (open) => {
  if (!open) staffPendingReactivation.value = null
 })
 
+watch(showMoveStaffModal, (open) => {
+ if (!open) staffPendingMove.value = null
+})
+
 function syncDepartmentFromStore() {
  const updated = departmentsStore.getDepartmentById(departmentId.value)
  if (updated) department.value = { ...updated }
@@ -857,6 +942,15 @@ function applyStaffReactivated(member: Staff) {
  syncDepartmentManagerFromStaff()
  syncDepartmentFromStore()
  rosterTab.value = 'active'
+}
+
+function applyStaffMoved(member: Staff, fromDepartmentId: string) {
+ if (fromDepartmentId === departmentId.value) {
+ staff.value = staff.value.filter((s) => s.id !== member.id)
+ selectedStaffForBulk.value = selectedStaffForBulk.value.filter((s) => s.id !== member.id)
+ }
+ syncDepartmentManagerFromStaff()
+ syncDepartmentFromStore()
 }
 
 const toggleStaffSelection = (member: Staff, checked: boolean) => {
@@ -908,6 +1002,46 @@ async function handleConfirmDeactivateStaff() {
 function openReactivateStaffModal(member: Staff) {
  staffPendingReactivation.value = member
  showReactivateStaffModal.value = true
+}
+
+async function openMoveStaffModal(member: Staff) {
+ if (!departmentsStore.departments.length) {
+ await departmentsStore.fetchDepartments().catch(() => {})
+ }
+ staffPendingMove.value = member
+ showMoveStaffModal.value = true
+}
+
+async function handleConfirmMoveStaff(targetDepartmentId: string) {
+ const member = staffPendingMove.value
+ if (!member || !targetDepartmentId || targetDepartmentId === member.departmentId) return
+
+ const fromDepartmentId = member.departmentId
+ const targetDept =
+ departmentsStore.getDepartmentById(targetDepartmentId) ||
+ (await departmentsStore.fetchDepartment(targetDepartmentId).catch(() => null))
+ const targetName = targetDept?.name || 'the selected department'
+ const name = `${member.firstName} ${member.lastName}`.trim()
+
+ isMovingStaff.value = true
+ try {
+ await staffStore.updateStaff(member.id, { departmentId: targetDepartmentId })
+ const moved =
+ staffStore.getStaffMember(member.id) || {
+ ...member,
+ departmentId: targetDepartmentId,
+ departmentName: targetName,
+ }
+ applyStaffMoved(moved, fromDepartmentId)
+ showMoveStaffModal.value = false
+ staffPendingMove.value = null
+ toast.success(`${name} moved to ${targetName}`)
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Failed to move staff member'
+ toast.error(message)
+ } finally {
+ isMovingStaff.value = false
+ }
 }
 
 async function handleConfirmReactivateStaff() {
@@ -1181,12 +1315,6 @@ onMounted(async () => {
  // Add keyboard listener for ESC key
  if (import.meta.client) {
  window.addEventListener('keydown', handleKeyDown)
- // Close menu when clicking outside
- document.addEventListener('click', (e) => {
- if (!(e.target as HTMLElement).closest('.relative')) {
- openStaffMenuId.value = null
- }
- })
  }
 
  if (import.meta.server) return
@@ -1211,6 +1339,8 @@ onMounted(async () => {
 
 // Cleanup keyboard listener and restore body overflow
 onBeforeUnmount(() => {
+ removeStaffMenuOutsideListener()
+ removeStaffMenuPositionListeners()
  if (import.meta.client) {
  window.removeEventListener('keydown', handleKeyDown)
  document.body.style.overflow = ''
