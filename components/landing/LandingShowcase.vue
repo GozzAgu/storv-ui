@@ -16,7 +16,18 @@
       </div>
       <div class="landing-hero__glow" aria-hidden="true" />
       <div class="landing-hero__grid landing-line-grid" aria-hidden="true" />
+      <div class="landing-hero__floats" aria-hidden="true">
+        <span
+          v-for="item in heroFloatIcons"
+          :key="item.id"
+          class="landing-hero__float"
+          :class="`landing-hero__float--${item.id}`"
+        >
+          <component :is="item.icon" class="landing-hero__float-icon" stroke-width="1.5" />
+        </span>
+      </div>
       <div class="landing-hero__inner">
+        <div class="landing-hero__center">
         <div class="landing-hero__content">
           <p class="landing-label landing-label--blue landing-hero__reveal" style="--hero-i: 0">
             Retail operations platform
@@ -45,6 +56,7 @@
               <a :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
             </li>
           </ul>
+        </div>
         </div>
         <a href="#use-cases" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
           <span class="landing-hero__scroll-hint-text">See who it is for</span>
@@ -317,6 +329,7 @@ import {
   CubeIcon,
   DocumentTextIcon,
   PlusIcon,
+  ShoppingBagIcon,
   TagIcon,
   UserGroupIcon,
   UserIcon,
@@ -330,6 +343,15 @@ const heroChips = [
   { label: 'Receipts', href: '#features' },
   { label: 'Returns', href: '#features' },
   { label: 'Customers', href: '#features' },
+] as const
+
+const heroFloatIcons = [
+  { id: 'inventory', icon: ArchiveBoxIcon },
+  { id: 'receipts', icon: DocumentTextIcon },
+  { id: 'returns', icon: ArrowPathIcon },
+  { id: 'customers', icon: UserIcon },
+  { id: 'sales', icon: ChartBarIcon },
+  { id: 'store', icon: ShoppingBagIcon },
 ] as const
 
 function onHeroPointerMove(event: MouseEvent) {
