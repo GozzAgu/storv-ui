@@ -438,19 +438,21 @@
  <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
  </div>
  <div class="min-w-0">
- <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected staff</h3>
+ <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Remove selected staff</h3>
  <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedStaffForBulk.length }} staff member{{ selectedStaffForBulk.length !== 1 ? 's' : '' }} selected</p>
  </div>
  </div>
  </template>
  <div class="space-y-3">
  <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
- <p class="text-xs text-red-800 dark:text-red-200">This will permanently remove the selected staff members from this department. This action cannot be undone.</p>
+ <p class="text-xs text-red-800 dark:text-red-200">
+ They will be removed from your team and will not be able to sign in. Past receipts and activity logs will still show their name.
+ </p>
  </div>
  <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
  <Checkbox
  v-model="bulkDeleteStaffConfirmed"
- label="I understand that these staff members will be permanently removed."
+ label="I understand these staff members will be removed and cannot sign in."
  size="sm"
  wrapper-class="items-start"
  label-class="text-xs text-gray-700 dark:text-gray-300"
@@ -467,7 +469,7 @@
  class="!rounded-2xl"
  @click="handleConfirmBulkDeleteStaff"
  >
- {{ isBulkDeletingStaff ? 'Deleting...' : `Delete ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}
+ {{ isBulkDeletingStaff ? 'Removing...' : `Remove ${selectedStaffForBulk.length} staff member${selectedStaffForBulk.length !== 1 ? 's' : ''}` }}
  </Button>
  </template>
  </Modal>
@@ -681,9 +683,9 @@ const handleConfirmBulkDeleteStaff = async () => {
  showBulkDeleteStaffModal.value = false
  bulkDeleteStaffConfirmed.value = false
  await loadDepartmentData()
- toast.success(`${count} staff member${count !== 1 ? 's' : ''} deleted`)
+ toast.success(`${count} staff member${count !== 1 ? 's' : ''} removed`)
  } catch (error: any) {
- toast.error(error.message || 'Failed to delete some staff members')
+ toast.error(error.message || 'Failed to remove some staff members')
  } finally {
  isBulkDeletingStaff.value = false
  }
@@ -830,14 +832,20 @@ const handleToggleStaffRole = async (staffMember: Staff) => {
 }
 
 const handleDeleteStaff = async (staffMember: Staff) => {
- if (confirm(`Are you sure you want to delete ${staffMember.firstName} ${staffMember.lastName}? This action cannot be undone.`)) {
+ const name = `${staffMember.firstName} ${staffMember.lastName}`.trim()
+ if (
+ !confirm(
+ `${name} will be removed from your team and will not be able to sign in. Past receipts and activity logs will still show their name. Continue?`
+ )
+ ) {
+ return
+ }
  try {
  await staffStore.deleteStaff(staffMember.id)
- await loadDepartmentData() // Reload to update staff list and counts
- alert('Staff member deleted successfully')
+ await loadDepartmentData()
+ toast.success(`${name} was removed`)
  } catch (error: any) {
- alert(error.message || 'Failed to delete staff member')
- }
+ toast.error(error.message || 'Failed to remove staff member')
  }
 }
 
