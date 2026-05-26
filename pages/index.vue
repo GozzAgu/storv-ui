@@ -15,6 +15,7 @@
  </NuxtLink>
  <div class="hidden md:flex items-center gap-6 lg:gap-8">
  <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
+ <a href="#setup" class="landing-nav-link hidden lg:inline-block" @click.prevent="scrollToSection('setup')">Setup</a>
  <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
  <a href="#about" class="landing-nav-link" @click.prevent="scrollToSection('about')">About</a>
  <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
@@ -91,6 +92,11 @@
  @click.prevent="scrollToSection('features'); mobileMenuOpen = false"
  >Features</a>
  <a
+ href="#setup"
+ class="landing-mobile-nav-link"
+ @click.prevent="scrollToSection('setup'); mobileMenuOpen = false"
+ >Setup</a>
+ <a
  href="#pricing"
  class="landing-mobile-nav-link"
  @click.prevent="scrollToSection('pricing'); mobileMenuOpen = false"
@@ -120,407 +126,53 @@
  </Transition>
  </Teleport>
 
- <!-- Hero: photo + futuristic HUD layering (clean, high contrast) -->
- <section class="landing-hero relative isolate overflow-hidden pt-24 sm:pt-28">
- <!-- Background image -->
- <div
- ref="heroBackground"
- class="absolute inset-0 bg-center bg-cover will-change-transform"
- style="background-image: url('/hero-img.jpg');"
- />
- <!-- Readability: deeper vignette, Storvv primary light (no teal shift) -->
- <div class="absolute inset-0 bg-gradient-to-b from-slate-950/72 via-slate-950/48 to-slate-950/[0.78]" aria-hidden="true" />
- <div
- class="absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-10%,rgba(59,130,246,0.11),transparent_55%),radial-gradient(circle_at_12%_22%,rgba(59,130,246,0.15),transparent_46%),radial-gradient(circle_at_88%_25%,rgba(37,99,235,0.11),transparent_44%)]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute inset-x-0 top-0 z-[1] h-px bg-gradient-to-r from-transparent via-primary-400/50 to-transparent"
- aria-hidden="true"
- />
- <div
- class="landing-hero-grid pointer-events-none absolute inset-0 z-[1] opacity-[0.28] sm:opacity-[0.34]"
- aria-hidden="true"
- />
- <div class="pointer-events-none absolute -top-32 -right-32 z-0 h-[520px] w-[520px] animate-blob rounded-full bg-primary-400/14 blur-3xl" />
- <div class="pointer-events-none absolute -bottom-40 -left-32 z-0 h-[620px] w-[620px] animate-blob rounded-full bg-primary-500/10 blur-3xl animation-delay-2000" />
- <div
- class="pointer-events-none absolute inset-x-[6%] bottom-0 z-[1] h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
- aria-hidden="true"
- />
+ <!-- Marketing showcase: hero, pain points, core features, setup, multi-store -->
+ <LandingShowcase :logo-src="marketingLogoSrc" :app-url="appOriginUrl" />
 
- <div
- class="relative z-[2] mx-auto grid max-w-6xl gap-12 px-4 pb-28 sm:gap-14 sm:px-6 sm:pb-36 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:pb-44 xl:pb-48"
- >
- <div class="max-w-xl lg:col-span-6 xl:col-span-7">
- <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
- <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.32em] text-primary-300">
- Ops console
- </p>
- <span class="hidden h-3 w-px bg-primary-500/35 sm:block" aria-hidden="true" />
- <span class="rounded-md border-0 bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-[0.22em] text-primary-200/95">
- v2026</span>
- </div>
 
- <div
- class="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.13em] text-white/92 shadow-[inset_0_1px_0_0_rgba(255,255,255,.06)] backdrop-blur-xl sm:rounded-2xl"
- >
- <SparklesIcon class="h-3.5 w-3.5 shrink-0 text-primary-300" />
- Built for retail teams
- </div>
-
- <h1 class="landing-hero-headline mt-6 overflow-visible sm:mt-7 lg:mt-8">
- <span class="block text-[1.875rem] font-extralight leading-[1.16] tracking-[-0.03em] text-white/92 sm:text-[2.2rem] sm:leading-[1.12] lg:text-[2.75rem] lg:leading-[1.1] xl:text-[3.05rem]">
- Inventory and sales,</span>
- <span
- class="landing-hero-gradient-heading mt-1.5 block bg-gradient-to-r from-white via-white to-primary-200 bg-clip-text pb-[0.08em] text-[2.05rem] font-semibold leading-[1.22] tracking-[-0.025em] text-transparent [-webkit-background-clip:text] sm:mt-2 sm:text-[2.45rem] sm:leading-[1.2] lg:text-[3.05rem] lg:leading-[1.18] xl:text-[3.35rem] xl:leading-[1.16]"
- >
- always in sync.</span>
- </h1>
-
- <p class="mt-5 max-w-md text-[0.9375rem] leading-relaxed text-white/82 sm:mt-6 sm:max-w-lg sm:text-[0.975rem]">
- One calm workspace for stock, receipts, and permissions: on-hand counts and sales history without spreadsheet chaos.
- </p>
-
- <div class="mt-7 flex flex-wrap gap-2 sm:gap-2.5">
- <span class="rounded-lg border border-white/12 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,.04)]">
- Live stock</span>
- <span class="rounded-lg border border-white/12 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,.04)]">
- Receipt-linked updates</span>
- <span class="rounded-lg border border-white/12 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,.04)]">
- Multi-store ready</span>
- </div>
-
- <!-- Compact sync hint (mobile / tablet only; desktop uses floating card) -->
- <div class="landing-hero-float-card mt-9 flex items-center gap-4 p-[1.125rem] lg:hidden">
- <MarketingSyncLoader class="shrink-0" :size="60" />
- <p class="min-w-0 text-xs leading-relaxed text-white/85">
- Receipts and sales keep inventory current automatically. No exports.
- </p>
- </div>
-
- <div class="mt-9 flex flex-col gap-3 sm:mt-11 sm:flex-row sm:items-center sm:gap-4">
- <a
- :href="appOriginUrl"
- class="inline-flex min-h-[2.875rem] items-center justify-center rounded-xl bg-white px-7 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_12px_40px_-18px_rgba(59,130,246,0.45)] outline-none transition-all duration-300 ease-out hover:bg-white/97 active:scale-[0.98]"
- >
- Get Started
- </a>
- <button
- type="button"
- class="inline-flex min-h-[2.875rem] items-center justify-center rounded-xl border border-white/[0.2] bg-white/[0.07] px-7 py-3 text-sm font-semibold text-white outline-none backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,.06),0_0_0_1px_rgba(59,130,246,0.12)] transition-all duration-300 ease-out hover:border-primary-400/35 hover:bg-white/[0.11] active:scale-[0.98]"
- @click="scrollToSection('features')"
- >
- See it in action
- </button>
- </div>
- </div>
-
- <!-- Floating hero cards (desktop only) -->
- <div class="relative hidden min-h-[28rem] lg:col-span-6 lg:block xl:col-span-5">
- <div class="landing-hero-float-card absolute right-0 top-0 w-[19.5rem] p-4 xl:w-[20.5rem]">
- <div class="flex items-start gap-4">
- <MarketingSyncLoader class="shrink-0" :size="76" />
- <div class="min-w-0 pt-0.5">
- <p class="text-sm font-semibold tracking-tight text-white">Always current</p>
- <p class="mt-1 text-xs leading-relaxed text-white/75">
- Sales and receipts flow into stock so everyone sees the same numbers.
- </p>
- </div>
- </div>
- </div>
-
- <div class="landing-hero-float-card absolute right-6 top-[11.5rem] w-[17.5rem] p-4 xl:right-4 xl:w-[18.25rem]">
- <div class="flex items-center justify-between gap-2">
- <p class="text-xs font-semibold uppercase tracking-[0.12em] text-white/82">Inventory</p>
- <span
- class="inline-flex shrink-0 items-center gap-1 rounded-full border-0 bg-primary-500/[0.18] px-2 py-1 text-xs font-medium text-primary-50"
- >
- <FolderIcon class="h-3 w-3" />
- Categories
- </span>
- </div>
- <p class="mt-2 text-[0.8125rem] font-semibold leading-snug tracking-tight text-white/95">Templates that match how you sell</p>
- <p class="mt-1 text-xs leading-relaxed text-white/74">Serials, custom fields, and categories, organized, not generic.</p>
- </div>
-
- <div class="landing-hero-float-card absolute right-10 top-[23.5rem] w-[19rem] p-4 xl:right-6 xl:w-[19.5rem]">
- <div class="mb-2.5 flex items-center justify-between">
- <p class="text-xs font-semibold uppercase tracking-[0.12em] text-white/82">Checkout</p>
- <BellAlertIcon class="h-4 w-4 text-primary-300/90" />
- </div>
- <div class="space-y-2">
- <div class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2.5">
- <ShoppingCartIcon class="h-4 w-4 shrink-0 text-primary-200/95" />
- <span class="min-w-0 truncate text-[0.8125rem] text-white/88">Receipts in seconds</span>
- </div>
- <div class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2.5">
- <ArrowsRightLeftIcon class="h-4 w-4 shrink-0 text-primary-300/90" />
- <span class="min-w-0 truncate text-[0.8125rem] text-white/88">Returns &amp; swap-ins</span>
- </div>
- </div>
- <div class="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
- <p class="text-xs font-medium uppercase tracking-wide text-white/75">Scale</p>
- <div class="flex shrink-0 flex-wrap justify-end gap-1.5">
- <span class="rounded-lg border border-white/12 bg-white/[0.06] px-2 py-1 text-xs font-medium text-white/85">Roles</span>
- <span class="rounded-lg border border-white/12 bg-white/[0.06] px-2 py-1 text-xs font-medium text-white/85">Teams</span>
- <span class="rounded-lg border border-white/12 bg-white/[0.06] px-2 py-1 text-xs font-medium text-white/85">Stores</span>
- </div>
- </div>
- </div>
- </div>
- </div>
- </section>
-
- <!-- Why Storvv -->
+ <!-- Who uses Storvv -->
  <section
- data-section-id="problem"
- class="landing-why-section scroll-animate scroll-animate-up border-b border-slate-200 bg-white py-14 dark:border-gray-800 dark:bg-slate-950 sm:py-16 lg:py-20"
- aria-labelledby="landing-why-heading"
+ id="use-cases"
+ data-section-id="use-cases"
+ class="landing-who-uses-section scroll-animate scroll-animate-up"
+ aria-labelledby="landing-who-heading"
  >
- <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
- <header class="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
- <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
- Why teams choose Storvv</p>
- <h2
- id="landing-why-heading"
- class="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-gray-50 sm:text-3xl"
- >
- Stock, sales, and staff <span class="text-primary-600 dark:text-primary-400">in one layer</span>.
+ <div class="landing-who-bg" aria-hidden="true" />
+
+ <div class="landing-who-inner">
+ <div class="landing-who-layout">
+ <div class="landing-who-copy">
+ <p class="landing-label landing-label--blue">For any business that sells</p>
+ <h2 id="landing-who-heading" class="landing-who-heading">
+ Any business can use <span class="landing-who-heading-accent">Storvv</span>
  </h2>
- <p class="mt-3 text-sm leading-relaxed text-slate-600 dark:text-gray-400 sm:text-[15px]">
- Fewer spreadsheets, clearer accountability.</p>
- </header>
+ <p class="landing-who-lede">
+ If you sell products and need reliable stock, receipts, and customer records, Storvv fits. Boutiques, workshops, showrooms, and general stores all run on the same simple system.
+ </p>
 
- <div class="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-[minmax(0,304px)_1fr] lg:items-start lg:gap-12">
- <figure
- class="landing-why-figure m-0 mx-auto w-full max-w-sm overflow-hidden rounded-sm border border-slate-200 bg-slate-50 lg:mx-0 lg:max-w-none dark:bg-slate-900/60"
- >
- <div class="relative aspect-[4/3] w-full overflow-hidden bg-slate-200 dark:bg-slate-800">
- <img
- :src="whySectionPhotoSrc"
- alt=""
- width="912"
- height="684"
- class="landing-why-figure-photo h-full w-full object-cover object-center"
- decoding="async"
- />
+ <ul class="landing-who-points">
+ <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
+ <span class="landing-who-point-num">{{ point.num }}</span>
+ <div class="landing-who-point-body">
+ <p class="landing-who-point-title">{{ point.title }}</p>
+ <p class="landing-who-point-desc">{{ point.description }}</p>
  </div>
- <figcaption class="border-t border-slate-200 px-4 py-2.5 text-xs leading-snug text-slate-600 dark:text-gray-400">
- Fewer loose ends when receipts, inventory, and permissions share one backbone.</figcaption>
- </figure>
-
- <ul
- class="m-0 list-none divide-y divide-slate-200 rounded-sm border border-slate-200 bg-white p-0 dark:divide-gray-700 dark:bg-slate-950"
- aria-label="What teams get"
- >
- <li v-for="(pillar, i) in whyPillars" :key="pillar.title">
- <article class="flex gap-4 p-5 sm:p-6">
- <div
- class="mt-0.5 grid size-10 shrink-0 place-items-center rounded-sm border border-slate-200 bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-gray-200"
- >
- <component :is="pillar.icon" class="size-[1.125rem]" stroke-width="1.75" aria-hidden="true" />
- </div>
- <div class="min-w-0 flex-1">
- <p class="text-[11px] font-semibold tabular-nums leading-none text-slate-400 dark:text-gray-500">
- {{ String(i + 1).padStart(2, '0') }}</p>
- <h3 class="mt-1 text-base font-semibold tracking-tight text-slate-900 dark:text-gray-50">
- {{ pillar.title }}</h3>
- <p class="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-gray-400">
- {{ pillar.body }}</p>
- </div>
- </article>
  </li>
  </ul>
  </div>
 
- <div
- class="mt-10 flex flex-col items-center gap-4 border-t border-slate-200 pt-8 sm:flex-row sm:items-center sm:justify-end sm:gap-6"
- >
- <a
- href="#pricing"
- class="inline-flex min-h-11 shrink-0 items-center text-sm font-semibold leading-none text-slate-700 underline decoration-slate-400/80 underline-offset-[4px] transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
- @click.prevent="scrollToSection('pricing')"
- >View plans</a>
- <a
- :href="appOriginUrl"
- class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-sm border border-slate-900 bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:border-primary-600 dark:bg-primary-600 dark:hover:bg-primary-500"
- >
- Get started <ArrowRightIcon class="size-4" aria-hidden="true" />
- </a>
- </div>
- </div>
- </section>
-
- <!-- Who uses Storvv: futuristic HUD, Storvv primary blue accents -->
- <section
- id="use-cases"
- data-section-id="use-cases"
- class="landing-who-uses-section scroll-animate scroll-animate-up relative overflow-hidden border-b border-primary-950/90 bg-[#030712] py-20 dark:border-primary-950 sm:py-28 lg:py-36"
- >
- <div class="absolute inset-0 bg-[#030712]" aria-hidden="true" />
- <div
- class="landing-who-uses-grid pointer-events-none absolute inset-0 opacity-[0.4] sm:opacity-[0.45]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_88%_58%_at_48%_-8%,rgba(59,130,246,0.11),transparent_55%)]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_62%_48%_at_100%_92%,rgba(37,99,235,0.12),transparent_52%)]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute -left-[20%] top-[-12%] h-[min(100vw,44rem)] w-[min(100vw,44rem)] rounded-full bg-primary-600/[0.07] blur-[min(140px,12vw)]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute -right-[12%] bottom-[-26%] h-[min(92vw,38rem)] w-[min(92vw,38rem)] rounded-full bg-primary-500/[0.06] blur-[min(120px,10vw)]"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/55 to-transparent"
- aria-hidden="true"
- />
- <div
- class="pointer-events-none absolute inset-x-[10%] bottom-0 h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent"
- aria-hidden="true"
- />
-
- <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
- <div class="flex flex-wrap items-end justify-between gap-4 border-b border-white/[0.08] pb-6">
- <div class="flex min-w-0 flex-col gap-1.5">
- <p class="font-mono text-[10px] font-semibold uppercase tracking-[0.38em] text-primary-400 sm:text-[11px]">
- Retail ops grid
- </p>
- <p class="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">
- Built for modern retail teams
- </p>
- </div>
- <div class="flex shrink-0 items-center gap-2.5">
- <span class="relative flex h-2 w-2">
- <span class="relative block h-2 w-2 rounded-[1px] bg-primary-400 shadow-[0_0_14px_rgba(96,165,250,0.65)]" />
- </span>
- <span class="font-mono text-[10px] font-medium tracking-[0.24em] text-slate-500">ACTIVE</span>
- </div>
- </div>
-
- <div class="mt-12 grid gap-14 lg:mt-16 lg:grid-cols-12 lg:gap-12 lg:items-start">
- <div class="lg:col-span-5">
- <h2 class="text-[clamp(1.875rem,4.2vw,2.875rem)] font-light leading-[1.08] tracking-[-0.03em] text-white">
- <span class="block text-slate-200">Who uses</span>
- <span class="mt-2 block bg-gradient-to-r from-white via-primary-200 to-primary-300 bg-clip-text font-semibold text-transparent sm:mt-1.5">
- Storvv?
- </span>
- </h2>
- <p class="mt-7 max-w-md text-[0.9375rem] leading-[1.7] text-slate-300 sm:text-base">
- One backbone for POS, serialized stock, and staff. Quiet layout with loud clarity at every counter and branch you run.
- </p>
-
- <div class="mt-10 divide-y divide-white/[0.07] border-y border-white/[0.08]">
- <div class="landing-who-uses-row grid grid-cols-[auto_1fr] items-start gap-x-5 gap-y-1 py-4 sm:gap-x-6 sm:py-5">
- <span class="font-mono text-[11px] font-semibold tabular-nums tracking-wider text-primary-400">01</span>
- <div>
- <p class="text-sm font-semibold tracking-wide text-white sm:text-[0.9375rem]">Gadget &amp; IMEI desks</p>
- <p class="mt-1 text-sm leading-relaxed text-slate-400">
- Serial lines, swaps, and traceable history without brittle spreadsheets.</p>
- </div>
- </div>
- <div class="landing-who-uses-row grid grid-cols-[auto_1fr] items-start gap-x-5 gap-y-1 py-4 sm:gap-x-6 sm:py-5">
- <span class="font-mono text-[11px] font-semibold tabular-nums tracking-wider text-primary-400/90">02</span>
- <div>
- <p class="text-sm font-semibold tracking-wide text-white sm:text-[0.9375rem]">Fast-turn retail floors</p>
- <p class="mt-1 text-sm leading-relaxed text-slate-400">
- Fashion and lifestyle aisles stay on pace through peak hours and returns.</p>
- </div>
- </div>
- <div class="landing-who-uses-row grid grid-cols-[auto_1fr] items-start gap-x-5 gap-y-1 py-4 sm:gap-x-6 sm:py-5">
- <span class="font-mono text-[11px] font-semibold tabular-nums tracking-wider text-primary-400/90">03</span>
- <div>
- <p class="text-sm font-semibold tracking-wide text-white sm:text-[0.9375rem]">Multi-branch HQ</p>
- <p class="mt-1 text-sm leading-relaxed text-slate-400">
- Standard workflows across stores while each location owns its lane.</p>
- </div>
- </div>
- </div>
- </div>
-
- <div class="lg:col-span-7">
- <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+ <div class="landing-who-cards">
  <article
- class="landing-who-uses-glass group relative overflow-hidden rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] pb-px shadow-[inset_0_1px_0_0_rgba(255,255,255,.05)] backdrop-blur-2xl sm:col-span-2 sm:flex sm:min-h-[11.75rem]"
+ v-for="card in whoUsesCards"
+ :key="card.title"
+ class="landing-who-card"
  >
- <div
- class="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-gradient-to-bl from-primary-400/[0.18] via-primary-600/[0.06] to-transparent opacity-95 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
- aria-hidden="true"
- />
- <div class="relative flex flex-1 flex-col gap-6 p-6 sm:flex-row sm:items-stretch sm:p-7">
- <span class="absolute right-6 top-6 font-mono text-[9px] font-semibold tracking-[0.28em] text-primary-300">
- SYNC
- </span>
- <div class="relative shrink-0">
- <div
- class="flex size-12 items-center justify-center rounded-xl border-0 bg-gradient-to-br from-primary-500/25 to-primary-600/[0.08] text-primary-100 shadow-[inset_0_1px_0_0_rgba(147,197,253,0.2)] sm:size-14 sm:rounded-2xl"
- >
- <CubeIcon class="size-7" stroke-width="1.25" aria-hidden="true" />
- </div>
- </div>
- <div class="relative min-w-0 flex-1 sm:flex sm:flex-col sm:justify-center sm:pr-14">
- <h3 class="text-lg font-semibold tracking-tight text-white sm:text-xl">
- Serialized inventory, one ledger</h3>
- <p class="mt-2 max-w-xl text-sm leading-relaxed text-slate-300">
- IMEI anchors, pooled counts, receipts, and swaps stay aligned so supervisors audit with confidence.</p>
- </div>
- <div
- class="relative hidden shrink-0 self-stretch border-l border-white/[0.08] py-1 pl-6 sm:flex sm:flex-col sm:items-center sm:justify-between sm:pb-2 sm:pt-1"
- >
- <span class="font-mono text-[9px] font-medium tracking-[0.22em] text-slate-400">DEPTH</span>
- <CheckIcon class="size-7 text-primary-400 drop-shadow-[0_0_10px_rgba(96,165,250,0.45)]" aria-hidden="true" />
- </div>
+ <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" aria-hidden="true" />
+ <div class="landing-who-card-content">
+ <h3 class="landing-who-card-title">{{ card.title }}</h3>
+ <p class="landing-who-card-desc">{{ card.description }}</p>
  </div>
  </article>
-
- <article
- class="landing-who-uses-glass relative overflow-hidden rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] p-6 pb-px shadow-[inset_0_1px_0_0_rgba(255,255,255,.05)] backdrop-blur-2xl sm:rounded-[1.35rem] sm:p-7"
- >
- <div
- class="pointer-events-none absolute -bottom-14 -left-12 h-40 w-40 rounded-full bg-gradient-to-tr from-primary-500/[0.14] to-transparent blur-2xl"
- aria-hidden="true"
- />
- <div class="relative">
- <div
- class="inline-flex size-11 items-center justify-center rounded-xl border-0 bg-gradient-to-br from-primary-500/22 to-transparent text-primary-100 shadow-[inset_0_1px_0_0_rgba(147,197,253,0.14)] sm:size-[3.15rem]"
- >
- <TagIcon class="size-[1.4rem]" stroke-width="1.25" aria-hidden="true" />
- </div>
- <p class="mt-5 font-mono text-[9px] font-medium tracking-[0.26em] text-primary-400/80">VELO</p>
- <h3 class="mt-2.5 text-[0.9375rem] font-semibold tracking-tight text-white">Faster checkout</h3>
- <p class="mt-2 text-sm leading-relaxed text-slate-300">
- Discount lines, refunds, and splits keep stock and CRM in sync at the register.</p>
- </div>
- </article>
-
- <article
- class="landing-who-uses-glass relative overflow-hidden rounded-[1.25rem] border border-white/[0.07] bg-white/[0.03] p-6 pb-px shadow-[inset_0_1px_0_0_rgba(255,255,255,.05)] backdrop-blur-2xl sm:rounded-[1.35rem] sm:p-7"
- >
- <div
- class="pointer-events-none absolute -bottom-12 -right-10 h-36 w-36 rounded-full bg-gradient-to-tl from-primary-600/[0.14] to-transparent blur-2xl"
- aria-hidden="true"
- />
- <div class="relative">
- <div
- class="inline-flex size-11 items-center justify-center rounded-xl border-0 bg-gradient-to-br from-primary-500/22 to-transparent text-primary-100 shadow-[inset_0_1px_0_0_rgba(147,197,253,0.14)] sm:size-[3.15rem]"
- >
- <UserGroupIcon class="size-[1.4rem]" stroke-width="1.25" aria-hidden="true" />
- </div>
- <p class="mt-5 font-mono text-[9px] font-medium tracking-[0.26em] text-primary-400/80">ROLES</p>
- <h3 class="mt-2.5 text-[0.9375rem] font-semibold tracking-tight text-white">Branch-grade access</h3>
- <p class="mt-2 text-sm leading-relaxed text-slate-300">
- Permissions match floor and HQ separately, without fragile shared master logins.</p>
- </div>
- </article>
- </div>
  </div>
  </div>
  </div>
@@ -530,134 +182,71 @@
  <section
  id="about"
  data-section-id="about"
- class="landing-about-chart scroll-animate scroll-animate-up scroll-mt-[4.75rem] border-y border-primary-100/40 bg-gradient-to-b from-primary-50/70 via-white to-sky-50/40 py-20 dark:border-gray-800/60 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 sm:py-24 lg:scroll-mt-28 lg:py-28"
+ class="landing-about-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+ aria-labelledby="landing-about-heading"
  >
- <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
- <div
- class="pointer-events-none absolute inset-0 opacity-50 dark:opacity-25"
- aria-hidden="true"
- style="background-image: radial-gradient(ellipse 55% 45% at 12% 15%, rgb(59 130 246 / 0.11), transparent 55%), radial-gradient(ellipse 50% 40% at 92% 85%, rgb(14 165 233 / 0.09), transparent 50%)"
- />
- <div class="pointer-events-none absolute left-[6%] top-0 h-56 w-56 rounded-full bg-primary-400/18 blur-3xl dark:bg-primary-500/14" />
- <div class="pointer-events-none absolute bottom-0 right-[8%] h-48 w-48 rounded-full bg-sky-300/30 blur-3xl dark:bg-cyan-500/12" />
+ <div class="landing-about-bg" aria-hidden="true" />
 
- <div class="relative mx-auto max-w-3xl text-center">
- <p class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
- About Storvv
- </p>
- <h2 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-100">
- Store software that respects how retail really runs
+ <div class="landing-about-inner">
+ <header class="landing-about-header">
+ <p class="landing-label landing-label--blue landing-about-label">About Storvv</p>
+ <h2 id="landing-about-heading" class="landing-about-title">
+ Software that respects how <span class="landing-about-title-accent">your business</span> runs
  </h2>
- <p class="mt-4 text-sm leading-relaxed text-gray-600 sm:text-base dark:text-gray-400">
- We focus on clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
+ <p class="landing-about-lede">
+ Clarity over noise: fewer tabs, fewer surprises, and a layout your team can learn in days, not weeks.
  </p>
+ </header>
+
+ <div class="landing-about-grid">
+ <div class="landing-about-highlights">
+ <article
+ v-for="item in aboutHighlights"
+ :key="item.num"
+ class="landing-about-card landing-about-card--feature landing-about-animate"
+ >
+ <div class="landing-about-card-top">
+ <span class="landing-about-num">{{ item.num }}</span>
+ <component :is="item.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
+ </div>
+ <h3 class="landing-about-card-title">{{ item.title }}</h3>
+ <p class="landing-about-card-desc">{{ item.description }}</p>
+ <p class="landing-about-card-detail">{{ item.detail }}</p>
+ </article>
  </div>
 
- <div class="relative mx-auto mt-14 max-w-[92rem] lg:mt-20">
- <div
- class="overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-slate-200/55 via-primary-100/35 to-sky-100/45 p-px shadow-lg shadow-primary-900/[0.06] dark:from-slate-800/80 dark:via-slate-900/60 dark:to-primary-950/40 dark:shadow-black/30"
- >
- <div class="grid grid-cols-1 gap-px overflow-hidden rounded-[1.2rem] bg-slate-200/70 dark:bg-white/[0.08] lg:grid-cols-3">
- <div
- class="landing-about-cell group flex min-h-[15rem] flex-col bg-gradient-to-br from-white from-35% via-white to-primary-50/55 px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-md hover:shadow-primary-500/8 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:from-slate-950 dark:via-slate-950 dark:to-primary-950/35 dark:hover:bg-slate-900/98"
- :style="{ transitionDelay: '32ms' }"
- >
- <div class="flex items-start justify-between gap-3">
- <span
- class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-sm font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
- >
- 01
- </span>
- <div
- class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
- >
- <CubeIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
- </div>
- </div>
- <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
- One calm system for the floor
- </h3>
- <p class="mt-2 flex-1 text-sm leading-snug text-gray-600 dark:text-gray-400">
- Inventory, checkout, and notes in one workspace.</p>
- <p class="mt-2 text-sm leading-snug text-gray-600 dark:text-gray-400">
- Shape folders to your aisles and keep receipts sane when traffic spikes.
- </p>
- </div>
-
- <div
- class="landing-about-cell group flex min-h-[15rem] flex-col bg-gradient-to-br from-white from-35% via-sky-50/30 to-primary-50/50 px-6 py-8 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-md hover:shadow-sky-500/8 sm:min-h-[16rem] sm:px-7 sm:py-9 lg:min-h-[17.5rem] dark:from-slate-950 dark:via-slate-950 dark:to-sky-950/25 dark:hover:bg-slate-900/98"
- :style="{ transitionDelay: '84ms' }"
- >
- <div class="flex items-start justify-between gap-3">
- <span
- class="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-500/10 text-sm font-bold text-primary-700 dark:bg-primary-400/15 dark:text-primary-200"
- >
- 02
- </span>
- <div
- class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
- >
- <SparklesIcon class="h-5 w-5 shrink-0" stroke-width="1.5" />
- </div>
- </div>
- <h3 class="mt-4 text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
- Tools that feel obvious
- </h3>
- <p class="mt-2 flex-1 text-sm leading-snug text-gray-600 dark:text-gray-400">
- Owners keep the overview; managers and staff stay inside clear guardrails.</p>
- <p class="mt-2 text-sm leading-snug text-gray-600 dark:text-gray-400">
- Upgrade plans when branches or analytics need to grow.</p>
- </div>
-
- <div
- class="grid min-h-full grid-cols-1 gap-px self-stretch bg-slate-200/50 sm:grid-cols-3 lg:grid-cols-1 lg:grid-rows-3 dark:bg-white/[0.06]"
- >
- <div
- v-for="(pillar, idx) in aboutPillars"
+ <div class="landing-about-pillars">
+ <article
+ v-for="pillar in aboutPillars"
  :key="pillar.title"
- class="landing-about-cell group flex min-h-[12rem] flex-col bg-gradient-to-br from-white to-primary-50/40 px-5 py-7 text-left transition-[background-color,transform,box-shadow] duration-300 ease-out hover:shadow-sm hover:shadow-primary-500/5 sm:min-h-[14rem] sm:px-6 sm:py-8 lg:min-h-0 lg:flex-1 dark:from-slate-950 dark:to-primary-950/30 dark:hover:bg-slate-900/95"
- :style="{ transitionDelay: `${136 + idx * 52}ms` }"
+ class="landing-about-card landing-about-card--pillar landing-about-animate"
  >
- <div class="flex items-start justify-between gap-3">
- <span class="text-sm font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400">
- {{ pillar.title }}
- </span>
- <div
- class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500/14 to-primary-600/5 text-primary-600 transition-transform duration-300 ease-out group-hover:scale-[1.03] dark:from-primary-400/18 dark:to-primary-500/5 dark:text-primary-300"
- >
- <component :is="pillar.icon" class="h-5 w-5 shrink-0" stroke-width="1.5" />
+ <component :is="pillar.icon" class="landing-about-icon" stroke-width="1.5" aria-hidden="true" />
+ <div class="landing-about-pillar-body">
+ <p class="landing-about-pillar-label">{{ pillar.title }}</p>
+ <p class="landing-about-card-desc">{{ pillar.body }}</p>
  </div>
- </div>
- <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
- {{ pillar.body }}
- </p>
- </div>
- </div>
- </div>
+ </article>
  </div>
  </div>
 
- <p class="relative mx-auto mt-10 max-w-2xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-300 sm:text-base">
+ <p class="landing-about-footer">
  See the walkthrough with screenshots in
- <a
- href="#features"
- class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
- @click.prevent="scrollToSection('features')"
- >How Storvv works</a>
+ <a href="#how-it-works" class="landing-about-link" @click.prevent="scrollToSection('how-it-works')">
+ How Storvv works
+ </a>
  or
- <a
- href="#contact"
- class="font-medium text-primary-600 underline-offset-2 transition-colors hover:text-primary-700 hover:underline dark:text-primary-400 dark:hover:text-primary-300"
- @click.prevent="scrollToSection('contact')"
- >talk to us</a>.
+ <a href="#contact" class="landing-about-link" @click.prevent="scrollToSection('contact')">
+ talk to us
+ </a>.
  </p>
  </div>
  </section>
 
  <!-- How it works: high-impact timeline + gradient preview strip -->
  <section
- id="features"
- data-section-id="features"
+ id="how-it-works"
+ data-section-id="how-it-works"
  class="scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] grid min-h-[min(100vh,44rem)] overflow-hidden lg:min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28"
  >
  <div
@@ -1873,8 +1462,6 @@ import {
  PresentationChartLineIcon as PresentationChartLineSolidIcon,
 } from '@heroicons/vue/24/solid'
 import { useThemeStore } from '~/stores/theme'
-import whySectionPhotoSrc from '~/assets/marketing/questions.jpg'
-
 /** Product shots for “How Storvv works” (files in /public). */
 const howStorvvWorksScreenshotFiles = [
  'Screenshot 2026-05-10 at 17.09.01.png',
@@ -1927,27 +1514,6 @@ const howStorvvWorksSteps = [
  icon: markRaw(PresentationChartLineSolidIcon),
  title: 'Monitor & analyze',
  html: 'Dashboards, bestselling lines, lows, pacing. Upgrade when you want deeper exports.',
- },
-]
-
-type WhyPillar = { title: string; body: string; icon: Component }
-
-/** “Why Storvv”: three outcomes (paired with bundled photo in markup). */
-const whyPillars: WhyPillar[] = [
- {
- title: 'Career growth for your team',
- body: 'Roles and scoped access so shifts run consistently and mistakes at the till drop.',
- icon: markRaw(UsersIcon),
- },
- {
- title: 'Visibility that scales',
- body: 'Trends, fast sellers, low stock, and light CRM cues in dashboards instead of spreadsheets.',
- icon: markRaw(ChartBarIcon),
- },
- {
- title: 'Simple operations',
- body: 'One workflow for inventory, receipts, and handoffs, repeatable as you hire and expand.',
- icon: markRaw(ArrowPathIcon),
  },
 ]
 
@@ -2080,7 +1646,6 @@ const acceptCookies = () => {
 }
 
 const visibleSections = ref<Set<string>>(new Set())
-const heroBackground = ref<HTMLElement | null>(null)
 const openFaqItems = ref<Set<number>>(new Set())
 
 const toggleFaq = (index: number) => {
@@ -2243,6 +1808,71 @@ const landingMoreFeaturesPanelModel = computed(() => {
  return { icon: tab.gridIcon, rows: tab.items }
 })
 
+const whoUsesCards = [
+  {
+    icon: CubeIcon,
+    title: 'Inventory your way',
+    description:
+      'Organize by category with the fields you need: sizes, brands, colours, serial numbers, or simple quantities. Every sale and return updates stock automatically.',
+  },
+  {
+    icon: TagIcon,
+    title: 'Sell from any counter',
+    description:
+      'Ring up sales, apply discounts, process returns, and keep customer history whether you are in a shop, depot, or showroom.',
+  },
+  {
+    icon: UserGroupIcon,
+    title: 'Branch-grade access',
+    description:
+      'Permissions match floor and HQ separately, without fragile shared master logins.',
+  },
+] as const
+
+const whoUsesPoints = [
+  {
+    num: '01',
+    title: 'Any product catalog',
+    description:
+      'Clothing, spare parts, furniture, electronics, groceries, or your own mix. Set up categories and fields that match what you actually sell.',
+  },
+  {
+    num: '02',
+    title: 'One shop or many',
+    description:
+      'Start with a single location and add branches when you grow. Each store can stay separate or share what you choose.',
+  },
+  {
+    num: '03',
+    title: 'No special industry required',
+    description:
+      'You do not need custom software per trade. Stock, sales, returns, and customers work the same way for every business type.',
+  },
+  {
+    num: '04',
+    title: 'Your team, your rules',
+    description:
+      'Owners, managers, and floor staff each see what they need. No shared passwords or fragile spreadsheet handoffs.',
+  },
+] as const
+
+const aboutHighlights = [
+  {
+    num: '01',
+    icon: CubeIcon,
+    title: 'One calm system for your business',
+    description: 'Inventory, sales, customers, and team access in one workspace.',
+    detail: 'Set up categories your way and keep counts honest after every transaction.',
+  },
+  {
+    num: '02',
+    icon: SparklesIcon,
+    title: 'Tools that feel obvious',
+    description: 'Owners keep the overview; managers and staff stay inside clear guardrails.',
+    detail: 'Add branches and analytics when you are ready to grow.',
+  },
+] as const
+
 const aboutPillars = [
  {
  title: 'Focus',
@@ -2278,37 +1908,8 @@ const scrollToTop = () => {
  })
  }
 
-let rafId: number | null = null
-
 const handleScroll = () => {
- // Show button when user scrolls down more than 400px
  showBackToTop.value = window.scrollY > 400
-
- // Use requestAnimationFrame for smooth parallax
- if (rafId !== null) {
- cancelAnimationFrame(rafId)
- }
- 
- rafId = requestAnimationFrame(() => {
- // Parallax effect for hero media
- if (!heroBackground.value) return
-
- const scrolled = window.scrollY
- const heroSection = heroBackground.value.closest('section')
- const heroHeight = heroSection?.offsetHeight || 0
-
- // Only apply parallax when scrolling within hero section
- if (heroHeight > 0 && scrolled < heroHeight) {
- const parallaxSpeed = 0.12
- const translateY = scrolled * parallaxSpeed
- heroBackground.value.style.transform = `translate3d(0, ${translateY}px, 0) scale(1.06)`
- return
- }
-
- // Lock position when past hero section
- const maxTranslate = heroHeight * 0.12
- heroBackground.value.style.transform = `translate3d(0, ${maxTranslate}px, 0) scale(1.06)`
- })
 }
 
 // Intersection Observer for scroll animations
@@ -2386,9 +1987,6 @@ onUnmounted(() => {
  mobileMenuMql = null
  themeStore.applyTheme()
  window.removeEventListener('scroll', handleScroll)
- if (rafId !== null) {
- cancelAnimationFrame(rafId)
- }
  }
 })
 
@@ -2537,24 +2135,42 @@ useHead({
  }
 }
 
-/* About grid: staggered reveal when scroll-animate adds .visible */
-.landing-about-chart .landing-about-cell {
+/* About section: scroll reveal */
+.landing-about-section .landing-about-animate {
  opacity: 0;
  transform: translate3d(0, 0.75rem, 0);
  transition:
- opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
- transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
- background-color 0.3s ease-out,
- box-shadow 0.3s ease-out;
+ opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+ transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.landing-about-chart.visible .landing-about-cell {
+.landing-about-section.visible .landing-about-animate {
  opacity: 1;
  transform: translate3d(0, 0, 0);
 }
 
+.landing-about-section.visible .landing-about-highlights .landing-about-animate:nth-child(1) {
+ transition-delay: 60ms;
+}
+
+.landing-about-section.visible .landing-about-highlights .landing-about-animate:nth-child(2) {
+ transition-delay: 120ms;
+}
+
+.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(1) {
+ transition-delay: 100ms;
+}
+
+.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(2) {
+ transition-delay: 160ms;
+}
+
+.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(3) {
+ transition-delay: 220ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
- .landing-about-chart .landing-about-cell {
+ .landing-about-section .landing-about-animate {
  opacity: 1 !important;
  transform: none !important;
  transition: none !important;
@@ -2594,33 +2210,4 @@ useHead({
  filter: saturate(0.78) contrast(1.03) brightness(0.84);
 }
 
-/* Who uses Storvv: HUD grid (masked blueprint) */
-.landing-who-uses-grid {
- background-image:
- linear-gradient(rgba(96, 165, 250, 0.09) 1px, transparent 1px),
- linear-gradient(90deg, rgba(96, 165, 250, 0.09) 1px, transparent 1px);
- background-size: 48px 48px;
- mask-image: radial-gradient(ellipse 88% 72% at 50% 40%, rgb(0 0 0) 12%, transparent 72%);
- -webkit-mask-image: radial-gradient(
- ellipse 88% 72% at 50% 40%,
- rgb(0 0 0) 12%,
- transparent 72%
- );
-}
-
-@media (hover: hover) and (pointer: fine) {
- .landing-who-uses-glass {
- transition:
- border-color 0.3s ease-out,
- background-color 0.3s ease-out,
- box-shadow 0.3s ease-out;
- }
- .landing-who-uses-glass:hover {
- border-color: rgba(147, 197, 253, 0.22);
- background: rgba(255, 255, 255, 0.045);
- box-shadow:
- inset 0 1px 0 rgba(255, 255, 255, 0.06),
- 0 0 0 1px rgba(59, 130, 246, 0.07);
- }
-}
 </style>

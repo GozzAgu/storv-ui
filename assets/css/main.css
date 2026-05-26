@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 @import "./capacitor-native.css";
+@import "./landing-showcase.css";
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
 @layer components {
