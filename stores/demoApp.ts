@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Receipt } from '~/stores/receipts'
 import type {
+  DemoCustomer,
   DemoItem,
   DemoReceipt,
   DemoReceiptLine,
@@ -30,6 +31,10 @@ function saveState(state: DemoState) {
   localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(state))
 }
 
+function resolveCurrentStore(state: DemoState): DemoStoreRecord {
+  return state.stores.find((s) => s.id === state.currentStoreId) ?? state.stores[0]!
+}
+
 export const useDemoAppStore = defineStore('demoApp', {
   state: () => ({
     hydrated: false,
@@ -38,22 +43,38 @@ export const useDemoAppStore = defineStore('demoApp', {
 
   getters: {
     currentStore(): DemoStoreRecord {
-      const store =
-        this.state.stores.find((s) => s.id === this.state.currentStoreId) ?? this.state.stores[0]
-      return store!
+      return resolveCurrentStore(this.state)
     },
 
-    folders: (s) => s.currentStore.folders,
-    items: (s) => s.currentStore.items,
-    customers: (s) => s.currentStore.customers,
-    receipts: (s) => s.currentStore.receipts,
-    storeName: (s) => s.currentStore.name,
-    currencySymbol: (s) => s.state.currencySymbol,
-    allReceipts: (s) => s.state.stores.flatMap((store) => store.receipts),
+    folders(): DemoStoreRecord['folders'] {
+      return this.currentStore.folders
+    },
+    items(): DemoItem[] {
+      return this.currentStore.items
+    },
+    customers(): DemoStoreRecord['customers'] {
+      return this.currentStore.customers
+    },
+    receipts(): DemoReceipt[] {
+      return this.currentStore.receipts
+    },
+    storeName(): string {
+      return this.currentStore.name
+    },
+    currencySymbol(): string {
+      return this.state.currencySymbol
+    },
+    allReceipts(): DemoReceipt[] {
+      return this.state.stores.flatMap((store) => store.receipts)
+    },
 
-    availableItems: (s) => s.currentStore.items.filter((i) => i.quantity - i.sold > 0),
+    availableItems(): DemoItem[] {
+      return this.currentStore.items.filter((i) => i.quantity - i.sold > 0)
+    },
 
-    completedReceipts: (s) => s.currentStore.receipts.filter((r) => r.status === 'completed'),
+    completedReceipts(): DemoReceipt[] {
+      return this.currentStore.receipts.filter((r) => r.status === 'completed')
+    },
 
     todaySales(): number {
       const today = new Date().toDateString()
@@ -129,7 +150,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         (c) => c.name.toLowerCase() === trimmed.toLowerCase() && (!phone || c.phone === phone),
       )
       if (existing) return existing
-      const customer = {
+      const customer: DemoCustomer = {
         id: demoId('cust'),
         storeId: this.state.currentStoreId,
         name: trimmed,
