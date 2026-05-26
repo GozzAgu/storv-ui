@@ -1,91 +1,58 @@
 <template>
- <div class="min-h-screen bg-gradient-to-b from-[#fafafa] via-[#fafafa] to-[#f5f6f8] text-gray-900 antialiased dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 dark:text-gray-100">
- <!-- Nav: glass, minimal -->
+ <div class="landing-page min-h-screen bg-[#fafafa] text-gray-900 antialiased">
  <header
- class="fixed top-0 left-0 right-0 z-50 border-b border-gray-200/45 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75 dark:border-gray-800/55 dark:bg-slate-950/85 supports-[backdrop-filter]:dark:bg-slate-950/75 transition-[border-color,background-color] duration-300 ease-out"
+ class="landing-header"
+ :class="{ 'landing-header--menu-open': mobileMenuOpen }"
  >
- <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
- <div class="flex h-16 items-center justify-between gap-3 overflow-visible">
- <NuxtLink to="/" class="flex items-center overflow-visible transition-opacity hover:opacity-90">
- <img
- :src="marketingLogoSrc"
- alt="Storvv"
- class="h-9 w-auto max-h-9 origin-left object-contain will-change-transform sm:h-10 sm:max-h-10 lg:scale-110 lg:origin-left xl:scale-[1.18]"
- />
+ <div class="landing-header__inner">
+ <NuxtLink to="/" class="landing-header__logo" @click="mobileMenuOpen = false">
+ <img :src="marketingLogoSrc" alt="Storvv" width="120" height="32" />
  </NuxtLink>
- <div class="hidden md:flex items-center gap-6 lg:gap-8">
+
+ <div class="landing-header__desktop">
+ <nav class="landing-header__links" aria-label="Primary">
  <a href="#features" class="landing-nav-link" @click.prevent="scrollToSection('features')">Features</a>
- <a href="#how-it-works" class="landing-nav-link hidden lg:inline-block" @click.prevent="scrollToSection('how-it-works')">How it works</a>
+ <a href="#how-it-works" class="landing-nav-link" @click.prevent="scrollToSection('how-it-works')">How it works</a>
  <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')">Plans</a>
- <a href="#faq" class="landing-nav-link hidden xl:inline-block" @click.prevent="scrollToSection('faq')">FAQ</a>
+ <a href="#faq" class="landing-nav-link" @click.prevent="scrollToSection('faq')">FAQ</a>
  <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')">Contact</a>
- <a
- :href="appOriginUrl"
- class="rounded-lg bg-gray-900 text-white text-sm font-medium px-5 py-2.5 shadow-sm outline-none transition-all duration-300 ease-out hover:bg-gray-800 hover:shadow active:scale-[0.98] dark:bg-primary-600 dark:hover:bg-primary-500"
- >
- Get Started
- </a>
+ </nav>
+ <a :href="appOriginUrl" class="landing-header__cta">Get started</a>
  </div>
- <div class="flex items-center gap-1.5 md:hidden">
+
+ <div class="landing-header__mobile">
+ <a :href="appOriginUrl" class="landing-header__cta landing-header__cta--compact">Start</a>
  <button
  type="button"
- @click="mobileMenuOpen = !mobileMenuOpen"
- class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-transparent text-gray-900 outline-none transition-[color,transform] duration-200 ease-out hover:text-gray-700 active:scale-[0.96] dark:text-white dark:hover:text-white/85"
+ class="landing-header__menu-btn"
  :aria-expanded="mobileMenuOpen"
  aria-controls="landing-mobile-nav"
- aria-label="Toggle menu"
+ :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+ @click="mobileMenuOpen = !mobileMenuOpen"
  >
- <Bars3Icon v-if="!mobileMenuOpen" class="h-7 w-7" stroke-width="2" />
- <XMarkIcon v-else class="h-7 w-7" stroke-width="2" />
+ <XMarkIcon v-if="mobileMenuOpen" class="landing-header__menu-icon" aria-hidden="true" />
+ <Bars3Icon v-else class="landing-header__menu-icon" aria-hidden="true" />
  </button>
  </div>
  </div>
- </nav>
- </header>
 
- <!-- Mobile: full-screen menu (vertical list, Buckhill-style) -->
- <Teleport to="body">
  <Transition
- enter-active-class="transition ease-out duration-200"
- enter-from-class="opacity-0"
- enter-to-class="opacity-100"
- leave-active-class="transition ease-in duration-150"
- leave-from-class="opacity-100"
- leave-to-class="opacity-0"
+ enter-active-class="transition duration-200 ease-out"
+ enter-from-class="opacity-0 -translate-y-1"
+ enter-to-class="opacity-100 translate-y-0"
+ leave-active-class="transition duration-150 ease-in"
+ leave-from-class="opacity-100 translate-y-0"
+ leave-to-class="opacity-0 -translate-y-1"
  >
  <div
  v-if="mobileMenuOpen"
  id="landing-mobile-nav"
- class="fixed inset-0 z-[100] flex max-h-[100dvh] flex-col bg-white md:hidden dark:bg-slate-950"
+ class="landing-mobile-panel md:hidden"
  role="dialog"
  aria-modal="true"
  aria-label="Site menu"
  >
- <div
- class="flex h-14 min-h-[3.5rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/90 px-4 sm:px-6 dark:border-gray-800"
- >
- <NuxtLink
- to="/"
- class="flex items-center overflow-visible transition-opacity hover:opacity-90"
- @click="mobileMenuOpen = false"
- >
- <img
- :src="marketingLogoSrc"
- alt="Storvv"
- class="h-9 w-auto max-h-9 origin-left object-contain will-change-transform scale-110 sm:h-10 sm:max-h-10 sm:scale-125"
- />
- </NuxtLink>
- <button
- type="button"
- class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-900 outline-none transition-[color,transform] duration-200 ease-out hover:bg-gray-100 active:scale-[0.96] dark:text-white dark:hover:bg-white/10"
- aria-label="Close menu"
- @click="mobileMenuOpen = false"
- >
- <XMarkIcon class="h-7 w-7" stroke-width="2" />
- </button>
- </div>
-
- <nav class="min-h-0 flex-1 overflow-y-auto px-4 sm:px-6" aria-label="Primary">
+ <nav class="landing-mobile-panel__nav" aria-label="Primary">
  <a
  href="#features"
  class="landing-mobile-nav-link"
@@ -108,21 +75,39 @@
  >FAQ</a>
  <a
  href="#contact"
- class="landing-mobile-nav-link landing-mobile-nav-link--last"
+ class="landing-mobile-nav-link"
  @click.prevent="scrollToSection('contact'); mobileMenuOpen = false"
  >Contact</a>
  </nav>
-
- <div class="shrink-0 border-t border-gray-200/90 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 dark:border-gray-800 dark:bg-slate-950">
+ <div class="landing-mobile-panel__cta-wrap">
  <a
  :href="appOriginUrl"
- class="flex w-full items-center justify-center rounded-full bg-gray-900 py-3.5 text-center text-sm font-semibold text-white shadow-sm outline-none transition-colors hover:bg-gray-800 active:scale-[0.98] dark:bg-primary-600 dark:hover:bg-primary-500"
+ class="landing-header__cta landing-mobile-panel__cta"
  @click="mobileMenuOpen = false"
  >
- Get Started
+ Get started free
  </a>
  </div>
  </div>
+ </Transition>
+ </header>
+
+ <Teleport to="body">
+ <Transition
+ enter-active-class="transition-opacity duration-200 ease-out"
+ enter-from-class="opacity-0"
+ enter-to-class="opacity-100"
+ leave-active-class="transition-opacity duration-150 ease-in"
+ leave-from-class="opacity-100"
+ leave-to-class="opacity-0"
+ >
+ <button
+ v-if="mobileMenuOpen"
+ type="button"
+ class="landing-mobile-backdrop md:hidden"
+ aria-label="Close menu"
+ @click="mobileMenuOpen = false"
+ />
  </Transition>
  </Teleport>
 
@@ -1956,82 +1941,6 @@ useHead({
  -webkit-box-decoration-break: clone;
  background-clip: text;
  -webkit-background-clip: text;
-}
-
-/* Top nav in-page links: primary underline draws in from the left */
-.landing-nav-link {
- position: relative;
- display: inline-block;
- padding-bottom: 2px;
- font-size: 0.875rem;
- line-height: 1.25rem;
- font-weight: 500;
- color: rgb(75 85 99);
- outline: none;
- transition: color 0.25s ease-out;
-}
-.landing-nav-link:hover,
-.landing-nav-link:focus-visible {
- color: rgb(17 24 39);
-}
-.landing-nav-link::after {
- content: '';
- position: absolute;
- left: 0;
- right: 0;
- bottom: 0;
- height: 2px;
- border-radius: 9999px;
- background: rgb(59 130 246);
- transform: scaleX(0);
- transform-origin: left center;
- transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
- opacity: 0.9;
- pointer-events: none;
-}
-@media (hover: hover) and (pointer: fine) {
- .landing-nav-link:hover::after {
- transform: scaleX(1);
- }
-}
-.landing-nav-link:focus-visible::after {
- transform: scaleX(1);
-}
-
-/* Full-screen mobile menu: block links (desktop .landing-nav-link is inline-block) */
-.landing-mobile-nav-link {
- display: block;
- width: 100%;
- border-bottom: 1px solid rgb(243 244 246);
- padding-top: 1rem;
- padding-bottom: 1rem;
- font-size: 1.125rem;
- line-height: 1.75rem;
- font-weight: 600;
- color: rgb(17 24 39);
- outline: none;
- transition: color 0.2s ease-out, background-color 0.2s ease-out;
-}
-.landing-mobile-nav-link:hover,
-.landing-mobile-nav-link:focus-visible {
- color: rgb(59 130 246);
-}
-.landing-mobile-nav-link--last {
- border-bottom-width: 0;
-}
-.dark .landing-mobile-nav-link {
- border-bottom-color: rgb(31 41 55);
- color: rgb(243 244 246);
-}
-.dark .landing-mobile-nav-link:hover,
-.dark .landing-mobile-nav-link:focus-visible {
- color: rgb(96 165 250);
-}
-
-@media (prefers-reduced-motion: reduce) {
- .landing-nav-link::after {
- transition: none;
- }
 }
 
 /* About section: scroll reveal */

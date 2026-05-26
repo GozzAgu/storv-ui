@@ -129,13 +129,13 @@ html.dark .landing-about-section .landing-label--blue {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-  padding-top: 5.5rem;
+  padding-top: calc(var(--landing-header-h, 3.5rem) + 1.5rem);
   padding-bottom: 2.5rem;
 }
 
 @media (min-width: 640px) {
   .landing-hero {
-    padding-top: 6rem;
+    padding-top: calc(var(--landing-header-h, 3.5rem) + 2rem);
     padding-bottom: 3rem;
   }
 }
@@ -1641,4 +1641,279 @@ html.dark .landing-about-link {
 
 html.dark .landing-about-link:hover {
   color: var(--storvv-blue-pale);
+}
+
+/* ── Mobile: clean spacing, touch targets, readable type ── */
+@media (max-width: 767px) {
+  .landing-showcase {
+    --landing-text-body: 1rem;
+    --landing-text-lead: 1.0625rem;
+  }
+
+  .landing-showcase .landing-label {
+    font-size: var(--landing-text-lead);
+    line-height: 1.45;
+  }
+
+  .landing-hero {
+    min-height: 100dvh;
+    min-height: 100svh;
+    padding-bottom: 1.75rem;
+  }
+
+  .landing-hero__inner {
+    padding-inline: 1rem;
+  }
+
+  .landing-hero__title {
+    font-size: clamp(2.25rem, 11vw, 3.25rem);
+  }
+
+  .landing-hero__subtitle {
+    margin-top: 1.125rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding-inline: 0.25rem;
+  }
+
+  .landing-hero__actions {
+    margin-top: 1.75rem;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 20rem;
+    margin-inline: auto;
+    gap: 0.75rem;
+  }
+
+  .landing-pill-cta--hero {
+    width: 100%;
+    justify-content: center;
+    padding: 0.9375rem 1.25rem;
+  }
+
+  .landing-hero__link {
+    justify-content: center;
+    width: 100%;
+    padding: 0.625rem;
+  }
+
+  .landing-hero__chips {
+    margin-top: 1.75rem;
+    gap: 0.5rem;
+  }
+
+  .landing-hero__chip {
+    font-size: 0.875rem;
+    padding: 0.4375rem 0.875rem;
+  }
+
+  .landing-hero__scroll-hint {
+    padding-top: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .landing-hero__scroll-hint-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .landing-hero__orb {
+    filter: blur(56px);
+    opacity: 0.35;
+  }
+
+  .landing-who-uses-section,
+  .landing-problems,
+  .landing-core,
+  .landing-multistore {
+    padding-block: 3.25rem;
+  }
+
+  .landing-who-inner,
+  .landing-problems__inner,
+  .landing-core__inner,
+  .landing-multistore__inner {
+    padding-inline: 1rem;
+  }
+
+  .landing-who-layout {
+    gap: 2rem;
+  }
+
+  .landing-who-heading,
+  .landing-problems__headline,
+  .landing-core__title,
+  .landing-multistore__title {
+    font-size: clamp(1.625rem, 7vw, 2.125rem);
+    line-height: 1.15;
+  }
+
+  .landing-who-lede,
+  .landing-problems__lede,
+  .landing-multistore__lede {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .landing-who-points {
+    margin-top: 1.75rem;
+    gap: 1.25rem;
+  }
+
+  .landing-who-point-title {
+    font-size: 1.0625rem;
+  }
+
+  .landing-who-point-desc {
+    font-size: 0.9375rem;
+  }
+
+  .landing-who-card {
+    padding: 1rem 1.125rem;
+    gap: 0.875rem;
+  }
+
+  .landing-who-card-title {
+    font-size: 1.0625rem;
+  }
+
+  .landing-who-card-desc {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .landing-problems__answer {
+    margin-top: 2rem;
+  }
+
+  .landing-problems__item {
+    padding-block: 1rem;
+  }
+
+  .landing-problems__cta-box {
+    margin-top: 1.5rem;
+    padding: 1rem;
+  }
+
+  .landing-core__header {
+    margin-bottom: 1.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .landing-core__card {
+    min-height: 0;
+    padding: 1.25rem 1.125rem;
+  }
+
+  .landing-core__card-title {
+    font-size: 1.1875rem;
+  }
+
+  .landing-setup {
+    min-height: 0;
+  }
+
+  .landing-setup__visual {
+    padding: 2.5rem 1rem;
+  }
+
+  .landing-setup__content {
+    padding: 2.25rem 1rem 2.5rem;
+  }
+
+  .landing-setup__headline {
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
+  }
+
+  .landing-setup__steps {
+    margin-top: 1.5rem;
+  }
+
+  .landing-setup .landing-pill-cta {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .landing-multistore__features {
+    margin-top: 1.5rem;
+  }
+
+  .landing-multistore__feature {
+    padding-block: 0.875rem;
+  }
+
+  .landing-store-card {
+    padding: 1rem 1.125rem;
+  }
+
+  .landing-multistore__cards {
+    margin-top: 2rem;
+    gap: 0.75rem;
+  }
+
+  .landing-multistore__footer-cta .landing-pill-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Landing page sections outside showcase (how-it-works, pricing, etc.) */
+@media (max-width: 767px) {
+  .landing-page #how-it-works {
+    min-height: 0 !important;
+  }
+
+  .landing-page #how-it-works > div:first-child {
+    padding: 2.5rem 1rem;
+  }
+
+  .landing-page #how-it-works > div:last-child {
+    min-height: 0 !important;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .landing-about-section {
+    padding-block: 3.25rem;
+  }
+
+  .landing-about-inner {
+    padding-inline: 1rem;
+  }
+
+  .landing-about-title {
+    font-size: clamp(1.625rem, 7vw, 2.125rem) !important;
+  }
+
+  .landing-about-lede {
+    font-size: 1rem !important;
+  }
+
+  .landing-about-grid {
+    gap: 0.875rem;
+  }
+
+  .landing-page #pricing,
+  .landing-page #faq {
+    padding-block: 3rem !important;
+  }
+
+  .landing-page #pricing h2,
+  .landing-page #faq h2 {
+    font-size: 1.75rem !important;
+  }
+
+  .landing-page #pricing > div,
+  .landing-page #faq > div {
+    padding-inline: 1rem;
+  }
+
+  .landing-page #capabilities-grid .max-w-7xl {
+    padding-inline: 1rem;
+  }
+
+  .landing-page #capabilities-grid h2 {
+    font-size: 1.5rem !important;
+  }
 }

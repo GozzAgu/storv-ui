@@ -3,6 +3,7 @@
 @import "@nuxt/ui";
 @import "./capacitor-native.css";
 @import "./landing-showcase.css";
+@import "./landing-nav.css";
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
 @layer components {

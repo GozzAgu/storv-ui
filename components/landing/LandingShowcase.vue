@@ -57,7 +57,7 @@
     <section
       id="use-cases"
       data-section-id="use-cases"
-      class="landing-who-uses-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+      class="landing-who-uses-section scroll-animate scroll-animate-up"
       aria-labelledby="landing-who-heading"
     >
       <div class="landing-who-bg" aria-hidden="true" />
@@ -152,7 +152,7 @@
     <section
       id="features"
       data-section-id="landing-features"
-      class="landing-core scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+      class="landing-core scroll-animate scroll-animate-up"
       aria-labelledby="landing-features-title"
     >
       <div class="landing-core__glow" aria-hidden="true" />
@@ -191,7 +191,7 @@
     <section
       id="setup"
       data-section-id="landing-setup"
-      class="landing-setup scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+      class="landing-setup scroll-animate scroll-animate-up"
       aria-labelledby="landing-setup-title"
     >
       <div class="landing-setup__visual">
@@ -225,7 +225,7 @@
     <section
       id="multi-store"
       data-section-id="landing-multistore"
-      class="landing-multistore scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
+      class="landing-multistore scroll-animate scroll-animate-up"
       aria-labelledby="landing-multistore-title"
     >
       <div class="landing-multistore__glow" aria-hidden="true" />
