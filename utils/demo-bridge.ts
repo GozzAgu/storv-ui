@@ -10,6 +10,7 @@ import type { ActivityLog } from '~/composables/useActivityLog'
 import type { Notification } from '~/stores/notifications'
 import type { SavedSearch } from '~/stores/search'
 import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
+import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { demoId } from '~/utils/demo-seed'
 import {
   DEMO_USER_UID,
@@ -128,10 +129,11 @@ export function getDemoUserData(state: DemoState): UserData {
 }
 
 export function demoStoreToStore(record: DemoStoreRecord): Store {
+  const name = sanitizeDemoDisplayDashes(record.name)
   return {
     id: record.id,
-    name: record.name,
-    branchName: record.name,
+    name,
+    branchName: name,
     address: record.address,
     phone: '0800 000 0000',
     isActive: true,

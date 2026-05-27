@@ -28,46 +28,76 @@
       </div>
       <div class="landing-hero__inner">
         <div class="landing-hero__center">
-        <div class="landing-hero__content">
-          <p class="landing-label landing-label--blue landing-hero__reveal" style="--hero-i: 0">
-            Retail, sales, and inventory in one workspace
-          </p>
-          <h1 id="landing-hero-title" class="landing-hero__title">
-            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1">Stop losing</span>
-            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
-              <span class="landing-hero__accent">money</span>
-            </span>
-            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">on stock.</span>
-          </h1>
-          <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
-            Know what’s in each branch, what sold, and what’s running low. Receipts and customers in
-            one dashboard, not Excel or WhatsApp threads.
-          </p>
-          <div class="landing-hero__actions landing-hero__reveal" style="--hero-i: 5">
-            <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
-              Try the demo (no signup)
-            </NuxtLink>
-            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">
-              Start free on Micro
-            </a>
-            <a :href="appUrl" class="landing-hero__link">
-              <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
-              {{ appHost }}
-            </a>
+          <div class="landing-hero__content">
+            <div class="landing-hero__stack">
+              <p class="landing-label landing-label--blue landing-hero__reveal" style="--hero-i: 0">
+                Retail, sales, and inventory in one workspace
+              </p>
+              <h1 id="landing-hero-title" class="landing-hero__title">
+                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1">Stop losing</span>
+                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
+                  <span class="landing-hero__accent">money</span>
+                </span>
+                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">on stock.</span>
+              </h1>
+              <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
+                Know what’s in each branch, what sold, and what’s running low. Receipts and customers in
+                one dashboard, not Excel or WhatsApp threads.
+              </p>
+            </div>
+
+            <div
+              class="landing-hero__actions landing-hero__panel landing-hero__reveal"
+              style="--hero-i: 5"
+            >
+              <div class="landing-hero__cta-row">
+                <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
+                  Try the demo (no signup)
+                </NuxtLink>
+                <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">
+                  Start free on Micro
+                </a>
+              </div>
+              <div class="landing-hero__link-row">
+                <a :href="appUrl" class="landing-hero__link">
+                  <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
+                  {{ appHost }}
+                </a>
+              </div>
+            </div>
+
+            <div
+              class="landing-hero__capabilities landing-hero__panel landing-hero__reveal"
+              style="--hero-i: 6"
+              aria-label="Core capabilities"
+            >
+              <p class="landing-hero__capabilities-label">Explore</p>
+              <ul class="landing-hero__chip-row">
+                <li v-for="chip in heroChipsPrimary" :key="chip.label">
+                  <NuxtLink
+                    v-if="chip.href.startsWith('/')"
+                    :to="chip.href"
+                    class="landing-hero__chip"
+                  >
+                    {{ chip.label }}
+                  </NuxtLink>
+                  <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
+                </li>
+              </ul>
+              <ul class="landing-hero__chip-row landing-hero__chip-row--secondary">
+                <li v-for="chip in heroChipsSecondary" :key="chip.label">
+                  <NuxtLink
+                    v-if="chip.href.startsWith('/')"
+                    :to="chip.href"
+                    class="landing-hero__chip"
+                  >
+                    {{ chip.label }}
+                  </NuxtLink>
+                  <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
+                </li>
+              </ul>
+            </div>
           </div>
-          <ul class="landing-hero__chips landing-hero__reveal" style="--hero-i: 6" aria-label="Core capabilities">
-            <li v-for="chip in heroChips" :key="chip.label">
-              <NuxtLink
-                v-if="chip.href.startsWith('/')"
-                :to="chip.href"
-                class="landing-hero__chip"
-              >
-                {{ chip.label }}
-              </NuxtLink>
-              <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
-            </li>
-          </ul>
-        </div>
         </div>
         <a href="#use-cases" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
           <span class="landing-hero__scroll-hint-text">See who it is for</span>
@@ -88,38 +118,50 @@
       <div class="landing-who-inner">
         <div class="landing-who-layout">
           <div class="landing-who-copy">
-            <p class="landing-label landing-label--blue">Who it is for</p>
-            <h2 id="landing-who-heading" class="landing-who-heading">
-              Built for <span class="landing-who-heading-accent">retail, sales,</span> and operations
-            </h2>
-            <p class="landing-who-lede">
-              Shops, showrooms, procurement-led teams, and multi-branch operators who need one system
-              for stock, selling, and customer records.
-            </p>
+            <div class="landing-who-stack">
+              <p class="landing-label landing-label--blue">Who it is for</p>
+              <h2 id="landing-who-heading" class="landing-who-heading">
+                Built for <span class="landing-who-heading-accent">retail, sales,</span> and operations
+              </h2>
+              <p class="landing-who-lede">
+                Shops, showrooms, procurement-led teams, and multi-branch operators who need one system
+                for stock, selling, and customer records.
+              </p>
+            </div>
 
-            <ul class="landing-who-points">
-              <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
-                <span class="landing-who-point-num">{{ point.num }}</span>
-                <div class="landing-who-point-body">
-                  <p class="landing-who-point-title">{{ point.title }}</p>
-                  <p class="landing-who-point-desc">{{ point.description }}</p>
-                </div>
-              </li>
-            </ul>
+            <div class="landing-section-panel landing-section-panel--dark">
+              <p class="landing-section-panel__label">Highlights</p>
+              <ul class="landing-who-points">
+                <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
+                  <span class="landing-who-point-num">{{ point.num }}</span>
+                  <div class="landing-who-point-body">
+                    <p class="landing-who-point-title">{{ point.title }}</p>
+                    <p class="landing-who-point-desc">{{ point.description }}</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          <div class="landing-who-cards">
-            <article
-              v-for="card in whoUsesCards"
-              :key="card.title"
-              class="landing-who-card"
-            >
-              <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" aria-hidden="true" />
-              <div class="landing-who-card-content">
-                <h3 class="landing-who-card-title">{{ card.title }}</h3>
-                <p class="landing-who-card-desc">{{ card.description }}</p>
+          <div class="landing-who-cards-wrap">
+            <div class="landing-section-panel landing-section-panel--dark">
+              <p class="landing-section-panel__label">Built in</p>
+              <div class="landing-who-cards">
+                <article
+                  v-for="card in whoUsesCards"
+                  :key="card.title"
+                  class="landing-who-card"
+                >
+                  <span class="landing-who-card-icon-wrap" aria-hidden="true">
+                    <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" />
+                  </span>
+                  <div class="landing-who-card-content">
+                    <h3 class="landing-who-card-title">{{ card.title }}</h3>
+                    <p class="landing-who-card-desc">{{ card.description }}</p>
+                  </div>
+                </article>
               </div>
-            </article>
+            </div>
           </div>
         </div>
       </div>
@@ -135,38 +177,52 @@
       <div class="landing-problems__dots landing-dot-grid" aria-hidden="true" />
       <div class="landing-problems__inner">
         <div class="landing-problems__pains">
-          <p class="landing-label landing-label--muted">Sound familiar?</p>
-          <h2 id="landing-problems-title" class="landing-problems__headline landing-problems__headline--pains">
-            Store work should not live in chaos.
-          </h2>
-          <ul class="m-0 list-none p-0">
-            <li
-              v-for="item in painPoints"
-              :key="item.num"
-              class="landing-problems__item"
-            >
-              <span class="landing-problems__item-num">{{ item.num }}</span>
-              <p class="landing-problems__item-title">{{ item.title }}</p>
-              <p class="landing-problems__item-desc">{{ item.description }}</p>
-            </li>
-          </ul>
+          <div class="landing-problems__stack">
+            <p class="landing-label landing-label--muted">Sound familiar?</p>
+            <h2 id="landing-problems-title" class="landing-problems__headline landing-problems__headline--pains">
+              Store work should not live in chaos.
+            </h2>
+          </div>
+
+          <div class="landing-section-panel landing-section-panel--light">
+            <p class="landing-section-panel__label landing-section-panel__label--muted">Pain points</p>
+            <ul class="landing-problems__list m-0 list-none p-0">
+              <li
+                v-for="item in painPoints"
+                :key="item.num"
+                class="landing-problems__item"
+              >
+                <span class="landing-problems__item-num">{{ item.num }}</span>
+                <div class="landing-problems__item-body">
+                  <p class="landing-problems__item-title">{{ item.title }}</p>
+                  <p class="landing-problems__item-desc">{{ item.description }}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div class="landing-problems__answer">
-          <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
-          <p class="landing-label landing-label--blue">The fix</p>
-          <h2 class="landing-problems__headline">One dashboard. Every branch.</h2>
-          <p class="landing-problems__lede">
-            Live stock per location, saved receipts, and customer history. Less spreadsheet chaos.
-          </p>
-          <div class="landing-problems__cta-box">
-            <span class="landing-problems__cta-icon" aria-hidden="true">
-              <CheckIcon class="h-5 w-5 text-white" stroke-width="2.5" />
-            </span>
-            <div>
-              <p class="landing-problems__cta-title">Try the interactive demo</p>
-              <p class="landing-problems__cta-sub">Sample multi-branch data. No account.</p>
+          <div class="landing-section-panel landing-section-panel--light landing-section-panel--solution">
+            <div class="landing-problems__answer-stack">
+              <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
+              <div>
+                <p class="landing-label landing-label--blue">The fix</p>
+                <h2 class="landing-problems__headline">One dashboard. Every branch.</h2>
+                <p class="landing-problems__lede">
+                  Live stock per location, saved receipts, and customer history. Less spreadsheet chaos.
+                </p>
+              </div>
             </div>
+            <NuxtLink to="/demo/dashboard" class="landing-problems__cta-box">
+              <span class="landing-problems__cta-icon" aria-hidden="true">
+                <CheckIcon class="h-5 w-5 text-white" stroke-width="2.5" />
+              </span>
+              <div>
+                <p class="landing-problems__cta-title">Try the interactive demo</p>
+                <p class="landing-problems__cta-sub">Sample multi-branch data. No account.</p>
+              </div>
+            </NuxtLink>
           </div>
         </div>
       </div>
@@ -362,6 +418,9 @@ const heroChips = [
   { label: 'Customers', href: '#features' },
   { label: 'See outcomes', href: '#proof' },
 ] as const
+
+const heroChipsPrimary = heroChips.slice(0, 3)
+const heroChipsSecondary = heroChips.slice(3)
 
 const heroFloatIcons = [
   { id: 'inventory', icon: ArchiveBoxIcon },

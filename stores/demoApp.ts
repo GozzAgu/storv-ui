@@ -9,7 +9,28 @@ import type {
   DemoStoreRecord,
 } from '~/types/demo'
 import { DEMO_STORAGE_KEY } from '~/utils/demo-mode'
+import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { createDemoSeedState, demoId, nextDemoReceiptNumber } from '~/utils/demo-seed'
+
+function normalizeDemoState(state: DemoState): DemoState {
+  for (const store of state.stores) {
+    store.name = sanitizeDemoDisplayDashes(store.name)
+    if (store.address) {
+      store.address = sanitizeDemoDisplayDashes(store.address)
+    }
+  }
+  state.version = 3
+  return state
+}
+
+function isValidDemoState(value: unknown): value is DemoState {
+  const state = value as DemoState
+  return (
+    (state?.version === 2 || state?.version === 3) &&
+    Array.isArray(state.stores) &&
+    state.stores.length > 0
+  )
+}
 
 function loadState(): DemoState {
   if (!import.meta.client) return createDemoSeedState()
@@ -17,10 +38,16 @@ function loadState(): DemoState {
     const raw = localStorage.getItem(DEMO_STORAGE_KEY)
     if (!raw) return createDemoSeedState()
     const parsed = JSON.parse(raw) as DemoState
-    if (parsed?.version !== 2 || !Array.isArray(parsed.stores)) {
+    if (!isValidDemoState(parsed)) {
       return createDemoSeedState()
     }
-    return parsed
+    const namesBefore = parsed.stores.map((s) => s.name).join('\0')
+    const state = normalizeDemoState(parsed)
+    const namesAfter = state.stores.map((s) => s.name).join('\0')
+    if (parsed.version < 3 || namesBefore !== namesAfter) {
+      saveState(state)
+    }
+    return state
   } catch {
     return createDemoSeedState()
   }

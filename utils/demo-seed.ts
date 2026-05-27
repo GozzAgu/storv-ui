@@ -229,7 +229,7 @@ function seedReceipts(state: DemoState) {
 
 export function createDemoSeedState(): DemoState {
   const state: DemoState = {
-    version: 2,
+    version: 3,
     currentStoreId: DEMO_STORE_LAGOS,
     currencyCode: 'NGN',
     currencySymbol: '₦',
