@@ -83,3 +83,42 @@ export function computeFolderAvailabilityStats(
 
  return stats
 }
+
+const PRICE_KEYS = ['price', 'Price', 'unitPrice', 'Unit Price', 'sellingPrice', 'Selling Price'] as const
+
+/** Effective unit price for valuation (discounts apply when set). */
+export function readInventoryUnitPrice(item: InventoryItem): number {
+ if (item.discountedPrice !== undefined && item.discountedPrice !== null) {
+ const n = Number(item.discountedPrice)
+ if (Number.isFinite(n) && n >= 0) return n
+ }
+ for (const key of PRICE_KEYS) {
+ const raw = item[key]
+ if (raw === undefined || raw === null || raw === '') continue
+ const n = typeof raw === 'number' ? raw : parseFloat(String(raw))
+ if (Number.isFinite(n) && n >= 0) return n
+ }
+ if (item.originalPrice !== undefined && item.originalPrice !== null) {
+ const n = Number(item.originalPrice)
+ if (Number.isFinite(n) && n >= 0) return n
+ }
+ return 0
+}
+
+/** Available stock value (available units × unit price), aligned with demo folder stats. */
+export function computeFolderTotalValue(
+ items: InventoryItem[],
+ folder: Pick<InventoryFolder, 'hasSerialNumbers' | 'template'>
+): number {
+ const qtyField = quantityFieldName(folder)
+ let total = 0
+
+ for (const item of items) {
+ if (isItemSold(item) || isItemOnStockLoan(item) || isItemAwaitingPayment(item)) continue
+ const units = unitsForItem(item, folder.hasSerialNumbers, qtyField)
+ if (units <= 0) continue
+ total += units * readInventoryUnitPrice(item)
+ }
+
+ return total
+}

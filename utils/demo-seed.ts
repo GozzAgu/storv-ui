@@ -16,7 +16,7 @@ function lagosStore(): DemoStoreRecord {
 
   return {
     id: DEMO_STORE_LAGOS,
-    name: 'Lagos — Lekki',
+    name: 'Lagos, Lekki',
     address: '12 Admiralty Way, Lekki, Lagos',
     folders: [
       { id: folderPhones, name: 'Phones', storeId: DEMO_STORE_LAGOS },
@@ -90,7 +90,7 @@ function abujaStore(): DemoStoreRecord {
 
   return {
     id: DEMO_STORE_ABUJA,
-    name: 'Abuja — Wuse',
+    name: 'Abuja, Wuse',
     address: '22 Adetokunbo Ademola Crescent, Wuse II',
     folders: [{ id: folderElectronics, name: 'Electronics', storeId: DEMO_STORE_ABUJA }],
     items: [
@@ -134,7 +134,7 @@ function phStore(): DemoStoreRecord {
 
   return {
     id: DEMO_STORE_PH,
-    name: 'Port Harcourt — GRA',
+    name: 'Port Harcourt, GRA',
     address: '8 Harold Wilson Drive, Port Harcourt',
     folders: [{ id: folderAccessories, name: 'Accessories', storeId: DEMO_STORE_PH }],
     items: [

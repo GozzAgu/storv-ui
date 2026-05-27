@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { InventoryFolder, InventoryItem } from '~/stores/inventory'
 import {
  computeFolderAvailabilityStats,
+ computeFolderTotalValue,
  folderAvailabilityPercent,
+ readInventoryUnitPrice,
 } from '~/utils/inventory-folder-availability'
 
 const serialFolder: Pick<InventoryFolder, 'hasSerialNumbers' | 'template'> = {
@@ -59,5 +61,29 @@ describe('inventory-folder-availability', () => {
  expect(stats.sold).toBe(10)
  expect(stats.total).toBe(16)
  expect(folderAvailabilityPercent(stats)).toBe(38)
+ })
+
+ it('sums available units × unit price for total value', () => {
+ const bulkFolder: Pick<InventoryFolder, 'hasSerialNumbers' | 'template'> = {
+ hasSerialNumbers: false,
+ template: {
+ id: 't1',
+ name: 'T',
+ description: '',
+ fields: [{ id: 'q', name: 'quantity', label: 'Qty', type: 'number', required: true }],
+ },
+ }
+ const bulkItem = item({
+ id: 'b1',
+ price: 100,
+ quantity: 5,
+ discountedPrice: 80,
+ })
+ expect(readInventoryUnitPrice(bulkItem)).toBe(80)
+ const value = computeFolderTotalValue(
+ [bulkItem, item({ id: 'b2', price: 50, quantity: 2, dateOut: new Date() })],
+ bulkFolder
+ )
+ expect(value).toBe(400)
  })
 })

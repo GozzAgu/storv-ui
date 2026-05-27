@@ -1357,6 +1357,7 @@ import { useSubscriptionFeatures } from '~/composables/useSubscriptionFeatures'
 import { useAppToast } from '~/composables/useAppToast'
 import { usePreferences } from '~/composables/usePreferences'
 import { getVisibleMenuAnchorElement } from '~/utils/menuAnchor'
+import { computeFolderTotalValue } from '~/utils/inventory-folder-availability'
 import { getInventoryItemDisplayName } from '~/composables/useInventoryItemDisplay'
 import {
  AVAILABILITY_SORT_ORDER,
@@ -2032,8 +2033,17 @@ const existingSerialProductKeysInFolder = computed(() => {
  return set
 })
 
-// Folder aggregate from Firestore (correct across all pages; not just the loaded page).
-const totalInventoryValue = computed(() => folder.value?.totalValue ?? 0)
+// Available stock value (full category when loaded; otherwise folder aggregate from store).
+const totalInventoryValue = computed(() => {
+ const f = folder.value
+ if (!f) return 0
+ const list = fullItemsForSerialDup.value ?? items.value
+ const expected = f.itemCount ?? 0
+ if (list.length > 0 && (list.length >= expected || expected === 0)) {
+ return computeFolderTotalValue(list, f)
+ }
+ return f.totalValue ?? 0
+})
 
 // Check if an item has been sold
 const isItemSold = (item: InventoryItem) => {
@@ -3651,6 +3661,9 @@ const loadFolderData = async () => {
  })
  // Load items for this folder
  await loadItems()
+ await inventoryStore.recomputeFolderTotalValue(folderId.value).catch(() => {})
+ const refreshed = inventoryStore.getFolderById(folderId.value)
+ if (refreshed) folder.value = { ...refreshed }
  } else {
  // Folder not found, show error and redirect back
  toast.error('Folder not found or you do not have access to this folder')

@@ -48,6 +48,7 @@ import {
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
 import {
  computeFolderAvailabilityStats,
+ computeFolderTotalValue,
  type FolderAvailabilityStats,
 } from '~/utils/inventory-folder-availability'
 
@@ -483,6 +484,11 @@ export const useInventoryStore = defineStore('inventory', {
  const cached = this.items[folder.id] ?? []
  const items = queried.length >= cached.length ? queried : cached.length ? cached : queried
  next[folder.id] = computeFolderAvailabilityStats(items, folder)
+ const totalValue = computeFolderTotalValue(items, folder)
+ const folderIndex = this.folders.findIndex((f) => f.id === folder.id)
+ if (folderIndex > -1 && this.folders[folderIndex]) {
+ this.folders[folderIndex].totalValue = totalValue
+ }
  }
  this.folderAvailabilityStats = { ...next }
  } catch (error: unknown) {
@@ -491,6 +497,48 @@ export const useInventoryStore = defineStore('inventory', {
  } finally {
  this.availabilityStatsLoading = false
  }
+ },
+
+ /** Recompute and cache available stock value for one category (all items in folder). */
+ async recomputeFolderTotalValue(folderId: string): Promise<number> {
+ const folder = this.getFolderById(folderId)
+ if (!folder) return 0
+
+ let items: InventoryItem[] = []
+ try {
+ items = await this.fetchItemsAllChunked(folderId)
+ } catch {
+ items = this.items[folderId] ?? []
+ }
+
+ const totalValue = computeFolderTotalValue(items, folder)
+ const index = this.folders.findIndex((f) => f.id === folderId)
+ if (index > -1 && this.folders[index]) {
+ this.folders[index].totalValue = totalValue
+ }
+
+ const userStore = useUserStore()
+ if (userStore.userData?.role === 'superAdmin') {
+ try {
+ const db = useFirestore().getFirestoreInstance()
+ const userId = await getQueryUserId()
+ const storeId = await getCurrentStoreId()
+ if (db && userId && storeId) {
+ const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
+ await updateDoc(folderRef, {
+ totalValue,
+ updatedAt: serverTimestamp(),
+ })
+ }
+ } catch (error: unknown) {
+ const err = error as { code?: string }
+ if (err?.code !== 'permission-denied') {
+ console.warn('[InventoryStore] recomputeFolderTotalValue persist failed:', error)
+ }
+ }
+ }
+
+ return totalValue
  },
 
  /**
@@ -1994,10 +2042,13 @@ export const useInventoryStore = defineStore('inventory', {
  })
  }
 
+ const totalValue = computeFolderTotalValue(folderItems, folder)
+
  // Update in local state (everyone)
  const index = this.folders.findIndex(f => f.id === folderId)
  if (index > -1 && this.folders[index]) {
  this.folders[index].lowStockCount = lowStockCount
+ this.folders[index].totalValue = totalValue
  }
 
  // Only super admins persist low-stock aggregates to Firestore
@@ -2016,6 +2067,7 @@ export const useInventoryStore = defineStore('inventory', {
  const folderRef = getInventoryFolderDocument(db, userId, storeId, folderId)
  await updateDoc(folderRef, {
  lowStockCount,
+ totalValue,
  updatedAt: serverTimestamp(),
  })
  }

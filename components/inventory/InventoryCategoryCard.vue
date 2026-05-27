@@ -108,7 +108,6 @@
  </p>
  </div>
  <p
- v-if="totalValue > 0"
  class="shrink-0 text-[10px] font-semibold tabular-nums text-gray-800 dark:text-gray-200"
  :title="`Value ${formattedValue}`"
  >

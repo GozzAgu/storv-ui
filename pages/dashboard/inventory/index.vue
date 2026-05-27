@@ -77,6 +77,33 @@
  </template>
  </DashboardPageHeader>
 
+ <div
+ v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
+ class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3"
+ >
+ <StatCard
+ label="Categories"
+ :value="String(inventoryStore.folders.length)"
+ :subtext="`${filteredFolders.length} shown`"
+ />
+ <StatCard
+ label="Products"
+ :value="String(inventoryStore.totalItems)"
+ subtext="Across all categories"
+ />
+ <StatCard
+ label="Total value"
+ :value="formatCurrency(filteredFoldersTotalValue)"
+ :subtext="`${formatCurrency(inventoryStore.totalValue)} store total`"
+ />
+ <StatCard
+ label="Low stock"
+ :value="String(inventoryStore.lowStockFolders.length)"
+ :subtext="inventoryStore.lowStockFolders.length > 0 ? 'Needs attention' : 'Within thresholds'"
+ :subtext-class="inventoryStore.lowStockFolders.length > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
+ />
+ </div>
+
  <!-- Content area: show only one of skeleton, folders, or empty -->
  <!-- Loading skeleton -->
  <div
@@ -280,6 +307,7 @@
  <th scope="col">Category</th>
  <th scope="col" class="hidden sm:table-cell">Type</th>
  <th scope="col" class="text-right">Products</th>
+ <th scope="col" class="hidden sm:table-cell text-right">Value</th>
  <th scope="col" class="hidden md:table-cell dashboard-table__col-status">Tracking</th>
  <th scope="col" class="hidden lg:table-cell">Departments</th>
  <th v-if="canCreateInventoryFolders" scope="col" class="dashboard-table__col-actions">
@@ -339,6 +367,9 @@
  >
  {{ folder.lowStockCount }} low stock
  </span>
+ </td>
+ <td class="hidden sm:table-cell text-right">
+ <span class="dashboard-table__money">{{ formatCurrency(folder.totalValue ?? 0) }}</span>
  </td>
  <td class="hidden md:table-cell dashboard-table__col-status">
  <span
@@ -986,6 +1017,7 @@ import Button from '~/components/ui/Button.vue'
 import DeleteFolderModal from '~/components/inventory/DeleteFolderModal.vue'
 import DuplicateFeatureUpsellBanner from '~/components/inventory/DuplicateFeatureUpsellBanner.vue'
 import InventoryCategoryCard from '~/components/inventory/InventoryCategoryCard.vue'
+import StatCard from '~/components/ui/StatCard.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import DashboardTablePagination from '~/components/dashboard/DashboardTablePagination.vue'
@@ -1643,6 +1675,10 @@ const filteredFolders = computed(() => {
 
  return result
 })
+
+const filteredFoldersTotalValue = computed(() =>
+ filteredFolders.value.reduce((sum, folder) => sum + (folder.totalValue ?? 0), 0)
+)
 
 const folderForOpenMenu = computed(() => {
  const id = openFolderMenuId.value
