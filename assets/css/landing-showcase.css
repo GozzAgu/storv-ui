@@ -1904,17 +1904,33 @@ html.dark .landing-about-link:hover {
   color: var(--storvv-blue-pale);
 }
 
-/* ── Mobile: clean spacing, touch targets, readable type ── */
+/* ── Mobile: tighter type scale for a cleaner layout ── */
 @media (max-width: 767px) {
+  .landing-page,
   .landing-showcase {
-    --landing-text-body: 1.0625rem;
-    --landing-text-lead: 1.125rem;
-    --landing-text-min: 1.0625rem;
+    --landing-text-min: 0.875rem;
+    --landing-text-body: 0.9375rem;
+    --landing-text-lead: 1rem;
+    --landing-text-lg: 1rem;
+    --landing-text-xl: 1.0625rem;
+    font-size: var(--landing-text-body);
   }
 
-  .landing-showcase .landing-label {
-    font-size: var(--landing-text-lead);
-    line-height: 1.45;
+  .landing-showcase .landing-label,
+  .landing-page .landing-label {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .landing-showcase .landing-pill-cta,
+  .landing-page .landing-pill-cta {
+    font-size: 0.875rem;
+    padding: 0.6875rem 1.25rem;
+  }
+
+  .landing-showcase .landing-hero__title,
+  .landing-showcase .landing-hero__title .landing-hero__accent {
+    font-size: clamp(1.875rem, 9vw, 2.5rem);
   }
 
   .landing-hero {
@@ -1977,13 +1993,9 @@ html.dark .landing-about-link:hover {
     border-radius: 0.875rem;
   }
 
-  .landing-hero__title {
-    font-size: clamp(2.25rem, 11vw, 3.25rem);
-  }
-
   .landing-hero__subtitle {
-    font-size: 1rem;
-    line-height: 1.6;
+    font-size: 0.9375rem;
+    line-height: 1.55;
     padding-inline: 0.25rem;
   }
 
@@ -1993,8 +2005,8 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-hero__cta-row .landing-pill-cta {
-    min-height: 3rem;
-    padding: 0.9375rem 1.25rem;
+    min-height: 2.75rem;
+    padding: 0.6875rem 1rem;
   }
 
   .landing-hero__link-row {
@@ -2017,13 +2029,20 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-hero__chip {
-    font-size: 0.875rem;
-    min-height: 2.375rem;
+    font-size: 0.8125rem;
+    min-height: 2.25rem;
+    padding: 0.4375rem 0.75rem;
+  }
+
+  .landing-hero__capabilities-label,
+  .landing-section-panel__label {
+    font-size: 0.6875rem;
+    margin-bottom: 0.625rem;
   }
 
   .landing-hero__scroll-hint {
     padding-top: 1.75rem;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 
   .landing-hero__scroll-hint-icon {
@@ -2057,16 +2076,23 @@ html.dark .landing-about-link:hover {
   .landing-who-heading,
   .landing-problems__headline,
   .landing-core__title,
-  .landing-multistore__title {
-    font-size: clamp(1.625rem, 7vw, 2.125rem);
+  .landing-multistore__title,
+  .landing-setup__headline {
+    font-size: clamp(1.375rem, 6vw, 1.75rem);
     line-height: 1.15;
   }
 
   .landing-who-lede,
   .landing-problems__lede,
-  .landing-multistore__lede {
-    font-size: 1rem;
-    line-height: 1.6;
+  .landing-multistore__lede,
+  .landing-setup__step-desc {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .landing-who-uses-section .landing-who-point-desc,
+  .landing-who-uses-section .landing-who-card-desc {
+    font-size: var(--landing-text-body);
   }
 
   .landing-who-points {
@@ -2074,12 +2100,19 @@ html.dark .landing-about-link:hover {
     gap: 1.25rem;
   }
 
-  .landing-who-point-title {
-    font-size: 1.0625rem;
+  .landing-who-point-title,
+  .landing-problems__item-title {
+    font-size: 0.9375rem;
   }
 
-  .landing-who-point-desc {
-    font-size: 0.9375rem;
+  .landing-who-point-desc,
+  .landing-problems__item-desc {
+    font-size: 0.875rem;
+  }
+
+  .landing-who-point-num,
+  .landing-problems__item-num {
+    font-size: 0.8125rem;
   }
 
   .landing-who-card {
@@ -2088,12 +2121,20 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-who-card-title {
-    font-size: 1.0625rem;
+    font-size: 0.9375rem;
   }
 
   .landing-who-card-desc {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .landing-problems__cta-title {
     font-size: 0.9375rem;
-    line-height: 1.55;
+  }
+
+  .landing-problems__cta-sub {
+    font-size: 0.8125rem;
   }
 
   .landing-problems__answer {
@@ -2121,7 +2162,63 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-core__card-title {
-    font-size: 1.1875rem;
+    font-size: 1rem;
+  }
+
+  .landing-core__card-desc,
+  .landing-core__badge,
+  .landing-multistore__feature-title,
+  .landing-multistore__feature-desc,
+  .landing-setup__step-title {
+    font-size: 0.875rem;
+  }
+
+  .landing-store-card__name {
+    font-size: 0.9375rem;
+  }
+
+  .landing-store-card__stat-value {
+    font-size: 1.125rem;
+  }
+
+  .landing-store-card__stat-label,
+  .landing-store-card__tag {
+    font-size: 0.75rem;
+  }
+
+  .landing-setup__minutes {
+    font-size: clamp(2.75rem, 12vw, 3.5rem);
+  }
+
+  .landing-setup__minutes-label {
+    font-size: 1rem;
+  }
+
+  .landing-setup__minutes-caption {
+    font-size: 0.8125rem;
+  }
+
+  .landing-capabilities__title,
+  .landing-contact__title,
+  .landing-security__title {
+    font-size: clamp(1.375rem, 6vw, 1.75rem);
+  }
+
+  .landing-capabilities__lede,
+  .landing-capabilities__panel-desc,
+  .landing-capabilities__item-desc,
+  .landing-capabilities__item-title,
+  .landing-contact__lede,
+  .landing-security__lede {
+    font-size: 0.875rem;
+  }
+
+  .landing-capabilities__tab-label {
+    font-size: 0.8125rem;
+  }
+
+  .landing-capabilities__panel-title {
+    font-size: 1rem;
   }
 
   .landing-setup {
@@ -2134,10 +2231,6 @@ html.dark .landing-about-link:hover {
 
   .landing-setup__content {
     padding: 2.25rem 1rem 2.5rem;
-  }
-
-  .landing-setup__headline {
-    font-size: clamp(1.75rem, 7vw, 2.25rem);
   }
 
   .landing-setup__steps {
@@ -2196,11 +2289,30 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-about-title {
-    font-size: clamp(1.625rem, 7vw, 2.125rem) !important;
+    font-size: clamp(1.375rem, 6vw, 1.75rem) !important;
   }
 
-  .landing-about-lede {
+  .landing-about-lede,
+  .landing-about-footer {
+    font-size: 0.9375rem !important;
+  }
+
+  .landing-about-section .landing-label {
+    font-size: 0.875rem !important;
+  }
+
+  .landing-about-card-title {
     font-size: 1rem !important;
+  }
+
+  .landing-about-card-desc,
+  .landing-about-card-detail,
+  .landing-about-pillar-label {
+    font-size: 0.875rem !important;
+  }
+
+  .landing-about-num {
+    font-size: 0.875rem !important;
   }
 
   .landing-about-grid {
@@ -2213,8 +2325,48 @@ html.dark .landing-about-link:hover {
   }
 
   .landing-page #pricing h2,
-  .landing-page #faq h2 {
-    font-size: 1.75rem !important;
+  .landing-page #faq h2,
+  .landing-page #how-it-works h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .landing-page #pricing .text-base,
+  .landing-page #faq .text-base,
+  .landing-page #how-it-works .text-base,
+  .landing-page #pricing p,
+  .landing-page #faq p {
+    font-size: 0.875rem !important;
+  }
+
+  .landing-page #pricing .text-lg,
+  .landing-page #faq .text-lg {
+    font-size: 0.9375rem !important;
+  }
+
+  .landing-page #pricing .text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+  .landing-page #pricing .text-sm,
+  .landing-page #faq .text-sm {
+    font-size: 0.8125rem !important;
+  }
+
+  .landing-page #how-it-works .text-sm {
+    font-size: 0.8125rem !important;
+  }
+
+  .landing-page #how-it-works h3 {
+    font-size: 0.9375rem !important;
+  }
+
+  .landing-page #how-it-works .text-2xl {
+    font-size: 1.375rem !important;
+  }
+
+  .landing-page #how-it-works .text-base {
+    font-size: 0.875rem !important;
   }
 
   .landing-page #pricing > div,
