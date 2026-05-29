@@ -20,17 +20,30 @@ export default defineEventHandler(async (event) => {
  throw createError({ statusCode: 410, message: 'This receipt link has expired' })
  }
 
- let storeName = data.snapshot?.storeBranchName || ''
- if (!storeName && data.ownerUserId) {
+ let businessName = ''
+ let branchName = data.snapshot?.storeBranchName || ''
+ if (data.ownerUserId) {
  const userSnap = await adminDb.collection('users').doc(data.ownerUserId).get()
- storeName = userSnap.data()?.storeDetails?.storeName || ''
+ const owner = userSnap.data()
+ const ownerName = String(owner?.name || '').trim()
+ if (ownerName) {
+ businessName = ownerName
+ } else {
+ const email = String(owner?.email || '')
+ const local = email.split('@')[0]?.replace(/[._-]+/g, ' ').trim()
+ businessName = local
+ ? local.replace(/\b\w/g, (c: string) => c.toUpperCase())
+ : String(owner?.storeDetails?.storeName || '').trim()
+ }
  }
 
  return {
  success: true,
  receipt: {
  ...data.snapshot,
- storeName,
+ storeName: businessName || branchName,
+ businessName,
+ branchName,
  receiptId: data.receiptId,
  },
  expiresAt: expiresAt?.toISOString() ?? null,

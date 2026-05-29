@@ -164,9 +164,9 @@
  <Checkbox v-model="useSplitPayment" label="Split payment" size="sm" />
  </div>
 
- <div v-if="!useSplitPayment" class="grid grid-cols-2 gap-2">
+ <div v-if="!useSplitPayment" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
  <button
- v-for="method in ['Cash', 'Card', 'Mobile Money', 'Bank Transfer']"
+ v-for="method in paymentTenderOptions"
  :key="method"
  type="button"
  @click="paymentMethod = method"
@@ -182,16 +182,11 @@
  :key="index"
  class="flex items-center gap-2 flex-wrap"
  >
- <select
+ <PaymentMethodSelect
  v-model="payment.method"
- class="flex-1 min-w-[8rem] px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
- >
- <option value="">Method</option>
- <option value="Cash">Cash</option>
- <option value="Card">Card</option>
- <option value="Mobile Money">Mobile Money</option>
- <option value="Bank Transfer">Bank Transfer</option>
- </select>
+ select-class="flex-1 min-w-[8rem] px-3 py-2 text-sm rounded-sm bg-white dark:!bg-dashboard-card text-gray-900 dark:text-gray-100"
+ placeholder="Method"
+ />
  <div class="relative w-32">
  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">{{ currencySymbol }}</span>
  <input
@@ -295,6 +290,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Modal from '~/components/ui/Modal.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
+import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'
@@ -345,7 +341,8 @@ const cartItems = ref<Array<{ id: string; name: string; price: number; quantity:
 const showCustomerInfo = ref(false)
 const customerName = ref('')
 const customerPhone = ref('')
-const paymentMethod = ref<'Cash' | 'Card' | 'Mobile Money' | 'Bank Transfer' | string>('Cash')
+const { paymentTenderOptions } = usePaymentTenders()
+const paymentMethod = ref('Cash')
 const useSplitPayment = ref(false)
 const splitPayments = ref<Array<{ method: string; amount: number }>>([{ method: '', amount: 0 }])
 const isProcessing = ref(false)

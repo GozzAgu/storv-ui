@@ -85,8 +85,8 @@
  <ReceiptShareSurface
  ref="shareSurfaceRef"
  :receipt="receiptForCapture"
- :store-name="storeName"
- :store-address="storeAddress"
+ :business-name="resolvedBusinessName"
+ :branch-name="branchName"
  :store-logo-url="storeLogoUrl"
  />
  </div>
@@ -101,7 +101,7 @@
  <div class="flex w-full flex-wrap justify-end gap-2">
  <button
  type="button"
- class="rounded-sm px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+ class="btn-secondary"
  @click="emit('update:modelValue', false)"
  >
  Cancel
@@ -144,8 +144,10 @@ const props = withDefaults(
  getReceiptPdfBlob?: () => Promise<Blob>
  receiptForCapture?: Receipt | null
  receiptData?: Receipt | Record<string, unknown>
+ businessName?: string
+ branchName?: string
+ /** @deprecated use businessName */
  storeName?: string
- storeAddress?: string
  storeLogoUrl?: string
  receiptNumber?: string
  }>(),
@@ -174,6 +176,11 @@ const sending = ref(false)
 const preparing = ref(false)
 const shareSurfaceRef = ref<InstanceType<typeof ReceiptShareSurface> | null>(null)
 
+const resolvedBusinessName = computed(
+ () => props.businessName?.trim() || props.storeName?.trim() || props.templateVars?.storeName?.trim() || 'Store',
+)
+const branchName = computed(() => props.branchName?.trim() || '')
+
 const activeFormatClass =
  'rounded-sm border-0 bg-primary-50 px-3 py-2 text-xs font-medium text-primary-800 dark:bg-primary-950/40 dark:text-primary-200'
 const inactiveFormatClass =
@@ -198,7 +205,7 @@ const defaultCaption = computed(() => {
  if (props.mode === 'payment_reminder') {
  return `Payment reminder: ${props.templateVars?.balanceDue || 'balance due'}`
  }
- const store = props.templateVars?.storeName || props.storeName || 'our store'
+ const store = props.templateVars?.storeName || resolvedBusinessName.value || 'our store'
  return `Your receipt from ${store}`
 })
 
@@ -266,7 +273,7 @@ async function buildReceiptFile(): Promise<File> {
 
 async function buildPaymentReminderFile(): Promise<File> {
  const blob = await generatePaymentReminderImage({
- storeName: props.templateVars?.storeName || props.storeName || 'Store',
+ storeName: props.templateVars?.storeName || resolvedBusinessName.value || 'Store',
  customerName: props.templateVars?.customerName || 'Customer',
  balanceDue: props.templateVars?.balanceDue || '',
  })
@@ -282,7 +289,10 @@ const handleSend = async () => {
  props.receiptData && Object.keys(props.receiptData).length > 0
  ? props.receiptData
  : props.receiptForCapture
- ? { ...props.receiptForCapture, storeBranchName: props.storeName }
+ ? {
+ ...props.receiptForCapture,
+ storeBranchName: branchName.value || props.receiptForCapture.storeBranchName,
+ }
  : undefined
 
  const result = await deliverReceiptToContact({

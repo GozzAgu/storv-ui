@@ -7,81 +7,69 @@ import { useStaffStore } from '~/stores/staff'
  * Composable for checking user permissions
  */
 export const usePermissions = () => {
- const authStore = useAuthStore()
- const userStore = useUserStore()
- const staffStore = useStaffStore()
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
+  const staffStore = useStaffStore()
 
- // Check if current user is staff
- const isStaff = computed(() => {
- return userStore.userData?.role === 'staff'
- })
+  const isStaff = computed(() => userStore.userData?.role === 'staff')
 
- // Check if current user is a manager
- const isManager = computed(() => {
- if (!isStaff.value || !authStore.currentUser) return false
- 
- // Get the current staff member's document from state
- const currentStaffMember = staffStore.getCurrentStaffMember
- return currentStaffMember?.role === 'manager'
- })
+  const isManager = computed(() => {
+    if (!isStaff.value || !authStore.currentUser) return false
+    const currentStaffMember = staffStore.getCurrentStaffMember
+    return currentStaffMember?.role === 'manager'
+  })
 
- // Store ops except inventory: super admin or manager (departments, settings, etc.)
- const canManage = computed(() => {
- if (!isStaff.value) return true
- return isManager.value
- })
+  /** Owner-granted inventory access for a manager (not all managers by default). */
+  const hasInventoryEditorAccess = computed(() => {
+    if (!userStore.isSuperAdmin) {
+      const member = staffStore.getCurrentStaffMember
+      return member?.canManageInventory === true
+    }
+    return true
+  })
 
- // Check if user can only view (read-only access)
- const isReadOnly = computed(() => {
- return isStaff.value && !isManager.value
- })
+  const canManage = computed(() => {
+    if (!isStaff.value) return true
+    return isManager.value
+  })
 
- // Check if user can create receipts - all authenticated users can create
- const canCreate = computed(() => {
- // All authenticated users (super admins, managers, and staff) can create receipts
- return !!authStore.currentUser
- })
+  const isReadOnly = computed(() => {
+    return isStaff.value && !isManager.value && !hasInventoryEditorAccess.value
+  })
 
- // Edit receipt / line items / refund flows: super admin or store manager (not regular staff)
- const canEditReceipts = computed(() => userStore.isSuperAdmin || isManager.value)
+  const canCreate = computed(() => !!authStore.currentUser)
 
- // Check if user can delete receipts - only super admins
- const canDeleteReceipts = computed(() => {
- // Only super admins can delete receipts
- return !isStaff.value
- })
+  const canEditReceipts = computed(() => userStore.isSuperAdmin || isManager.value)
 
- // Inventory structure (folders/items): super admin only
- const canManageInventoryItems = computed(() => userStore.isSuperAdmin)
+  const canDeleteReceipts = computed(() => !isStaff.value)
 
- const canCreateInventoryFolders = computed(() => userStore.isSuperAdmin)
+  const canManageInventoryItems = computed(() => hasInventoryEditorAccess.value)
 
- // Check if user can create staff - only super admins (managers cannot create staff)
- const canCreateStaff = computed(() => {
- // Only super admins can create staff
- // Managers have all other permissions but cannot create staff
- return !isStaff.value
- })
+  const canCreateInventoryFolders = computed(() => hasInventoryEditorAccess.value)
 
- // Remove staff (deactivate + disable Auth): store owner only (matches POST /api/staff/deactivate)
- const canRemoveStaff = computed(() => userStore.isSuperAdmin)
+  const canCreateStaff = computed(() => !isStaff.value)
 
- // Move staff between departments: store owner only
- const canMoveStaff = computed(() => userStore.isSuperAdmin)
+  const canRemoveStaff = computed(() => userStore.isSuperAdmin)
 
- return {
- isStaff,
- isManager,
- canManage,
- isReadOnly,
- canCreate,
- canEditReceipts,
- canDeleteReceipts,
- canManageInventoryItems,
- canCreateInventoryFolders,
- canCreateStaff,
- canRemoveStaff,
- canMoveStaff,
- }
+  const canMoveStaff = computed(() => userStore.isSuperAdmin)
+
+  /** Super admin can grant inventory editor rights to chosen managers. */
+  const canGrantInventoryAccess = computed(() => userStore.isSuperAdmin)
+
+  return {
+    isStaff,
+    isManager,
+    hasInventoryEditorAccess,
+    canManage,
+    isReadOnly,
+    canCreate,
+    canEditReceipts,
+    canDeleteReceipts,
+    canManageInventoryItems,
+    canCreateInventoryFolders,
+    canCreateStaff,
+    canRemoveStaff,
+    canMoveStaff,
+    canGrantInventoryAccess,
+  }
 }
-

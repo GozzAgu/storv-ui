@@ -9,7 +9,6 @@ import { useCustomersStore } from './customers'
 import { useDepartmentsStore } from './departments'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import { useStaffStore } from './staff'
-
 export type SearchEntityType = 'all' | 'receipts' | 'inventory' | 'customers' | 'departments' | 'staff'
 
 /** Item-level inventory search needs typed text; avoids full-folder Firestore scans on filter-only. */

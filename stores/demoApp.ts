@@ -194,6 +194,7 @@ export const useDemoAppStore = defineStore('demoApp', {
         id: demoId('folder'),
         name: name.trim() || 'New folder',
         description: '',
+        storeId: this.state.currentStoreId,
       }
       this.currentStore.folders.push(folder)
       this.persist()

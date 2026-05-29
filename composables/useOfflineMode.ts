@@ -18,7 +18,7 @@ const isSyncing = ref(false)
 const STORAGE_KEY = 'storv_pending_operations'
 
 export const useOfflineMode = () => {
- const { db } = useFirestore()
+ const db = useFirestore().getFirestoreInstance()
 
  // Load pending operations from localStorage
  const loadPendingOperations = () => {
@@ -42,7 +42,7 @@ export const useOfflineMode = () => {
  }
 
  // Add operation to pending queue
- const queueOperation = (operation: Omit<PendingOperation, 'timestamp'>) => {
+ const queueOperation = (operation: Omit<PendingOperation, 'id' | 'timestamp'>) => {
  const pendingOp: PendingOperation = {
  ...operation,
  timestamp: Date.now(),

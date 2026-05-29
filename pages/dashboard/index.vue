@@ -36,16 +36,46 @@
  </div>
 
  <template v-else-if="isLoading">
- <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4 xl:grid-cols-4">
+ <!-- Period snapshot -->
+ <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+ <div
+ v-for="i in 4"
+ :key="`snap-${i}`"
+ class="h-[4.75rem] animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]"
+ />
+ </div>
+
+ <!-- Inventory health -->
+ <div class="rounded-xl bg-white p-4 dark:bg-dashboard-card">
+ <div class="mb-3 flex items-center justify-between">
+ <div class="h-3 w-32 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
+ <div class="h-3 w-20 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
+ </div>
+ <div class="h-2 w-full animate-pulse rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+ </div>
+
+ <!-- KPI grid -->
+ <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
  <div
  v-for="i in 8"
- :key="i"
+ :key="`kpi-${i}`"
  class="h-[5.5rem] animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-[6rem]"
  />
  </div>
- <div class="h-48 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-56" />
- <div class="grid gap-3 lg:grid-cols-3">
- <div v-for="i in 3" :key="i" class="h-40 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06]" />
+
+ <!-- Revenue chart + payment mix -->
+ <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
+ <div class="h-72 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] lg:col-span-8" />
+ <div class="h-72 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] lg:col-span-4" />
+ </div>
+
+ <!-- Low stock + activity + quick links -->
+ <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
+ <div
+ v-for="i in 3"
+ :key="`panel-${i}`"
+ class="h-56 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06]"
+ />
  </div>
  </template>
 
@@ -365,14 +395,25 @@
  <!-- Low stock + activity + quick links -->
  <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:items-start">
  <section :class="[panelClass, 'lg:col-span-1']">
- <div class="mb-2.5 flex items-center justify-between border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
+ <div class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
  <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Low stock</h2>
+ <div class="flex items-center gap-2">
+ <button
+ v-if="lowStockItems.length > 0"
+ type="button"
+ class="text-[11px] font-medium text-primary-700 hover:text-primary-800 disabled:opacity-50 dark:text-primary-300"
+ :disabled="reorderExporting"
+ @click="handleExportReorderList"
+ >
+ {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
+ </button>
  <NuxtLink
  to="/dashboard/inventory"
  class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
  >
  Inventory
  </NuxtLink>
+ </div>
  </div>
  <div v-if="lowStockItems.length === 0" class="py-2 text-xs text-gray-500 dark:text-gray-400">
  All lines above threshold.
@@ -474,6 +515,8 @@ import { useStaffStore } from '~/stores/staff'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useDashboardInsights, type DashboardAlertLevel } from '~/composables/useDashboardInsights'
+import { useAppToast } from '~/composables/useAppToast'
+import { useReorderListExport } from '~/composables/useReorderListExport'
 import {
  activityActionBadgeClass,
  activityActionLabel,
@@ -547,6 +590,19 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})
+
+const toast = useAppToast()
+const { exporting: reorderExporting, exportReorderListExcel } = useReorderListExport()
+
+async function handleExportReorderList() {
+ try {
+ const { count } = await exportReorderListExcel()
+ toast.success(`Reorder list exported (${count} ${count === 1 ? 'line' : 'lines'})`)
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Export failed'
+ toast.error(message)
+ }
+}
 
 const insights = useDashboardInsights(dashboardFolderItems)
 const {
