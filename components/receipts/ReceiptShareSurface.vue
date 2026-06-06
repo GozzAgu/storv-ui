@@ -8,23 +8,23 @@
  <div v-if="storeLogoUrl" class="mb-2 flex justify-center">
  <img :src="storeLogoUrl" alt="" class="receipt-logo h-16 w-16 object-contain" />
  </div>
- <h1 class="text-sm font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
- <p v-if="storeAddress" class="mt-1 text-[10px] leading-snug text-gray-500">{{ storeAddress }}</p>
+ <h1 class="receipt-display-title text-gray-900">{{ businessName || 'Store' }}</h1>
+ <p v-if="branchName" class="mt-1 text-[11px] leading-snug text-gray-600">{{ branchName }}</p>
  </div>
 
  <div class="px-6 py-4 border-b border-gray-100">
  <div class="flex justify-between gap-3">
  <div>
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</p>
+ <p class="receipt-section-label text-gray-500">Receipt</p>
  <p class="mt-1 text-[13px] font-medium text-gray-900">{{ receipt.receiptNumber }}</p>
  </div>
  <div class="text-right">
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Date</p>
+ <p class="receipt-section-label text-gray-500">Date</p>
  <p class="mt-1 text-[12px] text-gray-900">{{ dateLabel }}</p>
  </div>
  </div>
  <div class="mt-3 border-t border-gray-100 pt-3">
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
+ <p class="receipt-section-label text-gray-500">Customer</p>
  <p class="mt-1 text-[13px] font-medium text-gray-900">{{ receipt.customerName }}</p>
  <p v-if="receipt.customerPhone" class="mt-1 text-[10px] text-gray-500">{{ receipt.customerPhone }}</p>
  </div>
@@ -34,16 +34,16 @@
  <table class="w-full text-[12px]">
  <thead class="bg-gray-50">
  <tr class="border-b border-gray-200">
- <th class="py-2 text-left text-[10px] uppercase text-gray-600">Product</th>
- <th class="py-2 text-center text-[10px] uppercase text-gray-600">Qty</th>
- <th class="py-2 text-right text-[10px] uppercase text-gray-600">Total</th>
+ <th class="receipt-section-label py-2 text-left text-gray-600">Product</th>
+ <th class="receipt-section-label py-2 text-center text-gray-600">Qty</th>
+ <th class="receipt-section-label py-2 text-right text-gray-600">Total</th>
  </tr>
  </thead>
  <tbody>
  <tr v-for="(item, i) in receipt.items || []" :key="i" class="border-b border-gray-100/90">
  <td class="py-2 text-gray-900">{{ item.itemName }}</td>
- <td class="py-2 text-center text-gray-700">{{ item.quantity }}</td>
- <td class="py-2 text-right font-medium text-gray-900">
+ <td class="py-2 text-center tabular-nums text-gray-700">{{ item.quantity }}</td>
+ <td class="py-2 text-right font-medium tabular-nums text-gray-900">
  {{ formatCurrency(item.price * item.quantity) }}
  </td>
  </tr>
@@ -67,13 +67,18 @@ import type { Receipt } from '~/stores/receipts'
 
 const props = defineProps<{
  receipt: Receipt
+ businessName?: string
+ branchName?: string
+ /** @deprecated use businessName */
  storeName?: string
- storeAddress?: string
  storeLogoUrl?: string
 }>()
 
 const rootEl = ref<HTMLElement | null>(null)
 const { formatCurrency } = usePreferences()
+
+const businessName = computed(() => props.businessName?.trim() || props.storeName?.trim() || 'Store')
+const branchName = computed(() => props.branchName?.trim() || '')
 
 const dateLabel = computed(() => {
  const d = props.receipt.date as { toDate?: () => Date } | Date | string

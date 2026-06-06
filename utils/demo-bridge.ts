@@ -292,7 +292,7 @@ export function getDemoActivityLogs(storeId: string): ActivityLog[] {
       userId: DEMO_USER_UID,
       userDisplayName: 'Demo User',
       action: 'created',
-      entityType: 'receipt',
+      entityType: 'item',
       entityId: 'rcpt_lagos_1',
       entityName: 'Receipt DEMO-1001',
       storeId,

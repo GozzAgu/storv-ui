@@ -60,12 +60,10 @@
  <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
  Payment method
  </label>
- <select
+ <PaymentMethodSelect
  v-model="paymentMethod"
- class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
- >
- <option v-for="m in paymentMethods" :key="m" :value="m">{{ m }}</option>
- </select>
+ select-class="w-full rounded-sm bg-white px-3 py-2 text-sm dark:!bg-dashboard-card dark:text-gray-100"
+ />
  </div>
 
  <div v-if="receipt.payments?.length" class="border-t border-gray-100 pt-3 dark:border-gray-800">
@@ -88,7 +86,7 @@
  <div class="flex w-full justify-end gap-2">
  <button
  type="button"
- class="rounded-sm px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+ class="btn-secondary"
  @click="emit('update:modelValue', false)"
  >
  Cancel
@@ -109,6 +107,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
+import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import type { Receipt } from '~/stores/receipts'
 import { receiptAmountPaid, receiptBalanceDue, roundMoney } from '~/utils/receipt-balance'
 import { usePreferences } from '~/composables/usePreferences'
@@ -132,7 +131,7 @@ const paymentAmount = ref(0)
 const paymentMethod = ref('Cash')
 const submitting = ref(false)
 
-const paymentMethods = ['Cash', 'Card', 'Bank Transfer', 'POS', 'Other']
+const { paymentTenderOptions } = usePaymentTenders()
 
 const amountPaid = computed(() => (props.receipt ? receiptAmountPaid(props.receipt) : 0))
 const balanceDue = computed(() => (props.receipt ? receiptBalanceDue(props.receipt) : 0))

@@ -556,7 +556,47 @@
  
  <!-- Toast Notifications -->
  <ToastContainer />
- 
+
+ <!-- Sign out confirmation -->
+ <Modal
+ :model-value="showLogoutConfirm"
+ size="sm"
+ :show-close="false"
+ :close-on-backdrop="!loggingOut"
+ @update:model-value="(value: boolean) => { if (!value) cancelSignOut() }"
+ >
+ <div class="flex flex-col items-center text-center">
+ <div class="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
+ <ArrowRightOnRectangleIcon class="h-5 w-5" stroke-width="1.75" />
+ </div>
+ <h3 class="mt-3 text-base font-semibold text-gray-900 dark:text-gray-50">Sign out?</h3>
+ <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+ You'll need to sign in again to access your dashboard.
+ </p>
+ </div>
+
+ <template #footer>
+ <div class="flex w-full gap-2">
+ <button
+ type="button"
+ :disabled="loggingOut"
+ class="btn-secondary flex-1"
+ @click="cancelSignOut"
+ >
+ Cancel
+ </button>
+ <button
+ type="button"
+ :disabled="loggingOut"
+ class="btn-danger flex-1"
+ @click="confirmSignOut"
+ >
+ {{ loggingOut ? 'Signing out…' : 'Sign out' }}
+ </button>
+ </div>
+ </template>
+ </Modal>
+
  <!-- Global Search -->
  <GlobalSearch />
 
@@ -610,6 +650,7 @@ import {
  BuildingOfficeIcon as BuildingOfficeIconSolid,
  BanknotesIcon as BanknotesIconSolid,
 } from '@heroicons/vue/24/solid'
+import Modal from '~/components/ui/Modal.vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
@@ -1399,10 +1440,26 @@ const userInitials = computed(() => {
  return 'U'
 })
 
-const handleSignOut = async () => {
+const showLogoutConfirm = ref(false)
+const loggingOut = ref(false)
+
+const handleSignOut = () => {
+ showLogoutConfirm.value = true
+}
+
+const cancelSignOut = () => {
+ if (loggingOut.value) return
+ showLogoutConfirm.value = false
+}
+
+const confirmSignOut = async () => {
+ if (loggingOut.value) return
+ loggingOut.value = true
  if (isDemoDashboard.value) {
  const { clearDemoSession } = await import('~/utils/demo-mode')
  clearDemoSession()
+ showLogoutConfirm.value = false
+ loggingOut.value = false
  return navigateTo('/')
  }
  const { signOut } = useFirebaseAuth()
@@ -1416,6 +1473,9 @@ const handleSignOut = async () => {
  userStore.clearUserData()
  clearCachedUser()
  navigateTo('/signin')
+ } finally {
+ showLogoutConfirm.value = false
+ loggingOut.value = false
  }
 }
 

@@ -30,8 +30,9 @@ export function buildWhatsAppUrl(phone: string, message: string): string {
 
 export function openWhatsApp(phone: string, message: string): void {
  const url = buildWhatsAppUrl(phone, message)
- if (import.meta.client) {
- window.open(url, '_blank', 'noopener,noreferrer')
+  if (import.meta.client && typeof globalThis !== 'undefined') {
+    const opener = (globalThis as { open?: (url?: string, target?: string, features?: string) => unknown }).open
+    opener?.(url, '_blank', 'noopener,noreferrer')
  }
 }
 

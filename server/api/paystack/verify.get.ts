@@ -29,7 +29,15 @@ export default defineEventHandler(async (event) => {
  })
  }
 
- const response = await $fetch<{
+ const response = (await $fetch(
+ `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+ {
+ method: 'GET',
+ headers: {
+ Authorization: `Bearer ${secretKey}`,
+ },
+ },
+ )) as {
  status: boolean
  data?: {
  status: string
@@ -39,12 +47,7 @@ export default defineEventHandler(async (event) => {
  metadata?: { userId?: string; planId?: string }
  }
  message?: string
- }>(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
- method: 'GET',
- headers: {
- Authorization: `Bearer ${secretKey}`,
- },
- })
+ }
 
  if (!response.status || !response.data) {
  throw createError({

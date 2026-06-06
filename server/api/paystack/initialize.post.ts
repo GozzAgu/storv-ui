@@ -42,11 +42,9 @@ export default defineEventHandler(async (event) => {
  const baseUrl = getRequestURL(event).origin
  const callbackUrl = `${baseUrl}/dashboard/settings?paystack_callback=1`
 
- const response = await $fetch<{
- status: boolean
- data?: { authorization_url: string; reference: string; access_code: string }
- message?: string
- }>('https://api.paystack.co/transaction/initialize', {
+ const response = (await $fetch(
+ 'https://api.paystack.co/transaction/initialize',
+ {
  method: 'POST',
  headers: {
  Authorization: `Bearer ${secretKey}`,
@@ -63,7 +61,12 @@ export default defineEventHandler(async (event) => {
  planId,
  },
  },
- })
+ },
+ )) as {
+ status: boolean
+ data?: { authorization_url: string; reference: string; access_code: string }
+ message?: string
+ }
 
  if (!response.status || !response.data?.authorization_url) {
  throw createError({

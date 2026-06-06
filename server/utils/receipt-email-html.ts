@@ -56,7 +56,8 @@ export function generateReceiptEmailHTML(receiptData: Record<string, unknown>): 
  </head>
  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
  <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;">
- <h1 style="margin: 0; font-size: 24px; font-weight: bold;">${escapeHtml(String(receiptData.storeBranchName || 'Store'))}</h1>
+ <h1 style="margin: 0; font-size: 24px; font-weight: bold;">${escapeHtml(String(receiptData.storeName || receiptData.businessName || 'Store'))}</h1>
+ ${receiptData.storeBranchName ? `<p style="margin: 4px 0 0; font-size: 14px; color: #666;">${escapeHtml(String(receiptData.storeBranchName))}</p>` : ''}
  </div>
  <p style="font-size: 14px;">Hi ${escapeHtml(String(receiptData.customerName || 'Customer'))},</p>
  <p style="font-size: 14px;">Please find your receipt attached.</p>
