@@ -560,6 +560,9 @@ export const useStaffStore = defineStore('staff', {
  storeId,
  position: staffData.position.trim(),
  role: staffData.role === 'manager' || staffData.role === 'intern' ? staffData.role : 'staff',
+ ...(staffData.role === 'manager' && staffData.canManageInventory === true
+   ? { canManageInventory: true as const }
+   : {}),
  hireDate: staffData.hireDate || new Date().toISOString().split('T')[0],
  ...(staffData.salary !== undefined && { salary: Number(staffData.salary) }),
  status: staffData.status === 'inactive' || staffData.status === 'on_leave' ? staffData.status : 'active',
@@ -728,8 +731,16 @@ export const useStaffStore = defineStore('staff', {
  } else {
  // Use hierarchical path: users/{userId}/stores/{storeId}/departments/{departmentId}/staff/{staffId}
  const staffRef = getStaffDocument(db, userId, storeId, departmentId, staffId)
+ const mergedRole = updates.role ?? staffMember.role
+ const inventoryPatch =
+ mergedRole === 'manager' && updates.canManageInventory === true
+ ? { canManageInventory: true }
+ : mergedRole !== 'manager' || updates.canManageInventory === false
+ ? { canManageInventory: deleteField() }
+ : {}
  await updateDoc(staffRef, {
  ...updates,
+ ...inventoryPatch,
  updatedAt: serverTimestamp(),
  })
  }

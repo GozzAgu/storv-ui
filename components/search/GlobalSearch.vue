@@ -258,7 +258,7 @@
  </div>
 
           <!-- Footer -->
-          <div
+            <div
             class="flex shrink-0 items-center justify-between gap-3 bg-gray-50/70 px-4 py-2.5 dark:bg-white/[0.02]"
           >
             <div class="hidden items-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 sm:flex">

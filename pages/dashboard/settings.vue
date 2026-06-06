@@ -401,6 +401,68 @@
  </div>
  </DashboardSettingsPanel>
 
+ <!-- Payment methods at checkout -->
+ <DashboardSettingsPanel
+ title="Checkout payments"
+ subtitle="Tender types on receipts, including OPay, Moniepoint, transfer, and cash."
+ compact
+ >
+ <template #actions>
+ <Button
+ v-if="canEditSettings"
+ variant="primary"
+ size="sm"
+ :class="headerBtnClass"
+ aria-label="Save payment methods"
+ @click="savePaymentSettings"
+ >
+ Save
+ </Button>
+ <span v-else :class="viewOnlyBadgeClass">View only</span>
+ </template>
+
+ <div class="space-y-3">
+ <p class="text-[11px] text-gray-500 dark:text-gray-400">
+ These appear on new sales and balance payments. Add labels your staff use at the counter.
+ </p>
+ <ul class="flex flex-wrap gap-1.5">
+ <li
+ v-for="(tender, index) in paymentTenders"
+ :key="`${tender}-${index}`"
+ class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-800 dark:bg-white/[0.08] dark:text-gray-200"
+ >
+ {{ tender }}
+ <button
+ v-if="canEditSettings"
+ type="button"
+ class="text-gray-500 hover:text-red-600 dark:hover:text-red-400"
+ aria-label="Remove"
+ @click="removePaymentTender(index)"
+ >
+ ×
+ </button>
+ </li>
+ </ul>
+ <div v-if="canEditSettings" class="flex flex-wrap items-center gap-2">
+ <input
+ v-model="newPaymentTender"
+ type="text"
+ :class="[inputClass(true), 'min-w-[10rem] flex-1']"
+ placeholder="e.g. OPay, Moniepoint"
+ @keydown.enter.prevent="addPaymentTender"
+ />
+ <Button variant="outline" size="sm" @click="addPaymentTender">Add</Button>
+ <button
+ type="button"
+ class="text-[11px] font-medium text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+ @click="resetPaymentTendersToDefault"
+ >
+ Reset to defaults
+ </button>
+ </div>
+ </div>
+ </DashboardSettingsPanel>
+
  <!-- Receipt & invoice settings -->
  <DashboardSettingsPanel title="Receipts & invoices" subtitle="Numbering, prefixes, and print behavior." compact>
  <template #actions>
@@ -656,6 +718,7 @@ import {
  fillSettingsStoreInfoFromStore,
  type StaffWorkspaceContext,
 } from '~/composables/useStaffWorkspaceContext'
+import { DEFAULT_PAYMENT_TENDERS, normalizePaymentTenderList } from '~/utils/payment-tenders'
 
 type AccountLogoUploadResult = { url: string; path: string }
 
@@ -932,6 +995,26 @@ const receiptSettings = reactive({
  autoPrint: false,
 })
 
+const paymentTenders = ref<string[]>([...DEFAULT_PAYMENT_TENDERS])
+const newPaymentTender = ref('')
+
+function addPaymentTender() {
+ const label = newPaymentTender.value.trim()
+ if (!label) return
+ if (!paymentTenders.value.some((t) => t.toLowerCase() === label.toLowerCase())) {
+ paymentTenders.value.push(label)
+ }
+ newPaymentTender.value = ''
+}
+
+function removePaymentTender(index: number) {
+ paymentTenders.value.splice(index, 1)
+}
+
+function resetPaymentTendersToDefault() {
+ paymentTenders.value = [...DEFAULT_PAYMENT_TENDERS]
+}
+
 const switchStore = async (storeId: string) => {
  try {
  toast.info('Switching store...')
@@ -1130,6 +1213,9 @@ async function loadSettingsFromFirestore() {
  receiptSettings.nextNumber = settings.receipt.nextNumber ?? receiptSettings.nextNumber
  receiptSettings.autoPrint = settings.receipt.autoPrint ?? receiptSettings.autoPrint
  }
+ if (settings?.payment?.paymentMethods) {
+ paymentTenders.value = normalizePaymentTenderList(settings.payment.paymentMethods)
+ }
  Object.assign(backupStoreInfo, { ...storeInfo })
  }
  return
@@ -1177,6 +1263,9 @@ async function loadSettingsFromFirestore() {
  receiptSettings.prefix = settings.receipt.prefix || 'REC-'
  receiptSettings.nextNumber = settings.receipt.nextNumber ?? 1001
  receiptSettings.autoPrint = settings.receipt.autoPrint ?? false
+ }
+ if (settings.payment?.paymentMethods) {
+ paymentTenders.value = normalizePaymentTenderList(settings.payment.paymentMethods)
  }
  }
  }
@@ -1354,6 +1443,19 @@ const saveInventorySettings = async () => {
  console.error('Error updating low stock counts:', error)
  // Don't show error to user, just log it - the threshold is saved anyway
  }
+}
+
+const savePaymentSettings = async () => {
+ if (!canEditSettings.value) {
+ toast.error('Only super admins can edit settings')
+ return
+ }
+ const methods = normalizePaymentTenderList(paymentTenders.value)
+ paymentTenders.value = methods
+ await updateStoreSettings({
+ payment: { paymentMethods: methods },
+ })
+ toast.success('Payment methods saved')
 }
 
 // Save receipt settings

@@ -277,17 +277,7 @@
  
  <!-- Single Payment Method -->
  <div v-if="!useSplitPayment">
- <select
- v-model="receiptForm.paymentMethod"
- required
- class="app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
- >
- <option value="">Select payment method</option>
- <option value="Cash">Cash</option>
- <option value="Card">Card</option>
- <option value="Mobile Money">Mobile Money</option>
- <option value="Bank Transfer">Bank Transfer</option>
- </select>
+ <PaymentMethodSelect v-model="receiptForm.paymentMethod" required />
  </div>
 
  <!-- Split Payment Methods -->
@@ -297,17 +287,12 @@
  :key="index"
  class="flex items-center gap-2"
  >
- <select
+ <PaymentMethodSelect
  v-model="payment.method"
  required
- class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
- >
- <option value="">Select method</option>
- <option value="Cash">Cash</option>
- <option value="Card">Card</option>
- <option value="Mobile Money">Mobile Money</option>
- <option value="Bank Transfer">Bank Transfer</option>
- </select>
+ select-class="app-field flex-1 px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40"
+ placeholder="Select method"
+ />
  <div class="relative w-28">
  <span class="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">{{ currencySymbol }}</span>
  <input
@@ -643,7 +628,7 @@
  <div class="flex gap-2 justify-end">
  <button
  @click="showEmailModal = false"
- class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
+ class="btn-secondary"
  >
  Cancel
  </button>
@@ -675,6 +660,7 @@ import SidePanel from '~/components/ui/SidePanel.vue'
 import DashboardDrawerStepper from '~/components/dashboard/DashboardDrawerStepper.vue'
 import DashboardDrawerSearch from '~/components/dashboard/DashboardDrawerSearch.vue'
 import SellScreenNoteBanner from '~/components/receipts/SellScreenNoteBanner.vue'
+import PaymentMethodSelect from '~/components/receipts/PaymentMethodSelect.vue'
 import Button from '~/components/ui/Button.vue'
 import Checkbox from '~/components/ui/Checkbox.vue'
 import { useInventoryStore, type InventoryFolder, type InventoryItem } from '~/stores/inventory'

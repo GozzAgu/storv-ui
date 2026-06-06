@@ -504,12 +504,23 @@
  </div>
  </template>
  <template #actions>
+ <div class="flex items-center gap-3">
+ <button
+ v-if="lowStockItems.length > 0"
+ type="button"
+ class="text-[11px] font-medium text-primary-700 hover:text-primary-800 disabled:opacity-50 dark:text-primary-300"
+ :disabled="reorderExporting"
+ @click="handleExportReorderList"
+ >
+ {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
+ </button>
  <NuxtLink
  to="/dashboard/inventory"
  class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
  >
  View inventory →
  </NuxtLink>
+ </div>
  </template>
  </DataTableToolbar>
  <div class="space-y-1.5 px-3 pb-3 sm:px-4">
@@ -584,6 +595,17 @@ const chartCurrencyAxis = computed(() =>
  )
 )
 const toast = useAppToast()
+const { exporting: reorderExporting, exportReorderListExcel } = useReorderListExport()
+
+async function handleExportReorderList() {
+ try {
+ const { count } = await exportReorderListExcel()
+ toast.success(`Reorder list exported (${count} ${count === 1 ? 'line' : 'lines'})`)
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Export failed'
+ toast.error(message)
+ }
+}
 
 /** ApexCharts stores formatters built in computed runs; read prefs during eval so options refresh when profile currency/base changes */
 const displayCurrencyDeps = computed(

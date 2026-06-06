@@ -14,8 +14,10 @@ export interface Staff {
  departmentName?: string
  storeId: string // Store this staff member belongs to
  position: string
- role: 'manager' | 'staff' | 'intern'
- hireDate: string
+  role: 'manager' | 'staff' | 'intern'
+  /** When true (managers only), owner allows full inventory edit without super-admin access. */
+  canManageInventory?: boolean
+  hireDate: string
  salary?: number
   status: 'active' | 'inactive' | 'on_leave'
   removedAt?: unknown

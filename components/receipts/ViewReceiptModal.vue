@@ -74,8 +74,8 @@
  class="receipt-logo h-16 w-16 sm:h-20 sm:w-20 rounded-sm object-contain"
  />
  </div>
- <h1 class="text-sm font-semibold tracking-tight text-gray-900">{{ storeName || 'Store' }}</h1>
- <p v-if="storeAddress" class="mt-1 text-[10px] leading-snug text-gray-500">{{ storeAddress }}</p>
+ <h1 class="receipt-display-title text-gray-900">{{ businessName }}</h1>
+ <p v-if="branchName" class="mt-1 text-[11px] leading-snug text-gray-600">{{ branchName }}</p>
  <p v-if="storePhone || storeEmail" class="mt-1 text-[10px] leading-snug text-gray-500">
  <span v-if="storePhone">{{ storePhone }}</span><span v-if="storePhone && storeEmail"> · </span><span v-if="storeEmail">{{ storeEmail }}</span>
  </p>
@@ -85,20 +85,20 @@
  <div class="receipt-section px-6 py-4 border-b border-gray-100">
  <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
  <div>
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Receipt</p>
+ <p class="receipt-section-label text-gray-500">Receipt</p>
  <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">
  {{ receipt.receiptNumber }}
  <span v-if="receipt.isSwapIn" class="font-normal text-gray-500"> · Swap-in</span>
  </p>
  </div>
  <div class="text-right">
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Date & time</p>
+ <p class="receipt-section-label text-gray-500">Date & time</p>
  <p class="mt-1 text-[12px] leading-tight text-gray-900">{{ formatReceiptDate(receipt.date) }}</p>
  <p class="text-[10px] text-gray-500">{{ formatReceiptTime(receipt.date) }}</p>
  </div>
  </div>
  <div class="mt-3 border-t border-gray-100 pt-3">
- <p class="text-[10px] font-medium uppercase tracking-wider text-gray-500">Customer</p>
+ <p class="receipt-section-label text-gray-500">Customer</p>
  <p class="mt-1 text-[13px] font-medium leading-tight text-gray-900">{{ receipt.customerName }}</p>
  <p v-if="receipt.customerEmail" class="mt-1 text-[10px] leading-snug text-gray-500">{{ receipt.customerEmail }}</p>
  </div>
@@ -106,14 +106,14 @@
 
  <!-- Items -->
  <div class="receipt-section px-6 py-4 border-b border-gray-100">
- <p class="mb-2 text-[10px] font-medium uppercase tracking-wider text-gray-500">Items</p>
+ <p class="receipt-section-label mb-2 text-gray-500">Items</p>
  <table class="w-full">
  <thead class="bg-gray-50">
  <tr class="border-b border-gray-200">
- <th class="py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-600">Product</th>
- <th class="w-12 py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-gray-600">Qty</th>
- <th class="py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-600">Price</th>
- <th class="py-2 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-600">Total</th>
+ <th class="receipt-section-label py-2 text-left text-gray-600">Product</th>
+ <th class="receipt-section-label w-12 py-2 text-center text-gray-600">Qty</th>
+ <th class="receipt-section-label py-2 text-right text-gray-600">Price</th>
+ <th class="receipt-section-label py-2 text-right text-gray-600">Total</th>
  </tr>
  </thead>
  <tbody>
@@ -140,15 +140,15 @@
  {{ item.discountPercentage ? `${item.discountPercentage}% off` : `-${formatCurrency(item.discountAmount || 0)}` }}
  </p>
  </td>
- <td class="py-2 text-center text-[12px] text-gray-700">{{ item.quantity }}</td>
- <td class="py-2 text-right text-[12px] text-gray-700">
+ <td class="py-2 text-center text-[12px] tabular-nums text-gray-700">{{ item.quantity }}</td>
+ <td class="py-2 text-right text-[12px] tabular-nums text-gray-700">
  <template v-if="item.hasDiscount && item.originalPrice">
  <span class="block text-[10px] leading-tight text-gray-400 line-through">{{ formatCurrency(item.originalPrice) }}</span>
  <span class="leading-tight">{{ formatCurrency(item.price) }}</span>
  </template>
  <span v-else>{{ formatCurrency(item.price) }}</span>
  </td>
- <td class="py-2 text-right text-[12px] font-medium text-gray-900">
+ <td class="py-2 text-right text-[12px] font-medium tabular-nums text-gray-900">
  <template v-if="item.hasDiscount && item.originalPrice">
  <span class="block text-[10px] font-normal leading-tight text-gray-400 line-through">{{ formatCurrency((item.originalPrice || 0) * item.quantity) }}</span>
  <span class="leading-tight">{{ formatCurrency(item.price * item.quantity) }}</span>
@@ -218,13 +218,13 @@
 
  <!-- Notes -->
  <div v-if="receipt.notes" class="px-6 pb-3">
- <p class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-500">Notes</p>
+ <p class="receipt-section-label mb-1 text-gray-500">Notes</p>
  <p class="whitespace-pre-wrap text-[12px] leading-snug text-gray-700">{{ receipt.notes }}</p>
  </div>
 
  <!-- Swap-in (trade-in device added to inventory) -->
  <div v-if="receipt.isSwapIn" class="px-6 pb-3">
- <p class="mb-1 text-[10px] font-medium uppercase tracking-wider text-gray-500">Swap-in</p>
+ <p class="receipt-section-label mb-1 text-gray-500">Swap-in</p>
  <p v-if="swapInFolderName" class="text-[10px] text-gray-500 mb-1.5">
  Folder: {{ swapInFolderName }}
  </p>
@@ -255,9 +255,8 @@
  </div>
 
  <!-- Branch & generated by -->
- <div v-if="receipt.storeBranchName || receipt.createdByUserName" class="flex flex-wrap justify-between gap-2 border-t border-gray-100 px-6 py-3 text-[10px] leading-snug text-gray-500">
- <span v-if="receipt.storeBranchName">Branch: {{ receipt.storeBranchName }}</span>
- <span v-if="receipt.createdByUserName">Generated by {{ receipt.createdByUserName }}</span>
+ <div v-if="receipt.createdByUserName" class="border-t border-gray-100 px-6 py-3 text-[10px] leading-snug text-gray-500">
+ <span>Generated by {{ receipt.createdByUserName }}</span>
  </div>
 
  <!-- Account policies (set on Profile: Receipt terms & policies) -->
@@ -266,15 +265,15 @@
  class="border-t border-gray-100 px-6 py-4 space-y-3 text-left receipt-policies"
  >
  <div v-if="receiptPolicies.salesTerms">
- <p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Terms & conditions (sales)</p>
+ <p class="receipt-section-label mb-1 text-gray-500">Terms & conditions (sales)</p>
  <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">{{ receiptPolicies.salesTerms }}</p>
  </div>
  <div v-if="receiptPolicies.refundPolicy">
- <p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Refund policy</p>
+ <p class="receipt-section-label mb-1 text-gray-500">Refund policy</p>
  <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">{{ receiptPolicies.refundPolicy }}</p>
  </div>
  <div v-if="receiptPolicies.warrantyPolicy">
- <p class="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Warranty policy</p>
+ <p class="receipt-section-label mb-1 text-gray-500">Warranty policy</p>
  <p class="whitespace-pre-wrap text-[10px] leading-snug text-gray-600">{{ receiptPolicies.warrantyPolicy }}</p>
  </div>
  </div>
@@ -312,7 +311,7 @@
  <div class="flex gap-2 justify-end">
  <button
  @click="showEmailModal = false"
- class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm transition-colors"
+ class="btn-secondary"
  >
  Cancel
  </button>
@@ -335,8 +334,8 @@
  :email="receipt?.customerEmail || ''"
  :template-vars="whatsAppTemplateVars"
  :receipt-number="receipt?.receiptNumber"
- :store-name="storeName"
- :store-address="storeAddress"
+ :business-name="businessName"
+ :branch-name="branchName"
  :store-logo-url="storeLogoUrl"
  :receipt-data="receipt || undefined"
  :get-receipt-element="() => receiptContent"
@@ -356,7 +355,6 @@ import type { InventoryItem } from '~/stores/inventory'
 import { useUserStore } from '~/stores/user'
 import { useAuthStore } from '~/stores/auth'
 import { useInventoryStore } from '~/stores/inventory'
-import { useStoresStore } from '~/stores/stores'
 import { usePreferences } from '~/composables/usePreferences'
 import { useCopy } from '~/composables/useCopy'
 import { getProductDetailLines, getInventoryItemDetailLines } from '~/composables/useReceiptProductDetails'
@@ -366,6 +364,8 @@ import { useUser } from '~/composables/useUser'
 import { getQueryUserId } from '~/composables/useFirestorePaths'
 import { formatReceiptDateForWhatsApp } from '~/utils/whatsapp'
 import { base64ToBlob } from '~/utils/file-share'
+import { setReceiptPdfFont } from '~/utils/receipt-pdf-font'
+import { useReceiptPaperHeader } from '~/composables/useReceiptPaperHeader'
 
 interface Props {
  modelValue: boolean
@@ -424,28 +424,15 @@ async function loadReceiptPoliciesForView() {
  }
 }
 const inventoryStore = useInventoryStore()
-const storesStore = useStoresStore()
 const { formatCurrency } = usePreferences()
 
 function receiptItemDetailLines(item: ReceiptItem) {
  return getProductDetailLines(item, { formatMoney: (n) => formatCurrency(n) })
 }
 
-// Store information (receipt.storeBranchName takes precedence for receipts created in a specific branch)
-const storeName = computed(() => props.receipt?.storeBranchName || userStore.userData?.storeDetails?.storeName || '')
-const storeAddress = computed(() => userStore.userData?.storeDetails?.storeAddress || '')
-const storePhone = computed(() => userStore.userData?.storeDetails?.storePhone || '')
-const storeEmail = computed(() => userStore.userData?.storeDetails?.storeEmail || '')
-// Store logo - from receipt (when created), store by storeId, or account logo
-const storeLogoUrl = computed(() => {
- const receipt = props.receipt
- if (receipt?.storeLogoUrl) return receipt.storeLogoUrl
- if (receipt?.storeId) {
- const store = storesStore.getStoreById?.(receipt.storeId) || (storesStore.currentStore?.id === receipt.storeId ? storesStore.currentStore : null)
- if (store?.logoUrl) return store.logoUrl
- }
- return userStore.userData?.storeLogoUrl || ''
-})
+const receiptRef = computed(() => props.receipt)
+const { businessName, branchName, storePhone, storeEmail, storeLogoUrl, refreshOwnerUserData } =
+ useReceiptPaperHeader(receiptRef)
 
 // Swap-in folder name
 const swapInFolderName = computed(() => {
@@ -551,7 +538,7 @@ const receiptDisplayTotal = computed(() => {
 
 const whatsAppTemplateVars = computed(() => ({
  customerName: props.receipt?.customerName || 'Customer',
- storeName: storeName.value || 'Store',
+ storeName: businessName.value || 'Store',
  receiptNumber: props.receipt?.receiptNumber || '',
  receiptDate: props.receipt?.date ? formatReceiptDateForWhatsApp(props.receipt.date) : '',
  total: formatCurrency(receiptDisplayTotal.value),
@@ -578,8 +565,9 @@ watch(() => props.receipt, (receipt) => {
 }, { immediate: true })
 
 // Load user data and folders if not already loaded
-watch(() => props.modelValue, async (isOpen) => {
+ watch(() => props.modelValue, async (isOpen) => {
  if (isOpen) {
+ await refreshOwnerUserData()
  await loadReceiptPoliciesForView()
  if (!userStore.userData && authStore.currentUser) {
  try {
@@ -902,8 +890,22 @@ function addCanvasLeftGutter(canvas: HTMLCanvasElement, gutterPx = 24): HTMLCanv
  * Renders the receipt to jsPDF, retrying with lower scale if canvas is too large
  * (browser limits) or the pipeline throws.
  */
+async function ensureReceiptFontsReady(): Promise<void> {
+ if (!import.meta.client || !document.fonts?.load) return
+ try {
+ await Promise.all([
+ document.fonts.load('600 1.05rem "Pixelify Sans"'),
+ document.fonts.load('400 11px "JetBrains Mono"'),
+ ])
+ await document.fonts.ready
+ } catch {
+ // Built-in fallbacks apply
+ }
+}
+
 async function receiptElementToJsPdf(el: HTMLElement) {
  await nextTick()
+ await ensureReceiptFontsReady()
  await injectDataUrlsForImages(el)
  const { default: jsPDF } = await import('jspdf')
  if (!props.receipt) {
@@ -928,7 +930,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  }
 
  const writeLabel = (label: string) => {
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.setFontSize(8)
  pdf.setTextColor(107, 114, 128)
  pdf.text(label.toUpperCase(), margin, y)
@@ -939,7 +941,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  const clean = String(text || '').trim()
  if (!clean) return
  const lines = pdf.splitTextToSize(clean, maxWidth) as string[]
- pdf.setFont('helvetica', opts?.bold ? 'bold' : 'normal')
+ setReceiptPdfFont(pdf, opts?.bold ? 'bold' : 'normal')
  pdf.setFontSize(10)
  pdf.setTextColor(31, 41, 55)
  for (const line of lines) {
@@ -967,17 +969,17 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  }
  }
 
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.setFontSize(11)
  pdf.setTextColor(17, 24, 39)
- pdf.text(storeName.value || 'Store', pageWidth / 2, y, { align: 'center' })
+ pdf.text(businessName.value || 'Store', pageWidth / 2, y, { align: 'center' })
  y += 6
- if (storeAddress.value) {
- pdf.setFont('helvetica', 'normal')
+ if (branchName.value) {
+ setReceiptPdfFont(pdf, 'normal')
  pdf.setFontSize(9)
  pdf.setTextColor(75, 85, 99)
- const addr = pdf.splitTextToSize(storeAddress.value, contentWidth - 24) as string[]
- addr.forEach((line) => {
+ const branchLines = pdf.splitTextToSize(branchName.value, contentWidth - 24) as string[]
+ branchLines.forEach((line) => {
  ensureSpace(5)
  pdf.text(line, pageWidth / 2, y, { align: 'center' })
  y += rowGap
@@ -998,11 +1000,11 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  y -= rowGap * 2
  const rightColX = rightEdge
  const dateY = y
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.setFontSize(8)
  pdf.setTextColor(107, 114, 128)
  pdf.text('DATE & TIME', rightColX, dateY, { align: 'right' })
- pdf.setFont('helvetica', 'normal')
+ setReceiptPdfFont(pdf, 'normal')
  pdf.setFontSize(10)
  pdf.setTextColor(31, 41, 55)
  pdf.text(formatReceiptDate(receipt.date), rightColX, dateY + rowGap, { align: 'right' })
@@ -1025,7 +1027,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  const qtyX = margin + 92
  const priceX = margin + 134
  const totalX = rightEdge
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.setFontSize(9)
  pdf.setTextColor(55, 65, 81)
  pdf.text('PRODUCT', productX, y)
@@ -1050,7 +1052,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  const itemBlockHeight = Math.max(6, productLines.length * rowGap)
  ensureSpace(itemBlockHeight + 8)
 
- pdf.setFont('helvetica', 'normal')
+ setReceiptPdfFont(pdf, 'normal')
  pdf.setFontSize(10)
  pdf.setTextColor(31, 41, 55)
  productLines.forEach((line, index) => {
@@ -1060,7 +1062,7 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  pdf.setTextColor(17, 24, 39)
  pdf.text(String(item.quantity), qtyX, y, { align: 'right' })
  pdf.text(formatPdfCurrency(item.price), priceX, y, { align: 'right' })
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.text(formatPdfCurrency(item.price * item.quantity), totalX, y, { align: 'right' })
 
  y += itemBlockHeight + 2
@@ -1073,11 +1075,11 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  const totalsLeft = margin + 108
  const writeTotalRow = (label: string, value: string, bold = false) => {
  ensureSpace(7)
- pdf.setFont('helvetica', 'normal')
+ setReceiptPdfFont(pdf, 'normal')
  pdf.setFontSize(10)
  pdf.setTextColor(75, 85, 99)
  pdf.text(label, totalsLeft, y)
- pdf.setFont('helvetica', bold ? 'bold' : 'normal')
+ setReceiptPdfFont(pdf, bold ? 'bold' : 'normal')
  pdf.setTextColor(17, 24, 39)
  pdf.text(value, rightEdge, y, { align: 'right' })
  y += rowGap + 0.5
@@ -1131,23 +1133,19 @@ async function receiptElementToJsPdf(el: HTMLElement) {
  writeTextLines('Trade-in recorded; details unavailable.', contentWidth)
  }
  }
- if (receipt.storeBranchName || receipt.createdByUserName) {
+ if (receipt.createdByUserName) {
  y += 1
- const meta = [
- receipt.storeBranchName ? `Branch: ${receipt.storeBranchName}` : '',
- receipt.createdByUserName ? `Generated by ${receipt.createdByUserName}` : '',
- ].filter(Boolean).join(' ')
- writeTextLines(meta, contentWidth)
+ writeTextLines(`Generated by ${receipt.createdByUserName}`, contentWidth)
  }
 
  y += 5
  ensureSpace(10)
- pdf.setFont('helvetica', 'bold')
+ setReceiptPdfFont(pdf, 'bold')
  pdf.setFontSize(10)
  pdf.setTextColor(31, 41, 55)
  pdf.text('Thank you for your business', pageWidth / 2, y, { align: 'center' })
  y += rowGap
- pdf.setFont('helvetica', 'normal')
+ setReceiptPdfFont(pdf, 'normal')
  pdf.setFontSize(8)
  pdf.setTextColor(107, 114, 128)
  pdf.text('Computer-generated receipt - Generated by storvv', pageWidth / 2, y, { align: 'center' })
@@ -1233,6 +1231,8 @@ const handleSendEmail = async () => {
  customerEmail: emailToSend.value,
  receiptData: {
  ...props.receipt,
+ businessName: businessName.value,
+ storeName: businessName.value,
  salesTerms: receiptPolicies.salesTerms,
  refundPolicy: receiptPolicies.refundPolicy,
  warrantyPolicy: receiptPolicies.warrantyPolicy,
@@ -1259,119 +1259,4 @@ const handleSendEmail = async () => {
 }
 </script>
 
-<style scoped>
-.receipt-content {
- font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
- line-height: 1.45;
- color-scheme: light;
-}
-
-/* Keep on-screen receipt text readable and prevent clipping artifacts */
-.receipt-content p,
-.receipt-content span,
-.receipt-content td,
-.receipt-content th {
- line-height: 1.5;
- text-rendering: optimizeLegibility;
- -webkit-font-smoothing: antialiased;
-}
-
-.receipt-content .leading-tight {
- line-height: 1.45 !important;
-}
-
-.receipt-content .leading-snug {
- line-height: 1.4 !important;
-}
-
-/* Logo: preserve aspect ratio (no stretch) in PDF and on screen */
-.receipt-logo {
- object-fit: contain;
- object-position: center;
-}
-
-/* PDF export: mirror on-screen layout, keep text crisp and avoid clipping */
-.receipt-content.pdf-export {
- width: 640px !important;
- max-width: 640px !important;
- margin: 0 auto !important;
- font-size: 10px;
- line-height: 1.55;
- overflow: visible !important;
- padding-left: 12px !important;
- padding-right: 8px !important;
- box-sizing: border-box !important;
- font-family: Arial, Helvetica, sans-serif !important;
- -webkit-font-smoothing: auto;
- text-rendering: auto;
- font-kerning: none;
-}
-.receipt-content.pdf-export h1 {
- font-size: 13px !important;
- line-height: 1.35 !important;
-}
-.receipt-content.pdf-export .text-xs,
-.receipt-content.pdf-export .text-sm,
-.receipt-content.pdf-export .text-\[11px\],
-.receipt-content.pdf-export p {
- font-size: 10px !important;
- line-height: 1.5 !important;
-}
-.receipt-content.pdf-export .text-\[10px\],
-.receipt-content.pdf-export .text-\[9px\] {
- font-size: 9px !important;
- line-height: 1.5 !important;
-}
-.receipt-content.pdf-export th,
-.receipt-content.pdf-export td {
- font-size: 10px !important;
- line-height: 1.6 !important;
- padding-top: 6px !important;
- padding-bottom: 6px !important;
- vertical-align: top;
- overflow: visible !important;
-}
-
-/* Prevent clipped glyph descenders and long unbroken strings in PDF capture */
-.receipt-content.pdf-export p,
-.receipt-content.pdf-export span,
-.receipt-content.pdf-export td,
-.receipt-content.pdf-export th,
-.receipt-content.pdf-export h1 {
- overflow-wrap: anywhere !important;
- word-break: break-word !important;
- hyphens: auto;
- white-space: normal !important;
- line-height: 1.6 !important;
- overflow: visible !important;
- font-family: Arial, Helvetica, sans-serif !important;
- font-kerning: none;
- letter-spacing: 0.01em;
- text-rendering: auto;
-}
-
-.receipt-content.pdf-export table {
- width: 100% !important;
- table-layout: fixed;
- border-collapse: collapse;
-}
-
-.receipt-content.pdf-export tr {
- overflow: visible !important;
-}
-.receipt-content.pdf-export .receipt-logo {
- width: 64px !important;
- height: 64px !important;
-}
-
-/* PDF capture: ensure clean print look */
-@media print {
- .receipt-content {
- page-break-inside: avoid;
- box-shadow: none;
- border-radius: 0;
- background: #fff;
- }
-}
-</style>
 

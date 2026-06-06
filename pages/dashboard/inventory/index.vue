@@ -52,6 +52,16 @@
  <TableCellsIcon class="h-3.5 w-3.5" aria-hidden="true" />
  </button>
  </div>
+ <Button
+ v-if="inventoryStore.lowStockFolders.length > 0"
+ variant="outline"
+ size="sm"
+ :extra-class="headerBtnClass"
+ :disabled="reorderExporting"
+ @click="handleExportReorderList"
+ >
+ {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
+ </Button>
  <template v-if="canCreateInventoryFolders">
  <Button
  v-if="canShowCopyFolderTemplatesFromBranch"
@@ -1253,6 +1263,17 @@ const inventoryStore = useInventoryStore()
 const departmentsStore = useDepartmentsStore()
 const storesStore = useStoresStore()
 const toast = useAppToast()
+const { exporting: reorderExporting, exportReorderListExcel } = useReorderListExport()
+
+async function handleExportReorderList() {
+ try {
+ const { count } = await exportReorderListExcel()
+ toast.success(`Reorder list exported (${count} ${count === 1 ? 'line' : 'lines'})`)
+ } catch (error: unknown) {
+ const message = error instanceof Error ? error.message : 'Export failed'
+ toast.error(message)
+ }
+}
 const { canCreateInventoryFolders } = usePermissions()
 const { formatCurrency, preferences } = usePreferences()
 const currencySymbol = computed(() => preferences.value?.currencySymbol || '$')

@@ -136,6 +136,23 @@
  </select>
  </div>
 
+ <div
+ v-if="canGrantInventoryAccess && formData.role === 'manager'"
+ class="rounded-lg border border-primary-200/60 bg-primary-50/40 px-3 py-2.5 dark:border-primary-500/20 dark:bg-primary-950/20"
+ >
+ <label class="flex cursor-pointer items-start gap-2.5">
+ <input
+ v-model="formData.canManageInventory"
+ type="checkbox"
+ class="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500/40"
+ />
+ <span class="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
+<span class="font-medium text-gray-900 dark:text-gray-100">Inventory editor:</span>
+can add and edit categories, products, quantities, and prices (same as owner on the floor, not billing or staff admin).
+ </span>
+ </label>
+ </div>
+
  <div>
  <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
  Hire date <span class="text-red-500">*</span>
@@ -228,6 +245,7 @@ const emit = defineEmits<{
 const staffStore = useStaffStore()
 const departmentsStore = useDepartmentsStore()
 const staffInvitePasswordsStore = useStaffInvitePasswordsStore()
+const { canGrantInventoryAccess } = usePermissions()
 
 const formData = ref({
  firstName: '',
@@ -236,6 +254,7 @@ const formData = ref({
  phone: '',
  position: '',
  role: 'staff' as 'manager' | 'staff' | 'intern',
+ canManageInventory: false,
  hireDate: new Date().toISOString().split('T')[0]!,
  salary: undefined as number | undefined,
  status: 'active' as 'active' | 'inactive' | 'on_leave',
@@ -296,6 +315,7 @@ const resetForm = () => {
  phone: '',
  position: '',
  role: 'staff',
+ canManageInventory: false,
  hireDate: new Date().toISOString().split('T')[0]!,
  salary: undefined,
  status: 'active',
@@ -326,6 +346,15 @@ const closeAfterSuccess = () => {
 }
 
 watch(
+ () => formData.value.role,
+ (role) => {
+ if (role !== 'manager') {
+ formData.value.canManageInventory = false
+ }
+ },
+)
+
+watch(
  () => props.modelValue,
  (isOpen) => {
  if (isOpen) {
@@ -338,6 +367,7 @@ watch(
  phone: props.staff.phone || '',
  position: props.staff.position || '',
  role: (props.staff.role as 'manager' | 'staff' | 'intern') || 'staff',
+ canManageInventory: props.staff.canManageInventory === true,
  hireDate: props.staff.hireDate || new Date().toISOString().split('T')[0]!,
  salary: props.staff.salary,
  status: (props.staff.status as 'active' | 'inactive' | 'on_leave') || 'active',
@@ -374,6 +404,8 @@ const handleSubmit = async () => {
  phone: formData.value.phone || undefined,
  position: formData.value.position,
  role: formData.value.role,
+ canManageInventory:
+ formData.value.role === 'manager' ? formData.value.canManageInventory : false,
  hireDate: formData.value.hireDate,
  salary: formData.value.salary,
  status: formData.value.status,
@@ -388,6 +420,8 @@ const handleSubmit = async () => {
  phone: formData.value.phone || undefined,
  position: formData.value.position,
  role: formData.value.role,
+ canManageInventory:
+ formData.value.role === 'manager' ? formData.value.canManageInventory : false,
  hireDate: formData.value.hireDate,
  salary: formData.value.salary,
  status: formData.value.status,

@@ -94,7 +94,7 @@
  <div class="flex w-full justify-end gap-2">
  <button
  type="button"
- class="rounded-sm px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+ class="btn-secondary"
  @click="emit('update:modelValue', false)"
  >
  Close
