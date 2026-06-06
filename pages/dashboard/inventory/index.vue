@@ -292,7 +292,7 @@
  key="table"
  class="inventory-categories-table flex min-h-0 flex-1 flex-col"
  >
- <div class="min-h-0 flex-1 overflow-x-auto overscroll-contain">
+ <div class="overflow-x-auto">
  <table class="dashboard-table min-w-full">
  <thead>
  <tr>

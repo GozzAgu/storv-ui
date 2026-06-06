@@ -1038,9 +1038,15 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 
   /* Inventory categories */
+  /* Table view: size to content so the page scrolls normally (no clipped, fixed-height box) */
   .inventory-categories-shell--table.data-table-shell {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: min(68vh, calc(100dvh - 13rem));
+  }
+
+  .inventory-categories-shell--table .inventory-categories-table {
+    flex: 0 0 auto;
+    min-height: 0;
   }
 
   /* Grid mode: page background shows through; cards provide their own surfaces */
