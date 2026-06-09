@@ -36,15 +36,6 @@
  </div>
 
  <template v-else-if="isLoading">
- <!-- Period snapshot -->
- <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
- <div
- v-for="i in 4"
- :key="`snap-${i}`"
- class="h-[4.75rem] animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.06]"
- />
- </div>
-
  <!-- Inventory health -->
  <div class="rounded-xl bg-white p-4 dark:bg-dashboard-card">
  <div class="mb-3 flex items-center justify-between">
@@ -55,9 +46,9 @@
  </div>
 
  <!-- KPI grid -->
- <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+ <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
  <div
- v-for="i in 8"
+ v-for="i in 5"
  :key="`kpi-${i}`"
  class="h-[5.5rem] animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-[6rem]"
  />
@@ -80,42 +71,6 @@
  </template>
 
  <template v-else>
- <!-- Period snapshot (compact, no narrative block) -->
- <div
- class="grid grid-cols-2 divide-x divide-y divide-gray-200/80 overflow-hidden rounded-lg bg-white dark:divide-gray-800/80 dark:bg-dashboard-card sm:grid-cols-4 sm:divide-y-0"
- >
- <div class="px-3 py-2.5 sm:px-4 sm:py-3">
- <p class="text-[11px] text-gray-500 dark:text-gray-400">Today</p>
- <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
- {{ todayReceiptsCount }} orders
- </p>
- <p class="text-[11px] tabular-nums text-gray-600 dark:text-gray-400">{{ formatCurrency(todaySales) }}</p>
- </div>
- <div class="px-3 py-2.5 sm:px-4 sm:py-3">
- <p class="text-[11px] text-gray-500 dark:text-gray-400">This month</p>
- <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
- {{ formatCurrency(monthSales) }}
- </p>
- <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ completedReceiptsCount }} completed</p>
- </div>
- <div class="px-3 py-2.5 sm:px-4 sm:py-3">
- <p class="text-[11px] text-gray-500 dark:text-gray-400">Last 7 days</p>
- <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
- {{ salesLast7Days }} sales
- </p>
- <p class="text-[11px] tabular-nums text-gray-600 dark:text-gray-400">{{ formatCurrency(revenueLast7Days) }}</p>
- </div>
- <div class="px-3 py-2.5 sm:px-4 sm:py-3">
- <p class="text-[11px] text-gray-500 dark:text-gray-400">Inventory</p>
- <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
- {{ sellThroughRate }}% sold
- </p>
- <p class="text-[11px] text-gray-600 dark:text-gray-400">
- {{ outstandingCount > 0 ? `${outstandingCount} balance open` : 'No open balances' }}
- </p>
- </div>
- </div>
-
  <!-- Inventory health (top) -->
  <section :class="panelClass">
  <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
@@ -167,8 +122,8 @@
  </li>
  </ul>
 
- <!-- KPI grid -->
- <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+ <!-- KPI grid (core glance metrics) -->
+ <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
  <StatCard
  label="Total revenue"
  :value="formatCurrency(totalRevenue)"
@@ -178,25 +133,15 @@
  :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
  />
  <StatCard
- label="Avg. order value"
- :value="formatCurrency(averageOrderValue)"
- :subtext="`${completedReceiptsCount} completed orders`"
+ label="Orders today"
+ :value="todayReceiptsCount.toString()"
+ :subtext="`${formatCurrency(todaySales)} revenue`"
  />
  <StatCard
  label="Customers"
  :value="totalCustomers.toString()"
  :subtext="`${newCustomersToday} active today`"
  :subtext-class="newCustomersToday > 0 ? 'text-emerald-600 dark:text-emerald-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
- />
- <StatCard
- label="Orders today"
- :value="todayReceiptsCount.toString()"
- :subtext="`${formatCurrency(todaySales)} revenue`"
- />
- <StatCard
- label="Inventory units"
- :value="totalInventoryItems.toString()"
- :subtext="`${inStockCount} available · ${outOfStockCount} sold`"
  />
  <StatCard
  label="Low stock signals"
@@ -209,11 +154,6 @@
  :value="formatCurrency(outstandingBalanceTotal)"
  :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
  :subtext-class="outstandingCount > 0 ? 'text-amber-600 dark:text-amber-400 text-xs font-medium' : 'text-gray-500 dark:text-gray-400 text-xs'"
- />
- <StatCard
- label="Book value"
- :value="formatCurrency(inventoryTotalValue)"
- :subtext="`${totalFolders} folders · ${serialFolderCount} serial`"
  />
  </div>
 
@@ -296,32 +236,29 @@
  </div>
  </div>
 
- <!-- Sales + operations detail -->
- <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
- <section :class="panelClass">
- <p class="mb-3 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
- Sales breakdown
- </p>
- <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5">
- <div v-for="row in salesMetricsTop" :key="row.label" class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]">
- <dt class="text-xs text-gray-600 dark:text-gray-400">{{ row.label }}</dt>
- <dd class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ row.value }}</dd>
- </div>
- </dl>
- </section>
+        <!-- Payment links -->
+        <PaymentLinksSummaryCard v-if="canUseSubscriptionFeature('payment_links')" :card-class="panelClass" />
 
- <section :class="panelClass">
- <p class="mb-3 text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
- Store operations
+        <!-- Business metrics (sales + operations, merged) -->
+        <section :class="panelClass">
+ <div class="mb-3 flex items-center justify-between gap-2">
+ <p class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400">
+ Business metrics
  </p>
- <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5">
- <div v-for="row in operationsMetricsTop" :key="row.label" class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]">
+ <NuxtLink
+ to="/dashboard/analytics"
+ class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+ >
+ Full analytics
+ </NuxtLink>
+ </div>
+ <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-3 lg:grid-cols-4">
+ <div v-for="row in businessMetricsTop" :key="row.label" class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]">
  <dt class="text-xs text-gray-600 dark:text-gray-400">{{ row.label }}</dt>
  <dd class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">{{ row.value }}</dd>
  </div>
  </dl>
  </section>
- </div>
 
  <!-- Recent + top products -->
  <div class="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
@@ -504,6 +441,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
+import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial from '~/components/Tutorial.vue'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
@@ -609,22 +547,15 @@ const {
  formatCurrency,
  totalRevenue,
  todaySales,
- monthSales,
  totalOrders,
- averageOrderValue,
  todayReceiptsCount,
- completedReceiptsCount,
  outstandingCount,
  outstandingBalanceTotal,
  totalCustomers,
  newCustomersToday,
- totalInventoryItems,
- totalFolders,
  inventoryTotalValue,
- serialFolderCount,
  inStockCount,
  outOfStockCount,
- sellThroughRate,
  inStockPercentage,
  soldPercentage,
  lowStockPercentage,
@@ -643,8 +574,6 @@ const {
  quickLinks,
  operationsMetrics,
  salesMetrics,
- salesLast7Days,
- revenueLast7Days,
 } = insights
 
 function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
@@ -653,8 +582,7 @@ function topN<T>(items: T[], limit = DASHBOARD_LIST_TOP): T[] {
 
 const attentionItemsTop = computed(() => topN(attentionItems.value))
 const paymentMethodsTop = computed(() => topN(paymentMethodBreakdown.value))
-const salesMetricsTop = computed(() => topN(salesMetrics.value))
-const operationsMetricsTop = computed(() => topN(operationsMetrics.value))
+const businessMetricsTop = computed(() => [...salesMetrics.value, ...operationsMetrics.value])
 const recentReceiptsTop = computed(() => topN(recentReceipts.value))
 const topProductsTop = computed(() => topN(topSellingItems.value))
 const lowStockItemsTop = computed(() => topN(lowStockItems.value))

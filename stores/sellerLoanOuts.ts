@@ -88,7 +88,12 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  async fetchSellerLoanOuts(force = false) {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- this.loans = []
+ const storeId = (await getCurrentStoreId()) || ''
+ if (force || this.loans.length === 0 || this.lastFetchedStoreId !== storeId) {
+ const { getDemoSellerLoans } = await import('~/utils/demo-bridge')
+ this.loans = getDemoSellerLoans(storeId)
+ this.lastFetchedStoreId = storeId
+ }
  this.loading = false
  this.error = null
  return
@@ -135,9 +140,27 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  partyNotes?: string
  lines: SellerLoanLineSnapshot[]
  }) {
- const { isDemoModeActive } = await import('~/utils/demo-mode')
+ const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- throw new Error('Stock loans are not available in the interactive demo.')
+ const demoStoreId = (await getCurrentStoreId()) || ''
+ const name = params.partyName.trim()
+ if (!name) throw new Error('Seller or reseller name is required')
+ const lines = params.lines.filter((l) => l.inventoryItemId && l.folderId)
+ if (lines.length === 0) throw new Error('Select at least one product')
+ const loanId = `demo_loan_${Math.random().toString(36).slice(2, 9)}`
+ this.loans.unshift({
+ id: loanId,
+ storeId: demoStoreId,
+ status: 'active',
+ partyName: name,
+ partyPhone: params.partyPhone.trim(),
+ partyNotes: (params.partyNotes || '').trim(),
+ lines,
+ createdAt: new Date(),
+ updatedAt: new Date(),
+ createdBy: DEMO_USER_UID,
+ })
+ return loanId
  }
 
  const db = useFirestore().getFirestoreInstance()
@@ -217,7 +240,14 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  async returnSellerLoanOut(loanId: string) {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- throw new Error('Stock loans are not available in the interactive demo.')
+ const loan = this.loans.find((l) => l.id === loanId)
+ if (!loan) throw new Error('Loan not found')
+ if (loan.status === 'returned') throw new Error('This loan was already marked as returned')
+ if (loan.status === 'sold') throw new Error('This loan was already marked as sold')
+ loan.status = 'returned'
+ loan.returnedAt = new Date()
+ loan.updatedAt = new Date()
+ return
  }
 
  const db = useFirestore().getFirestoreInstance()
@@ -293,7 +323,14 @@ export const useSellerLoanOutsStore = defineStore('sellerLoanOuts', {
  async markSellerLoanOutSold(loanId: string) {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- throw new Error('Stock loans are not available in the interactive demo.')
+ const loan = this.loans.find((l) => l.id === loanId)
+ if (!loan) throw new Error('Loan not found')
+ if (loan.status === 'returned') throw new Error('This loan was already marked as returned')
+ if (loan.status === 'sold') throw new Error('This loan was already marked as sold')
+ loan.status = 'sold'
+ loan.soldAt = new Date()
+ loan.updatedAt = new Date()
+ return
  }
 
  const db = useFirestore().getFirestoreInstance()

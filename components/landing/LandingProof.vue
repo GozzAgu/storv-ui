@@ -77,7 +77,7 @@ const proofCards = [
 
 <style scoped>
 .landing-proof {
-  padding: clamp(3rem, 8vw, 5rem) 1.25rem;
+  padding: clamp(4rem, 9vw, 7rem) 1.25rem;
   background: #fff;
 }
 
@@ -91,14 +91,16 @@ const proofCards = [
 }
 
 .landing-proof .landing-label {
-  font-size: 1.1875rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #143f8d;
 }
 
 .landing-proof__title {
   margin-top: 0.5rem;
-  font-size: clamp(1.875rem, 4.5vw, 2.5rem);
+  font-size: clamp(1.5rem, 3.2vw, 2.125rem);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -107,8 +109,8 @@ const proofCards = [
 
 .landing-proof__lede {
   margin-top: 0.75rem;
-  font-size: 1.125rem;
-  line-height: 1.65;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   color: #334155;
 }
 
@@ -142,14 +144,14 @@ const proofCards = [
 
 .landing-proof__card-title {
   margin-top: 0.5rem;
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
 }
 
 .landing-proof__card-desc {
   margin-top: 0.5rem;
-  font-size: 1.0625rem;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: #475569;
 }
@@ -177,7 +179,7 @@ const proofCards = [
 
 .landing-proof__founding-title {
   margin-top: 0.35rem;
-  font-size: 1.25rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: #0f172a;
 }
@@ -185,13 +187,13 @@ const proofCards = [
 .landing-proof__founding-desc {
   margin-top: 0.5rem;
   max-width: 36rem;
-  font-size: 1.0625rem;
+  font-size: 0.875rem;
   line-height: 1.6;
   color: #334155;
 }
 
 .landing-proof .landing-label--muted {
-  font-size: 1rem;
+  font-size: 0.75rem;
   color: #475569;
 }
 

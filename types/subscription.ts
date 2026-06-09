@@ -26,6 +26,8 @@ export type SubscriptionFeature =
  | 'whatsapp_messaging'
  /** Customer balance / credit ledger & payment reminders tied to balance. */
  | 'customer_balance'
+ /** Shareable Paystack payment links for remote sales (all plans; platform fee applies). */
+ | 'payment_links'
 
 /** Max limits by plan (use -1 for unlimited where applicable). */
 interface SubscriptionLimits {
@@ -47,6 +49,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
  'profile',
  'notifications',
  'whatsapp_messaging',
+ 'payment_links',
  ],
  storvv_medium: [
  'dashboard',
@@ -62,6 +65,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
  'notifications',
  'whatsapp_messaging',
  'customer_balance',
+ 'payment_links',
  ],
  storvv_enterprise: [
  'dashboard',
@@ -79,6 +83,7 @@ const FEATURES_BY_PLAN: Record<SubscriptionPlan, SubscriptionFeature[]> = {
  'notifications',
  'whatsapp_messaging',
  'customer_balance',
+ 'payment_links',
  ],
 }
 
@@ -154,6 +159,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
  'Inventory, receipts, returns & customers',
  'Dashboard, notifications & help center',
  'WhatsApp receipts (10/month)',
+ 'Payment links (get paid online)',
  ],
  storvv_medium: [
  'Everything in Micro',

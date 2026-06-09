@@ -368,10 +368,13 @@
  :options="heatmapChartOptions"
  :series="heatmapSeries"
  />
- </Card>
- </div>
+        </Card>
+      </div>
 
- <!-- Detailed Tables -->
+      <!-- Payment links -->
+      <PaymentLinksSummaryCard v-if="canUseSubscriptionFeature('payment_links')" :card-class="analyticsCardClass" :limit="6" />
+
+      <!-- Detailed Tables -->
  <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
  <!-- Top Products -->
  <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
@@ -563,6 +566,7 @@ import { useAppToast } from '~/composables/useAppToast'
 import Card from '~/components/ui/Card.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
+import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import jsPDF from 'jspdf'
 import { tableMoneyClass } from '~/utils/table-money-styles'
 import {

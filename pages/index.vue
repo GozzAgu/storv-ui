@@ -158,17 +158,17 @@
  />
  <div class="pointer-events-none absolute -left-24 top-1/3 h-48 w-48 rounded-full bg-primary-500/12 blur-3xl" />
  <div class="relative mx-auto max-w-lg lg:mx-0">
- <p class="text-sm font-bold uppercase tracking-[0.2em] text-primary-400 sm:text-base">
- How it works
- </p>
- <h2
- class="mt-2 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:text-3xl"
- >
- From signup to a calmer floor
- </h2>
- <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-300 sm:text-base">
- Five steps. Same flow whether you run one shop or several.
- </p>
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-400 sm:text-[0.8125rem]">
+                How it works
+              </p>
+              <h2
+                class="mt-2 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl"
+              >
+                From signup to a calmer floor
+              </h2>
+              <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-300">
+                Five steps. Same flow whether you run one shop or several.
+              </p>
 
  <div class="mt-7 space-y-2 sm:mt-8 sm:space-y-2.5">
  <div
@@ -361,9 +361,9 @@
  <!-- Pricing -->
  <section id="pricing" data-section-id="pricing" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-gradient-to-b from-white to-slate-50/65 py-20 dark:from-slate-950 dark:to-slate-900/80 lg:scroll-mt-28 lg:py-28 sm:py-24">
  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
- <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">
- Plans that match your stage
- </h2>
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">
+            Plans that match your stage
+          </h2>
  <p class="mt-4 text-base text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto leading-relaxed">
  Start on <strong class="font-semibold text-gray-800 dark:text-gray-200">Micro</strong> (free, one store).
  Medium adds analytics and a second branch. Enterprise is for multi-store operators who need sync and transfers.
@@ -479,8 +479,8 @@
  <!-- FAQ -->
  <section id="faq" data-section-id="faq" class="scroll-animate scroll-animate-up scroll-mt-[4.75rem] bg-[#f5f7f9] py-20 dark:bg-slate-900/55 lg:scroll-mt-28 lg:py-28 sm:py-24">
  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
- <p class="text-base uppercase tracking-[0.12em] font-semibold text-gray-600 dark:text-gray-300 text-center">Frequently asked questions</p>
- <h2 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Quick answers</h2>
+          <p class="text-xs sm:text-[0.8125rem] uppercase tracking-[0.16em] font-semibold text-gray-600 dark:text-gray-300 text-center">Frequently asked questions</p>
+          <h2 class="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100 text-center">Quick answers</h2>
  <p class="mt-2 text-center text-base text-gray-600 dark:text-gray-300">Setup, plans, and how Storvv fits your store.</p>
  <div class="mt-10 space-y-3">
  <div data-section-id="faq-1" class="scroll-animate scroll-animate-scale stagger-1 rounded-xl bg-white/55 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/40 overflow-hidden">

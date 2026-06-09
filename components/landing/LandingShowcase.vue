@@ -65,38 +65,6 @@
                 </a>
               </div>
             </div>
-
-            <div
-              class="landing-hero__capabilities landing-hero__panel landing-hero__reveal"
-              style="--hero-i: 6"
-              aria-label="Core capabilities"
-            >
-              <p class="landing-hero__capabilities-label">Explore</p>
-              <ul class="landing-hero__chip-row">
-                <li v-for="chip in heroChipsPrimary" :key="chip.label">
-                  <NuxtLink
-                    v-if="chip.href.startsWith('/')"
-                    :to="chip.href"
-                    class="landing-hero__chip"
-                  >
-                    {{ chip.label }}
-                  </NuxtLink>
-                  <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
-                </li>
-              </ul>
-              <ul class="landing-hero__chip-row landing-hero__chip-row--secondary">
-                <li v-for="chip in heroChipsSecondary" :key="chip.label">
-                  <NuxtLink
-                    v-if="chip.href.startsWith('/')"
-                    :to="chip.href"
-                    class="landing-hero__chip"
-                  >
-                    {{ chip.label }}
-                  </NuxtLink>
-                  <a v-else :href="chip.href" class="landing-hero__chip">{{ chip.label }}</a>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
         <a href="#use-cases" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
@@ -252,6 +220,7 @@
             v-for="feature in coreFeatures"
             :key="feature.num"
             class="landing-core__card"
+            :class="{ 'landing-core__card--wide': feature.wide }"
           >
             <div class="landing-core__card-top">
               <span class="landing-core__card-icon" aria-hidden="true">
@@ -399,6 +368,7 @@ import {
   ArrowRightIcon,
   ChartBarIcon,
   CheckIcon,
+  CreditCardIcon,
   CubeIcon,
   DocumentTextIcon,
   PlusIcon,
@@ -410,17 +380,6 @@ import {
 import { computed, ref } from 'vue'
 
 const heroSectionRef = ref<HTMLElement | null>(null)
-
-const heroChips = [
-  { label: 'Live stock', href: '#features' },
-  { label: 'Multi-branch', href: '#multi-store' },
-  { label: 'Receipts', href: '#features' },
-  { label: 'Customers', href: '#features' },
-  { label: 'See outcomes', href: '#proof' },
-] as const
-
-const heroChipsPrimary = heroChips.slice(0, 3)
-const heroChipsSecondary = heroChips.slice(3)
 
 const heroFloatIcons = [
   { id: 'inventory', icon: ArchiveBoxIcon },
@@ -532,6 +491,7 @@ const coreFeatures = [
     title: 'Inventory',
     description: 'Live stock per branch. Low-stock signals so you reorder before you lose margin.',
     badge: 'Stop stockouts',
+    wide: false,
   },
   {
     num: '02',
@@ -539,6 +499,7 @@ const coreFeatures = [
     title: 'Receipts',
     description: 'Sales, payments, and history in one search, not scattered across WhatsApp.',
     badge: 'One record',
+    wide: false,
   },
   {
     num: '03',
@@ -546,6 +507,7 @@ const coreFeatures = [
     title: 'Returns',
     description: 'Refund against the original receipt. Stock restores automatically.',
     badge: 'Stock restored',
+    wide: false,
   },
   {
     num: '04',
@@ -553,6 +515,16 @@ const coreFeatures = [
     title: 'Customers',
     description: 'Names, phones, and spend history linked to receipts at every branch.',
     badge: 'Know buyers',
+    wide: false,
+  },
+  {
+    num: '05',
+    icon: CreditCardIcon,
+    title: 'Payment links',
+    description:
+      'Send a secure Paystack pay-by-link. The moment a customer pays, the receipt is created and stock updates automatically, with no manual reconciling.',
+    badge: 'Get paid online',
+    wide: true,
   },
 ] as const
 
