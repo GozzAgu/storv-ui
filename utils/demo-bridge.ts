@@ -7,6 +7,8 @@ import type { UserData } from '~/composables/useUser'
 import type { Store } from '~/composables/useStores'
 import type { Department } from '~/composables/useDepartments'
 import type { ActivityLog } from '~/composables/useActivityLog'
+import type { Staff } from '~/composables/useStaff'
+import type { SellerLoanOut } from '~/stores/sellerLoanOuts'
 import type { Notification } from '~/stores/notifications'
 import type { SavedSearch } from '~/stores/search'
 import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
@@ -38,6 +40,130 @@ export const DEMO_PRODUCT_TEMPLATE: Template = {
     { id: 'quantity', name: 'quantity', label: 'Quantity in stock', type: 'number', required: true },
     { id: 'sku', name: 'sku', label: 'SKU', type: 'text', required: false },
   ],
+}
+
+function getDemoStaffMembers(storeId: string): Staff[] {
+  const base = {
+    storeId,
+    hireDate: '2025-01-15',
+    status: 'active' as const,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    createdBy: DEMO_USER_UID,
+  }
+  return [
+    {
+      ...base,
+      id: 'demo_staff_amaka',
+      firstName: 'Amaka',
+      lastName: 'Nwosu',
+      email: 'amaka@storvv.app',
+      phone: '0803 111 0001',
+      departmentId: 'demo_dept_sales',
+      departmentName: 'Sales',
+      position: 'Sales lead',
+      role: 'manager',
+      canManageInventory: true,
+    },
+    {
+      ...base,
+      id: 'demo_staff_chidi',
+      firstName: 'Chidi',
+      lastName: 'Eze',
+      email: 'chidi@storvv.app',
+      departmentId: 'demo_dept_sales',
+      departmentName: 'Sales',
+      position: 'Sales associate',
+      role: 'staff',
+    },
+    {
+      ...base,
+      id: 'demo_staff_bisi',
+      firstName: 'Bisi',
+      lastName: 'Adeyemi',
+      email: 'bisi@storvv.app',
+      departmentId: 'demo_dept_sales',
+      departmentName: 'Sales',
+      position: 'Cashier',
+      role: 'staff',
+    },
+    {
+      ...base,
+      id: 'demo_staff_ibrahim',
+      firstName: 'Ibrahim',
+      lastName: 'Kabir',
+      email: 'ibrahim@storvv.app',
+      phone: '0805 222 0002',
+      departmentId: 'demo_dept_ops',
+      departmentName: 'Operations',
+      position: 'Operations lead',
+      role: 'manager',
+      canManageInventory: true,
+    },
+    {
+      ...base,
+      id: 'demo_staff_femi',
+      firstName: 'Femi',
+      lastName: 'Johnson',
+      email: 'femi@storvv.app',
+      departmentId: 'demo_dept_ops',
+      departmentName: 'Operations',
+      position: 'Stock associate',
+      role: 'staff',
+    },
+  ]
+}
+
+/** Demo staff roster (exported for the staff store's demo branches). */
+export function getDemoStaff(storeId: string): Staff[] {
+  return getDemoStaffMembers(storeId)
+}
+
+/** Dummy stock-loan records for the demo, built from the store's seeded inventory. */
+export function getDemoSellerLoans(storeId: string): SellerLoanOut[] {
+  const demo = useDemoAppStore()
+  demo.hydrate()
+  const store = demo.getStore(storeId) ?? demo.currentStore
+  const items = store?.items ?? []
+  if (items.length === 0) return []
+
+  const now = Date.now()
+  const day = 24 * 60 * 60 * 1000
+  const first = items[0]!
+  const second = items[1] ?? items[0]!
+
+  const loans: SellerLoanOut[] = [
+    {
+      id: 'demo_loan_active',
+      storeId,
+      status: 'active',
+      partyName: 'Emeka Traders',
+      partyPhone: '0803 555 0101',
+      partyNotes: 'Reseller — settles weekly',
+      lines: [
+        { inventoryItemId: first.id, folderId: first.folderId, itemSummary: first.name },
+      ],
+      createdAt: new Date(now - day * 3),
+      updatedAt: new Date(now - day * 3),
+      createdBy: DEMO_USER_UID,
+    },
+    {
+      id: 'demo_loan_returned',
+      storeId,
+      status: 'returned',
+      partyName: 'Gadget Hub',
+      partyPhone: '0805 555 0202',
+      partyNotes: 'Returned unsold units',
+      lines: [
+        { inventoryItemId: second.id, folderId: second.folderId, itemSummary: second.name },
+      ],
+      createdAt: new Date(now - day * 8),
+      updatedAt: new Date(now - day * 5),
+      returnedAt: new Date(now - day * 5),
+      createdBy: DEMO_USER_UID,
+    },
+  ]
+  return loans
 }
 
 function getDemoDepartments(storeId: string): Department[] {
@@ -380,10 +506,10 @@ export async function syncDemoToPinia() {
   })
 
   const staffStore = useStaffStore()
-  staffStore.$patch({
-    staff: [],
-    loading: false,
-    error: null,
+  staffStore.$patch((s) => {
+    s.staff = getDemoStaffMembers(state.currentStoreId)
+    s.loading = false
+    s.error = null
   })
 
   const notificationsStore = useNotificationsStore()

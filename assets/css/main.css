@@ -1161,7 +1161,8 @@ html.capacitor-native {
   --cap-safe-right: env(safe-area-inset-right, 0px);
   --dashboard-native-top-bar: 2.75rem;
   --dashboard-native-top-chrome: calc(var(--dashboard-native-top-bar) + var(--cap-safe-top));
-  --dashboard-bottom-nav-height: 3.25rem;
+  /* Floating glass tab bar: pill height (3.25rem) + float gap clearance */
+  --dashboard-bottom-nav-height: 4rem;
   --dashboard-fixed-footer-height: 2.75rem;
 }
 
@@ -1434,8 +1435,8 @@ html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
 }
 
 html.capacitor-native .dashboard-native-bottom-nav {
-  padding-left: var(--cap-safe-left);
-  padding-right: var(--cap-safe-right);
+  padding-left: calc(var(--cap-safe-left) + 0.875rem);
+  padding-right: calc(var(--cap-safe-right) + 0.875rem);
 }
 
 /* ── iOS polish: cleaner surfaces, spacing, and tables ── */

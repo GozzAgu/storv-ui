@@ -1,13 +1,13 @@
 <template>
- <nav
- class="dashboard-native-bottom-nav pointer-events-none fixed inset-x-0 bottom-0 z-[60]"
- aria-label="Main navigation"
- >
- <div
- :class="[barClass, 'pb-[env(safe-area-inset-bottom,0px)]']"
- role="tablist"
- >
- <div class="mx-auto flex h-[3.25rem] max-w-lg items-stretch justify-around px-0.5">
+  <nav
+    class="dashboard-native-bottom-nav pointer-events-none fixed inset-x-0 bottom-0 z-[60]"
+    aria-label="Main navigation"
+  >
+    <div
+      :class="barClass"
+      role="tablist"
+    >
+      <div class="flex h-[3.25rem] items-stretch justify-around px-1.5">
  <NuxtLink
  v-for="item in primaryItems"
  :key="item.href"

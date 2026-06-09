@@ -47,6 +47,56 @@ export interface CustomerAccount {
 
 const MAX_LEDGER_ENTRIES = 50
 
+/** Build illustrative balance accounts from the demo customers so the ledger is never empty. */
+async function buildDemoCustomerAccounts(): Promise<Record<string, CustomerAccount>> {
+ const { useDemoAppStore } = await import('~/stores/demoApp')
+ const { DEMO_USER_UID } = await import('~/utils/demo-mode')
+ const demo = useDemoAppStore()
+ demo.hydrate()
+ const storeId = demo.state.currentStoreId
+ const customers = demo.currentStore.customers
+ const map: Record<string, CustomerAccount> = {}
+
+ // Give the first named customer an outstanding balance with a short ledger trail.
+ const withBalance = customers.find((c) => c.name && c.name !== 'Walk-in customer')
+ if (withBalance) {
+ const contactKey = getCustomerContactKey({
+ name: withBalance.name,
+ phone: withBalance.phone,
+ })
+ const now = Date.now()
+ const day = 24 * 60 * 60 * 1000
+ map[contactKey] = {
+ id: customerAccountDocId(contactKey),
+ contactKey,
+ customerName: withBalance.name,
+ phone: withBalance.phone,
+ accountBalance: 120000,
+ balanceLedger: [
+ {
+ id: 'demo_le_1',
+ type: 'payment',
+ amount: -80000,
+ note: 'Part-payment received',
+ createdAt: new Date(now - day),
+ createdBy: DEMO_USER_UID,
+ },
+ {
+ id: 'demo_le_2',
+ type: 'charge',
+ amount: 200000,
+ note: 'Balance-due sale',
+ createdAt: new Date(now - day * 4),
+ createdBy: DEMO_USER_UID,
+ },
+ ],
+ storeId,
+ updatedAt: new Date(now - day),
+ }
+ }
+ return map
+}
+
 function parseLedgerEntry(raw: Record<string, unknown>, id: string): BalanceLedgerEntry {
  const createdAt = raw.createdAt as { toDate?: () => Date } | Date | string | undefined
  let created: Date
@@ -81,10 +131,10 @@ export const useCustomerAccountsStore = defineStore('customerAccounts', {
  },
 
  actions: {
- async fetchAccountsForStore() {
+  async fetchAccountsForStore() {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- this.accountsByContactKey = {}
+ this.accountsByContactKey = await buildDemoCustomerAccounts()
  this.loading = false
  this.error = null
  return

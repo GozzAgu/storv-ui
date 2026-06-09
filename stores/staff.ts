@@ -101,10 +101,12 @@ export const useStaffStore = defineStore('staff', {
 
  actions: {
  // Get all staff
- async fetchStaff() {
+  async fetchStaff() {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- this.staff = []
+ const storeId = (await getCurrentStoreId()) || ''
+ const { getDemoStaff } = await import('~/utils/demo-bridge')
+ this.staff = getDemoStaff(storeId)
  this.loading = false
  this.error = null
  return
@@ -245,13 +247,19 @@ export const useStaffStore = defineStore('staff', {
  },
 
  // Get staff by department
- async fetchStaffByDepartment(departmentId: string) {
+  async fetchStaffByDepartment(departmentId: string) {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
  if (isDemoModeActive()) {
- this.staff = []
+ const storeId = (await getCurrentStoreId()) || ''
+ const { getDemoStaff } = await import('~/utils/demo-bridge')
+ const deptStaff = getDemoStaff(storeId).filter((s) => s.departmentId === departmentId)
+ this.staff = [
+ ...this.staff.filter((s) => s.departmentId !== departmentId),
+ ...deptStaff,
+ ]
  this.loading = false
  this.error = null
- return
+ return deptStaff
  }
 
  this.loading = true
@@ -405,7 +413,11 @@ export const useStaffStore = defineStore('staff', {
  // Get a single staff member
  async fetchStaffMember(staffId: string): Promise<Staff | null> {
  const { isDemoModeActive } = await import('~/utils/demo-mode')
- if (isDemoModeActive()) return null
+ if (isDemoModeActive()) {
+ const storeId = (await getCurrentStoreId()) || ''
+ const { getDemoStaff } = await import('~/utils/demo-bridge')
+ return getDemoStaff(storeId).find((s) => s.id === staffId) ?? null
+ }
 
  const db = useFirestore().getFirestoreInstance()
  if (!db) {
@@ -483,10 +495,32 @@ export const useStaffStore = defineStore('staff', {
  },
 
  // Create a new staff member: frontend creates Firebase Auth account (secondary app) + Firestore doc. Admin types password in the form.
- async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'> & { password: string }) {
+  async createStaff(staffData: Omit<Staff, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'departmentName' | 'storeId'> & { password: string }) {
  const authStore = useAuthStore()
  if (!authStore.currentUser) {
  throw new Error('User must be authenticated to create staff')
+ }
+
+ const { isDemoModeActive, DEMO_USER_UID } = await import('~/utils/demo-mode')
+ if (isDemoModeActive()) {
+ const departmentsStore = useDepartmentsStore()
+ const department = departmentsStore.getDepartmentById(staffData.departmentId)
+ const storeId = department?.storeId || (await getCurrentStoreId()) || ''
+ const { password: _pw, ...fields } = staffData
+ const staffId = `demo_staff_${Math.random().toString(36).slice(2, 9)}`
+ const now = new Date()
+ const demoMember: Staff = {
+ id: staffId,
+ ...fields,
+ storeId,
+ status: 'active',
+ createdAt: now,
+ updatedAt: now,
+ createdBy: DEMO_USER_UID,
+ departmentName: department?.name || 'Unknown',
+ }
+ this.staff.unshift(demoMember)
+ return { staffId, temporaryPassword: staffData.password }
  }
  if (!staffData.email?.trim()) {
  throw new Error('Staff email is required')

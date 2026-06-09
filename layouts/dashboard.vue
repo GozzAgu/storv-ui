@@ -634,6 +634,7 @@ import {
   BookOpenIcon,
  BuildingStorefrontIcon,
  BanknotesIcon,
+ CreditCardIcon,
 } from '@heroicons/vue/24/outline'
 import {
  HomeIcon as HomeIconSolid,
@@ -649,6 +650,7 @@ import {
  BuildingStorefrontIcon as BuildingStorefrontIconSolid,
  BuildingOfficeIcon as BuildingOfficeIconSolid,
  BanknotesIcon as BanknotesIconSolid,
+ CreditCardIcon as CreditCardIconSolid,
 } from '@heroicons/vue/24/solid'
 import Modal from '~/components/ui/Modal.vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
@@ -802,6 +804,7 @@ const navigation: Array<{
  { name: 'Inventory', segment: '/inventory', icon: CubeIcon, iconSolid: CubeIconSolid, subscriptionFeature: 'inventory' },
  { name: 'Stock loans', segment: '/seller-loans', icon: BanknotesIcon, iconSolid: BanknotesIconSolid, subscriptionFeature: 'seller_loans', requiresManagerOrSuperAdmin: true },
  { name: 'Receipts', segment: '/receipts', icon: ReceiptPercentIcon, iconSolid: ReceiptPercentIconSolid, subscriptionFeature: 'receipts' },
+ { name: 'Payment links', segment: '/payment-links', icon: CreditCardIcon, iconSolid: CreditCardIconSolid, subscriptionFeature: 'payment_links' },
  {
  name: 'Departments',
  segment: '/departments',

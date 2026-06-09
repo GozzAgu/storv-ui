@@ -147,12 +147,38 @@ html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
   background-color: rgb(7 8 12 / 0.94) !important;
 }
 
+/* Wrapper is transparent — only the floating pill is visible */
 html.capacitor-native .dashboard-native-bottom-nav {
-  background-color: rgb(255 255 255 / 0.98);
+  background-color: transparent;
 }
 
-html.capacitor-native.dark .dashboard-native-bottom-nav {
-  background-color: #07080c;
+/* ── Floating glass tab bar (Instagram-style) ── */
+html.capacitor-native .native-tabbar {
+  margin-inline: auto;
+  margin-bottom: max(0.6rem, var(--cap-safe-bottom));
+  width: 100%;
+  max-width: 30rem;
+  border-radius: 1.75rem;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  background: rgb(255 255 255 / 0.6);
+  box-shadow:
+    0 12px 40px -8px rgb(15 23 42 / 0.32),
+    0 2px 12px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.7);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  overflow: hidden;
+  transform: translateZ(0);
+  isolation: isolate;
+}
+
+html.capacitor-native.dark .native-tabbar {
+  border-color: rgb(255 255 255 / 0.12);
+  background: rgb(22 24 32 / 0.58);
+  box-shadow:
+    0 16px 48px -8px rgb(0 0 0 / 0.66),
+    0 2px 12px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
 /* ── Dashboard typography (one scale) ── */
@@ -240,9 +266,17 @@ html.capacitor-native .app-field {
   line-height: var(--cap-leading-normal) !important;
 }
 
+/* Uniform 44px iOS touch targets across every input/select/textarea */
+html.capacitor-ios.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-ios.capacitor-native select,
+html.capacitor-ios.capacitor-native textarea,
 html.capacitor-ios.capacitor-native .app-field,
 html.capacitor-ios.capacitor-native .auth-field-input {
   min-height: 2.75rem !important;
+}
+
+html.capacitor-ios.capacitor-native textarea {
+  min-height: 4.5rem !important;
 }
 
 /* ── Auth screens ── */

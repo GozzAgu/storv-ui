@@ -36,7 +36,9 @@ export default defineNuxtConfig({
  // Plan amounts in kobo (NGN) - override via env: PAYSTACK_PLAN_MICRO_AMOUNT, etc.
  paystackPlanMicroAmount: parseInt(process.env.PAYSTACK_PLAN_MICRO_AMOUNT || '0', 10),
  paystackPlanMediumAmount: parseInt(process.env.PAYSTACK_PLAN_MEDIUM_AMOUNT || '0', 10),
- paystackPlanEnterpriseAmount: parseInt(process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT || '0', 10),
+  paystackPlanEnterpriseAmount: parseInt(process.env.PAYSTACK_PLAN_ENTERPRISE_AMOUNT || '0', 10),
+  // Platform fee (%) retained by Storvv on each payment-link sale (Paystack subaccount percentage_charge).
+  paymentLinkPlatformFeePercent: parseFloat(process.env.PAYMENT_LINK_PLATFORM_FEE_PERCENT || '0'),
  firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
  firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
  resendApiKey: process.env.RESEND_API_KEY || '',

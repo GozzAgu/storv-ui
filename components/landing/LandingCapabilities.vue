@@ -157,11 +157,17 @@
 import type { Component } from 'vue'
 import { computed, ref } from 'vue'
 import {
+  ArrowDownTrayIcon,
   ArrowPathIcon,
   BanknotesIcon,
   BellAlertIcon,
+  BoltIcon,
+  BookmarkSquareIcon,
   ChartBarIcon,
+  ChatBubbleLeftRightIcon,
   ChevronRightIcon,
+  CloudArrowUpIcon,
+  CreditCardIcon,
   CubeIcon,
   CursorArrowRaysIcon,
   DocumentTextIcon,
@@ -170,6 +176,7 @@ import {
   LockClosedIcon,
   MagnifyingGlassIcon,
   ReceiptPercentIcon,
+  ShareIcon,
   ShieldCheckIcon,
   Square2StackIcon,
   UserGroupIcon,
@@ -220,14 +227,39 @@ const coreItems: CapabilityItem[] = [
 
 const toolsItems: CapabilityItem[] = [
   {
+    icon: CreditCardIcon,
+    title: 'Payment links',
+    description: 'Send a Paystack pay-by-link; stock and receipts update on payment.',
+  },
+  {
+    icon: ShareIcon,
+    title: 'Receipt sharing',
+    description: 'Send receipts over WhatsApp, email, PDF, or a public link.',
+  },
+  {
+    icon: BoltIcon,
+    title: 'Quick sale',
+    description: 'Ring a fast over-the-counter sale without the full wizard.',
+  },
+  {
     icon: BellAlertIcon,
     title: 'Low-stock alerts',
     description: 'Per-folder thresholds before shelves run empty.',
   },
   {
+    icon: CloudArrowUpIcon,
+    title: 'Offline mode',
+    description: 'Keep selling when the network drops; changes sync when back online.',
+  },
+  {
     icon: DocumentTextIcon,
     title: 'Excel import & export',
     description: 'Bulk load spreadsheets and export catalogs for finance.',
+  },
+  {
+    icon: ArrowDownTrayIcon,
+    title: 'Reorder list export',
+    description: 'One-click low-stock reorder sheet for suppliers.',
   },
   {
     icon: ShieldCheckIcon,
@@ -240,9 +272,14 @@ const toolsItems: CapabilityItem[] = [
     description: 'Customer profiles build from optional receipt fields.',
   },
   {
+    icon: BanknotesIcon,
+    title: 'Balance & credit ledger',
+    description: 'Medium+: track balance-due sales and customer credit over time.',
+  },
+  {
     icon: MagnifyingGlassIcon,
     title: 'Unified search',
-    description: 'One search across inventory, receipts, and customers.',
+    description: 'One search across inventory, receipts, and customers, with saved searches.',
   },
   {
     icon: ChartBarIcon,
@@ -294,12 +331,32 @@ const moreSubcategories: MoreSubcategory[] = [
         title: 'Templates & duplicates',
         description: 'Reuse folder shapes; Medium+ dedup helpers.',
       },
+      {
+        icon: FolderIcon,
+        title: 'Custom fields',
+        description: 'Text, number, date, currency, select, and boolean per folder.',
+      },
+      {
+        icon: ArrowDownTrayIcon,
+        title: 'Reorder list export',
+        description: 'Export a low-stock reorder sheet for suppliers.',
+      },
     ],
   },
   {
     id: 'sales',
     label: 'Sales',
     items: [
+      {
+        icon: BoltIcon,
+        title: 'Quick sale',
+        description: 'Fast counter checkout for busy periods.',
+      },
+      {
+        icon: ArrowPathIcon,
+        title: 'Returns & refunds',
+        description: 'Reverse a receipt and return stock cleanly.',
+      },
       {
         icon: ReceiptPercentIcon,
         title: 'Layouts & printers',
@@ -318,6 +375,32 @@ const moreSubcategories: MoreSubcategory[] = [
     ],
   },
   {
+    id: 'payments',
+    label: 'Payments',
+    items: [
+      {
+        icon: CreditCardIcon,
+        title: 'Payment links',
+        description: 'Collect online with a secure Paystack pay-by-link.',
+      },
+      {
+        icon: BanknotesIcon,
+        title: 'Bank payouts & settlements',
+        description: 'Connect a bank account and track what has settled.',
+      },
+      {
+        icon: ShareIcon,
+        title: 'Receipt delivery',
+        description: 'WhatsApp, email, PDF, or a public share link per receipt.',
+      },
+      {
+        icon: BanknotesIcon,
+        title: 'Balance due & credit',
+        description: 'Part-payments and a per-customer credit ledger.',
+      },
+    ],
+  },
+  {
     id: 'teams',
     label: 'Teams',
     items: [
@@ -332,9 +415,14 @@ const moreSubcategories: MoreSubcategory[] = [
         description: 'Mirror floor, back office, and ecommerce pods.',
       },
       {
-        icon: UserGroupIcon,
+        icon: BellAlertIcon,
         title: 'Notifications',
         description: 'Approve, restock, and nudge staff in-app.',
+      },
+      {
+        icon: LockClosedIcon,
+        title: 'Role-based access',
+        description: 'Super admin, manager, and staff scoped to folders.',
       },
     ],
   },
@@ -377,6 +465,21 @@ const moreSubcategories: MoreSubcategory[] = [
         icon: GlobeAltIcon,
         title: 'Profile & security',
         description: 'Themes, 2FA, billing, and sessions in one hub.',
+      },
+      {
+        icon: CloudArrowUpIcon,
+        title: 'Offline mode',
+        description: 'Sell through outages; data syncs when you reconnect.',
+      },
+      {
+        icon: ChatBubbleLeftRightIcon,
+        title: 'Help & onboarding',
+        description: 'Guided setup, tutorials, and an in-app help center.',
+      },
+      {
+        icon: BookmarkSquareIcon,
+        title: 'Saved searches',
+        description: 'Pin frequent inventory and receipt queries.',
       },
     ],
   },
