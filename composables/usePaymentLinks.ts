@@ -202,7 +202,7 @@ export function usePaymentLinks() {
       '/api/payment-links/create',
       { method: 'POST', body: { ownerUserId, storeId, ...input } }
     )
-    return res
+    return res 
   }
 
   return {
