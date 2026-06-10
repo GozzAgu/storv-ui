@@ -229,7 +229,7 @@ const toolsItems: CapabilityItem[] = [
   {
     icon: CreditCardIcon,
     title: 'Payment links',
-    description: 'Send a Paystack pay-by-link; stock and receipts update on payment.',
+    description: 'In progress: send a Paystack pay-by-link; stock and receipts update on payment.',
   },
   {
     icon: ShareIcon,
@@ -381,7 +381,7 @@ const moreSubcategories: MoreSubcategory[] = [
       {
         icon: CreditCardIcon,
         title: 'Payment links',
-        description: 'Collect online with a secure Paystack pay-by-link.',
+        description: 'In progress: collect online with a secure Paystack pay-by-link.',
       },
       {
         icon: BanknotesIcon,

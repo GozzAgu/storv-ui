@@ -1,6 +1,5 @@
 <template>
   <div class="flex w-full max-w-none flex-col gap-5 pb-10 sm:gap-6">
-    <!-- Header -->
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Payments</p>
@@ -10,10 +9,14 @@
       </template>
       <template #description>
         <p :class="descriptionClass">
-          Get paid for orders without the customer visiting your store.
+          {{
+            showNativeComingSoon
+              ? 'Paystack pay-by-link is coming soon on mobile.'
+              : 'Get paid for orders without the customer visiting your store.'
+          }}
         </p>
       </template>
-      <template #actions>
+      <template v-if="!showNativeComingSoon" #actions>
         <Button variant="ghost" size="sm" :extra-class="headerBtnClass" :loading="loading" @click="refresh">
           Refresh
         </Button>
@@ -30,7 +33,9 @@
       </template>
     </DashboardPageHeader>
 
-    <!-- Connect bank -->
+    <PaymentLinksComingSoon v-if="showNativeComingSoon" />
+
+    <template v-else>
     <section
       v-if="!payout.connected || editingBank"
       class="rounded-xl border-0 bg-white px-4 py-3.5 dark:!bg-dashboard-card sm:px-5 sm:py-4"
@@ -223,6 +228,7 @@
 
     <CreatePaymentLinkModal v-model="showCreate" @created="onCreated" />
     <SharePaymentLinkModal v-model="showShare" :link="activeLink" />
+    </template>
   </div>
 </template>
 
@@ -244,11 +250,14 @@ const SharePaymentLinkModal = defineAsyncComponent(
 import { formatNaira } from '~/utils/naira'
 import { usePaymentLinks, type PaymentLinkListItem } from '~/composables/usePaymentLinks'
 import { useUserStore } from '~/stores/user'
+import PaymentLinksComingSoon from '~/components/payments/PaymentLinksComingSoon.vue'
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth',
 })
+
+const { showNativeComingSoon } = usePaymentLinksLaunch()
 
 const { eyebrowClass, titleClass, descriptionClass, headerBtnClass, fieldClass } = useDashboardPageChrome()
 const userStore = useUserStore()
@@ -393,6 +402,7 @@ const statusClass = (s: PaymentLinkListItem['status']) =>
   })[s]
 
 onMounted(async () => {
+  if (showNativeComingSoon.value) return
   await loadAll()
   if (!payout.value.connected) await loadBanks()
 })

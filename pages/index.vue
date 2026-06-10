@@ -786,9 +786,9 @@
  <LandingContact @open-form="showContactFormModal = true" />
 
  <!-- Footer -->
- <footer class="border-t border-white/[0.08] bg-slate-950 text-slate-300 dark:border-black/50 dark:bg-neutral-950">
+ <footer class="border-t border-gray-200 bg-[#f8f9fb] text-slate-600 dark:border-black/50 dark:bg-neutral-950 dark:text-slate-300">
  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
- <div class="grid lg:grid-cols-12 gap-10 pb-10 border-b border-white/[0.08]">
+ <div class="grid lg:grid-cols-12 gap-10 pb-10 border-b border-gray-200 dark:border-white/[0.08]">
  <!-- Brand -->
  <div class="lg:col-span-4 space-y-4">
  <NuxtLink to="/" class="inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
@@ -798,7 +798,7 @@
  class="landing-footer-brand-img h-10 w-auto max-h-10 origin-left object-contain will-change-transform sm:h-11 sm:max-h-11 lg:scale-105"
  />
  </NuxtLink>
- <p class="text-sm text-slate-400 leading-relaxed max-w-sm">
+ <p class="text-sm text-slate-500 leading-relaxed max-w-sm dark:text-slate-400">
  Store management software for modern retailers, inventory, receipts, customers, and teams in one fast system.
  </p>
  <div class="flex items-center gap-5 pt-1">
@@ -806,7 +806,7 @@
  href="https://x.com/_storvv_"
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center justify-center rounded-md p-1.5 -m-1.5 text-slate-300 transition-colors hover:text-primary-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-400"
+ class="inline-flex items-center justify-center rounded-md p-1.5 -m-1.5 text-slate-500 transition-colors hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-400 dark:text-slate-300 dark:hover:text-primary-400"
  aria-label="X"
  >
  <svg class="h-7 w-7 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -842,7 +842,7 @@
  <!-- Links -->
  <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
  <div>
- <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Product</h4>
+ <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Product</h4>
  <ul class="space-y-2.5">
  <li><a href="#features" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('features')">Features</a></li>
  <li><a href="#capabilities-grid" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('capabilities-grid')">Capabilities</a></li>
@@ -851,21 +851,21 @@
  </ul>
  </div>
  <div>
- <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Company</h4>
+ <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Company</h4>
  <ul class="space-y-2.5">
  <li><a href="#about" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('about')">About</a></li>
  <li><a href="#contact" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100" @click.prevent="scrollToSection('contact')">Contact</a></li>
  </ul>
  </div>
  <div>
- <h4 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Legal</h4>
+ <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Legal</h4>
  <ul class="space-y-2.5">
  <li><NuxtLink to="/privacy" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Privacy</NuxtLink></li>
  <li><NuxtLink to="/terms" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Terms</NuxtLink></li>
  </ul>
  </div>
  <div>
- <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-4">Support</h4>
+ <h4 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Support</h4>
  <ul class="space-y-2.5">
  <li><a href="mailto:hello@storvv.com" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">hello@storvv.com</a></li>
  <li><a href="https://www.instagram.com/_storvv_" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100">Instagram</a></li>

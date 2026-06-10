@@ -30,11 +30,15 @@
  class="h-[1.375rem] w-[1.375rem] shrink-0"
  :stroke-width="isActive(item.href) ? undefined : 1.75"
  />
- <span
- class="max-w-full truncate text-xs font-medium leading-none tracking-tight"
- :class="isActive(item.href) ? 'font-semibold' : ''"
- >
+ <span class="relative max-w-full truncate text-xs font-medium leading-none tracking-tight">
+ <span :class="isActive(item.href) ? 'font-semibold' : ''">
  {{ shortLabel(item.name) }}
+ </span>
+ <span
+ v-if="showNativeComingSoon && item.name === 'Payment links'"
+ class="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-amber-500 ring-2 ring-white dark:ring-gray-950"
+ aria-label="Coming soon"
+ />
  </span>
  </NuxtLink>
 
@@ -135,6 +139,12 @@
  />
  </span>
  <span class="min-w-0 flex-1 text-sm font-medium leading-snug">{{ item.name }}</span>
+ <span
+ v-if="showNativeComingSoon && item.name === 'Payment links'"
+ class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
+ >
+ Soon
+ </span>
  </NuxtLink>
  </li>
  <li v-if="moreItems.length === 0" class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -193,6 +203,8 @@ const {
  sheetIconWrapClass,
  sheetIconWrapActiveClass,
 } = useDashboardNativeNavChrome()
+
+const { showNativeComingSoon } = usePaymentLinksLaunch()
 
 const route = useRoute()
 const moreOpen = ref(false)

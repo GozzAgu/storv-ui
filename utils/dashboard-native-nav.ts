@@ -7,13 +7,24 @@ export type DashboardNavItem = {
   iconSolid: unknown
 }
 
-const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Departments'] as const
+export const NATIVE_PRIMARY_ORDER = ['Dashboard', 'Inventory', 'Receipts', 'Departments'] as const
 
-export function splitNativeBottomNav(items: DashboardNavItem[]) {
+/** Primary tabs when payment links is promoted (coming-soon on native). */
+export const NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS = [
+  'Dashboard',
+  'Inventory',
+  'Receipts',
+  'Payment links',
+] as const
+
+export function splitNativeBottomNav(
+  items: DashboardNavItem[],
+  primaryOrder: readonly string[] = NATIVE_PRIMARY_ORDER
+) {
  const primary: DashboardNavItem[] = []
  const primaryHrefs = new Set<string>()
 
- for (const name of NATIVE_PRIMARY_ORDER) {
+ for (const name of primaryOrder) {
  const match = items.find((item) => item.name === name)
  if (match) {
  primary.push(match)
@@ -32,6 +43,7 @@ export function nativeNavShortLabel(name: string): string {
     Receipts: 'Sales',
     Departments: 'Teams',
     Analytics: 'Insights',
+    'Payment links': 'Links',
  'Stock loans': 'Loans',
  'Activity Logs': 'Activity',
  'Multi-Store Sync': 'Sync',

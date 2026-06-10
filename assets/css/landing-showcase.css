@@ -132,27 +132,39 @@ html.dark .landing-about-section .landing-label--blue {
   --hero-my: 0;
   position: relative;
   overflow: hidden;
-  background: var(--landing-ink);
-  color: #fff;
-  min-height: 100dvh;
-  min-height: 100svh;
+  background:
+    radial-gradient(ellipse 90% 65% at 50% -12%, #eaf1fb 0%, rgba(234, 241, 251, 0) 60%),
+    linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
+  color: #0a0c14;
   display: flex;
   flex-direction: column;
-  padding-top: calc(var(--landing-header-h, 3.5rem) + 1.5rem);
-  padding-bottom: 2.5rem;
+  padding-top: calc(var(--landing-header-h, 3.5rem) + 3rem);
+  padding-bottom: 3.5rem;
 }
 
 @media (min-width: 640px) {
   .landing-hero {
-    padding-top: calc(var(--landing-header-h, 3.5rem) + 2rem);
-    padding-bottom: 3rem;
+    padding-top: calc(var(--landing-header-h, 3.5rem) + 4rem);
+    padding-bottom: 4.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .landing-hero {
-    min-height: max(100dvh, 52rem);
+    padding-top: calc(var(--landing-header-h, 3.5rem) + 5.5rem);
+    padding-bottom: 6rem;
   }
+}
+
+/* Bright hero: drop the dark-mode decorations for a clean, Slack-like calm. */
+.landing-hero__orbs,
+.landing-hero__glow,
+.landing-hero__floats {
+  display: none;
+}
+
+.landing-hero__grid {
+  opacity: 0.4;
 }
 
 .landing-hero__orbs {
@@ -399,17 +411,16 @@ html.dark .landing-about-section .landing-label--blue {
   margin-inline: auto;
   font-size: clamp(0.9375rem, 1.5vw, 1.0625rem);
   line-height: 1.6;
-  color: #e2e8f0;
+  color: #475569;
 }
 
 .landing-hero__panel {
   width: 100%;
   max-width: 36rem;
-  padding: 1.125rem 1.25rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .landing-hero__actions {
@@ -438,8 +449,28 @@ html.dark .landing-about-section .landing-label--blue {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 0.125rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Hero sits on a light surface: secondary CTA + link use ink/navy, not white. */
+.landing-hero .landing-pill-cta--outline {
+  color: var(--storvv-blue);
+  border-color: rgba(var(--storvv-blue-rgb), 0.3);
+}
+
+.landing-hero .landing-pill-cta--outline:hover {
+  background: rgba(var(--storvv-blue-rgb), 0.06);
+  border-color: var(--storvv-blue);
+}
+
+.landing-hero .landing-hero__link {
+  color: #334155;
+}
+
+.landing-hero .landing-hero__link:hover {
+  color: var(--storvv-blue);
+  border-color: rgba(var(--storvv-blue-rgb), 0.3);
 }
 
 .landing-pill-cta--hero {
@@ -2453,7 +2484,7 @@ html.dark .landing-about-link:hover {
   }
 }
 
-/* ── Capabilities explorer: full-screen dark ── */
+/* ── Capabilities explorer ── */
 .landing-capabilities {
   --storvv-blue: #143f8d;
   --storvv-blue-light: #6e94d6;
@@ -2466,12 +2497,9 @@ html.dark .landing-about-link:hover {
   --cap-border: rgb(255 255 255 / 0.08);
   position: relative;
   isolation: isolate;
-  overflow: hidden;
-  min-height: 100dvh;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  padding: calc(var(--landing-header-h, 3.5rem) + 1.25rem) 0 max(1.5rem, env(safe-area-inset-bottom));
+  overflow-x: clip;
+  display: block;
+  padding: calc(var(--landing-header-h, 3.5rem) + 2.5rem) 0 max(3rem, env(safe-area-inset-bottom));
   background: var(--cap-ink);
   color: #f8fafc;
   border-top: 1px solid rgb(255 255 255 / 0.06);
@@ -2498,14 +2526,10 @@ html.dark .landing-about-link:hover {
 .landing-capabilities__shell {
   position: relative;
   z-index: 1;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   width: 100%;
   max-width: 72rem;
   margin-inline: auto;
   padding-inline: 1rem;
-  min-height: 0;
 }
 
 @media (min-width: 640px) {
@@ -2592,10 +2616,6 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-capabilities__frame {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: min(28rem, calc(100dvh - 18rem));
   margin-top: 1rem;
   border-radius: 1rem;
   border: 1px solid var(--cap-border);
@@ -2603,14 +2623,12 @@ html.dark .landing-about-link:hover {
   box-shadow:
     0 0 0 1px rgb(0 0 0 / 0.2),
     0 24px 64px rgb(0 0 0 / 0.45);
-  overflow: hidden;
 }
 
 @media (min-width: 768px) {
   .landing-capabilities__frame {
     display: grid;
     grid-template-columns: 12.5rem minmax(0, 1fr);
-    min-height: min(32rem, calc(100dvh - 16rem));
     margin-top: 1.25rem;
   }
 }
@@ -2671,8 +2689,7 @@ html.dark .landing-about-link:hover {
     flex-direction: column;
     gap: 0.25rem;
     padding: 0 0.625rem 0.75rem;
-    overflow-y: auto;
-    overflow-x: visible;
+    overflow: visible;
     mask-image: none;
   }
 }
@@ -2900,16 +2917,12 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-capabilities__list {
-  flex: 1;
   margin: 0.75rem 0 0;
   padding: 0 1.25rem 1.25rem;
   list-style: none;
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 @media (min-width: 640px) {
@@ -3663,4 +3676,334 @@ html.dark .landing-about-link:hover {
   .landing-capabilities__also-btn:hover {
     transform: none;
   }
+}
+
+/* ===========================================================================
+   Bright (Slack-style) theme
+   Converts the dark showcase bands (who-uses, core, multistore, security)
+   to a clean, airy, light treatment. Originals above are left intact so this
+   can be tuned or removed in one place.
+   =========================================================================== */
+
+/* ── Who it is for ── */
+.landing-who-uses-section {
+  background: #ffffff;
+  border-bottom-color: rgb(20 63 141 / 0.08);
+}
+
+.landing-who-bg {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.05), transparent 55%),
+    linear-gradient(rgba(20 63 141 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20 63 141 / 0.035) 1px, transparent 1px);
+  background-size:
+    auto,
+    48px 48px,
+    48px 48px;
+  background-color: #ffffff;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
+}
+
+.landing-who-uses-section .landing-label {
+  color: var(--storvv-blue);
+}
+
+.landing-who-uses-section .landing-section-panel__label {
+  color: #64748b;
+}
+
+.landing-who-heading {
+  color: #0f172a;
+}
+
+.landing-who-heading-accent {
+  color: var(--storvv-blue);
+}
+
+.landing-who-lede {
+  color: #475569;
+}
+
+.landing-who-point-num {
+  color: var(--storvv-blue);
+}
+
+.landing-who-point-title {
+  color: #0f172a;
+}
+
+.landing-who-point-desc {
+  color: #475569;
+}
+
+.landing-who-card {
+  border-color: rgb(20 63 141 / 0.1);
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 12px 30px rgb(20 63 141 / 0.05);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .landing-who-card:hover {
+    border-color: rgb(20 63 141 / 0.28);
+    background: #ffffff;
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.05),
+      0 16px 36px rgb(20 63 141 / 0.08);
+  }
+}
+
+.landing-who-card-icon {
+  color: var(--storvv-blue);
+}
+
+.landing-who-card-title {
+  color: #0f172a;
+}
+
+.landing-who-card-desc {
+  color: #475569;
+}
+
+/* ── Core features ── */
+.landing-core {
+  background: #f6f8fc;
+  color: #0f172a;
+}
+
+.landing-core__glow {
+  opacity: 0.6;
+}
+
+.landing-core__title {
+  color: #0f172a;
+}
+
+.landing-core__card {
+  border-color: rgb(20 63 141 / 0.1);
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 12px 30px rgb(20 63 141 / 0.05);
+}
+
+.landing-core__card-icon {
+  border-color: rgb(20 63 141 / 0.12);
+  background: rgba(var(--storvv-blue-rgb), 0.07);
+  color: var(--storvv-blue);
+}
+
+.landing-core__card-num {
+  color: #94a3b8;
+}
+
+.landing-core__card-title {
+  color: #0f172a;
+}
+
+.landing-core__card-desc {
+  color: #475569;
+}
+
+.landing-core__badge {
+  background: rgba(var(--storvv-blue-rgb), 0.08);
+  color: var(--storvv-blue);
+}
+
+.landing-core__card--wide {
+  border-color: rgba(var(--storvv-blue-rgb), 0.25);
+  background: linear-gradient(135deg, rgba(var(--storvv-blue-rgb), 0.07), #ffffff 70%);
+}
+
+.landing-core__card--wide .landing-core__card-icon {
+  border-color: rgba(var(--storvv-blue-rgb), 0.3);
+  background: rgba(var(--storvv-blue-rgb), 0.12);
+  color: var(--storvv-blue);
+}
+
+/* ── Multi-store ── */
+.landing-multistore {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.landing-multistore__glow {
+  background: radial-gradient(ellipse 70% 55% at 30% 40%, rgba(var(--storvv-blue-rgb), 0.06), transparent 60%);
+}
+
+.landing-multistore__title {
+  color: #0f172a;
+}
+
+.landing-multistore__lede {
+  color: #475569;
+}
+
+.landing-multistore__feature-icon {
+  border-color: rgba(var(--storvv-blue-rgb), 0.2);
+  background: rgba(var(--storvv-blue-rgb), 0.08);
+  color: var(--storvv-blue);
+}
+
+.landing-multistore__feature-title {
+  color: #0f172a;
+}
+
+.landing-multistore__feature-desc {
+  color: #475569;
+}
+
+.landing-store-card {
+  border-color: rgb(20 63 141 / 0.12);
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.landing-store-card--primary {
+  border-color: rgba(var(--storvv-blue-rgb), 0.35);
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(var(--storvv-blue-rgb), 0.08),
+    0 16px 36px rgb(20 63 141 / 0.08);
+}
+
+.landing-store-card--dim {
+  background: #f8fafc;
+}
+
+.landing-store-card--ghost {
+  border-color: rgb(20 63 141 / 0.22);
+  background: #f8fafc;
+}
+
+.landing-store-card__ghost-note {
+  color: #475569;
+}
+
+.landing-store-card__name {
+  color: #0f172a;
+}
+
+.landing-store-card__tag--active {
+  background: rgba(var(--storvv-blue-rgb), 0.1);
+  color: var(--storvv-blue);
+}
+
+.landing-store-card__tag--muted {
+  background: #eef2f7;
+  color: #475569;
+}
+
+.landing-store-card__stat-value {
+  color: #0f172a;
+}
+
+.landing-store-card__stat-label {
+  color: #64748b;
+}
+
+.landing-store-divider {
+  color: #94a3b8;
+}
+
+.landing-store-divider::before,
+.landing-store-divider::after {
+  background: rgb(20 63 141 / 0.12);
+}
+
+.landing-multistore .landing-label--blue {
+  color: var(--storvv-blue);
+}
+
+.landing-multistore .landing-label--muted {
+  color: #64748b;
+}
+
+/* ── Security / trust ── */
+.landing-security {
+  background: #f6f8fc;
+  color: #0f172a;
+  border-top-color: rgb(20 63 141 / 0.08);
+}
+
+.landing-security__bg {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.08), transparent 58%),
+    radial-gradient(ellipse 50% 45% at 100% 60%, rgba(var(--storvv-blue-mid-rgb), 0.05), transparent 55%);
+}
+
+.landing-security__badge {
+  color: var(--storvv-blue);
+  background: rgba(var(--storvv-blue-rgb), 0.07);
+  border-color: rgba(var(--storvv-blue-rgb), 0.2);
+  box-shadow: none;
+}
+
+.landing-security .landing-label--blue {
+  color: var(--storvv-blue);
+}
+
+.landing-security__title {
+  color: #0f172a;
+}
+
+.landing-security__title-accent {
+  color: var(--storvv-blue);
+}
+
+.landing-security__lede {
+  color: #475569;
+}
+
+.landing-security__pillars li {
+  color: #475569;
+  background: #ffffff;
+  border-color: rgb(20 63 141 / 0.12);
+}
+
+.landing-security__card {
+  background: #ffffff;
+  border-color: rgb(20 63 141 / 0.1);
+  box-shadow:
+    inset 3px 0 0 var(--storvv-blue),
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 12px 30px rgb(20 63 141 / 0.05);
+}
+
+.landing-security__card-num {
+  color: #94a3b8;
+}
+
+.landing-security__icon-wrap {
+  color: var(--storvv-blue);
+  background: rgba(var(--storvv-blue-rgb), 0.08);
+  border-color: rgba(var(--storvv-blue-rgb), 0.2);
+}
+
+.landing-security__card-title {
+  color: #0f172a;
+}
+
+.landing-security__card-desc {
+  color: #475569;
+}
+
+.landing-security__card-tag {
+  color: var(--storvv-blue);
+  border-top-color: rgb(20 63 141 / 0.1);
+}
+
+.landing-security__footer {
+  color: #64748b;
+}
+
+.landing-security__link {
+  color: var(--storvv-blue);
+  text-decoration-color: rgba(var(--storvv-blue-rgb), 0.4);
+}
+
+.landing-security__footer-sep {
+  color: #94a3b8;
 }

@@ -522,8 +522,8 @@ const coreFeatures = [
     icon: CreditCardIcon,
     title: 'Payment links',
     description:
-      'Send a secure Paystack pay-by-link. The moment a customer pays, the receipt is created and stock updates automatically, with no manual reconciling.',
-    badge: 'Get paid online',
+      'In progress: send a secure Paystack pay-by-link. When a customer pays, the receipt is created and stock updates automatically.',
+    badge: 'In progress',
     wide: true,
   },
 ] as const

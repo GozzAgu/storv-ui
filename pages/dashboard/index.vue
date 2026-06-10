@@ -237,7 +237,10 @@
  </div>
 
         <!-- Payment links -->
-        <PaymentLinksSummaryCard v-if="canUseSubscriptionFeature('payment_links')" :card-class="panelClass" />
+        <PaymentLinksSummaryCard
+          v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon"
+          :card-class="panelClass"
+        />
 
         <!-- Business metrics (sales + operations, merged) -->
         <section :class="panelClass">
@@ -525,6 +528,7 @@ const themeStore = useThemeStore()
 
 const { preferences } = usePreferences()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
+const { showNativeComingSoon } = usePaymentLinksLaunch()
 
 const currencySymbol = computed(() => preferences.value.currencySymbol || '$')
 const dashboardFolderItems = ref<Record<string, InventoryItem[]>>({})

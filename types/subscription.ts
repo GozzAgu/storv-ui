@@ -159,7 +159,7 @@ export const SUBSCRIPTION_FEATURE_SUMMARY: Record<SubscriptionPlan, string[]> = 
  'Inventory, receipts, returns & customers',
  'Dashboard, notifications & help center',
  'WhatsApp receipts (10/month)',
- 'Payment links (get paid online)',
+ 'Payment links (in progress)',
  ],
  storvv_medium: [
  'Everything in Micro',

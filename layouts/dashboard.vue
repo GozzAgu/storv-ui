@@ -658,7 +658,14 @@ import DashboardHoverTooltip from '~/components/ui/DashboardHoverTooltip.vue'
 import DemoModeBanner from '~/components/demo/DemoModeBanner.vue'
 import DashboardNativeBottomNav from '~/components/dashboard/DashboardNativeBottomNav.vue'
 import DashboardProfileMenu from '~/components/dashboard/DashboardProfileMenu.vue'
-import { splitNativeBottomNav, isDashboardNavActive } from '~/utils/dashboard-native-nav'
+import {
+ splitNativeBottomNav,
+ isDashboardNavActive,
+ NATIVE_PRIMARY_ORDER,
+ NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS,
+ type DashboardNavItem,
+} from '~/utils/dashboard-native-nav'
+import { isPaymentLinksNativeComingSoon } from '~/utils/payment-links-launch'
 import { resolveStoreDepartmentsPath } from '~/utils/department-routes'
 import StoreSelector from '~/components/ui/StoreSelector.vue'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
@@ -844,8 +851,36 @@ const filteredNavigation = computed(() => {
  }))
 })
 
-const nativePrimaryNav = computed(() => splitNativeBottomNav(filteredNavigation.value).primary)
-const nativeMoreNav = computed(() => splitNativeBottomNav(filteredNavigation.value).more)
+/**
+ * Native bottom nav is CSS-gated (html.capacitor-native), not isNativeApp.
+ * Promote Payment links whenever native coming-soon is on.
+ */
+const nativeNavigationItems = computed((): DashboardNavItem[] => {
+ const items = filteredNavigation.value
+ if (!isPaymentLinksNativeComingSoon()) return items
+ if (items.some((item) => item.name === 'Payment links')) return items
+ return [
+  ...items,
+  {
+   name: 'Payment links',
+   href: dashPath('/payment-links'),
+   icon: CreditCardIcon,
+   iconSolid: CreditCardIconSolid,
+  },
+ ]
+})
+
+const nativePrimaryOrder = computed(() =>
+ isPaymentLinksNativeComingSoon()
+  ? NATIVE_PRIMARY_ORDER_WITH_PAYMENT_LINKS
+  : NATIVE_PRIMARY_ORDER
+)
+
+const nativeNavSplit = computed(() =>
+ splitNativeBottomNav(nativeNavigationItems.value, nativePrimaryOrder.value)
+)
+const nativePrimaryNav = computed(() => nativeNavSplit.value.primary)
+const nativeMoreNav = computed(() => nativeNavSplit.value.more)
 
 const route = useRoute()
 const { dashPath, isDemoDashboard, matchesDashboardPath } = useDashboardPaths()
