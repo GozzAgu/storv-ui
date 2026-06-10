@@ -38,19 +38,24 @@
  </button>
  </div>
  </div>
+ </header>
 
- <Transition
- enter-active-class="transition duration-200 ease-out"
- enter-from-class="opacity-0"
- enter-to-class="opacity-100"
- leave-active-class="transition duration-150 ease-in"
- leave-from-class="opacity-100"
- leave-to-class="opacity-0"
- >
+ <Teleport to="body">
+ <Transition name="landing-mobile-layer">
  <div
  v-if="mobileMenuOpen"
+ class="landing-mobile-layer md:hidden"
+ role="presentation"
+ >
+ <button
+ type="button"
+ class="landing-mobile-backdrop"
+ aria-label="Close menu"
+ @click="mobileMenuOpen = false"
+ />
+ <div
  id="landing-mobile-nav"
- class="landing-mobile-panel md:hidden"
+ class="landing-mobile-panel"
  role="dialog"
  aria-modal="true"
  aria-label="Site menu"
@@ -109,25 +114,7 @@
  </a>
  </div>
  </div>
- </Transition>
- </header>
-
- <Teleport to="body">
- <Transition
- enter-active-class="transition-opacity duration-200 ease-out"
- enter-from-class="opacity-0"
- enter-to-class="opacity-100"
- leave-active-class="transition-opacity duration-150 ease-in"
- leave-from-class="opacity-100"
- leave-to-class="opacity-0"
- >
- <button
- v-if="mobileMenuOpen"
- type="button"
- class="landing-mobile-backdrop md:hidden"
- aria-label="Close menu"
- @click="mobileMenuOpen = false"
- />
+ </div>
  </Transition>
  </Teleport>
 
