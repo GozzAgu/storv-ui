@@ -635,8 +635,10 @@
           class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-blue-600 transition-colors hover:bg-blue-50 disabled:opacity-50 dark:text-blue-400 dark:hover:bg-blue-900/25"
           :disabled="!!roleToggleBusyId && roleToggleBusyId !== staffForOpenMenu.id"
           @click="
-            handleToggleStaffRole(staffForOpenMenu)
-            openStaffMenuId = null
+            () => {
+              handleToggleStaffRole(staffForOpenMenu)
+              openStaffMenuId = null
+            }
           "
         >
           <ArrowPathIcon
@@ -654,8 +656,10 @@
           role="menuitem"
           class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800/80"
           @click="
-            handleEditStaff(staffForOpenMenu)
-            openStaffMenuId = null
+            () => {
+              handleEditStaff(staffForOpenMenu)
+              openStaffMenuId = null
+            }
           "
         >
           <PencilSquareIcon class="h-4 w-4 shrink-0" />
@@ -667,8 +671,10 @@
           role="menuitem"
           class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-950/35"
           @click="
-            openMoveStaffModal(staffForOpenMenu)
-            openStaffMenuId = null
+            () => {
+              openMoveStaffModal(staffForOpenMenu)
+              openStaffMenuId = null
+            }
           "
         >
           <ArrowsRightLeftIcon class="h-4 w-4 shrink-0" />
@@ -680,8 +686,10 @@
           role="menuitem"
           class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
           @click="
-            openDeactivateStaffModal(staffForOpenMenu)
-            openStaffMenuId = null
+            () => {
+              openDeactivateStaffModal(staffForOpenMenu)
+              openStaffMenuId = null
+            }
           "
         >
           <TrashIcon class="h-4 w-4 shrink-0" />

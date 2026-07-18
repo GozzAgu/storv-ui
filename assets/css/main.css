@@ -4,6 +4,8 @@
 @import './capacitor-native.css';
 @import './landing-showcase.css';
 @import './landing-nav.css';
+@import './landing-portfolio.css';
+@import './landing-designs.css';
 @import './receipt-typography.css';
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */

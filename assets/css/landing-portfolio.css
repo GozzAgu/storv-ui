@@ -1,0 +1,859 @@
+/* Portfolio dark theme for Storvv landing — goz-portfolio-app.vercel.app */
+
+.landing-page--portfolio {
+  --portfolio-bg: #050508;
+  --portfolio-bg-soft: #0a0c14;
+  --portfolio-ink: #f8fafc;
+  --portfolio-muted: #94a3b8;
+  --portfolio-border: rgb(255 255 255 / 0.08);
+  --portfolio-card: rgb(255 255 255 / 0.03);
+  --landing-glass-bg: rgb(255 255 255 / 0.06);
+  --landing-glass-bg-strong: rgb(255 255 255 / 0.09);
+  --landing-glass-border: rgb(255 255 255 / 0.14);
+  --landing-glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  --landing-glass-shadow: 0 8px 32px rgb(0 0 0 / 0.28);
+  --landing-section-heading: var(--portfolio-ink);
+  --landing-section-body: var(--portfolio-muted);
+  --landing-section-accent: #9ab5e3;
+  background: var(--portfolio-bg);
+  color: var(--portfolio-ink);
+  font-family: Quicksand, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+}
+
+/* ── Hero (portfolio layout) ── */
+.landing-page--portfolio .landing-hero {
+  min-height: min(100dvh, 52rem);
+  padding-top: calc(var(--landing-header-h, 4.25rem) + 4rem);
+  padding-bottom: 4rem;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% -10%, rgb(20 63 141 / 0.22), transparent 58%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgb(72 118 199 / 0.1), transparent 55%),
+    linear-gradient(180deg, #050508 0%, #0a0c14 100%);
+  color: var(--portfolio-ink);
+}
+
+.landing-page--portfolio .landing-hero__grid {
+  opacity: 0.35;
+}
+
+.landing-page--portfolio .landing-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid var(--portfolio-border);
+  background: rgb(255 255 255 / 0.04);
+  color: var(--portfolio-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.landing-page--portfolio .landing-hero__title {
+  font-size: clamp(2.75rem, 8vw, 4.75rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.landing-page--portfolio .landing-hero__line {
+  display: block;
+}
+
+.landing-page--portfolio .landing-hero__accent {
+  color: #9ab5e3;
+}
+
+.landing-page--portfolio .landing-hero__role {
+  margin-top: 1rem;
+  max-width: 36rem;
+  font-size: clamp(1rem, 2.2vw, 1.125rem);
+  line-height: 1.55;
+  color: var(--portfolio-muted);
+}
+
+.landing-page--portfolio .landing-hero__subtitle {
+  color: var(--portfolio-muted);
+  font-size: clamp(1rem, 2.2vw, 1.125rem);
+  line-height: 1.55;
+  max-width: 36rem;
+}
+
+.landing-page--portfolio .landing-hero__panel {
+  margin-top: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.landing-page--portfolio .landing-pill-cta {
+  background: #f8fafc;
+  color: #050508;
+  font-size: 0.875rem;
+  padding: 0.6875rem 1.25rem;
+}
+
+.landing-page--portfolio .landing-pill-cta:hover {
+  background: #fff;
+}
+
+.landing-page--portfolio .landing-pill-cta--outline {
+  background: transparent;
+  color: var(--portfolio-ink);
+  border: 1px solid var(--portfolio-border);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.landing-page--portfolio .landing-pill-cta--outline:hover {
+  background: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.14);
+}
+
+.landing-page--portfolio .landing-hero__link {
+  color: var(--portfolio-muted);
+}
+
+.landing-page--portfolio .landing-hero__scroll-hint {
+  color: var(--portfolio-muted);
+}
+
+/* ── Hero split layout ── */
+.landing-page--portfolio .landing-hero {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-page--portfolio .landing-hero__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.landing-page--portfolio .landing-hero__inner--split {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .landing-page--portfolio .landing-hero__inner--split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 3rem;
+  }
+}
+
+.landing-page--portfolio .landing-hero__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .landing-page--portfolio .landing-hero__copy {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .landing-page--portfolio .landing-hero__title {
+    align-items: flex-start;
+  }
+
+  .landing-page--portfolio .landing-hero__cta-row {
+    max-width: 24rem;
+  }
+}
+
+.landing-page--portfolio .landing-hero__title {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+}
+
+.landing-page--portfolio .landing-hero__visual {
+  margin: 0;
+  width: 100%;
+  max-width: 28rem;
+  justify-self: center;
+}
+
+@media (min-width: 1024px) {
+  .landing-page--portfolio .landing-hero__visual {
+    max-width: none;
+    justify-self: end;
+  }
+}
+
+.landing-page--portfolio .landing-hero__link-row {
+  border-top-color: var(--portfolio-border);
+}
+
+.landing-page--portfolio .landing-hero__scroll-hint--split {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+.landing-who-visual-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.landing-core__visual-row {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .landing-core__visual-row {
+    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+}
+
+.landing-problems__answer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .landing-problems__answer {
+    gap: 1.25rem;
+  }
+}
+
+.landing-multistore__cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.landing-about-brand {
+  margin: 2.5rem auto 0;
+}
+
+.landing-page--portfolio .landing-multistore {
+  background: var(--portfolio-bg-soft) !important;
+  color: var(--portfolio-ink) !important;
+  border-top: 1px solid var(--portfolio-border);
+}
+
+.landing-page--portfolio .landing-multistore__title,
+.landing-page--portfolio .landing-multistore__feature-title {
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio .landing-multistore__lede,
+.landing-page--portfolio .landing-multistore__feature-desc,
+.landing-page--portfolio .landing-multistore .landing-label--muted {
+  color: var(--portfolio-muted) !important;
+}
+
+.landing-page--portfolio .landing-label,
+.landing-page--portfolio .landing-eyebrow {
+  color: var(--portfolio-muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+}
+
+.landing-page--portfolio .landing-label--blue,
+.landing-page--portfolio .landing-eyebrow--blue {
+  color: #9ab5e3;
+}
+
+/* ── Sections: force dark portfolio bands ── */
+.landing-page--portfolio .landing-who-uses-section,
+.landing-page--portfolio .landing-core,
+.landing-page--portfolio .landing-demo,
+.landing-page--portfolio .landing-proof,
+.landing-page--portfolio .landing-capabilities,
+.landing-page--portfolio .landing-about-section,
+.landing-page--portfolio .landing-contact,
+.landing-page--portfolio .landing-security {
+  background: var(--portfolio-bg-soft) !important;
+  color: var(--portfolio-ink) !important;
+  border-color: var(--portfolio-border) !important;
+}
+
+.landing-page--portfolio .landing-who-bg,
+.landing-page--portfolio .landing-about-bg {
+  opacity: 0.55;
+}
+
+.landing-page--portfolio .landing-who-card,
+.landing-page--portfolio .landing-core__card,
+.landing-page--portfolio .landing-section-panel,
+.landing-page--portfolio .landing-proof__card,
+.landing-page--portfolio .landing-proof__founding,
+.landing-page--portfolio .landing-contact__card:not(.landing-contact__card--primary),
+.landing-page--portfolio .landing-security__card,
+.landing-page--portfolio .landing-security__pillars li,
+.landing-page--portfolio .landing-promo-card,
+.landing-page--portfolio .landing-dashboard-mock__card,
+.landing-page--portfolio .landing-dashboard-mock__ghost,
+.landing-page--portfolio .landing-hero-mock__card,
+.landing-page--portfolio #pricing .bg-white,
+.landing-page--portfolio #pricing .dark\:bg-slate-900,
+.landing-page--portfolio #pricing .bg-primary-50\/35,
+.landing-page--portfolio #faq .rounded-xl,
+.landing-page--portfolio #faq .bg-white\/55 {
+  background: var(--landing-glass-bg) !important;
+  backdrop-filter: blur(18px) saturate(1.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.45);
+  border-color: var(--landing-glass-border) !important;
+  box-shadow: var(--landing-glass-shadow), var(--landing-glass-highlight) !important;
+}
+
+.landing-page--portfolio .landing-promo-card--cta {
+  background: linear-gradient(
+    165deg,
+    rgb(20 63 141 / 0.22),
+    rgb(255 255 255 / 0.05)
+  ) !important;
+}
+
+.landing-page--portfolio .landing-core__card--wide {
+  background: linear-gradient(
+    135deg,
+    rgb(20 63 141 / 0.18),
+    rgb(255 255 255 / 0.05) 70%
+  ) !important;
+}
+
+/* Headings on dark bands */
+.landing-page--portfolio .landing-who-heading,
+.landing-page--portfolio .landing-who-point-title,
+.landing-page--portfolio .landing-who-card-title,
+.landing-page--portfolio .landing-core__title,
+.landing-page--portfolio .landing-core__card-title,
+.landing-page--portfolio .landing-demo__title,
+.landing-page--portfolio .landing-proof__title,
+.landing-page--portfolio .landing-proof__card-title,
+.landing-page--portfolio .landing-proof__founding-title,
+.landing-page--portfolio .landing-capabilities__title,
+.landing-page--portfolio .landing-capabilities__panel-title,
+.landing-page--portfolio .landing-capabilities__item-title,
+.landing-page--portfolio .landing-about-title,
+.landing-page--portfolio .landing-about-card-title,
+.landing-page--portfolio .landing-contact__title,
+.landing-page--portfolio .landing-contact__card-title:not(.landing-contact__card-title--on-dark),
+.landing-page--portfolio .landing-security__title,
+.landing-page--portfolio .landing-security__card-title,
+.landing-page--portfolio #pricing h2,
+.landing-page--portfolio #pricing h3,
+.landing-page--portfolio #faq h2,
+.landing-page--portfolio #faq h3,
+.landing-page--portfolio #how-it-works h2 {
+  color: var(--portfolio-ink) !important;
+}
+
+/* Body / secondary copy on dark bands */
+.landing-page--portfolio .landing-who-lede,
+.landing-page--portfolio .landing-who-point-desc,
+.landing-page--portfolio .landing-section-panel__label,
+.landing-page--portfolio .landing-core__card-num,
+.landing-page--portfolio .landing-demo__lede,
+.landing-page--portfolio .landing-demo__points,
+.landing-page--portfolio .landing-proof__lede,
+.landing-page--portfolio .landing-proof__card-desc,
+.landing-page--portfolio .landing-proof__founding-desc,
+.landing-page--portfolio .landing-proof .landing-label--muted,
+.landing-page--portfolio .landing-capabilities__lede,
+.landing-page--portfolio .landing-capabilities__panel-desc,
+.landing-page--portfolio .landing-capabilities__item-desc,
+.landing-page--portfolio .landing-capabilities__tabs-sublabel,
+.landing-page--portfolio .landing-capabilities__footer,
+.landing-page--portfolio .landing-about-lede,
+.landing-page--portfolio .landing-about-card-desc,
+.landing-page--portfolio .landing-about-card-detail,
+.landing-page--portfolio .landing-about-pillar-label,
+.landing-page--portfolio .landing-about-footer,
+.landing-page--portfolio .landing-contact__lede,
+.landing-page--portfolio .landing-contact__card-desc:not(.landing-contact__card-desc--on-dark),
+.landing-page--portfolio .landing-security__lede,
+.landing-page--portfolio .landing-security__card-desc,
+.landing-page--portfolio .landing-security__footer,
+.landing-page--portfolio .landing-security__pillars li {
+  color: var(--portfolio-muted) !important;
+}
+
+/* Card body copy — slightly brighter for readability */
+.landing-page--portfolio .landing-who-card-desc,
+.landing-page--portfolio .landing-core__card-desc,
+.landing-page--portfolio .landing-promo-card__lede {
+  color: rgb(203 213 225 / 0.92) !important;
+  line-height: 1.6;
+}
+
+/* Accent labels & links on dark bands */
+.landing-page--portfolio .landing-label,
+.landing-page--portfolio .landing-eyebrow,
+.landing-page--portfolio .landing-label--blue,
+.landing-page--portfolio .landing-eyebrow--blue,
+.landing-page--portfolio .landing-who-heading-accent,
+.landing-page--portfolio .landing-who-point-num,
+.landing-page--portfolio .landing-who-card-icon,
+.landing-page--portfolio .landing-core__badge,
+.landing-page--portfolio .landing-demo__accent,
+.landing-page--portfolio .landing-demo__secondary,
+.landing-page--portfolio .landing-demo__points li::before,
+.landing-page--portfolio .landing-proof__metric,
+.landing-page--portfolio .landing-about-title-accent,
+.landing-page--portfolio .landing-about-link,
+.landing-page--portfolio .landing-contact .landing-label--blue,
+.landing-page--portfolio .landing-contact__step,
+.landing-page--portfolio .landing-contact__icon,
+.landing-page--portfolio .landing-contact__email,
+.landing-page--portfolio .landing-security .landing-label--blue,
+.landing-page--portfolio .landing-security__title-accent,
+.landing-page--portfolio .landing-security__card-tag,
+.landing-page--portfolio .landing-security__link,
+.landing-page--portfolio .landing-capabilities__footer-link {
+  color: var(--landing-section-accent) !important;
+}
+
+.landing-page--portfolio .landing-about-link:hover,
+.landing-page--portfolio .landing-contact__email:hover,
+.landing-page--portfolio .landing-security__link:hover,
+.landing-page--portfolio .landing-capabilities__footer-link:hover {
+  color: var(--portfolio-ink) !important;
+}
+
+/* Tailwind gray/slate utilities inside dark landing sections */
+.landing-page--portfolio #pricing,
+.landing-page--portfolio #faq {
+  background: var(--portfolio-bg) !important;
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio #pricing .text-gray-900,
+.landing-page--portfolio #pricing .text-gray-800,
+.landing-page--portfolio #pricing .text-gray-700,
+.landing-page--portfolio #faq .text-gray-900,
+.landing-page--portfolio #faq .text-gray-800,
+.landing-page--portfolio #faq .text-gray-50 {
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio #pricing .text-gray-600,
+.landing-page--portfolio #pricing .text-gray-500,
+.landing-page--portfolio #pricing .text-gray-400,
+.landing-page--portfolio #pricing .text-gray-300,
+.landing-page--portfolio #faq .text-gray-600,
+.landing-page--portfolio #faq .text-gray-500,
+.landing-page--portfolio #faq .text-gray-400,
+.landing-page--portfolio #faq .text-gray-300,
+.landing-page--portfolio #pricing p,
+.landing-page--portfolio #faq p {
+  color: var(--portfolio-muted) !important;
+}
+
+.landing-page--portfolio #pricing .text-primary-700,
+.landing-page--portfolio #pricing a.text-primary-700 {
+  color: var(--landing-section-accent) !important;
+}
+
+.landing-page--portfolio #pricing .bg-white,
+.landing-page--portfolio #pricing .dark\:bg-slate-900,
+.landing-page--portfolio #pricing .bg-primary-50\/35,
+.landing-page--portfolio #faq .rounded-xl,
+.landing-page--portfolio #faq .bg-white\/55 {
+  border: 1px solid var(--landing-glass-border);
+  color: var(--portfolio-ink);
+}
+
+.landing-page--portfolio #pricing .border-gray-300,
+.landing-page--portfolio #pricing .dark\:border-gray-600,
+.landing-page--portfolio #faq .dark\:border-white\/10 {
+  border-color: var(--portfolio-border) !important;
+}
+
+.landing-page--portfolio #pricing .border-t.border-gray-200\/90,
+.landing-page--portfolio #pricing .dark\:border-gray-800\/80 {
+  border-color: var(--portfolio-border) !important;
+}
+
+.landing-page--portfolio #pricing .bg-green-100 {
+  background: rgb(16 185 129 / 0.15) !important;
+}
+
+.landing-page--portfolio #pricing .text-green-800,
+.landing-page--portfolio #pricing .dark\:text-green-300 {
+  color: #6ee7b7 !important;
+}
+
+.landing-page--portfolio #pricing .line-through {
+  color: rgb(148 163 184 / 0.65) !important;
+}
+
+.landing-page--portfolio #pricing a.border-gray-300.bg-white,
+.landing-page--portfolio #pricing a.dark\:bg-slate-900 {
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio #pricing a.border-gray-300.bg-white:hover,
+.landing-page--portfolio #pricing a.dark\:hover\:bg-slate-800:hover {
+  background: rgb(255 255 255 / 0.06) !important;
+}
+
+.landing-page--portfolio #faq button .text-gray-500,
+.landing-page--portfolio #faq .text-gray-400 {
+  color: rgb(148 163 184 / 0.75) !important;
+}
+
+.landing-page--portfolio #faq .bg-white\/70,
+.landing-page--portfolio #faq .dark\:bg-white\/\[0\.08\] {
+  background: rgb(255 255 255 / 0.06) !important;
+  border: 1px solid var(--portfolio-border);
+}
+
+/* Keep demo preview window readable (light UI mock) */
+.landing-page--portfolio .landing-demo__window,
+.landing-page--portfolio .landing-demo__window * {
+  color: inherit;
+}
+
+.landing-page--portfolio .landing-demo__window {
+  background: #fff !important;
+  border-color: rgb(20 63 141 / 0.12) !important;
+}
+
+.landing-page--portfolio .landing-demo__window-title,
+.landing-page--portfolio .landing-demo__stat-label {
+  color: #64748b !important;
+}
+
+.landing-page--portfolio .landing-demo__stat-value,
+.landing-page--portfolio .landing-demo__row {
+  color: #0f172a !important;
+}
+
+.landing-page--portfolio .landing-demo__window-bar {
+  background: #f1f5f9 !important;
+}
+
+.landing-page--portfolio .landing-demo__row {
+  background: #f8fafc !important;
+}
+
+.landing-page--portfolio .landing-proof__founding {
+  border-style: dashed !important;
+}
+
+.landing-page--portfolio .landing-contact::before {
+  display: none;
+}
+
+.landing-page--portfolio .landing-security__badge {
+  color: var(--portfolio-ink) !important;
+  background: rgb(255 255 255 / 0.06) !important;
+  border-color: var(--portfolio-border) !important;
+}
+
+.landing-page--portfolio .landing-security__card-num,
+.landing-page--portfolio .landing-security__footer-sep {
+  color: rgb(148 163 184 / 0.65) !important;
+}
+
+.landing-page--portfolio .landing-security__icon-wrap {
+  color: var(--landing-section-accent) !important;
+  background: rgb(20 63 141 / 0.2) !important;
+  border-color: rgb(110 148 214 / 0.25) !important;
+}
+
+/* ── Footer (portfolio) ── */
+.landing-footer {
+  border-top: 1px solid var(--portfolio-border);
+  background: var(--portfolio-bg);
+  color: var(--portfolio-muted);
+}
+
+.landing-footer__inner {
+  max-width: 56rem;
+  margin-inline: auto;
+  padding: 3.5rem 1rem 2rem;
+}
+
+@media (min-width: 640px) {
+  .landing-footer__inner {
+    padding-inline: 1.5rem;
+  }
+}
+
+.landing-footer__top {
+  display: grid;
+  gap: 2.5rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--portfolio-border);
+}
+
+@media (min-width: 768px) {
+  .landing-footer__top {
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.landing-footer__brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--portfolio-ink);
+}
+
+.landing-footer__logo {
+  display: block;
+  height: 2rem;
+  width: auto;
+  max-width: 8.75rem;
+}
+
+.landing-footer__tagline {
+  margin-top: 0.875rem;
+  max-width: 20rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--portfolio-muted);
+}
+
+.landing-footer__heading {
+  margin-bottom: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(148 163 184 / 0.85);
+}
+
+.landing-footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.landing-footer__link {
+  font-size: 0.875rem;
+  color: var(--portfolio-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.landing-footer__link:hover {
+  color: var(--portfolio-ink);
+}
+
+.landing-footer__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1.75rem;
+  font-size: 0.8125rem;
+  color: rgb(148 163 184 / 0.75);
+}
+
+@media (min-width: 640px) {
+  .landing-footer__bottom {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* ── Cookie banner ── */
+.landing-cookie-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.875rem 1rem;
+  border-top: 1px solid var(--portfolio-border);
+  background: rgb(8 10 18 / 0.98);
+}
+
+.landing-cookie-banner__text {
+  flex: 1 1 16rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--portfolio-muted);
+}
+
+.landing-cookie-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.landing-cookie-banner__link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #9ab5e3;
+  text-decoration: none;
+}
+
+.landing-cookie-banner__link:hover {
+  color: var(--portfolio-ink);
+}
+
+.landing-cookie-banner__btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #050508;
+  background: #f8fafc;
+  border: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.landing-cookie-banner__btn:hover {
+  background: #fff;
+}
+
+/* ── Problems + light panels on portfolio page ── */
+.landing-page--portfolio .landing-problems {
+  background: var(--portfolio-bg) !important;
+  color: var(--portfolio-ink);
+  border-block: 1px solid var(--portfolio-border);
+}
+
+.landing-page--portfolio .landing-problems .landing-label--muted {
+  color: rgb(148 163 184 / 0.9) !important;
+}
+
+.landing-page--portfolio .landing-problems__headline,
+.landing-page--portfolio .landing-problems__item-title,
+.landing-page--portfolio .landing-problems__cta-title {
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio .landing-problems__item-desc,
+.landing-page--portfolio .landing-problems__lede,
+.landing-page--portfolio .landing-problems__cta-sub {
+  color: var(--portfolio-muted) !important;
+}
+
+.landing-page--portfolio .landing-problems .landing-section-panel--light {
+  background: var(--landing-glass-bg) !important;
+  backdrop-filter: blur(18px) saturate(1.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.45);
+  border-color: var(--landing-glass-border) !important;
+  box-shadow: var(--landing-glass-shadow), var(--landing-glass-highlight) !important;
+}
+
+.landing-page--portfolio .landing-problems .landing-section-panel__label--muted {
+  color: rgb(148 163 184 / 0.85) !important;
+}
+
+.landing-page--portfolio .landing-problems__cta-box {
+  background: rgb(255 255 255 / 0.05) !important;
+  backdrop-filter: blur(14px) saturate(1.35);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  border: 1px solid var(--landing-glass-border);
+  box-shadow: var(--landing-glass-shadow), var(--landing-glass-highlight);
+  text-decoration: none;
+}
+
+.landing-page--portfolio .landing-problems__item-num {
+  color: rgb(148 163 184 / 0.75) !important;
+}
+
+/* ── Card typography + padding polish ── */
+.landing-page--portfolio .landing-section-panel {
+  padding: 1.375rem 1.5rem !important;
+}
+
+.landing-page--portfolio .landing-section-panel__label {
+  margin-bottom: 1rem !important;
+  color: rgb(148 163 184 / 0.9) !important;
+}
+
+.landing-page--portfolio .landing-who-card {
+  padding: 1.125rem 1.25rem !important;
+}
+
+.landing-page--portfolio .landing-who-cards {
+  gap: 0.75rem;
+}
+
+.landing-page--portfolio .landing-who-card-desc,
+.landing-page--portfolio .landing-who-point-desc {
+  line-height: 1.6 !important;
+}
+
+.landing-page--portfolio .landing-core__card {
+  padding: 1.375rem 1.5rem !important;
+}
+
+.landing-page--portfolio .landing-core__card-title {
+  margin-top: 0.75rem;
+}
+
+.landing-page--portfolio .landing-core__card-desc {
+  margin-top: 0.5rem;
+  line-height: 1.6 !important;
+}
+
+.landing-page--portfolio .landing-core__badge {
+  margin-top: 1rem;
+  display: inline-flex;
+}
+
+.landing-page--portfolio .landing-promo-card__title {
+  color: var(--portfolio-ink) !important;
+}
+
+.landing-page--portfolio .landing-promo-card__list li {
+  color: rgb(241 245 249 / 0.95) !important;
+}
+
+.landing-page--portfolio .landing-promo-card__lede,
+.landing-page--portfolio .landing-promo-card__link {
+  color: rgb(203 213 225 / 0.88) !important;
+}
+
+.landing-page--portfolio .landing-promo-card__stat-label,
+.landing-page--portfolio .landing-dashboard-mock__stat-label {
+  color: rgb(203 213 225 / 0.85) !important;
+}
+
+.landing-page--portfolio .landing-about-card {
+  padding: 1.375rem 1.5rem !important;
+}
+
+.landing-page--portfolio .landing-about-card-desc,
+.landing-page--portfolio .landing-about-card-detail {
+  line-height: 1.6 !important;
+}
+
+.landing-page--portfolio .landing-proof__card,
+.landing-page--portfolio .landing-proof__founding {
+  padding: 1.375rem 1.5rem !important;
+}
+
+.landing-page--portfolio .landing-hero__actions {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.landing-page--portfolio .landing-hero__link-row {
+  padding-top: 1rem;
+  margin-top: 0.25rem;
+}

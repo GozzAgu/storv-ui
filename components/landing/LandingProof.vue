@@ -104,14 +104,14 @@ const proofCards = [
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  color: #0f172a;
+  color: var(--landing-section-heading, #0f172a);
 }
 
 .landing-proof__lede {
   margin-top: 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: #334155;
+  color: var(--landing-section-body, #334155);
 }
 
 .landing-proof__grid {
@@ -146,14 +146,14 @@ const proofCards = [
   margin-top: 0.5rem;
   font-size: 1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--landing-section-heading, #0f172a);
 }
 
 .landing-proof__card-desc {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   line-height: 1.6;
-  color: #475569;
+  color: var(--landing-section-body, #475569);
 }
 
 .landing-proof__founding {
@@ -181,7 +181,7 @@ const proofCards = [
   margin-top: 0.35rem;
   font-size: 1.0625rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--landing-section-heading, #0f172a);
 }
 
 .landing-proof__founding-desc {
@@ -189,12 +189,12 @@ const proofCards = [
   max-width: 36rem;
   font-size: 0.875rem;
   line-height: 1.6;
-  color: #334155;
+  color: var(--landing-section-body, #334155);
 }
 
 .landing-proof .landing-label--muted {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--landing-section-body, #475569);
 }
 
 .landing-proof__founding-cta {

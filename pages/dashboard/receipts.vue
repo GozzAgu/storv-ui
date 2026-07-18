@@ -1092,8 +1092,10 @@
                   variant="outline"
                   size="sm"
                   @click="
-                    showBulkDeleteReceiptsModal = false
-                    bulkDeleteReceiptsConfirmed = false
+                    () => {
+                      showBulkDeleteReceiptsModal = false
+                      bulkDeleteReceiptsConfirmed = false
+                    }
                   "
                   class="!rounded-2xl"
                   >Cancel</Button
@@ -1621,8 +1623,10 @@
         type="button"
         role="menuitem"
         @click="
-          handleViewReceiptTimeline(receiptForOpenMenu)
-          openReceiptMenuId = null
+          () => {
+            handleViewReceiptTimeline(receiptForOpenMenu)
+            openReceiptMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
@@ -1633,8 +1637,10 @@
         type="button"
         role="menuitem"
         @click="
-          handleViewReceipt(receiptForOpenMenu)
-          openReceiptMenuId = null
+          () => {
+            handleViewReceipt(receiptForOpenMenu)
+            openReceiptMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
@@ -1646,8 +1652,10 @@
         type="button"
         role="menuitem"
         @click="
-          handleRefundReceipt(receiptForOpenMenu)
-          openReceiptMenuId = null
+          () => {
+            handleRefundReceipt(receiptForOpenMenu)
+            openReceiptMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-orange-600 transition-colors hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950/30"
       >
@@ -1659,8 +1667,10 @@
         type="button"
         role="menuitem"
         @click="
-          handleDeleteReceipt(receiptForOpenMenu)
-          openReceiptMenuId = null
+          () => {
+            handleDeleteReceipt(receiptForOpenMenu)
+            openReceiptMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
       >
@@ -1682,8 +1692,10 @@
         type="button"
         role="menuitem"
         @click="
-          viewCustomerReceipts(customerForOpenMenu)
-          openCustomerMenuId = null
+          () => {
+            viewCustomerReceipts(customerForOpenMenu)
+            openCustomerMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
@@ -1698,8 +1710,10 @@
         type="button"
         role="menuitem"
         @click="
-          openCustomerBalance(customerForOpenMenu)
-          openCustomerMenuId = null
+          () => {
+            openCustomerBalance(customerForOpenMenu)
+            openCustomerMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
       >
@@ -1710,8 +1724,10 @@
         type="button"
         role="menuitem"
         @click="
-          openCustomerPaymentReminder(customerForOpenMenu)
-          openCustomerMenuId = null
+          () => {
+            openCustomerPaymentReminder(customerForOpenMenu)
+            openCustomerMenuId = null
+          }
         "
         class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-[#128C7E] transition-colors hover:bg-emerald-50 dark:text-[#25D366] dark:hover:bg-emerald-950/30"
       >

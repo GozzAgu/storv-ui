@@ -3,80 +3,88 @@
     <!-- 1. Hero -->
     <section
       id="hero"
-      ref="heroSectionRef"
       data-section-id="landing-hero"
       class="landing-hero scroll-animate scroll-animate-up"
       aria-labelledby="landing-hero-title"
-      @mousemove="onHeroPointerMove"
-      @mouseleave="onHeroPointerLeave"
     >
-      <div class="landing-hero__orbs" aria-hidden="true">
-        <span class="landing-hero__orb landing-hero__orb--a" />
-        <span class="landing-hero__orb landing-hero__orb--b" />
-      </div>
-      <div class="landing-hero__glow" aria-hidden="true" />
       <div class="landing-hero__grid landing-line-grid" aria-hidden="true" />
-      <div class="landing-hero__floats" aria-hidden="true">
-        <span
-          v-for="item in heroFloatIcons"
-          :key="item.id"
-          class="landing-hero__float"
-          :class="`landing-hero__float--${item.id}`"
-        >
-          <component :is="item.icon" class="landing-hero__float-icon" stroke-width="1.5" />
-        </span>
-      </div>
-      <div class="landing-hero__inner">
-        <div class="landing-hero__center">
-          <div class="landing-hero__content">
-            <div class="landing-hero__stack">
-              <p class="landing-label landing-label--blue landing-hero__reveal" style="--hero-i: 0">
-                Retail, sales, and inventory in one workspace
-              </p>
-              <h1 id="landing-hero-title" class="landing-hero__title">
-                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1"
-                  >Stop losing</span
-                >
-                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
-                  <span class="landing-hero__accent">money</span>
-                </span>
-                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3"
-                  >on stock.</span
-                >
-              </h1>
-              <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
-                Know what’s in each branch, what sold, and what’s running low. Receipts and
-                customers in one dashboard, not Excel or WhatsApp threads.
-              </p>
-            </div>
-
-            <div
-              class="landing-hero__actions landing-hero__panel landing-hero__reveal"
-              style="--hero-i: 5"
+      <div class="landing-hero__inner landing-hero__inner--split">
+        <div class="landing-hero__copy">
+          <p class="landing-hero__badge landing-hero__reveal" style="--hero-i: 0">
+            Built for modern retail · Web &amp; mobile
+          </p>
+          <h1 id="landing-hero-title" class="landing-hero__title">
+            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1"
+              >Simplify your</span
             >
-              <div class="landing-hero__cta-row">
-                <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
-                  Try the demo (no signup)
-                </NuxtLink>
-                <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">
-                  Start free on Micro
-                </a>
+            <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
+              <span class="landing-hero__accent">selling.</span>
+            </span>
+          </h1>
+          <p class="landing-hero__role landing-hero__reveal" style="--hero-i: 3">
+            Track every variant, clear the spreadsheets, and manage every branch from one calm
+            dashboard.
+          </p>
+
+          <div
+            class="landing-hero__actions landing-hero__reveal"
+            style="--hero-i: 4"
+          >
+            <div class="landing-hero__cta-row">
+              <NuxtLink to="/demo/dashboard" class="landing-pill-cta landing-pill-cta--hero">
+                Explore the demo
+              </NuxtLink>
+              <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">
+                Start free
+              </a>
+            </div>
+            <div class="landing-hero__link-row">
+              <a :href="appUrl" class="landing-hero__link">
+                <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
+                {{ appHost }}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="landing-hero-mock landing-hero__visual landing-hero__reveal" style="--hero-i: 5">
+          <div class="landing-hero-mock__card">
+            <div class="landing-hero-mock__split">
+              <div class="landing-hero-mock__boxes" aria-hidden="true">
+                <span class="landing-hero-mock__box landing-hero-mock__box--a" />
+                <span class="landing-hero-mock__box landing-hero-mock__box--b" />
+                <span class="landing-hero-mock__box landing-hero-mock__box--c" />
+                <div class="landing-hero-mock__overlay">
+                  <strong>Dashboard overview</strong>
+                  Three shops connected · One integrated view
+                </div>
               </div>
-              <div class="landing-hero__link-row">
-                <a :href="appUrl" class="landing-hero__link">
-                  <span class="landing-hero__link-arrow" aria-hidden="true">→</span>
-                  {{ appHost }}
-                </a>
+              <div class="landing-hero-mock__panel">
+                <p class="landing-hero-mock__panel-title">Track, clear, and manage.</p>
+                <p class="landing-hero-mock__panel-sub">Every branch, one workspace</p>
+                <ul class="landing-hero-mock__panel-list">
+                  <li>Variant-level stock tracking</li>
+                  <li>Ditch complex spreadsheets</li>
+                  <li>Multi-store from one login</li>
+                </ul>
+                <span class="landing-hero-mock__pill">Start free →</span>
+              </div>
+            </div>
+            <div class="landing-hero-mock__stats">
+              <div v-for="stat in heroStats" :key="stat.label" class="landing-hero-mock__stat">
+                <p class="landing-hero-mock__stat-value">{{ stat.value }}</p>
+                <p class="landing-hero-mock__stat-label">{{ stat.label }}</p>
               </div>
             </div>
           </div>
         </div>
+
         <a
           href="#use-cases"
-          class="landing-hero__scroll-hint landing-hero__reveal"
-          style="--hero-i: 7"
+          class="landing-hero__scroll-hint landing-hero__reveal landing-hero__scroll-hint--split"
+          style="--hero-i: 6"
         >
-          <span class="landing-hero__scroll-hint-text">See who it is for</span>
+          <span class="landing-hero__scroll-hint-text">Scroll</span>
           <span class="landing-hero__scroll-hint-icon" aria-hidden="true">↓</span>
         </a>
       </div>
@@ -120,8 +128,22 @@
             </div>
           </div>
 
-          <div class="landing-who-cards-wrap">
-            <div class="landing-section-panel landing-section-panel--dark">
+          <div class="landing-who-visual-column">
+            <div class="landing-ops-mock" aria-hidden="true">
+              <div class="landing-ops-mock__shelf" />
+              <div class="landing-ops-mock__jars">
+                <span v-for="n in 12" :key="n" class="landing-ops-mock__jar" />
+              </div>
+              <div class="landing-ops-mock__tablet">
+                <div class="landing-ops-mock__tablet-bar" />
+                <div class="landing-ops-mock__tablet-row landing-ops-mock__tablet-row--accent" />
+                <div class="landing-ops-mock__tablet-row" />
+                <div class="landing-ops-mock__tablet-row landing-ops-mock__tablet-row--short" />
+              </div>
+              <span class="landing-ops-mock__caption">Live stock check</span>
+            </div>
+
+            <div class="landing-section-panel landing-who-cards-wrap">
               <p class="landing-section-panel__label">Built in</p>
               <div class="landing-who-cards">
                 <article v-for="card in whoUsesCards" :key="card.title" class="landing-who-card">
@@ -177,17 +199,30 @@
         </div>
 
         <div class="landing-problems__answer">
+          <div class="landing-promo-card landing-promo-card--cta landing-problems__promo">
+            <span class="landing-promo-card__badge">
+              <span class="landing-promo-card__badge-dot" aria-hidden="true" />
+              Your store, next
+            </span>
+            <h3 class="landing-promo-card__title">
+              Whatever you sell, <em>Storvv keeps up.</em>
+            </h3>
+            <p class="landing-promo-card__lede">
+              Join retailers who ditched spreadsheets for one clear system.
+            </p>
+            <a :href="appUrl" class="landing-promo-card__cta">Start free →</a>
+            <span class="landing-promo-card__link">{{ appHost }}</span>
+          </div>
           <div
             class="landing-section-panel landing-section-panel--light landing-section-panel--solution"
           >
             <div class="landing-problems__answer-stack">
               <img
-                :src="logoSrc"
-                alt=""
+                :src="darkLogoSrc"
+                alt="Storvv"
                 class="landing-problems__logo"
                 width="96"
                 height="40"
-                aria-hidden="true"
               />
               <div>
                 <p class="landing-label landing-label--blue">The fix</p>
@@ -231,7 +266,27 @@
           <p class="landing-label landing-label--muted hidden sm:block">All linked together</p>
         </header>
 
-        <div class="landing-core__grid">
+        <div class="landing-core__visual-row">
+          <div class="landing-promo-card landing-promo-card--variants">
+            <h3 class="landing-promo-card__title">
+              Sizes, colors, restocks. <em>Sorted.</em>
+            </h3>
+            <p class="landing-promo-card__lede">
+              Track every size and colour variant without losing count when stock moves fast.
+            </p>
+            <ul class="landing-promo-card__list">
+              <li v-for="item in variantHighlights" :key="item">
+                <span class="landing-promo-card__list-icon" aria-hidden="true">✓</span>
+                {{ item }}
+              </li>
+            </ul>
+            <div class="landing-promo-card__shapes" aria-hidden="true">
+              <span class="landing-promo-card__shape landing-promo-card__shape--a" />
+              <span class="landing-promo-card__shape landing-promo-card__shape--b" />
+            </div>
+          </div>
+
+          <div class="landing-core__grid">
           <article
             v-for="feature in coreFeatures"
             :key="feature.num"
@@ -248,6 +303,7 @@
             <p class="landing-core__card-desc">{{ feature.description }}</p>
             <span class="landing-core__badge">{{ feature.badge }}</span>
           </article>
+          </div>
         </div>
       </div>
     </section>
@@ -348,46 +404,51 @@
           </div>
         </div>
 
-        <div class="landing-multistore__cards" aria-label="Example store branches">
-          <article class="landing-store-card landing-store-card--primary">
-            <div class="landing-store-card__head">
-              <span class="landing-store-card__name">Main store</span>
-              <span class="landing-store-card__tag landing-store-card__tag--active">Active</span>
-            </div>
-            <div class="landing-store-card__stats">
-              <div v-for="stat in mainStoreStats" :key="stat.label">
-                <p class="landing-store-card__stat-value">{{ stat.value }}</p>
-                <p class="landing-store-card__stat-label">{{ stat.label }}</p>
+        <div class="landing-multistore__cards" aria-label="Multi-store dashboard preview">
+          <div class="landing-promo-card landing-promo-card--multistore landing-multistore__promo">
+            <h3 class="landing-promo-card__title">
+              Three shops. <em>One dashboard.</em>
+            </h3>
+            <p class="landing-promo-card__logo">
+              <span class="landing-promo-card__mark">S</span>
+              Storvv
+            </p>
+            <div class="landing-promo-card__stats">
+              <div v-for="stat in multiStoreStats" :key="stat.label">
+                <p class="landing-promo-card__stat-value">{{ stat.value }}</p>
+                <p class="landing-promo-card__stat-label">{{ stat.label }}</p>
               </div>
             </div>
-          </article>
-
-          <div class="landing-store-divider" aria-hidden="true">
-            <span>One account</span>
           </div>
 
-          <article class="landing-store-card landing-store-card--dim">
-            <div class="landing-store-card__head">
-              <span class="landing-store-card__name">Branch 2</span>
-              <span class="landing-store-card__tag landing-store-card__tag--muted"
-                >Separate data</span
-              >
-            </div>
-            <div class="landing-store-card__stats">
-              <div v-for="stat in branchStoreStats" :key="stat.label">
-                <p class="landing-store-card__stat-value">{{ stat.value }}</p>
-                <p class="landing-store-card__stat-label">{{ stat.label }}</p>
+          <div class="landing-dashboard-mock">
+            <article class="landing-dashboard-mock__card landing-dashboard-mock__card--primary">
+              <div class="landing-dashboard-mock__head">
+                <span class="landing-dashboard-mock__name">Main store</span>
+                <span class="landing-dashboard-mock__tag">Active</span>
               </div>
-            </div>
-          </article>
-
-          <article class="landing-store-card landing-store-card--ghost">
-            <div class="landing-store-card__head">
-              <span class="landing-store-card__name">+ Add another location</span>
-              <span class="landing-store-card__tag landing-store-card__tag--muted">Enterprise</span>
-            </div>
-            <p class="landing-store-card__ghost-note">Add more branches on Enterprise</p>
-          </article>
+              <div class="landing-dashboard-mock__stats">
+                <div v-for="stat in mainStoreStats" :key="stat.label">
+                  <p class="landing-dashboard-mock__stat-value">{{ stat.value }}</p>
+                  <p class="landing-dashboard-mock__stat-label">{{ stat.label }}</p>
+                </div>
+              </div>
+            </article>
+            <div class="landing-dashboard-mock__divider">One account</div>
+            <article class="landing-dashboard-mock__card landing-dashboard-mock__card--dim">
+              <div class="landing-dashboard-mock__head">
+                <span class="landing-dashboard-mock__name">Branch 2</span>
+                <span class="landing-dashboard-mock__tag">Separate data</span>
+              </div>
+              <div class="landing-dashboard-mock__stats">
+                <div v-for="stat in branchStoreStats" :key="stat.label">
+                  <p class="landing-dashboard-mock__stat-value">{{ stat.value }}</p>
+                  <p class="landing-dashboard-mock__stat-label">{{ stat.label }}</p>
+                </div>
+              </div>
+            </article>
+            <p class="landing-dashboard-mock__ghost">+ Add branches on Enterprise</p>
+          </div>
         </div>
       </div>
     </section>
@@ -410,40 +471,43 @@ import {
   UserGroupIcon,
   UserIcon,
 } from '@heroicons/vue/24/outline'
-import { computed, ref } from 'vue'
-
-const heroSectionRef = ref<HTMLElement | null>(null)
-
-const heroFloatIcons = [
-  { id: 'inventory', icon: ArchiveBoxIcon },
-  { id: 'receipts', icon: DocumentTextIcon },
-  { id: 'returns', icon: ArrowPathIcon },
-  { id: 'customers', icon: UserIcon },
-  { id: 'sales', icon: ChartBarIcon },
-  { id: 'store', icon: ShoppingBagIcon },
-] as const
-
-function onHeroPointerMove(event: MouseEvent) {
-  const el = heroSectionRef.value
-  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const rect = el.getBoundingClientRect()
-  const x = (event.clientX - rect.left) / rect.width - 0.5
-  const y = (event.clientY - rect.top) / rect.height - 0.5
-  el.style.setProperty('--hero-mx', String(x * 28))
-  el.style.setProperty('--hero-my', String(y * 18))
-}
-
-function onHeroPointerLeave() {
-  const el = heroSectionRef.value
-  if (!el) return
-  el.style.setProperty('--hero-mx', '0')
-  el.style.setProperty('--hero-my', '0')
-}
+import { computed } from 'vue'
 
 const props = defineProps<{
   logoSrc: string
+  darkLogoSrc: string
   appUrl: string
 }>()
+
+const heroStats = [
+  { value: '3×', label: 'Faster stock checks' },
+  { value: '0', label: 'Spreadsheets needed' },
+  { value: '1', label: 'Login, every store' },
+] as const
+
+const variantHighlights = [
+  'Variant-level stock tracking',
+  'Instant low-stock alerts',
+  'Receipts and returns, handled',
+] as const
+
+const multiStoreStats = [
+  { value: '3×', label: 'Faster stock checks' },
+  { value: '0', label: 'Spreadsheets needed' },
+  { value: '1', label: 'Login, every store' },
+] as const
+
+const mainStoreStats = [
+  { value: '247', label: 'Products' },
+  { value: '38', label: 'Sales today' },
+  { value: '3', label: 'Staff' },
+] as const
+
+const branchStoreStats = [
+  { value: '184', label: 'Products' },
+  { value: '21', label: 'Sales today' },
+  { value: '2', label: 'Staff' },
+] as const
 
 const appHost = computed(() => {
   try {
@@ -602,17 +666,5 @@ const multiStoreFeatures = [
     title: 'Reports per branch',
     description: 'See performance store by store.',
   },
-] as const
-
-const mainStoreStats = [
-  { value: '247', label: 'Products' },
-  { value: '38', label: 'Sales today' },
-  { value: '3', label: 'Staff' },
-] as const
-
-const branchStoreStats = [
-  { value: '184', label: 'Products' },
-  { value: '21', label: 'Sales today' },
-  { value: '2', label: 'Staff' },
 ] as const
 </script>

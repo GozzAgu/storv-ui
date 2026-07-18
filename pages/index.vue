@@ -1,56 +1,59 @@
 <template>
-  <div class="landing-page min-h-screen bg-[#fafafa] text-gray-900 antialiased">
+  <div class="landing-page landing-page--portfolio min-h-screen antialiased">
     <header class="landing-header" :class="{ 'landing-header--menu-open': mobileMenuOpen }">
-      <div class="landing-header__inner">
-        <NuxtLink to="/" class="landing-header__logo" @click="mobileMenuOpen = false">
-          <img :src="marketingLogoSrc" alt="Storvv" width="120" height="32" />
-        </NuxtLink>
+      <div class="landing-header__shell">
+        <div class="landing-header__pill">
+          <NuxtLink to="/" class="landing-header__brand" @click="mobileMenuOpen = false">
+            <img
+              :src="landingNavLogoSrc"
+              alt="Storvv"
+              class="landing-header__logo"
+              width="132"
+              height="36"
+            />
+          </NuxtLink>
 
-        <div class="landing-header__desktop">
-          <nav class="landing-header__links" aria-label="Primary">
+          <nav class="landing-header__links landing-header__desktop" aria-label="Primary">
             <a
               href="#features"
               class="landing-nav-link"
               @click.prevent="scrollToSection('features')"
               >Features</a
             >
-            <a href="#proof" class="landing-nav-link" @click.prevent="scrollToSection('proof')"
-              >Outcomes</a
-            >
-            <NuxtLink to="/demo/dashboard" class="landing-nav-link">Try demo</NuxtLink>
-            <a
-              href="#how-it-works"
-              class="landing-nav-link"
-              @click.prevent="scrollToSection('how-it-works')"
-              >How it works</a
-            >
+            <NuxtLink to="/demo/dashboard" class="landing-nav-link">Demo</NuxtLink>
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')"
               >Plans</a
             >
-            <a href="#faq" class="landing-nav-link" @click.prevent="scrollToSection('faq')">FAQ</a>
             <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')"
               >Contact</a
             >
           </nav>
-          <NuxtLink to="/demo/dashboard" class="landing-header__cta">Try demo</NuxtLink>
-          <a :href="appOriginUrl" class="landing-nav-link landing-header__start-link">Start free</a>
-        </div>
 
-        <div class="landing-header__mobile">
-          <NuxtLink to="/demo/dashboard" class="landing-header__cta landing-header__cta--compact"
-            >Demo</NuxtLink
-          >
-          <button
-            type="button"
-            class="landing-header__menu-btn"
-            :aria-expanded="mobileMenuOpen"
-            aria-controls="landing-mobile-nav"
-            :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
-            @click="mobileMenuOpen = !mobileMenuOpen"
-          >
-            <XMarkIcon v-if="mobileMenuOpen" class="landing-header__menu-icon" aria-hidden="true" />
-            <Bars3Icon v-else class="landing-header__menu-icon" aria-hidden="true" />
-          </button>
+          <div class="landing-header__actions">
+            <a :href="appOriginUrl" class="landing-header__cta">Start free</a>
+            <div class="landing-header__mobile">
+              <NuxtLink
+                to="/demo/dashboard"
+                class="landing-header__cta landing-header__cta--compact"
+                >Demo</NuxtLink
+              >
+              <button
+                type="button"
+                class="landing-header__menu-btn"
+                :aria-expanded="mobileMenuOpen"
+                aria-controls="landing-mobile-nav"
+                :aria-label="mobileMenuOpen ? 'Close menu' : 'Open menu'"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+              >
+                <XMarkIcon
+                  v-if="mobileMenuOpen"
+                  class="landing-header__menu-icon"
+                  aria-hidden="true"
+                />
+                <Bars3Icon v-else class="landing-header__menu-icon" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -76,59 +79,38 @@
                 href="#features"
                 class="landing-mobile-nav-link"
                 @click.prevent="
-                  scrollToSection('features')
-                  mobileMenuOpen = false
+                  () => {
+                    scrollToSection('features')
+                    mobileMenuOpen = false
+                  }
                 "
                 >Features</a
-              >
-              <a
-                href="#proof"
-                class="landing-mobile-nav-link"
-                @click.prevent="
-                  scrollToSection('proof')
-                  mobileMenuOpen = false
-                "
-                >Outcomes</a
               >
               <a
                 href="/demo/dashboard"
                 class="landing-mobile-nav-link"
                 @click.prevent="navigateFromMobileMenu('/demo/dashboard')"
-                >Try demo</a
-              >
-              <a
-                href="#how-it-works"
-                class="landing-mobile-nav-link"
-                @click.prevent="
-                  scrollToSection('how-it-works')
-                  mobileMenuOpen = false
-                "
-                >How it works</a
+                >Demo</a
               >
               <a
                 href="#pricing"
                 class="landing-mobile-nav-link"
                 @click.prevent="
-                  scrollToSection('pricing')
-                  mobileMenuOpen = false
+                  () => {
+                    scrollToSection('pricing')
+                    mobileMenuOpen = false
+                  }
                 "
                 >Plans</a
-              >
-              <a
-                href="#faq"
-                class="landing-mobile-nav-link"
-                @click.prevent="
-                  scrollToSection('faq')
-                  mobileMenuOpen = false
-                "
-                >FAQ</a
               >
               <a
                 href="#contact"
                 class="landing-mobile-nav-link"
                 @click.prevent="
-                  scrollToSection('contact')
-                  mobileMenuOpen = false
+                  () => {
+                    scrollToSection('contact')
+                    mobileMenuOpen = false
+                  }
                 "
                 >Contact</a
               >
@@ -139,14 +121,14 @@
                 class="landing-header__cta landing-mobile-panel__cta"
                 @click="mobileMenuOpen = false"
               >
-                Try demo (no signup)
+                Explore the demo
               </NuxtLink>
               <a
                 :href="appOriginUrl"
                 class="landing-mobile-panel__secondary-cta"
                 @click="mobileMenuOpen = false"
               >
-                Start free on Micro
+                Start free
               </a>
             </div>
           </div>
@@ -155,7 +137,11 @@
     </Teleport>
 
     <!-- Marketing showcase: hero → who → problems → features → setup → multi-store -->
-    <LandingShowcase :logo-src="marketingLogoSrc" :app-url="appOriginUrl" />
+    <LandingShowcase
+      :logo-src="marketingLogoSrc"
+      :dark-logo-src="landingNavLogoSrc"
+      :app-url="appOriginUrl"
+    />
 
     <LandingDemo :app-url="appOriginUrl" />
 
@@ -348,6 +334,14 @@
             out of Excel and WhatsApp.
           </p>
         </header>
+
+        <div class="landing-brand-panel landing-about-brand">
+          <div class="landing-brand-panel__icon">
+            <span class="landing-brand-panel__icon-shape" />
+          </div>
+          <span class="landing-brand-panel__name">Storvv</span>
+          <p class="landing-brand-panel__tagline">The retailers' intelligence platform</p>
+        </div>
 
         <div class="landing-about-grid">
           <div class="landing-about-highlights">
@@ -1224,239 +1218,98 @@
     <LandingContact @open-form="showContactFormModal = true" />
 
     <!-- Footer -->
-    <footer
-      class="border-t border-gray-200 bg-[#f8f9fb] text-slate-600 dark:border-black/50 dark:bg-neutral-950 dark:text-slate-300"
-    >
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
-        <div
-          class="grid lg:grid-cols-12 gap-10 pb-10 border-b border-gray-200 dark:border-white/[0.08]"
-        >
-          <!-- Brand -->
-          <div class="lg:col-span-4 space-y-4">
-            <NuxtLink
-              to="/"
-              class="inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
-            >
+    <footer class="landing-footer">
+      <div class="landing-footer__inner">
+        <div class="landing-footer__top">
+          <div>
+            <NuxtLink to="/" class="landing-footer__brand">
               <img
-                :src="footerLogoSrc"
+                :src="landingNavLogoSrc"
                 alt="Storvv"
-                class="landing-footer-brand-img h-10 w-auto max-h-10 origin-left object-contain will-change-transform sm:h-11 sm:max-h-11 lg:scale-105"
+                class="landing-footer__logo"
+                width="140"
+                height="40"
               />
             </NuxtLink>
-            <p class="text-sm text-slate-500 leading-relaxed max-w-sm dark:text-slate-400">
-              Store management software for modern retailers, inventory, receipts, customers, and
-              teams in one fast system.
+            <p class="landing-footer__tagline">
+              Store management for modern retailers. Inventory, receipts, customers, and teams in
+              one calm workspace.
             </p>
-            <div class="flex items-center gap-5 pt-1">
+          </div>
+
+          <div>
+            <p class="landing-footer__heading">Explore</p>
+            <div class="landing-footer__links">
               <a
-                href="https://x.com/_storvv_"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center justify-center rounded-md p-1.5 -m-1.5 text-slate-500 transition-colors hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-400 dark:text-slate-300 dark:hover:text-primary-400"
-                aria-label="X"
+                href="#features"
+                class="landing-footer__link"
+                @click.prevent="scrollToSection('features')"
+                >Features</a
               >
-                <svg
-                  class="h-7 w-7 shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-                  />
-                </svg>
-              </a>
+              <NuxtLink to="/demo/dashboard" class="landing-footer__link">Demo</NuxtLink>
+              <a
+                href="#pricing"
+                class="landing-footer__link"
+                @click.prevent="scrollToSection('pricing')"
+                >Plans</a
+              >
+              <a
+                href="#faq"
+                class="landing-footer__link"
+                @click.prevent="scrollToSection('faq')"
+                >FAQ</a
+              >
+              <a
+                href="#contact"
+                class="landing-footer__link"
+                @click.prevent="scrollToSection('contact')"
+                >Contact</a
+              >
+            </div>
+          </div>
+
+          <div>
+            <p class="landing-footer__heading">Connect</p>
+            <div class="landing-footer__links">
+              <a href="mailto:hello@storvv.com" class="landing-footer__link">hello@storvv.com</a>
               <a
                 href="https://www.instagram.com/_storvv_"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center justify-center rounded-md p-1.5 -m-1.5 transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-                aria-label="Instagram"
+                class="landing-footer__link"
+                >Instagram</a
               >
-                <svg class="h-7 w-7 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                  <defs>
-                    <linearGradient
-                      id="footer-instagram-gradient"
-                      x1="0%"
-                      y1="100%"
-                      x2="100%"
-                      y2="0%"
-                    >
-                      <stop offset="0%" stop-color="#f09433" />
-                      <stop offset="50%" stop-color="#e6683c" />
-                      <stop offset="100%" stop-color="#bc1888" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    fill="url(#footer-instagram-gradient)"
-                    fill-rule="evenodd"
-                    d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </a>
-            </div>
-          </div>
-
-          <!-- Links -->
-          <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
-            <div>
-              <h4
-                class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4"
+              <a
+                href="https://x.com/_storvv_"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="landing-footer__link"
+                >X</a
               >
-                Product
-              </h4>
-              <ul class="space-y-2.5">
-                <li>
-                  <a
-                    href="#features"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('features')"
-                    >Features</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#capabilities-grid"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('capabilities-grid')"
-                    >Capabilities</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#pricing"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('pricing')"
-                    >Plans</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#faq"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('faq')"
-                    >FAQs</a
-                  >
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4
-                class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4"
-              >
-                Company
-              </h4>
-              <ul class="space-y-2.5">
-                <li>
-                  <a
-                    href="#about"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('about')"
-                    >About</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#contact"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    @click.prevent="scrollToSection('contact')"
-                    >Contact</a
-                  >
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4
-                class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4"
-              >
-                Legal
-              </h4>
-              <ul class="space-y-2.5">
-                <li>
-                  <NuxtLink
-                    to="/privacy"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    >Privacy</NuxtLink
-                  >
-                </li>
-                <li>
-                  <NuxtLink
-                    to="/terms"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    >Terms</NuxtLink
-                  >
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4
-                class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4"
-              >
-                Support
-              </h4>
-              <ul class="space-y-2.5">
-                <li>
-                  <a
-                    href="mailto:hello@storvv.com"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    >hello@storvv.com</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="https://www.instagram.com/_storvv_"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    >Instagram</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="https://x.com/_storvv_"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors dark:text-gray-400 dark:hover:text-gray-100"
-                    >X</a
-                  >
-                </li>
-              </ul>
+              <NuxtLink to="/privacy" class="landing-footer__link">Privacy</NuxtLink>
+              <NuxtLink to="/terms" class="landing-footer__link">Terms</NuxtLink>
             </div>
           </div>
         </div>
 
-        <!-- Bottom bar -->
-        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            &copy; {{ new Date().getFullYear() }} Storvv. All rights reserved.
-          </p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            Store management for modern retailers.
-          </p>
+        <div class="landing-footer__bottom">
+          <p>&copy; {{ new Date().getFullYear() }} Storvv. All rights reserved.</p>
+          <p>Built with Nuxt &amp; Firebase</p>
         </div>
       </div>
 
       <!-- Cookie consent banner -->
       <div
         v-if="!cookiesAccepted"
-        class="bg-gray-100 border-t border-gray-200 px-4 py-3 flex flex-wrap items-center justify-between gap-4 dark:bg-slate-950 dark:border-gray-800"
+        class="landing-cookie-banner"
       >
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p class="landing-cookie-banner__text">
           We use cookies on our website to help us provide the best browsing experience. By
           continuing to use our website you are deemed to have agreed to the use of cookies.
         </p>
-        <div class="flex items-center gap-3 flex-shrink-0">
-          <NuxtLink
-            to="/privacy"
-            class="text-sm font-medium text-primary-500 hover:text-primary-600"
-          >
-            Learn more
-          </NuxtLink>
-          <button
-            @click="acceptCookies"
-            class="px-4 py-2 rounded-sm bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
+        <div class="landing-cookie-banner__actions">
+          <NuxtLink to="/privacy" class="landing-cookie-banner__link">Learn more</NuxtLink>
+          <button type="button" class="landing-cookie-banner__btn" @click="acceptCookies">
             OK
           </button>
         </div>
@@ -1647,20 +1500,20 @@ const howStorvvWorksSteps = [
   },
 ]
 
-/** Marketing site is light-only; logo asset for light backgrounds. */
+/** Light wordmark for setup panel (white background). */
 const marketingLogoSrc = '/storvv logo 2.png'
-/** Light wordmark on dark footer (matches dashboard sidebar dark theme). */
-const footerLogoSrc = '/storvv logo.png'
+/** Dark wordmark for nav, footer, and dark landing panels. */
+const landingNavLogoSrc = '/storvv logo.png'
 
 const themeStore = useThemeStore()
 
-function applyLandingLightDocument() {
+function applyLandingDocumentTheme() {
   if (!import.meta.client) return
   const html = document.documentElement
-  html.classList.remove('dark')
-  html.style.colorScheme = 'light'
+  html.classList.add('dark')
+  html.style.colorScheme = 'dark'
   const meta = document.getElementById('theme-color-meta')
-  if (meta) meta.setAttribute('content', '#fafafa')
+  if (meta) meta.setAttribute('content', '#050508')
 }
 
 const mobileMenuOpen = ref(false)
@@ -1923,7 +1776,7 @@ const setupScrollAnimations = () => {
 
 onMounted(() => {
   if (import.meta.client) {
-    applyLandingLightDocument()
+    applyLandingDocumentTheme()
     detectPricingRegion()
     mobileMenuMql = window.matchMedia('(min-width: 768px)')
     mobileMenuMql.addEventListener('change', closeMobileMenuIfDesktop)

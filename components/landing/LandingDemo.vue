@@ -112,11 +112,11 @@ const points = [
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--landing-section-heading, #0f172a);
 }
 
 .landing-demo__accent {
-  color: #143f8d;
+  color: var(--landing-section-accent, #143f8d);
   font-size: inherit;
   font-weight: inherit;
   line-height: inherit;
@@ -128,7 +128,7 @@ const points = [
   max-width: 32rem;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: #334155;
+  color: var(--landing-section-body, #334155);
 }
 
 .landing-demo__points {
@@ -137,7 +137,7 @@ const points = [
   gap: 0.625rem;
   font-size: 0.875rem;
   line-height: 1.55;
-  color: #1e293b;
+  color: var(--landing-section-body, #1e293b);
 }
 
 .landing-demo__points li {
@@ -178,7 +178,7 @@ const points = [
 .landing-demo__secondary {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #143f8d;
+  color: var(--landing-section-accent, #143f8d);
 }
 
 .landing-demo__preview {

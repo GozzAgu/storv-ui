@@ -269,8 +269,10 @@
           variant="outline"
           size="sm"
           @click="
-            showBulkDeleteDepartmentsModal = false
-            bulkDeleteDepartmentsConfirmed = false
+            () => {
+              showBulkDeleteDepartmentsModal = false
+              bulkDeleteDepartmentsConfirmed = false
+            }
           "
           class="!rounded-2xl"
           >Cancel</Button
@@ -307,8 +309,10 @@
         <button
           type="button"
           @click="
-            handleEditDepartment(departmentForOpenMenu)
-            openDepartmentMenuId = null
+            () => {
+              handleEditDepartment(departmentForOpenMenu)
+              openDepartmentMenuId = null
+            }
           "
           class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
         >
@@ -320,8 +324,10 @@
           :disabled="deletingDepartmentId === departmentForOpenMenu.id"
           class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           @click="
-            handleDeleteDepartment(departmentForOpenMenu)
-            openDepartmentMenuId = null
+            () => {
+              handleDeleteDepartment(departmentForOpenMenu)
+              openDepartmentMenuId = null
+            }
           "
         >
           <ArrowPathIcon

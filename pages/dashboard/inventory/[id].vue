@@ -1421,8 +1421,10 @@
           variant="outline"
           size="sm"
           @click="
-            showBulkDeleteModal = false
-            bulkDeleteConfirmed = false
+            () => {
+              showBulkDeleteModal = false
+              bulkDeleteConfirmed = false
+            }
           "
           class="!rounded-2xl"
           >Cancel</Button
@@ -1505,8 +1507,10 @@
             size="sm"
             type="button"
             @click="
-              showDuplicateModal = false
-              clearDuplicateModal()
+              () => {
+                showDuplicateModal = false
+                clearDuplicateModal()
+              }
             "
             class="!rounded-2xl"
             >Cancel</Button
@@ -1550,8 +1554,10 @@
           type="button"
           role="menuitem"
           @click="
-            handleViewTimeline(itemForOpenMenu)
-            openItemMenuId = null
+            () => {
+              handleViewTimeline(itemForOpenMenu)
+              openItemMenuId = null
+            }
           "
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85"
         >
@@ -1565,8 +1571,10 @@
           type="button"
           role="menuitem"
           @click="
-            handleApplyDiscount(itemForOpenMenu)
-            openItemMenuId = null
+            () => {
+              handleApplyDiscount(itemForOpenMenu)
+              openItemMenuId = null
+            }
           "
           :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-primary-50/80 dark:text-gray-200 dark:hover:bg-primary-950/30 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1580,8 +1588,10 @@
           type="button"
           role="menuitem"
           @click="
-            handleEditItem(itemForOpenMenu)
-            openItemMenuId = null
+            () => {
+              handleEditItem(itemForOpenMenu)
+              openItemMenuId = null
+            }
           "
           :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1611,8 +1621,10 @@
           type="button"
           role="menuitem"
           @click="
-            handleDuplicateItem(itemForOpenMenu)
-            openItemMenuId = null
+            () => {
+              handleDuplicateItem(itemForOpenMenu)
+              openItemMenuId = null
+            }
           "
           :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-gray-700 transition-colors hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800/85 disabled:cursor-not-allowed disabled:opacity-40"
@@ -1627,8 +1639,10 @@
           type="button"
           role="menuitem"
           @click="
-            handleDeleteItem(itemForOpenMenu)
-            openItemMenuId = null
+            () => {
+              handleDeleteItem(itemForOpenMenu)
+              openItemMenuId = null
+            }
           "
           :disabled="isInventoryItemLocked(itemForOpenMenu)"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/45 disabled:cursor-not-allowed disabled:opacity-40"

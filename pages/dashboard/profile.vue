@@ -827,8 +827,10 @@
       <Button
         variant="secondary"
         @click="
-          showPasswordModal = false
-          resetPasswordForm()
+          () => {
+            showPasswordModal = false
+            resetPasswordForm()
+          }
         "
         >Cancel</Button
       >
@@ -1073,9 +1075,11 @@
       <Button
         variant="secondary"
         @click="
-          show2FADisableModal = false
-          disable2FAPassword = ''
-          disable2FAError = ''
+          () => {
+            show2FADisableModal = false
+            disable2FAPassword = ''
+            disable2FAError = ''
+          }
         "
         >Cancel</Button
       >

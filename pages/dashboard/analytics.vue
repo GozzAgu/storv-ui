@@ -28,8 +28,10 @@
                 : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             "
             @click="
-              selectedPeriod = period.value
-              loadAnalytics()
+              () => {
+                selectedPeriod = period.value
+                loadAnalytics()
+              }
             "
           >
             {{ period.label }}

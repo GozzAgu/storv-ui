@@ -563,8 +563,10 @@
           variant="outline"
           size="sm"
           @click="
-            showBulkDeleteFoldersModal = false
-            bulkDeleteFoldersConfirmed = false
+            () => {
+              showBulkDeleteFoldersModal = false
+              bulkDeleteFoldersConfirmed = false
+            }
           "
           class="!rounded-2xl"
           >Cancel</Button
@@ -927,8 +929,10 @@
           type="button"
           :class="footerBtnOutlineClass"
           @click="
-            showDuplicateFolderModal = false
-            clearDuplicateFolderModal()
+            () => {
+              showDuplicateFolderModal = false
+              clearDuplicateFolderModal()
+            }
           "
           >Cancel</Button
         >
@@ -1129,8 +1133,10 @@
           v-if="canDuplicateByPlan"
           type="button"
           @click="
-            handleDuplicateFolder(folderForOpenMenu)
-            openFolderMenuId = null
+            () => {
+              handleDuplicateFolder(folderForOpenMenu)
+              openFolderMenuId = null
+            }
           "
           class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
         >
@@ -1140,8 +1146,10 @@
         <button
           type="button"
           @click="
-            handleEditFolder(folderForOpenMenu)
-            openFolderMenuId = null
+            () => {
+              handleEditFolder(folderForOpenMenu)
+              openFolderMenuId = null
+            }
           "
           class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
         >
@@ -1151,8 +1159,10 @@
         <button
           type="button"
           @click="
-            handleDeleteFolder(folderForOpenMenu)
-            openFolderMenuId = null
+            () => {
+              handleDeleteFolder(folderForOpenMenu)
+              openFolderMenuId = null
+            }
           "
           class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors"
         >
