@@ -5,53 +5,53 @@
  * This is a standalone function that can be used in stores and composables
  */
 export async function getCurrentStoreId(): Promise<string | null> {
- if (import.meta.server) return null
+  if (import.meta.server) return null
 
- const { isDemoModeActive } = await import('~/utils/demo-mode')
- if (isDemoModeActive()) {
- const { useDemoAppStore } = await import('~/stores/demoApp')
- const demo = useDemoAppStore()
- demo.hydrate()
- return demo.state.currentStoreId
- }
+  const { isDemoModeActive } = await import('~/utils/demo-mode')
+  if (isDemoModeActive()) {
+    const { useDemoAppStore } = await import('~/stores/demoApp')
+    const demo = useDemoAppStore()
+    demo.hydrate()
+    return demo.state.currentStoreId
+  }
 
- const { useAuthStore } = await import('~/stores/auth')
- const { useUserStore } = await import('~/stores/user')
- const authStore = useAuthStore()
- const userStore = useUserStore()
+  const { useAuthStore } = await import('~/stores/auth')
+  const { useUserStore } = await import('~/stores/user')
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
 
- if (!authStore.currentUser) return null
+  if (!authStore.currentUser) return null
 
- // Fetch user data if not loaded
- if (!userStore.userData) {
- await userStore.fetchUserData(authStore.currentUser.uid)
- }
+  // Fetch user data if not loaded
+  if (!userStore.userData) {
+    await userStore.fetchUserData(authStore.currentUser.uid)
+  }
 
- // If staff, get storeId from staff document
- if (userStore.userData?.role === 'staff') {
- const { useStaffStore } = await import('~/stores/staff')
- const staffStore = useStaffStore()
- 
- // Try to get from cached staff member first
- let staffMember = staffStore.getCurrentStaffMember
- if (!staffMember || !staffMember.storeId) {
- staffMember = await staffStore.fetchCurrentStaffMember()
- }
- 
- return staffMember?.storeId || null
- }
+  // If staff, get storeId from staff document
+  if (userStore.userData?.role === 'staff') {
+    const { useStaffStore } = await import('~/stores/staff')
+    const staffStore = useStaffStore()
 
- // For super admin (or any non-staff: admin, etc.), get from stores store
- const { useStoresStore } = await import('~/stores/stores')
- const storesStore = useStoresStore()
+    // Try to get from cached staff member first
+    let staffMember = staffStore.getCurrentStaffMember
+    if (!staffMember || !staffMember.storeId) {
+      staffMember = await staffStore.fetchCurrentStaffMember()
+    }
 
- if (!storesStore.currentStoreId && storesStore.stores.length === 0) {
- await storesStore.fetchStores()
- }
+    return staffMember?.storeId || null
+  }
 
- if (!storesStore.currentStoreId) {
- await storesStore.initializeCurrentStore()
- }
+  // For super admin (or any non-staff: admin, etc.), get from stores store
+  const { useStoresStore } = await import('~/stores/stores')
+  const storesStore = useStoresStore()
 
- return storesStore.currentStoreId
+  if (!storesStore.currentStoreId && storesStore.stores.length === 0) {
+    await storesStore.fetchStores()
+  }
+
+  if (!storesStore.currentStoreId) {
+    await storesStore.initializeCurrentStore()
+  }
+
+  return storesStore.currentStoreId
 }

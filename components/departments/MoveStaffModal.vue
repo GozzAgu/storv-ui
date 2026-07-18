@@ -12,7 +12,9 @@
           <ArrowsRightLeftIcon class="h-4 w-4 text-primary-600 dark:text-primary-400" />
         </div>
         <div class="min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Move to another department</h3>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Move to another department
+          </h3>
           <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ staffName }}</p>
         </div>
       </div>
@@ -24,9 +26,12 @@
       >
         <p class="text-xs text-gray-700 dark:text-gray-300">
           From
-          <span class="font-medium text-gray-900 dark:text-gray-100">{{ currentDepartmentName }}</span>
-          to the department you select below. Their role stays the same; inventory and department access
-          update to match the new department on their next action (or immediately if they refresh).
+          <span class="font-medium text-gray-900 dark:text-gray-100">{{
+            currentDepartmentName
+          }}</span>
+          to the department you select below. Their role stays the same; inventory and department
+          access update to match the new department on their next action (or immediately if they
+          refresh).
         </p>
       </div>
 
@@ -40,11 +45,7 @@
           :disabled="isProcessing || departmentOptions.length === 0"
         >
           <option value="" disabled>Select department</option>
-          <option
-            v-for="dept in departmentOptions"
-            :key="dept.id"
-            :value="dept.id"
-          >
+          <option v-for="dept in departmentOptions" :key="dept.id" :value="dept.id">
             {{ dept.name }}
           </option>
         </select>
@@ -124,9 +125,7 @@ const staffName = computed(() => {
 })
 
 const departmentOptions = computed(() =>
-  props.departments.filter(
-    (d) => d.id !== props.currentDepartmentId && d.isActive !== false
-  )
+  props.departments.filter((d) => d.id !== props.currentDepartmentId && d.isActive !== false)
 )
 
 const canSubmit = computed(

@@ -37,7 +37,10 @@ export default defineEventHandler(async (event) => {
   await requireStoreReadAccess(auth.uid, ownerUserId, storeId)
 
   const adminDb = getAdminFirestore()
-  const payoutSnap = await adminDb.collection('merchantPayouts').doc(payoutDocId(ownerUserId, storeId)).get()
+  const payoutSnap = await adminDb
+    .collection('merchantPayouts')
+    .doc(payoutDocId(ownerUserId, storeId))
+    .get()
   const payout = payoutSnap.data() as MerchantPayoutDoc | undefined
   if (!payout?.subaccountCode) {
     return { success: true, settlements: [], pendingTotal: 0, settledTotal: 0, lastSettledAtMs: 0 }
@@ -70,8 +73,12 @@ export default defineEventHandler(async (event) => {
   })
 
   const isSettled = (st: string) => st === 'success' || st === 'completed'
-  const pendingTotal = settlements.filter((s) => !isSettled(s.status)).reduce((sum, s) => sum + s.amount, 0)
-  const settledTotal = settlements.filter((s) => isSettled(s.status)).reduce((sum, s) => sum + s.amount, 0)
+  const pendingTotal = settlements
+    .filter((s) => !isSettled(s.status))
+    .reduce((sum, s) => sum + s.amount, 0)
+  const settledTotal = settlements
+    .filter((s) => isSettled(s.status))
+    .reduce((sum, s) => sum + s.amount, 0)
   const lastSettledAtMs = settlements
     .filter((s) => isSettled(s.status))
     .reduce((max, s) => Math.max(max, s.dateMs), 0)

@@ -20,7 +20,7 @@ export function suggestedReorderQuantity(currentQty: number, threshold: number):
 export function collectLowStockRows(
   folders: InventoryFolder[],
   itemsByFolderId: Record<string, InventoryItem[]>,
-  lowStockThreshold: number,
+  lowStockThreshold: number
 ): LowStockRow[] {
   const list: LowStockRow[] = []
   const threshold = Math.max(1, lowStockThreshold)

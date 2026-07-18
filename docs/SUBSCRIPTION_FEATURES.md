@@ -8,11 +8,11 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 ## Plan strategy (why tiers are split this way)
 
-| Plan | Who it’s for | Captivation goal |
-|------|----------------|------------------|
-| **Micro** | Single store, solo or tiny team | Complete daily ops without paywalls on core selling |
-| **Medium** | Growing business, second branch, real team | Visibility (analytics), accountability (activity logs), scale (staff/depts) |
-| **Enterprise** | Multi-location operators | Central control across branches (sync, template copy, stock loans) |
+| Plan           | Who it’s for                               | Captivation goal                                                            |
+| -------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| **Micro**      | Single store, solo or tiny team            | Complete daily ops without paywalls on core selling                         |
+| **Medium**     | Growing business, second branch, real team | Visibility (analytics), accountability (activity logs), scale (staff/depts) |
+| **Enterprise** | Multi-location operators                   | Central control across branches (sync, template copy, stock loans)          |
 
 **Principle:** Micro must feel **complete for one store**. Paid tiers unlock **scale, insight, and multi-location** — not receipts or inventory basics.
 
@@ -20,27 +20,27 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 ## Feature matrix
 
-| Feature | Micro | Medium | Enterprise |
-|---------|:-----:|:------:|:----------:|
-| **Stores** | 1 | 2 | Unlimited |
-| **Departments per store** | 1 | 10 | Unlimited |
-| **Staff per store** | 2 | 25 | Unlimited |
-| Dashboard | ✓ | ✓ | ✓ |
-| Inventory & categories | ✓ | ✓ | ✓ |
-| Receipts, returns, customers | ✓ | ✓ | ✓ |
-| Notifications | ✓ | ✓ | ✓ |
-| Settings & profile | ✓ | ✓ | ✓ |
-| Help center & onboarding | ✓ | ✓ | ✓ |
-| WhatsApp receipts | 10 / month | Unlimited | Unlimited |
-| Analytics & reports | — | ✓ | ✓ |
-| Activity logs | — | ✓ | ✓ |
-| Departments (multi-dept teams) | — | ✓ | ✓ |
-| Customer balance / credit ledger | — | ✓ | ✓ |
-| Duplicate category (same branch) | — | ✓ | ✓ |
-| Multi-store sync & transfers | — | — | ✓ |
-| Copy from branch (templates) | — | — | ✓ |
-| Stock loans | — | — | ✓ |
-| Priority support | — | — | ✓ |
+| Feature                          |   Micro    |  Medium   | Enterprise |
+| -------------------------------- | :--------: | :-------: | :--------: |
+| **Stores**                       |     1      |     2     | Unlimited  |
+| **Departments per store**        |     1      |    10     | Unlimited  |
+| **Staff per store**              |     2      |    25     | Unlimited  |
+| Dashboard                        |     ✓      |     ✓     |     ✓      |
+| Inventory & categories           |     ✓      |     ✓     |     ✓      |
+| Receipts, returns, customers     |     ✓      |     ✓     |     ✓      |
+| Notifications                    |     ✓      |     ✓     |     ✓      |
+| Settings & profile               |     ✓      |     ✓     |     ✓      |
+| Help center & onboarding         |     ✓      |     ✓     |     ✓      |
+| WhatsApp receipts                | 10 / month | Unlimited | Unlimited  |
+| Analytics & reports              |     —      |     ✓     |     ✓      |
+| Activity logs                    |     —      |     ✓     |     ✓      |
+| Departments (multi-dept teams)   |     —      |     ✓     |     ✓      |
+| Customer balance / credit ledger |     —      |     ✓     |     ✓      |
+| Duplicate category (same branch) |     —      |     ✓     |     ✓      |
+| Multi-store sync & transfers     |     —      |     —     |     ✓      |
+| Copy from branch (templates)     |     —      |     —     |     ✓      |
+| Stock loans                      |     —      |     —     |     ✓      |
+| Priority support                 |     —      |     —     |     ✓      |
 
 ---
 
@@ -78,17 +78,17 @@ This document is the source of truth for **marketing**, **Help center**, and **`
 
 Includes **everything in Micro**, plus:
 
-| Area | What’s included |
-|------|------------------|
-| **Stores** | Up to **2** |
-| **Departments** | Up to **10** per store |
-| **Staff** | Up to **25** per store |
-| **Analytics** | Reports, charts, revenue trends, busiest times, exports |
-| **Activity logs** | Who changed what, dated audit trail |
-| **Departments** | Organize teams; folder access by department |
-| **Customer balance** | Credit ledger & payment reminders tied to balance |
-| **WhatsApp** | **Unlimited** receipt sharing & payment nudges |
-| **Duplicate category** | Clone folder templates **within the same branch** |
+| Area                   | What’s included                                         |
+| ---------------------- | ------------------------------------------------------- |
+| **Stores**             | Up to **2**                                             |
+| **Departments**        | Up to **10** per store                                  |
+| **Staff**              | Up to **25** per store                                  |
+| **Analytics**          | Reports, charts, revenue trends, busiest times, exports |
+| **Activity logs**      | Who changed what, dated audit trail                     |
+| **Departments**        | Organize teams; folder access by department             |
+| **Customer balance**   | Credit ledger & payment reminders tied to balance       |
+| **WhatsApp**           | **Unlimited** receipt sharing & payment nudges          |
+| **Duplicate category** | Clone folder templates **within the same branch**       |
 
 ### Not included
 
@@ -105,15 +105,15 @@ Includes **everything in Micro**, plus:
 
 Includes **everything in Medium**, plus:
 
-| Area | What’s included |
-|------|------------------|
-| **Stores** | **Unlimited** |
-| **Departments** | **Unlimited** per store |
-| **Staff** | **Unlimited** per store |
-| **Multi-Store Sync** | Transfer items between stores, transfer history, consolidated reporting |
+| Area                 | What’s included                                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Stores**           | **Unlimited**                                                                                                     |
+| **Departments**      | **Unlimited** per store                                                                                           |
+| **Staff**            | **Unlimited** per store                                                                                           |
+| **Multi-Store Sync** | Transfer items between stores, transfer history, consolidated reporting                                           |
 | **Copy from branch** | Copy selected **category templates** from one branch to another (names, fields, serial mode — not live stock qty) |
-| **Stock loans** | Lend serial-tracked inventory to borrowers until sold or returned |
-| **Support** | Priority support |
+| **Stock loans**      | Lend serial-tracked inventory to borrowers until sold or returned                                                 |
+| **Support**          | Priority support                                                                                                  |
 
 ---
 
@@ -132,18 +132,18 @@ These build trust and word-of-mouth; keep them on every tier:
 
 ## Plan-specific gates (implementation notes)
 
-| User action | Minimum plan | Code / UI |
-|-------------|--------------|-----------|
-| Open Analytics | Medium | `canUse('analytics')`, route guard |
-| View Activity logs | Medium | `canUse('activity_logs')` |
-| Add 2nd+ department (beyond cap) | Medium | `canUse('departments')`, `canAddDepartment()` |
-| Customer balance screens | Medium | `canUse('customer_balance')` |
-| Duplicate category | Medium | `canDuplicateByPlan` in inventory pages |
-| WhatsApp beyond cap | Medium | `maxWhatsAppMessagesPerMonth` in limits |
-| Multi-Store Sync | Enterprise | `canUse('multi_store_sync')` |
-| Copy from branch | Enterprise | `inventoryStore.copyFolderTemplates…`, super admin |
-| Stock loans | Enterprise | `canUse('seller_loans')` |
-| Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation |
+| User action                           | Minimum plan        | Code / UI                                          |
+| ------------------------------------- | ------------------- | -------------------------------------------------- |
+| Open Analytics                        | Medium              | `canUse('analytics')`, route guard                 |
+| View Activity logs                    | Medium              | `canUse('activity_logs')`                          |
+| Add 2nd+ department (beyond cap)      | Medium              | `canUse('departments')`, `canAddDepartment()`      |
+| Customer balance screens              | Medium              | `canUse('customer_balance')`                       |
+| Duplicate category                    | Medium              | `canDuplicateByPlan` in inventory pages            |
+| WhatsApp beyond cap                   | Medium              | `maxWhatsAppMessagesPerMonth` in limits            |
+| Multi-Store Sync                      | Enterprise          | `canUse('multi_store_sync')`                       |
+| Copy from branch                      | Enterprise          | `inventoryStore.copyFolderTemplates…`, super admin |
+| Stock loans                           | Enterprise          | `canUse('seller_loans')`                           |
+| Add 2nd store (Micro) / 3rd+ (Medium) | Medium / Enterprise | `getEligibleStoresForPlan`, store creation         |
 
 ---
 
@@ -151,14 +151,14 @@ These build trust and word-of-mouth; keep them on every tier:
 
 Show upgrade prompts when users **hit a limit**, not at random:
 
-| Moment | Suggested message |
-|--------|-------------------|
-| Analytics nav (Micro) | “See revenue trends and busiest hours on Medium” |
-| 3rd staff invite (Micro) | “Medium supports up to 25 staff per store” |
-| 2nd store creation (Micro) | “Add a second branch on Medium” |
-| WhatsApp cap (Micro) | “Unlimited WhatsApp receipts on Medium” |
-| Copy from branch | “Enterprise: copy category templates across branches” |
-| Stock loans nav | “Enterprise: track inventory lent to resellers” |
+| Moment                     | Suggested message                                     |
+| -------------------------- | ----------------------------------------------------- |
+| Analytics nav (Micro)      | “See revenue trends and busiest hours on Medium”      |
+| 3rd staff invite (Micro)   | “Medium supports up to 25 staff per store”            |
+| 2nd store creation (Micro) | “Add a second branch on Medium”                       |
+| WhatsApp cap (Micro)       | “Unlimited WhatsApp receipts on Medium”               |
+| Copy from branch           | “Enterprise: copy category templates across branches” |
+| Stock loans nav            | “Enterprise: track inventory lent to resellers”       |
 
 ---
 

@@ -14,11 +14,7 @@ import type { SavedSearch } from '~/stores/search'
 import { DEMO_SAVED_SEARCHES_KEY } from '~/utils/demo-mode'
 import { sanitizeDemoDisplayDashes } from '~/utils/demo-display-text'
 import { demoId } from '~/utils/demo-seed'
-import {
-  DEMO_USER_UID,
-  isDemoModeActive,
-  markDemoSessionActive,
-} from '~/utils/demo-mode'
+import { DEMO_USER_UID, isDemoModeActive, markDemoSessionActive } from '~/utils/demo-mode'
 import { useDemoAppStore } from '~/stores/demoApp'
 import { useAuthStore } from '~/stores/auth'
 import { useUserStore } from '~/stores/user'
@@ -37,7 +33,13 @@ export const DEMO_PRODUCT_TEMPLATE: Template = {
   fields: [
     { id: 'name', name: 'name', label: 'Product name', type: 'text', required: true },
     { id: 'price', name: 'price', label: 'Price', type: 'currency', required: true },
-    { id: 'quantity', name: 'quantity', label: 'Quantity in stock', type: 'number', required: true },
+    {
+      id: 'quantity',
+      name: 'quantity',
+      label: 'Quantity in stock',
+      type: 'number',
+      required: true,
+    },
     { id: 'sku', name: 'sku', label: 'SKU', type: 'text', required: false },
   ],
 }
@@ -140,9 +142,7 @@ export function getDemoSellerLoans(storeId: string): SellerLoanOut[] {
       partyName: 'Emeka Traders',
       partyPhone: '0803 555 0101',
       partyNotes: 'Reseller — settles weekly',
-      lines: [
-        { inventoryItemId: first.id, folderId: first.folderId, itemSummary: first.name },
-      ],
+      lines: [{ inventoryItemId: first.id, folderId: first.folderId, itemSummary: first.name }],
       createdAt: new Date(now - day * 3),
       updatedAt: new Date(now - day * 3),
       createdBy: DEMO_USER_UID,
@@ -154,9 +154,7 @@ export function getDemoSellerLoans(storeId: string): SellerLoanOut[] {
       partyName: 'Gadget Hub',
       partyPhone: '0805 555 0202',
       partyNotes: 'Returned unsold units',
-      lines: [
-        { inventoryItemId: second.id, folderId: second.folderId, itemSummary: second.name },
-      ],
+      lines: [{ inventoryItemId: second.id, folderId: second.folderId, itemSummary: second.name }],
       createdAt: new Date(now - day * 8),
       updatedAt: new Date(now - day * 5),
       returnedAt: new Date(now - day * 5),
@@ -528,7 +526,7 @@ export async function syncDemoToPinia() {
 
 export async function applyDemoInventoryItemCreate(
   folderId: string,
-  itemData: Partial<InventoryItem>,
+  itemData: Partial<InventoryItem>
 ): Promise<string> {
   const demo = useDemoAppStore()
   const item = demo.addInventoryItem({
@@ -542,7 +540,10 @@ export async function applyDemoInventoryItemCreate(
   return item.id
 }
 
-export async function applyDemoInventoryItemUpdate(itemId: string, updates: Partial<InventoryItem>) {
+export async function applyDemoInventoryItemUpdate(
+  itemId: string,
+  updates: Partial<InventoryItem>
+) {
   const demo = useDemoAppStore()
   const item = demo.state.stores.flatMap((s) => s.items).find((i) => i.id === itemId)
   if (!item) return
@@ -558,16 +559,14 @@ export async function applyDemoInventoryItemUpdate(itemId: string, updates: Part
 }
 
 export async function applyDemoCreateReceipt(
-  receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>,
+  receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
 ) {
   const id = useDemoAppStore().importDashboardReceipt(receiptData)
   await syncDemoToPinia()
   return id
 }
 
-export async function applyDemoReceiptSale(
-  lines: { itemId: string; quantitySold: number }[],
-) {
+export async function applyDemoReceiptSale(lines: { itemId: string; quantitySold: number }[]) {
   useDemoAppStore().applySaleLines(lines)
   await syncDemoToPinia()
 }
@@ -579,7 +578,7 @@ export async function applyDemoCustomerFromReceipt(
     customerEmail?: string
     customerPhone?: string
     total: number
-  },
+  }
 ) {
   const id = useDemoAppStore().syncCustomerFromReceipt(receiptId, receiptData)
   await syncDemoToPinia()
@@ -591,10 +590,7 @@ export async function applyDemoReceiptRefund(receiptId: string) {
   await syncDemoToPinia()
 }
 
-export async function applyDemoReceiptUpdate(
-  receiptId: string,
-  updates: Partial<Receipt>,
-) {
+export async function applyDemoReceiptUpdate(receiptId: string, updates: Partial<Receipt>) {
   const demo = useDemoAppStore()
   const receipt = demo.currentStore.receipts.find((r) => r.id === receiptId)
   if (!receipt) throw new Error('Receipt not found')
@@ -617,7 +613,10 @@ export function getDemoUserDocument(uid?: string): UserData | null {
 }
 
 export async function applyDemoCreateFolder(
-  folderData: Pick<InventoryFolder, 'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template'>,
+  folderData: Pick<
+    InventoryFolder,
+    'name' | 'description' | 'type' | 'color' | 'hasSerialNumbers' | 'template'
+  >
 ): Promise<string> {
   const id = useDemoAppStore().addFolder(folderData.name)
   await syncDemoToPinia()
@@ -655,7 +654,11 @@ export function getDemoSavedSearches(): SavedSearch[] {
   return loadDemoSavedSearches()
 }
 
-export function saveDemoSearch(name: string, query: string, filters: SavedSearch['filters']): string {
+export function saveDemoSearch(
+  name: string,
+  query: string,
+  filters: SavedSearch['filters']
+): string {
   const id = demoId('search')
   const entry: SavedSearch = {
     id,

@@ -26,7 +26,10 @@ export default defineEventHandler(async (event) => {
     return { error: 'Invalid signature' }
   }
 
-  let payload: { event?: string; data?: { reference?: string; amount?: number; channel?: string; metadata?: { token?: string } } }
+  let payload: {
+    event?: string
+    data?: { reference?: string; amount?: number; channel?: string; metadata?: { token?: string } }
+  }
   try {
     payload = JSON.parse(raw)
   } catch {

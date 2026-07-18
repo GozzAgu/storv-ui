@@ -129,7 +129,9 @@ html.capacitor-native .dashboard-native-main {
 }
 
 html.capacitor-native .dashboard-native-main:has(.dashboard-page-with-footer) {
-  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.25rem) !important;
+  padding-bottom: calc(
+    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.25rem
+  ) !important;
 }
 
 html.capacitor-native .dashboard-top-nav-spacer-native {
@@ -161,9 +163,7 @@ html.capacitor-native .native-tabbar {
   border-radius: 1.75rem;
   border: 1px solid rgb(255 255 255 / 0.6);
   background: rgb(255 255 255 / 0.6);
-  box-shadow:
-    0 12px 40px -8px rgb(15 23 42 / 0.32),
-    0 2px 12px rgb(15 23 42 / 0.1),
+  box-shadow: 0 12px 40px -8px rgb(15 23 42 / 0.32), 0 2px 12px rgb(15 23 42 / 0.1),
     inset 0 1px 0 rgb(255 255 255 / 0.7);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   backdrop-filter: blur(30px) saturate(180%);
@@ -175,9 +175,7 @@ html.capacitor-native .native-tabbar {
 html.capacitor-native.dark .native-tabbar {
   border-color: rgb(255 255 255 / 0.12);
   background: rgb(22 24 32 / 0.58);
-  box-shadow:
-    0 16px 48px -8px rgb(0 0 0 / 0.66),
-    0 2px 12px rgb(0 0 0 / 0.45),
+  box-shadow: 0 16px 48px -8px rgb(0 0 0 / 0.66), 0 2px 12px rgb(0 0 0 / 0.45),
     inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
@@ -258,7 +256,10 @@ html.capacitor-native .btn-primary {
   font-size: var(--cap-text-sm) !important;
 }
 
-html.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-native
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
+    [type='button']
+  ):not([type='submit']):not([type='reset']),
 html.capacitor-native select,
 html.capacitor-native textarea,
 html.capacitor-native .app-field {
@@ -267,7 +268,10 @@ html.capacitor-native .app-field {
 }
 
 /* Uniform 44px iOS touch targets across every input/select/textarea */
-html.capacitor-ios.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-ios.capacitor-native
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
+    [type='button']
+  ):not([type='submit']):not([type='reset']),
 html.capacitor-ios.capacitor-native select,
 html.capacitor-ios.capacitor-native textarea,
 html.capacitor-ios.capacitor-native .app-field,

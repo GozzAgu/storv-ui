@@ -5,7 +5,8 @@
  */
 
 .receipt-content {
-  --receipt-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  --receipt-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Monaco, Consolas,
+    'Liberation Mono', monospace;
   --receipt-display: 'Pixelify Sans', var(--receipt-mono);
   font-family: var(--receipt-mono);
   font-size: 11px;

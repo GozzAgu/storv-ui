@@ -99,7 +99,7 @@ function computeStats(links: PaymentLinkListItem[]): PaymentLinkStats {
       }
       return acc
     },
-    { collected: 0, paid: 0, unpaid: 0, failed: 0 },
+    { collected: 0, paid: 0, unpaid: 0, failed: 0 }
   )
 }
 
@@ -137,9 +137,7 @@ export function getDemoSettlements(): {
   }
   const lastSettledAtMs = Date.now() - 12 * 60 * 60 * 1000
   return {
-    settlements: [
-      { id: 1, status: 'success', amount: stats.collected, dateMs: lastSettledAtMs },
-    ],
+    settlements: [{ id: 1, status: 'success', amount: stats.collected, dateMs: lastSettledAtMs }],
     pendingTotal: 0,
     settledTotal: stats.collected,
     lastSettledAtMs,
@@ -187,10 +185,7 @@ export function createDemoPaymentLink(input: {
   }
 
   const existing = readLinks()
-  const nextNumber =
-    1043 +
-    existing.filter((l) => l.invoiceNumber.startsWith('INV-')).length +
-    1
+  const nextNumber = 1043 + existing.filter((l) => l.invoiceNumber.startsWith('INV-')).length + 1
   const token = demoId('demo_pl')
   const invoiceNumber = `INV-${nextNumber}`
   const link: PaymentLinkListItem = {

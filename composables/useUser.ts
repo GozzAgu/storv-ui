@@ -4,210 +4,214 @@ import type { SubscriptionPlan } from '~/types/subscription'
 import type { UserPreferences } from '~/composables/usePreferences'
 
 export interface StoreSettings {
- inventory?: {
- lowStockThreshold?: number
- autoReorder?: boolean
- defaultCategory?: string
- }
- receipt?: {
- prefix?: string
- nextNumber?: number
- autoPrint?: boolean
- /** Printed / emailed receipts; set from Profile (super admin). */
- salesTerms?: string
- refundPolicy?: string
- warrantyPolicy?: string
- }
- payment?: {
- paymentMethods?: string[]
- }
+  inventory?: {
+    lowStockThreshold?: number
+    autoReorder?: boolean
+    defaultCategory?: string
+  }
+  receipt?: {
+    prefix?: string
+    nextNumber?: number
+    autoPrint?: boolean
+    /** Printed / emailed receipts; set from Profile (super admin). */
+    salesTerms?: string
+    refundPolicy?: string
+    warrantyPolicy?: string
+  }
+  payment?: {
+    paymentMethods?: string[]
+  }
 }
 
 export interface StoreDetails {
- storeName: string
- storeAddress?: string
- storePhone?: string
- storeEmail?: string
- storeDescription?: string
- settings?: StoreSettings
+  storeName: string
+  storeAddress?: string
+  storePhone?: string
+  storeEmail?: string
+  storeDescription?: string
+  settings?: StoreSettings
 }
 
 export interface UserData {
- uid: string
- email: string
- name: string
- role: 'superAdmin' | 'admin' | 'user' | 'staff'
- subscription: SubscriptionPlan
- photoURL?: string
- storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
- storeDetails?: StoreDetails
- preferences?: UserPreferences
- hasCompletedOnboarding: boolean
- hasCompletedTutorial: boolean
- mustChangePassword?: boolean // Staff: must change password on next login
- twoFactorEnabled?: boolean
- twoFactorMethod?: 'totp' | 'phone' | null
- twoFactorSecret?: string | null
- twoFactorEnabledAt?: string | null
- createdAt: any
- updatedAt: any
+  uid: string
+  email: string
+  name: string
+  role: 'superAdmin' | 'admin' | 'user' | 'staff'
+  subscription: SubscriptionPlan
+  photoURL?: string
+  storeLogoUrl?: string // Account logo - applies to all stores, shown on receipts
+  storeDetails?: StoreDetails
+  preferences?: UserPreferences
+  hasCompletedOnboarding: boolean
+  hasCompletedTutorial: boolean
+  mustChangePassword?: boolean // Staff: must change password on next login
+  twoFactorEnabled?: boolean
+  twoFactorMethod?: 'totp' | 'phone' | null
+  twoFactorSecret?: string | null
+  twoFactorEnabledAt?: string | null
+  createdAt: any
+  updatedAt: any
 }
 
 /**
  * Composable for user data management in Firestore
  */
 export const useUser = () => {
- const { getFirestoreInstance } = useFirestore()
- 
- // Create or update user document
- const createUserDocument = async (uid: string, userData: Partial<UserData>) => {
- const { isDemoModeActive } = await import('~/utils/demo-mode')
- if (isDemoModeActive()) {
- const { getDemoUserDocument } = await import('~/utils/demo-bridge')
- return getDemoUserDocument(uid) ?? {
- uid,
- email: userData.email || 'demo@storvv.app',
- name: userData.name || 'Demo User',
- role: 'superAdmin',
- subscription: 'storvv_enterprise',
- hasCompletedOnboarding: true,
- hasCompletedTutorial: true,
- createdAt: new Date(),
- updatedAt: new Date(),
- } as UserData
- }
+  const { getFirestoreInstance } = useFirestore()
 
- const db = getFirestoreInstance()
- if (!db) {
- throw new Error('Firestore not initialized. Please ensure Firebase is properly configured.')
- }
+  // Create or update user document
+  const createUserDocument = async (uid: string, userData: Partial<UserData>) => {
+    const { isDemoModeActive } = await import('~/utils/demo-mode')
+    if (isDemoModeActive()) {
+      const { getDemoUserDocument } = await import('~/utils/demo-bridge')
+      return (
+        getDemoUserDocument(uid) ??
+        ({
+          uid,
+          email: userData.email || 'demo@storvv.app',
+          name: userData.name || 'Demo User',
+          role: 'superAdmin',
+          subscription: 'storvv_enterprise',
+          hasCompletedOnboarding: true,
+          hasCompletedTutorial: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as UserData)
+      )
+    }
 
- try {
- const userRef = doc(db, 'users', uid)
- const userDoc = await getDoc(userRef)
+    const db = getFirestoreInstance()
+    if (!db) {
+      throw new Error('Firestore not initialized. Please ensure Firebase is properly configured.')
+    }
 
- if (!userDoc.exists()) {
- // Create new user document
- const newUserData: UserData = {
- uid,
- email: userData.email || '',
- name: userData.name || '',
- role: 'superAdmin', // First user is always superAdmin
- hasCompletedOnboarding: false,
- hasCompletedTutorial: false,
- createdAt: serverTimestamp(),
- updatedAt: serverTimestamp(),
- ...userData,
- // Ensure default subscription isn't overwritten by undefined
- subscription: (userData.subscription as SubscriptionPlan) || 'storvv_micro',
- }
- 
- await setDoc(userRef, newUserData)
- return newUserData
- } else {
- // Update existing user document
- await updateDoc(userRef, {
- ...userData,
- updatedAt: serverTimestamp()
- })
- 
- const updatedDoc = await getDoc(userRef)
- return updatedDoc.data() as UserData
- }
- } catch (error: any) {
- // Handle Firestore permission errors specifically
- if (error.code === 'permission-denied') {
- throw new Error('PERMISSION_DENIED: Firestore security rules are blocking access. Please:\n1. Go to Firebase Console → Firestore Database → Rules\n2. Copy the rules from firestore.rules file\n3. Paste and click Publish\n\nSee FIRESTORE_SETUP.md for detailed instructions.')
- }
- // Handle other Firestore errors
- if (error.code) {
- throw new Error(`Firestore error (${error.code}): ${error.message}`)
- }
- throw error
- }
- }
+    try {
+      const userRef = doc(db, 'users', uid)
+      const userDoc = await getDoc(userRef)
 
- // Get user document
- const getUserDocument = async (uid: string): Promise<UserData | null> => {
- const { isDemoModeActive } = await import('~/utils/demo-mode')
- if (isDemoModeActive()) {
- const { getDemoUserDocument } = await import('~/utils/demo-bridge')
- return getDemoUserDocument(uid)
- }
+      if (!userDoc.exists()) {
+        // Create new user document
+        const newUserData: UserData = {
+          uid,
+          email: userData.email || '',
+          name: userData.name || '',
+          role: 'superAdmin', // First user is always superAdmin
+          hasCompletedOnboarding: false,
+          hasCompletedTutorial: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          ...userData,
+          // Ensure default subscription isn't overwritten by undefined
+          subscription: (userData.subscription as SubscriptionPlan) || 'storvv_micro',
+        }
 
- const db = getFirestoreInstance()
- if (!db) {
- console.warn('Firestore not initialized')
- return null
- }
+        await setDoc(userRef, newUserData)
+        return newUserData
+      } else {
+        // Update existing user document
+        await updateDoc(userRef, {
+          ...userData,
+          updatedAt: serverTimestamp(),
+        })
 
- try {
- const userRef = doc(db, 'users', uid)
- const userDoc = await getDoc(userRef)
+        const updatedDoc = await getDoc(userRef)
+        return updatedDoc.data() as UserData
+      }
+    } catch (error: any) {
+      // Handle Firestore permission errors specifically
+      if (error.code === 'permission-denied') {
+        throw new Error(
+          'PERMISSION_DENIED: Firestore security rules are blocking access. Please:\n1. Go to Firebase Console → Firestore Database → Rules\n2. Copy the rules from firestore.rules file\n3. Paste and click Publish\n\nSee FIRESTORE_SETUP.md for detailed instructions.'
+        )
+      }
+      // Handle other Firestore errors
+      if (error.code) {
+        throw new Error(`Firestore error (${error.code}): ${error.message}`)
+      }
+      throw error
+    }
+  }
 
- if (!userDoc.exists()) {
- return null
- }
+  // Get user document
+  const getUserDocument = async (uid: string): Promise<UserData | null> => {
+    const { isDemoModeActive } = await import('~/utils/demo-mode')
+    if (isDemoModeActive()) {
+      const { getDemoUserDocument } = await import('~/utils/demo-bridge')
+      return getDemoUserDocument(uid)
+    }
 
- return userDoc.data() as UserData
- } catch (error: any) {
- // Log error but don't throw - allow auth to proceed even if Firestore fails
- console.error('Error getting user document:', error)
- if (error.code === 'permission-denied') {
- console.error('Firestore permission denied. Please set up security rules.')
- }
- return null
- }
- }
+    const db = getFirestoreInstance()
+    if (!db) {
+      console.warn('Firestore not initialized')
+      return null
+    }
 
- // Update user document
- const updateUserDocument = async (uid: string, updates: Partial<UserData>) => {
- const { isDemoModeActive } = await import('~/utils/demo-mode')
- if (isDemoModeActive()) {
- const { syncDemoToPinia } = await import('~/utils/demo-bridge')
- await syncDemoToPinia()
- const { useUserStore } = await import('~/stores/user')
- const current = useUserStore().userData
- if (!current) return null
- return { ...current, ...updates, updatedAt: new Date() } as UserData
- }
+    try {
+      const userRef = doc(db, 'users', uid)
+      const userDoc = await getDoc(userRef)
 
- const db = getFirestoreInstance()
- if (!db) {
- throw new Error('Firestore not initialized')
- }
+      if (!userDoc.exists()) {
+        return null
+      }
 
- const userRef = doc(db, 'users', uid)
- await updateDoc(userRef, {
- ...updates,
- updatedAt: serverTimestamp()
- })
+      return userDoc.data() as UserData
+    } catch (error: any) {
+      // Log error but don't throw - allow auth to proceed even if Firestore fails
+      console.error('Error getting user document:', error)
+      if (error.code === 'permission-denied') {
+        console.error('Firestore permission denied. Please set up security rules.')
+      }
+      return null
+    }
+  }
 
- const updatedDoc = await getDoc(userRef)
- return updatedDoc.data() as UserData
- }
+  // Update user document
+  const updateUserDocument = async (uid: string, updates: Partial<UserData>) => {
+    const { isDemoModeActive } = await import('~/utils/demo-mode')
+    if (isDemoModeActive()) {
+      const { syncDemoToPinia } = await import('~/utils/demo-bridge')
+      await syncDemoToPinia()
+      const { useUserStore } = await import('~/stores/user')
+      const current = useUserStore().userData
+      if (!current) return null
+      return { ...current, ...updates, updatedAt: new Date() } as UserData
+    }
 
- // Update store details
- const updateStoreDetails = async (uid: string, storeDetails: StoreDetails) => {
- return updateUserDocument(uid, {
- storeDetails,
- hasCompletedOnboarding: true
- })
- }
+    const db = getFirestoreInstance()
+    if (!db) {
+      throw new Error('Firestore not initialized')
+    }
 
- // Mark tutorial as completed
- const completeTutorial = async (uid: string) => {
- return updateUserDocument(uid, {
- hasCompletedTutorial: true
- })
- }
+    const userRef = doc(db, 'users', uid)
+    await updateDoc(userRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    })
 
- return {
- createUserDocument,
- getUserDocument,
- updateUserDocument,
- updateStoreDetails,
- completeTutorial
- }
+    const updatedDoc = await getDoc(userRef)
+    return updatedDoc.data() as UserData
+  }
+
+  // Update store details
+  const updateStoreDetails = async (uid: string, storeDetails: StoreDetails) => {
+    return updateUserDocument(uid, {
+      storeDetails,
+      hasCompletedOnboarding: true,
+    })
+  }
+
+  // Mark tutorial as completed
+  const completeTutorial = async (uid: string) => {
+    return updateUserDocument(uid, {
+      hasCompletedTutorial: true,
+    })
+  }
+
+  return {
+    createUserDocument,
+    getUserDocument,
+    updateUserDocument,
+    updateStoreDetails,
+    completeTutorial,
+  }
 }
-

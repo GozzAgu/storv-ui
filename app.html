@@ -1,220 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" id="theme-color-meta" content="#fafafa">
-    
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" id="theme-color-meta" content="#fafafa" />
+
     <!-- CRITICAL: Apply theme IMMEDIATELY - blocking script that runs before rendering -->
     <script>
-      !function() {
-        'use strict';
-        var html = document.documentElement;
-        var theme, isDark = false;
-        
+      !(function () {
+        'use strict'
+        var html = document.documentElement
+        var theme,
+          isDark = false
+
         try {
-          theme = localStorage.getItem('theme');
-          
+          theme = localStorage.getItem('theme')
+
           if (theme === 'dark') {
-            isDark = true;
+            isDark = true
           } else if (theme === 'light') {
-            isDark = false;
+            isDark = false
           } else if (theme === 'system') {
             // User explicitly chose system - follow device preference
             try {
               if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                isDark = true;
+                isDark = true
               }
-            } catch(e) {
-              isDark = false;
+            } catch (e) {
+              isDark = false
             }
           } else {
             // No saved theme (first-time user) - default to light until they change it
-            isDark = false;
+            isDark = false
           }
-        } catch(e) {
+        } catch (e) {
           // localStorage access failed - default to light
-          isDark = false;
+          isDark = false
         }
-        
+
         // Apply theme class SYNCHRONOUSLY before any rendering
         if (isDark) {
-          html.className = (html.className ? html.className + ' ' : '') + 'dark';
+          html.className = (html.className ? html.className + ' ' : '') + 'dark'
         } else {
-          html.className = html.className.replace(/\s*dark\s*/g, ' ').trim();
+          html.className = html.className.replace(/\s*dark\s*/g, ' ').trim()
         }
         try {
-          html.style.colorScheme = isDark ? 'dark' : 'light';
+          html.style.colorScheme = isDark ? 'dark' : 'light'
         } catch (e) {}
         try {
-          var meta = document.getElementById('theme-color-meta');
-          if (meta) meta.setAttribute('content', isDark ? '#07080c' : '#fafafa');
+          var meta = document.getElementById('theme-color-meta')
+          if (meta) meta.setAttribute('content', isDark ? '#07080c' : '#fafafa')
         } catch (e) {}
-      }();
+      })()
     </script>
-    
+
     <!-- CRITICAL: Block ALL rendering until styles load - SIMPLE & AGGRESSIVE -->
     <style id="fouc-blocker">
       /* Hide everything until styles are loaded - use display:none for complete hiding */
-      html:not(.styles-loaded) { 
+      html:not(.styles-loaded) {
         display: none !important;
       }
-      html:not(.styles-loaded) body { 
+      html:not(.styles-loaded) body {
         display: none !important;
       }
       /* Reveal when ready */
-      html.styles-loaded { 
+      html.styles-loaded {
         display: block !important;
-        opacity: 1 !important; 
+        opacity: 1 !important;
         transition: opacity 0.15s ease-in;
       }
-      html.styles-loaded body { 
+      html.styles-loaded body {
         display: block !important;
-        opacity: 1 !important; 
+        opacity: 1 !important;
       }
       /* Must match dashboard canvas + marketing shells: avoids visible seams on overscroll */
-      html.dark { background-color: #07080c !important; }
-      html:not(.dark) { background-color: #fafafa !important; }
-      body { 
-        background-color: inherit !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
+      html.dark {
+        background-color: #07080c !important;
+      }
+      html:not(.dark) {
+        background-color: #fafafa !important;
+      }
+      body {
+        background-color: inherit !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       /* Critical layout */
-      #__nuxt { 
-        min-height: 100vh; 
-        width: 100%; 
-        position: relative; 
-        overflow-x: hidden; 
+      #__nuxt {
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow-x: hidden;
       }
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
     </style>
-    
+
     <!-- SIMPLE & RELIABLE: Hide immediately, reveal when window loads -->
     <script>
-      (function() {
-        'use strict';
-        var html = document.documentElement;
-        var revealed = false;
+      ;(function () {
+        'use strict'
+        var html = document.documentElement
+        var revealed = false
 
         function isCapacitorShell() {
           try {
-            var loc = window.location;
-            var p = loc.protocol;
-            var h = (loc.hostname || '').toLowerCase();
-            var port = loc.port || '';
-            var href = loc.href || '';
-            var ua = navigator.userAgent || '';
-            var local = h === 'localhost' || h === '127.0.0.1';
-            if (p === 'capacitor:' || href.indexOf('capacitor://') === 0) return true;
-            if (local && p === 'https:' && (!port || port === '443')) return true;
-            if (local && p === 'http:' && (!port || port === '80')) return true;
-            if (/Capacitor/i.test(ua)) return true;
+            var loc = window.location
+            var p = loc.protocol
+            var h = (loc.hostname || '').toLowerCase()
+            var port = loc.port || ''
+            var href = loc.href || ''
+            var ua = navigator.userAgent || ''
+            var local = h === 'localhost' || h === '127.0.0.1'
+            if (p === 'capacitor:' || href.indexOf('capacitor://') === 0) return true
+            if (local && p === 'https:' && (!port || port === '443')) return true
+            if (local && p === 'http:' && (!port || port === '80')) return true
+            if (/Capacitor/i.test(ua)) return true
           } catch (e) {}
-          return false;
+          return false
         }
 
         if (isCapacitorShell()) {
-          html.classList.add('capacitor-native', 'styles-loaded');
-          html.style.removeProperty('display');
-          var capPath = location.pathname || '/';
+          html.classList.add('capacitor-native', 'styles-loaded')
+          html.style.removeProperty('display')
+          var capPath = location.pathname || '/'
           if (capPath === '/' || capPath === '/index.html') {
-            location.replace('/signin');
+            location.replace('/signin')
           }
-          return;
+          return
         }
-        
+
         // HIDE IMMEDIATELY - before anything renders - use display:none
-        html.style.cssText = 'display: none !important;';
-        
+        html.style.cssText = 'display: none !important;'
+
         // Hide body as soon as it exists
         function hideBody() {
           if (document.body) {
-            document.body.style.cssText = 'display: none !important;';
+            document.body.style.cssText = 'display: none !important;'
           }
         }
-        hideBody();
-        
+        hideBody()
+
         // Watch for body creation
         if (document.readyState === 'loading') {
-          var bodyObserver = new MutationObserver(function() {
+          var bodyObserver = new MutationObserver(function () {
             if (document.body) {
-              hideBody();
-              bodyObserver.disconnect();
-          }
-          });
-          bodyObserver.observe(document.documentElement, { childList: true, subtree: true });
+              hideBody()
+              bodyObserver.disconnect()
+            }
+          })
+          bodyObserver.observe(document.documentElement, { childList: true, subtree: true })
         }
-        
+
         function reveal() {
-          if (revealed) return;
-          revealed = true;
-          html.classList.add('styles-loaded');
-          html.style.removeProperty('display');
+          if (revealed) return
+          revealed = true
+          html.classList.add('styles-loaded')
+          html.style.removeProperty('display')
           if (document.body) {
-            document.body.style.removeProperty('display');
+            document.body.style.removeProperty('display')
+          }
         }
-        }
-        
+
         // Test Tailwind is working
         function testTailwind() {
           try {
-            if (!document.body) return false;
-            var test = document.createElement('div');
-            test.className = 'flex';
-            test.style.cssText = 'position:absolute;visibility:hidden;top:-9999px;';
-            document.body.appendChild(test);
-            var style = window.getComputedStyle(test);
-            var works = style.display === 'flex' || style.display === '-webkit-box';
-            document.body.removeChild(test);
-            return works;
-          } catch(e) {
-            return false;
+            if (!document.body) return false
+            var test = document.createElement('div')
+            test.className = 'flex'
+            test.style.cssText = 'position:absolute;visibility:hidden;top:-9999px;'
+            document.body.appendChild(test)
+            var style = window.getComputedStyle(test)
+            var works = style.display === 'flex' || style.display === '-webkit-box'
+            document.body.removeChild(test)
+            return works
+          } catch (e) {
+            return false
           }
         }
-        
+
         // Wait for window load (all resources including CSS)
-        window.addEventListener('load', function() {
-          // Check Tailwind multiple times
-          var attempts = 0;
-          var maxAttempts = 20; // 1 second total
-          var checkInterval = setInterval(function() {
-            attempts++;
-            if (testTailwind() || attempts >= maxAttempts) {
-              clearInterval(checkInterval);
-              reveal();
-            }
-          }, 50);
-        }, {once: true});
-        
+        window.addEventListener(
+          'load',
+          function () {
+            // Check Tailwind multiple times
+            var attempts = 0
+            var maxAttempts = 20 // 1 second total
+            var checkInterval = setInterval(function () {
+              attempts++
+              if (testTailwind() || attempts >= maxAttempts) {
+                clearInterval(checkInterval)
+                reveal()
+              }
+            }, 50)
+          },
+          { once: true }
+        )
+
         // DOMContentLoaded fallback - start checking earlier
-        document.addEventListener('DOMContentLoaded', function() {
-          setTimeout(function() {
-            if (!revealed) {
-              var attempts = 0;
-              var maxAttempts = 30; // 1.5 seconds
-              var checkInterval = setInterval(function() {
-                attempts++;
-                if (testTailwind() || attempts >= maxAttempts) {
-                  clearInterval(checkInterval);
-                  if (!revealed) reveal();
-                }
-              }, 50);
-            }
-          }, 300);
-        }, {once: true});
-        
+        document.addEventListener(
+          'DOMContentLoaded',
+          function () {
+            setTimeout(function () {
+              if (!revealed) {
+                var attempts = 0
+                var maxAttempts = 30 // 1.5 seconds
+                var checkInterval = setInterval(function () {
+                  attempts++
+                  if (testTailwind() || attempts >= maxAttempts) {
+                    clearInterval(checkInterval)
+                    if (!revealed) reveal()
+                  }
+                }, 50)
+              }
+            }, 300)
+          },
+          { once: true }
+        )
+
         // Absolute safety fallback - never hide forever
-        setTimeout(function() {
-          if (!revealed) reveal();
-        }, 2000);
-      })();
+        setTimeout(function () {
+          if (!revealed) reveal()
+        }, 2000)
+      })()
     </script>
-    
+
     {{ HEAD }}
   </head>
   <body>
     {{ APP }}
   </body>
 </html>
-

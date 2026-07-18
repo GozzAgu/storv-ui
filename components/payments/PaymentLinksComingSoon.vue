@@ -22,10 +22,7 @@
     >
       Coming soon
     </p>
-    <h2
-      v-if="!compact"
-      class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-50"
-    >
+    <h2 v-if="!compact" class="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-50">
       Payment links
     </h2>
     <p
@@ -34,12 +31,10 @@
         compact ? 'mt-2 max-w-sm text-xs' : 'mt-2 max-w-md text-sm',
       ]"
     >
-      Paystack pay-by-link is in progress on mobile. You'll connect your bank, send secure links, and auto-create receipts when customers pay.
+      Paystack pay-by-link is in progress on mobile. You'll connect your bank, send secure links,
+      and auto-create receipts when customers pay.
     </p>
-    <p
-      v-if="!compact"
-      class="mx-auto mt-3 max-w-md text-xs text-gray-500 dark:text-gray-500"
-    >
+    <p v-if="!compact" class="mx-auto mt-3 max-w-md text-xs text-gray-500 dark:text-gray-500">
       Use the web app for now, or check back after the next update.
     </p>
   </section>

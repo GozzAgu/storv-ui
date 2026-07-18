@@ -9,7 +9,7 @@ const props = withDefaults(
     disabled?: boolean
     size?: 'sm' | 'md'
   }>(),
-  { loading: false, disabled: false, size: 'sm' },
+  { loading: false, disabled: false, size: 'sm' }
 )
 
 defineEmits<{ click: [] }>()
@@ -34,7 +34,12 @@ const iconClass = computed(() => (props.size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5
     @click="$emit('click')"
   >
     <span v-if="loading" class="staff-role-cycle-btn__spinner" aria-hidden="true" />
-    <ArrowPathIcon v-else :class="iconClass" class="staff-role-cycle-btn__icon" aria-hidden="true" />
+    <ArrowPathIcon
+      v-else
+      :class="iconClass"
+      class="staff-role-cycle-btn__icon"
+      aria-hidden="true"
+    />
   </button>
 </template>
 
@@ -47,10 +52,7 @@ const iconClass = computed(() => (props.size === 'md' ? 'h-5 w-5' : 'h-3.5 w-3.5
   justify-content: center;
   border-radius: var(--app-radius-sm, 0.25rem);
   color: rgb(107 114 128);
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    transform 0.12s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
 }
 
 .staff-role-cycle-btn:hover:not(:disabled) {

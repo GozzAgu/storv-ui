@@ -44,7 +44,10 @@ function resolveItemName(data: Record<string, unknown>): string {
 }
 
 function makeInvoiceNumber(): string {
-  return `PL-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.random().toString(36).toUpperCase().slice(2, 4)}`
+  return `PL-${Date.now().toString(36).toUpperCase().slice(-6)}${Math.random()
+    .toString(36)
+    .toUpperCase()
+    .slice(2, 4)}`
 }
 
 /**
@@ -78,9 +81,15 @@ export default defineEventHandler(async (event) => {
   const adminDb = getAdminFirestore()
 
   // Require a connected payout account.
-  const payoutSnap = await adminDb.collection('merchantPayouts').doc(payoutDocId(ownerUserId, storeId)).get()
+  const payoutSnap = await adminDb
+    .collection('merchantPayouts')
+    .doc(payoutDocId(ownerUserId, storeId))
+    .get()
   if (!payoutSnap.exists || !payoutSnap.data()?.subaccountCode) {
-    throw createError({ statusCode: 400, message: 'Connect a payout account before creating payment links' })
+    throw createError({
+      statusCode: 400,
+      message: 'Connect a payout account before creating payment links',
+    })
   }
 
   const storeRef = adminDb.collection('users').doc(ownerUserId).collection('stores').doc(storeId)
@@ -111,13 +120,17 @@ export default defineEventHandler(async (event) => {
     const data = itemSnap.data() as Record<string, unknown>
 
     // Availability + stock check.
-    const folder = (await getFolder(folderId)) as
-      | { hasSerialNumbers?: boolean; template?: { fields?: Array<{ name?: string }> } }
-      | null
+    const folder = (await getFolder(folderId)) as {
+      hasSerialNumbers?: boolean
+      template?: { fields?: Array<{ name?: string }> }
+    } | null
     const usesSerial = !!folder?.hasSerialNumbers
     if (usesSerial) {
       if (data.dateOut || data.pendingSaleReceiptId || data.sellerLoanOutId) {
-        throw createError({ statusCode: 409, message: `"${resolveItemName(data)}" is no longer available` })
+        throw createError({
+          statusCode: 409,
+          message: `"${resolveItemName(data)}" is no longer available`,
+        })
       }
       if (quantity !== 1) {
         throw createError({ statusCode: 400, message: `Serialized items must have quantity 1` })
@@ -126,7 +139,10 @@ export default defineEventHandler(async (event) => {
       const resolved = resolveBulkStockFieldAndValueFromMap(data, folder?.template?.fields)
       const available = resolved?.value ?? 0
       if (available < quantity) {
-        throw createError({ statusCode: 409, message: `Not enough stock for "${resolveItemName(data)}" (${available} left)` })
+        throw createError({
+          statusCode: 409,
+          message: `Not enough stock for "${resolveItemName(data)}" (${available} left)`,
+        })
       }
     }
 

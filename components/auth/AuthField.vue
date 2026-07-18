@@ -1,9 +1,6 @@
 <template>
   <div class="space-y-1.5">
-    <div
-      v-if="label || $slots['label-right']"
-      class="flex items-center justify-between gap-2"
-    >
+    <div v-if="label || $slots['label-right']" class="flex items-center justify-between gap-2">
       <label
         v-if="label"
         :for="inputId"

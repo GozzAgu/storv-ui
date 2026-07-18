@@ -39,7 +39,7 @@ describe('receipt-business-name', () => {
         updatedAt: new Date(),
         storeDetails: { storeName: 'Port Harcourt' },
       },
-      { branchName: 'Port Harcourt' },
+      { branchName: 'Port Harcourt' }
     )
     expect(name).toBe('Rockstar Limited')
   })

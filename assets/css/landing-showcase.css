@@ -91,8 +91,7 @@ html.dark .landing-about-section .landing-label--blue {
 }
 
 .landing-line-grid {
-  background-image:
-    linear-gradient(rgba(var(--storvv-blue-light-rgb), 0.1) 1px, transparent 1px),
+  background-image: linear-gradient(rgba(var(--storvv-blue-light-rgb), 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(var(--storvv-blue-light-rgb), 0.1) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 95% 80% at 50% 35%, rgb(0 0 0) 15%, transparent 75%);
@@ -132,8 +131,7 @@ html.dark .landing-about-section .landing-label--blue {
   --hero-my: 0;
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 90% 65% at 50% -12%, #eaf1fb 0%, rgba(234, 241, 251, 0) 60%),
+  background: radial-gradient(ellipse 90% 65% at 50% -12%, #eaf1fb 0%, rgba(234, 241, 251, 0) 60%),
     linear-gradient(180deg, #ffffff 0%, #f6f8fc 100%);
   color: #0a0c14;
   display: flex;
@@ -225,9 +223,16 @@ html.dark .landing-about-section .landing-label--blue {
   position: absolute;
   inset: -8%;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 70% 55% at 72% 18%, rgba(var(--storvv-blue-rgb), 0.24), transparent 58%),
-    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(var(--storvv-blue-mid-rgb), 0.1), transparent 55%);
+  background: radial-gradient(
+      ellipse 70% 55% at 72% 18%,
+      rgba(var(--storvv-blue-rgb), 0.24),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 20% 80%,
+      rgba(var(--storvv-blue-mid-rgb), 0.1),
+      transparent 55%
+    );
   transform: translate(calc(var(--hero-mx) * 1px), calc(var(--hero-my) * 1px));
   transition: transform 0.35s ease-out;
 }
@@ -572,10 +577,7 @@ html.dark .landing-about-section .landing-label--blue {
   color: #f1f5f9;
   padding: 0.375rem 0.25rem;
   border-bottom: 1px solid transparent;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    gap 0.2s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
 }
 
 .landing-hero__link-arrow {
@@ -645,12 +647,8 @@ html.dark .landing-about-section .landing-label--blue {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease,
+    transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .landing-hero__chip:hover {
@@ -924,9 +922,16 @@ html.dark .landing-about-section .landing-label--blue {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(var(--storvv-blue-rgb), 0.16), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 100% 100%, rgba(var(--storvv-blue-mid-rgb), 0.12), transparent 50%);
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(var(--storvv-blue-rgb), 0.16),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 55% 45% at 100% 100%,
+      rgba(var(--storvv-blue-mid-rgb), 0.12),
+      transparent 50%
+    );
 }
 
 .landing-core__inner {
@@ -1032,8 +1037,7 @@ html.dark .landing-about-section .landing-label--blue {
 .landing-core__card--wide {
   min-height: 0;
   border-color: rgba(var(--storvv-blue-mid-rgb), 0.45);
-  background:
-    linear-gradient(135deg, rgba(var(--storvv-blue-rgb), 0.2), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(135deg, rgba(var(--storvv-blue-rgb), 0.2), rgba(255, 255, 255, 0.04));
 }
 
 .landing-core__card--wide .landing-core__card-icon {
@@ -1082,8 +1086,7 @@ html.dark .landing-about-section .landing-label--blue {
   height: min(18rem, 70vw);
   border-radius: 9999px;
   border: 1px solid rgba(var(--storvv-blue-mid-rgb), 0.28);
-  box-shadow:
-    0 0 0 1px rgba(var(--storvv-blue-rgb), 0.1),
+  box-shadow: 0 0 0 1px rgba(var(--storvv-blue-rgb), 0.1),
     0 0 60px rgba(var(--storvv-blue-rgb), 0.14);
 }
 
@@ -1229,7 +1232,11 @@ html.dark .landing-about-section .landing-label--blue {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 55% at 30% 40%, rgba(var(--storvv-blue-rgb), 0.18), transparent 60%);
+  background: radial-gradient(
+    ellipse 70% 55% at 30% 40%,
+    rgba(var(--storvv-blue-rgb), 0.18),
+    transparent 60%
+  );
 }
 
 .landing-multistore__inner {
@@ -1457,14 +1464,14 @@ html.dark .landing-about-section .landing-label--blue {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.18), transparent 55%),
+  background: radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(var(--storvv-blue-rgb), 0.18),
+      transparent 55%
+    ),
     linear-gradient(rgba(var(--storvv-blue-light-rgb), 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(var(--storvv-blue-light-rgb), 0.06) 1px, transparent 1px);
-  background-size:
-    auto,
-    48px 48px,
-    48px 48px;
+  background-size: auto, 48px 48px, 48px 48px;
   background-color: #030712;
 }
 
@@ -1645,9 +1652,16 @@ html.dark .landing-about-section {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 75% 55% at 10% 0%, rgba(var(--storvv-blue-rgb), 0.12), transparent 58%),
-    radial-gradient(ellipse 65% 50% at 95% 100%, rgba(var(--storvv-blue-mid-rgb), 0.1), transparent 55%),
+  background: radial-gradient(
+      ellipse 75% 55% at 10% 0%,
+      rgba(var(--storvv-blue-rgb), 0.12),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 65% 50% at 95% 100%,
+      rgba(var(--storvv-blue-mid-rgb), 0.1),
+      transparent 55%
+    ),
     radial-gradient(circle at 50% 120%, rgba(var(--storvv-blue-light-rgb), 0.08), transparent 45%);
 }
 
@@ -1776,12 +1790,8 @@ html.dark .landing-about-lede {
   border-radius: 1.125rem;
   border: 1px solid rgb(20 63 141 / 0.1);
   background: #fff;
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 12px 32px rgb(20 63 141 / 0.06);
-  transition:
-    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.28s ease,
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px rgb(20 63 141 / 0.06);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease,
     border-color 0.28s ease;
 }
 
@@ -1795,9 +1805,7 @@ html.dark .landing-about-card {
   .landing-about-card:hover {
     transform: translateY(-3px);
     border-color: rgb(72 118 199 / 0.35);
-    box-shadow:
-      0 2px 4px rgb(15 23 42 / 0.04),
-      0 20px 44px rgb(20 63 141 / 0.12);
+    box-shadow: 0 2px 4px rgb(15 23 42 / 0.04), 0 20px 44px rgb(20 63 141 / 0.12);
   }
 }
 
@@ -2510,9 +2518,16 @@ html.dark .landing-about-link:hover {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 55% at 50% -5%, rgba(var(--storvv-blue-rgb), 0.22), transparent 58%),
-    radial-gradient(ellipse 45% 40% at 100% 80%, rgba(var(--storvv-blue-mid-rgb), 0.12), transparent 55%);
+  background: radial-gradient(
+      ellipse 80% 55% at 50% -5%,
+      rgba(var(--storvv-blue-rgb), 0.22),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 45% 40% at 100% 80%,
+      rgba(var(--storvv-blue-mid-rgb), 0.12),
+      transparent 55%
+    );
 }
 
 .landing-capabilities__grid-bg {
@@ -2620,9 +2635,7 @@ html.dark .landing-about-link:hover {
   border-radius: 1rem;
   border: 1px solid var(--cap-border);
   background: var(--cap-surface);
-  box-shadow:
-    0 0 0 1px rgb(0 0 0 / 0.2),
-    0 24px 64px rgb(0 0 0 / 0.45);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.2), 0 24px 64px rgb(0 0 0 / 0.45);
 }
 
 @media (min-width: 768px) {
@@ -2711,10 +2724,7 @@ html.dark .landing-about-link:hover {
   border: 1px solid rgb(255 255 255 / 0.08);
   border-radius: 0.625rem;
   outline: none;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease,
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
     transform 0.15s ease;
 }
 
@@ -2847,9 +2857,7 @@ html.dark .landing-about-link:hover {
   border-radius: 0.5rem;
   border: 1px solid rgb(110 148 214 / 0.45);
   background: rgb(20 63 141 / 0.35);
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .landing-capabilities__panel-link:hover {
@@ -2893,10 +2901,7 @@ html.dark .landing-about-link:hover {
   border-radius: 9999px;
   cursor: pointer;
   outline: none;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .landing-capabilities__subtab:hover {
@@ -3011,10 +3016,7 @@ html.dark .landing-about-link:hover {
   border: 1px solid rgb(110 148 214 / 0.25);
   border-radius: 9999px;
   outline: none;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    border-color 0.2s ease,
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
     transform 0.15s ease;
 }
 
@@ -3086,8 +3088,7 @@ html.dark .landing-about-link:hover {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgb(20 63 141 / 0.07), transparent 55%),
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgb(20 63 141 / 0.07), transparent 55%),
     linear-gradient(180deg, #f8fafc 0%, #fff 35%);
 }
 
@@ -3154,13 +3155,8 @@ html.dark .landing-about-link:hover {
   background: #fff;
   border: 1px solid rgb(15 23 42 / 0.1);
   border-radius: 1rem;
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 8px 24px rgb(15 23 42 / 0.05);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 @media (min-width: 640px) {
@@ -3171,25 +3167,19 @@ html.dark .landing-about-link:hover {
 
 .landing-contact__card:hover {
   border-color: rgb(20 63 141 / 0.22);
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 16px 40px rgb(20 63 141 / 0.1);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 16px 40px rgb(20 63 141 / 0.1);
   transform: translateY(-2px);
 }
 
 .landing-contact__card--primary {
   background: linear-gradient(165deg, #143f8d 0%, #0f357a 55%, #0a2a63 100%);
   border-color: rgb(110 148 214 / 0.35);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.15),
-    0 16px 48px rgb(20 63 141 / 0.35);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 16px 48px rgb(20 63 141 / 0.35);
 }
 
 .landing-contact__card--primary:hover {
   border-color: rgb(154 181 227 / 0.5);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.15),
-    0 20px 56px rgb(20 63 141 / 0.45);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15), 0 20px 56px rgb(20 63 141 / 0.45);
 }
 
 .landing-contact__card-top {
@@ -3289,9 +3279,7 @@ html.dark .landing-about-link:hover {
   border: none;
   border-radius: 0.625rem;
   outline: none;
-  transition:
-    background-color 0.2s ease,
-    transform 0.15s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 .landing-contact__cta:hover {
@@ -3310,11 +3298,8 @@ html.dark .landing-about-link:hover {
 .landing-contact-animate {
   opacity: 0;
   transform: translate3d(0, 0.75rem, 0);
-  transition:
-    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
   transition-delay: calc(60ms + var(--contact-i, 0) * 70ms);
 }
 
@@ -3367,10 +3352,21 @@ html.dark .landing-about-link:hover {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.28), transparent 58%),
-    radial-gradient(ellipse 50% 45% at 100% 60%, rgba(var(--storvv-blue-mid-rgb), 0.14), transparent 55%),
-    radial-gradient(ellipse 40% 40% at 0% 80%, rgba(var(--storvv-blue-light-rgb), 0.08), transparent 50%);
+  background: radial-gradient(
+      ellipse 90% 55% at 50% -10%,
+      rgba(var(--storvv-blue-rgb), 0.28),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 100% 60%,
+      rgba(var(--storvv-blue-mid-rgb), 0.14),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 40% 40% at 0% 80%,
+      rgba(var(--storvv-blue-light-rgb), 0.08),
+      transparent 50%
+    );
 }
 
 .landing-security__grid {
@@ -3384,12 +3380,7 @@ html.dark .landing-about-link:hover {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgb(110 148 214 / 0.04) 48%,
-    transparent 52%
-  );
+  background: linear-gradient(180deg, transparent 0%, rgb(110 148 214 / 0.04) 48%, transparent 52%);
   background-size: 100% 220%;
   animation: landing-security-scan 8s linear infinite;
 }
@@ -3637,8 +3628,7 @@ html.dark .landing-about-link:hover {
 .landing-security-animate {
   opacity: 0;
   transform: translate3d(0, 1rem, 0);
-  transition:
-    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: calc(80ms + var(--sec-i, 0) * 90ms);
 }
@@ -3692,14 +3682,14 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-who-bg {
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.05), transparent 55%),
+  background: radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(var(--storvv-blue-rgb), 0.05),
+      transparent 55%
+    ),
     linear-gradient(rgba(20 63 141 / 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(20 63 141 / 0.035) 1px, transparent 1px);
-  background-size:
-    auto,
-    48px 48px,
-    48px 48px;
+  background-size: auto, 48px 48px, 48px 48px;
   background-color: #ffffff;
   mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
   -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 30%, transparent 78%);
@@ -3740,18 +3730,14 @@ html.dark .landing-about-link:hover {
 .landing-who-card {
   border-color: rgb(20 63 141 / 0.1);
   background: #ffffff;
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 12px 30px rgb(20 63 141 / 0.05);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 30px rgb(20 63 141 / 0.05);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .landing-who-card:hover {
     border-color: rgb(20 63 141 / 0.28);
     background: #ffffff;
-    box-shadow:
-      0 1px 2px rgb(15 23 42 / 0.05),
-      0 16px 36px rgb(20 63 141 / 0.08);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 16px 36px rgb(20 63 141 / 0.08);
   }
 }
 
@@ -3784,9 +3770,7 @@ html.dark .landing-about-link:hover {
 .landing-core__card {
   border-color: rgb(20 63 141 / 0.1);
   background: #ffffff;
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.04),
-    0 12px 30px rgb(20 63 141 / 0.05);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 30px rgb(20 63 141 / 0.05);
 }
 
 .landing-core__card-icon {
@@ -3830,7 +3814,11 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-multistore__glow {
-  background: radial-gradient(ellipse 70% 55% at 30% 40%, rgba(var(--storvv-blue-rgb), 0.06), transparent 60%);
+  background: radial-gradient(
+    ellipse 70% 55% at 30% 40%,
+    rgba(var(--storvv-blue-rgb), 0.06),
+    transparent 60%
+  );
 }
 
 .landing-multistore__title {
@@ -3864,9 +3852,7 @@ html.dark .landing-about-link:hover {
 .landing-store-card--primary {
   border-color: rgba(var(--storvv-blue-rgb), 0.35);
   background: #ffffff;
-  box-shadow:
-    0 0 0 1px rgba(var(--storvv-blue-rgb), 0.08),
-    0 16px 36px rgb(20 63 141 / 0.08);
+  box-shadow: 0 0 0 1px rgba(var(--storvv-blue-rgb), 0.08), 0 16px 36px rgb(20 63 141 / 0.08);
 }
 
 .landing-store-card--dim {
@@ -3929,9 +3915,16 @@ html.dark .landing-about-link:hover {
 }
 
 .landing-security__bg {
-  background:
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(var(--storvv-blue-rgb), 0.08), transparent 58%),
-    radial-gradient(ellipse 50% 45% at 100% 60%, rgba(var(--storvv-blue-mid-rgb), 0.05), transparent 55%);
+  background: radial-gradient(
+      ellipse 90% 55% at 50% -10%,
+      rgba(var(--storvv-blue-rgb), 0.08),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 50% 45% at 100% 60%,
+      rgba(var(--storvv-blue-mid-rgb), 0.05),
+      transparent 55%
+    );
 }
 
 .landing-security__badge {
@@ -3966,9 +3959,7 @@ html.dark .landing-about-link:hover {
 .landing-security__card {
   background: #ffffff;
   border-color: rgb(20 63 141 / 0.1);
-  box-shadow:
-    inset 3px 0 0 var(--storvv-blue),
-    0 1px 2px rgb(15 23 42 / 0.04),
+  box-shadow: inset 3px 0 0 var(--storvv-blue), 0 1px 2px rgb(15 23 42 / 0.04),
     0 12px 30px rgb(20 63 141 / 0.05);
 }
 

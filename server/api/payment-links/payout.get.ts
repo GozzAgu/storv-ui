@@ -17,7 +17,10 @@ export default defineEventHandler(async (event) => {
   await requireStoreReadAccess(auth.uid, ownerUserId, storeId)
 
   const adminDb = getAdminFirestore()
-  const snap = await adminDb.collection('merchantPayouts').doc(payoutDocId(ownerUserId, storeId)).get()
+  const snap = await adminDb
+    .collection('merchantPayouts')
+    .doc(payoutDocId(ownerUserId, storeId))
+    .get()
 
   if (!snap.exists) {
     return { success: true, payout: { connected: false } }

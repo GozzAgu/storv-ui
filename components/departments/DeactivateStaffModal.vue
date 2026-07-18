@@ -25,11 +25,11 @@
         class="rounded-sm bg-red-50 p-3 ring-1 ring-red-200/50 dark:bg-red-900/20 dark:ring-red-800/40"
       >
         <div class="flex items-start gap-2.5">
-          <ExclamationTriangleIcon
-            class="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400"
-          />
+          <ExclamationTriangleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
           <div>
-            <p class="text-xs font-medium text-red-800 dark:text-red-200">They will lose sign-in access</p>
+            <p class="text-xs font-medium text-red-800 dark:text-red-200">
+              They will lose sign-in access
+            </p>
             <p class="mt-0.5 text-xs text-red-700 dark:text-red-300">
               Removed staff cannot sign in. You can reactivate them later from the Removed tab. Past
               receipts and activity logs will still show their name.
@@ -123,7 +123,9 @@ const isBulk = computed(() => staffList.value.length > 1)
 const subtitle = computed(() => {
   if (!staffList.value.length) return ''
   if (isBulk.value) {
-    return `${staffList.value.length} staff member${staffList.value.length !== 1 ? 's' : ''} selected`
+    return `${staffList.value.length} staff member${
+      staffList.value.length !== 1 ? 's' : ''
+    } selected`
   }
   const member = staffList.value[0]!
   return `${member.firstName} ${member.lastName}`.trim()

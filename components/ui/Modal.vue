@@ -1,10 +1,6 @@
 <template>
   <Teleport :to="teleportTarget">
-    <div
-      v-if="modelValue"
-      :class="rootClass"
-      role="presentation"
-    >
+    <div v-if="modelValue" :class="rootClass" role="presentation">
       <div
         v-if="!nativeInApp"
         :class="[
@@ -18,12 +14,28 @@
 
       <div :class="stageClass">
         <Transition
-          :enter-active-class="nativeInApp ? 'modal-native-enter-active' : 'transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'"
-          :leave-active-class="nativeInApp ? 'modal-native-leave-active' : 'transition duration-200 ease-in'"
-          :enter-from-class="nativeInApp ? 'modal-native-enter-from' : 'opacity-0 translate-y-4 sm:translate-y-2 sm:scale-[0.98]'"
-          :enter-to-class="nativeInApp ? 'modal-native-enter-to' : 'opacity-100 translate-y-0 sm:scale-100'"
-          :leave-from-class="nativeInApp ? 'modal-native-leave-from' : 'opacity-100 translate-y-0 sm:scale-100'"
-          :leave-to-class="nativeInApp ? 'modal-native-leave-to' : 'opacity-0 translate-y-3 sm:scale-[0.99]'"
+          :enter-active-class="
+            nativeInApp
+              ? 'modal-native-enter-active'
+              : 'transition duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]'
+          "
+          :leave-active-class="
+            nativeInApp ? 'modal-native-leave-active' : 'transition duration-200 ease-in'
+          "
+          :enter-from-class="
+            nativeInApp
+              ? 'modal-native-enter-from'
+              : 'opacity-0 translate-y-4 sm:translate-y-2 sm:scale-[0.98]'
+          "
+          :enter-to-class="
+            nativeInApp ? 'modal-native-enter-to' : 'opacity-100 translate-y-0 sm:scale-100'
+          "
+          :leave-from-class="
+            nativeInApp ? 'modal-native-leave-from' : 'opacity-100 translate-y-0 sm:scale-100'
+          "
+          :leave-to-class="
+            nativeInApp ? 'modal-native-leave-to' : 'opacity-0 translate-y-3 sm:scale-[0.99]'
+          "
         >
           <div
             v-if="modelValue"
@@ -34,10 +46,7 @@
             :class="dialogClass"
             @click.stop
           >
-            <div
-              v-if="title || subtitle || $slots.header || showClose"
-              :class="headerClass"
-            >
+            <div v-if="title || subtitle || $slots.header || showClose" :class="headerClass">
               <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
                 <slot name="header">
                   <div v-if="title || subtitle" class="min-w-0">

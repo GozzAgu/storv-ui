@@ -5,11 +5,7 @@
     panel-title="Open a workspace built for multi-branch retail."
     panel-description="Create your owner account, then invite managers and staff. Inventory, receipts, and structure stay connected."
   >
-    <AuthPageHeader
-      v-if="!registrationComplete"
-      eyebrow="Get started"
-      title="Create your account"
-    >
+    <AuthPageHeader v-if="!registrationComplete" eyebrow="Get started" title="Create your account">
       Takes a minute. Already set up?
       <NuxtLink
         to="/signin"
@@ -162,9 +158,7 @@
         >
           <template #hint>
             <p
-              v-if="
-                form.password && form.confirmPassword && form.password !== form.confirmPassword
-              "
+              v-if="form.password && form.confirmPassword && form.password !== form.confirmPassword"
               class="mt-1 text-xs text-red-500 dark:text-red-400"
             >
               Passwords do not match

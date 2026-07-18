@@ -1,6 +1,9 @@
 import { createError } from 'h3'
 
-export function rethrowFirebaseAdminSetupError(err: unknown, action: 'remove' | 'reactivate'): never {
+export function rethrowFirebaseAdminSetupError(
+  err: unknown,
+  action: 'remove' | 'reactivate'
+): never {
   const message = err instanceof Error ? err.message : String(err)
   if (
     message.includes('Firebase Admin not configured') ||

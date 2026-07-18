@@ -2,11 +2,11 @@
 
 ## Commands
 
-| Script | What runs |
-|--------|-----------|
-| `npm run test:unit` | Vitest: `tests/server/**` + `tests/integration/**` + `tests/unit/**` (Vue SFC tests use `happy-dom`) |
-| `npm test` | Playwright E2E: only root `tests/*.spec.ts` (see `playwright.config.ts` `testIgnore`) |
-| `npm run test:rules` | Firebase emulators (Firestore + Storage) + Vitest on `tests/rules/**` |
+| Script               | What runs                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run test:unit`  | Vitest: `tests/server/**` + `tests/integration/**` + `tests/unit/**` (Vue SFC tests use `happy-dom`) |
+| `npm test`           | Playwright E2E: only root `tests/*.spec.ts` (see `playwright.config.ts` `testIgnore`)                |
+| `npm run test:rules` | Firebase emulators (Firestore + Storage) + Vitest on `tests/rules/**`                                |
 
 `@firebase/rules-unit-testing` v5 expects emulator host/port (set automatically when using `firebase emulators:exec`). Use `test:rules` for rule tests; ensure **Java** is installed for the emulators.
 

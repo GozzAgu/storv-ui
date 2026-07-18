@@ -44,7 +44,9 @@ export default defineEventHandler(async (event) => {
         invoiceNumber: l.invoiceNumber,
         customerName: l.customerName,
         customerPhone: l.customerPhone,
-        itemsCount: Array.isArray(l.items) ? l.items.reduce((s, i) => s + (Number(i.quantity) || 0), 0) : 0,
+        itemsCount: Array.isArray(l.items)
+          ? l.items.reduce((s, i) => s + (Number(i.quantity) || 0), 0)
+          : 0,
         total: koboToNaira(Number(l.amount) || 0),
         status,
         url: `${origin}/pay/${l.token}`,

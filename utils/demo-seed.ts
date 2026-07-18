@@ -1,10 +1,5 @@
 import type { DemoReceipt, DemoState, DemoStoreRecord } from '~/types/demo'
-import {
-  DEMO_STORE_ABUJA,
-  DEMO_STORE_LAGOS,
-  DEMO_STORE_PH,
-  DEMO_USER_UID,
-} from '~/utils/demo-mode'
+import { DEMO_STORE_ABUJA, DEMO_STORE_LAGOS, DEMO_STORE_PH, DEMO_USER_UID } from '~/utils/demo-mode'
 
 function id(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`
@@ -187,7 +182,9 @@ function seedReceipts(state: DemoState) {
       customerName: 'Ada Okonkwo',
       customerPhone: '0803 111 2233',
       date: new Date(now - day).toISOString(),
-      items: [{ itemId: 'item_lagos_iphone', itemName: 'iPhone 13 128GB', quantity: 1, price: 485000 }],
+      items: [
+        { itemId: 'item_lagos_iphone', itemName: 'iPhone 13 128GB', quantity: 1, price: 485000 },
+      ],
       total: 485000,
       paymentMethod: 'Transfer',
       status: 'completed',
@@ -241,9 +238,7 @@ export function createDemoSeedState(): DemoState {
         destinationStoreId: DEMO_STORE_ABUJA,
         folderId: 'folder_lagos_accessories',
         destinationFolderId: 'folder_abuja_electronics',
-        items: [
-          { itemId: 'item_lagos_charger', quantity: 2, itemName: '20W USB-C charger' },
-        ],
+        items: [{ itemId: 'item_lagos_charger', quantity: 2, itemName: '20W USB-C charger' }],
         itemsCount: 1,
         hasSerialNumbers: false,
         notes: 'Restock Abuja from Lagos warehouse',

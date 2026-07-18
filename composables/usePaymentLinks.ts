@@ -49,7 +49,11 @@ export function usePaymentLinks() {
   const links = ref<PaymentLinkListItem[]>([])
   const stats = ref<PaymentLinkStats>({ collected: 0, paid: 0, unpaid: 0, failed: 0 })
   const settlements = ref<SettlementItem[]>([])
-  const settlementSummary = ref<{ pendingTotal: number; settledTotal: number; lastSettledAtMs: number }>({
+  const settlementSummary = ref<{
+    pendingTotal: number
+    settledTotal: number
+    lastSettledAtMs: number
+  }>({
     pendingTotal: 0,
     settledTotal: 0,
     lastSettledAtMs: 0,
@@ -77,7 +81,9 @@ export function usePaymentLinks() {
     }
     const { ownerUserId, storeId } = await resolveScope()
     const res = await authFetch<{ payout: PayoutStatus }>(
-      `/api/payment-links/payout?ownerUserId=${encodeURIComponent(ownerUserId)}&storeId=${encodeURIComponent(storeId)}`
+      `/api/payment-links/payout?ownerUserId=${encodeURIComponent(
+        ownerUserId
+      )}&storeId=${encodeURIComponent(storeId)}`
     )
     payout.value = res.payout
   }
@@ -92,7 +98,9 @@ export function usePaymentLinks() {
     }
     const { ownerUserId, storeId } = await resolveScope()
     const res = await authFetch<{ links: PaymentLinkListItem[]; stats: PaymentLinkStats }>(
-      `/api/payment-links/list?ownerUserId=${encodeURIComponent(ownerUserId)}&storeId=${encodeURIComponent(storeId)}`
+      `/api/payment-links/list?ownerUserId=${encodeURIComponent(
+        ownerUserId
+      )}&storeId=${encodeURIComponent(storeId)}`
     )
     links.value = res.links
     stats.value = res.stats
@@ -117,7 +125,9 @@ export function usePaymentLinks() {
       settledTotal: number
       lastSettledAtMs: number
     }>(
-      `/api/payment-links/settlements?ownerUserId=${encodeURIComponent(ownerUserId)}&storeId=${encodeURIComponent(storeId)}`
+      `/api/payment-links/settlements?ownerUserId=${encodeURIComponent(
+        ownerUserId
+      )}&storeId=${encodeURIComponent(storeId)}`
     )
     settlements.value = res.settlements || []
     settlementSummary.value = {
@@ -146,7 +156,9 @@ export function usePaymentLinks() {
       const { DEMO_BANKS } = await import('~/utils/demo-payment-links')
       return DEMO_BANKS
     }
-    const res = await authFetch<{ banks: { name: string; code: string }[] }>('/api/payment-links/banks')
+    const res = await authFetch<{ banks: { name: string; code: string }[] }>(
+      '/api/payment-links/banks'
+    )
     return res.banks
   }
 
@@ -202,7 +214,7 @@ export function usePaymentLinks() {
       '/api/payment-links/create',
       { method: 'POST', body: { ownerUserId, storeId, ...input } }
     )
-    return res 
+    return res
   }
 
   return {

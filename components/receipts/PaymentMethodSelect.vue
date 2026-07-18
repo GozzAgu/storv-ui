@@ -28,7 +28,7 @@ withDefaults(
     disabled: false,
     selectClass:
       'app-field w-full px-3 py-2 text-xs rounded-sm dark:!bg-dashboard-card text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-primary-400/40',
-  },
+  }
 )
 
 const emit = defineEmits<{

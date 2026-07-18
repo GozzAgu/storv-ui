@@ -29,7 +29,11 @@
         Sign in with {{ biometryLabel }}
       </Button>
 
-      <form class="auth-form space-y-5" :class="{ 'mt-5': hasSavedLogin && isSupported }" @submit.prevent="handleSignIn">
+      <form
+        class="auth-form space-y-5"
+        :class="{ 'mt-5': hasSavedLogin && isSupported }"
+        @submit.prevent="handleSignIn"
+      >
         <AuthField
           v-model="form.email"
           input-id="email"

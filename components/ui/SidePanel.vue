@@ -23,18 +23,18 @@
     </Transition>
 
     <Transition
-      :enter-active-class="nativeInApp ? 'side-panel-native-enter-active' : 'side-panel-enter-active'"
-      :leave-active-class="nativeInApp ? 'side-panel-native-leave-active' : 'side-panel-leave-active'"
+      :enter-active-class="
+        nativeInApp ? 'side-panel-native-enter-active' : 'side-panel-enter-active'
+      "
+      :leave-active-class="
+        nativeInApp ? 'side-panel-native-leave-active' : 'side-panel-leave-active'
+      "
       :enter-from-class="nativeInApp ? 'side-panel-native-enter-from' : 'side-panel-enter-from'"
       :enter-to-class="nativeInApp ? 'side-panel-native-enter-to' : 'side-panel-enter-to'"
       :leave-from-class="nativeInApp ? 'side-panel-native-leave-from' : 'side-panel-leave-from'"
       :leave-to-class="nativeInApp ? 'side-panel-native-leave-to' : 'side-panel-leave-to'"
     >
-      <div
-        v-if="modelValue"
-        :class="panelShellClass"
-        role="presentation"
-      >
+      <div v-if="modelValue" :class="panelShellClass" role="presentation">
         <div
           role="dialog"
           aria-modal="true"
@@ -48,7 +48,9 @@
             v-if="title || subtitle || $slots.header || showClose"
             :class="[
               'flex shrink-0 items-start justify-between gap-2.5 border-b border-gray-100/90 bg-white dark:border-gray-800/80 dark:bg-white/[0.02]',
-              dense ? 'px-3 py-2.5 sm:px-4' : 'bg-gray-50/50 px-4 py-3.5 sm:px-5 sm:py-4 dark:bg-white/[0.02]',
+              dense
+                ? 'px-3 py-2.5 sm:px-4'
+                : 'bg-gray-50/50 px-4 py-3.5 sm:px-5 sm:py-4 dark:bg-white/[0.02]',
             ]"
           >
             <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">

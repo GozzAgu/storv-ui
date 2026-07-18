@@ -1,10 +1,10 @@
 @config "../../tailwind.config.js";
-@import "tailwindcss";
-@import "@nuxt/ui";
-@import "./capacitor-native.css";
-@import "./landing-showcase.css";
-@import "./landing-nav.css";
-@import "./receipt-typography.css";
+@import 'tailwindcss';
+@import '@nuxt/ui';
+@import './capacitor-native.css';
+@import './landing-showcase.css';
+@import './landing-nav.css';
+@import './receipt-typography.css';
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
 @layer components {
@@ -275,8 +275,9 @@ html.theme-transitioning textarea {
   /* Targeted list (instead of `*`) avoids stutter on very large tables. */
   /* Omit filter/backdrop on bulk nodes (tables); see `.frosted-glass` block below. */
   /* Do not include tr/td/th; see `.data-table-shell` row rule below (zebra + scroll). */
-  transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
-    text-decoration-color, fill, stroke, opacity, accent-color, caret-color, column-rule-color !important;
+  transition-property: background-color, background-image, color, border-color, outline-color,
+    box-shadow, text-decoration-color, fill, stroke, opacity, accent-color, caret-color,
+    column-rule-color !important;
   transition-duration: 0.5s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
@@ -287,8 +288,9 @@ html.theme-transitioning [data-inventory-categories],
 html.theme-transitioning [data-inventory-categories] header,
 html.theme-transitioning [data-inventory-categories] article.inv-category-card,
 html.theme-transitioning [data-inventory-categories] .inv-category-card {
-  transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
-    text-decoration-color, fill, stroke, opacity, accent-color, caret-color, column-rule-color !important;
+  transition-property: background-color, background-image, color, border-color, outline-color,
+    box-shadow, text-decoration-color, fill, stroke, opacity, accent-color, caret-color,
+    column-rule-color !important;
   transition-duration: 0.5s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
 }
@@ -308,9 +310,9 @@ html.theme-transitioning .inv-folder-uisverse {
 /* Blur panels only: animating backdrop-filter on every <tr>/<td> is a major source of theme-toggle jank. */
 html.theme-transitioning .frosted-glass,
 html.theme-transitioning .dashboard-global-tooltip-bubble {
-  transition-property: background-color, background-image, color, border-color, outline-color, box-shadow,
-    text-decoration-color, fill, stroke, opacity, filter, backdrop-filter, -webkit-backdrop-filter,
-    accent-color, caret-color, column-rule-color !important;
+  transition-property: background-color, background-image, color, border-color, outline-color,
+    box-shadow, text-decoration-color, fill, stroke, opacity, filter, backdrop-filter,
+    -webkit-backdrop-filter, accent-color, caret-color, column-rule-color !important;
   transition-duration: 0.5s !important;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
   transition-delay: 0s !important;
@@ -356,7 +358,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 
   html {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
@@ -364,15 +367,16 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: optimizeLegibility;
   }
-  
+
   html.styles-loaded {
     visibility: visible !important;
     opacity: 1 !important;
     transition: opacity 0.15s ease-in;
   }
-  
+
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -445,14 +449,14 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       }
     }
   }
-  
+
   /* Prevent layout shift - ensure smooth transition */
   *,
   *::before,
   *::after {
     box-sizing: border-box;
   }
-  
+
   /* Prevent flash of unstyled content */
   #__nuxt {
     min-height: 100vh;
@@ -462,7 +466,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     /* Prevent layout shift */
     display: block;
   }
-  
+
   /* Ensure layout stability during hydration */
   #__nuxt > * {
     min-height: 100vh;
@@ -470,25 +474,25 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     position: relative;
     overflow-x: clip;
   }
-  
+
   /* Prevent layout shift for fixed elements */
-  [class*="fixed"] {
+  [class*='fixed'] {
     will-change: transform;
     backface-visibility: hidden;
   }
-  
+
   /* Ensure main content area is stable */
   main {
     min-height: calc(100vh - 4rem);
     width: 100%;
     max-width: 100%;
   }
-  
+
   /* Prevent overflow causing layout shifts */
   * {
     max-width: 100%;
   }
-  
+
   /* Smooth reveal animation */
   @keyframes fadeIn {
     from {
@@ -498,11 +502,11 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       opacity: 1;
     }
   }
-  
+
   html.styles-loaded #__nuxt {
     animation: fadeIn 0.15s ease-in;
   }
-  
+
   /* Blob animation for hero section */
   @keyframes blob {
     0% {
@@ -518,19 +522,19 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: translate(0px, 0px) scale(1);
     }
   }
-  
+
   .animate-blob {
     animation: blob 7s infinite;
   }
-  
+
   .animation-delay-2000 {
     animation-delay: 2s;
   }
-  
+
   .animation-delay-4000 {
     animation-delay: 4s;
   }
-  
+
   @keyframes spin-slow {
     from {
       transform: rotate(0deg);
@@ -539,11 +543,11 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: rotate(360deg);
     }
   }
-  
+
   .animate-spin-slow {
     animation: spin-slow 8s linear infinite;
   }
-  
+
   /* Scroll animations */
   @keyframes fadeInUp {
     from {
@@ -555,7 +559,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: translateY(0);
     }
   }
-  
+
   @keyframes fadeInDown {
     from {
       opacity: 0;
@@ -566,7 +570,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: translateY(0);
     }
   }
-  
+
   @keyframes fadeInScale {
     from {
       opacity: 0;
@@ -577,7 +581,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: scale(1);
     }
   }
-  
+
   @keyframes slideInLeft {
     from {
       opacity: 0;
@@ -588,7 +592,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: translateX(0);
     }
   }
-  
+
   @keyframes slideInRight {
     from {
       opacity: 0;
@@ -599,65 +603,63 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transform: translateX(0);
     }
   }
-  
+
   .animate-fade-in-up {
     animation: fadeInUp 0.6s ease-out forwards;
   }
-  
+
   .animate-fade-in-down {
     animation: fadeInDown 0.6s ease-out forwards;
   }
-  
+
   .animate-fade-in-scale {
     animation: fadeInScale 0.6s ease-out forwards;
   }
-  
+
   .animate-slide-in-left {
     animation: slideInLeft 0.6s ease-out forwards;
   }
-  
+
   .animate-slide-in-right {
     animation: slideInRight 0.6s ease-out forwards;
   }
-  
+
   /* Scroll-triggered animations (ease-out-expo feel) */
   .scroll-animate {
     opacity: 0;
-    transition:
-      opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  
+
   .scroll-animate.visible,
   .scroll-animate[data-section-id].visible {
     opacity: 1;
   }
-  
+
   /* Show elements immediately if they're in viewport on load */
   .scroll-animate[data-section-id] {
     opacity: 0;
   }
-  
+
   .scroll-animate-up {
     transform: translateY(1.5rem);
   }
-  
+
   .scroll-animate-up.visible {
     transform: translateY(0);
   }
-  
+
   .scroll-animate-down {
     transform: translateY(-1.5rem);
   }
-  
+
   .scroll-animate-down.visible {
     transform: translateY(0);
   }
-  
+
   .scroll-animate-scale {
     transform: scale(0.97);
   }
-  
+
   .scroll-animate-scale.visible {
     transform: scale(1);
   }
@@ -678,76 +680,88 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
       transition-delay: 0ms !important;
     }
   }
-  
+
   /* Stagger animation delays */
-  .stagger-1 { transition-delay: 0.08s; }
-  .stagger-2 { transition-delay: 0.14s; }
-  .stagger-3 { transition-delay: 0.2s; }
-  .stagger-4 { transition-delay: 0.26s; }
-  .stagger-5 { transition-delay: 0.32s; }
-  
+  .stagger-1 {
+    transition-delay: 0.08s;
+  }
+  .stagger-2 {
+    transition-delay: 0.14s;
+  }
+  .stagger-3 {
+    transition-delay: 0.2s;
+  }
+  .stagger-4 {
+    transition-delay: 0.26s;
+  }
+  .stagger-5 {
+    transition-delay: 0.32s;
+  }
+
   /* Smooth gradient animations */
   @keyframes gradient-shift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {
       background-position: 100% 50%;
     }
   }
-  
+
   .animate-gradient {
     background-size: 200% 200%;
     animation: gradient-shift 3s ease infinite;
   }
-  
+
   /* Pulse animation for CTAs */
   @keyframes pulse-glow {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
       opacity: 0.85;
     }
   }
-  
+
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
-  
+
   /* Smooth scale on hover */
   .hover-lift {
     transition: transform 0.3s ease;
   }
-  
+
   .hover-lift:hover {
     transform: translateY(-4px);
   }
-  
+
   /* Hero parallax effect */
   .hero-parallax {
     will-change: transform;
     backface-visibility: hidden;
     transform-origin: center center;
   }
-  
+
   /* Glassmorphism effect */
   .glassmorphism {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
-  
+
   .glassmorphism-button {
     background: rgba(59, 130, 246, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
-  
+
   .glassmorphism:hover {
     background: rgba(255, 255, 255, 0.15);
   }
-  
+
   .glassmorphism-button:hover {
     background: rgba(59, 130, 246, 0.95);
   }
@@ -779,7 +793,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
 /* Global corner-radius polish (subtle, clean) */
 @layer base {
   :root {
-    --app-radius-sm: 0.5rem;   /* 8px */
+    --app-radius-sm: 0.5rem; /* 8px */
     --app-radius-md: 0.625rem; /* 10px */
   }
 
@@ -803,13 +817,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
    * this only fills the gaps, giving every button the same clean, responsive feel.
    */
   :where(button):not(:disabled):not([aria-disabled='true']) {
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease,
-      box-shadow 0.15s ease,
-      opacity 0.15s ease,
-      transform 0.12s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+      box-shadow 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
   }
 
   :where(button):not(:disabled):not([aria-disabled='true']):active {
@@ -1079,7 +1088,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
     background-color: rgb(249 250 251);
   }
 
-  html.dark   .activity-log-shell .dashboard-table tbody tr:hover {
+  html.dark .activity-log-shell .dashboard-table tbody tr:hover {
     background-color: rgb(255 255 255 / 0.03);
   }
 
@@ -1281,7 +1290,9 @@ html.capacitor-native .dashboard-inline-footer {
 }
 
 html.capacitor-native .dashboard-page-with-footer {
-  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.5rem) !important;
+  padding-bottom: calc(
+    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.5rem
+  ) !important;
 }
 
 html.capacitor-native .capacitor-boot-splash {
@@ -1314,7 +1325,10 @@ html.capacitor-native .dashboard-native-main {
   max-width: 100%;
 }
 
-html.capacitor-native input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not([type='button']):not([type='submit']):not([type='reset']),
+html.capacitor-native
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']):not(
+    [type='button']
+  ):not([type='submit']):not([type='reset']),
 html.capacitor-native select,
 html.capacitor-native textarea {
   font-size: 16px !important;
@@ -1349,20 +1363,29 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
     --app-field-border-color-focus-dark: rgb(110 148 214 / 0.44);
   }
 
-  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']),
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ),
   select,
   textarea {
     border-width: var(--app-field-border-width) !important;
     border-style: solid !important;
     border-color: var(--app-field-border-color) !important;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      background-color 0.2s ease !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
   }
 
-  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus,
-  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus-visible,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ):focus,
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ):focus-visible,
   select:focus,
   select:focus-visible,
   textarea:focus,
@@ -1372,16 +1395,28 @@ html.capacitor-native .dashboard-native-bottom-nav-host {
   }
 
   html.dark
-    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']),
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ),
   html.dark select,
   html.dark textarea {
     border-color: var(--app-field-border-color-dark) !important;
   }
 
   html.dark
-    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus,
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ):focus,
   html.dark
-    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not([type='image']):focus-visible,
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not(
+      [type='range']
+    ):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']):not(
+      [type='image']
+    ):focus-visible,
   html.dark select:focus,
   html.dark select:focus-visible,
   html.dark textarea:focus,
@@ -1469,7 +1504,9 @@ html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
 
 /* Inventory categories — grid on clear page bg */
 html.capacitor-native .inventory-categories-page {
-  padding-bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem) !important;
+  padding-bottom: calc(
+    var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem
+  ) !important;
   gap: 0.75rem;
 }
 
@@ -1491,9 +1528,7 @@ html.capacitor-native .inventory-categories-grid {
 
 html.capacitor-native .inventory-categories-grid .inv-category-card {
   border-radius: 0.75rem;
-  box-shadow:
-    0 1px 2px rgb(15 23 42 / 0.05),
-    0 6px 16px rgb(15 23 42 / 0.04);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 6px 16px rgb(15 23 42 / 0.04);
 }
 
 html.capacitor-native.dark .inventory-categories-grid .inv-category-card {

@@ -15,14 +15,19 @@ export default defineEventHandler(async (event) => {
   const bankCode = (body.bankCode || '').trim()
 
   if (accountNumber.length !== 10 || !bankCode) {
-    throw createError({ statusCode: 400, message: 'A 10-digit account number and bank are required' })
+    throw createError({
+      statusCode: 400,
+      message: 'A 10-digit account number and bank are required',
+    })
   }
 
   const config = useRuntimeConfig()
   const secretKey = getPaystackSecret(config)
 
   const data = await paystackRequest<{ account_name?: string; account_number?: string }>(
-    `/bank/resolve?account_number=${encodeURIComponent(accountNumber)}&bank_code=${encodeURIComponent(bankCode)}`,
+    `/bank/resolve?account_number=${encodeURIComponent(
+      accountNumber
+    )}&bank_code=${encodeURIComponent(bankCode)}`,
     { method: 'GET', secretKey }
   )
 

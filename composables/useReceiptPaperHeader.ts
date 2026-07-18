@@ -83,7 +83,7 @@ export function useReceiptPaperHeader(receipt: Ref<Receipt | null | undefined>) 
     () => {
       void loadOwnerUserData()
     },
-    { immediate: true },
+    { immediate: true }
   )
 
   return {

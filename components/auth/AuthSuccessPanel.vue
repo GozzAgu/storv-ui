@@ -6,7 +6,11 @@
     <div
       class="mb-3.5 flex h-12 w-12 items-center justify-center rounded-full bg-primary-500/15 ring-1 ring-primary-500/25 dark:bg-primary-500/12 dark:ring-primary-500/35"
     >
-      <component :is="icon" class="h-6 w-6 text-primary-600 dark:text-primary-400" stroke-width="1.5" />
+      <component
+        :is="icon"
+        class="h-6 w-6 text-primary-600 dark:text-primary-400"
+        stroke-width="1.5"
+      />
     </div>
     <p class="text-sm font-semibold text-gray-900 dark:text-gray-50">
       <slot name="title" />

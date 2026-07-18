@@ -34,14 +34,18 @@ export default defineEventHandler(async (event) => {
   const businessName = (body.businessName || '').trim() || accountName || 'Storvv merchant'
 
   if (!ownerUserId || !storeId || !bankCode || accountNumber.length !== 10 || !accountName) {
-    throw createError({ statusCode: 400, message: 'Bank, valid account number and resolved name are required' })
+    throw createError({
+      statusCode: 400,
+      message: 'Bank, valid account number and resolved name are required',
+    })
   }
 
   await requireStoreManageAccess(auth.uid, ownerUserId, storeId)
 
   const config = useRuntimeConfig()
   const secretKey = getPaystackSecret(config)
-  const feePercent = Number(config.paymentLinkPlatformFeePercent ?? DEFAULT_PLATFORM_FEE_PERCENT) || 0
+  const feePercent =
+    Number(config.paymentLinkPlatformFeePercent ?? DEFAULT_PLATFORM_FEE_PERCENT) || 0
 
   const subaccount = await paystackRequest<{ subaccount_code?: string }>('/subaccount', {
     method: 'POST',
@@ -59,25 +63,22 @@ export default defineEventHandler(async (event) => {
   }
 
   const adminDb = getAdminFirestore()
-  await adminDb
-    .collection('merchantPayouts')
-    .doc(payoutDocId(ownerUserId, storeId))
-    .set(
-      {
-        ownerUserId,
-        storeId,
-        connected: true,
-        bankName,
-        bankCode,
-        accountNumber,
-        accountName,
-        subaccountCode: subaccount.subaccount_code,
-        percentageCharge: feePercent,
-        updatedAt: FieldValue.serverTimestamp(),
-        createdAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    )
+  await adminDb.collection('merchantPayouts').doc(payoutDocId(ownerUserId, storeId)).set(
+    {
+      ownerUserId,
+      storeId,
+      connected: true,
+      bankName,
+      bankCode,
+      accountNumber,
+      accountName,
+      subaccountCode: subaccount.subaccount_code,
+      percentageCharge: feePercent,
+      updatedAt: FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  )
 
   return {
     success: true,

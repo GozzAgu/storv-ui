@@ -12,8 +12,8 @@
           What multi-branch shops fix first
         </h2>
         <p class="landing-proof__lede">
-          Early stores on Storvv, especially retailers and procurement-led teams with 2+ counters, use
-          the same three wins.
+          Early stores on Storvv, especially retailers and procurement-led teams with 2+ counters,
+          use the same three wins.
         </p>
       </header>
 

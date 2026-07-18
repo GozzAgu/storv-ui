@@ -6,10 +6,7 @@
 import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 
-const JAVA_PATHS = [
-  '/opt/homebrew/opt/openjdk@21/bin',
-  '/usr/local/opt/openjdk@21/bin',
-]
+const JAVA_PATHS = ['/opt/homebrew/opt/openjdk@21/bin', '/usr/local/opt/openjdk@21/bin']
 
 function envWithJava() {
   const env = { ...process.env }
@@ -37,7 +34,7 @@ if (!hasJava(env)) {
       'Then add to PATH: export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"',
       '',
       'To skip rules tests locally: SKIP_FIREBASE_RULES=1 npm run test:rules',
-    ].join('\n'),
+    ].join('\n')
   )
   process.exit(process.env.SKIP_FIREBASE_RULES === '1' ? 0 : 1)
 }

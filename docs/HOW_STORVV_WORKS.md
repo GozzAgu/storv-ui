@@ -18,10 +18,10 @@ The product is aimed at store owners, managers, and front-line staff. A single *
 
 **Brand and codebase naming**
 
-| Name | Meaning |
-|------|---------|
-| **Storvv** | Product and brand (`storvv.com`) |
-| **storv-ui** | This repository and npm package |
+| Name              | Meaning                                       |
+| ----------------- | --------------------------------------------- |
+| **Storvv**        | Product and brand (`storvv.com`)              |
+| **storv-ui**      | This repository and npm package               |
 | **com.storv.app** | Native iOS/Android app identifier (Capacitor) |
 
 ---
@@ -30,11 +30,11 @@ The product is aimed at store owners, managers, and front-line staff. A single *
 
 ### Roles
 
-| Role | Typical user | What they can do |
-|------|--------------|------------------|
+| Role            | Typical user                | What they can do                                                                                 |
+| --------------- | --------------------------- | ------------------------------------------------------------------------------------------------ |
 | **Super admin** | Account owner who signed up | Create stores, folders, staff; switch branches; full settings; destructive actions where allowed |
-| **Manager** | Senior staff | Broader edit on sales, refunds, and operations (plan and rules permitting) |
-| **Staff** | Day-to-day sellers | Sell via receipts, view inventory; limited structural changes |
+| **Manager**     | Senior staff                | Broader edit on sales, refunds, and operations (plan and rules permitting)                       |
+| **Staff**       | Day-to-day sellers          | Sell via receipts, view inventory; limited structural changes                                    |
 
 Authentication uses **Firebase Auth** (email/password and related flows). After sign-in, the app loads a **user profile** from Firestore with `role` and `subscription` so the UI can show the right screens and limits.
 
@@ -42,11 +42,11 @@ Authentication uses **Firebase Auth** (email/password and related flows). After 
 
 Plans unlock features and caps (stores, departments, staff counts). Summary:
 
-| Plan | Stores | Highlights |
-|------|--------|------------|
-| **Micro** | 1 | Core inventory, receipts, returns, customers; WhatsApp (10/mo) |
-| **Medium** | Up to 2 | + Analytics, activity logs, customer balance, teams, unlimited WhatsApp, duplicate categories |
-| **Enterprise** | Unlimited | + Multi-store sync, copy templates across branches, stock loans, priority support |
+| Plan           | Stores    | Highlights                                                                                    |
+| -------------- | --------- | --------------------------------------------------------------------------------------------- |
+| **Micro**      | 1         | Core inventory, receipts, returns, customers; WhatsApp (10/mo)                                |
+| **Medium**     | Up to 2   | + Analytics, activity logs, customer balance, teams, unlimited WhatsApp, duplicate categories |
+| **Enterprise** | Unlimited | + Multi-store sync, copy templates across branches, stock loans, priority support             |
 
 Billing uses **Paystack** (NGN). Plan details and implementation hooks are documented in [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md).
 
@@ -131,11 +131,11 @@ flowchart TB
 
 ### Three layers in the codebase
 
-| Layer | Responsibility | Where it lives |
-|-------|----------------|----------------|
-| **UI** | Pages, layouts, components | `pages/`, `layouts/dashboard.vue`, `components/` |
-| **State** | Caching, loading, client-side permissions | `stores/` (Pinia), `composables/` |
-| **Data** | Persistence and security | Firestore paths in `composables/useFirestorePaths.ts`, `firestore.rules` |
+| Layer     | Responsibility                            | Where it lives                                                           |
+| --------- | ----------------------------------------- | ------------------------------------------------------------------------ |
+| **UI**    | Pages, layouts, components                | `pages/`, `layouts/dashboard.vue`, `components/`                         |
+| **State** | Caching, loading, client-side permissions | `stores/` (Pinia), `composables/`                                        |
+| **Data**  | Persistence and security                  | Firestore paths in `composables/useFirestorePaths.ts`, `firestore.rules` |
 
 ### Typical request flow
 
@@ -176,20 +176,20 @@ users/{ownerUserId}/
 
 ## Main Product Areas
 
-| Area | Purpose | Typical route |
-|------|---------|----------------|
-| **Dashboard** | Overview and quick stats | `/dashboard` |
-| **Inventory** | Folders and items | `/dashboard/inventory`, `/dashboard/inventory/[id]` |
-| **Receipts / Sales** | Create and manage sales; customers tab | `/dashboard/receipts` |
-| **Returns** | Refunds tied to receipts | `/dashboard/returns` |
-| **Customers** | Buyer history | `/dashboard/customers` |
-| **Analytics** | Charts and exports (Medium+) | `/dashboard/analytics` |
-| **Activity logs** | Audit trail (Medium+, role-gated) | `/dashboard/activity` |
-| **Multi-store sync** | Transfers and consolidated reports (Enterprise) | `/dashboard/multi-store-sync` |
-| **Seller loans** | Serial stock lent out (Enterprise) | `/dashboard/seller-loans` |
-| **Settings / Profile** | Branding, billing, account | `/dashboard/settings`, `/dashboard/profile` |
-| **Onboarding** | Currency, country, first store setup | `/dashboard/onboarding` |
-| **Public receipt** | Share link, no login | `/r/[token]` |
+| Area                   | Purpose                                         | Typical route                                       |
+| ---------------------- | ----------------------------------------------- | --------------------------------------------------- |
+| **Dashboard**          | Overview and quick stats                        | `/dashboard`                                        |
+| **Inventory**          | Folders and items                               | `/dashboard/inventory`, `/dashboard/inventory/[id]` |
+| **Receipts / Sales**   | Create and manage sales; customers tab          | `/dashboard/receipts`                               |
+| **Returns**            | Refunds tied to receipts                        | `/dashboard/returns`                                |
+| **Customers**          | Buyer history                                   | `/dashboard/customers`                              |
+| **Analytics**          | Charts and exports (Medium+)                    | `/dashboard/analytics`                              |
+| **Activity logs**      | Audit trail (Medium+, role-gated)               | `/dashboard/activity`                               |
+| **Multi-store sync**   | Transfers and consolidated reports (Enterprise) | `/dashboard/multi-store-sync`                       |
+| **Seller loans**       | Serial stock lent out (Enterprise)              | `/dashboard/seller-loans`                           |
+| **Settings / Profile** | Branding, billing, account                      | `/dashboard/settings`, `/dashboard/profile`         |
+| **Onboarding**         | Currency, country, first store setup            | `/dashboard/onboarding`                             |
+| **Public receipt**     | Share link, no login                            | `/r/[token]`                                        |
 
 The **dashboard layout** (`layouts/dashboard.vue`) provides the sidebar (or bottom nav on native), store selector, global search, notifications, and theme toggle. Navigation items are filtered by **plan** and **role**.
 
@@ -222,15 +222,15 @@ flowchart TD
 
 ## Integrations
 
-| Service | Role in Storvv |
-|---------|----------------|
-| **Firebase Auth** | Sign-in, session, ID tokens for API calls |
-| **Firestore** | All operational data |
-| **Firebase Storage** | Images and uploads (see [STORAGE_SETUP.md](./STORAGE_SETUP.md)) |
-| **Paystack** | Subscription checkout and verification |
-| **Resend** | Transactional email (e.g. receipt delivery) |
-| **WhatsApp Cloud API** | Optional receipt messaging; usage caps by plan |
-| **Cloudinary** | Optional account logo hosting |
+| Service                | Role in Storvv                                                  |
+| ---------------------- | --------------------------------------------------------------- |
+| **Firebase Auth**      | Sign-in, session, ID tokens for API calls                       |
+| **Firestore**          | All operational data                                            |
+| **Firebase Storage**   | Images and uploads (see [STORAGE_SETUP.md](./STORAGE_SETUP.md)) |
+| **Paystack**           | Subscription checkout and verification                          |
+| **Resend**             | Transactional email (e.g. receipt delivery)                     |
+| **WhatsApp Cloud API** | Optional receipt messaging; usage caps by plan                  |
+| **Cloudinary**         | Optional account logo hosting                                   |
 
 Server endpoints live under `server/api/` (receipts, Paystack, stores, inventory validation, WhatsApp usage, storage helpers).
 
@@ -271,30 +271,30 @@ Example: **Copy from branch** requires super admin + Enterprise + at least two s
 
 ## Repository Map (Quick Reference)
 
-| Topic | Path |
-|-------|------|
-| Routes | `pages/` |
-| Dashboard shell | `layouts/dashboard.vue` |
-| Pinia state | `stores/` |
-| Firestore paths | `composables/useFirestorePaths.ts` |
+| Topic               | Path                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Routes              | `pages/`                                                                                           |
+| Dashboard shell     | `layouts/dashboard.vue`                                                                            |
+| Pinia state         | `stores/`                                                                                          |
+| Firestore paths     | `composables/useFirestorePaths.ts`                                                                 |
 | Permissions / plans | `composables/usePermissions.ts`, `composables/useSubscriptionFeatures.ts`, `types/subscription.ts` |
-| Auth | `stores/auth.ts`, `middleware/auth.global.ts` |
-| Security rules | `firestore.rules` |
-| Server APIs | `server/api/` |
-| Capacitor | `capacitor.config.ts`, `plugins/00.capacitor.client.ts` |
-| Tests | `tests/README.md` |
+| Auth                | `stores/auth.ts`, `middleware/auth.global.ts`                                                      |
+| Security rules      | `firestore.rules`                                                                                  |
+| Server APIs         | `server/api/`                                                                                      |
+| Capacitor           | `capacitor.config.ts`, `plugins/00.capacitor.client.ts`                                            |
+| Tests               | `tests/README.md`                                                                                  |
 
 ---
 
 ## Related Documentation
 
-| Document | Contents |
-|----------|----------|
-| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md) | Detailed user flows, module behavior, scenarios, file references |
-| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Micro / Medium / Enterprise feature matrix |
-| [STORAGE_SETUP.md](./STORAGE_SETUP.md) | Firebase Storage for images |
-| [DEPLOYMENT.md](../DEPLOYMENT.md) | Hosting, env vars, subdomain setup |
-| [tests/README.md](../tests/README.md) | E2E, unit, and Firestore rules testing |
+| Document                                               | Contents                                                         |
+| ------------------------------------------------------ | ---------------------------------------------------------------- |
+| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)             | Detailed user flows, module behavior, scenarios, file references |
+| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Micro / Medium / Enterprise feature matrix                       |
+| [STORAGE_SETUP.md](./STORAGE_SETUP.md)                 | Firebase Storage for images                                      |
+| [DEPLOYMENT.md](../DEPLOYMENT.md)                      | Hosting, env vars, subdomain setup                               |
+| [tests/README.md](../tests/README.md)                  | E2E, unit, and Firestore rules testing                           |
 
 ---
 

@@ -2,10 +2,7 @@
  * Shared layout tokens for dashboard page headers and toolbars (32px controls, aligned rows).
  */
 import { computed } from 'vue'
-import {
-  APP_CARD_CLASS,
-  APP_FIELD_COMPACT_CLASS,
-} from '~/utils/app-chrome'
+import { APP_CARD_CLASS, APP_FIELD_COMPACT_CLASS } from '~/utils/app-chrome'
 
 export function useDashboardPageChrome() {
   const { isNativeApp } = useCapacitorNativeApp()
@@ -20,11 +17,9 @@ export function useDashboardPageChrome() {
   const pageHeaderClass =
     'relative rounded-xl border-0 bg-white px-4 py-3.5 dark:!bg-dashboard-card sm:px-5'
 
-  const toolbarDividerClass =
-    'mt-3.5 border-t border-gray-100/90 pt-3.5 dark:border-gray-800/80'
+  const toolbarDividerClass = 'mt-3.5 border-t border-gray-100/90 pt-3.5 dark:border-gray-800/80'
 
-  const toolbarRowClass =
-    'flex flex-col gap-2.5 xl:flex-row xl:items-center xl:gap-3'
+  const toolbarRowClass = 'flex flex-col gap-2.5 xl:flex-row xl:items-center xl:gap-3'
 
   const fieldClass = `${APP_FIELD_COMPACT_CLASS} bg-white dark:!bg-dashboard-card`
 

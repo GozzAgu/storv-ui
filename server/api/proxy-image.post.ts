@@ -6,11 +6,11 @@ import { getProxiedImageForUrl, sendProxiedImage } from '~/server/utils/proxyIma
  * Use for long signed URLs (Firebase, etc.); long query strings are often truncated.
  */
 export default defineEventHandler(async (event) => {
- const body = await readBody(event).catch(() => ({} as { url?: string }))
- const url = body?.url
- if (typeof url !== 'string') {
- throw createError({ statusCode: 400, message: 'url is required in JSON body' })
- }
- const { buffer, contentType } = await getProxiedImageForUrl(url)
- return sendProxiedImage(event, buffer, contentType)
+  const body = await readBody(event).catch(() => ({} as { url?: string }))
+  const url = body?.url
+  if (typeof url !== 'string') {
+    throw createError({ statusCode: 400, message: 'url is required in JSON body' })
+  }
+  const { buffer, contentType } = await getProxiedImageForUrl(url)
+  return sendProxiedImage(event, buffer, contentType)
 })

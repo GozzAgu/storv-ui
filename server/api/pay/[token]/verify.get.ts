@@ -1,7 +1,11 @@
 import { createError, defineEventHandler, getRouterParam, getQuery } from 'h3'
 import { FieldValue } from 'firebase-admin/firestore'
 import { getAdminFirestore } from '~/server/utils/firebase-admin'
-import { getPaystackSecret, paystackRequest, type PaymentLinkDoc } from '~/server/utils/payment-links'
+import {
+  getPaystackSecret,
+  paystackRequest,
+  type PaymentLinkDoc,
+} from '~/server/utils/payment-links'
 import { settlePaymentLink } from '~/server/utils/payment-link-settle'
 
 /**
@@ -40,14 +44,22 @@ export default defineEventHandler(async (event) => {
   if (data?.status !== 'success') {
     // A definitive failure marks the link failed; "abandoned"/pending stay unpaid so the customer can retry.
     if (data?.status === 'failed') {
-      await adminDb.collection('paymentLinks').doc(token).update({
-        status: 'failed',
-        channel: data.channel || null,
-        updatedAt: FieldValue.serverTimestamp(),
-      })
+      await adminDb
+        .collection('paymentLinks')
+        .doc(token)
+        .update({
+          status: 'failed',
+          channel: data.channel || null,
+          updatedAt: FieldValue.serverTimestamp(),
+        })
       return { success: true, paid: false, status: 'failed', message: 'Payment failed' }
     }
-    return { success: true, paid: false, status: data?.status || 'pending', message: 'Payment not completed' }
+    return {
+      success: true,
+      paid: false,
+      status: data?.status || 'pending',
+      message: 'Payment not completed',
+    }
   }
 
   const result = await settlePaymentLink(adminDb, token, {

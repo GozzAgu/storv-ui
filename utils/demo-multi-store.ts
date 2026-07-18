@@ -20,7 +20,7 @@ export interface DemoConsolidatedReport {
 
 export function getDemoConsolidatedReport(
   dateRange: string,
-  storeFilter: string,
+  storeFilter: string
 ): DemoConsolidatedReport {
   const demo = useDemoAppStore()
   demo.hydrate()
@@ -48,7 +48,7 @@ export function getDemoConsolidatedReport(
     const sales = receipts.length
     const items = receipts.reduce(
       (sum, r) => sum + r.items.reduce((n, line) => n + line.quantity, 0),
-      0,
+      0
     )
 
     totalRevenue += revenue
@@ -77,11 +77,13 @@ export function getDemoTransfers(): DemoTransfer[] {
   const demo = useDemoAppStore()
   demo.hydrate()
   return [...demo.state.transfers].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 }
 
-export async function addDemoTransferRequest(payload: Omit<DemoTransfer, 'id' | 'createdAt' | 'createdBy' | 'status'>) {
+export async function addDemoTransferRequest(
+  payload: Omit<DemoTransfer, 'id' | 'createdAt' | 'createdBy' | 'status'>
+) {
   const demo = useDemoAppStore()
   demo.hydrate()
   const transfer: DemoTransfer = {
@@ -100,7 +102,7 @@ export async function addDemoTransferRequest(payload: Omit<DemoTransfer, 'id' | 
 export async function updateDemoTransferStatus(
   transferId: string,
   status: DemoTransfer['status'],
-  extra?: Partial<DemoTransfer>,
+  extra?: Partial<DemoTransfer>
 ) {
   const demo = useDemoAppStore()
   const transfer = demo.state.transfers.find((t) => t.id === transferId)
@@ -127,9 +129,7 @@ export async function executeDemoTransfer(transfer: DemoTransfer) {
     }
     sourceItem.quantity -= line.quantity
 
-    let destItem = dest.items.find(
-      (i) => i.name === line.itemName || i.sku === sourceItem.sku,
-    )
+    let destItem = dest.items.find((i) => i.name === line.itemName || i.sku === sourceItem.sku)
     if (destItem) {
       destItem.quantity += line.quantity
     } else {

@@ -34,11 +34,7 @@
             <p class="landing-capabilities__tabs-label">Categories</p>
             <p class="landing-capabilities__tabs-sublabel">Click to explore</p>
           </div>
-          <nav
-            class="landing-capabilities__tabs"
-            role="tablist"
-            aria-label="Feature categories"
-          >
+          <nav class="landing-capabilities__tabs" role="tablist" aria-label="Feature categories">
             <button
               v-for="group in groups"
               :key="group.id"
@@ -103,11 +99,7 @@
             </div>
           </nav>
 
-          <ul
-            class="landing-capabilities__list"
-            role="tabpanel"
-            :aria-label="activeMeta.title"
-          >
+          <ul class="landing-capabilities__list" role="tabpanel" :aria-label="activeMeta.title">
             <li
               v-for="item in visibleItems"
               :key="`${activeGroup}-${item.title}`"
@@ -143,11 +135,16 @@
 
       <p class="landing-capabilities__footer">
         Questions?
-        <a href="#faq" class="landing-capabilities__footer-link" @click.prevent="emit('navigate', 'faq')">
+        <a
+          href="#faq"
+          class="landing-capabilities__footer-link"
+          @click.prevent="emit('navigate', 'faq')"
+        >
           Read the FAQ
         </a>
         <span class="landing-capabilities__footer-sep" aria-hidden="true">·</span>
-        After sign-in, open <span class="landing-capabilities__footer-strong">Help</span> for walkthroughs.
+        After sign-in, open <span class="landing-capabilities__footer-strong">Help</span> for
+        walkthroughs.
       </p>
     </div>
   </section>

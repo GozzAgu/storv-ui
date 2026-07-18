@@ -20,7 +20,8 @@
           Security with <span class="landing-security__title-accent">backbone</span>
         </h2>
         <p class="landing-security__lede">
-          Stock, sales, and team access should feel safe without you needing a tech manual. Storvv is built that way from the start.
+          Stock, sales, and team access should feel safe without you needing a tech manual. Storvv
+          is built that way from the start.
         </p>
         <ul class="landing-security__pillars" aria-label="How we keep you safe">
           <li v-for="pillar in pillars" :key="pillar">{{ pillar }}</li>

@@ -116,13 +116,20 @@ export async function paystackRequest<T = unknown>(
     throw createError({ statusCode: 502, message: `Paystack: ${message}` })
   }
   if (res?.status === false) {
-    throw createError({ statusCode: 502, message: `Paystack: ${res.message || 'request rejected'}` })
+    throw createError({
+      statusCode: 502,
+      message: `Paystack: ${res.message || 'request rejected'}`,
+    })
   }
   return res.data as T
 }
 
 /** Verify Paystack webhook signature (HMAC SHA512 of raw body with secret key). */
-export function isValidPaystackSignature(rawBody: string, signature: string, secretKey: string): boolean {
+export function isValidPaystackSignature(
+  rawBody: string,
+  signature: string,
+  secretKey: string
+): boolean {
   if (!signature) return false
   const hash = createHmac('sha512', secretKey).update(rawBody).digest('hex')
   return hash === signature

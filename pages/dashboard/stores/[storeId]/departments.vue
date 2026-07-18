@@ -1,309 +1,361 @@
 <template>
- <div
- class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
- >
- <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
+  <div
+    class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+  >
+    <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
- <DashboardPageHeader>
- <template #eyebrow>
- <p :class="eyebrowClass">Settings</p>
- </template>
- <template #title>
- <div class="flex min-w-0 items-center gap-2">
- <DashboardBackButton
- to="/dashboard/settings"
- label="Back to settings"
- />
- <h1 :class="[pageTitleClass, 'min-w-0 truncate']">
- Departments in {{ store?.name || 'Store' }}
- </h1>
- </div>
- </template>
- <template #description>
- <p :class="descriptionClass">
- Manage departments and staff for this store.
- <template v-if="store && !departmentsStore.loading && !storesLoading">
- <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
- {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
- </span>
- <span class="text-gray-300 dark:text-gray-600"> · </span>
- <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
- <template v-if="currentStore?.id === store.id">
- <span class="text-gray-300 dark:text-gray-600"> · </span>
- <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
- </template>
- </template>
- </p>
- </template>
- <template #actions>
- <Button
- v-if="canManageDepartments"
- variant="primary"
- size="sm"
- :icon="PlusIcon"
- :disabled="!canAddDepartmentForStore"
- :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
- :extra-class="headerBtnClass + ' w-full sm:w-auto'"
- @click="openCreateDepartmentModal"
- >
- New department
- </Button>
- </template>
- <template v-if="store && !departmentsStore.loading && !storesLoading" #toolbar>
- <DashboardToolbarSearch v-model="searchQuery" placeholder="Search departments…" />
- <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
- <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
- <ArrowPathIcon class="h-4 w-4" />
- </DashboardToolbarIconButton>
- <DashboardToolbarMeta>
- {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
- </DashboardToolbarMeta>
- </div>
- <div
- v-if="canManageDepartments && paginatedDepartments.length > 0"
- :class="bulkActionsClass"
- >
- <Checkbox
- :model-value="allDepartmentsOnPageSelected"
- size="sm"
- wrapper-class="!h-8 items-center"
- label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
- @update:model-value="setSelectAllDepartmentsBulk"
- >
- {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
- </Checkbox>
- <template v-if="selectedDepartmentsForBulk.length > 0">
- <span
- class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
- >
- {{ selectedDepartmentsForBulk.length }} selected
- </span>
- <Button
- variant="outline"
- size="sm"
- :icon="TrashIcon"
- :extra-class="headerBtnClass + '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'"
- @click="openBulkDeleteDepartmentsModal"
- >
- Delete
- </Button>
- </template>
- </div>
- </template>
- </DashboardPageHeader>
+    <DashboardPageHeader>
+      <template #eyebrow>
+        <p :class="eyebrowClass">Settings</p>
+      </template>
+      <template #title>
+        <div class="flex min-w-0 items-center gap-2">
+          <DashboardBackButton to="/dashboard/settings" label="Back to settings" />
+          <h1 :class="[pageTitleClass, 'min-w-0 truncate']">
+            Departments in {{ store?.name || 'Store' }}
+          </h1>
+        </div>
+      </template>
+      <template #description>
+        <p :class="descriptionClass">
+          Manage departments and staff for this store.
+          <template v-if="store && !departmentsStore.loading && !storesLoading">
+            <span class="tabular-nums font-medium text-gray-600 dark:text-gray-300">
+              {{ storeDepartments.length }} dept{{ storeDepartments.length === 1 ? '' : 's' }}
+            </span>
+            <span class="text-gray-300 dark:text-gray-600"> · </span>
+            <span class="tabular-nums">{{ totalStaffForStore }} staff</span>
+            <template v-if="currentStore?.id === store.id">
+              <span class="text-gray-300 dark:text-gray-600"> · </span>
+              <span class="text-emerald-700 dark:text-emerald-400/90">Current branch</span>
+            </template>
+          </template>
+        </p>
+      </template>
+      <template #actions>
+        <Button
+          v-if="canManageDepartments"
+          variant="primary"
+          size="sm"
+          :icon="PlusIcon"
+          :disabled="!canAddDepartmentForStore"
+          :title="canAddDepartmentForStore ? 'Create new department' : departmentLimitMessage"
+          :extra-class="headerBtnClass + ' w-full sm:w-auto'"
+          @click="openCreateDepartmentModal"
+        >
+          New department
+        </Button>
+      </template>
+      <template v-if="store && !departmentsStore.loading && !storesLoading" #toolbar>
+        <DashboardToolbarSearch v-model="searchQuery" placeholder="Search departments…" />
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <DashboardToolbarIconButton aria-label="Reset filters" @click="resetFilters">
+            <ArrowPathIcon class="h-4 w-4" />
+          </DashboardToolbarIconButton>
+          <DashboardToolbarMeta>
+            {{ filteredDepartments.length }} dept{{ filteredDepartments.length === 1 ? '' : 's' }}
+          </DashboardToolbarMeta>
+        </div>
+        <div
+          v-if="canManageDepartments && paginatedDepartments.length > 0"
+          :class="bulkActionsClass"
+        >
+          <Checkbox
+            :model-value="allDepartmentsOnPageSelected"
+            size="sm"
+            wrapper-class="!h-8 items-center"
+            label-class="!text-xs !ml-2 !font-normal !leading-none text-gray-500 dark:text-gray-500"
+            @update:model-value="setSelectAllDepartmentsBulk"
+          >
+            {{ allDepartmentsOnPageSelected ? 'All selected' : 'Select all' }}
+          </Checkbox>
+          <template v-if="selectedDepartmentsForBulk.length > 0">
+            <span
+              class="inline-flex h-8 items-center text-xs font-medium tabular-nums text-gray-600 dark:text-gray-400"
+            >
+              {{ selectedDepartmentsForBulk.length }} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              :icon="TrashIcon"
+              :extra-class="
+                headerBtnClass +
+                '-red-200/70 !text-red-600 hover:!bg-red-50/80 dark:!border-red-900/40 dark:!text-red-400 dark:hover:!bg-red-950/30'
+              "
+              @click="openBulkDeleteDepartmentsModal"
+            >
+              Delete
+            </Button>
+          </template>
+        </div>
+      </template>
+    </DashboardPageHeader>
 
- <div
- v-if="departmentsStore.error && !departmentsStore.loading"
- class="rounded-sm border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
- >
- <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30">
- <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
- </div>
- <h3 class="mb-1.5 text-base font-semibold text-gray-900 dark:text-gray-100">Error loading departments</h3>
- <p class="mx-auto mb-4 max-w-md text-xs text-gray-600 dark:text-gray-400">{{ departmentsStore.error }}</p>
- <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch">Retry</Button>
- </div>
+    <div
+      v-if="departmentsStore.error && !departmentsStore.loading"
+      class="rounded-sm border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
+    >
+      <div
+        class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30"
+      >
+        <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
+      </div>
+      <h3 class="mb-1.5 text-base font-semibold text-gray-900 dark:text-gray-100">
+        Error loading departments
+      </h3>
+      <p class="mx-auto mb-4 max-w-md text-xs text-gray-600 dark:text-gray-400">
+        {{ departmentsStore.error }}
+      </p>
+      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch">Retry</Button>
+    </div>
 
- <div
- v-else-if="departmentsStore.loading || storesLoading"
- class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
- >
- <div
- v-for="i in 12"
- :key="i"
- class="animate-pulse rounded-xl bg-white p-2.5 dark:bg-[#141820] dark:ring-white/[0.06]"
- >
- <div class="mb-2 flex justify-between">
- <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
- <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
- </div>
- <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
- <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
- <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
- <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
- <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
- </div>
- <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
- <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
- <div class="flex-1 pt-0.5">
- <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
- </div>
- </div>
- </div>
- </div>
+    <div
+      v-else-if="departmentsStore.loading || storesLoading"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
+    >
+      <div
+        v-for="i in 12"
+        :key="i"
+        class="animate-pulse rounded-xl bg-white p-2.5 dark:bg-[#141820] dark:ring-white/[0.06]"
+      >
+        <div class="mb-2 flex justify-between">
+          <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
+          <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
+        <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
+        <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
+        </div>
+        <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+          <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="flex-1 pt-0.5">
+            <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
+          </div>
+        </div>
+      </div>
+    </div>
 
- <div v-else-if="!departmentsStore.error">
- <div
- v-if="paginatedDepartments.length > 0"
- class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
- >
- <DepartmentCard
- v-for="department in paginatedDepartments"
- :key="department.id"
- :name="department.name"
- :description="department.description"
- :staff-count="department.staffCount || 0"
- :department-type="department.departmentType || ''"
- :manager="department.manager"
- :store-name="store?.name"
- :inactive="department.isActive === false"
- :deleting="deletingDepartmentId === department.id"
- :updated-at="department.updatedAt"
- :created-at="department.createdAt"
- :has-overlays="canManageDepartments"
- @open="navigateToDepartment(department.id)"
- >
- <template v-if="canManageDepartments" #checkbox>
- <Checkbox
- :model-value="selectedDepartmentsForBulk.some(d => d.id === department.id)"
- @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
- size="sm"
- wrapper-class="justify-center"
- />
- </template>
- <template v-if="canManageDepartments" #menu>
- <div data-department-menu>
- <button
- type="button"
- :data-department-actions-anchor="department.id"
- class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
- aria-label="Department options"
- @click="toggleDepartmentMenu(department.id)"
- >
- <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
- </button>
- </div>
- </template>
- </DepartmentCard>
- </div>
+    <div v-else-if="!departmentsStore.error">
+      <div
+        v-if="paginatedDepartments.length > 0"
+        class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
+      >
+        <DepartmentCard
+          v-for="department in paginatedDepartments"
+          :key="department.id"
+          :name="department.name"
+          :description="department.description"
+          :staff-count="department.staffCount || 0"
+          :department-type="department.departmentType || ''"
+          :manager="department.manager"
+          :store-name="store?.name"
+          :inactive="department.isActive === false"
+          :deleting="deletingDepartmentId === department.id"
+          :updated-at="department.updatedAt"
+          :created-at="department.createdAt"
+          :has-overlays="canManageDepartments"
+          @open="navigateToDepartment(department.id)"
+        >
+          <template v-if="canManageDepartments" #checkbox>
+            <Checkbox
+              :model-value="selectedDepartmentsForBulk.some((d) => d.id === department.id)"
+              @update:model-value="(checked) => toggleDepartmentSelection(department, checked)"
+              size="sm"
+              wrapper-class="justify-center"
+            />
+          </template>
+          <template v-if="canManageDepartments" #menu>
+            <div data-department-menu>
+              <button
+                type="button"
+                :data-department-actions-anchor="department.id"
+                class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+                aria-label="Department options"
+                @click="toggleDepartmentMenu(department.id)"
+              >
+                <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
+              </button>
+            </div>
+          </template>
+        </DepartmentCard>
+      </div>
 
- <DashboardTableEmptyState
- v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
- :icon="BuildingOfficeIcon"
- :title="searchQuery ? 'No departments found' : 'No departments yet'"
- :description="
- searchQuery
- ? 'Try a different search term.'
- : 'Departments organize staff and can restrict which inventory categories they see.'
- "
- :tips="
- searchQuery
- ? ['Search matches department names', 'Clear search to see every department in this store']
- : ['Each department can have its own staff roster', 'Open a department to add members and manage roles']
- "
- extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
- />
- </div>
+      <DashboardTableEmptyState
+        v-if="paginatedDepartments.length === 0 && filteredDepartments.length === 0"
+        :icon="BuildingOfficeIcon"
+        :title="searchQuery ? 'No departments found' : 'No departments yet'"
+        :description="
+          searchQuery
+            ? 'Try a different search term.'
+            : 'Departments organize staff and can restrict which inventory categories they see.'
+        "
+        :tips="
+          searchQuery
+            ? [
+                'Search matches department names',
+                'Clear search to see every department in this store',
+              ]
+            : [
+                'Each department can have its own staff roster',
+                'Open a department to add members and manage roles',
+              ]
+        "
+        extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
+      />
+    </div>
 
- <DashboardFixedFooter v-if="filteredDepartments.length > 0" :sidebar-collapsed="sidebarCollapsed">
- <Pagination
- :current-page="currentPage"
- :items-per-page="itemsPerPage"
- :total="filteredDepartments.length"
- @page-change="handlePageChange"
- />
- </DashboardFixedFooter>
+    <DashboardFixedFooter
+      v-if="filteredDepartments.length > 0"
+      :sidebar-collapsed="sidebarCollapsed"
+    >
+      <Pagination
+        :current-page="currentPage"
+        :items-per-page="itemsPerPage"
+        :total="filteredDepartments.length"
+        @page-change="handlePageChange"
+      />
+    </DashboardFixedFooter>
 
- <!-- Bulk Delete Departments Modal -->
- <Modal
- v-model="showBulkDeleteDepartmentsModal"
- @update:model-value="(v: boolean) => { showBulkDeleteDepartmentsModal = v; if (!v) bulkDeleteDepartmentsConfirmed = false }"
- size="md"
- >
- <template #header>
- <div class="flex items-center gap-2.5">
- <div class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
- <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
- </div>
- <div class="min-w-0">
- <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Delete selected departments</h3>
- <p class="text-xs text-gray-500 dark:text-gray-400">{{ selectedDepartmentsForBulk.length }} department{{ selectedDepartmentsForBulk.length !== 1 ? 's' : '' }} selected</p>
- </div>
- </div>
- </template>
- <div class="space-y-3">
- <div class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm">
- <p class="text-xs text-red-800 dark:text-red-200">This will permanently delete the selected departments and their staff associations. This action cannot be undone.</p>
- </div>
- <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
- <Checkbox
- v-model="bulkDeleteDepartmentsConfirmed"
- label="I understand that these departments will be permanently deleted."
- size="sm"
- wrapper-class="items-start"
- label-class="text-xs text-gray-700 dark:text-gray-300"
- />
- </div>
- </div>
- <template #footer>
- <Button variant="outline" size="sm" @click="showBulkDeleteDepartmentsModal = false; bulkDeleteDepartmentsConfirmed = false" class="!rounded-2xl">Cancel</Button>
- <Button
- variant="danger"
- size="sm"
- :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
- :loading="isBulkDeletingDepartments"
- :icon="TrashIcon"
- class="!rounded-2xl"
- @click="handleConfirmBulkDeleteDepartments"
- >
- {{ isBulkDeletingDepartments ? 'Deleting...' : `Delete ${selectedDepartmentsForBulk.length} department${selectedDepartmentsForBulk.length !== 1 ? 's' : ''}` }}
- </Button>
- </template>
- </Modal>
+    <!-- Bulk Delete Departments Modal -->
+    <Modal
+      v-model="showBulkDeleteDepartmentsModal"
+      @update:model-value="(v: boolean) => { showBulkDeleteDepartmentsModal = v; if (!v) bulkDeleteDepartmentsConfirmed = false }"
+      size="md"
+    >
+      <template #header>
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-sm bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+          >
+            <TrashIcon class="w-4 h-4 text-red-600 dark:text-red-400" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Delete selected departments
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              {{ selectedDepartmentsForBulk.length }} department{{
+                selectedDepartmentsForBulk.length !== 1 ? 's' : ''
+              }}
+              selected
+            </p>
+          </div>
+        </div>
+      </template>
+      <div class="space-y-3">
+        <div
+          class="p-3 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-200/50 dark:ring-red-800/40 rounded-sm"
+        >
+          <p class="text-xs text-red-800 dark:text-red-200">
+            This will permanently delete the selected departments and their staff associations. This
+            action cannot be undone.
+          </p>
+        </div>
+        <div class="rounded-sm bg-gray-50 p-2.5 dark:!bg-dashboard-card/35">
+          <Checkbox
+            v-model="bulkDeleteDepartmentsConfirmed"
+            label="I understand that these departments will be permanently deleted."
+            size="sm"
+            wrapper-class="items-start"
+            label-class="text-xs text-gray-700 dark:text-gray-300"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button
+          variant="outline"
+          size="sm"
+          @click="
+            showBulkDeleteDepartmentsModal = false
+            bulkDeleteDepartmentsConfirmed = false
+          "
+          class="!rounded-2xl"
+          >Cancel</Button
+        >
+        <Button
+          variant="danger"
+          size="sm"
+          :disabled="!bulkDeleteDepartmentsConfirmed || isBulkDeletingDepartments"
+          :loading="isBulkDeletingDepartments"
+          :icon="TrashIcon"
+          class="!rounded-2xl"
+          @click="handleConfirmBulkDeleteDepartments"
+        >
+          {{
+            isBulkDeletingDepartments
+              ? 'Deleting...'
+              : `Delete ${selectedDepartmentsForBulk.length} department${
+                  selectedDepartmentsForBulk.length !== 1 ? 's' : ''
+                }`
+          }}
+        </Button>
+      </template>
+    </Modal>
 
- <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
- <Teleport to="body">
- <div
- v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
- data-department-menu
- class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
- :style="departmentMenuFixedStyle"
- @click.stop
- >
- <button
- type="button"
- @click="handleEditDepartment(departmentForOpenMenu); openDepartmentMenuId = null"
- class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
- >
- <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
- Edit
- </button>
- <button
- type="button"
- :disabled="deletingDepartmentId === departmentForOpenMenu.id"
- class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
- @click="handleDeleteDepartment(departmentForOpenMenu); openDepartmentMenuId = null"
- >
- <ArrowPathIcon v-if="deletingDepartmentId === departmentForOpenMenu.id" class="w-3.5 h-3.5 shrink-0 animate-spin" />
- <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
- {{ deletingDepartmentId === departmentForOpenMenu.id ? 'Deleting...' : 'Delete' }}
- </button>
- </div>
- </Teleport>
+    <!-- Department ⋮ menu (teleported; same as main Departments list + Inventory folders) -->
+    <Teleport to="body">
+      <div
+        v-if="openDepartmentMenuId && departmentForOpenMenu && departmentMenuFixedStyle"
+        data-department-menu
+        class="frosted-glass fixed z-[1000] min-w-[120px] rounded-sm py-0.5"
+        :style="departmentMenuFixedStyle"
+        @click.stop
+      >
+        <button
+          type="button"
+          @click="
+            handleEditDepartment(departmentForOpenMenu)
+            openDepartmentMenuId = null
+          "
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/85 transition-colors"
+        >
+          <PencilSquareIcon class="w-3.5 h-3.5 shrink-0" />
+          Edit
+        </button>
+        <button
+          type="button"
+          :disabled="deletingDepartmentId === departmentForOpenMenu.id"
+          class="w-full px-2.5 py-2 flex items-center gap-1.5 text-left text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/35 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="
+            handleDeleteDepartment(departmentForOpenMenu)
+            openDepartmentMenuId = null
+          "
+        >
+          <ArrowPathIcon
+            v-if="deletingDepartmentId === departmentForOpenMenu.id"
+            class="w-3.5 h-3.5 shrink-0 animate-spin"
+          />
+          <TrashIcon v-else class="w-3.5 h-3.5 shrink-0" />
+          {{ deletingDepartmentId === departmentForOpenMenu.id ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </Teleport>
 
- <DepartmentModal
- v-model="showDepartmentModal"
- :department="editingDepartment"
- :storeId="storeId"
- @success="handleDepartmentSuccess"
- @error="handleDepartmentError"
- />
-
- </div>
+    <DepartmentModal
+      v-model="showDepartmentModal"
+      :department="editingDepartment"
+      :storeId="storeId"
+      @success="handleDepartmentSuccess"
+      @error="handleDepartmentError"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {
- PlusIcon,
- BuildingOfficeIcon,
- Cog6ToothIcon,
- UsersIcon,
- UserCircleIcon,
- ArrowPathIcon,
- PencilSquareIcon,
- TrashIcon,
- EllipsisVerticalIcon,
+  PlusIcon,
+  BuildingOfficeIcon,
+  Cog6ToothIcon,
+  UsersIcon,
+  UserCircleIcon,
+  ArrowPathIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  EllipsisVerticalIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
 import Breadcrumbs from '~/components/ui/Breadcrumbs.vue'
@@ -318,20 +370,20 @@ import { getEligibleStoresForPlan } from '~/types/subscription'
 import type { SubscriptionPlan } from '~/types/subscription'
 
 definePageMeta({
- layout: 'dashboard',
- middleware: 'auth',
- ssr: false
+  layout: 'dashboard',
+  middleware: 'auth',
+  ssr: false,
 })
 
 const route = useRoute()
 const storeId = computed(() => route.params.storeId as string)
 
 useHead({
- title: `Departments - Storvv`,
+  title: `Departments - Storvv`,
 })
 
 const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass, bulkActionsClass } =
- useDashboardPageChrome()
+  useDashboardPageChrome()
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)
@@ -349,15 +401,15 @@ const searchQuery = ref('')
 
 // Load pagination state from localStorage
 const getInitialPage = (): number => {
- if (import.meta.client) {
- try {
- const saved = localStorage.getItem(`stores-${storeId.value}-departments-page`)
- return saved ? parseInt(saved, 10) : 1
- } catch (e) {
- return 1
- }
- }
- return 1
+  if (import.meta.client) {
+    try {
+      const saved = localStorage.getItem(`stores-${storeId.value}-departments-page`)
+      return saved ? parseInt(saved, 10) : 1
+    } catch (e) {
+      return 1
+    }
+  }
+  return 1
 }
 const currentPage = ref(getInitialPage())
 const itemsPerPage = ref(100)
@@ -382,37 +434,37 @@ const sidebarCollapsed = ref(false)
 
 // Load sidebar state from localStorage
 if (import.meta.client) {
- try {
- const savedState = localStorage.getItem('sidebarCollapsed')
- if (savedState !== null) {
- sidebarCollapsed.value = savedState === 'true'
- }
- } catch (e) {
- // Ignore localStorage errors
- }
+  try {
+    const savedState = localStorage.getItem('sidebarCollapsed')
+    if (savedState !== null) {
+      sidebarCollapsed.value = savedState === 'true'
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
 }
 
 // Watch for sidebar state changes
 if (import.meta.client) {
- window.addEventListener('storage', (e) => {
- if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
- sidebarCollapsed.value = e.newValue === 'true'
- }
- })
- // Also check periodically for changes (since storage event doesn't fire on same window)
- setInterval(() => {
- try {
- const savedState = localStorage.getItem('sidebarCollapsed')
- if (savedState !== null) {
- const newValue = savedState === 'true'
- if (newValue !== sidebarCollapsed.value) {
- sidebarCollapsed.value = newValue
- }
- }
- } catch (e) {
- // Ignore
- }
- }, 100)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'sidebarCollapsed' && e.newValue !== null) {
+      sidebarCollapsed.value = e.newValue === 'true'
+    }
+  })
+  // Also check periodically for changes (since storage event doesn't fire on same window)
+  setInterval(() => {
+    try {
+      const savedState = localStorage.getItem('sidebarCollapsed')
+      if (savedState !== null) {
+        const newValue = savedState === 'true'
+        if (newValue !== sidebarCollapsed.value) {
+          sidebarCollapsed.value = newValue
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }, 100)
 }
 
 // Check if current user is staff (limited permissions)
@@ -426,414 +478,432 @@ const currentStore = computed(() => storesStore.currentStore)
 const { canAddDepartment, limits: subscriptionLimits } = useSubscriptionFeatures()
 const canAddDepartmentForStore = computed(() => canAddDepartment(storeDepartments.value.length))
 const departmentLimitMessage = computed(() => {
- const max = subscriptionLimits.value.maxDepartmentsPerStore
- if (max < 0) return ''
- return max === 1
- ? 'Storvv Micro allows 1 department. Upgrade to add more.'
- : `Your plan allows up to ${max} departments per store. Upgrade for more.`
+  const max = subscriptionLimits.value.maxDepartmentsPerStore
+  if (max < 0) return ''
+  return max === 1
+    ? 'Storvv Micro allows 1 department. Upgrade to add more.'
+    : `Your plan allows up to ${max} departments per store. Upgrade for more.`
 })
 
 const storeDepartmentsBreadcrumbs = computed(() => [
- { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
- { label: store.value?.name || 'Store', icon: BuildingOfficeIcon },
+  { label: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
+  { label: store.value?.name || 'Store', icon: BuildingOfficeIcon },
 ])
 
 // Filter departments by storeId
 const storeDepartments = computed(() => {
- return departmentsStore.departments.filter(dept => dept.storeId === storeId.value)
+  return departmentsStore.departments.filter((dept) => dept.storeId === storeId.value)
 })
 
 const totalStaffForStore = computed(() => {
- return storeDepartments.value.reduce((sum, dept) => sum + (dept.staffCount || 0), 0)
+  return storeDepartments.value.reduce((sum, dept) => sum + (dept.staffCount || 0), 0)
 })
 
 const filteredDepartments = computed(() => {
- if (!searchQuery.value) return storeDepartments.value
+  if (!searchQuery.value) return storeDepartments.value
 
- const query = searchQuery.value.toLowerCase()
- return storeDepartments.value.filter((dept: Department) =>
- dept.name.toLowerCase().includes(query) ||
- (dept.departmentType && dept.departmentType.toLowerCase().includes(query)) ||
- (dept.manager && dept.manager.toLowerCase().includes(query))
- )
+  const query = searchQuery.value.toLowerCase()
+  return storeDepartments.value.filter(
+    (dept: Department) =>
+      dept.name.toLowerCase().includes(query) ||
+      (dept.departmentType && dept.departmentType.toLowerCase().includes(query)) ||
+      (dept.manager && dept.manager.toLowerCase().includes(query))
+  )
 })
 
 const paginatedDepartments = computed(() => {
- const start = (currentPage.value - 1) * itemsPerPage.value
- const end = start + itemsPerPage.value
- return filteredDepartments.value.slice(start, end)
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredDepartments.value.slice(start, end)
 })
 
 const resetFilters = () => {
- searchQuery.value = ''
- currentPage.value = 1
- // Clear pagination from localStorage when filters are reset
- if (import.meta.client) {
- try {
- localStorage.setItem(`stores-${storeId.value}-departments-page`, '1')
- } catch (e) {
- // Ignore localStorage errors
- }
- }
+  searchQuery.value = ''
+  currentPage.value = 1
+  // Clear pagination from localStorage when filters are reset
+  if (import.meta.client) {
+    try {
+      localStorage.setItem(`stores-${storeId.value}-departments-page`, '1')
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
 }
 
 const handlePageChange = (page: number) => {
- currentPage.value = page
- // Save to localStorage
- if (import.meta.client) {
- try {
- localStorage.setItem(`stores-${storeId.value}-departments-page`, page.toString())
- } catch (e) {
- // Ignore localStorage errors
- }
- }
- window.scrollTo({ top: 0, behavior: 'smooth' })
+  currentPage.value = page
+  // Save to localStorage
+  if (import.meta.client) {
+    try {
+      localStorage.setItem(`stores-${storeId.value}-departments-page`, page.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 // Watch for page changes to persist
 watch(currentPage, (newPage) => {
- openDepartmentMenuId.value = null
- if (import.meta.client) {
- try {
- localStorage.setItem(`stores-${storeId.value}-departments-page`, newPage.toString())
- } catch (e) {
- // Ignore localStorage errors
- }
- }
+  openDepartmentMenuId.value = null
+  if (import.meta.client) {
+    try {
+      localStorage.setItem(`stores-${storeId.value}-departments-page`, newPage.toString())
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  }
 })
 
 // Watch for storeId changes
-watch(() => route.params.storeId, (newStoreId) => {
- if (newStoreId && import.meta.client) {
- currentPage.value = 1
- // Reload departments when storeId changes
- if (authStore.currentUser) {
- departmentsStore.fetchDepartments().catch(err => console.error('Error fetching departments:', err))
- }
- }
-})
+watch(
+  () => route.params.storeId,
+  (newStoreId) => {
+    if (newStoreId && import.meta.client) {
+      currentPage.value = 1
+      // Reload departments when storeId changes
+      if (authStore.currentUser) {
+        departmentsStore
+          .fetchDepartments()
+          .catch((err) => console.error('Error fetching departments:', err))
+      }
+    }
+  }
+)
 
 const handleRetryFetch = async () => {
- // console.log('[StoreDepartmentsPage] Retrying fetch...')
- try {
- await departmentsStore.fetchDepartments()
- } catch (error: any) {
- console.error('[StoreDepartmentsPage] Retry error:', error.message || error)
- }
+  // console.log('[StoreDepartmentsPage] Retrying fetch...')
+  try {
+    await departmentsStore.fetchDepartments()
+  } catch (error: any) {
+    console.error('[StoreDepartmentsPage] Retry error:', error.message || error)
+  }
 }
 
 // Load departments on mount
 onMounted(async () => {
- // Only run on client
- if (import.meta.server) return
- 
- // Wait for auth and user data to load
- let attempts = 0
- while ((authStore.loading || !userStore.userData) && attempts < 100) {
- await new Promise(resolve => setTimeout(resolve, 100))
- attempts++
- }
- 
- // Check if user is staff/intern and redirect
- if (userStore.userData?.role === 'staff') {
- // console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
- await navigateTo('/dashboard')
- return
- }
- 
- // console.log('[StoreDepartmentsPage] onMounted - Starting load process')
- 
- const loadData = async () => {
- // console.log('[StoreDepartmentsPage] loadData - Checking auth state')
- 
- // Wait for auth to finish loading with timeout
- let attempts = 0
- while (authStore.loading && attempts < 100) {
- await new Promise(resolve => setTimeout(resolve, 100))
- attempts++
- if (attempts % 10 === 0) {
- // console.log('[StoreDepartmentsPage] Still waiting for auth...', attempts)
- }
- }
- 
- if (attempts >= 100) {
- console.warn('[StoreDepartmentsPage] Auth loading timeout')
- }
- 
- // Check if user is authenticated
- if (!authStore.currentUser) {
- console.error('[StoreDepartmentsPage] No authenticated user found')
- return
- }
- 
- // console.log('[StoreDepartmentsPage] User authenticated:', authStore.currentUser.uid)
- 
- // Fetch user data if not already loaded
- if (!userStore.userData) {
- // console.log('[StoreDepartmentsPage] Fetching user data...')
- try {
- await userStore.fetchUserData(authStore.currentUser.uid)
- // console.log('[StoreDepartmentsPage] User data fetched:', userStore.userData)
- } catch (error) {
- console.error('[StoreDepartmentsPage] Error fetching user data:', error)
- }
- }
+  // Only run on client
+  if (import.meta.server) return
 
- if (!store.value) {
- // console.log('[StoreDepartmentsPage] Fetching stores...')
- try {
- await storesStore.fetchStores()
- } catch (error) {
- console.error('[StoreDepartmentsPage] Error fetching stores:', error)
- }
- }
+  // Wait for auth and user data to load
+  let attempts = 0
+  while ((authStore.loading || !userStore.userData) && attempts < 100) {
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    attempts++
+  }
 
- if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
- const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
- const eligible = getEligibleStoresForPlan(storesStore.stores, plan)
- const eligibleIds = new Set(eligible.map(s => s.id))
- if (!eligibleIds.has(storeId.value)) {
- const fallback = eligible[0]
- if (fallback) {
- toast.info('This branch is not on your current plan. Opening an available branch.')
- await navigateTo(`/dashboard/stores/${fallback.id}/departments`, { replace: true })
- return
- }
- await navigateTo('/dashboard/settings', { replace: true })
- return
- }
- }
+  // Check if user is staff/intern and redirect
+  if (userStore.userData?.role === 'staff') {
+    // console.log('[StoreDepartmentsPage] Staff user detected - redirecting to dashboard')
+    await navigateTo('/dashboard')
+    return
+  }
 
- // Load departments
- // console.log('[StoreDepartmentsPage] Fetching departments...')
- try {
- await departmentsStore.fetchDepartments()
- // console.log('[StoreDepartmentsPage] Departments fetched:', departmentsStore.departments.length)
- if (departmentsStore.error) {
- console.error('[StoreDepartmentsPage] Departments store error:', departmentsStore.error)
- }
- } catch (error: any) {
- console.error('[StoreDepartmentsPage] Error loading departments:', error.message || error)
- console.error('[StoreDepartmentsPage] Full error:', error)
- }
- }
- 
- await loadData()
+  // console.log('[StoreDepartmentsPage] onMounted - Starting load process')
+
+  const loadData = async () => {
+    // console.log('[StoreDepartmentsPage] loadData - Checking auth state')
+
+    // Wait for auth to finish loading with timeout
+    let attempts = 0
+    while (authStore.loading && attempts < 100) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      attempts++
+      if (attempts % 10 === 0) {
+        // console.log('[StoreDepartmentsPage] Still waiting for auth...', attempts)
+      }
+    }
+
+    if (attempts >= 100) {
+      console.warn('[StoreDepartmentsPage] Auth loading timeout')
+    }
+
+    // Check if user is authenticated
+    if (!authStore.currentUser) {
+      console.error('[StoreDepartmentsPage] No authenticated user found')
+      return
+    }
+
+    // console.log('[StoreDepartmentsPage] User authenticated:', authStore.currentUser.uid)
+
+    // Fetch user data if not already loaded
+    if (!userStore.userData) {
+      // console.log('[StoreDepartmentsPage] Fetching user data...')
+      try {
+        await userStore.fetchUserData(authStore.currentUser.uid)
+        // console.log('[StoreDepartmentsPage] User data fetched:', userStore.userData)
+      } catch (error) {
+        console.error('[StoreDepartmentsPage] Error fetching user data:', error)
+      }
+    }
+
+    if (!store.value) {
+      // console.log('[StoreDepartmentsPage] Fetching stores...')
+      try {
+        await storesStore.fetchStores()
+      } catch (error) {
+        console.error('[StoreDepartmentsPage] Error fetching stores:', error)
+      }
+    }
+
+    if (userStore.userData?.role === 'superAdmin' && storesStore.stores.length > 0) {
+      const plan = (userStore.userData.subscription as SubscriptionPlan) || 'storvv_micro'
+      const eligible = getEligibleStoresForPlan(storesStore.stores, plan)
+      const eligibleIds = new Set(eligible.map((s) => s.id))
+      if (!eligibleIds.has(storeId.value)) {
+        const fallback = eligible[0]
+        if (fallback) {
+          toast.info('This branch is not on your current plan. Opening an available branch.')
+          await navigateTo(`/dashboard/stores/${fallback.id}/departments`, { replace: true })
+          return
+        }
+        await navigateTo('/dashboard/settings', { replace: true })
+        return
+      }
+    }
+
+    // Load departments
+    // console.log('[StoreDepartmentsPage] Fetching departments...')
+    try {
+      await departmentsStore.fetchDepartments()
+      // console.log('[StoreDepartmentsPage] Departments fetched:', departmentsStore.departments.length)
+      if (departmentsStore.error) {
+        console.error('[StoreDepartmentsPage] Departments store error:', departmentsStore.error)
+      }
+    } catch (error: any) {
+      console.error('[StoreDepartmentsPage] Error loading departments:', error.message || error)
+      console.error('[StoreDepartmentsPage] Full error:', error)
+    }
+  }
+
+  await loadData()
 })
 
 // Watch for auth state changes
-watch(() => authStore.currentUser, async (newUser, oldUser) => {
- if (import.meta.server) return
- // console.log('[StoreDepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
- 
- if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
- // console.log('[StoreDepartmentsPage] Auth changed and no departments, fetching...')
- try {
- await departmentsStore.fetchDepartments()
- // console.log('[StoreDepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
- } catch (error: any) {
- console.error('[StoreDepartmentsPage] Error in watch fetch:', error.message || error)
- }
- }
-}, { immediate: false })
+watch(
+  () => authStore.currentUser,
+  async (newUser, oldUser) => {
+    if (import.meta.server) return
+    // console.log('[StoreDepartmentsPage] Auth state changed:', { newUser: !!newUser, oldUser: !!oldUser })
+
+    if (newUser && !departmentsStore.loading && departmentsStore.departments.length === 0) {
+      // console.log('[StoreDepartmentsPage] Auth changed and no departments, fetching...')
+      try {
+        await departmentsStore.fetchDepartments()
+        // console.log('[StoreDepartmentsPage] Departments fetched from watch:', departmentsStore.departments.length)
+      } catch (error: any) {
+        console.error('[StoreDepartmentsPage] Error in watch fetch:', error.message || error)
+      }
+    }
+  },
+  { immediate: false }
+)
 
 const openDepartmentMenuId = ref<string | null>(null)
 const toggleDepartmentMenu = (departmentId: string) => {
- openDepartmentMenuId.value = openDepartmentMenuId.value === departmentId ? null : departmentId
+  openDepartmentMenuId.value = openDepartmentMenuId.value === departmentId ? null : departmentId
 }
 
 const departmentForOpenMenu = computed(() => {
- const id = openDepartmentMenuId.value
- if (!id) return null
- return filteredDepartments.value.find(d => d.id === id) ?? null
+  const id = openDepartmentMenuId.value
+  if (!id) return null
+  return filteredDepartments.value.find((d) => d.id === id) ?? null
 })
 
 const departmentMenuFixedStyle = ref<Record<string, string> | null>(null)
 
 function updateDepartmentMenuPosition() {
- const id = openDepartmentMenuId.value
- if (!id || !import.meta.client) {
- departmentMenuFixedStyle.value = null
- return
- }
- const el = getVisibleMenuAnchorElement('data-department-actions-anchor', id)
- if (!el) {
- departmentMenuFixedStyle.value = null
- return
- }
- const r = el.getBoundingClientRect()
- departmentMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
- menuWidth: 120,
- estimatedMenuHeight: 88,
- margin: 4,
- viewportPadding: 8,
- })
+  const id = openDepartmentMenuId.value
+  if (!id || !import.meta.client) {
+    departmentMenuFixedStyle.value = null
+    return
+  }
+  const el = getVisibleMenuAnchorElement('data-department-actions-anchor', id)
+  if (!el) {
+    departmentMenuFixedStyle.value = null
+    return
+  }
+  const r = el.getBoundingClientRect()
+  departmentMenuFixedStyle.value = computeFixedAnchoredMenuStyle(r, {
+    menuWidth: 120,
+    estimatedMenuHeight: 88,
+    margin: 4,
+    viewportPadding: 8,
+  })
 }
 
 function addDepartmentMenuPositionListeners() {
- if (!import.meta.client) return
- window.addEventListener('scroll', updateDepartmentMenuPosition, true)
- window.addEventListener('resize', updateDepartmentMenuPosition)
+  if (!import.meta.client) return
+  window.addEventListener('scroll', updateDepartmentMenuPosition, true)
+  window.addEventListener('resize', updateDepartmentMenuPosition)
 }
 
 function removeDepartmentMenuPositionListeners() {
- if (!import.meta.client) return
- window.removeEventListener('scroll', updateDepartmentMenuPosition, true)
- window.removeEventListener('resize', updateDepartmentMenuPosition)
+  if (!import.meta.client) return
+  window.removeEventListener('scroll', updateDepartmentMenuPosition, true)
+  window.removeEventListener('resize', updateDepartmentMenuPosition)
 }
 
 let departmentMenuOutsideHandler: ((e: MouseEvent) => void) | null = null
 
 function removeDepartmentMenuOutsideListener() {
- if (departmentMenuOutsideHandler && import.meta.client) {
- document.removeEventListener('click', departmentMenuOutsideHandler, true)
- departmentMenuOutsideHandler = null
- }
+  if (departmentMenuOutsideHandler && import.meta.client) {
+    document.removeEventListener('click', departmentMenuOutsideHandler, true)
+    departmentMenuOutsideHandler = null
+  }
 }
 
 watch(openDepartmentMenuId, (id) => {
- removeDepartmentMenuOutsideListener()
- removeDepartmentMenuPositionListeners()
- departmentMenuFixedStyle.value = null
- if (!id || !import.meta.client) return
+  removeDepartmentMenuOutsideListener()
+  removeDepartmentMenuPositionListeners()
+  departmentMenuFixedStyle.value = null
+  if (!id || !import.meta.client) return
 
- nextTick(() => {
- updateDepartmentMenuPosition()
- addDepartmentMenuPositionListeners()
- })
+  nextTick(() => {
+    updateDepartmentMenuPosition()
+    addDepartmentMenuPositionListeners()
+  })
 
- departmentMenuOutsideHandler = (e: MouseEvent) => {
- const t = e.target as HTMLElement | null
- if (t?.closest?.('[data-department-menu]')) return
- openDepartmentMenuId.value = null
- removeDepartmentMenuOutsideListener()
- }
+  departmentMenuOutsideHandler = (e: MouseEvent) => {
+    const t = e.target as HTMLElement | null
+    if (t?.closest?.('[data-department-menu]')) return
+    openDepartmentMenuId.value = null
+    removeDepartmentMenuOutsideListener()
+  }
 
- nextTick(() => {
- setTimeout(() => {
- if (openDepartmentMenuId.value && departmentMenuOutsideHandler) {
- document.addEventListener('click', departmentMenuOutsideHandler, true)
- }
- }, 0)
- })
+  nextTick(() => {
+    setTimeout(() => {
+      if (openDepartmentMenuId.value && departmentMenuOutsideHandler) {
+        document.addEventListener('click', departmentMenuOutsideHandler, true)
+      }
+    }, 0)
+  })
 })
 
 onBeforeUnmount(() => {
- removeDepartmentMenuOutsideListener()
- removeDepartmentMenuPositionListeners()
+  removeDepartmentMenuOutsideListener()
+  removeDepartmentMenuPositionListeners()
 })
 
 const openCreateDepartmentModal = () => {
- if (!canAddDepartmentForStore.value) {
- toast.error(departmentLimitMessage.value || 'Department limit reached. Upgrade your plan to add more.')
- return
- }
- editingDepartment.value = null
- showDepartmentModal.value = true
+  if (!canAddDepartmentForStore.value) {
+    toast.error(
+      departmentLimitMessage.value || 'Department limit reached. Upgrade your plan to add more.'
+    )
+    return
+  }
+  editingDepartment.value = null
+  showDepartmentModal.value = true
 }
 
 const navigateToDepartment = async (departmentId: string) => {
- if (import.meta.server) return
- 
- try {
- // Use router directly for more reliable navigation
- const router = useRouter()
- await router.push(`/dashboard/departments/${departmentId}`)
- 
- // Force scroll to top after navigation
- await nextTick()
- window.scrollTo({ top: 0, behavior: 'smooth' })
- } catch (error) {
- console.error('Navigation error:', error)
- // Fallback to navigateTo if router.push fails
- try {
- await navigateTo(`/dashboard/departments/${departmentId}`)
- } catch (err) {
- console.error('Both navigation methods failed:', err)
- }
- }
+  if (import.meta.server) return
+
+  try {
+    // Use router directly for more reliable navigation
+    const router = useRouter()
+    await router.push(`/dashboard/departments/${departmentId}`)
+
+    // Force scroll to top after navigation
+    await nextTick()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  } catch (error) {
+    console.error('Navigation error:', error)
+    // Fallback to navigateTo if router.push fails
+    try {
+      await navigateTo(`/dashboard/departments/${departmentId}`)
+    } catch (err) {
+      console.error('Both navigation methods failed:', err)
+    }
+  }
 }
 
 const toggleDepartmentSelection = (department: Department, checked: boolean) => {
- const idx = selectedDepartmentsForBulk.value.findIndex(d => d.id === department.id)
- if (checked && idx === -1) selectedDepartmentsForBulk.value.push(department)
- else if (!checked && idx !== -1) selectedDepartmentsForBulk.value.splice(idx, 1)
+  const idx = selectedDepartmentsForBulk.value.findIndex((d) => d.id === department.id)
+  if (checked && idx === -1) selectedDepartmentsForBulk.value.push(department)
+  else if (!checked && idx !== -1) selectedDepartmentsForBulk.value.splice(idx, 1)
 }
-const allDepartmentsOnPageSelected = computed(() =>
- paginatedDepartments.value.length > 0 &&
- selectedDepartmentsForBulk.value.length === paginatedDepartments.value.length
+const allDepartmentsOnPageSelected = computed(
+  () =>
+    paginatedDepartments.value.length > 0 &&
+    selectedDepartmentsForBulk.value.length === paginatedDepartments.value.length
 )
 const toggleSelectAllDepartments = () => {
- if (allDepartmentsOnPageSelected.value) {
- selectedDepartmentsForBulk.value = []
- } else {
- selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
- }
+  if (allDepartmentsOnPageSelected.value) {
+    selectedDepartmentsForBulk.value = []
+  } else {
+    selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
+  }
 }
 
 /** Checkbox "Select all" in header (Inventory Folders pattern) */
 const setSelectAllDepartmentsBulk = (checked: boolean) => {
- if (checked) {
- selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
- } else {
- selectedDepartmentsForBulk.value = []
- }
+  if (checked) {
+    selectedDepartmentsForBulk.value = [...paginatedDepartments.value]
+  } else {
+    selectedDepartmentsForBulk.value = []
+  }
 }
 const openBulkDeleteDepartmentsModal = () => {
- bulkDeleteDepartmentsConfirmed.value = false
- showBulkDeleteDepartmentsModal.value = true
+  bulkDeleteDepartmentsConfirmed.value = false
+  showBulkDeleteDepartmentsModal.value = true
 }
 const handleConfirmBulkDeleteDepartments = async () => {
- if (!bulkDeleteDepartmentsConfirmed.value || selectedDepartmentsForBulk.value.length === 0) return
- isBulkDeletingDepartments.value = true
- const ids = selectedDepartmentsForBulk.value.map(d => d.id)
- const count = ids.length
- try {
- for (const id of ids) {
- await departmentsStore.deleteDepartment(id, storeId.value)
- }
- selectedDepartmentsForBulk.value = []
- showBulkDeleteDepartmentsModal.value = false
- bulkDeleteDepartmentsConfirmed.value = false
- await departmentsStore.fetchDepartments()
- toast.success(`${count} department${count !== 1 ? 's' : ''} deleted`)
- } catch (error: any) {
- toast.error(error.message || 'Failed to delete some departments')
- } finally {
- isBulkDeletingDepartments.value = false
- }
+  if (!bulkDeleteDepartmentsConfirmed.value || selectedDepartmentsForBulk.value.length === 0) return
+  isBulkDeletingDepartments.value = true
+  const ids = selectedDepartmentsForBulk.value.map((d) => d.id)
+  const count = ids.length
+  try {
+    for (const id of ids) {
+      await departmentsStore.deleteDepartment(id, storeId.value)
+    }
+    selectedDepartmentsForBulk.value = []
+    showBulkDeleteDepartmentsModal.value = false
+    bulkDeleteDepartmentsConfirmed.value = false
+    await departmentsStore.fetchDepartments()
+    toast.success(`${count} department${count !== 1 ? 's' : ''} deleted`)
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete some departments')
+  } finally {
+    isBulkDeletingDepartments.value = false
+  }
 }
 
 const handleEditDepartment = (department: Department) => {
- editingDepartment.value = department
- showDepartmentModal.value = true
+  editingDepartment.value = department
+  showDepartmentModal.value = true
 }
 
 const handleDeleteDepartment = async (department: Department) => {
- if (!confirm(`Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`)) return
- deletingDepartmentId.value = department.id
- try {
- await departmentsStore.deleteDepartment(department.id, storeId.value)
- toast.success('Department deleted successfully')
- } catch (error: any) {
- toast.error(error.message || 'Failed to delete department')
- } finally {
- deletingDepartmentId.value = null
- }
+  if (
+    !confirm(
+      `Are you sure you want to delete the "${department.name}" department? This action cannot be undone.`
+    )
+  )
+    return
+  deletingDepartmentId.value = department.id
+  try {
+    await departmentsStore.deleteDepartment(department.id, storeId.value)
+    toast.success('Department deleted successfully')
+  } catch (error: any) {
+    toast.error(error.message || 'Failed to delete department')
+  } finally {
+    deletingDepartmentId.value = null
+  }
 }
 
 const handleDepartmentSuccess = async (action?: 'create' | 'update') => {
- // Only refetch on update, since create already adds to local state
- if (action === 'update') {
- await departmentsStore.fetchDepartments()
- }
- // For create, the department is already in local state, no need to refetch
- 
- showDepartmentModal.value = false
- editingDepartment.value = null
+  // Only refetch on update, since create already adds to local state
+  if (action === 'update') {
+    await departmentsStore.fetchDepartments()
+  }
+  // For create, the department is already in local state, no need to refetch
+
+  showDepartmentModal.value = false
+  editingDepartment.value = null
 }
 
 const handleDepartmentError = (error: string) => {
- console.error('Department operation failed:', error)
+  console.error('Department operation failed:', error)
 }
 </script>

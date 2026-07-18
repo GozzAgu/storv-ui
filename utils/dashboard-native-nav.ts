@@ -21,35 +21,35 @@ export function splitNativeBottomNav(
   items: DashboardNavItem[],
   primaryOrder: readonly string[] = NATIVE_PRIMARY_ORDER
 ) {
- const primary: DashboardNavItem[] = []
- const primaryHrefs = new Set<string>()
+  const primary: DashboardNavItem[] = []
+  const primaryHrefs = new Set<string>()
 
- for (const name of primaryOrder) {
- const match = items.find((item) => item.name === name)
- if (match) {
- primary.push(match)
- primaryHrefs.add(match.href)
- }
- }
+  for (const name of primaryOrder) {
+    const match = items.find((item) => item.name === name)
+    if (match) {
+      primary.push(match)
+      primaryHrefs.add(match.href)
+    }
+  }
 
- const more = items.filter((item) => !primaryHrefs.has(item.href))
- return { primary, more }
+  const more = items.filter((item) => !primaryHrefs.has(item.href))
+  return { primary, more }
 }
 
 export function nativeNavShortLabel(name: string): string {
- const labels: Record<string, string> = {
- Dashboard: 'Home',
- Inventory: 'Stock',
+  const labels: Record<string, string> = {
+    Dashboard: 'Home',
+    Inventory: 'Stock',
     Receipts: 'Sales',
     Departments: 'Teams',
     Analytics: 'Insights',
     'Payment links': 'Links',
- 'Stock loans': 'Loans',
- 'Activity Logs': 'Activity',
- 'Multi-Store Sync': 'Sync',
- 'Help center': 'Help',
- }
- return labels[name] ?? (name.length > 10 ? name.slice(0, 9) + '…' : name)
+    'Stock loans': 'Loans',
+    'Activity Logs': 'Activity',
+    'Multi-Store Sync': 'Sync',
+    'Help center': 'Help',
+  }
+  return labels[name] ?? (name.length > 10 ? name.slice(0, 9) + '…' : name)
 }
 
 export function isDashboardNavActive(currentPath: string, href: string, visibleHrefs: string[]) {
@@ -58,12 +58,12 @@ export function isDashboardNavActive(currentPath: string, href: string, visibleH
   }
 
   const hasLongerMatch = visibleHrefs.some((otherHref) => {
- if (otherHref === href) return false
- if (otherHref.length <= href.length) return false
- return currentPath.startsWith(otherHref)
- })
- if (hasLongerMatch) return false
- if (currentPath === href) return true
- if (href !== '/dashboard' && currentPath.startsWith(`${href}/`)) return true
- return false
+    if (otherHref === href) return false
+    if (otherHref.length <= href.length) return false
+    return currentPath.startsWith(otherHref)
+  })
+  if (hasLongerMatch) return false
+  if (currentPath === href) return true
+  if (href !== '/dashboard' && currentPath.startsWith(`${href}/`)) return true
+  return false
 }

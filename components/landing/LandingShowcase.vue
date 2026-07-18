@@ -34,15 +34,19 @@
                 Retail, sales, and inventory in one workspace
               </p>
               <h1 id="landing-hero-title" class="landing-hero__title">
-                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1">Stop losing</span>
+                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 1"
+                  >Stop losing</span
+                >
                 <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 2">
                   <span class="landing-hero__accent">money</span>
                 </span>
-                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3">on stock.</span>
+                <span class="landing-hero__line landing-hero__reveal" style="--hero-i: 3"
+                  >on stock.</span
+                >
               </h1>
               <p class="landing-hero__subtitle landing-hero__reveal" style="--hero-i: 4">
-                Know what’s in each branch, what sold, and what’s running low. Receipts and customers in
-                one dashboard, not Excel or WhatsApp threads.
+                Know what’s in each branch, what sold, and what’s running low. Receipts and
+                customers in one dashboard, not Excel or WhatsApp threads.
               </p>
             </div>
 
@@ -67,7 +71,11 @@
             </div>
           </div>
         </div>
-        <a href="#use-cases" class="landing-hero__scroll-hint landing-hero__reveal" style="--hero-i: 7">
+        <a
+          href="#use-cases"
+          class="landing-hero__scroll-hint landing-hero__reveal"
+          style="--hero-i: 7"
+        >
           <span class="landing-hero__scroll-hint-text">See who it is for</span>
           <span class="landing-hero__scroll-hint-icon" aria-hidden="true">↓</span>
         </a>
@@ -89,11 +97,12 @@
             <div class="landing-who-stack">
               <p class="landing-label landing-label--blue">Who it is for</p>
               <h2 id="landing-who-heading" class="landing-who-heading">
-                Built for <span class="landing-who-heading-accent">retail, sales,</span> and operations
+                Built for <span class="landing-who-heading-accent">retail, sales,</span> and
+                operations
               </h2>
               <p class="landing-who-lede">
-                Shops, showrooms, procurement-led teams, and multi-branch operators who need one system
-                for stock, selling, and customer records.
+                Shops, showrooms, procurement-led teams, and multi-branch operators who need one
+                system for stock, selling, and customer records.
               </p>
             </div>
 
@@ -115,11 +124,7 @@
             <div class="landing-section-panel landing-section-panel--dark">
               <p class="landing-section-panel__label">Built in</p>
               <div class="landing-who-cards">
-                <article
-                  v-for="card in whoUsesCards"
-                  :key="card.title"
-                  class="landing-who-card"
-                >
+                <article v-for="card in whoUsesCards" :key="card.title" class="landing-who-card">
                   <span class="landing-who-card-icon-wrap" aria-hidden="true">
                     <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" />
                   </span>
@@ -147,19 +152,20 @@
         <div class="landing-problems__pains">
           <div class="landing-problems__stack">
             <p class="landing-label landing-label--muted">Sound familiar?</p>
-            <h2 id="landing-problems-title" class="landing-problems__headline landing-problems__headline--pains">
+            <h2
+              id="landing-problems-title"
+              class="landing-problems__headline landing-problems__headline--pains"
+            >
               Store work should not live in chaos.
             </h2>
           </div>
 
           <div class="landing-section-panel landing-section-panel--light">
-            <p class="landing-section-panel__label landing-section-panel__label--muted">Pain points</p>
+            <p class="landing-section-panel__label landing-section-panel__label--muted">
+              Pain points
+            </p>
             <ul class="landing-problems__list m-0 list-none p-0">
-              <li
-                v-for="item in painPoints"
-                :key="item.num"
-                class="landing-problems__item"
-              >
+              <li v-for="item in painPoints" :key="item.num" class="landing-problems__item">
                 <span class="landing-problems__item-num">{{ item.num }}</span>
                 <div class="landing-problems__item-body">
                   <p class="landing-problems__item-title">{{ item.title }}</p>
@@ -171,14 +177,24 @@
         </div>
 
         <div class="landing-problems__answer">
-          <div class="landing-section-panel landing-section-panel--light landing-section-panel--solution">
+          <div
+            class="landing-section-panel landing-section-panel--light landing-section-panel--solution"
+          >
             <div class="landing-problems__answer-stack">
-              <img :src="logoSrc" alt="" class="landing-problems__logo" width="96" height="40" aria-hidden="true" />
+              <img
+                :src="logoSrc"
+                alt=""
+                class="landing-problems__logo"
+                width="96"
+                height="40"
+                aria-hidden="true"
+              />
               <div>
                 <p class="landing-label landing-label--blue">The fix</p>
                 <h2 class="landing-problems__headline">One dashboard. Every branch.</h2>
                 <p class="landing-problems__lede">
-                  Live stock per location, saved receipts, and customer history. Less spreadsheet chaos.
+                  Live stock per location, saved receipts, and customer history. Less spreadsheet
+                  chaos.
                 </p>
               </div>
             </div>
@@ -251,7 +267,14 @@
       </div>
 
       <div class="landing-setup__content">
-        <img :src="logoSrc" alt="" class="landing-setup__logo" width="88" height="36" aria-hidden="true" />
+        <img
+          :src="logoSrc"
+          alt=""
+          class="landing-setup__logo"
+          width="88"
+          height="36"
+          aria-hidden="true"
+        />
         <p class="landing-label landing-label--blue">Quick setup</p>
         <h2 id="landing-setup-title" class="landing-setup__headline">
           Go live<br />
@@ -267,8 +290,12 @@
           </li>
         </ol>
         <div class="mt-8 flex flex-wrap items-center gap-3">
-          <NuxtLink to="/demo/dashboard" class="landing-pill-cta inline-flex">Try the demo</NuxtLink>
-          <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline inline-flex">Start free on Micro</a>
+          <NuxtLink to="/demo/dashboard" class="landing-pill-cta inline-flex"
+            >Try the demo</NuxtLink
+          >
+          <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline inline-flex"
+            >Start free on Micro</a
+          >
         </div>
       </div>
     </section>
@@ -282,7 +309,9 @@
     >
       <div class="landing-multistore__glow" aria-hidden="true" />
       <div class="landing-multistore__inner">
-        <p class="landing-label landing-label--muted mb-6 text-right lg:absolute lg:right-8 lg:top-0 lg:mb-0">
+        <p
+          class="landing-label landing-label--muted mb-6 text-right lg:absolute lg:right-8 lg:top-0 lg:mb-0"
+        >
           Built for growth
         </p>
         <div>
@@ -313,7 +342,9 @@
 
           <div class="landing-multistore__footer-cta">
             <NuxtLink to="/demo/dashboard" class="landing-pill-cta">Try multi-store demo</NuxtLink>
-            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline">Start free on Micro</a>
+            <a :href="appUrl" class="landing-pill-cta landing-pill-cta--outline"
+              >Start free on Micro</a
+            >
           </div>
         </div>
 
@@ -338,7 +369,9 @@
           <article class="landing-store-card landing-store-card--dim">
             <div class="landing-store-card__head">
               <span class="landing-store-card__name">Branch 2</span>
-              <span class="landing-store-card__tag landing-store-card__tag--muted">Separate data</span>
+              <span class="landing-store-card__tag landing-store-card__tag--muted"
+                >Separate data</span
+              >
             </div>
             <div class="landing-store-card__stats">
               <div v-for="stat in branchStoreStats" :key="stat.label">
@@ -424,12 +457,14 @@ const whoUsesCards = [
   {
     icon: CubeIcon,
     title: 'Stock you can trust',
-    description: 'Per-branch counts update on every sale and return. See low stock before you lose the sale.',
+    description:
+      'Per-branch counts update on every sale and return. See low stock before you lose the sale.',
   },
   {
     icon: TagIcon,
     title: 'Receipts in one place',
-    description: 'Every transaction saved. Search by customer, item, or receipt number without digging through chats.',
+    description:
+      'Every transaction saved. Search by customer, item, or receipt number without digging through chats.',
   },
   {
     icon: UserGroupIcon,

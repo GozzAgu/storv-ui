@@ -9,18 +9,20 @@
       </template>
       <template #description>
         <p :class="descriptionClass">
-          A complete record of inventory changes by user, action, and time. Built for accountability and security reviews.
+          A complete record of inventory changes by user, action, and time. Built for accountability
+          and security reviews.
         </p>
       </template>
     </DashboardPageHeader>
 
-    <div
-      v-if="!canAccess"
-      :class="dashboardCardPaddedClass"
-    >
+    <div v-if="!canAccess" :class="dashboardCardPaddedClass">
       <p
         class="text-sm font-medium leading-relaxed"
-        :class="accessDeniedByRole ? 'text-red-800 dark:text-red-200' : 'text-amber-900 dark:text-amber-100'"
+        :class="
+          accessDeniedByRole
+            ? 'text-red-800 dark:text-red-200'
+            : 'text-amber-900 dark:text-amber-100'
+        "
       >
         {{
           accessDeniedByRole
@@ -53,17 +55,16 @@
 
       <template v-else>
         <!-- Summary metrics -->
-        <div
-          v-if="!loading && allLogs.length > 0"
-          class="grid grid-cols-2 gap-3 sm:grid-cols-4"
-        >
+        <div v-if="!loading && allLogs.length > 0" class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div
             v-for="stat in summaryStats"
             :key="stat.key"
             :class="dashboardCardPaddedClass"
             class="!py-3 sm:!py-3.5"
           >
-            <p class="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+            <p
+              class="text-[10px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500"
+            >
               {{ stat.label }}
             </p>
             <p
@@ -75,7 +76,9 @@
           </div>
         </div>
 
-        <div class="activity-log-shell data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div
+          class="activity-log-shell data-table-shell flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
           <DataTableToolbar>
             <template #heading>
               <div class="min-w-0">
@@ -86,13 +89,17 @@
                   Inventory activity for this store
                   <template v-if="reachedFetchCap">
                     <span class="text-gray-300 dark:text-gray-600"> · </span>
-                    <span class="text-[11px]">Showing newest {{ fetchLimit }}; use search to narrow</span>
+                    <span class="text-[11px]"
+                      >Showing newest {{ fetchLimit }}; use search to narrow</span
+                    >
                   </template>
                 </p>
               </div>
             </template>
             <template #filters>
-              <div class="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <div
+                class="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
+              >
                 <nav
                   class="flex flex-wrap gap-1 rounded-lg bg-gray-100/80 p-0.5 dark:bg-white/[0.04]"
                   aria-label="Filter by action"
@@ -125,19 +132,29 @@
           <div v-if="loading" class="px-4 py-8 sm:px-6 sm:py-10">
             <div class="space-y-0 divide-y divide-gray-100/90 dark:divide-gray-800/80">
               <div v-for="i in 8" :key="i" class="flex items-center gap-4 py-3.5">
-                <div class="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-200/90 dark:bg-white/10" />
+                <div
+                  class="h-9 w-9 shrink-0 animate-pulse rounded-full bg-gray-200/90 dark:bg-white/10"
+                />
                 <div class="min-w-0 flex-1 space-y-2">
                   <div class="h-3 w-28 animate-pulse rounded-md bg-gray-200/90 dark:bg-white/10" />
-                  <div class="h-3 max-w-md animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06]" />
+                  <div
+                    class="h-3 max-w-md animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06]"
+                  />
                 </div>
-                <div class="hidden h-3 w-16 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06] sm:block" />
+                <div
+                  class="hidden h-3 w-16 animate-pulse rounded-md bg-gray-100 dark:bg-white/[0.06] sm:block"
+                />
               </div>
             </div>
           </div>
 
           <div v-else-if="fetchError" class="px-4 py-12 text-center sm:px-6">
-            <p class="text-sm font-medium text-red-600 dark:text-red-400">Could not load activity logs</p>
-            <p class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            <p class="text-sm font-medium text-red-600 dark:text-red-400">
+              Could not load activity logs
+            </p>
+            <p
+              class="mx-auto mt-1.5 max-w-sm text-xs leading-relaxed text-gray-500 dark:text-gray-400"
+            >
               {{ fetchError }}
             </p>
             <button
@@ -217,10 +234,7 @@
                       </span>
                     </td>
                     <td class="max-w-[min(24rem,42vw)]">
-                      <p
-                        class="dashboard-table__primary truncate"
-                        :title="displayEntityName(log)"
-                      >
+                      <p class="dashboard-table__primary truncate" :title="displayEntityName(log)">
                         {{ displayEntityName(log) }}
                       </p>
                       <div class="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -292,12 +306,8 @@ import {
 import { getCurrentStoreId } from '~/composables/useCurrentStore'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 
-const {
-  eyebrowClass,
-  pageTitleClass,
-  descriptionClass,
-  dashboardCardPaddedClass,
-} = useDashboardPageChrome()
+const { eyebrowClass, pageTitleClass, descriptionClass, dashboardCardPaddedClass } =
+  useDashboardPageChrome()
 
 const userStore = useUserStore()
 const staffStore = useStaffStore()
@@ -305,7 +315,7 @@ const inventoryStore = useInventoryStore()
 const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 
 const isManager = computed(
-  () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager',
+  () => userStore.userData?.role === 'staff' && staffStore.getCurrentStaffMember?.role === 'manager'
 )
 const hasPlanAccess = computed(() => canUseSubscriptionFeature('activity_logs'))
 const canAccess = computed(() => (userStore.isSuperAdmin || isManager.value) && hasPlanAccess.value)
@@ -369,9 +379,15 @@ const paginatedLogs = computed(() => {
   return list.slice(start, start + itemsPerPage)
 })
 
-const createdCount = computed(() => filteredLogs.value.filter((log) => log.action === 'created').length)
-const updatedCount = computed(() => filteredLogs.value.filter((log) => log.action === 'updated').length)
-const deletedCount = computed(() => filteredLogs.value.filter((log) => log.action === 'deleted').length)
+const createdCount = computed(
+  () => filteredLogs.value.filter((log) => log.action === 'created').length
+)
+const updatedCount = computed(
+  () => filteredLogs.value.filter((log) => log.action === 'updated').length
+)
+const deletedCount = computed(
+  () => filteredLogs.value.filter((log) => log.action === 'deleted').length
+)
 
 const summaryStats = computed(() => [
   {
@@ -440,7 +456,9 @@ function displayEntityName(log: ActivityLog): string {
     return name
   }
   if (name && name !== '-') return name
-  return `${activityActionLabel(log.action)} ${activityEntityTypeLabel(log.entityType).toLowerCase()}`
+  return `${activityActionLabel(log.action)} ${activityEntityTypeLabel(
+    log.entityType
+  ).toLowerCase()}`
 }
 
 function entityTypeIcon(type: ActivityEntityType) {
@@ -451,8 +469,7 @@ function entityTypeIcon(type: ActivityEntityType) {
 
 function avatarToneClass(name: string): string {
   const value = String(name || 'U')
-  const idx =
-    value.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % AVATAR_TONES.length
+  const idx = value.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % AVATAR_TONES.length
   return AVATAR_TONES[idx]!
 }
 
@@ -522,9 +539,12 @@ async function loadLogs() {
 
 const storesStore = useStoresStore()
 
-watch(() => storesStore.currentStoreId, () => {
-  loadLogs()
-})
+watch(
+  () => storesStore.currentStoreId,
+  () => {
+    loadLogs()
+  }
+)
 
 watch(canAccess, (ok) => {
   if (ok) loadLogs()

@@ -23,8 +23,8 @@
           </div>
           <h3 class="landing-contact__card-title">Say hello</h3>
           <p class="landing-contact__card-desc">
-            Applying for founding onboarding? Include branch count, city, and whether you sell phones,
-            accessories, or general retail.
+            Applying for founding onboarding? Include branch count, city, and whether you sell
+            phones, accessories, or general retail.
           </p>
         </article>
 
@@ -34,10 +34,10 @@
             <GlobeAltIcon class="landing-contact__icon" stroke-width="1.5" aria-hidden="true" />
           </div>
           <h3 class="landing-contact__card-title">Email us directly</h3>
-          <p class="landing-contact__card-desc">Quick questions? Skip the form and write us anytime.</p>
-          <a href="mailto:hello@storvv.com" class="landing-contact__email">
-            hello@storvv.com
-          </a>
+          <p class="landing-contact__card-desc">
+            Quick questions? Skip the form and write us anytime.
+          </p>
+          <a href="mailto:hello@storvv.com" class="landing-contact__email"> hello@storvv.com </a>
         </article>
 
         <article
@@ -46,7 +46,11 @@
         >
           <div class="landing-contact__card-top">
             <span class="landing-contact__step landing-contact__step--on-dark">03</span>
-            <DocumentTextIcon class="landing-contact__icon landing-contact__icon--on-dark" stroke-width="1.5" aria-hidden="true" />
+            <DocumentTextIcon
+              class="landing-contact__icon landing-contact__icon--on-dark"
+              stroke-width="1.5"
+              aria-hidden="true"
+            />
           </div>
           <h3 class="landing-contact__card-title landing-contact__card-title--on-dark">
             Send a detailed message

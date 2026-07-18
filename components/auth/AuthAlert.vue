@@ -4,7 +4,9 @@
     class="rounded-lg bg-red-50 px-3.5 py-3 ring-1 ring-red-200/80 dark:bg-red-950/35 dark:ring-red-800/45"
   >
     <p class="mb-0.5 text-xs font-semibold text-red-800 dark:text-red-200">{{ title }}</p>
-    <div class="whitespace-pre-line text-left text-xs leading-relaxed text-red-700 dark:text-red-300">
+    <div
+      class="whitespace-pre-line text-left text-xs leading-relaxed text-red-700 dark:text-red-300"
+    >
       <slot>{{ message }}</slot>
     </div>
     <NuxtLink

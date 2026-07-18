@@ -1,7 +1,11 @@
 import type { Firestore } from 'firebase-admin/firestore'
 import { FieldValue } from 'firebase-admin/firestore'
 import { resolveBulkStockFieldAndValueFromMap } from '~/utils/inventory-bulk-quantity'
-import { koboToNaira, type PaymentLinkDoc, type PaymentLinkItem } from '~/server/utils/payment-links'
+import {
+  koboToNaira,
+  type PaymentLinkDoc,
+  type PaymentLinkItem,
+} from '~/server/utils/payment-links'
 
 export interface SettleResult {
   settled: boolean
@@ -76,7 +80,9 @@ export async function settlePaymentLink(
     for (const it of items) {
       const snap = itemSnaps.get(it.itemId)
       if (!snap || !snap.exists) continue
-      const folder = folderData.get(it.folderId) as { hasSerialNumbers?: boolean; template?: { fields?: Array<{ name?: string }> } } | undefined
+      const folder = folderData.get(it.folderId) as
+        | { hasSerialNumbers?: boolean; template?: { fields?: Array<{ name?: string }> } }
+        | undefined
       const usesSerial = !!folder?.hasSerialNumbers
 
       if (usesSerial) {

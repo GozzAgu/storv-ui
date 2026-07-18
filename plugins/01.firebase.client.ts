@@ -4,26 +4,27 @@ import { getFirebaseConfig } from '~/config/firebase.config'
 import { isCapacitorNative } from '~/utils/firebase-client-auth'
 
 export default defineNuxtPlugin(() => {
- let app: FirebaseApp | undefined
- let analytics: Analytics | undefined
+  let app: FirebaseApp | undefined
+  let analytics: Analytics | undefined
 
- // Only run on client side
- if (import.meta.client) {
- try {
- // Get Firebase config from environment variables
- const firebaseConfig = getFirebaseConfig()
- 
- // Validate that required Firebase config values are present
- if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
- const errorMessage = 'Firebase configuration is missing. Please set NUXT_PUBLIC_FIREBASE_API_KEY and NUXT_PUBLIC_FIREBASE_PROJECT_ID environment variables.'
- console.error('[Firebase]', errorMessage)
- 
- // Show user-friendly error in browser
- if (typeof window !== 'undefined') {
- // Create error overlay
- const errorOverlay = document.createElement('div')
- errorOverlay.id = 'firebase-config-error'
- errorOverlay.style.cssText = `
+  // Only run on client side
+  if (import.meta.client) {
+    try {
+      // Get Firebase config from environment variables
+      const firebaseConfig = getFirebaseConfig()
+
+      // Validate that required Firebase config values are present
+      if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+        const errorMessage =
+          'Firebase configuration is missing. Please set NUXT_PUBLIC_FIREBASE_API_KEY and NUXT_PUBLIC_FIREBASE_PROJECT_ID environment variables.'
+        console.error('[Firebase]', errorMessage)
+
+        // Show user-friendly error in browser
+        if (typeof window !== 'undefined') {
+          // Create error overlay
+          const errorOverlay = document.createElement('div')
+          errorOverlay.id = 'firebase-config-error'
+          errorOverlay.style.cssText = `
  position: fixed;
  top: 0;
  left: 0;
@@ -36,7 +37,7 @@ export default defineNuxtPlugin(() => {
  z-index: 9999;
  padding: 20px;
  `
- errorOverlay.innerHTML = `
+          errorOverlay.innerHTML = `
  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
  <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Firebase Configuration Error</h2>
  <p style="color: #374151; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
@@ -58,40 +59,40 @@ export default defineNuxtPlugin(() => {
  </p>
  </div>
  `
- document.body.appendChild(errorOverlay)
- }
- 
- return {
- provide: {
- firebaseApp: undefined,
- firebaseAnalytics: undefined
- }
- }
- }
- 
- // Initialize Firebase only if it hasn't been initialized
- if (!getApps().length) {
- app = initializeApp(firebaseConfig)
- } else {
- app = getApps()[0]
- }
+          document.body.appendChild(errorOverlay)
+        }
 
- // Analytics can hang or fail in Capacitor WKWebView — skip on native shells
- if (typeof window !== 'undefined' && !isCapacitorNative()) {
- try {
- analytics = getAnalytics(app)
- } catch (error) {
- console.warn('Firebase Analytics initialization failed:', error)
- }
- }
- } catch (error: any) {
- console.error('[Firebase] Initialization error:', error)
- 
- // Show error overlay if Firebase fails to initialize
- if (typeof window !== 'undefined' && error?.code !== 'app/duplicate-app') {
- const errorOverlay = document.createElement('div')
- errorOverlay.id = 'firebase-init-error'
- errorOverlay.style.cssText = `
+        return {
+          provide: {
+            firebaseApp: undefined,
+            firebaseAnalytics: undefined,
+          },
+        }
+      }
+
+      // Initialize Firebase only if it hasn't been initialized
+      if (!getApps().length) {
+        app = initializeApp(firebaseConfig)
+      } else {
+        app = getApps()[0]
+      }
+
+      // Analytics can hang or fail in Capacitor WKWebView — skip on native shells
+      if (typeof window !== 'undefined' && !isCapacitorNative()) {
+        try {
+          analytics = getAnalytics(app)
+        } catch (error) {
+          console.warn('Firebase Analytics initialization failed:', error)
+        }
+      }
+    } catch (error: any) {
+      console.error('[Firebase] Initialization error:', error)
+
+      // Show error overlay if Firebase fails to initialize
+      if (typeof window !== 'undefined' && error?.code !== 'app/duplicate-app') {
+        const errorOverlay = document.createElement('div')
+        errorOverlay.id = 'firebase-init-error'
+        errorOverlay.style.cssText = `
  position: fixed;
  top: 0;
  left: 0;
@@ -104,7 +105,7 @@ export default defineNuxtPlugin(() => {
  z-index: 9999;
  padding: 20px;
  `
- errorOverlay.innerHTML = `
+        errorOverlay.innerHTML = `
  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
  <h2 style="color: #dc2626; font-size: 24px; font-weight: bold; margin-bottom: 16px;">Firebase Initialization Error</h2>
  <p style="color: #374151; font-size: 16px; margin-bottom: 20px; line-height: 1.6;">
@@ -120,16 +121,15 @@ export default defineNuxtPlugin(() => {
  </button>
  </div>
  `
- document.body.appendChild(errorOverlay)
- }
- }
- }
+        document.body.appendChild(errorOverlay)
+      }
+    }
+  }
 
- return {
- provide: {
- firebaseApp: app,
- firebaseAnalytics: analytics
- }
- }
+  return {
+    provide: {
+      firebaseApp: app,
+      firebaseAnalytics: analytics,
+    },
+  }
 })
-

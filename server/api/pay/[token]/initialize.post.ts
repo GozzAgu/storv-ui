@@ -43,7 +43,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 410, message: 'This payment link has expired' })
   }
 
-  const payoutSnap = await adminDb.collection('merchantPayouts').doc(payoutDocId(link.ownerUserId, link.storeId)).get()
+  const payoutSnap = await adminDb
+    .collection('merchantPayouts')
+    .doc(payoutDocId(link.ownerUserId, link.storeId))
+    .get()
   const payout = payoutSnap.data() as MerchantPayoutDoc | undefined
   if (!payout?.subaccountCode) {
     throw createError({ statusCode: 503, message: 'This store cannot accept payments yet' })

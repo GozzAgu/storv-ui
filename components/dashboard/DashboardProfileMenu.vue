@@ -15,7 +15,9 @@
         <span class="relative">{{ userInitials }}</span>
       </div>
       <div v-if="!compact" class="hidden min-w-0 flex-1 text-left md:block">
-        <p class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50">
+        <p
+          class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
+        >
           {{ userName }}
         </p>
         <p class="truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400">
@@ -76,10 +78,15 @@
               <NuxtLink
                 :to="item.to"
                 role="menuitem"
-                :class="[menuRowClass, isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass]"
+                :class="[
+                  menuRowClass,
+                  isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass,
+                ]"
                 @click="open = false"
               >
-                <span :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']">
+                <span
+                  :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']"
+                >
                   <component :is="item.icon" :class="menuIconClass" stroke-width="1.75" />
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
@@ -96,10 +103,15 @@
               <NuxtLink
                 :to="item.to"
                 role="menuitem"
-                :class="[menuRowClass, isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass]"
+                :class="[
+                  menuRowClass,
+                  isActive(item.match) ? menuRowActiveClass : menuRowInactiveClass,
+                ]"
                 @click="open = false"
               >
-                <span :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']">
+                <span
+                  :class="[menuIconWrapClass, isActive(item.match) ? menuIconWrapActiveClass : '']"
+                >
                   <component :is="item.icon" :class="menuIconClass" stroke-width="1.75" />
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
@@ -108,7 +120,13 @@
           </nav>
 
           <div :class="menuFooterClass">
-            <button type="button" role="menuitem" class="group" :class="signOutRowClass" @click="onSignOut">
+            <button
+              type="button"
+              role="menuitem"
+              class="group"
+              :class="signOutRowClass"
+              @click="onSignOut"
+            >
               <span :class="signOutIconWrapClass">
                 <ArrowRightOnRectangleIcon :class="menuIconClass" stroke-width="1.75" />
               </span>
@@ -214,7 +232,12 @@ const roleLabel = computed(() => {
 
 const accountLinks = computed<MenuLink[]>(() => [
   { to: '/dashboard/profile', label: 'Profile', icon: UserCircleIcon, match: '/dashboard/profile' },
-  { to: '/dashboard/settings', label: 'Settings', icon: Cog6ToothIcon, match: '/dashboard/settings' },
+  {
+    to: '/dashboard/settings',
+    label: 'Settings',
+    icon: Cog6ToothIcon,
+    match: '/dashboard/settings',
+  },
   {
     to: '/dashboard/notifications',
     label: 'Notifications',

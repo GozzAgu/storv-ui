@@ -8,9 +8,7 @@ export function useDashboardPaths() {
 
   const isDemoDashboard = computed(() => isDemoRoutePath(route.path))
 
-  const basePath = computed(() =>
-    isDemoDashboard.value ? '/demo/dashboard' : '/dashboard',
-  )
+  const basePath = computed(() => (isDemoDashboard.value ? '/demo/dashboard' : '/dashboard'))
 
   function dashPath(subpath = ''): string {
     const base = basePath.value
@@ -25,7 +23,10 @@ export function useDashboardPaths() {
 
   function matchesDashboardPath(path: string, segment: string): boolean {
     const normalized = segment.startsWith('/') ? segment : `/${segment}`
-    return path === `${basePath.value}${normalized}` || path.startsWith(`${basePath.value}${normalized}/`)
+    return (
+      path === `${basePath.value}${normalized}` ||
+      path.startsWith(`${basePath.value}${normalized}/`)
+    )
   }
 
   return {

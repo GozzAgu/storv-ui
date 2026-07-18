@@ -27,7 +27,10 @@
     >
       {{ title }}
     </h1>
-    <p v-if="$slots.default" class="mt-2.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+    <p
+      v-if="$slots.default"
+      class="mt-2.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
+    >
       <slot />
     </p>
   </div>

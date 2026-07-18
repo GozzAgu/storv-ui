@@ -22,11 +22,11 @@ Storvv puts those answers in one place, tied to your actual store (or stores), w
 
 ## Who is Storvv for?
 
-| Audience | How they use Storvv |
-|----------|---------------------|
-| **Store owners** | Set up the business, create branches, manage billing, and control who has access |
-| **Managers** | Oversee sales, refunds, teams, and reporting on Medium and Enterprise plans |
-| **Front-line staff** | Create receipts, look up inventory, and serve customers at the counter |
+| Audience                     | How they use Storvv                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------- |
+| **Store owners**             | Set up the business, create branches, manage billing, and control who has access          |
+| **Managers**                 | Oversee sales, refunds, teams, and reporting on Medium and Enterprise plans               |
+| **Front-line staff**         | Create receipts, look up inventory, and serve customers at the counter                    |
 | **Multi-location operators** | Run several branches, copy category templates between stores, and sync stock (Enterprise) |
 
 Storvv is built for **retail and similar operations** — phone shops, fashion, auto parts, general merchandise, procurement-led teams with multiple counters, and any business that needs structured inventory plus sales records.
@@ -102,11 +102,11 @@ flowchart LR
 
 Storvv offers three paid tiers in Nigerian Naira via **Paystack**. Core selling (inventory, receipts, returns, customers) is available on every plan.
 
-| Plan | Best for | Stores | Highlights |
-|------|----------|--------|------------|
-| **Micro** | Single store, small team | 1 | Full daily ops; WhatsApp capped at 10 sends/month |
-| **Medium** | Growing business, second branch | Up to 2 | Analytics, activity logs, unlimited WhatsApp, customer balance, duplicate categories |
-| **Enterprise** | Chains and multi-location | Unlimited | Multi-store sync, copy templates across branches, stock loans, priority support |
+| Plan           | Best for                        | Stores    | Highlights                                                                           |
+| -------------- | ------------------------------- | --------- | ------------------------------------------------------------------------------------ |
+| **Micro**      | Single store, small team        | 1         | Full daily ops; WhatsApp capped at 10 sends/month                                    |
+| **Medium**     | Growing business, second branch | Up to 2   | Analytics, activity logs, unlimited WhatsApp, customer balance, duplicate categories |
+| **Enterprise** | Chains and multi-location       | Unlimited | Multi-store sync, copy templates across branches, stock loans, priority support      |
 
 For the full feature matrix and limits (staff counts, departments, etc.), see [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md).
 
@@ -114,12 +114,12 @@ For the full feature matrix and limits (staff counts, departments, etc.), see [S
 
 ## Where you can use Storvv
 
-| Platform | Description |
-|----------|-------------|
-| **Web** | Full dashboard at the app subdomain; marketing and pricing at the main site |
-| **iOS & Android** | Same experience in native apps (Capacitor), with mobile-friendly navigation |
-| **Public receipt links** | Customers open `/r/[token]` to view a shared receipt without an account |
-| **Demo** | Try the product without signing up via the demo dashboard on the marketing site |
+| Platform                 | Description                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| **Web**                  | Full dashboard at the app subdomain; marketing and pricing at the main site     |
+| **iOS & Android**        | Same experience in native apps (Capacitor), with mobile-friendly navigation     |
+| **Public receipt links** | Customers open `/r/[token]` to view a shared receipt without an account         |
+| **Demo**                 | Try the product without signing up via the demo dashboard on the marketing site |
 
 ---
 
@@ -148,23 +148,23 @@ Deeper architecture, data paths, and module maps live in [HOW_STORVV_WORKS.md](.
 
 ## Naming reference
 
-| Name | Meaning |
-|------|---------|
-| **Storvv** | Product and brand |
-| **storv-ui** | This codebase (Nuxt app) |
+| Name              | Meaning                      |
+| ----------------- | ---------------------------- |
+| **Storvv**        | Product and brand            |
+| **storv-ui**      | This codebase (Nuxt app)     |
 | **com.storv.app** | Native app bundle identifier |
 
 ---
 
 ## Related documentation
 
-| Document | Use when you need… |
-|----------|-------------------|
-| [HOW_STORVV_WORKS.md](./HOW_STORVV_WORKS.md) | Architecture, Firestore model, integrations, repo map |
-| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md) | Detailed flows per module, scenarios, file references |
-| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Plan gates, limits, upgrade messaging |
-| [DEPLOYMENT.md](../DEPLOYMENT.md) | Hosting, environment variables |
-| [STORAGE_SETUP.md](./STORAGE_SETUP.md) | Image uploads in Firebase Storage |
+| Document                                               | Use when you need…                                    |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| [HOW_STORVV_WORKS.md](./HOW_STORVV_WORKS.md)           | Architecture, Firestore model, integrations, repo map |
+| [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)             | Detailed flows per module, scenarios, file references |
+| [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Plan gates, limits, upgrade messaging                 |
+| [DEPLOYMENT.md](../DEPLOYMENT.md)                      | Hosting, environment variables                        |
+| [STORAGE_SETUP.md](./STORAGE_SETUP.md)                 | Image uploads in Firebase Storage                     |
 
 ---
 

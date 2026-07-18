@@ -12,7 +12,9 @@
           <ArrowUturnLeftIcon class="h-4 w-4 text-primary-600 dark:text-primary-400" />
         </div>
         <div class="min-w-0">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Reactivate staff member</h3>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Reactivate staff member
+          </h3>
           <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ staffName }}</p>
         </div>
       </div>
@@ -25,10 +27,12 @@
         <div class="flex items-start gap-2.5">
           <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-primary-600 dark:text-primary-400" />
           <div>
-            <p class="text-xs font-medium text-primary-900 dark:text-primary-100">Restore sign-in access</p>
+            <p class="text-xs font-medium text-primary-900 dark:text-primary-100">
+              Restore sign-in access
+            </p>
             <p class="mt-0.5 text-xs text-primary-800 dark:text-primary-200">
-              They can sign in again with their existing email and password. They will reappear on the
-              active roster.
+              They can sign in again with their existing email and password. They will reappear on
+              the active roster.
             </p>
           </div>
         </div>
@@ -45,7 +49,9 @@
           </div>
           <div class="flex justify-between gap-2 text-xs">
             <span class="text-gray-500 dark:text-gray-400">Email</span>
-            <span class="truncate font-medium text-gray-900 dark:text-gray-100">{{ staff.email }}</span>
+            <span class="truncate font-medium text-gray-900 dark:text-gray-100">{{
+              staff.email
+            }}</span>
           </div>
           <div v-if="staff.position" class="flex justify-between gap-2 text-xs">
             <span class="text-gray-500 dark:text-gray-400">Position</span>
@@ -53,7 +59,9 @@
           </div>
           <div class="flex justify-between gap-2 text-xs">
             <span class="text-gray-500 dark:text-gray-400">Role</span>
-            <span class="font-medium capitalize text-gray-900 dark:text-gray-100">{{ staff.role }}</span>
+            <span class="font-medium capitalize text-gray-900 dark:text-gray-100">{{
+              staff.role
+            }}</span>
           </div>
         </div>
       </div>

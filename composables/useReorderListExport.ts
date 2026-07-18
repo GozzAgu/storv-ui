@@ -12,7 +12,7 @@ export function useReorderListExport() {
   const exporting = ref(false)
 
   const lowStockThreshold = computed(
-    () => userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10,
+    () => userStore.userData?.storeDetails?.settings?.inventory?.lowStockThreshold || 10
   )
 
   async function gatherLowStockRows(): Promise<ReturnType<typeof collectLowStockRows>> {
@@ -34,7 +34,7 @@ export function useReorderListExport() {
         } catch {
           itemsByFolderId[folder.id] = []
         }
-      }),
+      })
     )
 
     return collectLowStockRows(inventoryStore.folders, itemsByFolderId, lowStockThreshold.value)
@@ -45,7 +45,9 @@ export function useReorderListExport() {
     try {
       const rows = await gatherLowStockRows()
       if (rows.length === 0) {
-        throw new Error('No low-stock items to export. Adjust your threshold in Settings → Inventory.')
+        throw new Error(
+          'No low-stock items to export. Adjust your threshold in Settings → Inventory.'
+        )
       }
 
       const businessName = resolveBusinessNameFromUserData(userStore.userData, {

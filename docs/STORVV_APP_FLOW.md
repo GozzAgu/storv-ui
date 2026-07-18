@@ -116,15 +116,15 @@ Understanding these three layers helps when debugging “the UI looks wrong” v
 
 Stores **cache server state**, **coordinate loading**, and **enforce UI permissions** before calling Firebase.
 
-| Store (examples) | What it carries |
-|------------------|----------------|
-| `stores/auth.ts` | Firebase session, UID, listeners |
-| `stores/user.ts` | Profile doc: role, subscription, display prefs, linked store/customer-facing fields |
-| `stores/stores.ts` | List of branches, **currentStoreId**, initialization from local persistence |
-| `stores/inventory.ts` | Folders for current fetch, paginated/chunked item strategies, CRUD helpers, Copy from branch |
-| `stores/receipts.ts` | Receipt list state, mutations around sales |
-| `stores/customers.ts` | Customer aggregates as used by Sales screens |
-| `stores/notifications.ts` | Panels feeds, read state, **time-based pruning** |
+| Store (examples)          | What it carries                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| `stores/auth.ts`          | Firebase session, UID, listeners                                                             |
+| `stores/user.ts`          | Profile doc: role, subscription, display prefs, linked store/customer-facing fields          |
+| `stores/stores.ts`        | List of branches, **currentStoreId**, initialization from local persistence                  |
+| `stores/inventory.ts`     | Folders for current fetch, paginated/chunked item strategies, CRUD helpers, Copy from branch |
+| `stores/receipts.ts`      | Receipt list state, mutations around sales                                                   |
+| `stores/customers.ts`     | Customer aggregates as used by Sales screens                                                 |
+| `stores/notifications.ts` | Panels feeds, read state, **time-based pruning**                                             |
 
 If a bug “fixes itself on refresh”, suspect **Pinia cache** versus **Firestore** versus **listeners not wired**.
 
@@ -230,12 +230,12 @@ Already perfected your templates on **Branch A**? Copy those **layouts** onto **
 
 #### Eligibility checklist (every condition must align)
 
-| Requirement | Why it exists |
-|-------------|---------------|
-| **Super admin login** | Only owners may rewrite cross-branch structural data this way |
-| **Enterprise subscription** | Positioned as a chain-scale convenience |
+| Requirement                   | Why it exists                                                       |
+| ----------------------------- | ------------------------------------------------------------------- |
+| **Super admin login**         | Only owners may rewrite cross-branch structural data this way       |
+| **Enterprise subscription**   | Positioned as a chain-scale convenience                             |
 | **Two or more active stores** | There must be somewhere to copy **from**, distinct from destination |
-| **Destination chosen first** | The store switcher sets where new folder docs appear |
+| **Destination chosen first**  | The store switcher sets where new folder docs appear                |
 
 Managers and staff will **never** trigger this pathway in the current product.
 
@@ -258,30 +258,30 @@ Managers and staff will **never** trigger this pathway in the current product.
 
 **Copied fields (destination gets new IDs on disk)**
 
-| Category | Detail |
-|---------|--------|
-| Identity | Folder **display name**, **description**, optional **type** label |
-| Appearance | Folder **color** chip |
-| Mode | **`hasSerialNumbers`** toggle |
-| Template | Complete field list (**label**, **widget type**, validation, selects, placeholders) cloned as JSON |
+| Category   | Detail                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Identity   | Folder **display name**, **description**, optional **type** label                                  |
+| Appearance | Folder **color** chip                                                                              |
+| Mode       | **`hasSerialNumbers`** toggle                                                                      |
+| Template   | Complete field list (**label**, **widget type**, validation, selects, placeholders) cloned as JSON |
 
 **Excluded by design**
 
-| Category | Explanation |
-|---------|-------------|
-| Items | SKU rows do not teleport; stocking is always explicit |
-| Counts/`itemCount`/values | Derived metrics reset fresh |
-| `allowedDepartments` | Department identifiers are scoped per store; recreated manually if you rely on departmental locks |
-| Historical receipts/customers/taxes/etc. | Unrelated aggregates |
+| Category                                 | Explanation                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Items                                    | SKU rows do not teleport; stocking is always explicit                                             |
+| Counts/`itemCount`/values                | Derived metrics reset fresh                                                                       |
+| `allowedDepartments`                     | Department identifiers are scoped per store; recreated manually if you rely on departmental locks |
+| Historical receipts/customers/taxes/etc. | Unrelated aggregates                                                                              |
 
 #### Compare similar features so users stop mixing them up
 
-| Flow | Moves stock? | Copies folder schema? | Plan |
-|------|--------------|-----------------------|------|
-| **Receipt sale** | Yes (rules-based) | No | Core |
-| **Folder Duplicate (single)** | No | Copies one folder to new names on **same branch** | Medium + Enterprise |
-| **Copy from branch** | No | Copies **chosen** folders from **another** branch onto **currently selected** branch | Enterprise |
-| **Multi-Store Sync** | Yes via transfer workflow | No | Enterprise |
+| Flow                          | Moves stock?              | Copies folder schema?                                                                | Plan                |
+| ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------ | ------------------- |
+| **Receipt sale**              | Yes (rules-based)         | No                                                                                   | Core                |
+| **Folder Duplicate (single)** | No                        | Copies one folder to new names on **same branch**                                    | Medium + Enterprise |
+| **Copy from branch**          | No                        | Copies **chosen** folders from **another** branch onto **currently selected** branch | Enterprise          |
+| **Multi-Store Sync**          | Yes via transfer workflow | No                                                                                   | Enterprise          |
 
 #### Developer touchpoints
 
@@ -320,12 +320,12 @@ Swap-in lines optionally link to **inventory item creation**, credit math, recei
 
 ### After save
 
-| Path | Meaning |
-|------|---------|
+| Path                                | Meaning                                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **View modal** (`ViewReceiptModal`) | Read-oriented detail, **PDF** triggered manually (does not silently download unless marketing copy says otherwise post-change) |
-| **Email receipt** server route | Sends structured payload optionally with base64 attachments |
-| **Toast + notifications** | Human confirmation loops |
-| **Inventory stock** side effects | When receipt status implies consumptive sale/refund pipelines |
+| **Email receipt** server route      | Sends structured payload optionally with base64 attachments                                                                    |
+| **Toast + notifications**           | Human confirmation loops                                                                                                       |
+| **Inventory stock** side effects    | When receipt status implies consumptive sale/refund pipelines                                                                  |
 
 Returns happen through **explicit refund/return tooling** anchored on the original receipt identity so traceability survives audits.
 
@@ -396,25 +396,25 @@ Access is **`f(role, subscription, storeAssignment)`**. Being logged in ≠ bein
 
 ### Role axis
 
-| Capability sample | Super admin | Manager staff | Regular staff |
-|-------------------|-------------|---------------|----------------|
-| Create inventory folders/templates | Typical yes | Usually no structural add | View catalog for selling |
-| Delete receipts destructive | Typical yes paths | Depends | Denied destructive |
-| Approve receipts edits/refunds paths | Flexible | Often yes vs standard | Limited |
-| Use Multi-Store Sync | Yes | Locked | Locked |
+| Capability sample                    | Super admin       | Manager staff             | Regular staff            |
+| ------------------------------------ | ----------------- | ------------------------- | ------------------------ |
+| Create inventory folders/templates   | Typical yes       | Usually no structural add | View catalog for selling |
+| Delete receipts destructive          | Typical yes paths | Depends                   | Denied destructive       |
+| Approve receipts edits/refunds paths | Flexible          | Often yes vs standard     | Limited                  |
+| Use Multi-Store Sync                 | Yes               | Locked                    | Locked                   |
 
 (Exact allowances should still be validated against Firebase security rules whenever adding new writes.)
 
 ### Subscription axis
 
-| Feature cluster | Micro | Medium | Enterprise |
-|------------------|-------|--------|-------------|
-| Core inventory+sales baseline | Included | Included | Included |
-| Analytics | No | Yes | Yes |
-| Activity Logs visibility | No | Yes | Yes |
-| Multiple stores | Single store framing | Expanded branch caps | Unlimited marketing posture |
-| Multi-Store transfers | No | No | Yes |
-| **Copy from branch templates** | No | No | **Yes** |
+| Feature cluster                | Micro                | Medium               | Enterprise                  |
+| ------------------------------ | -------------------- | -------------------- | --------------------------- |
+| Core inventory+sales baseline  | Included             | Included             | Included                    |
+| Analytics                      | No                   | Yes                  | Yes                         |
+| Activity Logs visibility       | No                   | Yes                  | Yes                         |
+| Multiple stores                | Single store framing | Expanded branch caps | Unlimited marketing posture |
+| Multi-Store transfers          | No                   | No                   | Yes                         |
+| **Copy from branch templates** | No                   | No                   | **Yes**                     |
 
 ### Store context axis
 
@@ -493,18 +493,18 @@ Cross-links for roadmap brainstorming (non-binding):
 
 Copy/paste anchors for debugging tickets:
 
-| Area | Primary files |
-|------|---------------|
-| Dashboard shell chrome | `layouts/dashboard.vue` |
-| Folders + Copy from branch | `pages/dashboard/inventory/index.vue` |
-| Folder item grid | `pages/dashboard/inventory/[id].vue` |
-| Sales hub | `pages/dashboard/receipts.vue` |
-| Receipt PDF/email modal heavy UI | `components/receipts/ViewReceiptModal.vue` |
-| Line item receipt detail tables | `components/receipts/ReceiptTableLineItems.vue` |
-| Notifications panel/page | `components/notifications/NotificationsPanel.vue`, `stores/notifications.ts` |
-| Activity listing | `pages/dashboard/activity.vue`, `composables/useActivityLog.ts` |
-| Store selection | `stores/stores.ts`, `components/ui/StoreSelector.vue` |
-| Copy templates store math | `stores/inventory.ts` (`fetchFolderTemplatesForStore`, `duplicateFolderTemplatesBetweenStores`) |
+| Area                             | Primary files                                                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Dashboard shell chrome           | `layouts/dashboard.vue`                                                                         |
+| Folders + Copy from branch       | `pages/dashboard/inventory/index.vue`                                                           |
+| Folder item grid                 | `pages/dashboard/inventory/[id].vue`                                                            |
+| Sales hub                        | `pages/dashboard/receipts.vue`                                                                  |
+| Receipt PDF/email modal heavy UI | `components/receipts/ViewReceiptModal.vue`                                                      |
+| Line item receipt detail tables  | `components/receipts/ReceiptTableLineItems.vue`                                                 |
+| Notifications panel/page         | `components/notifications/NotificationsPanel.vue`, `stores/notifications.ts`                    |
+| Activity listing                 | `pages/dashboard/activity.vue`, `composables/useActivityLog.ts`                                 |
+| Store selection                  | `stores/stores.ts`, `components/ui/StoreSelector.vue`                                           |
+| Copy templates store math        | `stores/inventory.ts` (`fetchFolderTemplatesForStore`, `duplicateFolderTemplatesBetweenStores`) |
 
 ---
 

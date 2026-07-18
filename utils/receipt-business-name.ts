@@ -16,7 +16,7 @@ export function formatBusinessNameFromEmail(email?: string): string {
  */
 export function resolveBusinessNameFromUserData(
   userData?: UserData | null,
-  options?: { branchName?: string },
+  options?: { branchName?: string }
 ): string {
   if (!userData) return ''
 

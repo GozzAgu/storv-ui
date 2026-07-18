@@ -11,12 +11,14 @@ Firebase Storage is configured for saving images. Use the `useFirebaseStorage` c
 ## 2. Deploy Storage Rules
 
 **Option A: Using Firebase CLI**
+
 ```bash
 firebase login
 firebase deploy --only storage
 ```
 
 **Option B: Using Firebase Console**
+
 1. Open **Storage** → **Rules**
 2. Replace the rules with the content of `storage.rules` in this project
 3. Click **Publish**

@@ -10,7 +10,9 @@
       <!-- Customer -->
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Customer name</label>
+          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
+            >Customer name</label
+          >
           <input
             v-model="customerName"
             type="text"
@@ -19,7 +21,9 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Customer phone (WhatsApp)</label>
+          <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
+            >Customer phone (WhatsApp)</label
+          >
           <input
             v-model="customerPhone"
             type="tel"
@@ -31,23 +35,33 @@
 
       <!-- Folder picker -->
       <div>
-        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Category</label>
+        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
+          >Category</label
+        >
         <select
           v-model="selectedFolderId"
           class="w-full rounded-lg bg-white px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400/40 dark:bg-white/[0.04] dark:text-gray-100 dark:ring-white/10"
           @change="onFolderChange"
         >
           <option value="">Select a category</option>
-          <option v-for="f in inventoryStore.folders" :key="f.id" :value="f.id">{{ f.name }}</option>
+          <option v-for="f in inventoryStore.folders" :key="f.id" :value="f.id">
+            {{ f.name }}
+          </option>
         </select>
       </div>
 
       <!-- Items -->
       <div v-if="selectedFolderId">
-        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">Items</label>
+        <label class="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400"
+          >Items</label
+        >
 
         <div v-if="itemsLoading" class="space-y-2">
-          <div v-for="i in 3" :key="i" class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.05]" />
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-white/[0.05]"
+          />
         </div>
 
         <div
@@ -57,14 +71,19 @@
           No available items in this category.
         </div>
 
-        <div v-else class="max-h-64 divide-y divide-gray-100 overflow-y-auto rounded-lg ring-1 ring-gray-200 dark:divide-white/[0.06] dark:ring-white/10">
+        <div
+          v-else
+          class="max-h-64 divide-y divide-gray-100 overflow-y-auto rounded-lg ring-1 ring-gray-200 dark:divide-white/[0.06] dark:ring-white/10"
+        >
           <div
             v-for="entry in availableItems"
             :key="entry.itemId"
             class="flex items-center justify-between gap-3 bg-white px-3 py-2.5 dark:bg-white/[0.02]"
           >
             <div class="min-w-0">
-              <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ entry.name }}</p>
+              <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ entry.name }}
+              </p>
               <p class="text-[11px] text-gray-500 dark:text-gray-400">
                 {{ formatNaira(entry.unitPrice) }}
                 <span v-if="entry.serial"> · serialized</span>
@@ -80,7 +99,9 @@
               >
                 −
               </button>
-              <span class="w-6 text-center text-sm tabular-nums text-gray-900 dark:text-gray-100">{{ cart[entry.itemId]?.quantity || 0 }}</span>
+              <span class="w-6 text-center text-sm tabular-nums text-gray-900 dark:text-gray-100">{{
+                cart[entry.itemId]?.quantity || 0
+              }}</span>
               <button
                 type="button"
                 class="flex h-7 w-7 items-center justify-center rounded-md text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-40 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-white/[0.06]"
@@ -101,11 +122,20 @@
       <div class="flex w-full items-center justify-between gap-3">
         <div class="text-sm">
           <span class="text-gray-500 dark:text-gray-400">Total</span>
-          <span class="ml-2 font-semibold tabular-nums text-gray-900 dark:text-gray-50">{{ formatNaira(total) }}</span>
+          <span class="ml-2 font-semibold tabular-nums text-gray-900 dark:text-gray-50">{{
+            formatNaira(total)
+          }}</span>
         </div>
         <div class="flex gap-2">
-          <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">Cancel</button>
-          <button type="button" class="btn-primary" :disabled="!canCreate || creating" @click="create">
+          <button type="button" class="btn-secondary" @click="emit('update:modelValue', false)">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            :disabled="!canCreate || creating"
+            @click="create"
+          >
             {{ creating ? 'Generating…' : 'Generate link' }}
           </button>
         </div>
@@ -120,7 +150,11 @@ import Modal from '~/components/ui/Modal.vue'
 import { formatNaira } from '~/utils/naira'
 import { useInventoryStore, type InventoryItem } from '~/stores/inventory'
 import { resolveBulkStockFieldAndValue } from '~/utils/inventory-bulk-quantity'
-import { isItemSold, isItemAwaitingPayment, isItemOnStockLoan } from '~/utils/inventory-availability'
+import {
+  isItemSold,
+  isItemAwaitingPayment,
+  isItemOnStockLoan,
+} from '~/utils/inventory-availability'
 import { usePaymentLinks } from '~/composables/usePaymentLinks'
 
 interface CreatedLink {
@@ -189,7 +223,10 @@ const total = computed(() =>
   Object.values(cart).reduce((sum, e) => sum + e.unitPrice * e.quantity, 0)
 )
 const canCreate = computed(
-  () => customerName.value.trim().length > 0 && total.value > 0 && Object.values(cart).some((e) => e.quantity > 0)
+  () =>
+    customerName.value.trim().length > 0 &&
+    total.value > 0 &&
+    Object.values(cart).some((e) => e.quantity > 0)
 )
 
 const inc = (entry: CartEntry) => {
@@ -243,7 +280,10 @@ const create = async () => {
     })
     emit('update:modelValue', false)
   } catch (e) {
-    errorMsg.value = (e as { data?: { message?: string } })?.data?.message || (e as Error)?.message || 'Could not create link'
+    errorMsg.value =
+      (e as { data?: { message?: string } })?.data?.message ||
+      (e as Error)?.message ||
+      'Could not create link'
   } finally {
     creating.value = false
   }

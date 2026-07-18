@@ -12,8 +12,26 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        display: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        sans: [
+          'Plus Jakarta Sans',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
+        display: [
+          'Plus Jakarta Sans',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Arial',
+          'sans-serif',
+        ],
       },
       colors: {
         primary: {
@@ -62,8 +80,8 @@ export default {
         },
       },
       transitionDelay: {
-        '75': '75ms',
-        '150': '150ms',
+        75: '75ms',
+        150: '150ms',
       },
       /* Same radius as sidebar panels & nav controls (rounded-sm = 2px) */
       borderRadius: {
@@ -71,6 +89,5 @@ export default {
       },
     },
   },
-  plugins: []
+  plugins: [],
 }
-

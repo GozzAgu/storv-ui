@@ -1,0 +1,12 @@
+node_modules
+.output
+dist
+.nuxt
+coverage
+playwright-report
+test-results
+ios
+android
+*.min.js
+*.min.css
+package-lock.json

@@ -28,13 +28,18 @@
         <div
           class="absolute inset-0 opacity-[0.28] bg-[linear-gradient(to_right,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[length:48px_48px] [mask-image:radial-gradient(ellipse_85%_70%_at_50%_40%,black_20%,transparent_100%)]"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
+        />
       </div>
 
       <div class="relative z-10">
         <a
           href="https://www.storvv.com"
-          :class="authEntranceClass() + ' inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900'"
+          :class="
+            authEntranceClass() +
+            ' inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900'
+          "
         >
           <img
             src="/storvv logo.png"
@@ -44,13 +49,14 @@
         </a>
 
         <h2
-          :class="authEntranceClass(60) + ' mt-10 text-2xl font-semibold leading-tight tracking-tight xl:mt-12 xl:text-[1.65rem] xl:leading-snug'"
+          :class="
+            authEntranceClass(60) +
+            ' mt-10 text-2xl font-semibold leading-tight tracking-tight xl:mt-12 xl:text-[1.65rem] xl:leading-snug'
+          "
         >
           {{ panelTitle }}
         </h2>
-        <p
-          :class="authEntranceClass(120) + ' mt-3 max-w-sm text-sm leading-relaxed text-white/80'"
-        >
+        <p :class="authEntranceClass(120) + ' mt-3 max-w-sm text-sm leading-relaxed text-white/80'">
           {{ panelDescription }}
         </p>
 
@@ -78,7 +84,10 @@
       </div>
 
       <p
-        :class="authEntranceClass(420) + ' relative z-10 flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/40'"
+        :class="
+          authEntranceClass(420) +
+          ' relative z-10 flex items-center gap-2 text-[11px] font-medium tracking-wide text-white/40'
+        "
       >
         <ShieldCheckIcon class="h-3.5 w-3.5 shrink-0 text-white/35" aria-hidden="true" />
         Secure sign-in · Encrypted connection
@@ -94,7 +103,10 @@
       >
         <ThemeToggle />
       </div>
-      <div class="pointer-events-none absolute inset-0 opacity-50 dark:opacity-25" aria-hidden="true">
+      <div
+        class="pointer-events-none absolute inset-0 opacity-50 dark:opacity-25"
+        aria-hidden="true"
+      >
         <div
           class="absolute left-1/2 top-[10%] h-[min(36rem,55vw)] w-[min(36rem,90vw)] -translate-x-1/2 rounded-full bg-primary-200/50 blur-3xl dark:bg-primary-900/25"
         />
@@ -111,11 +123,7 @@ import { computed, onMounted, type Component } from 'vue'
 import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 import { authEntranceClass } from '~/utils/auth-entrance'
 import { markCapacitorDocument } from '~/utils/capacitor-env'
-import {
-  ChartBarSquareIcon,
-  CubeIcon,
-  ShieldCheckIcon,
-} from '@heroicons/vue/24/outline'
+import { ChartBarSquareIcon, CubeIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
 
 interface AuthShellFeature {
   icon: Component

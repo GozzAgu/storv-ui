@@ -123,7 +123,7 @@ export const useDemoAppStore = defineStore('demoApp', {
     totalStockValue(): number {
       return this.currentStore.items.reduce(
         (sum, i) => sum + Math.max(0, i.quantity - i.sold) * i.price,
-        0,
+        0
       )
     },
 
@@ -174,7 +174,7 @@ export const useDemoAppStore = defineStore('demoApp', {
     findOrCreateCustomer(name: string, phone?: string) {
       const trimmed = name.trim() || 'Walk-in customer'
       const existing = this.currentStore.customers.find(
-        (c) => c.name.toLowerCase() === trimmed.toLowerCase() && (!phone || c.phone === phone),
+        (c) => c.name.toLowerCase() === trimmed.toLowerCase() && (!phone || c.phone === phone)
       )
       if (existing) return existing
       const customer: DemoCustomer = {
@@ -286,7 +286,7 @@ export const useDemoAppStore = defineStore('demoApp', {
     },
 
     importDashboardReceipt(
-      receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>,
+      receiptData: Omit<Receipt, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>
     ) {
       const receipt: DemoReceipt = {
         id: demoId('rcpt'),
@@ -314,9 +314,7 @@ export const useDemoAppStore = defineStore('demoApp', {
 
     applySaleLines(lines: { itemId: string; quantitySold: number }[]) {
       for (const line of lines) {
-        const item = this.state.stores
-          .flatMap((s) => s.items)
-          .find((i) => i.id === line.itemId)
+        const item = this.state.stores.flatMap((s) => s.items).find((i) => i.id === line.itemId)
         if (!item) throw new Error(`Item not found: ${line.itemId}`)
         const left = item.quantity - item.sold
         if (line.quantitySold > left) {
@@ -334,11 +332,11 @@ export const useDemoAppStore = defineStore('demoApp', {
         customerEmail?: string
         customerPhone?: string
         total: number
-      },
+      }
     ) {
       const customer = this.findOrCreateCustomer(
         receiptData.customerName,
-        receiptData.customerPhone,
+        receiptData.customerPhone
       )
       customer.totalOrders += 1
       customer.totalSpent += receiptData.total
