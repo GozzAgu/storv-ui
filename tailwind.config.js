@@ -13,6 +13,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          'Quicksand',
           'Plus Jakarta Sans',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -23,6 +24,7 @@ export default {
           'sans-serif',
         ],
         display: [
+          'Quicksand',
           'Plus Jakarta Sans',
           '-apple-system',
           'BlinkMacSystemFont',

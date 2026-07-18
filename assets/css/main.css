@@ -28,6 +28,7 @@
   html.dark main[data-dashboard-main] [class~='bg-white/30'],
   html.dark main[data-dashboard-main] [class~='bg-white/25'],
   html.dark main[data-dashboard-main] [class~='bg-white/20'],
+  html.dark main[data-dashboard-main] .ldg-card,
   html.dark [data-dashboard-teleport] [class~='bg-white'],
   html.dark [data-dashboard-teleport] [class~='!bg-white'],
   html.dark [data-dashboard-teleport] [class~='bg-white/90'],
@@ -40,8 +41,28 @@
   html.dark [data-dashboard-teleport] [class~='bg-white/35'],
   html.dark [data-dashboard-teleport] [class~='bg-white/30'],
   html.dark [data-dashboard-teleport] [class~='bg-white/25'],
-  html.dark [data-dashboard-teleport] [class~='bg-white/20'] {
+  html.dark [data-dashboard-teleport] [class~='bg-white/20'],
+  html.dark [data-dashboard-teleport] .ldg-card {
     background-color: #12141c !important;
+  }
+
+  html.dark main[data-dashboard-main] .ldg-card,
+  html.dark [data-dashboard-teleport] .ldg-card {
+    border-color: rgb(255 255 255 / 0.08) !important;
+  }
+
+  /** Borderless elevated surfaces */
+  .app-card {
+    @apply rounded-xl border-0 bg-white dark:bg-dashboard-card;
+  }
+
+  .app-card-sm {
+    @apply rounded-lg border-0 bg-white dark:bg-dashboard-card;
+  }
+
+  /** Dashboard ledger panels — uses same bg-white dark override as app-card */
+  .ldg-card {
+    @apply rounded-[0.65rem] border border-black/[0.09] bg-white dark:!bg-dashboard-card dark:border-white/[0.08];
   }
 
   /**
@@ -349,6 +370,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
 @layer base {
   :root {
     /* Global typography baseline */
+    --app-font-sans: Quicksand, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+      Roboto, 'Helvetica Neue', Arial, sans-serif;
     --app-text-size: 0.675rem;
     --app-line-height: 1.35;
     --app-heading-1: 1.275rem;
@@ -360,8 +383,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 
   html {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-      'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--app-font-sans);
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
@@ -377,8 +399,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-      'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--app-font-sans);
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -399,6 +420,12 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   :where(p, span, label, a, li, td, th, input, textarea, select, button) {
     font-size: var(--app-text-size);
     line-height: var(--app-line-height);
+  }
+
+  .font-sans,
+  .font-display,
+  .dashboard-layout-root {
+    font-family: var(--app-font-sans);
   }
 
   /* Force table typography to follow the same baseline, even when utility text sizes are present */
@@ -1556,4 +1583,14 @@ html.capacitor-native .activity-log-shell.data-table-shell,
 html.capacitor-native .inventory-categories-shell--table.data-table-shell {
   margin-left: 0;
   margin-right: 0;
+}
+
+/**
+ * Ledger panels: unlayered dark override so raw `background: #fff` on `.ldg-card`
+ * cannot win over Tailwind `dark:!bg-*` depending on generated rule order.
+ */
+html.dark main[data-dashboard-main] .ldg-card,
+html.dark [data-dashboard-teleport] .ldg-card {
+  background-color: #12141c !important;
+  border-color: rgb(255 255 255 / 0.08) !important;
 }

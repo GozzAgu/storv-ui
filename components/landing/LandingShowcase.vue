@@ -65,7 +65,7 @@
                 <ul class="landing-hero-mock__panel-list">
                   <li>Variant-level stock tracking</li>
                   <li>Ditch complex spreadsheets</li>
-                  <li>Multi-store from one login</li>
+                  <li>Paystack links for remote sales</li>
                 </ul>
                 <span class="landing-hero-mock__pill">Start free →</span>
               </div>
@@ -80,7 +80,7 @@
         </div>
 
         <a
-          href="#use-cases"
+          href="#problems"
           class="landing-hero__scroll-hint landing-hero__reveal landing-hero__scroll-hint--split"
           style="--hero-i: 6"
         >
@@ -156,8 +156,8 @@
                 <p class="landing-label landing-label--blue">The fix</p>
                 <h2 class="landing-problems__headline">One dashboard. Every branch.</h2>
                 <p class="landing-problems__lede">
-                  Live stock per location, saved receipts, and customer history. Less spreadsheet
-                  chaos.
+                  Live stock per location, saved receipts, customer history, and Paystack payment
+                  links when you sell over chat. Less spreadsheet chaos.
                 </p>
               </div>
             </div>
@@ -338,8 +338,13 @@
               Three shops. <em>One dashboard.</em>
             </h3>
             <p class="landing-promo-card__logo">
-              <span class="landing-promo-card__mark">S</span>
-              Storvv
+              <img
+                :src="darkLogoSrc"
+                alt="Storvv"
+                class="landing-promo-card__logo-img"
+                width="88"
+                height="28"
+              />
             </p>
             <div class="landing-promo-card__stats">
               <div v-for="stat in multiStoreStats" :key="stat.label">
@@ -450,8 +455,9 @@ const painPoints = [
   },
   {
     num: '02',
-    title: 'Receipts lost in chats',
-    description: 'Returns and disputes stall because proof lives in screenshots.',
+    title: 'Remote sales stuck in chat',
+    description:
+      'You share account numbers on WhatsApp. When they pay, there is no receipt and stock does not move.',
   },
   {
     num: '03',
@@ -503,8 +509,8 @@ const coreFeatures = [
     icon: CreditCardIcon,
     title: 'Payment links',
     description:
-      'In progress: send a secure Paystack pay-by-link. When a customer pays, the receipt is created and stock updates automatically.',
-    badge: 'In progress',
+      'Send a secure Paystack link from the web app. Customer pays on their phone—you get a receipt and stock updates automatically. Mobile app support coming soon.',
+    badge: 'On web now',
     wide: true,
   },
 ] as const
@@ -528,7 +534,8 @@ const setupSteps = [
   {
     num: 4,
     title: 'Invite staff and sell',
-    description: 'Each person sees only what their role needs.',
+    description:
+      'Each person sees only what their role needs. Send Paystack payment links when customers buy remotely.',
   },
 ] as const
 

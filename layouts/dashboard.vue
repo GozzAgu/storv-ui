@@ -16,7 +16,8 @@
   <div
     v-else
     :class="[
-      'dashboard-layout-root w-full overflow-x-clip relative bg-gray-100 dark:bg-[#07080c]',
+      'dashboard-layout-root font-sans w-full overflow-x-clip relative bg-gray-100 dark:bg-[#07080c]',
+      isDemoDashboard ? 'dashboard-layout-root--demo' : '',
       isNativeApp
         ? 'dashboard-layout-root--native h-[100dvh] max-h-[100dvh] overflow-hidden'
         : 'min-h-screen',

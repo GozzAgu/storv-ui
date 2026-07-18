@@ -3,13 +3,18 @@
     <header class="landing-header" :class="{ 'landing-header--menu-open': mobileMenuOpen }">
       <div class="landing-header__shell">
         <div class="landing-header__pill">
-          <NuxtLink to="/" class="landing-header__brand" @click="mobileMenuOpen = false">
+          <NuxtLink
+            to="/"
+            class="landing-header__brand"
+            aria-label="Storvv home"
+            @click="mobileMenuOpen = false"
+          >
             <img
               :src="landingNavLogoSrc"
-              alt="Storvv"
+              alt=""
               class="landing-header__logo"
-              width="132"
-              height="36"
+              width="140"
+              height="40"
             />
           </NuxtLink>
 
@@ -246,14 +251,10 @@
             </ul>
             <NuxtLink
               to="/demo/dashboard"
-              class="mt-4 flex w-full items-center justify-center rounded-sm border border-gray-300 py-2.5 text-center text-sm font-medium text-gray-800 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
+              class="landing-pill-cta landing-pill-cta--outline mt-4 flex w-full"
               >Try demo</NuxtLink
             >
-            <a
-              :href="appOriginUrl"
-              class="mt-2 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
-              >Start free</a
-            >
+            <a :href="appOriginUrl" class="landing-pill-cta mt-2 flex w-full">Start free</a>
           </div>
           <!-- Medium: 2 stores, 10 depts, 25 staff. Analytics, duplicate folders/items. No multi-store sync. -->
           <div
@@ -305,9 +306,7 @@
                 <span class="shrink-0">−</span> No stock transfers or copy-from-branch (Enterprise)
               </li>
             </ul>
-            <a :href="appOriginUrl" class="btn-primary mt-6 flex w-full justify-center py-2.5"
-              >Get Started</a
-            >
+            <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
           </div>
           <!-- Enterprise: unlimited. Multi-store sync, priority support. -->
           <div
@@ -353,11 +352,7 @@
                 <CheckIcon class="w-4 h-4 text-primary-500 shrink-0" />Priority support
               </li>
             </ul>
-            <a
-              :href="appOriginUrl"
-              class="mt-6 flex w-full items-center justify-center rounded-sm bg-gray-900 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-gray-800"
-              >Get Started</a
-            >
+            <a :href="appOriginUrl" class="landing-pill-cta mt-6 flex w-full">Get Started</a>
           </div>
         </div>
       </div>
@@ -375,16 +370,10 @@
           >.
         </p>
         <div class="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <NuxtLink
-            to="/demo/dashboard"
-            class="inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-500 sm:w-auto"
-          >
+          <NuxtLink to="/demo/dashboard" class="landing-pill-cta w-full sm:w-auto">
             Try the demo
           </NuxtLink>
-          <a
-            :href="appOriginUrl"
-            class="inline-flex w-full items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 sm:w-auto dark:border-gray-600 dark:bg-slate-900 dark:text-gray-100 dark:hover:bg-slate-800"
-          >
+          <a :href="appOriginUrl" class="landing-pill-cta landing-pill-cta--outline w-full sm:w-auto">
             Start free on Micro
           </a>
         </div>
@@ -1037,7 +1026,16 @@
 
         <div class="landing-footer__bottom">
           <p>&copy; {{ new Date().getFullYear() }} Storvv. All rights reserved.</p>
-          <p>Built with Nuxt &amp; Firebase</p>
+          <p>
+            Powered by Nuxt ·
+            <a
+              href="https://goz-portfolio-app.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="landing-footer__link"
+              >Credits</a
+            >
+          </p>
         </div>
       </div>
 

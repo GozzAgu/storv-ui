@@ -433,6 +433,7 @@ html.dark .landing-about-section .landing-label--blue {
   flex-direction: column;
   align-items: stretch;
   gap: 0.875rem;
+  margin-top: 1.5rem;
 }
 
 .landing-hero__cta-row {
@@ -3277,7 +3278,7 @@ html.dark .landing-about-link:hover {
   cursor: pointer;
   background: #fff;
   border: none;
-  border-radius: 0.625rem;
+  border-radius: 9999px;
   outline: none;
   transition: background-color 0.2s ease, transform 0.15s ease;
 }

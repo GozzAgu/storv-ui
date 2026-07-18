@@ -1,6 +1,9 @@
 /* Portfolio dark theme for Storvv landing — goz-portfolio-app.vercel.app */
 
 .landing-page--portfolio {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip;
   --portfolio-bg: #050508;
   --portfolio-bg-soft: #0a0c14;
   --portfolio-ink: #f8fafc;
@@ -69,6 +72,7 @@
 
 .landing-page--portfolio .landing-hero__role {
   margin-top: 1rem;
+  margin-bottom: 0;
   max-width: 36rem;
   font-size: clamp(1rem, 2.2vw, 1.125rem);
   line-height: 1.55;
@@ -111,6 +115,27 @@
 .landing-page--portfolio .landing-pill-cta--outline:hover {
   background: rgb(255 255 255 / 0.05);
   border-color: rgb(255 255 255 / 0.14);
+}
+
+/* Unified pill shape for all landing CTAs */
+.landing-page--portfolio .landing-contact__cta,
+.landing-page--portfolio .landing-promo-card__cta,
+.landing-page--portfolio .landing-cookie-banner__btn,
+.landing-page--portfolio .btn-primary {
+  border-radius: 9999px !important;
+}
+
+.landing-page--portfolio .landing-contact__cta {
+  background: #f8fafc;
+  color: #050508;
+}
+
+.landing-page--portfolio .landing-contact__cta:hover {
+  background: #fff;
+}
+
+.landing-page--portfolio #pricing .landing-pill-cta {
+  width: 100%;
 }
 
 .landing-page--portfolio .landing-hero__link {
@@ -851,6 +876,7 @@
 .landing-page--portfolio .landing-hero__actions {
   width: 100%;
   max-width: 24rem;
+  margin-top: 1.75rem;
 }
 
 .landing-page--portfolio .landing-hero__link-row {

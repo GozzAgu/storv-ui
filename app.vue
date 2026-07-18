@@ -1,5 +1,5 @@
 <template>
-  <UApp>
+  <UApp class="font-sans">
     <div
       v-if="capacitorBooting"
       class="capacitor-boot-splash fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#fafafa] dark:bg-[#07080c]"

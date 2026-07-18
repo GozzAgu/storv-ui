@@ -70,7 +70,7 @@ const proofCards = [
     metric: 'Sales',
     title: 'Receipts and customers together',
     description:
-      'Every sale saved with items and payment. Find a receipt or buyer history without digging through WhatsApp.',
+      'Every sale saved with items and payment—including Paystack links when customers pay remotely.',
   },
 ] as const
 </script>

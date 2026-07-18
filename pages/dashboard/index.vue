@@ -819,30 +819,22 @@ useHead({
 
 <style scoped>
 /* ---------------------------------------------------------------------
-   Ledger design system
-   A dashboard styled after a well-kept receipt ledger: warm ink/paper
-   tones, brass + verdigris accents (not the default blue/gray SaaS
-   palette), Space Grotesk for headers, Inter for body copy, and
-   IBM Plex Mono for every number so figures read like they came off a
-   till tape. The signature motif is a perforated "ticket tear" rule
-   used only at major section boundaries.
+   Ledger design system — warm ink/paper tones and brass accents.
+   Typography matches the SaaS landing (Quicksand); numbers stay mono.
    --------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-.ldg {
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 .ldg-display {
-  font-family: 'Space Grotesk', ui-sans-serif, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .ldg-eyebrow {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-family: inherit;
   font-size: 0.625rem;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #8a8172;
 }
@@ -853,17 +845,6 @@ useHead({
 .ldg-num {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
-}
-
-/* Card surface: warm paper in light mode, keeps existing token in dark. */
-.ldg-card {
-  background: #ffffff;
-  border: 1px solid rgba(28, 27, 25, 0.09);
-  border-radius: 0.65rem;
-}
-:global(.dark) .ldg-card {
-  background: var(--color-dashboard-card, #161a1f);
-  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Signature: perforated ticket-tear divider, used at section boundaries only */

@@ -510,25 +510,16 @@
 }
 
 .landing-promo-card--multistore .landing-promo-card__logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: flex;
+  justify-content: center;
   margin: 1rem 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
 }
 
-.landing-promo-card--multistore .landing-promo-card__mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 0.5rem;
-  background: linear-gradient(145deg, rgb(72 118 199 / 0.5), rgb(20 63 141 / 0.7));
-  border: 1px solid rgb(110 148 214 / 0.3);
-  font-size: 0.8125rem;
+.landing-promo-card__logo-img {
+  display: block;
+  height: 1.5rem;
+  width: auto;
+  max-width: 5.5rem;
 }
 
 .landing-promo-card--cta {
