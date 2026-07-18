@@ -90,79 +90,7 @@
       </div>
     </section>
 
-    <!-- 2. Who it is for -->
-    <section
-      id="use-cases"
-      data-section-id="use-cases"
-      class="landing-who-uses-section scroll-animate scroll-animate-up"
-      aria-labelledby="landing-who-heading"
-    >
-      <div class="landing-who-bg" aria-hidden="true" />
-
-      <div class="landing-who-inner">
-        <div class="landing-who-layout">
-          <div class="landing-who-copy">
-            <div class="landing-who-stack">
-              <p class="landing-label landing-label--blue">Who it is for</p>
-              <h2 id="landing-who-heading" class="landing-who-heading">
-                Built for <span class="landing-who-heading-accent">retail, sales,</span> and
-                operations
-              </h2>
-              <p class="landing-who-lede">
-                Shops, showrooms, procurement-led teams, and multi-branch operators who need one
-                system for stock, selling, and customer records.
-              </p>
-            </div>
-
-            <div class="landing-section-panel landing-section-panel--dark">
-              <p class="landing-section-panel__label">Highlights</p>
-              <ul class="landing-who-points">
-                <li v-for="point in whoUsesPoints" :key="point.num" class="landing-who-point">
-                  <span class="landing-who-point-num">{{ point.num }}</span>
-                  <div class="landing-who-point-body">
-                    <p class="landing-who-point-title">{{ point.title }}</p>
-                    <p class="landing-who-point-desc">{{ point.description }}</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="landing-who-visual-column">
-            <div class="landing-ops-mock" aria-hidden="true">
-              <div class="landing-ops-mock__shelf" />
-              <div class="landing-ops-mock__jars">
-                <span v-for="n in 12" :key="n" class="landing-ops-mock__jar" />
-              </div>
-              <div class="landing-ops-mock__tablet">
-                <div class="landing-ops-mock__tablet-bar" />
-                <div class="landing-ops-mock__tablet-row landing-ops-mock__tablet-row--accent" />
-                <div class="landing-ops-mock__tablet-row" />
-                <div class="landing-ops-mock__tablet-row landing-ops-mock__tablet-row--short" />
-              </div>
-              <span class="landing-ops-mock__caption">Live stock check</span>
-            </div>
-
-            <div class="landing-section-panel landing-who-cards-wrap">
-              <p class="landing-section-panel__label">Built in</p>
-              <div class="landing-who-cards">
-                <article v-for="card in whoUsesCards" :key="card.title" class="landing-who-card">
-                  <span class="landing-who-card-icon-wrap" aria-hidden="true">
-                    <component :is="card.icon" class="landing-who-card-icon" stroke-width="1.5" />
-                  </span>
-                  <div class="landing-who-card-content">
-                    <h3 class="landing-who-card-title">{{ card.title }}</h3>
-                    <p class="landing-who-card-desc">{{ card.description }}</p>
-                  </div>
-                </article>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. Problems -->
+    <!-- 2. Problems -->
     <section
       id="problems"
       data-section-id="landing-problems"
@@ -247,7 +175,7 @@
       </div>
     </section>
 
-    <!-- 4. Core features -->
+    <!-- 3. Core features -->
     <section
       id="features"
       data-section-id="landing-features"
@@ -308,7 +236,7 @@
       </div>
     </section>
 
-    <!-- 5. Setup -->
+    <!-- 4. Setup -->
     <section
       id="setup"
       data-section-id="landing-setup"
@@ -356,7 +284,7 @@
       </div>
     </section>
 
-    <!-- 6. Multi-store (growth) -->
+    <!-- 5. Multi-store -->
     <section
       id="multi-store"
       data-section-id="landing-multistore"
@@ -463,12 +391,9 @@ import {
   ChartBarIcon,
   CheckIcon,
   CreditCardIcon,
-  CubeIcon,
   DocumentTextIcon,
   PlusIcon,
   ShoppingBagIcon,
-  TagIcon,
-  UserGroupIcon,
   UserIcon,
 } from '@heroicons/vue/24/outline'
 import { computed } from 'vue'
@@ -516,49 +441,6 @@ const appHost = computed(() => {
     return 'app.storvv.com'
   }
 })
-
-const whoUsesCards = [
-  {
-    icon: CubeIcon,
-    title: 'Stock you can trust',
-    description:
-      'Per-branch counts update on every sale and return. See low stock before you lose the sale.',
-  },
-  {
-    icon: TagIcon,
-    title: 'Receipts in one place',
-    description:
-      'Every transaction saved. Search by customer, item, or receipt number without digging through chats.',
-  },
-  {
-    icon: UserGroupIcon,
-    title: 'Roles per branch',
-    description: 'Owners, managers, and floor staff each see what they need. No shared passwords.',
-  },
-] as const
-
-const whoUsesPoints = [
-  {
-    num: '01',
-    title: '2+ branches',
-    description: 'Switch stores without logging out. Compare branches side by side.',
-  },
-  {
-    num: '02',
-    title: 'Any product type',
-    description: 'Serials, SKUs, bundles, or simple quantity. Match how you buy and sell.',
-  },
-  {
-    num: '03',
-    title: 'Plans that scale',
-    description: 'Start free on Micro. WhatsApp receipt sharing on eligible plans.',
-  },
-  {
-    num: '04',
-    title: 'Start on Micro free',
-    description: 'One store free forever. Upgrade when you add branches or need analytics.',
-  },
-] as const
 
 const painPoints = [
   {

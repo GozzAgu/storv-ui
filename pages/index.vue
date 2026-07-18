@@ -136,269 +136,14 @@
       </Transition>
     </Teleport>
 
-    <!-- Marketing showcase: hero → who → problems → features → setup → multi-store -->
+    <!-- Marketing showcase: hero → problems → features → setup → multi-store -->
     <LandingShowcase
       :logo-src="marketingLogoSrc"
       :dark-logo-src="landingNavLogoSrc"
       :app-url="appOriginUrl"
     />
 
-    <LandingDemo :app-url="appOriginUrl" />
-
     <LandingProof @navigate="scrollToSection" />
-
-    <!-- How it works: product walkthrough -->
-    <section
-      id="how-it-works"
-      data-section-id="how-it-works"
-      class="scroll-animate scroll-animate-up relative scroll-mt-[4.75rem] grid min-h-[min(100vh,44rem)] overflow-hidden lg:min-h-[560px] lg:grid-cols-2 lg:scroll-mt-28"
-    >
-      <div
-        class="relative flex flex-col justify-center bg-slate-950 px-5 py-12 sm:px-7 sm:py-14 lg:px-12 lg:py-20"
-      >
-        <div
-          class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_15%_-15%,rgba(20,63,141,0.22),transparent_55%)]"
-        />
-        <div
-          class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_100%_110%,rgba(72,118,199,0.14),transparent_50%)]"
-        />
-        <div
-          class="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:16px_16px]"
-        />
-        <div
-          class="pointer-events-none absolute -left-24 top-1/3 h-48 w-48 rounded-full bg-primary-500/12 blur-3xl"
-        />
-        <div class="relative mx-auto max-w-lg lg:mx-0">
-          <p
-            class="text-xs font-semibold uppercase tracking-[0.16em] text-primary-400 sm:text-[0.8125rem]"
-          >
-            How it works
-          </p>
-          <h2
-            class="mt-2 bg-gradient-to-r from-white via-primary-50 to-primary-200/95 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:text-2xl"
-          >
-            From signup to a calmer floor
-          </h2>
-          <p class="mt-3 max-w-md text-sm leading-relaxed text-slate-300">
-            Five steps. Same flow whether you run one shop or several.
-          </p>
-
-          <div class="mt-7 space-y-2 sm:mt-8 sm:space-y-2.5">
-            <div
-              v-for="(step, idx) in howStorvvWorksSteps"
-              :key="step.sectionId"
-              :data-section-id="step.sectionId"
-              class="group scroll-animate scroll-animate-up relative flex gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3 transition-colors duration-200 hover:border-primary-400/30"
-              :class="`stagger-${idx + 1}`"
-            >
-              <div class="flex shrink-0 flex-col items-center">
-                <span
-                  class="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary-300 via-primary-400 to-primary-600 p-[1.5px] ring-1 ring-white/15"
-                >
-                  <span
-                    class="flex h-full w-full items-center justify-center rounded-[10px] bg-slate-950 text-[10px] font-black tabular-nums tracking-tight text-white"
-                  >
-                    {{ step.num }}
-                  </span>
-                </span>
-                <div
-                  v-if="idx < howStorvvWorksSteps.length - 1"
-                  class="mt-1.5 min-h-[0.75rem] w-px flex-1 bg-gradient-to-b from-primary-400/45 via-primary-500/20 to-transparent"
-                  aria-hidden="true"
-                />
-              </div>
-              <div class="flex min-w-0 flex-1 gap-2 sm:gap-2.5">
-                <div
-                  class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.05] text-primary-300 ring-1 ring-white/10 transition-colors group-hover:bg-primary-500/10 group-hover:text-primary-200"
-                >
-                  <component :is="step.icon" class="h-4 w-4" aria-hidden="true" />
-                </div>
-                <div class="min-w-0 pb-0.5 pt-0.5">
-                  <h3 class="text-sm font-semibold leading-snug text-white sm:text-base">
-                    {{ step.title }}
-                  </h3>
-                  <div
-                    class="mt-1.5 text-sm leading-relaxed text-slate-400 [&_span]:font-medium [&_span]:text-primary-100"
-                    v-html="step.html"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="relative flex min-h-[min(100%,28rem)] items-center justify-center overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-primary-700 p-6 sm:p-8 lg:min-h-0 lg:p-10"
-      >
-        <div
-          class="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary-300/35 blur-3xl"
-        />
-        <div
-          class="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-primary-700/40 blur-3xl"
-        />
-        <div
-          class="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.14)_0%,transparent_42%,rgba(8,27,64,0.12)_100%)]"
-        />
-        <div class="relative w-full max-w-2xl">
-          <div class="mb-3 flex justify-center sm:mb-4">
-            <span
-              class="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md sm:text-[10px] sm:tracking-[0.22em]"
-            >
-              <span class="relative flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-200/80 opacity-50"
-                />
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-primary-100" />
-              </span>
-              Inside the app
-            </span>
-          </div>
-          <div
-            class="overflow-hidden rounded-2xl border border-white/25 bg-slate-950/25 ring-1 ring-white/20 backdrop-blur-[2px]"
-          >
-            <div class="relative">
-              <img
-                :src="howStorvvWorksImages[howStorvvWorksSlide]"
-                :alt="`Storvv product screenshot ${howStorvvWorksSlide + 1} of ${
-                  howStorvvWorksImages.length
-                }`"
-                class="w-full max-h-[min(72vh,520px)] object-contain object-top"
-                loading="lazy"
-                decoding="async"
-              />
-              <button
-                type="button"
-                class="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-900 ring-1 ring-slate-900/5 transition-colors hover:bg-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                aria-label="Previous screenshot"
-                @click="
-                  howStorvvWorksSlide =
-                    (howStorvvWorksSlide - 1 + howStorvvWorksImages.length) %
-                    howStorvvWorksImages.length
-                "
-              >
-                <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200/90 bg-white text-slate-900 ring-1 ring-slate-900/5 transition-colors hover:bg-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                aria-label="Next screenshot"
-                @click="
-                  howStorvvWorksSlide = (howStorvvWorksSlide + 1) % howStorvvWorksImages.length
-                "
-              >
-                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-            <div
-              class="flex flex-wrap items-center justify-center gap-1.5 border-t border-white/15 bg-black/10 px-3 py-3 backdrop-blur-sm"
-              aria-label="Choose screenshot"
-            >
-              <button
-                v-for="(_, idx) in howStorvvWorksImages"
-                :key="idx"
-                type="button"
-                :aria-pressed="idx === howStorvvWorksSlide"
-                :aria-label="`Show screenshot ${idx + 1}`"
-                class="h-1.5 rounded-full transition-[width,background-color] duration-300"
-                :class="
-                  idx === howStorvvWorksSlide
-                    ? 'w-8 bg-white'
-                    : 'w-1.5 bg-white/45 hover:bg-white/80'
-                "
-                @click="howStorvvWorksSlide = idx"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- About -->
-    <section
-      id="about"
-      data-section-id="about"
-      class="landing-about-section scroll-animate scroll-animate-up scroll-mt-[4.75rem] lg:scroll-mt-28"
-      aria-labelledby="landing-about-heading"
-    >
-      <div class="landing-about-bg" aria-hidden="true" />
-
-      <div class="landing-about-inner">
-        <header class="landing-about-header">
-          <p class="landing-label landing-label--blue landing-about-label">Why Storvv</p>
-          <h2 id="landing-about-heading" class="landing-about-title">
-            Three pillars for <span class="landing-about-title-accent">retail & operations</span>
-          </h2>
-          <p class="landing-about-lede">
-            Stop stock surprises, run every branch from one login, and keep receipts and customers
-            out of Excel and WhatsApp.
-          </p>
-        </header>
-
-        <div class="landing-brand-panel landing-about-brand">
-          <div class="landing-brand-panel__icon">
-            <span class="landing-brand-panel__icon-shape" />
-          </div>
-          <span class="landing-brand-panel__name">Storvv</span>
-          <p class="landing-brand-panel__tagline">The retailers' intelligence platform</p>
-        </div>
-
-        <div class="landing-about-grid">
-          <div class="landing-about-highlights">
-            <article
-              v-for="item in aboutHighlights"
-              :key="item.num"
-              class="landing-about-card landing-about-card--feature landing-about-animate"
-            >
-              <div class="landing-about-card-top">
-                <span class="landing-about-num">{{ item.num }}</span>
-                <component
-                  :is="item.icon"
-                  class="landing-about-icon"
-                  stroke-width="1.5"
-                  aria-hidden="true"
-                />
-              </div>
-              <h3 class="landing-about-card-title">{{ item.title }}</h3>
-              <p class="landing-about-card-desc">{{ item.description }}</p>
-              <p class="landing-about-card-detail">{{ item.detail }}</p>
-            </article>
-          </div>
-
-          <div class="landing-about-pillars">
-            <article
-              v-for="pillar in aboutPillars"
-              :key="pillar.title"
-              class="landing-about-card landing-about-card--pillar landing-about-animate"
-            >
-              <component
-                :is="pillar.icon"
-                class="landing-about-icon"
-                stroke-width="1.5"
-                aria-hidden="true"
-              />
-              <div class="landing-about-pillar-body">
-                <p class="landing-about-pillar-label">{{ pillar.title }}</p>
-                <p class="landing-about-card-desc">{{ pillar.body }}</p>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <p class="landing-about-footer">
-          Compare plans in
-          <a href="#pricing" class="landing-about-link" @click.prevent="scrollToSection('pricing')"
-            >Pricing</a
-          >
-          or
-          <a href="#contact" class="landing-about-link" @click.prevent="scrollToSection('contact')"
-            >contact us</a
-          >.
-        </p>
-      </div>
-    </section>
-
-    <LandingCapabilities @navigate="scrollToSection" />
 
     <!-- Pricing -->
     <section
@@ -645,8 +390,6 @@
         </div>
       </div>
     </section>
-
-    <LandingSecurity />
 
     <!-- FAQ -->
     <section
@@ -1397,109 +1140,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, markRaw, type Component } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import Modal from '~/components/ui/Modal.vue'
 import MarketingSyncLoader from '~/components/marketing/MarketingSyncLoader.vue'
 import {
   Bars3Icon,
   XMarkIcon,
-  ArrowRightIcon,
   CheckIcon,
-  CubeIcon,
-  ReceiptPercentIcon,
   UsersIcon,
   ChartBarIcon,
   BuildingOfficeIcon,
   ArrowPathIcon,
-  Square2StackIcon,
   ShieldCheckIcon,
-  LockClosedIcon,
   DocumentTextIcon,
   BanknotesIcon,
-  ClipboardDocumentCheckIcon,
   FolderIcon,
-  TagIcon,
-  ShoppingCartIcon,
-  UserGroupIcon,
   BellAlertIcon,
-  MagnifyingGlassIcon,
   SparklesIcon,
-  ServerIcon,
-  GlobeAltIcon,
   ClockIcon,
   KeyIcon,
   ArrowUpIcon,
-  EnvelopeIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ChevronUpIcon,
-  ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
-import {
-  Cog6ToothIcon as Cog6ToothSolidIcon,
-  UsersIcon as UsersSolidIcon,
-  RectangleStackIcon as RectangleStackSolidIcon,
-  ReceiptPercentIcon as ReceiptPercentSolidIcon,
-  PresentationChartLineIcon as PresentationChartLineSolidIcon,
-} from '@heroicons/vue/24/solid'
 import { useThemeStore } from '~/stores/theme'
-/** Product shots for “How Storvv works” (files in /public). */
-const howStorvvWorksScreenshotFiles = [
-  'Screenshot 2026-05-10 at 17.09.01.png',
-  'Screenshot 2026-05-10 at 17.09.20.png',
-  'Screenshot 2026-05-10 at 17.10.05.png',
-  'Screenshot 2026-05-10 at 17.10.12.png',
-  'Screenshot 2026-05-10 at 17.10.21.png',
-  'Screenshot 2026-05-10 at 17.11.07.png',
-  'Screenshot 2026-05-10 at 17.11.56.png',
-  'Screenshot 2026-05-10 at 19.03.41.png',
-  'Screenshot 2026-05-10 at 19.03.47.png',
-] as const
-
-const howStorvvWorksImages = howStorvvWorksScreenshotFiles.map(
-  (name) => `/${encodeURIComponent(name)}`
-)
-const howStorvvWorksSlide = ref(0)
-
-/** Landing “How Storvv works”: compact copy + icons (static HTML only for descriptions). */
-const howStorvvWorksSteps = [
-  {
-    sectionId: 'step-1',
-    num: '01',
-    icon: markRaw(Cog6ToothSolidIcon),
-    title: 'Try the demo or sign up',
-    html: 'Explore with sample branches first, then create your store on <span class="font-medium text-primary-100">Micro (free)</span>.',
-  },
-  {
-    sectionId: 'step-2',
-    num: '02',
-    icon: markRaw(UsersSolidIcon),
-    title: 'Add your team',
-    html: 'Invite staff with roles. Limit folder access so people only see what they need.',
-  },
-  {
-    sectionId: 'step-3',
-    num: '03',
-    icon: markRaw(RectangleStackSolidIcon),
-    title: 'Load inventory',
-    html: 'Import from Excel or build folders with SKUs and serials.<br /><span class="text-slate-500">Enterprise: <span class="font-medium text-primary-100">copy layouts from another branch</span>.</span>',
-  },
-  {
-    sectionId: 'step-4',
-    num: '04',
-    icon: markRaw(ReceiptPercentSolidIcon),
-    title: 'Sell and receipt',
-    html: 'Ring sales, discounts, returns, and split payments. Capture customers as you go.',
-  },
-  {
-    sectionId: 'step-5',
-    num: '05',
-    icon: markRaw(PresentationChartLineSolidIcon),
-    title: 'Track performance',
-    html: 'Dashboards for bestsellers, low stock, and daily pace. Export more on higher plans.',
-  },
-]
-
 /** Light wordmark for setup panel (white background). */
 const marketingLogoSrc = '/storvv logo 2.png'
 /** Dark wordmark for nav, footer, and dark landing panels. */
@@ -1676,48 +1339,6 @@ const toggleFaq = (index: number) => {
   openFaqItems.value = next
 }
 
-const aboutHighlights = [
-  {
-    num: '01',
-    icon: CubeIcon,
-    title: 'Stop losing money on stock',
-    description: 'Live inventory per branch with low-stock visibility.',
-    detail: 'Know what sold and what’s left before a customer walks away.',
-  },
-  {
-    num: '02',
-    icon: BuildingOfficeIcon,
-    title: 'One dashboard, many branches',
-    description: 'Switch stores in one click. Compare branches without merged spreadsheets.',
-    detail: 'Enterprise: transfers, consolidated reports, central oversight.',
-  },
-  {
-    num: '03',
-    icon: SparklesIcon,
-    title: 'Receipts & customers together',
-    description: 'Sales history and buyer profiles in one search.',
-    detail: 'WhatsApp receipts and customer history on eligible plans.',
-  },
-] as const
-
-const aboutPillars = [
-  {
-    title: 'Retail to procurement',
-    body: 'Stock, sales, and buying workflows in one place, from shop floor to back office.',
-    icon: Square2StackIcon,
-  },
-  {
-    title: 'Demo-first',
-    body: 'Try the full dashboard with sample data before you create an account.',
-    icon: UserGroupIcon,
-  },
-  {
-    title: 'Start free',
-    body: 'Micro stays free for one store. Upgrade when you add branches or need analytics.',
-    icon: BuildingOfficeIcon,
-  },
-] as const
-
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
   if (element && import.meta.client) {
@@ -1877,55 +1498,5 @@ useHead({
   -webkit-box-decoration-break: clone;
   background-clip: text;
   -webkit-background-clip: text;
-}
-
-/* About section: scroll reveal */
-.landing-about-section .landing-about-animate {
-  opacity: 0;
-  transform: translate3d(0, 0.75rem, 0);
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.landing-about-section.visible .landing-about-animate {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-.landing-about-section.visible .landing-about-highlights .landing-about-animate:nth-child(1) {
-  transition-delay: 60ms;
-}
-
-.landing-about-section.visible .landing-about-highlights .landing-about-animate:nth-child(2) {
-  transition-delay: 120ms;
-}
-
-.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(1) {
-  transition-delay: 100ms;
-}
-
-.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(2) {
-  transition-delay: 160ms;
-}
-
-.landing-about-section.visible .landing-about-pillars .landing-about-animate:nth-child(3) {
-  transition-delay: 220ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-about-section .landing-about-animate {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
-/* Why Storvv: tame hero render slightly */
-.landing-why-figure-photo {
-  filter: saturate(0.88) contrast(0.96) brightness(0.98);
-}
-
-.dark .landing-why-figure-photo {
-  filter: saturate(0.78) contrast(1.03) brightness(0.84);
 }
 </style>

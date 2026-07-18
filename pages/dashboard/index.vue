@@ -1,157 +1,122 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-8 sm:space-y-6">
+  <div class="ldg w-full max-w-none space-y-6 pb-10 sm:space-y-7">
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
 
-    <header
-      data-tutorial="dashboard"
-      class="flex flex-col gap-3 border-b border-gray-200/80 pb-4 dark:border-gray-800/80 sm:flex-row sm:items-end sm:justify-between"
-    >
+    <header data-tutorial="dashboard" class="ldg-tear flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div class="min-w-0">
-        <h1
-          class="text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
-        >
+        <p class="ldg-eyebrow">Store ledger</p>
+        <h1 class="ldg-display mt-1 text-xl text-[#1C1B19] dark:text-[#F2EFE9] sm:text-[1.7rem]">
           Welcome back, {{ userName }}
         </h1>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          <span class="font-medium text-gray-800 dark:text-gray-200">{{ currentStoreLabel }}</span>
-          <span v-if="userRoleLabel" class="text-gray-400 dark:text-gray-500">
-            · {{ userRoleLabel }}</span
-          >
-          <span class="text-gray-400 dark:text-gray-500"> · {{ totalOrders }} receipts</span>
+        <p class="mt-1.5 text-sm text-[#706A5C] dark:text-[#A39C8E]">
+          <span class="font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ currentStoreLabel }}</span>
+          <span v-if="userRoleLabel" class="text-[#B7AF9E] dark:text-[#5C574C]"> · </span>
+          <span v-if="userRoleLabel">{{ userRoleLabel }}</span>
+          <span class="text-[#B7AF9E] dark:text-[#5C574C]"> · </span>
+          <span class="ldg-num">{{ totalOrders }} receipts</span>
         </p>
       </div>
     </header>
 
     <div
       v-if="needsStoreSelection && !isLoading"
-      class="rounded-xl border border-amber-200/80 bg-amber-50/90 px-5 py-8 text-center dark:border-amber-900/50 dark:bg-amber-950/30 sm:px-8"
+      class="rounded-lg border border-dashed border-[#C99A4A]/50 bg-[#C99A4A]/[0.06] px-5 py-8 text-center dark:border-[#E0AD5F]/40 dark:bg-[#E0AD5F]/[0.05] sm:px-8"
     >
-      <BuildingStorefrontIcon
-        class="mx-auto mb-3 h-8 w-8 text-amber-700 dark:text-amber-400"
-        stroke-width="1.5"
-      />
-      <p class="text-sm font-semibold text-amber-950 dark:text-amber-100">
-        Select a store to load your dashboard
-      </p>
-      <p class="mx-auto mt-1 max-w-md text-xs text-amber-900/80 dark:text-amber-200/80">
-        Choose a branch from the store selector in the top bar. Metrics, charts, and alerts are
-        scoped to the active store.
+      <BuildingStorefrontIcon class="mx-auto mb-3 h-8 w-8 text-[#A9762E] dark:text-[#E0AD5F]" stroke-width="1.5" />
+      <p class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Select a store to load your dashboard</p>
+      <p class="mx-auto mt-1 max-w-md text-xs text-[#8A8172] dark:text-[#A39C8E]">
+        Choose a branch from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active
+        store.
       </p>
       <NuxtLink
         to="/dashboard/settings"
-        class="mt-4 inline-block text-xs font-medium text-amber-950 underline underline-offset-2 dark:text-amber-100"
+        class="mt-4 inline-block text-xs font-medium text-[#A9762E] underline underline-offset-2 dark:text-[#E0AD5F]"
       >
         Manage stores in Settings
       </NuxtLink>
     </div>
 
     <template v-else-if="isLoading">
-      <!-- Inventory health -->
-      <div class="rounded-xl bg-white p-4 dark:bg-dashboard-card">
+      <div class="ldg-card p-4">
         <div class="mb-3 flex items-center justify-between">
-          <div class="h-3 w-32 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="h-3 w-20 animate-pulse rounded bg-gray-100 dark:bg-white/[0.06]" />
+          <div class="h-3 w-32 animate-pulse rounded bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
+          <div class="h-3 w-20 animate-pulse rounded bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
         </div>
-        <div class="h-2 w-full animate-pulse rounded-full bg-gray-100 dark:bg-white/[0.06]" />
+        <div class="h-2 w-full animate-pulse rounded-full bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
       </div>
 
-      <!-- KPI grid -->
       <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
         <div
           v-for="i in 5"
           :key="`kpi-${i}`"
-          class="h-[5.5rem] animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] sm:h-[6rem]"
+          class="h-[5.5rem] animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] sm:h-[6rem]"
         />
       </div>
 
-      <!-- Revenue chart + payment mix -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
-        <div class="h-72 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] lg:col-span-8" />
-        <div class="h-72 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06] lg:col-span-4" />
+        <div class="h-72 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] lg:col-span-8" />
+        <div class="h-72 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] lg:col-span-4" />
       </div>
 
-      <!-- Low stock + activity + quick links -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
         <div
           v-for="i in 3"
           :key="`panel-${i}`"
-          class="h-56 animate-pulse rounded-xl bg-gray-100 dark:bg-white/[0.06]"
+          class="h-56 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]"
         />
       </div>
     </template>
 
     <template v-else>
-      <!-- Inventory health (top) -->
-      <section :class="panelClass">
+      <!-- Inventory health -->
+      <section class="ldg-card p-4">
         <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
           <div>
-            <p
-              class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-            >
-              Inventory health
-            </p>
-            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-              {{ inStockCount }} available units · {{ outOfStockCount }} sold ·
-              {{ lowStockItems.length }} low-stock lines
+            <p class="ldg-eyebrow">Inventory health</p>
+            <p class="mt-1 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">
+              <span class="ldg-num">{{ inStockCount }}</span> available units ·
+              <span class="ldg-num">{{ outOfStockCount }}</span> sold ·
+              <span class="ldg-num">{{ lowStockItems.length }}</span> low-stock lines
             </p>
           </div>
           <NuxtLink
             to="/dashboard/inventory"
-            class="text-xs font-medium text-primary-700 underline underline-offset-2 dark:text-primary-400"
+            class="text-xs font-medium text-[#A9762E] underline underline-offset-2 dark:text-[#E0AD5F]"
           >
             Open inventory
           </NuxtLink>
         </div>
-        <div
-          class="flex h-2 gap-px overflow-hidden rounded-full bg-gray-200/90 dark:bg-white/[0.08]"
-        >
-          <div
-            class="bg-emerald-500 transition-all"
-            :style="{ width: `${inStockPercentage}%` }"
-            title="Available"
-          />
-          <div
-            class="bg-amber-500 transition-all"
-            :style="{ width: `${lowStockPercentage}%` }"
-            title="Low stock"
-          />
-          <div
-            class="bg-slate-400 transition-all dark:bg-slate-500"
-            :style="{ width: `${soldPercentage}%` }"
-            title="Sold"
-          />
+        <div class="flex h-1.5 gap-px overflow-hidden rounded-full bg-[#1C1B19]/[0.07] dark:bg-white/[0.08]">
+          <div class="bg-[#3F8F7C] transition-all dark:bg-[#5FC2A8]" :style="{ width: `${inStockPercentage}%` }" title="Available" />
+          <div class="bg-[#B9791C] transition-all dark:bg-[#E3A94C]" :style="{ width: `${lowStockPercentage}%` }" title="Low stock" />
+          <div class="bg-[#B7AF9E] transition-all dark:bg-[#5C574C]" :style="{ width: `${soldPercentage}%` }" title="Sold" />
         </div>
-        <div
-          class="mt-2 flex flex-wrap justify-between gap-2 text-[10px] text-gray-500 dark:text-gray-400 sm:text-[11px]"
-        >
-          <span>{{ inStockPercentage }}% available</span>
-          <span>{{ soldPercentage }}% sold through</span>
-          <span>{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
+        <div class="mt-2 flex flex-wrap justify-between gap-2 text-[10px] text-[#8A8172] dark:text-[#A39C8E] sm:text-[11px]">
+          <span class="ldg-num">{{ inStockPercentage }}% available</span>
+          <span class="ldg-num">{{ soldPercentage }}% sold through</span>
+          <span class="ldg-num">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
         </div>
       </section>
 
-      <!-- Attention (inline, not stacked alert cards) -->
+      <!-- Attention -->
       <ul v-if="attentionItems.length > 0" class="flex flex-col gap-2">
         <li
           v-for="alert in attentionItemsTop"
           :key="alert.id"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-lg border-0 px-3 py-2 text-xs"
+          class="flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-xs"
           :class="alertRowClass(alert.level)"
         >
-          <span class="text-gray-800 dark:text-gray-200">
-            <span class="font-medium text-gray-900 dark:text-gray-50">{{ alert.title }}.</span>
+          <span class="text-[#4A453B] dark:text-[#C9C3B6]">
+            <span class="font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ alert.title }}.</span>
             {{ alert.description }}
           </span>
-          <NuxtLink
-            :to="alert.href"
-            class="shrink-0 font-medium text-gray-900 underline underline-offset-2 dark:text-gray-100"
-          >
+          <NuxtLink :to="alert.href" class="shrink-0 font-medium text-[#1C1B19] underline underline-offset-2 dark:text-[#F2EFE9]">
             {{ alert.cta }}
           </NuxtLink>
         </li>
       </ul>
 
-      <!-- KPI grid (core glance metrics) -->
+      <!-- KPI grid -->
       <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
         <StatCard
           label="Total revenue"
@@ -159,23 +124,17 @@
           :subtext="revenueChangeText"
           :change="revenueChangePercent"
           :change-positive="revenueChangePositive"
-          :sparkline-data="
-            statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined
-          "
+          :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
         />
-        <StatCard
-          label="Orders today"
-          :value="todayReceiptsCount.toString()"
-          :subtext="`${formatCurrency(todaySales)} revenue`"
-        />
+        <StatCard label="Orders today" :value="todayReceiptsCount.toString()" :subtext="`${formatCurrency(todaySales)} revenue`" />
         <StatCard
           label="Customers"
           :value="totalCustomers.toString()"
           :subtext="`${newCustomersToday} active today`"
           :subtext-class="
             newCustomersToday > 0
-              ? 'text-emerald-600 dark:text-emerald-400 text-xs font-medium'
-              : 'text-gray-500 dark:text-gray-400 text-xs'
+              ? 'text-[#3F8F7C] dark:text-[#5FC2A8] text-xs font-medium'
+              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
           "
         />
         <StatCard
@@ -184,8 +143,8 @@
           :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
           :subtext-class="
             lowStockItems.length > 0
-              ? 'text-amber-600 dark:text-amber-400 text-xs font-medium'
-              : 'text-gray-500 dark:text-gray-400 text-xs'
+              ? 'text-[#B9791C] dark:text-[#E3A94C] text-xs font-medium'
+              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
           "
         />
         <StatCard
@@ -194,43 +153,30 @@
           :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
           :subtext-class="
             outstandingCount > 0
-              ? 'text-amber-600 dark:text-amber-400 text-xs font-medium'
-              : 'text-gray-500 dark:text-gray-400 text-xs'
+              ? 'text-[#B9791C] dark:text-[#E3A94C] text-xs font-medium'
+              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
           "
         />
       </div>
 
       <!-- Chart + payment mix -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
-        <Card
-          padding="sm"
-          extra-class="!p-0 overflow-hidden lg:col-span-8 rounded-xl bg-white dark:!bg-dashboard-card"
-        >
-          <div
-            class="flex flex-col gap-2 border-b border-gray-100/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-white/[0.06]"
-          >
+        <Card padding="sm" extra-class="!p-0 overflow-hidden lg:col-span-8 ldg-card">
+          <div class="ldg-tear flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-              >
-                Revenue performance
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ chartSubtitle }}</p>
+              <h2 class="ldg-display text-xs text-[#1C1B19] dark:text-[#F2EFE9] sm:text-sm">Revenue performance</h2>
+              <p class="mt-0.5 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">{{ chartSubtitle }}</p>
             </div>
-            <div
-              class="inline-flex w-fit shrink-0 rounded-lg bg-gray-50/50 p-0.5 dark:bg-white/[0.03]"
-              role="group"
-              aria-label="Chart period"
-            >
+            <div class="inline-flex w-fit shrink-0 rounded-md bg-[#1C1B19]/[0.04] p-0.5 dark:bg-white/[0.04]" role="group" aria-label="Chart period">
               <button
                 v-for="opt in chartPeriodOptions"
                 :key="opt.value"
                 type="button"
-                class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+                class="rounded px-2.5 py-1 text-xs font-medium transition-colors"
                 :class="
                   chartView === opt.value
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
-                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                    ? 'bg-white text-[#1C1B19] shadow-sm dark:bg-white/10 dark:text-[#F2EFE9]'
+                    : 'text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]'
                 "
                 @click="chartView = opt.value"
               >
@@ -239,64 +185,38 @@
             </div>
           </div>
           <div class="relative h-[11rem] px-2 pb-3 pt-1 sm:h-[14rem] sm:px-3 lg:h-[15rem]">
-            <div
-              v-if="chartData.length === 0"
-              class="flex h-full flex-col items-center justify-center text-center"
-            >
-              <ChartBarIcon class="mb-2 h-8 w-8 text-gray-400" stroke-width="1.5" />
-              <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                No revenue data yet
-              </p>
-              <p class="text-xs text-gray-500 dark:text-gray-400">
-                Completed receipts will populate this chart
-              </p>
+            <div v-if="chartData.length === 0" class="flex h-full flex-col items-center justify-center text-center">
+              <ChartBarIcon class="mb-2 h-8 w-8 text-[#B7AF9E]" stroke-width="1.5" />
+              <p class="text-sm font-medium text-[#4A453B] dark:text-[#C9C3B6]">No revenue data yet</p>
+              <p class="text-xs text-[#8A8172] dark:text-[#A39C8E]">Completed receipts will populate this chart</p>
             </div>
             <ClientOnly v-else>
-              <apexchart
-                type="area"
-                :height="chartHeight"
-                :options="chartOptions"
-                :series="chartSeries"
-              />
+              <apexchart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
               <template #fallback>
-                <div class="flex h-full items-center justify-center text-xs text-gray-400">
-                  Loading chart…
-                </div>
+                <div class="flex h-full items-center justify-center text-xs text-[#8A8172]">Loading chart…</div>
               </template>
             </ClientOnly>
           </div>
         </Card>
 
-        <div :class="[panelClass, 'lg:col-span-4 flex flex-col']">
-          <p
-            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-          >
-            Payment methods
-          </p>
-          <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-            Share of completed receipts by tender type
-          </p>
-          <div
-            v-if="paymentMethodBreakdown.length === 0"
-            class="mt-4 text-xs text-gray-500 dark:text-gray-400"
-          >
+        <div class="ldg-card flex flex-col p-4 lg:col-span-4">
+          <p class="ldg-eyebrow">Payment methods</p>
+          <p class="mt-1 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">Share of completed receipts by tender type</p>
+          <div v-if="paymentMethodBreakdown.length === 0" class="mt-4 text-xs text-[#8A8172] dark:text-[#A39C8E]">
             No completed sales to analyze yet.
           </div>
           <ul v-else class="mt-4 space-y-3">
             <li v-for="slice in paymentMethodsTop" :key="slice.method">
               <div class="mb-1 flex items-baseline justify-between gap-2 text-xs">
-                <span class="font-medium text-gray-800 dark:text-gray-200">{{ slice.label }}</span>
-                <span class="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
+                <span class="font-medium text-[#4A453B] dark:text-[#C9C3B6]">{{ slice.label }}</span>
+                <span class="ldg-num shrink-0 text-[#8A8172] dark:text-[#A39C8E]">
                   {{ slice.share }}% · {{ formatCurrency(slice.revenue) }}
                 </span>
               </div>
-              <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
-                <div
-                  class="h-full rounded-full bg-primary-500/70 transition-all dark:bg-primary-400/60"
-                  :style="{ width: `${Math.max(slice.share, 2)}%` }"
-                />
+              <div class="h-1.5 overflow-hidden rounded-full bg-[#1C1B19]/[0.06] dark:bg-white/[0.08]">
+                <div class="h-full rounded-full bg-[#C99A4A]/70 transition-all dark:bg-[#E0AD5F]/60" :style="{ width: `${Math.max(slice.share, 2)}%` }" />
               </div>
-              <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-500">
+              <p class="ldg-num mt-0.5 text-[10px] text-[#B7AF9E] dark:text-[#5C574C]">
                 {{ slice.count }} receipt{{ slice.count === 1 ? '' : 's' }}
               </p>
             </li>
@@ -304,24 +224,13 @@
         </div>
       </div>
 
-      <!-- Payment links -->
-      <PaymentLinksSummaryCard
-        v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon"
-        :card-class="panelClass"
-      />
+      <PaymentLinksSummaryCard v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon" card-class="ldg-card p-4" />
 
-      <!-- Business metrics (sales + operations, merged) -->
-      <section :class="panelClass">
+      <!-- Business metrics -->
+      <section class="ldg-card p-4">
         <div class="mb-3 flex items-center justify-between gap-2">
-          <p
-            class="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-500 dark:text-gray-400"
-          >
-            Business metrics
-          </p>
-          <NuxtLink
-            to="/dashboard/analytics"
-            class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-          >
+          <p class="ldg-eyebrow">Business metrics</p>
+          <NuxtLink to="/dashboard/analytics" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
             Full analytics
           </NuxtLink>
         </div>
@@ -329,219 +238,142 @@
           <div
             v-for="row in businessMetricsTop"
             :key="row.label"
-            class="flex items-baseline justify-between gap-2 border-b border-gray-100/80 pb-2 dark:border-white/[0.05]"
+            class="flex items-baseline justify-between gap-2 border-b border-dotted border-[#1C1B19]/10 pb-2 dark:border-white/10"
           >
-            <dt class="text-xs text-gray-600 dark:text-gray-400">{{ row.label }}</dt>
-            <dd class="text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-              {{ row.value }}
-            </dd>
+            <dt class="text-xs text-[#8A8172] dark:text-[#A39C8E]">{{ row.label }}</dt>
+            <dd class="ldg-num text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ row.value }}</dd>
           </div>
         </dl>
       </section>
 
       <!-- Recent + top products -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
-        <section :class="panelClass">
-          <div
-            class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80"
-          >
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent receipts</h2>
-            <NuxtLink
-              to="/dashboard/receipts"
-              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-            >
+        <section class="ldg-card p-4">
+          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
+            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Recent receipts</h2>
+            <NuxtLink to="/dashboard/receipts" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
               View all
             </NuxtLink>
           </div>
-          <div
-            v-if="recentReceipts.length === 0"
-            class="py-2 text-xs text-gray-500 dark:text-gray-400"
-          >
-            No receipts yet.
-          </div>
+          <div v-if="recentReceipts.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No receipts yet.</div>
           <ul v-else class="mt-1 space-y-0">
             <li
               v-for="tx in recentReceiptsTop"
               :key="tx.id"
-              class="flex items-center justify-between gap-3 border-b border-gray-100/90 py-2.5 last:border-0 dark:border-gray-800/70"
+              class="flex items-center justify-between gap-3 border-b border-dotted border-[#1C1B19]/10 py-2.5 last:border-0 dark:border-white/10"
             >
               <div class="min-w-0">
-                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
-                  {{ tx.customerName }}
-                </p>
-                <p
-                  class="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0 text-[11px] text-gray-500 dark:text-gray-500"
-                >
-                  <span class="font-medium text-gray-600 dark:text-gray-400"
-                    >#{{ tx.receiptNumber }}</span
-                  >
-                  <span class="text-gray-400 dark:text-gray-600" aria-hidden="true">·</span>
+                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ tx.customerName }}</p>
+                <p class="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0 text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">
+                  <span class="ldg-num font-medium text-[#8A8172] dark:text-[#A39C8E]">#{{ tx.receiptNumber }}</span>
+                  <span aria-hidden="true">·</span>
                   <span>{{ tx.paymentMethod }}</span>
-                  <span class="hidden text-gray-400 sm:inline dark:text-gray-600" aria-hidden="true"
-                    >·</span
-                  >
+                  <span class="hidden sm:inline" aria-hidden="true">·</span>
                   <span class="hidden sm:inline">{{ tx.statusLabel }}</span>
-                  <span class="text-gray-400 dark:text-gray-600" aria-hidden="true">·</span>
-                  <span class="shrink-0">{{ tx.time }}</span>
+                  <span aria-hidden="true">·</span>
+                  <span class="ldg-num shrink-0">{{ tx.time }}</span>
                 </p>
               </div>
-              <p
-                class="shrink-0 text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-              >
-                {{ tx.amount }}
-              </p>
+              <p class="ldg-num shrink-0 text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ tx.amount }}</p>
             </li>
           </ul>
         </section>
 
-        <section :class="panelClass">
-          <div
-            class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80"
-          >
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Top products</h2>
-            <NuxtLink
-              to="/dashboard/analytics"
-              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-            >
+        <section class="ldg-card p-4">
+          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
+            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Top products</h2>
+            <NuxtLink to="/dashboard/analytics" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
               Analytics
             </NuxtLink>
           </div>
-          <div
-            v-if="topSellingItems.length === 0"
-            class="py-2 text-xs text-gray-500 dark:text-gray-400"
-          >
-            No product sales yet.
-          </div>
+          <div v-if="topSellingItems.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No product sales yet.</div>
           <ul v-else class="mt-1 space-y-0">
             <li
               v-for="item in topProductsTop"
               :key="item.id"
-              class="flex items-center justify-between gap-3 border-b border-gray-100/90 py-2.5 last:border-0 dark:border-gray-800/70"
+              class="flex items-center justify-between gap-3 border-b border-dotted border-[#1C1B19]/10 py-2.5 last:border-0 dark:border-white/10"
             >
               <div class="min-w-0">
-                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
-                  {{ item.name }}
-                </p>
-                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-500">
-                  {{ item.sales }} sold
-                </p>
+                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ item.name }}</p>
+                <p class="ldg-num mt-0.5 text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">{{ item.sales }} sold</p>
               </div>
-              <p
-                class="shrink-0 text-xs font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-              >
-                {{ formatCurrency(item.revenue) }}
-              </p>
+              <p class="ldg-num shrink-0 text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ formatCurrency(item.revenue) }}</p>
             </li>
           </ul>
         </section>
       </div>
 
-      <!-- Low stock + activity + quick links -->
+      <!-- Low stock + activity + shortcuts -->
       <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:items-start">
-        <section :class="[panelClass, 'lg:col-span-1']">
-          <div
-            class="mb-2.5 flex items-center justify-between gap-2 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80"
-          >
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Low stock</h2>
+        <section class="ldg-card p-4 lg:col-span-1">
+          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
+            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Low stock</h2>
             <div class="flex items-center gap-2">
               <button
                 v-if="lowStockItems.length > 0"
                 type="button"
-                class="text-[11px] font-medium text-primary-700 hover:text-primary-800 disabled:opacity-50 dark:text-primary-300"
+                class="text-[11px] font-medium text-[#A9762E] hover:text-[#8A5F23] disabled:opacity-50 dark:text-[#E0AD5F]"
                 :disabled="reorderExporting"
                 @click="handleExportReorderList"
               >
                 {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
               </button>
-              <NuxtLink
-                to="/dashboard/inventory"
-                class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-              >
+              <NuxtLink to="/dashboard/inventory" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
                 Inventory
               </NuxtLink>
             </div>
           </div>
-          <div
-            v-if="lowStockItems.length === 0"
-            class="py-2 text-xs text-gray-500 dark:text-gray-400"
-          >
-            All lines above threshold.
-          </div>
+          <div v-if="lowStockItems.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">All lines above threshold.</div>
           <ul v-else class="mt-1 space-y-0">
             <li
               v-for="item in lowStockItemsTop"
               :key="item.id"
-              class="flex items-baseline justify-between gap-2 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/70"
+              class="flex items-baseline justify-between gap-2 border-b border-dotted border-[#1C1B19]/10 py-2 last:border-0 dark:border-white/10"
             >
-              <p class="min-w-0 truncate text-xs text-gray-800 dark:text-gray-200">
-                {{ item.name }}
-              </p>
-              <span
-                class="shrink-0 text-xs font-medium tabular-nums text-amber-800 dark:text-amber-300"
-              >
+              <p class="min-w-0 truncate text-xs text-[#4A453B] dark:text-[#C9C3B6]">{{ item.name }}</p>
+              <span class="ldg-num shrink-0 text-xs font-medium text-[#B9791C] dark:text-[#E3A94C]">
                 {{ item.quantity }}<span v-if="!item.isSerialNumber"> / {{ item.threshold }}</span>
               </span>
             </li>
           </ul>
         </section>
 
-        <section v-if="canViewActivity" :class="[panelClass, 'lg:col-span-1']">
-          <div
-            class="mb-2.5 flex items-center justify-between border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80"
-          >
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent activity</h2>
-            <NuxtLink
-              to="/dashboard/activity"
-              class="text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
-            >
+        <section v-if="canViewActivity" class="ldg-card p-4 lg:col-span-1">
+          <div class="ldg-tear mb-2.5 flex items-center justify-between pb-2.5">
+            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Recent activity</h2>
+            <NuxtLink to="/dashboard/activity" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
               All logs
             </NuxtLink>
           </div>
-          <div
-            v-if="recentActivityLogs.length === 0"
-            class="py-2 text-xs text-gray-500 dark:text-gray-400"
-          >
-            No activity logged yet.
-          </div>
+          <div v-if="recentActivityLogs.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No activity logged yet.</div>
           <ul v-else class="mt-1 space-y-0">
             <li
               v-for="log in recentActivityLogsTop"
               :key="log.id"
-              class="flex gap-2 border-b border-gray-100/90 py-2 last:border-0 dark:border-gray-800/70"
+              class="flex gap-2 border-b border-dotted border-[#1C1B19]/10 py-2 last:border-0 dark:border-white/10"
             >
-              <span class="self-start" :class="activityActionBadgeClass(log.action)">
-                {{ activityActionLabel(log.action) }}
-              </span>
+              <span class="self-start" :class="activityActionBadgeClass(log.action)">{{ activityActionLabel(log.action) }}</span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
-                  {{ activityLogPreviewTitle(log) }}
-                </p>
-                <p class="mt-0.5 truncate text-[11px] text-gray-500 dark:text-gray-500">
+                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ activityLogPreviewTitle(log) }}</p>
+                <p class="mt-0.5 truncate text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">
                   {{ activityEntityTypeLabel(log.entityType) }}
                   <span class="hidden sm:inline"> · {{ log.userDisplayName }}</span>
-                  · {{ formatActivityTime(log.createdAt) }}
+                  · <span class="ldg-num">{{ formatActivityTime(log.createdAt) }}</span>
                 </p>
               </div>
             </li>
           </ul>
         </section>
 
-        <section :class="[panelClass, canViewActivity ? 'lg:col-span-1' : 'lg:col-span-2']">
-          <div class="mb-2.5 border-b border-gray-100/90 pb-2.5 dark:border-gray-800/80">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Shortcuts</h2>
+        <section class="ldg-card p-4" :class="canViewActivity ? 'lg:col-span-1' : 'lg:col-span-2'">
+          <div class="ldg-tear mb-2.5 pb-2.5">
+            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Shortcuts</h2>
           </div>
           <ul class="mt-1 space-y-0">
-            <li
-              v-for="link in quickLinksTop"
-              :key="link.href"
-              class="border-b border-gray-100/90 last:border-0 dark:border-gray-800/70"
-            >
-              <NuxtLink
-                :to="link.href"
-                class="flex items-center justify-between gap-2 py-2.5 text-xs transition-colors hover:text-gray-900 dark:hover:text-gray-100"
-              >
-                <span class="font-medium text-gray-800 dark:text-gray-200">{{ link.label }}</span>
-                <span class="text-gray-400 dark:text-gray-500">→</span>
+            <li v-for="link in quickLinksTop" :key="link.href" class="border-b border-dotted border-[#1C1B19]/10 last:border-0 dark:border-white/10">
+              <NuxtLink :to="link.href" class="flex items-center justify-between gap-2 py-2.5 text-xs transition-colors hover:text-[#1C1B19] dark:hover:text-[#F2EFE9]">
+                <span class="font-medium text-[#4A453B] dark:text-[#C9C3B6]">{{ link.label }}</span>
+                <span class="text-[#B7AF9E] dark:text-[#5C574C]">→</span>
               </NuxtLink>
             </li>
           </ul>
@@ -592,8 +424,6 @@ definePageMeta({
   layout: 'dashboard',
   middleware: 'auth',
 })
-
-const { dashboardCardPaddedClass: panelClass } = useDashboardPageChrome()
 
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
@@ -805,9 +635,10 @@ const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
-  const lineColor = isDark ? '#93C5FD' : '#4876c7'
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.05)'
-  const labelColor = isDark ? '#A1A1AA' : '#64748B'
+  // Ledger palette: verdigris line on a warm ink/paper backdrop.
+  const lineColor = isDark ? '#5FC2A8' : '#3F8F7C'
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(28, 27, 25, 0.06)'
+  const labelColor = isDark ? '#A39C8E' : '#8A8172'
 
   return {
     chart: {
@@ -815,7 +646,7 @@ const chartOptions = computed(() => {
       height: chartHeight.value,
       toolbar: { show: false },
       zoom: { enabled: false },
-      fontFamily: 'inherit',
+      fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
       background: 'transparent',
       animations: { enabled: true, easing: 'easeinout', speed: 600 },
     },
@@ -825,11 +656,11 @@ const chartOptions = computed(() => {
       type: 'gradient',
       gradient: {
         shadeIntensity: 0,
-        opacityFrom: 0.2,
+        opacityFrom: 0.22,
         opacityTo: 0,
         stops: [0, 100],
         colorStops: [
-          { offset: 0, color: lineColor, opacity: 0.22 },
+          { offset: 0, color: lineColor, opacity: 0.24 },
           { offset: 100, color: lineColor, opacity: 0 },
         ],
       },
@@ -885,11 +716,11 @@ const chartOptions = computed(() => {
 function alertRowClass(level: DashboardAlertLevel): string {
   switch (level) {
     case 'critical':
-      return 'border-red-200/70 bg-red-50/40 dark:border-red-900/35 dark:bg-red-950/20'
+      return 'border border-[#AE463B]/25 bg-[#AE463B]/[0.06] dark:border-[#E2786C]/25 dark:bg-[#E2786C]/[0.06]'
     case 'warning':
-      return 'border-amber-200/70 bg-amber-50/40 dark:border-amber-900/35 dark:bg-amber-950/20'
+      return 'border border-[#B9791C]/25 bg-[#B9791C]/[0.06] dark:border-[#E3A94C]/25 dark:bg-[#E3A94C]/[0.06]'
     default:
-      return 'border-gray-200/80 bg-gray-50/60 dark:border-gray-800/80 dark:bg-white/[0.02]'
+      return 'border border-[#1C1B19]/10 bg-[#1C1B19]/[0.02] dark:border-white/10 dark:bg-white/[0.02]'
   }
 }
 
@@ -985,3 +816,73 @@ useHead({
   title: 'Dashboard - Storvv',
 })
 </script>
+
+<style scoped>
+/* ---------------------------------------------------------------------
+   Ledger design system
+   A dashboard styled after a well-kept receipt ledger: warm ink/paper
+   tones, brass + verdigris accents (not the default blue/gray SaaS
+   palette), Space Grotesk for headers, Inter for body copy, and
+   IBM Plex Mono for every number so figures read like they came off a
+   till tape. The signature motif is a perforated "ticket tear" rule
+   used only at major section boundaries.
+   --------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.ldg {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.ldg-display {
+  font-family: 'Space Grotesk', ui-sans-serif, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.ldg-eyebrow {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a8172;
+}
+:global(.dark) .ldg-eyebrow {
+  color: #a39c8e;
+}
+
+.ldg-num {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Card surface: warm paper in light mode, keeps existing token in dark. */
+.ldg-card {
+  background: #ffffff;
+  border: 1px solid rgba(28, 27, 25, 0.09);
+  border-radius: 0.65rem;
+}
+:global(.dark) .ldg-card {
+  background: var(--color-dashboard-card, #161a1f);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Signature: perforated ticket-tear divider, used at section boundaries only */
+.ldg-tear {
+  position: relative;
+  border-bottom: none;
+}
+.ldg-tear::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background-image: radial-gradient(circle, rgba(28, 27, 25, 0.22) 1px, transparent 1.3px);
+  background-size: 7px 1px;
+  background-repeat: repeat-x;
+}
+:global(.dark) .ldg-tear::after {
+  background-image: radial-gradient(circle, rgba(242, 239, 233, 0.22) 1px, transparent 1.3px);
+}
+</style>
