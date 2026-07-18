@@ -31,11 +31,11 @@
         compact ? 'mt-2 max-w-sm text-xs' : 'mt-2 max-w-md text-sm',
       ]"
     >
-      Paystack pay-by-link is in progress on mobile. You'll connect your bank, send secure links,
-      and auto-create receipts when customers pay.
+      Pay-by-link checkout is on the way. You'll connect your bank, send secure links, and
+      auto-create receipts when customers pay.
     </p>
     <p v-if="!compact" class="mx-auto mt-3 max-w-md text-xs text-gray-500 dark:text-gray-500">
-      Use the web app for now, or check back after the next update.
+      We're finishing the last pieces — check back soon.
     </p>
   </section>
 </template>

@@ -70,11 +70,9 @@ const emit = defineEmits<{
 
 const loadingIcon = ArrowPathIcon
 
-const radiusClass = 'rounded-sm'
+const radiusClass = '!rounded-full'
 
-const showGlassHighlight = computed(
-  () => props.variant === 'secondary' || props.variant === 'outline' || props.variant === 'ghost'
-)
+const showGlassHighlight = computed(() => false)
 
 const sizeClasses = computed(() => {
   const sizeMap = {
@@ -97,15 +95,17 @@ const iconSize = computed(() => {
 const variantSurfaceClasses = computed(() => {
   const map = {
     primary:
-      'bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-500 dark:active:bg-primary-700',
+      'border-0 bg-[#143f8d] text-white shadow-[0_4px_16px_rgb(20_63_141/0.22)] hover:bg-[#0f357a] active:bg-[#0c2d66] dark:bg-[#143f8d] dark:hover:bg-[#0f357a] dark:active:bg-[#0c2d66]',
     secondary:
-      'bg-white text-gray-900 hover:bg-gray-50 dark:bg-gray-800/90 dark:text-gray-50 dark:hover:bg-gray-800',
-    danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-800',
-    success: 'bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 active:bg-emerald-800',
+      'border-0 bg-transparent text-gray-700 hover:bg-gray-900/[0.05] hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/[0.06] dark:hover:text-gray-50',
+    danger:
+      'border-0 bg-red-600 text-white shadow-[0_4px_16px_rgb(220_38_38/0.18)] hover:bg-red-700 active:bg-red-800',
+    success:
+      'border-0 bg-emerald-600 text-white shadow-[0_4px_16px_rgb(5_150_105/0.18)] hover:bg-emerald-700 active:bg-emerald-800',
     outline:
-      'bg-white text-gray-800 hover:bg-gray-50 dark:bg-gray-900/40 dark:text-gray-100 dark:hover:bg-gray-800/60',
+      'border-[1.5px] border-[rgb(20_63_141/0.35)] bg-transparent text-[#143f8d] hover:border-[#143f8d] hover:bg-[rgb(20_63_141/0.06)] dark:border-white/15 dark:text-gray-100 dark:hover:border-white/25 dark:hover:bg-white/[0.06]',
     ghost:
-      'bg-transparent text-gray-700 hover:bg-gray-100/80 dark:text-gray-200 dark:hover:bg-gray-800/50',
+      'border-0 bg-transparent text-gray-700 hover:bg-gray-900/[0.05] dark:text-gray-200 dark:hover:bg-white/[0.06]',
   }
   return map[props.variant]
 })

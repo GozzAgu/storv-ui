@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="border-b border-gray-100/90 bg-gradient-to-b from-gray-50/90 to-white px-4 py-3 dark:border-gray-800/70 dark:from-white/[0.03] dark:to-transparent sm:px-5"
-  >
+  <div class="dash-table-toolbar">
     <div v-if="$slots.heading" class="mb-3 min-w-0">
       <slot name="heading" />
     </div>

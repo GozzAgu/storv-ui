@@ -2,35 +2,36 @@
  * Layout tokens for Capacitor / iOS bottom tab bar and "More" sheet.
  */
 export function useDashboardNativeNavChrome() {
-  // Floating glass pill (Meta-style). Visual surface is defined in
-  // capacitor-native.css (.native-tabbar) so blur/translucency stays consistent.
   const barClass = 'native-tabbar pointer-events-auto'
 
   const tabClass =
     'group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-1.5 transition-colors duration-150 active:opacity-70'
 
   const tabInactiveClass = 'text-gray-500 dark:text-gray-400'
-  const tabActiveClass = 'text-primary-600 dark:text-primary-400'
+  const tabActiveClass = 'text-[#143f8d] dark:text-[#9ab5e3]'
 
   const tabIndicatorClass =
-    'absolute top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary-500 dark:bg-primary-400'
+    'absolute top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#143f8d] dark:bg-[#9ab5e3]'
 
-  const sheetClass =
-    'fixed inset-x-0 bottom-0 z-[59] flex max-h-[min(72dvh,520px)] flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_-8px_40px_rgb(15_23_42/0.12)] dark:!bg-dashboard-card dark:shadow-[0_-12px_48px_rgb(0_0_0/0.45)]'
+  const sheetBackdropClass =
+    'native-bottom-nav__backdrop fixed inset-0 z-[58] dash-overlay-backdrop'
 
-  const sheetRowClass =
-    'flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors active:bg-gray-100/90 dark:active:bg-white/[0.04]'
+  const sheetClass = 'native-more-sheet'
 
-  const sheetRowActiveClass =
-    'bg-primary-50/90 text-primary-700 dark:bg-primary-950/30 dark:text-primary-300'
+  const sheetHeaderClass = 'native-more-sheet__header'
+  const sheetHandleClass = 'native-more-sheet__handle'
+  const sheetEyebrowClass = 'dash-overlay-eyebrow'
+  const sheetTitleClass = 'dash-overlay-title !text-sm'
+  const sheetListClass =
+    'native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2'
+  const sheetFooterClass = 'native-more-sheet__footer'
 
-  const sheetRowInactiveClass = 'text-gray-800 dark:text-gray-200'
+  const sheetRowClass = 'native-more-sheet__row'
+  const sheetRowActiveClass = 'native-more-sheet__row native-more-sheet__row--active'
+  const sheetRowInactiveClass = 'native-more-sheet__row text-gray-800 dark:text-gray-200'
 
-  const sheetIconWrapClass =
-    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100/90 text-gray-600 dark:bg-white/[0.05] dark:text-gray-300'
-
-  const sheetIconWrapActiveClass =
-    'bg-primary-500/12 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400'
+  const sheetIconWrapClass = 'native-more-sheet__icon'
+  const sheetIconWrapActiveClass = 'native-more-sheet__icon native-more-sheet__icon--active'
 
   return {
     barClass,
@@ -38,7 +39,14 @@ export function useDashboardNativeNavChrome() {
     tabInactiveClass,
     tabActiveClass,
     tabIndicatorClass,
+    sheetBackdropClass,
     sheetClass,
+    sheetHeaderClass,
+    sheetHandleClass,
+    sheetEyebrowClass,
+    sheetTitleClass,
+    sheetListClass,
+    sheetFooterClass,
     sheetRowClass,
     sheetRowActiveClass,
     sheetRowInactiveClass,

@@ -1,0 +1,186 @@
+/* App-wide buttons — match SaaS landing `.landing-pill-cta` (pill shape, Storvv navy) */
+
+:root {
+  --app-btn-primary-bg: #143f8d;
+  --app-btn-primary-hover: #0f357a;
+  --app-btn-primary-active: #0c2d66;
+  --app-btn-primary-shadow: 0 4px 16px rgb(20 63 141 / 0.22);
+  --app-btn-outline-border: rgb(20 63 141 / 0.35);
+  --app-btn-outline-hover-bg: rgb(20 63 141 / 0.06);
+  --app-btn-ghost-hover-bg: rgb(15 23 42 / 0.05);
+  --app-btn-radius: 9999px;
+  --app-btn-weight: 600;
+  --app-btn-transition:
+    background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+    transform 0.15s ease, opacity 0.2s ease;
+}
+
+html.dark {
+  --app-btn-outline-border: rgb(255 255 255 / 0.14);
+  --app-btn-outline-hover-bg: rgb(255 255 255 / 0.06);
+  --app-btn-ghost-hover-bg: rgb(255 255 255 / 0.06);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-danger,
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: var(--app-btn-radius) !important;
+  font-weight: var(--app-btn-weight);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  transition: var(--app-btn-transition);
+  cursor: pointer;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-outline:disabled,
+.btn-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-primary {
+  border: 0;
+  background: var(--app-btn-primary-bg);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  box-shadow: var(--app-btn-primary-shadow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--app-btn-primary-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary-sm {
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+.btn-secondary {
+  border: 0;
+  background: transparent;
+  color: rgb(55 65 81);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--app-btn-ghost-hover-bg);
+  color: rgb(17 24 39);
+}
+
+html.dark .btn-secondary {
+  color: rgb(203 213 225);
+}
+
+html.dark .btn-secondary:hover:not(:disabled) {
+  color: rgb(248 250 252);
+}
+
+.btn-secondary:active:not(:disabled),
+.btn-outline:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  border: 1.5px solid var(--app-btn-outline-border);
+  background: transparent;
+  color: var(--app-btn-primary-bg);
+  padding: calc(0.625rem - 1.5px) calc(1.25rem - 1.5px);
+  font-size: 0.875rem;
+  box-shadow: none;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--app-btn-outline-hover-bg);
+  border-color: var(--app-btn-primary-bg);
+}
+
+html.dark .btn-outline {
+  color: rgb(226 232 240);
+}
+
+html.dark .btn-outline:hover:not(:disabled) {
+  border-color: rgb(255 255 255 / 0.22);
+}
+
+.btn-danger {
+  border: 0;
+  background: rgb(220 38 38);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 16px rgb(220 38 38 / 0.18);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgb(185 28 28);
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-sm {
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+.btn-primary.btn-sm,
+.btn-outline.btn-sm,
+.btn-secondary.btn-sm,
+.btn-danger.btn-sm {
+  padding: 0.4375rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+.btn-outline.btn-sm {
+  padding: calc(0.4375rem - 1.5px) calc(0.875rem - 1.5px);
+}
+
+.dash-export-btn {
+  border-radius: var(--app-btn-radius) !important;
+}
+
+/* `<Button />` and legacy btn-* utilities — pill wins over scattered rounded overrides */
+button.btn-primary,
+button.btn-secondary,
+button.btn-outline,
+button.btn-danger,
+button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight {
+  border-radius: var(--app-btn-radius) !important;
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-outline:focus-visible,
+.btn-danger:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--app-btn-primary-shadow, none),
+    0 0 0 2px rgb(255 255 255 / 0.95),
+    0 0 0 4px rgb(20 63 141 / 0.35);
+}
+
+html.dark .btn-primary:focus-visible,
+html.dark .btn-secondary:focus-visible,
+html.dark .btn-outline:focus-visible,
+html.dark .btn-danger:focus-visible {
+  box-shadow:
+    0 0 0 2px rgb(18 20 28 / 0.95),
+    0 0 0 4px rgb(154 181 227 / 0.35);
+}

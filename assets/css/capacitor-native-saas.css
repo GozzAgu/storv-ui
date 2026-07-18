@@ -1,0 +1,344 @@
+/**
+ * Capacitor iOS/Android — parity with web SaaS dashboard (cards, tables, overlays, toasts, buttons).
+ * Loaded after dashboard-overlays.css; scoped to html.capacitor-native.
+ */
+
+html.capacitor-native {
+  --cap-canvas-bg: #f4f6fb;
+  --cap-surface-bg: #ffffff;
+  --dash-card-border: rgb(15 23 42 / 0.08);
+  --dash-card-surface: #ffffff;
+  --dash-card-ink: #0f172a;
+  --dash-card-muted: #64748b;
+}
+
+html.capacitor-native.dark {
+  --cap-canvas-bg: #07080c;
+  --cap-surface-bg: #12141c;
+  --dash-card-border: rgb(255 255 255 / 0.08);
+  --dash-card-surface: #12141c;
+  --dash-card-ink: #f8fafc;
+  --dash-card-muted: #94a3b8;
+}
+
+html.capacitor-native,
+html.capacitor-native body,
+html.capacitor-native #__nuxt,
+html.capacitor-native .dashboard-layout-root--native,
+html.capacitor-native .dashboard-native-shell {
+  background-color: var(--cap-canvas-bg) !important;
+}
+
+/* ── Cards & tables ── */
+html.capacitor-native .dash-card,
+html.capacitor-native .dash-table-shell,
+html.capacitor-native .data-table-shell,
+html.capacitor-native .dash-grid-card,
+html.capacitor-native .inv-category-card {
+  border-radius: 1rem;
+  border-color: var(--dash-card-border);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-native.dark .dash-card,
+html.capacitor-native.dark .dash-table-shell,
+html.capacitor-native.dark .data-table-shell,
+html.capacitor-native.dark .dash-grid-card,
+html.capacitor-native.dark .inv-category-card {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+html.capacitor-native .dash-page-header,
+html.capacitor-native .dash-home,
+html.capacitor-native .dash-analytics,
+html.capacitor-native .dash-multi-store,
+html.capacitor-native .dash-grid-page {
+  gap: 0.875rem;
+}
+
+html.capacitor-native .dashboard-native-main {
+  padding-left: 0.875rem;
+  padding-right: 0.875rem;
+}
+
+/* ── Top chrome ── */
+html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
+  border-bottom: 1px solid var(--dash-card-border) !important;
+  background: rgb(255 255 255 / 0.96) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+
+html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
+html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
+  background: rgb(7 8 12 / 0.96) !important;
+}
+
+/* ── Bottom tab bar ── */
+html.capacitor-native .native-tabbar {
+  border: 1px solid var(--dash-card-border);
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 0.88);
+  box-shadow: 0 12px 40px rgb(15 23 42 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.65);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  backdrop-filter: blur(24px) saturate(1.2);
+}
+
+html.capacitor-native.dark .native-tabbar {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(18 20 28 / 0.82);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 16px 48px rgb(0 0 0 / 0.45);
+}
+
+html.capacitor-native .native-tabbar .text-primary-600,
+html.capacitor-native .native-tabbar .text-primary-400 {
+  color: #143f8d !important;
+}
+
+html.capacitor-native.dark .native-tabbar .text-primary-400 {
+  color: #9ab5e3 !important;
+}
+
+html.capacitor-native .native-tabbar .bg-primary-500,
+html.capacitor-native .native-tabbar .bg-primary-400 {
+  background: #143f8d !important;
+}
+
+html.capacitor-native.dark .native-tabbar .bg-primary-400 {
+  background: #9ab5e3 !important;
+}
+
+/* ── Native more sheet ── */
+html.capacitor-native .native-more-sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 59;
+  display: flex;
+  max-height: min(72dvh, 520px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--dash-overlay-border);
+  border-bottom: 0;
+  border-radius: 1rem 1rem 0 0;
+  background: var(--dash-overlay-surface);
+  box-shadow: var(--dash-overlay-shadow);
+}
+
+html.capacitor-native .native-more-sheet__header {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--dash-overlay-divider);
+  background: rgb(248 250 252 / 0.72);
+  padding: 0.75rem 1rem 0.875rem;
+}
+
+html.capacitor-native.dark .native-more-sheet__header {
+  background: rgb(255 255 255 / 0.02);
+}
+
+html.capacitor-native .native-more-sheet__handle {
+  margin: 0 auto 0.625rem;
+  height: 0.25rem;
+  width: 2.25rem;
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.12);
+}
+
+html.capacitor-native.dark .native-more-sheet__handle {
+  background: rgb(255 255 255 / 0.14);
+}
+
+html.capacitor-native .native-more-sheet__footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--dash-overlay-divider);
+  background: rgb(248 250 252 / 0.55);
+  padding: 0.5rem;
+}
+
+html.capacitor-native.dark .native-more-sheet__footer {
+  background: rgb(255 255 255 / 0.02);
+}
+
+html.capacitor-native .native-more-sheet__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.875rem;
+  padding: 0.6875rem 0.75rem;
+  transition: background-color 0.12s ease;
+}
+
+html.capacitor-native .native-more-sheet__row:active {
+  background: rgb(15 23 42 / 0.05);
+}
+
+html.capacitor-native.dark .native-more-sheet__row:active {
+  background: rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-native .native-more-sheet__row--active {
+  background: rgb(20 63 141 / 0.08);
+  color: #143f8d;
+}
+
+html.capacitor-native.dark .native-more-sheet__row--active {
+  background: rgb(154 181 227 / 0.1);
+  color: #c7d5f0;
+}
+
+html.capacitor-native .native-more-sheet__icon {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: rgb(248 250 252 / 0.95);
+  color: rgb(71 85 105);
+}
+
+html.capacitor-native.dark .native-more-sheet__icon {
+  background: rgb(255 255 255 / 0.05);
+  color: rgb(203 213 225);
+}
+
+html.capacitor-native .native-more-sheet__icon--active {
+  background: rgb(20 63 141 / 0.12);
+  color: #143f8d;
+}
+
+html.capacitor-native.dark .native-more-sheet__icon--active {
+  background: rgb(154 181 227 / 0.14);
+  color: #9ab5e3;
+}
+
+html.capacitor-native .native-bottom-nav__backdrop {
+  background: rgb(15 23 42 / 0.38) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+html.capacitor-native.dark .native-bottom-nav__backdrop {
+  background: rgb(0 0 0 / 0.58) !important;
+}
+
+/* ── Modals & drawers inside native overlay host ── */
+html.capacitor-native .dashboard-native-overlay-host .dash-overlay-shell {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+}
+
+html.capacitor-native .side-panel-native-dialog {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: var(--dash-overlay-shadow);
+}
+
+html.capacitor-native .side-panel-native-dialog > :first-child {
+  border-top: 0;
+}
+
+html.capacitor-native .modal-native-shell .dash-overlay-modal {
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  border-radius: 1rem;
+}
+
+html.capacitor-native .modal-native-shell {
+  padding: 0.75rem;
+}
+
+/* ── Toasts above bottom nav ── */
+html.capacitor-native .dash-toast-stack {
+  top: auto;
+  right: 0.875rem;
+  left: 0.875rem;
+  bottom: calc(var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.625rem);
+  max-width: none;
+  width: auto;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  html.capacitor-native .dash-toast-stack {
+    right: 1rem;
+    left: auto;
+    max-width: min(calc(100vw - 2rem), 22rem);
+  }
+}
+
+html.capacitor-native .dash-toast {
+  border-radius: 1rem;
+}
+
+/* ── Pill buttons — iOS touch targets ── */
+html.capacitor-ios.capacitor-native .btn-primary,
+html.capacitor-ios.capacitor-native .btn-secondary,
+html.capacitor-ios.capacitor-native .btn-outline,
+html.capacitor-ios.capacitor-native .btn-danger,
+html.capacitor-ios.capacitor-native
+  button.group.relative.inline-flex.items-center.justify-center.overflow-hidden.border-0.font-semibold.tracking-tight {
+  min-height: 2.75rem;
+}
+
+html.capacitor-ios.capacitor-native .btn-primary-sm,
+html.capacitor-ios.capacitor-native .btn-sm {
+  min-height: 2.5rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-overlay-close,
+html.capacitor-ios.capacitor-native .dash-toast__close {
+  min-height: 2rem;
+  min-width: 2rem;
+}
+
+html.capacitor-ios.capacitor-native .dash-export-btn {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+}
+
+/* ── Context menus ── */
+html.capacitor-native .frosted-glass {
+  border-radius: 0.875rem !important;
+}
+
+/* ── Inventory grid on native ── */
+html.capacitor-native .inventory-categories-grid .inv-category-card,
+html.capacitor-native .inventory-categories-grid .dash-grid-card {
+  border-radius: 1rem;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.capacitor-native.dark .inventory-categories-grid .inv-category-card,
+html.capacitor-native.dark .inventory-categories-grid .dash-grid-card {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+/* ── Auth ── */
+html.capacitor-native .auth-card {
+  border: 1px solid var(--dash-card-border);
+  box-shadow: 0 12px 32px rgb(15 23 42 / 0.08);
+}
+
+html.capacitor-native.dark .auth-card {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 16px 40px rgb(0 0 0 / 0.35);
+}
+
+html.capacitor-ios.capacitor-native .auth-form .auth-btn {
+  min-height: 3rem;
+}

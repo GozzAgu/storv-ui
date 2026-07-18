@@ -1,0 +1,258 @@
+/* Unified dashboard table UI — hairline dividers, SaaS shell tokens */
+
+main[data-dashboard-main],
+[data-dashboard-teleport] {
+  --dash-table-divider: rgb(15 23 42 / 0.06);
+  --dash-table-divider-strong: rgb(15 23 42 / 0.08);
+  --dash-table-head-bg: rgb(248 250 252 / 0.72);
+  --dash-table-row-hover: rgb(248 250 252 / 0.9);
+  --dash-table-body-ink: rgb(51 65 85);
+  --dash-table-body-muted: rgb(100 116 139);
+  --dash-table-pagination-bg: rgb(248 250 252 / 0.55);
+}
+
+html.dark main[data-dashboard-main],
+html.dark [data-dashboard-teleport] {
+  --dash-table-divider: rgb(255 255 255 / 0.06);
+  --dash-table-divider-strong: rgb(255 255 255 / 0.08);
+  --dash-table-head-bg: rgb(255 255 255 / 0.02);
+  --dash-table-row-hover: rgb(255 255 255 / 0.035);
+  --dash-table-body-ink: rgb(226 232 240);
+  --dash-table-body-muted: rgb(148 163 184);
+  --dash-table-pagination-bg: rgb(255 255 255 / 0.02);
+}
+
+/* Shell */
+main[data-dashboard-main] .data-table-shell,
+main[data-dashboard-main] .dash-table-shell,
+[data-dashboard-teleport] .data-table-shell {
+  overflow: hidden;
+  border: 1px solid var(--dash-card-border);
+  border-radius: 1rem;
+  background: var(--dash-card-surface);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.dark main[data-dashboard-main] .data-table-shell,
+html.dark main[data-dashboard-main] .dash-table-shell,
+html.dark [data-dashboard-teleport] .data-table-shell {
+  background: #12141c;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 12px 32px rgb(0 0 0 / 0.18);
+}
+
+/* Toolbar + section header + pagination */
+.dash-table-toolbar {
+  border-bottom: 1px solid var(--dash-table-divider);
+  background: var(--dash-table-head-bg);
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .dash-table-toolbar {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+.dash-table-section-header {
+  border-bottom: 1px solid var(--dash-table-divider);
+  background: var(--dash-table-head-bg);
+}
+
+.dash-table-list-row {
+  box-shadow: inset 0 -1px 0 var(--dash-table-divider);
+}
+
+.dash-table-pagination {
+  flex-shrink: 0;
+  border-top: 1px solid var(--dash-table-divider);
+  background: var(--dash-table-pagination-bg);
+  padding: 0.5rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .dash-table-pagination {
+    padding: 0.625rem 1.25rem;
+  }
+}
+
+/* Core table */
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full,
+main[data-dashboard-main] .dash-items-picker .dashboard-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table thead,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full thead {
+  background: var(--dash-table-head-bg);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table thead th,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full thead th {
+  padding: 0.6875rem 0.875rem;
+  text-align: left;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dash-card-muted);
+  white-space: nowrap;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--dash-table-divider-strong);
+  background: var(--dash-table-head-bg) !important;
+}
+
+@media (min-width: 640px) {
+  main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table thead th,
+  main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full thead th {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full tbody {
+  background: transparent;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody td,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full tbody td {
+  padding: 0.8125rem 0.875rem;
+  vertical-align: middle;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--dash-table-body-ink);
+  border-bottom: none !important;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+@media (min-width: 640px) {
+  main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody td,
+  main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full tbody td {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+main[data-dashboard-main]
+  :is(.data-table-shell, .dash-table-shell, .dash-items-picker)
+  .dashboard-table
+  tbody
+  tr:not(:last-child)
+  td,
+main[data-dashboard-main]
+  :is(.data-table-shell, .dash-table-shell)
+  table.min-w-full
+  tbody
+  tr:not(:last-child)
+  td {
+  box-shadow: inset 0 -1px 0 var(--dash-table-divider);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody tr,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table tbody tr:hover,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) table.min-w-full tbody tr:hover {
+  background: var(--dash-table-row-hover);
+}
+
+/* Semantic cells */
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__primary {
+  font-weight: 500;
+  color: var(--dash-card-ink);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__muted {
+  color: var(--dash-table-body-muted);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__numeric {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--dash-card-ink);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__money,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__money {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: rgb(5 150 105);
+}
+
+html.dark main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__money,
+html.dark main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__money {
+  color: rgb(52 211 153);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__money-owed,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__money-owed {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: rgb(180 83 9);
+}
+
+html.dark main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table .dashboard-table__money-owed,
+html.dark main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__money-owed {
+  color: rgb(252 211 77);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-status,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-status {
+  min-width: 10.75rem;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-price,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-price {
+  min-width: 8.5rem;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table th.dashboard-table__col-actions,
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell, .dash-items-picker) .dashboard-table td.dashboard-table__col-actions {
+  width: 3.25rem;
+  text-align: right;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__action-btn {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  color: var(--dash-table-body-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__action-btn:hover {
+  background: var(--dash-table-row-hover);
+  color: var(--dash-card-ink);
+}
+
+main[data-dashboard-main] :is(.data-table-shell, .dash-table-shell) .dashboard-table__action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--dash-table-divider);
+  background: var(--dash-table-head-bg);
+  padding: 0.125rem;
+}
+
+/* Activity logs — slightly roomier */
+main[data-dashboard-main] .activity-log-shell .dashboard-table thead th {
+  padding-top: 0.8125rem;
+  padding-bottom: 0.8125rem;
+}
+
+main[data-dashboard-main] .activity-log-shell .dashboard-table tbody td {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}

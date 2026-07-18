@@ -14,16 +14,14 @@ export function departmentStatusPill(inactive: boolean): CategoryTrackingPill {
   if (inactive) {
     return {
       label: 'Inactive',
-      dotClass: 'bg-amber-500',
-      pillClass:
-        'bg-amber-50 text-amber-800 ring-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-800/50',
+      dotClass: '',
+      pillClass: 'dash-grid-card__pill dash-pill--warning',
     }
   }
   return {
     label: 'Active',
-    dotClass: 'bg-emerald-500',
-    pillClass:
-      'bg-emerald-50 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-950/35 dark:text-emerald-300 dark:ring-emerald-800/40',
+    dotClass: '',
+    pillClass: 'dash-grid-card__pill dash-pill--success',
   }
 }
 

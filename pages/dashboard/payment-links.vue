@@ -10,13 +10,13 @@
       <template #description>
         <p :class="descriptionClass">
           {{
-            showNativeComingSoon
-              ? 'Paystack pay-by-link is coming soon on mobile.'
+            showPaymentLinksComingSoon
+              ? 'Pay-by-link checkout is coming soon.'
               : 'Get paid for orders without the customer visiting your store.'
           }}
         </p>
       </template>
-      <template v-if="!showNativeComingSoon" #actions>
+      <template v-if="!showPaymentLinksComingSoon" #actions>
         <Button
           variant="ghost"
           size="sm"
@@ -39,7 +39,7 @@
       </template>
     </DashboardPageHeader>
 
-    <PaymentLinksComingSoon v-if="showNativeComingSoon" />
+    <PaymentLinksComingSoon v-if="showPaymentLinksComingSoon" />
 
     <template v-else>
       <section
@@ -201,10 +201,13 @@
       <!-- Payouts to bank (real Paystack settlements) -->
       <section
         v-if="payout.connected && settlements.length > 0"
-        class="overflow-hidden rounded-xl border-0 bg-white dark:!bg-dashboard-card"
+        :class="tableShellClass"
       >
         <div
-          class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-white/[0.06]"
+          :class="[
+            tableSectionHeaderClass,
+            'flex items-center justify-between px-4 py-3 sm:px-5',
+          ]"
         >
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">
             Payouts to your bank
@@ -216,11 +219,14 @@
             >
           </span>
         </div>
-        <ul class="divide-y divide-gray-50 dark:divide-white/[0.04]">
+        <ul class="m-0 list-none p-0">
           <li
-            v-for="s in settlements"
+            v-for="(s, index) in settlements"
             :key="s.id"
-            class="flex items-center justify-between px-4 py-2.5 text-sm"
+            :class="[
+              'flex items-center justify-between px-4 py-2.5 text-sm sm:px-5',
+              index < settlements.length - 1 ? 'dash-table-list-row' : '',
+            ]"
           >
             <span class="text-gray-700 dark:text-gray-200">{{ formatDate(s.dateMs) }}</span>
             <span class="flex items-center gap-2.5">
@@ -241,15 +247,18 @@
       </section>
 
       <!-- Invoices -->
-      <section class="overflow-hidden rounded-xl border-0 bg-white dark:!bg-dashboard-card">
+      <section :class="tableShellClass">
         <div
-          class="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-white/[0.06]"
+          :class="[
+            tableSectionHeaderClass,
+            'flex items-center justify-between px-4 py-3 sm:px-5',
+          ]"
         >
           <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-50">Recent links</h2>
           <span class="text-xs text-gray-500 dark:text-gray-400">{{ links.length }} total</span>
         </div>
 
-        <div v-if="loading && links.length === 0" class="space-y-2 p-4">
+        <div v-if="loading && links.length === 0" class="space-y-2 p-4 sm:p-5">
           <div
             v-for="i in 4"
             :key="i"
@@ -257,7 +266,7 @@
           />
         </div>
 
-        <div v-else-if="links.length === 0" class="px-4 py-12 text-center">
+        <div v-else-if="links.length === 0" class="px-4 py-12 text-center sm:px-5">
           <CreditCardIcon class="mx-auto mb-2 h-8 w-8 text-gray-300 dark:text-gray-600" />
           <p class="text-sm font-medium text-gray-700 dark:text-gray-200">No payment links yet</p>
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -266,44 +275,36 @@
         </div>
 
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full text-sm">
+          <table class="dashboard-table min-w-full">
             <thead>
-              <tr
-                class="border-b border-gray-100 text-[11px] uppercase tracking-wide text-gray-400 dark:border-white/[0.06]"
-              >
-                <th class="px-4 py-2.5 text-left font-medium">Invoice</th>
-                <th class="px-4 py-2.5 text-left font-medium">Customer</th>
-                <th class="px-4 py-2.5 text-right font-medium">Total</th>
-                <th class="px-4 py-2.5 text-left font-medium">Status</th>
-                <th class="px-4 py-2.5 text-right font-medium">Actions</th>
+              <tr>
+                <th scope="col">Invoice</th>
+                <th scope="col">Customer</th>
+                <th scope="col" class="text-right">Total</th>
+                <th scope="col" class="dashboard-table__col-status">Status</th>
+                <th scope="col" class="dashboard-table__col-actions">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50 dark:divide-white/[0.04]">
-              <tr
-                v-for="inv in links"
-                :key="inv.token"
-                class="hover:bg-gray-50/70 dark:hover:bg-white/[0.02]"
-              >
-                <td class="px-4 py-3">
-                  <span class="font-medium text-gray-900 dark:text-gray-100">{{
-                    inv.invoiceNumber
-                  }}</span>
-                  <span class="block text-[11px] text-gray-400"
+            <tbody>
+              <tr v-for="inv in links" :key="inv.token">
+                <td>
+                  <span class="dashboard-table__primary">{{ inv.invoiceNumber }}</span>
+                  <span class="dashboard-table__muted mt-0.5 block text-[11px]"
                     >{{ inv.itemsCount }} item{{ inv.itemsCount === 1 ? '' : 's' }}</span
                   >
                 </td>
-                <td class="px-4 py-3">
-                  <span class="text-gray-800 dark:text-gray-200">{{ inv.customerName }}</span>
-                  <span v-if="inv.customerPhone" class="block text-[11px] text-gray-400">{{
-                    inv.customerPhone
-                  }}</span>
+                <td>
+                  <span class="dashboard-table__primary">{{ inv.customerName }}</span>
+                  <span
+                    v-if="inv.customerPhone"
+                    class="dashboard-table__muted mt-0.5 block text-[11px]"
+                    >{{ inv.customerPhone }}</span
+                  >
                 </td>
-                <td
-                  class="px-4 py-3 text-right font-medium tabular-nums text-gray-900 dark:text-gray-100"
-                >
-                  {{ formatNaira(inv.total) }}
+                <td class="text-right">
+                  <span class="dashboard-table__money">{{ formatNaira(inv.total) }}</span>
                 </td>
-                <td class="px-4 py-3">
+                <td class="dashboard-table__col-status">
                   <span
                     :class="[
                       'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
@@ -314,12 +315,12 @@
                   </span>
                   <span
                     v-if="inv.status === 'paid'"
-                    class="mt-1 block text-[11px] text-emerald-600 dark:text-emerald-400"
+                    class="dashboard-table__muted mt-1 block text-[11px] text-emerald-600 dark:text-emerald-400"
                   >
                     {{ settlementNote(inv) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right">
+                <td class="dashboard-table__col-actions">
                   <div class="inline-flex gap-1.5">
                     <button type="button" class="btn-secondary btn-sm" @click="share(inv)">
                       Share
@@ -371,10 +372,11 @@ definePageMeta({
   middleware: 'auth',
 })
 
-const { showNativeComingSoon } = usePaymentLinksLaunch()
+const { showPaymentLinksComingSoon } = usePaymentLinksLaunch()
 
 const { eyebrowClass, titleClass, descriptionClass, headerBtnClass, fieldClass } =
   useDashboardPageChrome()
+const { tableShellClass, tableSectionHeaderClass } = useDashboardTableChrome()
 const userStore = useUserStore()
 const {
   payout,
@@ -525,7 +527,7 @@ const statusClass = (s: PaymentLinkListItem['status']) =>
   }[s])
 
 onMounted(async () => {
-  if (showNativeComingSoon.value) return
+  if (showPaymentLinksComingSoon.value) return
   await loadAll()
   if (!payout.value.connected) await loadBanks()
 })

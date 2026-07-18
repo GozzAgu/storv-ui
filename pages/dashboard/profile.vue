@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div :class="pageClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Account</p>
@@ -14,40 +14,26 @@
       </template>
     </DashboardPageHeader>
 
-    <div class="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12">
-      <!-- Profile summary -->
-      <aside class="w-full lg:col-span-4 xl:col-span-3 lg:sticky lg:top-14 lg:self-start">
-        <section :class="panelClass">
-          <div class="px-4 py-6 text-center sm:px-5 sm:py-7">
-            <div
-              class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary-500/90 to-primary-600 text-sm font-semibold text-white/80"
-            >
+    <div :class="profileGridClass">
+      <aside :class="profileSidebarClass">
+        <section :class="profileCardClass">
+          <div :class="profileCardBodyClass">
+            <div :class="profileAvatarClass">
               {{ profileAvatarInitials }}
             </div>
             <div v-if="isLoadingProfile" class="mx-auto mt-4 max-w-[180px] space-y-2">
-              <div class="h-4 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
-              <div class="h-3 animate-pulse rounded bg-gray-200/80 dark:bg-white/10" />
+              <div class="dash-skeleton h-4 w-full" />
+              <div class="dash-skeleton h-3 w-3/4" />
             </div>
             <template v-else>
-              <p
-                class="mt-4 text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-              >
-                Business
-              </p>
-              <h2
-                class="mt-1 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100"
-              >
+              <p :class="profileCardEyebrowClass">Business</p>
+              <h2 :class="profileCardNameClass">
                 {{ leftCardHeading }}
               </h2>
-              <p
-                class="mt-1 truncate px-2 text-xs text-gray-500 dark:text-gray-400"
-                :title="leftCardLine2 || ''"
-              >
+              <p :class="profileCardMetaClass" :title="leftCardLine2 || ''">
                 {{ leftCardLine2 || '-' }}
               </p>
-              <span
-                class="mt-2.5 inline-flex items-center rounded-full border-0 bg-primary-50/90 px-2.5 py-1 text-[10px] font-medium text-primary-700 dark:border-primary-500/30 dark:bg-primary-950/40 dark:text-primary-300"
-              >
+              <span :class="profileRoleBadgeClass">
                 {{
                   isStaff
                     ? 'Staff'
@@ -56,62 +42,41 @@
                     : profileData.role || 'User'
                 }}
               </span>
-              <p
-                v-if="leftCardBadgeExtra"
-                class="mt-2 text-[10px] font-medium text-gray-500 dark:text-gray-400"
-              >
+              <p v-if="leftCardBadgeExtra" :class="[inlineNoteClass, 'mt-2']">
                 {{ leftCardBadgeExtra }}
               </p>
             </template>
 
             <div :class="profileStatBarClass">
-              <div class="flex-1 px-2 py-3 text-center">
-                <p
-                  v-if="isLoadingStats"
-                  class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10"
-                />
-                <p
-                  v-else
-                  class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-                >
+              <div :class="profileStatItemClass">
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p v-else :class="profileStatValueClass">
                   {{ totalOrders }}
                 </p>
-                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Orders</p>
+                <p :class="profileStatLabelClass">Orders</p>
               </div>
-              <div class="w-px bg-gray-200/80 dark:bg-gray-700/60" />
-              <div class="flex-1 px-2 py-3 text-center">
-                <p
-                  v-if="isLoadingStats"
-                  class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10"
-                />
-                <p
-                  v-else
-                  class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-                >
+              <div :class="profileStatDividerClass" />
+              <div :class="profileStatItemClass">
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p v-else :class="profileStatValueClass">
                   {{ totalProducts }}
                 </p>
-                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Products</p>
+                <p :class="profileStatLabelClass">Products</p>
               </div>
-              <div class="w-px bg-gray-200/80 dark:bg-gray-700/60" />
-              <div class="flex-1 px-2 py-3 text-center">
-                <p
-                  v-if="isLoadingStats"
-                  class="mx-auto h-5 w-8 animate-pulse rounded bg-gray-200/80 dark:bg-white/10"
-                />
-                <p
-                  v-else
-                  class="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100"
-                >
+              <div :class="profileStatDividerClass" />
+              <div :class="profileStatItemClass">
+                <p v-if="isLoadingStats" class="dash-skeleton mx-auto h-5 w-8" />
+                <p v-else :class="profileStatValueClass">
                   {{ totalCustomers }}
                 </p>
-                <p class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">Customers</p>
+                <p :class="profileStatLabelClass">Customers</p>
               </div>
             </div>
           </div>
         </section>
       </aside>
 
-      <div class="space-y-4 sm:space-y-5 lg:col-span-8 xl:col-span-9">
+      <div :class="profileMainClass">
         <DashboardSettingsPanel
           :title="isStaff ? 'Staff profile' : 'Business profile'"
           :subtitle="
@@ -255,19 +220,19 @@
             >
               <div v-if="businessProfileDisplay.departmentName">
                 <p :class="labelClass">Department</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.departmentName }}
                 </p>
               </div>
               <div v-if="businessProfileDisplay.position">
                 <p :class="labelClass">Position</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.position }}
                 </p>
               </div>
               <div v-if="businessProfileDisplay.staffRole">
                 <p :class="labelClass">Team role</p>
-                <p class="text-xs capitalize text-gray-900 dark:text-gray-100">
+                <p :class="[readonlyValueClass, 'capitalize']">
                   {{ businessProfileDisplay.staffRole }}
                 </p>
               </div>
@@ -275,36 +240,36 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div v-if="businessProfileDisplay.storeName">
                 <p :class="labelClass">Branch name</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.storeName }}
                 </p>
               </div>
               <div v-if="businessProfileDisplay.storeDescription">
                 <p :class="labelClass">Business type</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.storeDescription }}
                 </p>
               </div>
               <div v-if="businessProfileDisplay.storeEmail">
                 <p :class="labelClass">Store email</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.storeEmail }}
                 </p>
               </div>
               <div v-if="businessProfileDisplay.storePhone">
                 <p :class="labelClass">Store phone</p>
-                <p class="text-xs text-gray-900 dark:text-gray-100">
+                <p :class="readonlyValueClass">
                   {{ businessProfileDisplay.storePhone }}
                 </p>
               </div>
             </div>
             <div v-if="businessProfileDisplay.storeAddress">
               <p :class="labelClass">Address</p>
-              <p class="text-xs text-gray-900 dark:text-gray-100">
+              <p :class="readonlyValueClass">
                 {{ businessProfileDisplay.storeAddress }}
               </p>
             </div>
-            <div v-if="!isStaff" class="border-t border-gray-100/90 pt-4 dark:border-gray-800/70">
+            <div v-if="!isStaff" :class="inlineDividerClass">
               <NuxtLink to="/dashboard/settings" :class="editLinkClass"
                 >Manage store settings →</NuxtLink
               >
@@ -400,10 +365,8 @@
               <div class="flex min-w-0 flex-1 items-center gap-3">
                 <component :is="pref.icon" :class="settingRowIconClass" />
                 <div class="min-w-0">
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
-                    {{ pref.label }}
-                  </p>
-                  <p class="truncate text-[11px] text-gray-500 dark:text-gray-400">
+                  <p :class="settingRowTitleClass">{{ pref.label }}</p>
+                  <p :class="settingRowDescClass">
                     {{ pref.value }}
                   </p>
                 </div>
@@ -425,8 +388,8 @@
               <div class="flex min-w-0 flex-1 items-center gap-3">
                 <KeyIcon :class="settingRowIconClass" />
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">Password</p>
-                  <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                  <p :class="settingRowTitleClass">Password</p>
+                  <p :class="settingRowDescClass">
                     Update your sign-in password
                   </p>
                 </div>
@@ -439,10 +402,10 @@
               <div class="flex min-w-0 flex-1 items-center gap-3">
                 <ShieldCheckIcon :class="settingRowIconClass" />
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                  <p :class="settingRowTitleClass">
                     Two-factor authentication
                   </p>
-                  <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                  <p :class="settingRowDescClass">
                     {{ securitySettings.twoFactor ? 'Enabled' : 'Not enabled' }}
                   </p>
                 </div>
@@ -463,10 +426,10 @@
               <div class="flex min-w-0 flex-1 items-center gap-3">
                 <DevicePhoneMobileIcon :class="settingRowIconClass" />
                 <div>
-                  <p class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                  <p :class="settingRowTitleClass">
                     Active sessions
                   </p>
-                  <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                  <p :class="settingRowDescClass">
                     {{ securitySettings.activeSessions }} devices
                   </p>
                 </div>
@@ -1183,14 +1146,33 @@ const {
   eyebrowClass,
   pageTitleClass,
   descriptionClass,
-  panelClass,
+  pageClass,
+  profileGridClass,
+  profileSidebarClass,
+  profileMainClass,
+  profileCardClass,
+  profileCardBodyClass,
+  profileAvatarClass,
+  profileCardEyebrowClass,
+  profileCardNameClass,
+  profileCardMetaClass,
+  profileRoleBadgeClass,
   profileStatBarClass,
+  profileStatItemClass,
+  profileStatValueClass,
+  profileStatLabelClass,
+  profileStatDividerClass,
   labelClass,
   inputClass,
   editLinkClass,
   cancelLinkClass,
   settingRowClass,
   settingRowIconClass,
+  settingRowTitleClass,
+  settingRowDescClass,
+  readonlyValueClass,
+  inlineNoteClass,
+  inlineDividerClass,
 } = useDashboardSettingsChrome()
 
 // Profile data: super admin uses businessName (maps to user `name`); staff uses firstName/lastName for person

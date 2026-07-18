@@ -6,12 +6,7 @@
   >
     <AuthPageHeader eyebrow="Welcome back" title="Sign in to your workspace">
       Enter your credentials to open the dashboard. New here?
-      <NuxtLink
-        to="/signup"
-        class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-      >
-        Create an account
-      </NuxtLink>
+      <NuxtLink to="/signup" class="auth-link">Create an account</NuxtLink>
     </AuthPageHeader>
 
     <AuthCard>
@@ -23,7 +18,7 @@
         :icon="FingerPrintIcon"
         :disabled="isLoading || isBiometricLoading"
         :loading="isBiometricLoading"
-        extra-class="!w-full"
+        extra-class="auth-btn auth-btn--outline !w-full"
         @click="handleBiometricSignIn"
       >
         Sign in with {{ biometryLabel }}
@@ -54,10 +49,7 @@
           required
         >
           <template #label-right>
-            <NuxtLink
-              to="/forgot-password"
-              class="shrink-0 text-xs font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
+            <NuxtLink to="/forgot-password" class="auth-link shrink-0 text-xs">
               Forgot?
             </NuxtLink>
           </template>
@@ -96,7 +88,7 @@
           size="md"
           :icon="ArrowRightIcon"
           icon-right
-          extra-class="!w-full"
+          extra-class="auth-btn auth-btn--primary !w-full"
         >
           Sign in
         </Button>
@@ -104,12 +96,7 @@
 
       <template #footer>
         Prefer to explore first?
-        <a
-          href="https://www.storvv.com"
-          class="font-semibold text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-        >
-          Back to home
-        </a>
+        <a href="https://www.storvv.com" class="auth-link">Back to home</a>
       </template>
     </AuthCard>
   </AuthShell>

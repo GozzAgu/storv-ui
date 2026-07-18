@@ -6,12 +6,7 @@
   >
     <AuthPageHeader eyebrow="Account recovery" title="Reset your password">
       We'll send a link to your inbox. Remembered it?
-      <NuxtLink
-        to="/signin"
-        class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-      >
-        Sign in
-      </NuxtLink>
+      <NuxtLink to="/signin" class="auth-link">Sign in</NuxtLink>
     </AuthPageHeader>
 
     <AuthCard>
@@ -36,7 +31,7 @@
           size="md"
           :icon="ArrowRightIcon"
           icon-right
-          extra-class="!w-full"
+          extra-class="auth-btn auth-btn--primary !w-full"
         >
           Send reset link
         </Button>
@@ -54,7 +49,7 @@
           Didn't receive it? Check spam or
           <button
             type="button"
-            class="font-semibold text-primary-600 transition-colors hover:text-primary-500 disabled:opacity-50 dark:text-primary-400 dark:hover:text-primary-300"
+            class="auth-link disabled:opacity-50"
             :disabled="isResending"
             @click="resendEmail"
           >
@@ -65,12 +60,7 @@
 
       <template #footer>
         Wrong place?
-        <a
-          href="https://www.storvv.com"
-          class="font-semibold text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-        >
-          Back to home
-        </a>
+        <a href="https://www.storvv.com" class="auth-link">Back to home</a>
       </template>
     </AuthCard>
   </AuthShell>

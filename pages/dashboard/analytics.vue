@@ -1,6 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
-    <!-- Hero -->
+  <div :class="pageClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Analytics</p>
@@ -12,21 +11,12 @@
         <p :class="descriptionClass">Track your sales, inventory, and customer insights</p>
       </template>
       <template #actions>
-        <div
-          class="flex h-8 shrink-0 items-center rounded-lg bg-gray-50/50 p-0.5 dark:bg-white/[0.03]"
-          role="group"
-          aria-label="Analytics period"
-        >
+        <div :class="segmentGroupClass" role="group" aria-label="Analytics period">
           <button
             v-for="period in analyticsPeriods"
             :key="period.value"
             type="button"
-            class="rounded-md px-2.5 text-xs font-medium transition-colors"
-            :class="
-              selectedPeriod === period.value
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            :class="[segmentBtnClass, selectedPeriod === period.value ? segmentBtnActiveClass : '']"
             @click="
               () => {
                 selectedPeriod = period.value
@@ -40,22 +30,16 @@
         <button
           type="button"
           :disabled="isExporting"
-          :class="[
-            headerBtnClass,
-            'gap-1.5-gray-200/90 !bg-white !font-medium !text-gray-800 hover:!bg-gray-50 dark:!border-gray-700/80 dark:!bg-dashboard-card dark:!text-gray-100',
-          ]"
+          :class="exportBtnSecondaryClass"
           @click="exportReport('pdf')"
         >
-          <ArrowDownTrayIcon class="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          <ArrowDownTrayIcon class="h-4 w-4 opacity-70" />
           <span>{{ isExporting ? 'Exporting…' : 'Export PDF' }}</span>
         </button>
         <button
           type="button"
           :disabled="isExporting"
-          :class="[
-            headerBtnClass,
-            'gap-1.5-emerald-200/90 !bg-emerald-50/90 !font-medium !text-emerald-800 hover:!bg-emerald-100/90 dark:!border-emerald-800/60 dark:!bg-emerald-950/40 dark:!text-emerald-300',
-          ]"
+          :class="exportBtnSuccessClass"
           @click="exportReport('excel')"
         >
           <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
@@ -64,90 +48,62 @@
       </template>
     </DashboardPageHeader>
 
-    <!-- Loading State -->
     <template v-if="isLoading">
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
-        <div
-          v-for="i in 5"
-          :key="i"
-          class="rounded-sm bg-white p-3 dark:!bg-dashboard-card sm:p-3.5"
-        >
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
-              <div class="mb-2 h-3 w-2/3 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-              <div
-                class="mb-1.5 h-7 w-3/4 animate-pulse rounded bg-gray-200 dark:bg-white/10 sm:h-8"
-              ></div>
-              <div class="h-3 w-1/2 animate-pulse rounded bg-gray-200 dark:bg-white/10"></div>
-            </div>
-            <div
-              class="h-11 w-11 shrink-0 animate-pulse rounded-sm bg-gray-200 dark:bg-white/10 sm:h-12 sm:w-12"
-            ></div>
-          </div>
-        </div>
+      <div :class="kpiGridWideClass">
+        <div v-for="i in 6" :key="i" class="dash-skeleton dash-skeleton--kpi" />
+      </div>
+      <div :class="chartsGridClass">
+        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
+        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
+      </div>
+      <div :class="splitGridClass">
+        <div v-for="i in 2" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
       </div>
     </template>
 
-    <!-- No store selected -->
     <template v-else-if="needsStoreSelection">
-      <div class="rounded-sm bg-white/90 dark:!bg-dashboard-card sm:px-10">
-        <DashboardTableEmptyState
-          :icon="BuildingStorefrontIcon"
-          title="Select a store to view analytics"
-          description="Choose a store from the selector in the top bar to load charts and reports."
-          :tips="[
-            'Revenue and product insights are calculated per branch',
-            'Add or switch stores anytime from Settings',
-          ]"
-          :fill="false"
-        >
-          <NuxtLink
-            to="/dashboard/settings"
-            class="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700 underline decoration-gray-300 underline-offset-2 transition hover:text-gray-900 dark:text-gray-300 dark:decoration-gray-600 dark:hover:text-white"
-          >
-            Go to Settings
-          </NuxtLink>
-        </DashboardTableEmptyState>
+      <div :class="stateCardClass">
+        <BuildingStorefrontIcon
+          class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
+          stroke-width="1.5"
+        />
+        <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+          Select a store to view analytics
+        </p>
+        <p :class="['dash-state-card__desc', cardDescClass]">
+          Choose a branch from the store selector in the top bar. Charts and reports are scoped to
+          the active store.
+        </p>
+        <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
+          Manage stores in Settings
+        </NuxtLink>
       </div>
     </template>
 
-    <!-- Analytics Content -->
     <template v-else>
-      <!-- Period summary -->
-      <section :class="analyticsCardClass">
-        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-          {{ analyticsSummary }}
-        </p>
-        <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <div class="rounded-lg bg-gray-50/80 px-3 py-2 dark:bg-white/[0.03]">
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Completed sales</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-              {{ completedReceiptsInPeriod.length }}
-            </p>
+      <section :class="cardPaddedClass">
+        <p :class="summaryTextClass">{{ analyticsSummary }}</p>
+        <dl :class="metricGridClass">
+          <div :class="metricRowClass">
+            <dt>Completed sales</dt>
+            <dd :class="numClass">{{ completedReceiptsInPeriod.length }}</dd>
           </div>
-          <div class="rounded-lg bg-gray-50/80 px-3 py-2 dark:bg-white/[0.03]">
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Units sold</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-              {{ itemsSoldInPeriod }}
-            </p>
+          <div :class="metricRowClass">
+            <dt>Units sold</dt>
+            <dd :class="numClass">{{ itemsSoldInPeriod }}</dd>
           </div>
-          <div class="rounded-lg bg-gray-50/80 px-3 py-2 dark:bg-white/[0.03]">
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Customers</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-              {{ uniqueCustomersInPeriod }}
-            </p>
+          <div :class="metricRowClass">
+            <dt>Customers</dt>
+            <dd :class="numClass">{{ uniqueCustomersInPeriod }}</dd>
           </div>
-          <div class="rounded-lg bg-gray-50/80 px-3 py-2 dark:bg-white/[0.03]">
-            <p class="text-[11px] text-gray-500 dark:text-gray-400">Repeat rate</p>
-            <p class="mt-0.5 text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-50">
-              {{ repeatPurchaseRate.toFixed(0) }}%
-            </p>
+          <div :class="metricRowClass">
+            <dt>Repeat rate</dt>
+            <dd :class="numClass">{{ repeatPurchaseRate.toFixed(0) }}%</dd>
           </div>
-        </div>
+        </dl>
       </section>
 
-      <!-- Key Metrics -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-6">
+      <div :class="kpiGridWideClass">
         <StatCard
           label="Total revenue"
           :value="formatCurrency(totalRevenue)"
@@ -174,89 +130,65 @@
           label="Low stock"
           :value="lowStockCount.toString()"
           :subtext="lowStockCount > 0 ? 'Review inventory' : 'All stocked'"
-          :subtext-class="
-            lowStockCount > 0
-              ? 'text-amber-600 dark:text-amber-400 text-xs font-medium'
-              : 'text-gray-500 dark:text-gray-400 text-xs'
-          "
+          :subtext-class="lowStockCount > 0 ? 'warning' : ''"
         />
         <StatCard
           label="Refunds"
           :value="refundedCount.toString()"
           :subtext="`${formatCurrency(refundAmount)} · ${refundRateText}`"
-          subtext-class="text-red-600 dark:text-red-400 text-xs"
+          subtext-class="danger"
         />
       </div>
 
-      <!-- Charts Row -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
-        <!-- Revenue Trend Chart -->
-        <Card class="lg:col-span-2" padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-4 flex items-center justify-between">
+      <div :class="chartsGridClass">
+        <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
+          <div
+            :class="[
+              cardHeaderClass,
+              'dash-card__header--compact !mb-0 border-b px-4 py-3 sm:flex-row sm:items-center',
+            ]"
+          >
             <div>
-              <h2
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-              >
-                Revenue Trends
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+              <h2 :class="cardTitleClass">Revenue trends</h2>
+              <p :class="cardDescClass">{{ periodLabel }}</p>
             </div>
           </div>
-          <apexchart
-            type="line"
-            height="300"
-            :options="revenueChartOptions"
-            :series="revenueChartSeries"
-          />
-        </Card>
-
-        <!-- Top Products Chart -->
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-4">
-            <h2
-              class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-            >
-              Top products
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              Share of revenue (top 5)
-            </p>
+          <div :class="['dash-chart-wrap dash-chart-wrap--tall']">
+            <apexchart
+              type="line"
+              height="300"
+              :options="revenueChartOptions"
+              :series="revenueChartSeries"
+            />
           </div>
-          <apexchart
-            type="donut"
-            height="300"
-            :options="topProductsChartOptions"
-            :series="topProductsChartSeries"
-          />
-        </Card>
+        </section>
+
+        <section :class="[cardPaddedClass, 'dash-charts-grid__side flex flex-col']">
+          <h2 :class="cardTitleClass">Top products</h2>
+          <p :class="cardDescClass">Share of revenue (top 5)</p>
+          <div class="mt-2 flex-1">
+            <apexchart
+              type="donut"
+              height="300"
+              :options="topProductsChartOptions"
+              :series="topProductsChartSeries"
+            />
+          </div>
+        </section>
       </div>
 
-      <!-- Inventory & Customer Insights Row -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
-        <!-- Sales by category -->
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-3 flex items-start justify-between gap-2">
+      <div :class="splitGridClass">
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
             <div>
-              <h2
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-              >
-                Sales by category
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <h2 :class="cardTitleClass">Sales by category</h2>
+              <p :class="cardDescClass">
                 Top folders in {{ periodLabel.toLowerCase() }} (max 8)
               </p>
             </div>
-            <NuxtLink
-              to="/dashboard/inventory"
-              class="shrink-0 text-[11px] font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-            >
-              Inventory →
-            </NuxtLink>
+            <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Inventory</NuxtLink>
           </div>
-          <div
-            v-if="topFoldersBySales.length === 0"
-            class="py-8 text-center text-xs text-gray-500 dark:text-gray-400"
-          >
+          <div v-if="topFoldersBySales.length === 0" :class="emptyClass">
             No category sales in this period.
           </div>
           <apexchart
@@ -266,24 +198,18 @@
             :options="categorySalesChartOptions"
             :series="categorySalesChartSeries"
           />
-        </Card>
+        </section>
 
-        <!-- Top customers -->
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-3">
-            <h2
-              class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-            >
-              Top customers
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              By spend · {{ repeatPurchaseRate.toFixed(0) }}% repeat purchase rate
-            </p>
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <div>
+              <h2 :class="cardTitleClass">Top customers</h2>
+              <p :class="cardDescClass">
+                By spend · {{ repeatPurchaseRate.toFixed(0) }}% repeat purchase rate
+              </p>
+            </div>
           </div>
-          <div
-            v-if="customerChartCustomers.length === 0"
-            class="py-8 text-center text-xs text-gray-500 dark:text-gray-400"
-          >
+          <div v-if="customerChartCustomers.length === 0" :class="emptyClass">
             No customer emails on receipts in this period.
           </div>
           <apexchart
@@ -293,93 +219,63 @@
             :options="customerChartOptions"
             :series="customerChartSeries"
           />
-        </Card>
+        </section>
       </div>
 
-      <!-- Payment methods -->
-      <section v-if="paymentMethodBreakdown.length > 0" :class="analyticsCardClass">
-        <h2 class="text-xs font-semibold text-gray-900 dark:text-gray-50 sm:text-sm">
-          Payment methods
-        </h2>
-        <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-          Completed sales by tender type
-        </p>
-        <ul class="mt-4 space-y-3">
+      <section v-if="paymentMethodBreakdown.length > 0" :class="cardPaddedClass">
+        <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+          <div>
+            <h2 :class="cardTitleClass">Payment methods</h2>
+            <p :class="cardDescClass">Completed sales by tender type</p>
+          </div>
+        </div>
+        <ul :class="barListClass">
           <li v-for="row in paymentMethodBreakdown.slice(0, 6)" :key="row.label">
-            <div class="mb-1 flex items-baseline justify-between gap-2 text-xs">
-              <span class="font-medium text-gray-800 dark:text-gray-200">{{ row.label }}</span>
-              <span class="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
+            <div :class="['dash-bar-row__head', numClass]">
+              <span :class="['dash-bar-row__label', cardTitleClass, '!text-xs']">{{ row.label }}</span>
+              <span :class="['dash-bar-row__meta', numClass]">
                 {{ row.share }}% · {{ formatCurrency(row.revenue) }}
               </span>
             </div>
-            <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.08]">
-              <div
-                class="h-full rounded-full bg-primary-500/75 dark:bg-primary-400/65"
-                :style="{ width: `${Math.max(row.share, 3)}%` }"
-              />
+            <div :class="barTrackClass">
+              <div :class="barFillClass" :style="{ width: `${Math.max(row.share, 3)}%` }" />
             </div>
           </li>
         </ul>
       </section>
 
-      <!-- Peak hours, Sales by day, Busiest time -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
-        <!-- Busiest day & hour -->
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex min-w-0 items-start gap-2.5">
-              <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800/80"
-              >
-                <ClockIcon class="h-4 w-4 text-gray-600 dark:text-gray-300" />
-              </div>
-              <div class="min-w-0">
-                <h2
-                  class="text-xs font-semibold leading-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-                >
-                  Peak hours
-                </h2>
-                <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
-              </div>
+      <div :class="tripleGridClass">
+        <section :class="cardPaddedClass">
+          <div class="flex items-start gap-2.5">
+            <div :class="insightIconClass">
+              <ClockIcon class="h-4 w-4" stroke-width="1.75" />
+            </div>
+            <div class="min-w-0">
+              <h2 :class="cardTitleClass">Peak hours</h2>
+              <p :class="cardDescClass">{{ periodLabel }}</p>
             </div>
           </div>
-
-          <p class="mt-3 text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-            {{ busiestTimeSummary }}
-          </p>
-
-          <dl class="mt-4 grid grid-cols-2 gap-2">
-            <div class="rounded-lg bg-gray-50/80 px-2.5 py-2 dark:bg-white/[0.03]">
-              <dt class="text-[10px] text-gray-500 dark:text-gray-400">Best day</dt>
-              <dd class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                {{ busiestDayName ?? '-' }}
-              </dd>
-              <dd class="text-[10px] tabular-nums text-gray-500">
-                {{ formatCurrency(peakDayRevenue) }}
-              </dd>
+          <p :class="[insightHighlightClass, numClass]">{{ busiestTimeSummary }}</p>
+          <dl :class="metricCellsClass">
+            <div :class="metricCellClass">
+              <dt>Best day</dt>
+              <dd :class="numClass">{{ busiestDayName ?? '-' }}</dd>
+              <dd :class="numClass">{{ formatCurrency(peakDayRevenue) }}</dd>
             </div>
-            <div class="rounded-lg bg-gray-50/80 px-2.5 py-2 dark:bg-white/[0.03]">
-              <dt class="text-[10px] text-gray-500 dark:text-gray-400">Best hour</dt>
-              <dd class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                {{ busiestHourLabel ?? '-' }}
-              </dd>
-              <dd class="text-[10px] tabular-nums text-gray-500">
-                {{ formatCurrency(peakHourRevenue) }}
-              </dd>
+            <div :class="metricCellClass">
+              <dt>Best hour</dt>
+              <dd :class="numClass">{{ busiestHourLabel ?? '-' }}</dd>
+              <dd :class="numClass">{{ formatCurrency(peakHourRevenue) }}</dd>
             </div>
           </dl>
-        </Card>
+        </section>
 
-        <Card padding="sm" :extra-class="`${analyticsCardClass} lg:col-span-2`">
-          <div class="mb-3">
-            <h2
-              class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-            >
-              Sales by hour
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-              Revenue by hour of day · hover for order count
-            </p>
+        <section :class="[cardPaddedClass, 'dash-triple-grid__wide']">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <div>
+              <h2 :class="cardTitleClass">Sales by hour</h2>
+              <p :class="cardDescClass">Revenue by hour of day · hover for order count</p>
+            </div>
           </div>
           <apexchart
             type="bar"
@@ -387,18 +283,16 @@
             :options="peakHoursChartOptions"
             :series="peakHoursChartSeries"
           />
-        </Card>
+        </section>
       </div>
 
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-4">
-            <h2
-              class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-            >
-              Sales by day of week
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Best and worst days</p>
+      <div :class="splitGridClass">
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <div>
+              <h2 :class="cardTitleClass">Sales by day of week</h2>
+              <p :class="cardDescClass">Best and worst days</p>
+            </div>
           </div>
           <apexchart
             type="bar"
@@ -406,16 +300,14 @@
             :options="salesByDayChartOptions"
             :series="salesByDayChartSeries"
           />
-        </Card>
+        </section>
 
-        <Card padding="sm" :extra-class="analyticsCardClass">
-          <div class="mb-4">
-            <h2
-              class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-            >
-              Traffic heatmap
-            </h2>
-            <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Revenue by day × hour</p>
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <div>
+              <h2 :class="cardTitleClass">Traffic heatmap</h2>
+              <p :class="cardDescClass">Revenue by day × hour</p>
+            </div>
           </div>
           <apexchart
             type="heatmap"
@@ -423,70 +315,41 @@
             :options="heatmapChartOptions"
             :series="heatmapSeries"
           />
-        </Card>
+        </section>
       </div>
 
-      <!-- Payment links -->
       <PaymentLinksSummaryCard
         v-if="canUseSubscriptionFeature('payment_links')"
-        :card-class="analyticsCardClass"
+        card-class="dash-card dash-card--padded"
         :limit="6"
       />
 
-      <!-- Detailed Tables -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
-        <!-- Top Products -->
-        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+      <div :class="tripleGridClass">
+        <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
           <DataTableToolbar>
             <template #heading>
               <div class="min-w-0">
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                >
-                  Top products
-                </p>
-                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+                <p :class="tableEyebrowClass">Top products</p>
+                <p :class="tableMetaClass">{{ periodLabel }}</p>
               </div>
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="dashboard-table min-w-full">
               <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
-                  <th
-                    class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Product
-                  </th>
-                  <th
-                    class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Qty
-                  </th>
-                  <th
-                    class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Revenue
-                  </th>
+                <tr>
+                  <th class="text-left">Product</th>
+                  <th class="text-right">Qty</th>
+                  <th class="text-right">Revenue</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(product, i) in topProducts"
-                  :key="product.id"
-                  class="border-b border-gray-100 dark:border-gray-800/80 last:border-0"
-                >
+                <tr v-for="(product, i) in topProducts" :key="product.id">
                   <td class="py-1.5 pr-2">
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 inline-block">{{
-                      i + 1
-                    }}</span>
-                    <span class="text-gray-900 dark:text-gray-100 truncate">{{
-                      product.name
-                    }}</span>
+                    <span :class="['inline-block w-4 text-[10px]', numClass]">{{ i + 1 }}</span>
+                    <span class="truncate">{{ product.name }}</span>
                   </td>
-                  <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">
-                    {{ product.quantity }}
-                  </td>
+                  <td class="py-1.5 px-2 text-right" :class="numClass">{{ product.quantity }}</td>
                   <td class="py-1.5 pl-2 text-right" :class="tableMoneyClass()">
                     {{ formatCurrency(product.revenue) }}
                   </td>
@@ -496,64 +359,36 @@
           </div>
         </div>
 
-        <!-- Top Customers -->
-        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+        <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
           <DataTableToolbar>
             <template #heading>
               <div class="min-w-0">
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                >
-                  Top customers
-                </p>
-                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+                <p :class="tableEyebrowClass">Top customers</p>
+                <p :class="tableMetaClass">{{ periodLabel }}</p>
               </div>
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="dashboard-table min-w-full">
               <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
-                  <th
-                    class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Customer
-                  </th>
-                  <th
-                    class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Orders
-                  </th>
-                  <th
-                    class="text-right py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Spent
-                  </th>
+                <tr>
+                  <th class="text-left">Customer</th>
+                  <th class="text-right">Orders</th>
+                  <th class="text-right">Spent</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(customer, i) in topCustomers"
-                  :key="customer.email"
-                  class="border-b border-gray-100 dark:border-gray-800/80 last:border-0"
-                >
+                <tr v-for="(customer, i) in topCustomers" :key="customer.email">
                   <td class="py-1.5 pr-2">
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 inline-block">{{
-                      i + 1
-                    }}</span>
+                    <span :class="['inline-block w-4 text-[10px]', numClass]">{{ i + 1 }}</span>
                     <div>
-                      <span class="text-gray-900 dark:text-gray-100 font-medium">{{
-                        customer.name
-                      }}</span>
-                      <span
-                        class="text-[10px] text-gray-500 dark:text-gray-400 block truncate max-w-[140px]"
-                        >{{ customer.email }}</span
-                      >
+                      <span class="font-medium">{{ customer.name }}</span>
+                      <span :class="['block max-w-[140px] truncate text-[10px]', tableMetaClass]">
+                        {{ customer.email }}
+                      </span>
                     </div>
                   </td>
-                  <td class="py-1.5 px-2 text-right text-gray-700 dark:text-gray-300">
-                    {{ customer.orders }}
-                  </td>
+                  <td class="py-1.5 px-2 text-right" :class="numClass">{{ customer.orders }}</td>
                   <td class="py-1.5 pl-2 text-right" :class="tableMoneyClass()">
                     {{ formatCurrency(customer.totalSpent) }}
                   </td>
@@ -563,73 +398,38 @@
           </div>
         </div>
 
-        <!-- Recent Returns -->
-        <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+        <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
           <DataTableToolbar>
             <template #heading>
               <div class="min-w-0">
-                <p
-                  class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                >
-                  Recent returns
-                </p>
-                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">{{ periodLabel }}</p>
+                <p :class="tableEyebrowClass">Recent returns</p>
+                <p :class="tableMetaClass">{{ periodLabel }}</p>
               </div>
             </template>
           </DataTableToolbar>
           <div class="overflow-x-auto px-3 pb-3 sm:px-4">
             <table class="dashboard-table min-w-full">
               <thead>
-                <tr class="border-b border-gray-200/80 dark:border-gray-800/70">
-                  <th
-                    class="text-left py-1.5 pr-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Receipt
-                  </th>
-                  <th
-                    class="text-left py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Date
-                  </th>
-                  <th
-                    class="text-right py-1.5 px-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Amount
-                  </th>
-                  <th
-                    class="text-left py-1.5 pl-2 text-[11px] font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    Reason
-                  </th>
+                <tr>
+                  <th class="text-left">Receipt</th>
+                  <th class="text-left">Date</th>
+                  <th class="text-right">Amount</th>
+                  <th class="text-left">Reason</th>
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="ret in recentReturns"
-                  :key="ret.id"
-                  class="border-b border-gray-100 dark:border-gray-800/80 last:border-0"
-                >
-                  <td class="py-1.5 pr-2 font-medium text-gray-900 dark:text-gray-100">
-                    {{ ret.receiptNumber }}
-                  </td>
-                  <td class="py-1.5 px-2 text-gray-700 dark:text-gray-300">
-                    {{ formatReturnDate(ret.date) }}
-                  </td>
+                <tr v-for="ret in recentReturns" :key="ret.id">
+                  <td class="py-1.5 pr-2 font-medium">{{ ret.receiptNumber }}</td>
+                  <td class="py-1.5 px-2" :class="numClass">{{ formatReturnDate(ret.date) }}</td>
                   <td class="py-1.5 px-2 text-right font-medium text-red-600 dark:text-red-400">
                     -{{ formatCurrency(ret.amount) }}
                   </td>
-                  <td
-                    class="py-1.5 pl-2 text-gray-600 dark:text-gray-400 max-w-[100px] truncate"
-                    :title="ret.reason"
-                  >
+                  <td class="max-w-[100px] truncate py-1.5 pl-2" :title="ret.reason">
                     {{ ret.reason }}
                   </td>
                 </tr>
                 <tr v-if="recentReturns.length === 0">
-                  <td
-                    colspan="4"
-                    class="py-3 text-center text-[11px] text-gray-500 dark:text-gray-400"
-                  >
+                  <td colspan="4" :class="['py-3 text-center', emptyClass]">
                     No returns in this period
                   </td>
                 </tr>
@@ -639,19 +439,12 @@
         </div>
       </div>
 
-      <!-- Low stock -->
-      <div class="data-table-shell flex min-h-0 flex-col overflow-hidden">
+      <div :class="[tableShellClass, 'flex min-h-0 flex-col overflow-hidden']">
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
-              <p
-                class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-              >
-                Low stock
-              </p>
-              <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                Items at or below threshold
-              </p>
+              <p :class="tableEyebrowClass">Low stock</p>
+              <p :class="tableMetaClass">Items at or below threshold</p>
             </div>
           </template>
           <template #actions>
@@ -659,44 +452,37 @@
               <button
                 v-if="lowStockItems.length > 0"
                 type="button"
-                class="text-[11px] font-medium text-primary-700 hover:text-primary-800 disabled:opacity-50 dark:text-primary-300"
+                :class="cardLinkClass"
                 :disabled="reorderExporting"
                 @click="handleExportReorderList"
               >
                 {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
               </button>
-              <NuxtLink
-                to="/dashboard/inventory"
-                class="text-[11px] font-medium text-gray-600 transition hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-              >
-                View inventory →
-              </NuxtLink>
+              <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">View inventory</NuxtLink>
             </div>
           </template>
         </DataTableToolbar>
-        <div class="space-y-1.5 px-3 pb-3 sm:px-4">
-          <template v-if="lowStockItems.length > 0">
-            <NuxtLink
-              v-for="item in lowStockItems"
-              :key="item.id"
-              :to="item.folderId ? `/dashboard/inventory/${item.folderId}` : '/dashboard/inventory'"
-              class="flex justify-between items-baseline gap-2 py-1 hover:opacity-80 transition-opacity"
-            >
-              <div class="min-w-0 flex-1">
-                <p class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                  {{ item.name }}
-                </p>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                  {{ item.folderName
-                  }}<span v-if="item.itemCount > 1"> · {{ item.itemCount }} items</span>
-                </p>
-              </div>
-              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0"
-                >{{ item.quantity }}/{{ item.threshold }}</span
+        <div class="px-3 pb-3 sm:px-4">
+          <ul v-if="lowStockItems.length > 0" :class="listClass">
+            <li v-for="item in lowStockItems" :key="item.id">
+              <NuxtLink
+                :to="item.folderId ? `/dashboard/inventory/${item.folderId}` : '/dashboard/inventory'"
+                :class="listRowClass"
               >
-            </NuxtLink>
-          </template>
-          <p v-else class="text-xs text-gray-500 dark:text-gray-400 py-1">All stocked</p>
+                <div class="min-w-0 flex-1">
+                  <p :class="['dash-list__primary', 'truncate']">{{ item.name }}</p>
+                  <p :class="['dash-list__secondary', numClass]">
+                    {{ item.folderName
+                    }}<span v-if="item.itemCount > 1"> · {{ item.itemCount }} items</span>
+                  </p>
+                </div>
+                <span :class="['dash-list__value text-amber-600 dark:text-amber-400', numClass]">
+                  {{ item.quantity }}/{{ item.threshold }}
+                </span>
+              </NuxtLink>
+            </li>
+          </ul>
+          <p v-else :class="emptyClass">All stocked</p>
         </div>
       </div>
     </template>
@@ -714,7 +500,6 @@ import { useUserStore } from '~/stores/user'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
 import { useAppToast } from '~/composables/useAppToast'
-import Card from '~/components/ui/Card.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
@@ -789,9 +574,46 @@ const { canUse: canUseSubscriptionFeature } = useSubscriptionFeatures()
 // State
 const isLoading = ref(true)
 const isExporting = ref(false)
-const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass, dashboardCardClass } =
-  useDashboardPageChrome()
-const analyticsCardClass = `${dashboardCardClass} p-4 sm:p-5`
+const {
+  pageClass,
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+  linkClass,
+  cardPaddedClass,
+  cardFlushClass,
+  cardHeaderClass,
+  cardTitleClass,
+  cardDescClass,
+  cardLinkClass,
+  kpiGridWideClass,
+  chartsGridClass,
+  splitGridClass,
+  tripleGridClass,
+  segmentGroupClass,
+  segmentBtnClass,
+  segmentBtnActiveClass,
+  metricGridClass,
+  metricRowClass,
+  barListClass,
+  barTrackClass,
+  barFillClass,
+  listClass,
+  listRowClass,
+  numClass,
+  emptyClass,
+  stateCardClass,
+  summaryTextClass,
+  insightIconClass,
+  insightHighlightClass,
+  tableShellClass,
+  tableEyebrowClass,
+  tableMetaClass,
+  exportBtnSecondaryClass,
+  exportBtnSuccessClass,
+  metricCellsClass,
+  metricCellClass,
+} = useDashboardAnalyticsChrome()
 
 const analyticsPeriods = [
   { value: 'daily' as const, label: 'Daily' },
@@ -1365,7 +1187,7 @@ const peakHoursChartOptions = computed(() => {
   const axisFmt = chartCurrencyAxis.value
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#60a5fa' : '#2563eb'],
+    colors: [isDark ? '#9ab5e3' : '#4876c7'],
     plotOptions: {
       bar: { borderRadius: 3, columnWidth: '70%', dataLabels: { position: 'top' } },
     },
@@ -1616,7 +1438,7 @@ const revenueChartOptions = computed(() => {
       zoom: { enabled: false },
       background: 'transparent',
     },
-    colors: ['#2563eb'],
+    colors: [isDark ? '#9ab5e3' : '#4876c7'],
     stroke: {
       curve: 'smooth',
       width: 2,
@@ -1691,7 +1513,7 @@ const topProductsChartOptions = computed(() => {
       background: 'transparent',
     },
     labels: topProducts.value.slice(0, 5).map((p) => truncateChartLabel(p.name, 20)),
-    colors: ['#2563eb', '#7c3aed', '#dc2626', '#ea580c', '#059669'],
+    colors: ['#4876c7', '#6e94d6', '#143f8d', '#9ab5e3', '#34d399'],
     legend: {
       position: 'bottom',
       labels: {
@@ -1727,7 +1549,7 @@ const categorySalesChartOptions = computed(() => {
 
   return {
     chart: { type: 'bar', toolbar: { show: false }, background: 'transparent' },
-    colors: [isDark ? '#a78bfa' : '#7c3aed'],
+    colors: [isDark ? '#9ab5e3' : '#4876c7'],
     plotOptions: {
       bar: {
         horizontal: true,

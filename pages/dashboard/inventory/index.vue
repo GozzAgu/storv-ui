@@ -1,7 +1,7 @@
 <template>
   <div
     data-inventory-categories
-    class="dashboard-page-with-footer inventory-categories-page flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
+    :class="pageWithFooterClass"
   >
     <DashboardPageHeader>
       <template #eyebrow>
@@ -20,19 +20,10 @@
         </div>
       </template>
       <template #actions>
-        <div
-          class="flex h-8 shrink-0 items-center rounded-lg bg-gray-100/80 p-0.5 dark:bg-white/[0.04]"
-          role="group"
-          aria-label="Category layout"
-        >
+        <div :class="viewToggleClass" role="group" aria-label="Category layout">
           <button
             type="button"
-            class="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150"
-            :class="
-              foldersViewMode === 'grid'
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
-                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            :class="[viewToggleBtnClass, foldersViewMode === 'grid' ? viewToggleBtnActiveClass : '']"
             :aria-pressed="foldersViewMode === 'grid'"
             @click="foldersViewMode = 'grid'"
           >
@@ -40,12 +31,7 @@
           </button>
           <button
             type="button"
-            class="flex h-7 w-7 items-center justify-center rounded-md transition-colors duration-150"
-            :class="
-              foldersViewMode === 'table'
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white'
-                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            :class="[viewToggleBtnClass, foldersViewMode === 'table' ? viewToggleBtnActiveClass : '']"
             :aria-pressed="foldersViewMode === 'table'"
             @click="foldersViewMode = 'table'"
           >
@@ -87,10 +73,7 @@
       </template>
     </DashboardPageHeader>
 
-    <div
-      v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-      class="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3"
-    >
+    <div v-if="!inventoryStore.loading && inventoryStore.folders.length > 0" :class="kpiGridClass">
       <StatCard
         label="Categories"
         :value="String(inventoryStore.folders.length)"
@@ -112,64 +95,35 @@
         :subtext="
           inventoryStore.lowStockFolders.length > 0 ? 'Needs attention' : 'Within thresholds'
         "
-        :subtext-class="
-          inventoryStore.lowStockFolders.length > 0
-            ? 'text-amber-600 dark:text-amber-400 text-xs font-medium'
-            : 'text-gray-500 dark:text-gray-400 text-xs'
-        "
+        :subtext-class="inventoryStore.lowStockFolders.length > 0 ? 'warning' : ''"
       />
     </div>
 
-    <!-- Content area: show only one of skeleton, folders, or empty -->
-    <!-- Loading skeleton -->
     <div
       v-if="inventoryStore.loading && inventoryStore.folders.length === 0"
-      class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
+      :class="gridClass"
     >
-      <div
-        v-for="i in 12"
-        :key="i"
-        class="animate-pulse rounded-xl bg-white p-2.5 dark:bg-[#141820] dark:ring-white/[0.06]"
-      >
-        <div class="mb-2 flex justify-between">
-          <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
-          <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
-        </div>
-        <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
-        <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
-        <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-          <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
-        </div>
-        <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-          <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="flex-1 pt-0.5">
-            <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
-          </div>
-        </div>
-      </div>
+      <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
     </div>
 
     <div
       v-if="!inventoryStore.loading && inventoryStore.folders.length > 0"
-      class="inventory-categories-shell flex min-h-0 flex-1 flex-col"
-      :class="
+      :class="[
+        gridShellClass,
         foldersViewMode === 'table'
-          ? 'data-table-shell inventory-categories-shell--table overflow-hidden'
-          : 'inventory-categories-shell--grid gap-3 overflow-visible sm:gap-4'
-      "
+          ? [tableShellClass, 'dash-grid-shell--table inventory-categories-shell--table']
+          : 'dash-grid-shell--grid inventory-categories-shell--grid',
+      ]"
     >
       <div
         class="shrink-0"
-        :class="foldersViewMode === 'grid' ? 'data-table-shell overflow-hidden rounded-xl' : ''"
+        :class="foldersViewMode === 'grid' ? [tableShellClass, 'overflow-hidden rounded-xl'] : ''"
       >
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
-              <h2 class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-                All categories
-              </h2>
-              <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <h2 :class="toolbarTitleClass">All categories</h2>
+              <p :class="toolbarDescClass">
                 Browse and manage product categories for this store
               </p>
             </div>
@@ -271,7 +225,7 @@
         <div
           v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
           key="grid"
-          class="inventory-categories-grid grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
+          class="inventory-categories-grid dash-grid"
         >
           <InventoryCategoryCard
             v-for="folder in paginatedFolders"
@@ -304,7 +258,7 @@
                   type="button"
                   :data-folder-actions-anchor="folder.id"
                   @click="toggleFolderMenu(folder.id)"
-                  class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+                  :class="menuBtnClass"
                   aria-label="Category options"
                 >
                   <EllipsisVerticalIcon class="h-3.5 w-3.5" stroke-width="2" />
@@ -457,7 +411,7 @@
 
       <div
         v-if="paginatedFolders.length > 0 && foldersViewMode === 'grid'"
-        class="inventory-categories-grid-footer data-table-shell shrink-0 overflow-hidden rounded-xl"
+        :class="[gridFooterClass, tableShellClass]"
       >
         <DashboardTablePagination
           :current-page="currentPage"
@@ -1225,7 +1179,23 @@ useHead({
   title: 'Inventory categories - Storvv',
 })
 
-const { eyebrowClass, titleClass, headerBtnClass } = useDashboardPageChrome()
+const {
+  pageWithFooterClass,
+  eyebrowClass,
+  titleClass,
+  headerBtnClass,
+  kpiGridClass,
+  tableShellClass,
+  gridShellClass,
+  gridClass,
+  gridFooterClass,
+  toolbarTitleClass,
+  toolbarDescClass,
+  menuBtnClass,
+  viewToggleClass,
+  viewToggleBtnClass,
+  viewToggleBtnActiveClass,
+} = useDashboardGridPagesChrome()
 const {
   sectionLabelClass,
   pickListClass,

@@ -46,39 +46,21 @@
           <!-- Header -->
           <div
             v-if="title || subtitle || $slots.header || showClose"
-            :class="[
-              'flex shrink-0 items-start justify-between gap-2.5 border-b border-gray-100/90 bg-white dark:border-gray-800/80 dark:bg-white/[0.02]',
-              dense
-                ? 'px-3 py-2.5 sm:px-4'
-                : 'bg-gray-50/50 px-4 py-3.5 sm:px-5 sm:py-4 dark:bg-white/[0.02]',
-            ]"
+            :class="[dense ? headerDenseClass : headerClass]"
           >
             <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
               <slot name="header">
                 <div v-if="title || subtitle" class="min-w-0">
-                  <p
-                    v-if="eyebrow"
-                    class="text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400 dark:text-gray-500"
-                  >
+                  <p v-if="eyebrow" :class="eyebrowClass">
                     {{ eyebrow }}
                   </p>
-                  <h3
-                    v-if="title"
-                    :id="titleId"
-                    :class="[
-                      'font-semibold tracking-tight text-gray-900 dark:text-gray-50',
-                      dense ? 'text-sm' : 'text-base',
-                    ]"
-                  >
+                  <h3 v-if="title" :id="titleId" :class="dense ? titleDenseClass : titleClass">
                     {{ title }}
                   </h3>
                   <p
                     v-if="subtitle"
                     :id="subtitleId"
-                    :class="[
-                      'leading-snug text-gray-500 dark:text-gray-400',
-                      dense ? 'mt-0.5 text-[11px]' : 'mt-1 text-[13px]',
-                    ]"
+                    :class="dense ? subtitleDenseClass : subtitleClass"
                   >
                     {{ subtitle }}
                   </p>
@@ -88,7 +70,7 @@
             <button
               v-if="showClose"
               type="button"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-100"
+              :class="closeButtonClass"
               aria-label="Close panel"
               @click="handleClose"
             >
@@ -98,20 +80,13 @@
 
           <!-- Body -->
           <div
-            class="side-panel-body-scroll flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-white dark:!bg-dashboard-card"
-            :class="resolvedContentPadding"
+            :class="[bodyClass, 'side-panel-body-scroll flex min-h-0 flex-1 flex-col', resolvedContentPadding]"
           >
             <slot />
           </div>
 
           <!-- Footer -->
-          <div
-            v-if="$slots.footer"
-            :class="[
-              'flex shrink-0 flex-col items-stretch justify-end gap-2 border-t border-gray-100/90 bg-white dark:border-gray-800/80 dark:bg-white/[0.02] sm:flex-row sm:items-center sm:justify-end sm:gap-2',
-              dense ? 'px-3 py-2.5 sm:px-4' : 'bg-gray-50/60 px-4 py-3 sm:gap-3 sm:px-5 sm:py-3.5',
-            ]"
-          >
+          <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
             <slot name="footer" />
           </div>
         </div>
@@ -164,7 +139,21 @@ const resolvedContentPadding = computed(() => {
   return props.dense ? 'p-0' : 'px-4 py-4 sm:px-5 sm:py-5'
 })
 
-const { backdropClass } = useDashboardOverlayChrome()
+const {
+  backdropClass,
+  drawerShellClass,
+  headerClass,
+  headerDenseClass,
+  bodyClass,
+  footerClass,
+  footerDenseClass,
+  closeButtonClass,
+  titleClass,
+  titleDenseClass,
+  subtitleClass,
+  subtitleDenseClass,
+  eyebrowClass,
+} = useDashboardOverlayChrome()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
@@ -188,11 +177,12 @@ const panelShellClass = computed(() =>
 const panelDialogClass = computed(() =>
   nativeInApp.value
     ? [
-        'side-panel-native-dialog flex h-full max-h-full min-h-0 w-full flex-col overflow-hidden border-0 bg-white text-gray-900 dark:!bg-dashboard-card dark:text-gray-100',
+        'side-panel-native-dialog flex h-full max-h-full min-h-0 w-full flex-col overflow-hidden',
+        drawerShellClass,
       ]
     : [
-        'pointer-events-auto flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden border-0 bg-white pb-[env(safe-area-inset-bottom,0)] text-gray-900 shadow-2xl shadow-gray-900/10 dark:!bg-dashboard-card dark:text-gray-100 dark:shadow-black/40',
-        'w-full min-w-0 rounded-none lg:rounded-l-xl',
+        'pointer-events-auto flex min-h-0 flex-col overflow-hidden',
+        drawerShellClass,
         panelWidthClasses,
       ]
 )

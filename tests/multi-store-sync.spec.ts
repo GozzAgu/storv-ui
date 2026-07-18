@@ -36,7 +36,7 @@ test.describe('Multi-Store Sync', () => {
     }
 
     const accessHeading = page.getByRole('heading', { name: 'Access restricted', exact: true })
-    const transferTab = page.getByRole('button', { name: 'Transfer Items' })
+    const transferTab = page.getByRole('button', { name: /transfer items/i })
 
     await expect(accessHeading.or(transferTab)).toBeVisible({ timeout: 20_000 })
 
@@ -48,8 +48,8 @@ test.describe('Multi-Store Sync', () => {
     }
 
     await expect(transferTab).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Consolidated Reports' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Transfer History' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /consolidated reports/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /transfer history/i })).toBeVisible()
   })
 
   test('shows stats cards when feature is unlocked', async ({ page }) => {

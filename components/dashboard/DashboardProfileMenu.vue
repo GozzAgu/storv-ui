@@ -15,14 +15,8 @@
         <span class="relative">{{ userInitials }}</span>
       </div>
       <div v-if="!compact" class="hidden min-w-0 flex-1 text-left md:block">
-        <p
-          class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-50"
-        >
-          {{ userName }}
-        </p>
-        <p class="truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-          {{ userEmail }}
-        </p>
+        <p class="dash-profile-trigger__name">{{ userName }}</p>
+        <p class="dash-profile-trigger__email">{{ userEmail }}</p>
       </div>
       <ChevronDownIcon
         v-if="!compact"

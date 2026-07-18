@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div :class="pageClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Help</p>
@@ -23,9 +23,7 @@
             wrapper-class="max-w-md"
           />
           <div>
-            <p
-              class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500"
-            >
+            <p :class="toolbarLabelClass">
               Popular topics
             </p>
             <div class="flex flex-wrap gap-2">
@@ -33,7 +31,7 @@
                 v-for="topic in popularTopics"
                 :key="topic.query"
                 type="button"
-                class="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-gray-700 transition-colors hover:bg-primary-50/80 hover:text-primary-800 dark:!bg-dashboard-card/60 dark:text-gray-200 dark:hover:bg-primary-950/40 dark:hover:text-primary-200"
+                :class="chipClass"
                 @click="searchQuery = topic.query"
               >
                 {{ topic.label }}
@@ -41,9 +39,7 @@
             </div>
           </div>
           <div>
-            <p
-              class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500"
-            >
+            <p :class="toolbarLabelClass">
               Common screens
             </p>
             <div class="flex flex-wrap gap-2">
@@ -51,7 +47,7 @@
                 v-for="link in quickScreenLinks"
                 :key="link.to"
                 :to="link.to"
-                class="inline-flex items-center rounded-full bg-gray-50/90 px-2.5 py-1 text-[11px] font-medium text-gray-800 transition-colors hover:bg-white hover:text-primary-800 dark:bg-gray-800/50 dark:text-gray-100 dark:hover:bg-gray-800"
+                :class="chipLinkClass"
               >
                 {{ link.label }}
               </NuxtLink>
@@ -61,21 +57,16 @@
       </template>
     </DashboardPageHeader>
 
-    <div class="flex flex-col items-start gap-4 lg:flex-row lg:gap-5">
-      <nav
-        aria-label="Topics"
-        class="w-full shrink-0 rounded-sm bg-white/95 p-3 dark:!bg-dashboard-card lg:sticky lg:top-14 lg:z-10 lg:w-52 lg:max-h-[calc(100dvh-4rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:p-3.5"
-      >
-        <p
-          class="mb-2 px-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500"
-        >
+    <div :class="layoutClass">
+      <nav aria-label="Topics" :class="tocClass">
+        <p :class="tocLabelClass">
           On this page
         </p>
         <ul class="space-y-0.5">
           <li v-for="cat in filteredCategories" :key="cat.id">
             <a
               :href="`#${cat.id}`"
-              class="block rounded-sm px-2 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100/90 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100"
+              :class="tocLinkClass"
               @click.prevent="scrollToSection(cat.id)"
               v-html="highlightText(cat.title, trimmedSearch)"
             ></a>
@@ -89,17 +80,15 @@
         </p>
       </nav>
 
-      <div class="min-w-0 flex-1 space-y-8">
+      <div :class="contentClass">
         <section
           v-for="cat in filteredCategories"
           :id="cat.id"
           :key="cat.id"
-          class="scroll-mt-24 sm:scroll-mt-28"
+          :class="sectionClass"
         >
-          <div class="mb-3 flex items-start gap-3">
-            <div
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-gray-50/90 dark:bg-gray-800/50"
-            >
+          <div :class="sectionHeadClass">
+            <div :class="sectionIconClass">
               <component
                 :is="cat.icon"
                 class="h-4 w-4 text-gray-500 dark:text-gray-400"
@@ -108,11 +97,11 @@
             </div>
             <div class="min-w-0">
               <h2
-                class="text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-100"
+                :class="sectionTitleClass"
                 v-html="highlightText(cat.title, trimmedSearch)"
               ></h2>
               <p
-                class="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-gray-400"
+                :class="sectionBlurbClass"
                 v-html="highlightText(cat.blurb, trimmedSearch)"
               ></p>
             </div>
@@ -122,13 +111,13 @@
             <article
               v-for="(article, idx) in cat.articles"
               :key="idx"
-              class="rounded-sm bg-white/95 px-4 py-3.5 dark:!bg-dashboard-card sm:px-4 sm:py-4"
+              :class="articleClass"
             >
               <h3
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100"
+                :class="articleTitleClass"
                 v-html="highlightText(article.title, trimmedSearch)"
               ></h3>
-              <div class="mt-2 space-y-2 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+              <div :class="articleBodyClass">
                 <p
                   v-for="(para, pIdx) in article.body"
                   :key="pIdx"
@@ -154,7 +143,7 @@
     <button
       v-show="showBackToTop"
       type="button"
-      class="fixed bottom-5 right-5 z-40 flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-700 transition-colors hover:bg-gray-50 dark:!bg-dashboard-card dark:text-gray-100 dark:hover:bg-gray-800"
+      :class="backTopClass"
       aria-label="Back to top"
       @click="scrollToTop"
     >
@@ -187,7 +176,32 @@ useHead({
   title: 'Help center - Storvv',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass } = useDashboardPageChrome()
+const {
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+} = useDashboardPageChrome()
+
+const {
+  pageClass,
+  layoutClass,
+  tocClass,
+  tocLabelClass,
+  tocLinkClass,
+  contentClass,
+  sectionClass,
+  sectionHeadClass,
+  sectionIconClass,
+  sectionTitleClass,
+  sectionBlurbClass,
+  articleClass,
+  articleTitleClass,
+  articleBodyClass,
+  chipClass,
+  chipLinkClass,
+  toolbarLabelClass,
+  backTopClass,
+} = useDashboardHelpChrome()
 
 type Article = {
   title: string

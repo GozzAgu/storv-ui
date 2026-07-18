@@ -8,8 +8,8 @@ html.capacitor-native {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 
-  --cap-canvas-bg: rgb(243 244 246);
-  --cap-surface-bg: rgb(255 255 255);
+  --cap-canvas-bg: #f4f6fb;
+  --cap-surface-bg: #ffffff;
 
   /* Uniform type scale */
   --cap-text-2xs: 0.75rem; /* 12px — eyebrows, nav labels, captions */
@@ -100,15 +100,7 @@ html.capacitor-native .dashboard-native-overlay-host:has(.modal-native-shell) {
 }
 
 html.capacitor-native .side-panel-native-dialog {
-  box-shadow: none;
-}
-
-html.capacitor-native .side-panel-native-dialog > :first-child {
-  border-top: 1px solid rgb(0 0 0 / 0.06);
-}
-
-html.capacitor-native.dark .side-panel-native-dialog > :first-child {
-  border-top-color: rgb(255 255 255 / 0.08);
+  box-shadow: var(--dash-overlay-shadow, none);
 }
 
 html.capacitor-native[data-native-drawer-open] .dashboard-native-main {
@@ -285,30 +277,35 @@ html.capacitor-ios.capacitor-native textarea {
 
 /* ── Auth screens ── */
 html.capacitor-native [data-auth-shell] {
+  height: 100dvh;
+  max-height: 100dvh;
   min-height: 100dvh;
+  overflow: hidden;
   padding-top: 0;
-  padding-bottom: var(--cap-safe-bottom);
+  padding-bottom: 0;
   background-color: var(--cap-canvas-bg);
 }
 
-html.capacitor-native [data-auth-shell] .auth-shell-mobile-strip {
+html.capacitor-native [data-auth-shell] .auth-shell__mobile-strip {
   padding-top: var(--cap-safe-top);
   padding-bottom: 0.875rem;
   padding-left: calc(1rem + var(--cap-safe-left));
   padding-right: calc(1rem + var(--cap-safe-right));
 }
 
-html.capacitor-native [data-auth-shell] .auth-shell-mobile-strip p {
+html.capacitor-native [data-auth-shell] .auth-shell__mobile-strip p {
   font-size: var(--cap-text-sm) !important;
 }
 
-html.capacitor-native [data-auth-shell] > div:last-child {
+html.capacitor-native [data-auth-shell] .auth-shell__main-scroll {
   flex: 1;
+  min-height: 0;
   width: 100%;
+  overflow-y: auto;
   padding-left: calc(1rem + var(--cap-safe-left));
   padding-right: calc(1rem + var(--cap-safe-right));
-  padding-top: 1.25rem;
-  padding-bottom: 1.5rem;
+  padding-top: calc(1.25rem + var(--cap-safe-top));
+  padding-bottom: calc(1.5rem + var(--cap-safe-bottom));
 }
 
 html.capacitor-native [data-auth-shell] .auth-shell-theme-toggle {
@@ -316,11 +313,11 @@ html.capacitor-native [data-auth-shell] .auth-shell-theme-toggle {
   right: calc(0.75rem + var(--cap-safe-right));
 }
 
-html.capacitor-native [data-auth-shell] .auth-page-header h1 {
+html.capacitor-native [data-auth-shell] .auth-page-header__title {
   font-size: var(--cap-text-xl) !important;
 }
 
-html.capacitor-native [data-auth-shell] .auth-page-header p {
+html.capacitor-native [data-auth-shell] .auth-page-header__lede {
   font-size: var(--cap-text-sm) !important;
 }
 
@@ -328,7 +325,7 @@ html.capacitor-native .auth-card {
   border-radius: 1rem;
 }
 
-html.capacitor-native .auth-card label {
+html.capacitor-native .auth-field__label {
   font-size: var(--cap-text-xs) !important;
 }
 

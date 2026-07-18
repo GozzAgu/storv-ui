@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-4 pb-10 sm:space-y-5 sm:pb-12">
+  <div :class="pageClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Store & app</p>
@@ -13,17 +13,14 @@
         </p>
       </template>
       <template #actions>
-        <div
-          v-if="!canEditSettings"
-          class="inline-flex h-8 shrink-0 items-center gap-2 rounded-lg border border-amber-200/80 bg-amber-50/90 px-3 dark:border-amber-500/25 dark:bg-amber-950/30"
-        >
+        <div v-if="!canEditSettings" :class="viewOnlyBadgeClass">
           <span class="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
-          <span class="text-xs font-medium text-amber-800 dark:text-amber-200">View only</span>
+          <span>View only</span>
         </div>
       </template>
     </DashboardPageHeader>
 
-    <div class="space-y-4 sm:space-y-5">
+    <div :class="pageStackClass">
       <!-- Account: logo + subscription -->
       <DashboardSettingsPanel
         v-if="userStore.isSuperAdmin"
@@ -952,6 +949,8 @@ const {
   eyebrowClass,
   pageTitleClass,
   descriptionClass,
+  pageClass,
+  pageStackClass,
   headerBtnClass,
   labelClass,
   inputClass,

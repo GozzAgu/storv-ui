@@ -1,19 +1,14 @@
 <template>
-  <div
-    role="alert"
-    class="rounded-lg bg-red-50 px-3.5 py-3 ring-1 ring-red-200/80 dark:bg-red-950/35 dark:ring-red-800/45"
-  >
-    <p class="mb-0.5 text-xs font-semibold text-red-800 dark:text-red-200">{{ title }}</p>
-    <div
-      class="whitespace-pre-line text-left text-xs leading-relaxed text-red-700 dark:text-red-300"
-    >
+  <div role="alert" class="auth-alert">
+    <p class="auth-alert__title">{{ title }}</p>
+    <div class="auth-alert__body whitespace-pre-line text-left">
       <slot>{{ message }}</slot>
     </div>
     <NuxtLink
       v-if="showFirestoreGuide"
       to="/QUICK_FIX.md"
       target="_blank"
-      class="mt-2 inline-block text-[11px] font-medium text-red-600 underline underline-offset-2 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200"
+      class="auth-link mt-2 inline-block text-[11px] underline underline-offset-2"
     >
       View Quick Fix Guide →
     </NuxtLink>

@@ -1,11 +1,7 @@
 <template>
-  <div class="space-y-1.5">
-    <div v-if="label || $slots['label-right']" class="flex items-center justify-between gap-2">
-      <label
-        v-if="label"
-        :for="inputId"
-        class="block text-xs font-medium text-gray-700 dark:text-gray-300"
-      >
+  <div class="auth-field">
+    <div v-if="label || $slots['label-right']" class="auth-field__label-row">
+      <label v-if="label" :for="inputId" class="auth-field__label">
         {{ label }}
       </label>
       <slot name="label-right" />
@@ -20,14 +16,14 @@
         :placeholder="placeholder"
         :minlength="minlength"
         :disabled="disabled"
-        class="app-field auth-field-input w-full min-h-10 h-auto py-2.5 text-sm"
+        class="app-field auth-field-input w-full"
         :class="[passwordToggle ? 'pr-10' : 'pr-2.5', inputClass]"
         v-bind="inputAttrs"
       />
       <button
         v-if="passwordToggle"
         type="button"
-        class="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-3 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-300"
+        class="auth-field__toggle"
         :aria-label="showPassword ? 'Hide password' : 'Show password'"
         @click="showPassword = !showPassword"
       >

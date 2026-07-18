@@ -70,7 +70,7 @@
         <button
           v-if="moreOpen"
           type="button"
-          class="native-bottom-nav__backdrop fixed inset-0 z-[58] bg-gray-900/40 backdrop-blur-[2px] dark:bg-black/55"
+          :class="sheetBackdropClass"
           aria-label="Close menu"
           @click="moreOpen = false"
         />
@@ -91,26 +91,13 @@
           role="dialog"
           aria-label="More navigation"
         >
-          <div
-            class="shrink-0 border-b border-gray-100/90 bg-gray-50/50 px-4 pb-3 pt-3 dark:border-gray-800/80 dark:bg-white/[0.02]"
-          >
-            <div
-              class="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300/80 dark:bg-white/15"
-              aria-hidden="true"
-            />
-            <p
-              class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-            >
-              Menu
-            </p>
-            <p class="mt-0.5 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
-              More
-            </p>
+          <div :class="sheetHeaderClass">
+            <div :class="sheetHandleClass" aria-hidden="true" />
+            <p :class="sheetEyebrowClass">Menu</p>
+            <p :class="sheetTitleClass">More</p>
           </div>
 
-          <ul
-            class="native-bottom-nav__sheet-list min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2"
-          >
+          <ul :class="sheetListClass">
             <li v-for="item in moreItems" :key="item.href">
               <NuxtLink
                 :to="item.href"
@@ -146,7 +133,7 @@
             </li>
           </ul>
 
-          <div class="shrink-0 border-t border-gray-100/90 px-2 py-2 dark:border-gray-800/80">
+          <div :class="sheetFooterClass">
             <button
               type="button"
               :class="[sheetRowClass, 'w-full text-red-600 dark:text-red-400']"
@@ -192,7 +179,14 @@ const {
   tabInactiveClass,
   tabActiveClass,
   tabIndicatorClass,
+  sheetBackdropClass,
   sheetClass,
+  sheetHeaderClass,
+  sheetHandleClass,
+  sheetEyebrowClass,
+  sheetTitleClass,
+  sheetListClass,
+  sheetFooterClass,
   sheetRowClass,
   sheetRowActiveClass,
   sheetRowInactiveClass,

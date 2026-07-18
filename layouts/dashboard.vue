@@ -26,16 +26,15 @@
     <!-- Sidebar (web / tablet — native app uses bottom nav) -->
     <aside
       v-if="!isNativeApp"
-      class="dashboard-sidebar"
+      class="dashboard-sidebar dash-sidebar"
       :class="[
-        /* z above DashboardFixedFooter (z-50) so collapsed-nav + sign-out tooltips paint over the pagination bar */
-        'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col border-r border-gray-200/50 bg-gray-50/98 backdrop-blur-xl transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:border-white/[0.06] dark:!bg-dashboard-card/95 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-[55] flex max-lg:transform-gpu max-lg:will-change-transform lg:will-change-auto flex-col transition-[transform,width] max-lg:duration-[420ms] max-lg:ease-[cubic-bezier(0.16,1,0.3,1)] lg:duration-300 lg:ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         effectiveSidebarCollapsed ? 'w-[72px]' : 'w-64',
       ]"
     >
       <!-- Logo / Brand -->
-      <div :class="sidebarLogoBarClass">
+      <div :class="['dash-sidebar__logo-bar', sidebarLogoBarClass]">
         <NuxtLink
           :to="dashPath('')"
           :class="[
@@ -74,7 +73,7 @@
 
       <!-- Navigation -->
       <nav
-        class="relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-1"
+        class="dash-sidebar__nav relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain py-1"
         :class="effectiveSidebarCollapsed ? 'px-1.5' : 'px-2'"
       >
         <div class="min-h-0 space-y-0">
@@ -224,7 +223,7 @@
           <!-- Stores (super admins) -->
           <div
             v-if="userStore.isSuperAdmin && !effectiveSidebarCollapsed"
-            class="mt-1.5 rounded-xl border-0 bg-gray-50/95 p-1.5 dark:bg-white/[0.04]"
+            class="dash-sidebar__branches mt-1.5 rounded-xl border-0 p-1.5"
           >
             <button
               type="button"
@@ -447,64 +446,47 @@
 
       <!-- Bottom: user + sign out -->
       <div
-        class="shrink-0 border-t border-gray-200/35 bg-white/30 backdrop-blur-md dark:border-white/[0.06] dark:bg-white/[0.02]"
+        class="dash-sidebar__footer"
         :class="effectiveSidebarCollapsed ? 'px-1.5 pb-2.5 pt-2.5' : 'px-2.5 pb-3 pt-2.5'"
       >
         <div
-          class="rounded-lg bg-white p-2.5 dark:!bg-dashboard-card"
-          :class="effectiveSidebarCollapsed ? 'px-1.5' : ''"
+          class="dash-sidebar__user"
+          :class="effectiveSidebarCollapsed ? 'dash-sidebar__user--collapsed group' : ''"
         >
-          <div
-            class="flex items-center gap-2.5"
-            :class="effectiveSidebarCollapsed ? 'relative justify-center group' : ''"
-          >
-            <div
-              class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary-400 via-primary-500 to-primary-700 text-[11px] font-bold text-white ring-1 ring-inset ring-white/25 dark:ring-white/15"
-            >
-              <span
-                class="pointer-events-none absolute inset-0 bg-linear-to-t from-black/15 to-transparent"
-                aria-hidden="true"
-              />
-              <span class="relative">{{ userInitials }}</span>
-            </div>
-            <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
-              <p
-                class="truncate text-xs font-semibold leading-tight tracking-tight text-gray-900 dark:text-gray-100"
-              >
-                {{ userName }}
-              </p>
-              <p class="mt-0.5 truncate text-[10px] leading-snug text-gray-500 dark:text-gray-400">
-                {{ userEmail }}
-              </p>
-            </div>
-            <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-              {{ userName }}
-              <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{
-                userEmail
-              }}</span>
-            </DashboardHoverTooltip>
+          <div class="dash-sidebar__avatar">
+            <span class="relative">{{ userInitials }}</span>
           </div>
-          <button
-            @click="handleSignOut"
-            :class="[
-              'mt-2.5 flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium transition-colors',
-              effectiveSidebarCollapsed ? 'relative group' : 'px-1',
-              'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/[0.04] dark:hover:text-gray-200',
-            ]"
-          >
-            <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 opacity-80" stroke-width="1.75" />
-            <span v-if="!effectiveSidebarCollapsed">Sign out</span>
-            <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
-              Sign out
-            </DashboardHoverTooltip>
-          </button>
-          <p
-            class="mt-2 text-[9px] tabular-nums tracking-wide text-gray-400 dark:text-gray-500"
-            :class="effectiveSidebarCollapsed ? 'text-center' : 'text-left'"
-          >
-            V{{ appVersion }}
-          </p>
+          <div v-if="!effectiveSidebarCollapsed" class="min-w-0 flex-1">
+            <p class="dash-sidebar__user-name">{{ userName }}</p>
+            <p class="dash-sidebar__user-email">{{ userEmail }}</p>
+          </div>
+          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
+            {{ userName }}
+            <span class="mt-0.5 block text-[11px] font-normal text-gray-400">{{
+              userEmail
+            }}</span>
+          </DashboardHoverTooltip>
         </div>
+        <button
+          type="button"
+          @click="handleSignOut"
+          :class="[
+            'dash-sidebar__sign-out',
+            effectiveSidebarCollapsed ? 'relative group' : '',
+          ]"
+        >
+          <ArrowRightOnRectangleIcon class="h-4 w-4 shrink-0 opacity-80" stroke-width="1.75" />
+          <span v-if="!effectiveSidebarCollapsed">Sign out</span>
+          <DashboardHoverTooltip v-if="effectiveSidebarCollapsed">
+            Sign out
+          </DashboardHoverTooltip>
+        </button>
+        <p
+          class="dash-sidebar__version"
+          :class="effectiveSidebarCollapsed ? 'dash-sidebar__version--center' : ''"
+        >
+          V{{ appVersion }}
+        </p>
       </div>
     </aside>
 
@@ -537,7 +519,7 @@
       <!-- Top Navigation (fixed so it stays visible when scrolling) -->
       <header
         :class="[
-          'dashboard-top-nav fixed top-0 right-0 isolate border-b border-gray-200/45 bg-white/92 backdrop-blur-xl dark:border-white/[0.06] dark:bg-[#0a0c12]/92',
+          'dash-topnav dashboard-top-nav fixed top-0 right-0 isolate',
           isNativeApp
             ? 'dashboard-top-nav-native left-0 z-[54]'
             : [
@@ -557,7 +539,7 @@
           <button
             v-if="!isNativeApp"
             type="button"
-            class="dashboard-sidebar-open-trigger group flex h-8 shrink-0 items-center gap-0.5 rounded-lg /55 bg-white/90 py-1 pl-1.5 pr-2 text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/[0.08] dark:bg-white/[0.05] dark:text-gray-300 dark:hover:bg-white/[0.08] lg:hidden"
+            class="dashboard-sidebar-open-trigger group flex h-8 shrink-0 items-center gap-0.5 py-1 pl-1.5 pr-2 lg:hidden"
             aria-label="Open menu"
             @click="sidebarOpen = true"
           >
@@ -596,11 +578,7 @@
 
           <!-- Page title -->
           <div v-else class="hidden min-w-0 shrink-0 md:block lg:min-w-[7.5rem]">
-            <p
-              class="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-            >
-              Workspace
-            </p>
+            <p class="dash-topnav__eyebrow">Workspace</p>
             <div class="mt-0.5 flex min-w-0 items-center gap-1.5">
               <component
                 :is="currentPageIcon"
@@ -608,11 +586,7 @@
                 stroke-width="1.75"
                 aria-hidden="true"
               />
-              <h1
-                class="min-w-0 truncate text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-100"
-              >
-                {{ currentPageName }}
-              </h1>
+              <h1 class="dash-topnav__title">{{ currentPageName }}</h1>
             </div>
           </div>
 
@@ -620,7 +594,7 @@
           <button
             v-if="!isNativeApp"
             type="button"
-            class="dashboard-topnav-search group relative hidden h-8 min-w-0 flex-1 items-center gap-2 rounded-lg border border-transparent bg-gray-100/70 px-2.5 text-gray-600 transition-colors hover:border-gray-200/60 hover:bg-white focus:outline-none focus-visible:border-primary-500/30 focus-visible:ring-2 focus-visible:ring-primary-500/20 dark:bg-white/[0.04] dark:text-gray-300 dark:hover:border-white/[0.08] dark:hover:bg-white/[0.06] md:flex md:max-w-[16rem] lg:max-w-[18rem] xl:max-w-[20rem]"
+            class="dash-topnav__search dashboard-topnav-search group relative hidden h-8 min-w-0 flex-1 items-center gap-2 px-2.5 md:flex md:max-w-[16rem] lg:max-w-[18rem] xl:max-w-[20rem]"
             @click="searchStore.openSearch()"
           >
             <MagnifyingGlassIcon
@@ -643,21 +617,18 @@
 
           <!-- Actions toolbar -->
           <div
-            class="dashboard-topnav-actions relative z-10 ml-auto flex shrink-0 items-center gap-1 rounded-xl bg-gray-50/80 p-0.5 backdrop-blur-sm dark:border-white/[0.07] dark:bg-white/[0.03] sm:gap-0.5 sm:p-1"
+            class="dash-topnav__actions dashboard-topnav-actions relative z-10 ml-auto flex shrink-0 items-center"
           >
             <button
               type="button"
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200 md:hidden"
+              class="dash-topnav__icon-btn md:hidden"
               aria-label="Search"
               @click="searchStore.openSearch()"
             >
               <MagnifyingGlassIcon class="h-4 w-4" stroke-width="1.75" />
             </button>
 
-            <span
-              class="hidden h-4 w-px shrink-0 bg-gray-200/70 dark:bg-white/10 md:block"
-              aria-hidden="true"
-            />
+            <span class="dash-topnav__divider hidden md:block" aria-hidden="true" />
 
             <StoreSelector
               v-if="userStore.userData?.role === 'superAdmin'"
@@ -669,7 +640,7 @@
             <div class="relative z-[130] h-8 w-8 shrink-0" ref="notificationsRef">
               <button
                 type="button"
-                class="group relative inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.06] dark:hover:text-gray-200"
+                class="dash-topnav__icon-btn group relative inline-flex cursor-pointer"
                 aria-label="Notifications"
                 :aria-expanded="notificationsOpen"
                 aria-haspopup="true"
@@ -687,28 +658,28 @@
                 </span>
               </button>
               <Transition
-                enter-active-class="transition ease-out duration-150"
-                enter-from-class="opacity-0 scale-95"
-                enter-to-class="opacity-100 scale-100"
-                leave-active-class="transition ease-in duration-100"
-                leave-from-class="opacity-100 scale-100"
-                leave-to-class="opacity-0 scale-95"
+                enter-active-class="transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                enter-from-class="opacity-0 translate-y-1 scale-[0.98]"
+                enter-to-class="opacity-100 translate-y-0 scale-100"
+                leave-active-class="transition-[opacity,transform] duration-150 ease-in"
+                leave-from-class="opacity-100 translate-y-0 scale-100"
+                leave-to-class="opacity-0 translate-y-0.5 scale-[0.99]"
               >
-                <div
-                  v-if="notificationsOpen"
-                  ref="notificationsPanelRef"
-                  class="absolute right-0 top-[calc(100%+0.375rem)] z-[140] w-80 max-w-[calc(100vw-1.5rem)] origin-top-right pointer-events-auto"
-                  @click.stop
-                >
-                  <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
-                </div>
+                <Teleport to="body">
+                  <div
+                    v-if="notificationsOpen"
+                    ref="notificationsPanelRef"
+                    :style="notificationsPanelStyle"
+                    class="pointer-events-auto origin-top-right"
+                    @click.stop
+                  >
+                    <NotificationsPanel variant="dropdown" @close="notificationsOpen = false" />
+                  </div>
+                </Teleport>
               </Transition>
             </div>
 
-            <span
-              class="hidden h-4 w-px shrink-0 bg-gray-200/70 dark:bg-white/10 sm:block"
-              aria-hidden="true"
-            />
+            <span class="dash-topnav__divider hidden sm:block" aria-hidden="true" />
 
             <DashboardProfileMenu
               :user-name="userName"
@@ -815,7 +786,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import {
   XMarkIcon,
   HomeIcon,
@@ -932,12 +903,47 @@ function closeMobileSidebarOverlay() {
 const notificationsOpen = ref(false)
 const notificationsRef = ref<HTMLElement | null>(null)
 const notificationsPanelRef = ref<HTMLElement | null>(null)
-/** Never block the whole shell on auth — show UI with a short gate only (Capacitor-safe). */
-const checkingAuth = ref(false)
+const notificationsPanelStyle = ref<Record<string, string>>({})
+
+function positionNotificationsPanel() {
+  if (!import.meta.client || !notificationsOpen.value || !notificationsRef.value) return
+  const rect = notificationsRef.value.getBoundingClientRect()
+  const gap = 8
+  const margin = 12
+  const panelWidth = Math.min(320, window.innerWidth - margin * 2)
+  let right = window.innerWidth - rect.right
+  const leftEdge = window.innerWidth - right - panelWidth
+  if (leftEdge < margin) {
+    right = Math.max(margin, window.innerWidth - panelWidth - margin)
+  }
+  notificationsPanelStyle.value = {
+    position: 'fixed',
+    top: `${Math.round(rect.bottom + gap)}px`,
+    right: `${Math.round(right)}px`,
+    left: 'auto',
+    width: `${Math.round(panelWidth)}px`,
+    maxWidth: `calc(100vw - ${margin * 2}px)`,
+    zIndex: '140',
+  }
+}
+
+function onNotificationsScrollOrResize() {
+  if (notificationsOpen.value) positionNotificationsPanel()
+}
 
 const toggleNotifications = () => {
   notificationsOpen.value = !notificationsOpen.value
 }
+
+watch(notificationsOpen, async (isOpen) => {
+  if (!import.meta.client || !isOpen) return
+  await nextTick()
+  positionNotificationsPanel()
+  requestAnimationFrame(() => positionNotificationsPanel())
+})
+
+/** Never block the whole shell on auth — show UI with a short gate only (Capacitor-safe). */
+const checkingAuth = ref(false)
 
 // Track store switching state
 const switchingStore = ref(false)
@@ -979,28 +985,18 @@ const sidebarLogoSrc = computed(() => {
   return actualTheme.value === 'dark' ? '/storvv logo.png' : '/storvv logo 2.png'
 })
 
-const sidebarLogoBarClass = computed(() => {
-  /** Fixed height: logo uses scale inside this strip so the row never grows. */
-  const bar =
-    'flex h-12 min-h-[3rem] shrink-0 items-center justify-between overflow-visible border-b border-gray-200/40 bg-gray-50/90 px-3 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]'
-  return [bar]
-})
+const sidebarLogoBarClass = computed(() => '')
 
 const sidebarLogoImgClass = computed(() => {
   const base =
-    'shrink-0 object-contain transition-[height,width,max-width,transform] duration-300 ease-in-out will-change-transform'
+    'shrink-0 object-contain transition-[height,width,max-width] duration-300 ease-in-out'
   if (effectiveSidebarCollapsed.value) {
-    return [
-      base,
-      'mx-auto object-center',
-      'h-8 w-8 max-h-8 max-w-8 origin-center scale-110 sm:scale-125',
-    ]
+    return [base, 'mx-auto object-center h-7 w-7 max-h-7 max-w-7']
   }
   return [
     base,
-    'object-left origin-left',
-    'h-8 w-auto max-h-8 max-w-[calc(100%-0.5rem)] sm:h-9 sm:max-h-9',
-    'scale-110 sm:scale-125 lg:scale-[1.32]',
+    'object-left',
+    'h-8 w-auto max-h-8 max-w-[calc(100%-0.5rem)]',
   ]
 })
 
@@ -1903,6 +1899,8 @@ const checkAuth = async () => {
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   if (import.meta.client) {
+    window.addEventListener('resize', onNotificationsScrollOrResize)
+    window.addEventListener('scroll', onNotificationsScrollOrResize, true)
     await checkAuth()
 
     // Initialize cache from localStorage after auth loads
@@ -2041,5 +2039,9 @@ watch(
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  if (import.meta.client) {
+    window.removeEventListener('resize', onNotificationsScrollOrResize)
+    window.removeEventListener('scroll', onNotificationsScrollOrResize, true)
+  }
 })
 </script>

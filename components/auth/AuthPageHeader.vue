@@ -1,36 +1,15 @@
 <template>
-  <div
-    :class="[
-      authEntranceClass(entranceDelay),
-      'auth-page-header mb-8 text-center lg:mb-9 lg:text-left',
-    ]"
-  >
+  <div :class="authEntranceClass(entranceDelay) + ' auth-page-header'">
     <a
       v-if="showMobileLogo"
       href="https://www.storvv.com"
-      class="mb-5 inline-block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/50 focus-visible:ring-offset-2 lg:hidden dark:focus-visible:ring-offset-dashboard-canvas"
+      class="auth-page-header__mobile-logo lg:hidden"
     >
-      <img
-        :src="logoSource"
-        alt="Storvv"
-        class="mx-auto h-7 w-auto max-w-[120px] shrink-0 object-contain sm:h-8"
-      />
+      <img :src="logoSource" alt="Storvv" width="140" height="40" />
     </a>
-    <p
-      v-if="eyebrow"
-      class="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-600 dark:text-primary-400"
-    >
-      {{ eyebrow }}
-    </p>
-    <h1
-      class="mt-1.5 text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-2xl"
-    >
-      {{ title }}
-    </h1>
-    <p
-      v-if="$slots.default"
-      class="mt-2.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400"
-    >
+    <p v-if="eyebrow" class="auth-page-header__eyebrow">{{ eyebrow }}</p>
+    <h1 class="auth-page-header__title">{{ title }}</h1>
+    <p v-if="$slots.default" class="auth-page-header__lede">
       <slot />
     </p>
   </div>

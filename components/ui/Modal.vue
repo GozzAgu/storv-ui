@@ -126,7 +126,7 @@ const teleportTarget = computed(() =>
 
 const {
   backdropClass,
-  shellClass,
+  modalShellClass,
   headerClass,
   bodyClass,
   footerClass,
@@ -168,14 +168,13 @@ const dialogClass = computed(() =>
   nativeInApp.value
     ? [
         'pointer-events-auto relative flex max-h-full w-full min-h-0 flex-col overflow-hidden',
-        shellClass,
-        'rounded-xl',
+        modalShellClass,
         sizeClasses.value,
       ]
     : [
         'pointer-events-auto relative max-h-[min(92dvh,calc(100dvh-1rem))]',
-        shellClass,
-        'rounded-t-xl sm:rounded-xl',
+        modalShellClass,
+        'rounded-t-2xl sm:rounded-2xl',
         sizeClasses.value,
       ]
 )

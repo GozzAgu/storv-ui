@@ -1,123 +1,107 @@
 <template>
-  <div class="ldg w-full max-w-none space-y-6 pb-10 sm:space-y-7">
+  <div :class="pageClass">
     <Tutorial :tutorial-steps="tutorialSteps" @complete="onTutorialComplete" />
 
-    <header data-tutorial="dashboard" class="ldg-tear flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between">
+    <header data-tutorial="dashboard" :class="pageHeaderClass">
       <div class="min-w-0">
-        <p class="ldg-eyebrow">Store ledger</p>
-        <h1 class="ldg-display mt-1 text-xl text-[#1C1B19] dark:text-[#F2EFE9] sm:text-[1.7rem]">
-          Welcome back, {{ userName }}
-        </h1>
-        <p class="mt-1.5 text-sm text-[#706A5C] dark:text-[#A39C8E]">
-          <span class="font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ currentStoreLabel }}</span>
-          <span v-if="userRoleLabel" class="text-[#B7AF9E] dark:text-[#5C574C]"> · </span>
-          <span v-if="userRoleLabel">{{ userRoleLabel }}</span>
-          <span class="text-[#B7AF9E] dark:text-[#5C574C]"> · </span>
-          <span class="ldg-num">{{ totalOrders }} receipts</span>
+        <p :class="eyebrowClass">Overview</p>
+        <h1 :class="pageTitleClass">Welcome back, {{ userName }}</h1>
+        <p :class="pageMetaClass">
+          <strong>{{ currentStoreLabel }}</strong>
+          <span v-if="userRoleLabel"> · {{ userRoleLabel }}</span>
+          <span> · </span>
+          <span :class="numClass">{{ totalOrders }} receipts</span>
         </p>
       </div>
     </header>
 
-    <div
-      v-if="needsStoreSelection && !isLoading"
-      class="rounded-lg border border-dashed border-[#C99A4A]/50 bg-[#C99A4A]/[0.06] px-5 py-8 text-center dark:border-[#E0AD5F]/40 dark:bg-[#E0AD5F]/[0.05] sm:px-8"
-    >
-      <BuildingStorefrontIcon class="mx-auto mb-3 h-8 w-8 text-[#A9762E] dark:text-[#E0AD5F]" stroke-width="1.5" />
-      <p class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Select a store to load your dashboard</p>
-      <p class="mx-auto mt-1 max-w-md text-xs text-[#8A8172] dark:text-[#A39C8E]">
+    <div v-if="needsStoreSelection && !isLoading" :class="stateCardClass">
+      <BuildingStorefrontIcon class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]" stroke-width="1.5" />
+      <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
+        Select a store to load your dashboard
+      </p>
+      <p :class="['dash-state-card__desc', cardDescClass]">
         Choose a branch from the store selector in the top bar. Metrics, charts, and alerts are scoped to the active
         store.
       </p>
-      <NuxtLink
-        to="/dashboard/settings"
-        class="mt-4 inline-block text-xs font-medium text-[#A9762E] underline underline-offset-2 dark:text-[#E0AD5F]"
-      >
+      <NuxtLink to="/dashboard/settings" :class="[linkClass, 'mt-4 inline-block']">
         Manage stores in Settings
       </NuxtLink>
     </div>
 
     <template v-else-if="isLoading">
-      <div class="ldg-card p-4">
+      <div :class="cardPaddedClass">
         <div class="mb-3 flex items-center justify-between">
-          <div class="h-3 w-32 animate-pulse rounded bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
-          <div class="h-3 w-20 animate-pulse rounded bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
+          <div class="dash-skeleton h-3 w-32" />
+          <div class="dash-skeleton h-3 w-20" />
         </div>
-        <div class="h-2 w-full animate-pulse rounded-full bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]" />
+        <div class="dash-skeleton dash-skeleton--bar" />
       </div>
 
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
-        <div
-          v-for="i in 5"
-          :key="`kpi-${i}`"
-          class="h-[5.5rem] animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] sm:h-[6rem]"
-        />
+      <div :class="kpiGridClass">
+        <div v-for="i in 5" :key="`kpi-${i}`" class="dash-skeleton dash-skeleton--kpi" />
       </div>
 
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
-        <div class="h-72 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] lg:col-span-8" />
-        <div class="h-72 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06] lg:col-span-4" />
+      <div :class="chartsGridClass">
+        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__main" />
+        <div class="dash-skeleton dash-skeleton--panel dash-charts-grid__side" />
       </div>
 
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
-        <div
-          v-for="i in 3"
-          :key="`panel-${i}`"
-          class="h-56 animate-pulse rounded-lg bg-[#1C1B19]/[0.06] dark:bg-white/[0.06]"
-        />
+      <div :class="tripleGridClass">
+        <div v-for="i in 3" :key="`panel-${i}`" class="dash-skeleton dash-skeleton--panel" />
       </div>
     </template>
 
     <template v-else>
-      <!-- Inventory health -->
-      <section class="ldg-card p-4">
-        <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+      <section :class="cardPaddedClass">
+        <div :class="cardHeaderClass">
           <div>
-            <p class="ldg-eyebrow">Inventory health</p>
-            <p class="mt-1 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">
-              <span class="ldg-num">{{ inStockCount }}</span> available units ·
-              <span class="ldg-num">{{ outOfStockCount }}</span> sold ·
-              <span class="ldg-num">{{ lowStockItems.length }}</span> low-stock lines
+            <p :class="eyebrowClass">Inventory health</p>
+            <p :class="cardDescClass">
+              <span :class="numClass">{{ inStockCount }}</span> available units ·
+              <span :class="numClass">{{ outOfStockCount }}</span> sold ·
+              <span :class="numClass">{{ lowStockItems.length }}</span> low-stock lines
             </p>
           </div>
-          <NuxtLink
-            to="/dashboard/inventory"
-            class="text-xs font-medium text-[#A9762E] underline underline-offset-2 dark:text-[#E0AD5F]"
-          >
-            Open inventory
-          </NuxtLink>
+          <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Open inventory</NuxtLink>
         </div>
-        <div class="flex h-1.5 gap-px overflow-hidden rounded-full bg-[#1C1B19]/[0.07] dark:bg-white/[0.08]">
-          <div class="bg-[#3F8F7C] transition-all dark:bg-[#5FC2A8]" :style="{ width: `${inStockPercentage}%` }" title="Available" />
-          <div class="bg-[#B9791C] transition-all dark:bg-[#E3A94C]" :style="{ width: `${lowStockPercentage}%` }" title="Low stock" />
-          <div class="bg-[#B7AF9E] transition-all dark:bg-[#5C574C]" :style="{ width: `${soldPercentage}%` }" title="Sold" />
+        <div :class="progressClass">
+          <div
+            class="dash-progress__segment--available transition-all"
+            :style="{ width: `${inStockPercentage}%` }"
+            title="Available"
+          />
+          <div
+            class="dash-progress__segment--low transition-all"
+            :style="{ width: `${lowStockPercentage}%` }"
+            title="Low stock"
+          />
+          <div
+            class="dash-progress__segment--sold transition-all"
+            :style="{ width: `${soldPercentage}%` }"
+            title="Sold"
+          />
         </div>
-        <div class="mt-2 flex flex-wrap justify-between gap-2 text-[10px] text-[#8A8172] dark:text-[#A39C8E] sm:text-[11px]">
-          <span class="ldg-num">{{ inStockPercentage }}% available</span>
-          <span class="ldg-num">{{ soldPercentage }}% sold through</span>
-          <span class="ldg-num">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
+        <div :class="progressLegendClass">
+          <span :class="numClass">{{ inStockPercentage }}% available</span>
+          <span :class="numClass">{{ soldPercentage }}% sold through</span>
+          <span :class="numClass">{{ formatCurrency(inventoryTotalValue) }} on hand (book)</span>
         </div>
       </section>
 
-      <!-- Attention -->
-      <ul v-if="attentionItems.length > 0" class="flex flex-col gap-2">
-        <li
-          v-for="alert in attentionItemsTop"
-          :key="alert.id"
-          class="flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2 text-xs"
-          :class="alertRowClass(alert.level)"
-        >
-          <span class="text-[#4A453B] dark:text-[#C9C3B6]">
-            <span class="font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ alert.title }}.</span>
+      <ul v-if="attentionItems.length > 0" :class="alertListClass">
+        <li v-for="alert in attentionItemsTop" :key="alert.id" :class="alertClass(alert.level)">
+          <span class="dash-alert__text">
+            <strong>{{ alert.title }}.</strong>
             {{ alert.description }}
           </span>
-          <NuxtLink :to="alert.href" class="shrink-0 font-medium text-[#1C1B19] underline underline-offset-2 dark:text-[#F2EFE9]">
+          <NuxtLink :to="alert.href" :class="['dash-alert__link', cardLinkClass, '!text-[inherit]']">
             {{ alert.cta }}
           </NuxtLink>
         </li>
       </ul>
 
-      <!-- KPI grid -->
-      <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
+      <div :class="kpiGridClass">
         <StatCard
           label="Total revenue"
           :value="formatCurrency(totalRevenue)"
@@ -126,254 +110,215 @@
           :change-positive="revenueChangePositive"
           :sparkline-data="statCardRevenueSparkline.length > 1 ? statCardRevenueSparkline : undefined"
         />
-        <StatCard label="Orders today" :value="todayReceiptsCount.toString()" :subtext="`${formatCurrency(todaySales)} revenue`" />
+        <StatCard
+          label="Orders today"
+          :value="todayReceiptsCount.toString()"
+          :subtext="`${formatCurrency(todaySales)} revenue`"
+        />
         <StatCard
           label="Customers"
           :value="totalCustomers.toString()"
           :subtext="`${newCustomersToday} active today`"
-          :subtext-class="
-            newCustomersToday > 0
-              ? 'text-[#3F8F7C] dark:text-[#5FC2A8] text-xs font-medium'
-              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
-          "
+          :subtext-class="newCustomersToday > 0 ? 'success' : ''"
         />
         <StatCard
           label="Low stock signals"
           :value="lowStockItems.length.toString()"
           :subtext="lowStockItems.length > 0 ? 'Review restocking' : 'Within thresholds'"
-          :subtext-class="
-            lowStockItems.length > 0
-              ? 'text-[#B9791C] dark:text-[#E3A94C] text-xs font-medium'
-              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
-          "
+          :subtext-class="lowStockItems.length > 0 ? 'warning' : ''"
         />
         <StatCard
           label="Outstanding"
           :value="formatCurrency(outstandingBalanceTotal)"
           :subtext="`${outstandingCount} open balance${outstandingCount === 1 ? '' : 's'}`"
-          :subtext-class="
-            outstandingCount > 0
-              ? 'text-[#B9791C] dark:text-[#E3A94C] text-xs font-medium'
-              : 'text-[#8A8172] dark:text-[#A39C8E] text-xs'
-          "
+          :subtext-class="outstandingCount > 0 ? 'warning' : ''"
         />
       </div>
 
-      <!-- Chart + payment mix -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-12">
-        <Card padding="sm" extra-class="!p-0 overflow-hidden lg:col-span-8 ldg-card">
-          <div class="ldg-tear flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div :class="chartsGridClass">
+        <section :class="[cardFlushClass, 'dash-charts-grid__main overflow-hidden']">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact !mb-0 px-4 py-3 sm:flex-row sm:items-center']">
             <div>
-              <h2 class="ldg-display text-xs text-[#1C1B19] dark:text-[#F2EFE9] sm:text-sm">Revenue performance</h2>
-              <p class="mt-0.5 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">{{ chartSubtitle }}</p>
+              <h2 :class="cardTitleClass">Revenue performance</h2>
+              <p :class="cardDescClass">{{ chartSubtitle }}</p>
             </div>
-            <div class="inline-flex w-fit shrink-0 rounded-md bg-[#1C1B19]/[0.04] p-0.5 dark:bg-white/[0.04]" role="group" aria-label="Chart period">
+            <div :class="segmentGroupClass" role="group" aria-label="Chart period">
               <button
                 v-for="opt in chartPeriodOptions"
                 :key="opt.value"
                 type="button"
-                class="rounded px-2.5 py-1 text-xs font-medium transition-colors"
-                :class="
-                  chartView === opt.value
-                    ? 'bg-white text-[#1C1B19] shadow-sm dark:bg-white/10 dark:text-[#F2EFE9]'
-                    : 'text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]'
-                "
+                :class="[segmentBtnClass, chartView === opt.value ? segmentBtnActiveClass : '']"
                 @click="chartView = opt.value"
               >
                 {{ opt.label }}
               </button>
             </div>
           </div>
-          <div class="relative h-[11rem] px-2 pb-3 pt-1 sm:h-[14rem] sm:px-3 lg:h-[15rem]">
-            <div v-if="chartData.length === 0" class="flex h-full flex-col items-center justify-center text-center">
-              <ChartBarIcon class="mb-2 h-8 w-8 text-[#B7AF9E]" stroke-width="1.5" />
-              <p class="text-sm font-medium text-[#4A453B] dark:text-[#C9C3B6]">No revenue data yet</p>
-              <p class="text-xs text-[#8A8172] dark:text-[#A39C8E]">Completed receipts will populate this chart</p>
+          <div :class="['dash-chart-wrap', chartData.length === 0 ? 'flex items-center justify-center' : '']">
+            <div v-if="chartData.length === 0" class="text-center">
+              <ChartBarIcon class="mx-auto mb-2 h-8 w-8 opacity-40" stroke-width="1.5" />
+              <p :class="cardTitleClass">No revenue data yet</p>
+              <p :class="cardDescClass">Completed receipts will populate this chart</p>
             </div>
             <ClientOnly v-else>
               <apexchart type="area" :height="chartHeight" :options="chartOptions" :series="chartSeries" />
               <template #fallback>
-                <div class="flex h-full items-center justify-center text-xs text-[#8A8172]">Loading chart…</div>
+                <div :class="emptyClass">Loading chart…</div>
               </template>
             </ClientOnly>
           </div>
-        </Card>
+        </section>
 
-        <div class="ldg-card flex flex-col p-4 lg:col-span-4">
-          <p class="ldg-eyebrow">Payment methods</p>
-          <p class="mt-1 text-[11px] text-[#8A8172] dark:text-[#A39C8E]">Share of completed receipts by tender type</p>
-          <div v-if="paymentMethodBreakdown.length === 0" class="mt-4 text-xs text-[#8A8172] dark:text-[#A39C8E]">
+        <section :class="[cardPaddedClass, 'dash-charts-grid__side flex flex-col']">
+          <p :class="eyebrowClass">Payment methods</p>
+          <p :class="cardDescClass">Share of completed receipts by tender type</p>
+          <div v-if="paymentMethodBreakdown.length === 0" :class="['dash-empty', 'mt-4']">
             No completed sales to analyze yet.
           </div>
-          <ul v-else class="mt-4 space-y-3">
+          <ul v-else :class="barListClass">
             <li v-for="slice in paymentMethodsTop" :key="slice.method">
-              <div class="mb-1 flex items-baseline justify-between gap-2 text-xs">
-                <span class="font-medium text-[#4A453B] dark:text-[#C9C3B6]">{{ slice.label }}</span>
-                <span class="ldg-num shrink-0 text-[#8A8172] dark:text-[#A39C8E]">
+              <div :class="['dash-bar-row__head', numClass]">
+                <span :class="['dash-bar-row__label', cardTitleClass, '!text-xs']">{{ slice.label }}</span>
+                <span :class="['dash-bar-row__meta', numClass]">
                   {{ slice.share }}% · {{ formatCurrency(slice.revenue) }}
                 </span>
               </div>
-              <div class="h-1.5 overflow-hidden rounded-full bg-[#1C1B19]/[0.06] dark:bg-white/[0.08]">
-                <div class="h-full rounded-full bg-[#C99A4A]/70 transition-all dark:bg-[#E0AD5F]/60" :style="{ width: `${Math.max(slice.share, 2)}%` }" />
+              <div :class="barTrackClass">
+                <div
+                  :class="barFillClass"
+                  :style="{ width: `${Math.max(slice.share, 2)}%` }"
+                />
               </div>
-              <p class="ldg-num mt-0.5 text-[10px] text-[#B7AF9E] dark:text-[#5C574C]">
+              <p :class="['dash-bar-row__foot', numClass]">
                 {{ slice.count }} receipt{{ slice.count === 1 ? '' : 's' }}
               </p>
             </li>
           </ul>
-        </div>
+        </section>
       </div>
 
-      <PaymentLinksSummaryCard v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon" card-class="ldg-card p-4" />
+      <PaymentLinksSummaryCard
+        v-if="canUseSubscriptionFeature('payment_links') || showNativeComingSoon"
+        card-class="dash-card dash-card--padded"
+      />
 
-      <!-- Business metrics -->
-      <section class="ldg-card p-4">
-        <div class="mb-3 flex items-center justify-between gap-2">
-          <p class="ldg-eyebrow">Business metrics</p>
-          <NuxtLink to="/dashboard/analytics" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
-            Full analytics
-          </NuxtLink>
+      <section :class="cardPaddedClass">
+        <div :class="cardHeaderClass">
+          <p :class="eyebrowClass">Business metrics</p>
+          <NuxtLink to="/dashboard/analytics" :class="cardLinkClass">Full analytics</NuxtLink>
         </div>
-        <dl class="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-3 lg:grid-cols-4">
-          <div
-            v-for="row in businessMetricsTop"
-            :key="row.label"
-            class="flex items-baseline justify-between gap-2 border-b border-dotted border-[#1C1B19]/10 pb-2 dark:border-white/10"
-          >
-            <dt class="text-xs text-[#8A8172] dark:text-[#A39C8E]">{{ row.label }}</dt>
-            <dd class="ldg-num text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ row.value }}</dd>
+        <dl :class="metricGridClass">
+          <div v-for="row in businessMetricsTop" :key="row.label" :class="metricRowClass">
+            <dt>{{ row.label }}</dt>
+            <dd :class="numClass">{{ row.value }}</dd>
           </div>
         </dl>
       </section>
 
-      <!-- Recent + top products -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
-        <section class="ldg-card p-4">
-          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
-            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Recent receipts</h2>
-            <NuxtLink to="/dashboard/receipts" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
-              View all
-            </NuxtLink>
+      <div :class="splitGridClass">
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Recent receipts</h2>
+            <NuxtLink to="/dashboard/receipts" :class="cardLinkClass">View all</NuxtLink>
           </div>
-          <div v-if="recentReceipts.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No receipts yet.</div>
-          <ul v-else class="mt-1 space-y-0">
-            <li
-              v-for="tx in recentReceiptsTop"
-              :key="tx.id"
-              class="flex items-center justify-between gap-3 border-b border-dotted border-[#1C1B19]/10 py-2.5 last:border-0 dark:border-white/10"
-            >
+          <div v-if="recentReceipts.length === 0" :class="emptyClass">No receipts yet.</div>
+          <ul v-else :class="listClass">
+            <li v-for="tx in recentReceiptsTop" :key="tx.id" :class="listRowClass">
               <div class="min-w-0">
-                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ tx.customerName }}</p>
-                <p class="mt-0.5 flex flex-wrap items-center gap-x-1 gap-y-0 text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">
-                  <span class="ldg-num font-medium text-[#8A8172] dark:text-[#A39C8E]">#{{ tx.receiptNumber }}</span>
-                  <span aria-hidden="true">·</span>
+                <p :class="['dash-list__primary', 'truncate']">{{ tx.customerName }}</p>
+                <p :class="['dash-list__secondary', numClass]">
+                  <span>#{{ tx.receiptNumber }}</span>
+                  <span aria-hidden="true"> · </span>
                   <span>{{ tx.paymentMethod }}</span>
-                  <span class="hidden sm:inline" aria-hidden="true">·</span>
+                  <span class="hidden sm:inline" aria-hidden="true"> · </span>
                   <span class="hidden sm:inline">{{ tx.statusLabel }}</span>
-                  <span aria-hidden="true">·</span>
-                  <span class="ldg-num shrink-0">{{ tx.time }}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{{ tx.time }}</span>
                 </p>
               </div>
-              <p class="ldg-num shrink-0 text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ tx.amount }}</p>
+              <p :class="['dash-list__value', numClass]">{{ tx.amount }}</p>
             </li>
           </ul>
         </section>
 
-        <section class="ldg-card p-4">
-          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
-            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Top products</h2>
-            <NuxtLink to="/dashboard/analytics" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
-              Analytics
-            </NuxtLink>
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Top products</h2>
+            <NuxtLink to="/dashboard/analytics" :class="cardLinkClass">Analytics</NuxtLink>
           </div>
-          <div v-if="topSellingItems.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No product sales yet.</div>
-          <ul v-else class="mt-1 space-y-0">
-            <li
-              v-for="item in topProductsTop"
-              :key="item.id"
-              class="flex items-center justify-between gap-3 border-b border-dotted border-[#1C1B19]/10 py-2.5 last:border-0 dark:border-white/10"
-            >
+          <div v-if="topSellingItems.length === 0" :class="emptyClass">No product sales yet.</div>
+          <ul v-else :class="listClass">
+            <li v-for="item in topProductsTop" :key="item.id" :class="listRowClass">
               <div class="min-w-0">
-                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ item.name }}</p>
-                <p class="ldg-num mt-0.5 text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">{{ item.sales }} sold</p>
+                <p :class="['dash-list__primary', 'truncate']">{{ item.name }}</p>
+                <p :class="['dash-list__secondary', numClass]">{{ item.sales }} sold</p>
               </div>
-              <p class="ldg-num shrink-0 text-xs font-semibold text-[#1C1B19] dark:text-[#F2EFE9]">{{ formatCurrency(item.revenue) }}</p>
+              <p :class="['dash-list__value', numClass]">{{ formatCurrency(item.revenue) }}</p>
             </li>
           </ul>
         </section>
       </div>
 
-      <!-- Low stock + activity + shortcuts -->
-      <div class="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:items-start">
-        <section class="ldg-card p-4 lg:col-span-1">
-          <div class="ldg-tear mb-2.5 flex items-center justify-between gap-2 pb-2.5">
-            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Low stock</h2>
+      <div :class="tripleGridClass">
+        <section :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Low stock</h2>
             <div class="flex items-center gap-2">
               <button
                 v-if="lowStockItems.length > 0"
                 type="button"
-                class="text-[11px] font-medium text-[#A9762E] hover:text-[#8A5F23] disabled:opacity-50 dark:text-[#E0AD5F]"
+                :class="[cardLinkClass, 'disabled:opacity-50']"
                 :disabled="reorderExporting"
                 @click="handleExportReorderList"
               >
                 {{ reorderExporting ? 'Exporting…' : 'Export reorder list' }}
               </button>
-              <NuxtLink to="/dashboard/inventory" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
-                Inventory
-              </NuxtLink>
+              <NuxtLink to="/dashboard/inventory" :class="cardLinkClass">Inventory</NuxtLink>
             </div>
           </div>
-          <div v-if="lowStockItems.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">All lines above threshold.</div>
-          <ul v-else class="mt-1 space-y-0">
-            <li
-              v-for="item in lowStockItemsTop"
-              :key="item.id"
-              class="flex items-baseline justify-between gap-2 border-b border-dotted border-[#1C1B19]/10 py-2 last:border-0 dark:border-white/10"
-            >
-              <p class="min-w-0 truncate text-xs text-[#4A453B] dark:text-[#C9C3B6]">{{ item.name }}</p>
-              <span class="ldg-num shrink-0 text-xs font-medium text-[#B9791C] dark:text-[#E3A94C]">
+          <div v-if="lowStockItems.length === 0" :class="emptyClass">All lines above threshold.</div>
+          <ul v-else :class="listClass">
+            <li v-for="item in lowStockItemsTop" :key="item.id" :class="listRowClass">
+              <p :class="['dash-list__primary', 'truncate', '!font-medium']">{{ item.name }}</p>
+              <span :class="['dash-list__value', 'dash-list__value--warning', numClass]">
                 {{ item.quantity }}<span v-if="!item.isSerialNumber"> / {{ item.threshold }}</span>
               </span>
             </li>
           </ul>
         </section>
 
-        <section v-if="canViewActivity" class="ldg-card p-4 lg:col-span-1">
-          <div class="ldg-tear mb-2.5 flex items-center justify-between pb-2.5">
-            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Recent activity</h2>
-            <NuxtLink to="/dashboard/activity" class="text-[11px] font-medium text-[#8A8172] hover:text-[#1C1B19] dark:text-[#A39C8E] dark:hover:text-[#F2EFE9]">
-              All logs
-            </NuxtLink>
+        <section v-if="canViewActivity" :class="cardPaddedClass">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Recent activity</h2>
+            <NuxtLink to="/dashboard/activity" :class="cardLinkClass">All logs</NuxtLink>
           </div>
-          <div v-if="recentActivityLogs.length === 0" class="py-2 text-xs text-[#8A8172] dark:text-[#A39C8E]">No activity logged yet.</div>
-          <ul v-else class="mt-1 space-y-0">
-            <li
-              v-for="log in recentActivityLogsTop"
-              :key="log.id"
-              class="flex gap-2 border-b border-dotted border-[#1C1B19]/10 py-2 last:border-0 dark:border-white/10"
-            >
-              <span class="self-start" :class="activityActionBadgeClass(log.action)">{{ activityActionLabel(log.action) }}</span>
+          <div v-if="recentActivityLogs.length === 0" :class="emptyClass">No activity logged yet.</div>
+          <ul v-else :class="listClass">
+            <li v-for="log in recentActivityLogsTop" :key="log.id" :class="[listRowClass, '!items-start gap-2']">
+              <span class="self-start" :class="activityActionBadgeClass(log.action)">
+                {{ activityActionLabel(log.action) }}
+              </span>
               <div class="min-w-0 flex-1">
-                <p class="truncate text-xs font-medium text-[#1C1B19] dark:text-[#F2EFE9]">{{ activityLogPreviewTitle(log) }}</p>
-                <p class="mt-0.5 truncate text-[11px] text-[#B7AF9E] dark:text-[#5C574C]">
+                <p :class="['dash-list__primary', 'truncate']">{{ activityLogPreviewTitle(log) }}</p>
+                <p :class="['dash-list__secondary', numClass]">
                   {{ activityEntityTypeLabel(log.entityType) }}
                   <span class="hidden sm:inline"> · {{ log.userDisplayName }}</span>
-                  · <span class="ldg-num">{{ formatActivityTime(log.createdAt) }}</span>
+                  · {{ formatActivityTime(log.createdAt) }}
                 </p>
               </div>
             </li>
           </ul>
         </section>
 
-        <section class="ldg-card p-4" :class="canViewActivity ? 'lg:col-span-1' : 'lg:col-span-2'">
-          <div class="ldg-tear mb-2.5 pb-2.5">
-            <h2 class="ldg-display text-sm text-[#1C1B19] dark:text-[#F2EFE9]">Shortcuts</h2>
+        <section :class="[cardPaddedClass, canViewActivity ? '' : 'dash-triple-grid__wide']">
+          <div :class="[cardHeaderClass, 'dash-card__header--compact']">
+            <h2 :class="cardTitleClass">Shortcuts</h2>
           </div>
-          <ul class="mt-1 space-y-0">
-            <li v-for="link in quickLinksTop" :key="link.href" class="border-b border-dotted border-[#1C1B19]/10 last:border-0 dark:border-white/10">
-              <NuxtLink :to="link.href" class="flex items-center justify-between gap-2 py-2.5 text-xs transition-colors hover:text-[#1C1B19] dark:hover:text-[#F2EFE9]">
-                <span class="font-medium text-[#4A453B] dark:text-[#C9C3B6]">{{ link.label }}</span>
-                <span class="text-[#B7AF9E] dark:text-[#5C574C]">→</span>
+          <ul :class="listClass">
+            <li v-for="link in quickLinksTop" :key="link.href" :class="listRowClass">
+              <NuxtLink :to="link.href" class="dash-shortcut-link w-full">
+                <span>{{ link.label }}</span>
+                <span aria-hidden="true">→</span>
               </NuxtLink>
             </li>
           </ul>
@@ -393,10 +338,10 @@ import {
   HomeIcon,
   ReceiptPercentIcon,
 } from '@heroicons/vue/24/outline'
-import Card from '~/components/ui/Card.vue'
 import StatCard from '~/components/ui/StatCard.vue'
 import PaymentLinksSummaryCard from '~/components/payments/PaymentLinksSummaryCard.vue'
 import Tutorial from '~/components/Tutorial.vue'
+import { useDashboardHomeChrome } from '~/composables/useDashboardHomeChrome'
 import { useReceiptsStore } from '~/stores/receipts'
 import { useInventoryStore } from '~/stores/inventory'
 import { useDepartmentsStore } from '~/stores/departments'
@@ -406,7 +351,7 @@ import { useStoresStore } from '~/stores/stores'
 import { useStaffStore } from '~/stores/staff'
 import { useThemeStore } from '~/stores/theme'
 import { usePreferences } from '~/composables/usePreferences'
-import { useDashboardInsights, type DashboardAlertLevel } from '~/composables/useDashboardInsights'
+import { useDashboardInsights } from '~/composables/useDashboardInsights'
 import { useAppToast } from '~/composables/useAppToast'
 import { useReorderListExport } from '~/composables/useReorderListExport'
 import {
@@ -424,6 +369,42 @@ definePageMeta({
   layout: 'dashboard',
   middleware: 'auth',
 })
+
+const {
+  pageClass,
+  cardPaddedClass,
+  cardFlushClass,
+  pageHeaderClass,
+  eyebrowClass,
+  pageTitleClass,
+  pageMetaClass,
+  linkClass,
+  cardHeaderClass,
+  cardTitleClass,
+  cardDescClass,
+  cardLinkClass,
+  kpiGridClass,
+  chartsGridClass,
+  splitGridClass,
+  tripleGridClass,
+  alertListClass,
+  progressClass,
+  progressLegendClass,
+  segmentGroupClass,
+  segmentBtnClass,
+  segmentBtnActiveClass,
+  listClass,
+  listRowClass,
+  metricGridClass,
+  metricRowClass,
+  barListClass,
+  barTrackClass,
+  barFillClass,
+  numClass,
+  emptyClass,
+  stateCardClass,
+  alertClass,
+} = useDashboardHomeChrome()
 
 /** Max rows shown in dashboard list cards (no in-card scrolling). */
 const DASHBOARD_LIST_TOP = 5
@@ -635,10 +616,9 @@ const chartHeight = computed(() => (isMobile.value ? 176 : 220))
 
 const chartOptions = computed(() => {
   const isDark = themeStore.actualTheme === 'dark'
-  // Ledger palette: verdigris line on a warm ink/paper backdrop.
-  const lineColor = isDark ? '#5FC2A8' : '#3F8F7C'
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(28, 27, 25, 0.06)'
-  const labelColor = isDark ? '#A39C8E' : '#8A8172'
+  const lineColor = isDark ? '#9ab5e3' : '#4876c7'
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.06)'
+  const labelColor = isDark ? '#94a3b8' : '#64748b'
 
   return {
     chart: {
@@ -646,7 +626,7 @@ const chartOptions = computed(() => {
       height: chartHeight.value,
       toolbar: { show: false },
       zoom: { enabled: false },
-      fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+      fontFamily: 'var(--app-font-sans, Quicksand, ui-sans-serif, system-ui, sans-serif)',
       background: 'transparent',
       animations: { enabled: true, easing: 'easeinout', speed: 600 },
     },
@@ -712,17 +692,6 @@ const chartOptions = computed(() => {
     markers: { size: 0, hover: { size: 4 } },
   }
 })
-
-function alertRowClass(level: DashboardAlertLevel): string {
-  switch (level) {
-    case 'critical':
-      return 'border border-[#AE463B]/25 bg-[#AE463B]/[0.06] dark:border-[#E2786C]/25 dark:bg-[#E2786C]/[0.06]'
-    case 'warning':
-      return 'border border-[#B9791C]/25 bg-[#B9791C]/[0.06] dark:border-[#E3A94C]/25 dark:bg-[#E3A94C]/[0.06]'
-    default:
-      return 'border border-[#1C1B19]/10 bg-[#1C1B19]/[0.02] dark:border-white/10 dark:bg-white/[0.02]'
-  }
-}
 
 function formatActivityTime(createdAt: ActivityLog['createdAt']): string {
   const d =
@@ -816,54 +785,3 @@ useHead({
   title: 'Dashboard - Storvv',
 })
 </script>
-
-<style scoped>
-/* ---------------------------------------------------------------------
-   Ledger design system — warm ink/paper tones and brass accents.
-   Typography matches the SaaS landing (Quicksand); numbers stay mono.
-   --------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-.ldg-display {
-  font-family: inherit;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.ldg-eyebrow {
-  font-family: inherit;
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #8a8172;
-}
-:global(.dark) .ldg-eyebrow {
-  color: #a39c8e;
-}
-
-.ldg-num {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Signature: perforated ticket-tear divider, used at section boundaries only */
-.ldg-tear {
-  position: relative;
-  border-bottom: none;
-}
-.ldg-tear::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 1px;
-  background-image: radial-gradient(circle, rgba(28, 27, 25, 0.22) 1px, transparent 1.3px);
-  background-size: 7px 1px;
-  background-repeat: repeat-x;
-}
-:global(.dark) .ldg-tear::after {
-  background-image: radial-gradient(circle, rgba(242, 239, 233, 0.22) 1px, transparent 1.3px);
-}
-</style>

@@ -7,12 +7,7 @@
   >
     <AuthPageHeader v-if="!registrationComplete" eyebrow="Get started" title="Create your account">
       Takes a minute. Already set up?
-      <NuxtLink
-        to="/signin"
-        class="font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-      >
-        Sign in instead
-      </NuxtLink>
+      <NuxtLink to="/signin" class="auth-link">Sign in instead</NuxtLink>
     </AuthPageHeader>
 
     <AuthPageHeader
@@ -39,10 +34,7 @@
           </template>
           <template v-else>
             We could not send a verification email automatically. You can still
-            <NuxtLink
-              :to="signInLinkWithEmail"
-              class="font-semibold text-primary-600 underline decoration-primary-500/30 underline-offset-2 hover:text-primary-500 dark:text-primary-400"
-            >
+            <NuxtLink :to="signInLinkWithEmail" class="auth-link underline underline-offset-2">
               sign in
             </NuxtLink>
             with the password you chose; verify your email from account settings when you can.
@@ -197,17 +189,9 @@
           label-class="!ml-2.5 !text-xs !font-normal !leading-snug !text-gray-600 dark:!text-gray-300"
         >
           I agree to the
-          <NuxtLink
-            to="/terms"
-            class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
-            >Terms of Service</NuxtLink
-          >
+          <NuxtLink to="/terms" class="auth-link">Terms of Service</NuxtLink>
           and
-          <NuxtLink
-            to="/privacy"
-            class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
-            >Privacy Policy</NuxtLink
-          >
+          <NuxtLink to="/privacy" class="auth-link">Privacy Policy</NuxtLink>
         </Checkbox>
 
         <Button
@@ -221,7 +205,7 @@
           size="md"
           :icon="ArrowRightIcon"
           icon-right
-          extra-class="!w-full"
+          extra-class="auth-btn auth-btn--primary !w-full"
         >
           Create account
         </Button>
@@ -229,12 +213,7 @@
 
       <template v-if="!registrationComplete" #footer>
         Questions?
-        <a
-          href="https://www.storvv.com"
-          class="font-semibold text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-        >
-          Learn more on the homepage
-        </a>
+        <a href="https://www.storvv.com" class="auth-link">Learn more on the homepage</a>
       </template>
     </AuthCard>
   </AuthShell>

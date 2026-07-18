@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="dashboard-page-with-footer flex min-h-[calc(100svh-4rem)] w-full max-w-none flex-col space-y-5 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] sm:space-y-6 sm:pb-32"
-  >
+  <div :class="pageWithFooterClass">
     <Breadcrumbs :items="storeDepartmentsBreadcrumbs" />
 
     <DashboardPageHeader>
@@ -94,55 +92,28 @@
 
     <div
       v-if="departmentsStore.error && !departmentsStore.loading"
-      class="rounded-sm border border-red-200/80 bg-red-50/50 px-4 py-6 text-center dark:border-red-900/40 dark:bg-red-950/20"
+      :class="errorCardClass"
     >
-      <div
-        class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-sm bg-red-100 dark:bg-red-900/30"
-      >
+      <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30">
         <BuildingOfficeIcon class="h-5 w-5 text-red-600 dark:text-red-400" />
       </div>
-      <h3 class="mb-1.5 text-base font-semibold text-gray-900 dark:text-gray-100">
+      <h3 :class="['dash-state-card__title', pageTitleClass, '!text-sm']">
         Error loading departments
       </h3>
-      <p class="mx-auto mb-4 max-w-md text-xs text-gray-600 dark:text-gray-400">
+      <p :class="['dash-state-card__desc', cardDescClass, 'mx-auto max-w-md']">
         {{ departmentsStore.error }}
       </p>
-      <Button variant="primary" :icon="ArrowPathIcon" @click="handleRetryFetch">Retry</Button>
+      <Button variant="primary" :icon="ArrowPathIcon" class="mt-4" @click="handleRetryFetch">
+        Retry
+      </Button>
     </div>
 
-    <div
-      v-else-if="departmentsStore.loading || storesLoading"
-      class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
-    >
-      <div
-        v-for="i in 12"
-        :key="i"
-        class="animate-pulse rounded-xl bg-white p-2.5 dark:bg-[#141820] dark:ring-white/[0.06]"
-      >
-        <div class="mb-2 flex justify-between">
-          <div class="h-4 w-4 rounded bg-gray-200 dark:bg-white/10" />
-          <div class="h-4 w-12 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
-        </div>
-        <div class="h-3 w-[75%] rounded bg-gray-200 dark:bg-white/10" />
-        <div class="mt-1 h-2.5 w-full rounded bg-gray-100 dark:bg-white/[0.05]" />
-        <div class="mt-2 space-y-1 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-          <div class="h-2 w-[85%] rounded bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="h-2 w-[60%] rounded bg-gray-100 dark:bg-white/[0.06]" />
-        </div>
-        <div class="mt-2 flex gap-1.5 border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-          <div class="h-7 w-7 rounded-full bg-gray-100 dark:bg-white/[0.06]" />
-          <div class="flex-1 pt-0.5">
-            <div class="h-2.5 w-12 rounded bg-gray-200 dark:bg-white/10" />
-          </div>
-        </div>
-      </div>
+    <div v-else-if="departmentsStore.loading || storesLoading" :class="gridClass">
+      <div v-for="i in 12" :key="i" class="dash-skeleton dash-skeleton--grid-card" />
     </div>
 
     <div v-else-if="!departmentsStore.error">
-      <div
-        v-if="paginatedDepartments.length > 0"
-        class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5"
-      >
+      <div v-if="paginatedDepartments.length > 0" :class="gridClass">
         <DepartmentCard
           v-for="department in paginatedDepartments"
           :key="department.id"
@@ -172,7 +143,7 @@
               <button
                 type="button"
                 :data-department-actions-anchor="department.id"
-                class="rounded-sm p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-800 dark:text-gray-500 dark:hover:bg-gray-800/90 dark:hover:text-gray-200"
+                :class="menuBtnClass"
                 aria-label="Department options"
                 @click="toggleDepartmentMenu(department.id)"
               >
@@ -203,7 +174,7 @@
                 'Open a department to add members and manage roles',
               ]
         "
-        extra-class="rounded-sm bg-white dark:!bg-dashboard-card sm:min-h-[min(48vh,22rem)]"
+        extra-class="dash-table-shell sm:min-h-[min(48vh,22rem)]"
       />
     </div>
 
@@ -388,8 +359,18 @@ useHead({
   title: `Departments - Storvv`,
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass, bulkActionsClass } =
-  useDashboardPageChrome()
+const {
+  pageWithFooterClass,
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+  cardDescClass,
+  headerBtnClass,
+  bulkActionsClass,
+  gridClass,
+  menuBtnClass,
+  errorCardClass,
+} = useDashboardGridPagesChrome()
 
 const showDepartmentModal = ref(false)
 const editingDepartment = ref<Department | null>(null)

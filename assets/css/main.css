@@ -6,6 +6,14 @@
 @import './landing-nav.css';
 @import './landing-portfolio.css';
 @import './landing-designs.css';
+@import './auth-shell.css';
+@import './dashboard-shell.css';
+@import './dashboard-cards.css';
+@import './dashboard-pages.css';
+@import './dashboard-tables.css';
+@import './app-buttons.css';
+@import './dashboard-overlays.css';
+@import './capacitor-native-saas.css';
 @import './receipt-typography.css';
 
 /* Dropdowns, modals, command palette: solid frosted glass (not fully transparent) */
@@ -60,9 +68,9 @@
     @apply rounded-lg border-0 bg-white dark:bg-dashboard-card;
   }
 
-  /** Dashboard ledger panels — uses same bg-white dark override as app-card */
+  /** Ledger panels — shared with dash-card on dashboard home */
   .ldg-card {
-    @apply rounded-[0.65rem] border border-black/[0.09] bg-white dark:!bg-dashboard-card dark:border-white/[0.08];
+    @apply rounded-2xl border border-black/[0.08] bg-white dark:!bg-dashboard-card dark:border-white/[0.08];
   }
 
   /**
@@ -121,33 +129,9 @@
     pointer-events: none !important;
   }
 
-  /** Solid navy primary actions */
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-sm border-0 bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/55 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
+  /** Legacy utility classes — see app-buttons.css for pill styling */
   .btn-primary-sm {
     @apply px-3 py-1 text-xs font-semibold;
-  }
-
-  /** Neutral secondary / cancel actions — quiet until hovered */
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border-0 bg-transparent px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-300 dark:hover:bg-white/[0.06];
-  }
-
-  /** Destructive actions (sign out, delete, remove) */
-  .btn-danger {
-    @apply inline-flex items-center justify-center rounded-lg border-0 bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/55 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  /** Bordered outline button — secondary actions that still need definition */
-  .btn-outline {
-    @apply inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition-colors hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400/45 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/[0.04] dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/[0.07];
-  }
-
-  /** Compact size modifier — pairs with any btn-* class */
-  .btn-sm {
-    @apply px-3 py-1.5 text-xs;
   }
 
   /** Borderless elevated surfaces */
@@ -310,7 +294,8 @@ html.theme-transitioning textarea {
 html.theme-transitioning [data-inventory-categories],
 html.theme-transitioning [data-inventory-categories] header,
 html.theme-transitioning [data-inventory-categories] article.inv-category-card,
-html.theme-transitioning [data-inventory-categories] .inv-category-card {
+html.theme-transitioning [data-inventory-categories] .inv-category-card,
+html.theme-transitioning [data-inventory-categories] .dash-grid-card {
   transition-property: background-color, background-image, color, border-color, outline-color,
     box-shadow, text-decoration-color, fill, stroke, opacity, accent-color, caret-color,
     column-rule-color !important;
@@ -361,7 +346,8 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   html.theme-transitioning select,
   html.theme-transitioning textarea,
   html.theme-transitioning [data-inventory-categories],
-  html.theme-transitioning [data-inventory-categories] .inv-category-card {
+  html.theme-transitioning [data-inventory-categories] .inv-category-card,
+  html.theme-transitioning [data-inventory-categories] .dash-grid-card {
     transition-duration: 0.11s !important;
     transition-timing-function: ease-out !important;
   }
@@ -836,7 +822,7 @@ html.theme-transitioning .dashboard-global-tooltip-bubble {
   }
 
   /* Ensure common form/actions follow the same subtle radius (pill buttons excluded) */
-  :where(button, input, select, textarea):not(.rounded-full):not(.btn-primary) {
+  :where(button, input, select, textarea):not(.rounded-full):not(.btn-primary):not(.btn-secondary):not(.btn-outline):not(.btn-danger):not(.btn-sm):not(.auth-btn):not(.dash-export-btn) {
     border-radius: var(--app-radius-sm);
   }
 
@@ -1181,7 +1167,7 @@ html.capacitor-native.styles-loaded body {
 }
 
 html.capacitor-native {
-  background-color: rgb(249 250 251) !important;
+  background-color: #f4f6fb !important;
 }
 
 html.capacitor-native.dark {
@@ -1211,57 +1197,18 @@ html.capacitor-native #__nuxt {
 }
 
 /* Auth safe-area + theme toggle — layout detail in capacitor-native.css */
-html.capacitor-native .auth-shell-root .auth-shell-theme-toggle {
+html.capacitor-native [data-auth-shell] .auth-shell-theme-toggle {
   top: calc(1rem + var(--cap-safe-top));
 }
 
-/* Auth form card — elevated fields on dashboard canvas */
-.auth-card .auth-field-input {
-  min-height: 2.5rem;
-}
-
-html.dark .auth-shell-root .auth-card .auth-field-input {
-  background-color: rgb(255 255 255 / 0.04);
-}
+/* Auth form card — field sizing handled in auth-shell.css */
 
 /** Slide-over drawers (`SidePanel`) — one width on desktop */
 html {
   --dashboard-drawer-width: 32rem;
 }
 
-/* Dashboard top bar — unified actions cluster */
-.dashboard-topnav-actions .store-switch-trigger {
-  height: 2rem;
-  max-width: 8.25rem;
-  border-radius: 0.5rem;
-  background-color: transparent;
-  box-shadow: none;
-}
-
-@media (min-width: 640px) {
-  .dashboard-topnav-actions .store-switch-trigger {
-    max-width: 9.5rem;
-  }
-}
-
-.dashboard-topnav-actions .store-switch-trigger:hover {
-  background-color: rgb(255 255 255);
-}
-
-html.dark .dashboard-topnav-actions .store-switch-trigger:hover {
-  background-color: rgb(255 255 255 / 0.06);
-}
-
-.dashboard-topnav-actions .store-switch-icon-wrap {
-  height: 1.5rem;
-  width: 1.5rem;
-}
-
-.dashboard-topnav-actions .store-switch-icon-wrap .h-4 {
-  height: 0.875rem;
-  width: 0.875rem;
-}
-
+/* Dashboard top bar — store switcher detail in dashboard-shell.css */
 /* Dashboard shell (web sidebar — hidden on native) */
 html.capacitor-native .dashboard-layout-root > aside.fixed {
   top: var(--cap-safe-top);
@@ -1302,7 +1249,8 @@ html.capacitor-native .dashboard-top-nav-native-row {
   min-height: var(--dashboard-native-top-bar);
 }
 
-html.capacitor-native .dashboard-top-nav-native .store-switch-trigger {
+html.capacitor-native .dashboard-top-nav-native .store-switch-trigger,
+html.capacitor-native .dashboard-top-nav-native .dash-store-trigger {
   max-width: 5.5rem;
 }
 
@@ -1503,35 +1451,13 @@ html.capacitor-native .dashboard-native-bottom-nav {
   padding-right: calc(var(--cap-safe-right) + 0.875rem);
 }
 
-/* ── iOS polish: cleaner surfaces, spacing, and tables ── */
+/* ── iOS polish: spacing (surfaces/tables — see capacitor-native-saas.css) ── */
 html.capacitor-native .dashboard-page-header,
 html.capacitor-native [data-dashboard-main] > .space-y-5,
 html.capacitor-native [data-dashboard-main] > .space-y-6 {
   gap: 0.875rem;
 }
 
-html.capacitor-native .data-table-shell {
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
-}
-
-html.dark.capacitor-native .data-table-shell {
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
-}
-
-html.capacitor-native .dashboard-top-nav.dashboard-top-nav-native,
-html.capacitor-native .dashboard-native-shell .dashboard-top-nav {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgb(229 231 235 / 0.7);
-}
-
-html.capacitor-native.dark .dashboard-top-nav.dashboard-top-nav-native,
-html.capacitor-native.dark .dashboard-native-shell .dashboard-top-nav {
-  border-bottom-color: rgb(55 65 81 / 0.55);
-}
-
-/* Inventory categories — grid on clear page bg */
 html.capacitor-native .inventory-categories-page {
   padding-bottom: calc(
     var(--dashboard-bottom-nav-height) + var(--cap-safe-bottom) + 0.75rem
@@ -1553,15 +1479,6 @@ html.capacitor-native .inventory-categories-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
   }
-}
-
-html.capacitor-native .inventory-categories-grid .inv-category-card {
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.05), 0 6px 16px rgb(15 23 42 / 0.04);
-}
-
-html.capacitor-native.dark .inventory-categories-grid .inv-category-card {
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
 html.capacitor-native .inventory-categories-shell--table.data-table-shell {

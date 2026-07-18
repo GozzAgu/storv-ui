@@ -1,26 +1,14 @@
 <template>
   <Teleport to="body">
-    <TransitionGroup
-      tag="div"
-      name="toast"
-      class="pointer-events-none fixed right-0 top-0 z-9999 flex w-full max-w-[min(100vw-1.25rem,20rem)] flex-col gap-2.5 p-3 sm:right-4 sm:top-4 sm:max-w-[20rem]"
-      :style="{
-        paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-        paddingRight: 'max(0.75rem, env(safe-area-inset-right))',
-      }"
-    >
+    <TransitionGroup tag="div" name="toast" class="dash-toast-stack">
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        :class="[
-          'toast-glass pointer-events-auto relative overflow-hidden rounded-xl',
-          'border border-white/50 bg-white/70 backdrop-blur-xl backdrop-saturate-150',
-          'dark:border-white/10 dark:bg-zinc-900/65',
-        ]"
+        class="dash-toast"
         role="status"
         :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
       >
-        <div class="flex items-start gap-2.5 px-3.5 pb-2.5 pt-3">
+        <div class="dash-toast__inner">
           <component
             :is="getIcon(toast.type)"
             :class="['mt-0.5 h-4 w-4 shrink-0', getIconClass(toast.type)]"
@@ -28,14 +16,14 @@
             aria-hidden="true"
           />
 
-          <div class="min-w-0 flex-1 pt-px">
-            <p class="text-[13px] font-medium leading-snug text-zinc-800 dark:text-zinc-100">
+          <div class="min-w-0 flex-1">
+            <p class="dash-toast__message">
               {{ toast.message }}
             </p>
             <button
               v-if="toast.action"
               type="button"
-              class="mt-1.5 text-xs font-medium text-primary-600 underline-offset-2 hover:underline dark:text-primary-400"
+              class="dash-toast__action"
               @click="toast.action.onClick()"
             >
               {{ toast.action.label }}
@@ -44,7 +32,7 @@
 
           <button
             type="button"
-            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+            class="dash-toast__close"
             aria-label="Dismiss"
             @click="removeToast(toast.id)"
           >
@@ -52,13 +40,9 @@
           </button>
         </div>
 
-        <div
-          v-if="showsProgress(toast)"
-          class="h-[2px] w-full bg-zinc-900/5 dark:bg-white/8"
-          aria-hidden="true"
-        >
+        <div v-if="showsProgress(toast)" class="dash-toast__progress-track" aria-hidden="true">
           <div
-            class="toast-progress h-full origin-left"
+            class="dash-toast__progress-bar"
             :class="getProgressClass(toast.type)"
             :style="{ animationDuration: `${toast.duration}ms` }"
           />
@@ -102,50 +86,48 @@ const getIcon = (type: ToastType) => {
 const getIconClass = (type: ToastType) => {
   switch (type) {
     case 'success':
-      return 'text-emerald-600 dark:text-emerald-400'
+      return 'dash-toast__icon--success'
     case 'error':
-      return 'text-red-600 dark:text-red-400'
+      return 'dash-toast__icon--error'
     case 'warning':
-      return 'text-amber-600 dark:text-amber-400'
+      return 'dash-toast__icon--warning'
     case 'info':
-      return 'text-sky-600 dark:text-sky-400'
+      return 'dash-toast__icon--info'
     default:
-      return 'text-zinc-500 dark:text-zinc-400'
+      return 'dash-toast__icon--info'
   }
 }
 
 const getProgressClass = (type: ToastType) => {
   switch (type) {
     case 'success':
-      return 'bg-emerald-500/80 dark:bg-emerald-400/90'
+      return 'dash-toast__progress-bar--success'
     case 'error':
-      return 'bg-red-500/80 dark:bg-red-400/90'
+      return 'dash-toast__progress-bar--error'
     case 'warning':
-      return 'bg-amber-500/80 dark:bg-amber-400/90'
+      return 'dash-toast__progress-bar--warning'
     case 'info':
-      return 'bg-sky-500/80 dark:bg-sky-400/90'
+      return 'dash-toast__progress-bar--info'
     default:
-      return 'bg-zinc-400/80'
+      return 'dash-toast__progress-bar--info'
   }
 }
 </script>
 
 <style scoped>
 .toast-enter-active {
-  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+  transition:
+    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .toast-leave-active {
-  transition: opacity 0.28s cubic-bezier(0.4, 0, 1, 1), transform 0.32s cubic-bezier(0.4, 0, 1, 1);
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.32s cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* Slide in from the right */
-.toast-enter-from {
-  opacity: 0;
-  transform: translate3d(100%, 0, 0);
-}
-
+.toast-enter-from,
 .toast-leave-to {
   opacity: 0;
   transform: translate3d(100%, 0, 0);
@@ -155,29 +137,8 @@ const getProgressClass = (type: ToastType) => {
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.toast-progress {
-  animation-name: toast-progress-shrink;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@keyframes toast-progress-shrink {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  .toast-glass {
-    background-color: rgb(255 255 255 / 0.95);
-  }
-
-  :global(.dark) .toast-glass {
-    background-color: rgb(24 24 27 / 0.95);
-  }
+.dash-toast__progress-bar {
+  animation-name: dash-toast-progress;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -192,7 +153,7 @@ const getProgressClass = (type: ToastType) => {
     transform: none;
   }
 
-  .toast-progress {
+  .dash-toast__progress-bar {
     animation: none;
     transform: scaleX(0);
   }

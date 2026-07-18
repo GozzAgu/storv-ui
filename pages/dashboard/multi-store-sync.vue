@@ -1,6 +1,5 @@
 <template>
-  <div class="w-full max-w-none space-y-5 pb-6 sm:space-y-6 sm:pb-8">
-    <!-- Hero -->
+  <div :class="pageClass">
     <DashboardPageHeader>
       <template #eyebrow>
         <p :class="eyebrowClass">Enterprise</p>
@@ -13,31 +12,24 @@
       </template>
     </DashboardPageHeader>
 
-    <div
-      v-if="!canAccess"
-      class="rounded-sm bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25 sm:px-5 sm:py-5"
-    >
-      <div class="flex items-start gap-3">
-        <div
-          class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-sm bg-amber-100 ring-1 ring-amber-200/80 dark:bg-amber-900/40 dark:ring-amber-800/50"
-        >
-          <ExclamationTriangleIcon class="h-5 w-5 text-amber-600 dark:text-amber-400" />
-        </div>
-        <div>
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Access restricted</h3>
-          <p class="mt-0.5 text-xs text-gray-600 dark:text-gray-400">
-            {{
-              isStaff
-                ? 'Only super admins can access multi-store sync.'
-                : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.'
-            }}
-          </p>
-        </div>
+    <div v-if="!canAccess" :class="restrictedClass">
+      <div :class="restrictedIconClass">
+        <ExclamationTriangleIcon class="h-5 w-5" stroke-width="1.75" />
+      </div>
+      <div>
+        <h3 :class="restrictedTitleClass">Access restricted</h3>
+        <p :class="restrictedDescClass">
+          {{
+            isStaff
+              ? 'Only super admins can access multi-store sync.'
+              : 'Multi-Store Sync is available on Storvv Enterprise. Upgrade in Settings to unlock.'
+          }}
+        </p>
       </div>
     </div>
 
     <template v-else>
-      <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3 lg:max-w-3xl lg:grid-cols-2">
+      <div :class="kpiGridCompactClass">
         <StatCard
           label="Total stores"
           :value="stores.length.toString()"
@@ -50,150 +42,98 @@
         />
       </div>
 
-      <!-- Tabs -->
-      <nav class="flex flex-wrap gap-8" aria-label="Multi-store sync views">
+      <nav :class="segmentGroupClass" role="tablist" aria-label="Multi-store sync views">
         <button
           type="button"
           role="tab"
           :aria-selected="activeTab === 'transfer'"
-          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'transfer'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="[segmentBtnClass, activeTab === 'transfer' ? segmentBtnActiveClass : '']"
           @click="activeTab = 'transfer'"
         >
-          Transfer Items
-          <span
-            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-            :class="
-              activeTab === 'transfer' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'
-            "
-            aria-hidden="true"
-          />
+          Transfer items
         </button>
         <button
           type="button"
           role="tab"
           :aria-selected="activeTab === 'reports'"
-          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'reports'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="[segmentBtnClass, activeTab === 'reports' ? segmentBtnActiveClass : '']"
           @click="activeTab = 'reports'"
         >
-          Consolidated Reports
-          <span
-            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-            :class="
-              activeTab === 'reports' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'
-            "
-            aria-hidden="true"
-          />
+          Consolidated reports
         </button>
         <button
           type="button"
           role="tab"
           :aria-selected="activeTab === 'history'"
-          class="relative pb-2.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 rounded-t"
-          :class="
-            activeTab === 'history'
-              ? 'text-gray-900 dark:text-gray-100 font-semibold'
-              : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-          "
+          :class="[segmentBtnClass, activeTab === 'history' ? segmentBtnActiveClass : '']"
           @click="activeTab = 'history'"
         >
-          Transfer History
-          <span
-            class="absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-opacity"
-            :class="
-              activeTab === 'history' ? 'bg-primary-500 opacity-100' : 'bg-transparent opacity-0'
-            "
-            aria-hidden="true"
-          />
+          Transfer history
         </button>
       </nav>
 
-      <Card
-        v-if="activeTab === 'transfer'"
-        padding="none"
-        extra-class="!p-0 mt-1 overflow-hidden rounded-sm bg-white/90 dark:!bg-dashboard-card sm:mt-2"
-      >
-        <div
-          class="border-b border-gray-100/90 px-3 py-3 sm:px-4 sm:py-3.5 dark:border-gray-800/80"
-        >
-          <h2
-            class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-          >
-            Move stock between branches
-          </h2>
-          <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
-            Request a transfer → Approve → In transit (add tracking) → Complete to update stock
-          </p>
-        </div>
-        <div class="space-y-4 p-3 sm:p-4">
+      <section v-if="activeTab === 'transfer'" :class="panelClass">
+        <header :class="panelHeaderClass">
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Source store</label
-            >
-            <select
-              v-model="transferForm.sourceStoreId"
-              @change="loadSourceStoreInventory"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-            >
-              <option value="">Select source store</option>
-              <option v-for="store in stores" :key="store.id" :value="store.id">
-                {{ store.name || store.branchName || store.id }}
-              </option>
-            </select>
+            <h2 :class="sectionTitleClass">Move stock between branches</h2>
+            <p :class="sectionSubtitleClass">
+              Request a transfer → Approve → In transit (add tracking) → Complete to update stock
+            </p>
           </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Destination store</label
-            >
-            <select
-              v-model="transferForm.destinationStoreId"
-              @change="loadDestinationStoreFolders"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-            >
-              <option value="">Select destination store</option>
-              <option
-                v-for="store in stores.filter((s) => s.id !== transferForm.sourceStoreId)"
-                :key="store.id"
-                :value="store.id"
+        </header>
+        <div :class="panelBodyClass">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label :class="labelClass">Source store</label>
+              <select
+                v-model="transferForm.sourceStoreId"
+                :class="fieldClass"
+                @change="loadSourceStoreInventory"
               >
-                {{ store.name || store.branchName || store.id }}
-              </option>
-            </select>
+                <option value="">Select source store</option>
+                <option v-for="store in stores" :key="store.id" :value="store.id">
+                  {{ store.name || store.branchName || store.id }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label :class="labelClass">Destination store</label>
+              <select
+                v-model="transferForm.destinationStoreId"
+                :class="fieldClass"
+                @change="loadDestinationStoreFolders"
+              >
+                <option value="">Select destination store</option>
+                <option
+                  v-for="store in stores.filter((s) => s.id !== transferForm.sourceStoreId)"
+                  :key="store.id"
+                  :value="store.id"
+                >
+                  {{ store.name || store.branchName || store.id }}
+                </option>
+              </select>
+            </div>
           </div>
-          <div v-if="transferForm.destinationStoreId">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Destination folder</label
-            >
-            <select
-              v-model="transferForm.destinationFolderId"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-            >
+
+          <div v-if="transferForm.destinationStoreId" class="mt-4">
+            <label :class="labelClass">Destination folder</label>
+            <select v-model="transferForm.destinationFolderId" :class="fieldClass">
               <option value="">Select destination folder</option>
               <option v-for="folder in destinationFolders" :key="folder.id" :value="folder.id">
                 {{ folder.name }}
               </option>
             </select>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p :class="[inlineNoteClass, 'mt-1.5']">
               Folder in the destination store where items will be transferred
             </p>
           </div>
-          <div v-if="transferForm.sourceStoreId">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Inventory folder</label
-            >
+
+          <div v-if="transferForm.sourceStoreId" class="mt-4">
+            <label :class="labelClass">Inventory folder</label>
             <select
               v-model="transferForm.folderId"
+              :class="fieldClass"
               @change="loadFolderItems"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400/30"
             >
               <option value="">Select folder</option>
               <option v-for="folder in sourceFolders" :key="folder.id" :value="folder.id">
@@ -202,70 +142,32 @@
             </select>
           </div>
 
-          <div v-if="transferForm.folderId && availableItems.length > 0" class="space-y-1.5">
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Select items to transfer</label
-            >
-            <div class="data-table-shell max-h-52 overflow-y-auto overflow-x-hidden">
+          <div v-if="transferForm.folderId && availableItems.length > 0" class="mt-4 space-y-2">
+            <label :class="labelClass">Select items to transfer</label>
+            <div :class="[tableShellClass, itemsTableShellClass, 'overflow-x-hidden']">
               <table class="dashboard-table min-w-full">
                 <thead class="sticky top-0">
                   <tr>
-                    <th
-                      class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Item
-                    </th>
-                    <th
-                      v-if="!currentFolderHasSerialNumbers"
-                      class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Available
-                    </th>
-                    <th
-                      v-if="!currentFolderHasSerialNumbers"
-                      class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Qty
-                    </th>
-                    <th
-                      v-else
-                      class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Select
-                    </th>
+                    <th class="text-left">Item</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="text-left">Available</th>
+                    <th v-if="!currentFolderHasSerialNumbers" class="text-left">Qty</th>
+                    <th v-else class="text-left">Select</th>
                   </tr>
                 </thead>
-                <tbody
-                  class="divide-y divide-gray-200/80 bg-white dark:divide-gray-700/80 dark:!bg-dashboard-card/40"
-                >
-                  <tr
-                    v-for="item in availableItems"
-                    :key="item.id"
-                    class="hover:bg-gray-50/80 dark:hover:bg-white/[0.03]"
-                  >
+                <tbody>
+                  <tr v-for="item in availableItems" :key="item.id">
                     <td class="px-3 py-2">
                       <div>
-                        <p class="font-medium text-gray-900 dark:text-gray-100">
-                          {{ item.name || item.itemName || 'Unnamed Item' }}
-                        </p>
-                        <p
-                          v-if="item.brand && item.model"
-                          class="text-xs text-gray-500 dark:text-gray-400"
-                        >
+                        <p class="font-medium">{{ item.name || item.itemName || 'Unnamed Item' }}</p>
+                        <p v-if="item.brand && item.model" :class="tableMetaClass">
                           {{ item.brand }} {{ item.model }}
                         </p>
-                        <p
-                          v-if="item.serialNo || item.serialNumber"
-                          class="text-xs text-gray-500 dark:text-gray-400"
-                        >
+                        <p v-if="item.serialNo || item.serialNumber" :class="tableMetaClass">
                           Serial: {{ item.serialNo || item.serialNumber }}
                         </p>
                       </div>
                     </td>
-                    <td
-                      v-if="!currentFolderHasSerialNumbers"
-                      class="px-3 py-2 text-gray-600 dark:text-gray-300"
-                    >
+                    <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2" :class="numClass">
                       {{ getAvailableQuantity(item) }}
                     </td>
                     <td v-if="!currentFolderHasSerialNumbers" class="px-3 py-2">
@@ -274,7 +176,7 @@
                         type="number"
                         :max="getAvailableQuantity(item)"
                         min="0"
-                        class="w-16 px-2 py-1 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-400/30"
+                        :class="[fieldClass, '!h-8 !min-h-8 !w-20']"
                         placeholder="0"
                       />
                     </td>
@@ -284,7 +186,7 @@
                         type="checkbox"
                         :true-value="1"
                         :false-value="0"
-                        class="w-3.5 h-3.5 rounded border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-400/30"
+                        class="h-3.5 w-3.5 rounded border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-400/30"
                       />
                     </td>
                   </tr>
@@ -293,19 +195,17 @@
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >Notes (optional)</label
-            >
+          <div class="mt-4">
+            <label :class="labelClass">Notes (optional)</label>
             <textarea
               v-model="transferForm.notes"
               rows="2"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400/30 resize-none"
+              :class="textareaClass"
               placeholder="Add any notes about this transfer..."
             />
           </div>
 
-          <div class="flex justify-end pt-1.5">
+          <div :class="formActionsClass">
             <Button
               @click="requestTransfer"
               :disabled="!canTransfer || isTransferring"
@@ -313,28 +213,23 @@
               variant="primary"
               size="sm"
               :icon="ArrowsRightLeftIcon"
-              extra-class="!rounded-2xl font-medium"
             >
               {{ isTransferring ? 'Creating...' : 'Request transfer' }}
             </Button>
           </div>
-          <p class="mt-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p :class="[formNoteClass, 'mt-2']">
             Transfer will be created as pending. Approve → mark in transit → add tracking (optional)
             → complete to update stock.
           </p>
         </div>
-      </Card>
+      </section>
 
-      <div v-if="activeTab === 'reports'" class="data-table-shell mt-1 overflow-hidden sm:mt-2">
+      <div v-if="activeTab === 'reports'" :class="[tableShellClass, 'overflow-hidden']">
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
-              <h2
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-              >
-                Consolidated reports
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <h2 :class="sectionTitleClass">Consolidated reports</h2>
+              <p :class="sectionSubtitleClass">
                 Revenue and sales across selected stores and date range
               </p>
             </div>
@@ -363,102 +258,59 @@
             </DashboardToolbarSelect>
           </template>
           <template #actions>
-            <Button
-              @click="exportConsolidatedReport"
-              variant="success"
-              size="sm"
-              :icon="ArrowDownTrayIcon"
-              :extra-class="headerBtnClass"
-            >
+            <button type="button" :class="exportBtnClass" @click="exportConsolidatedReport">
+              <ArrowDownTrayIcon class="h-4 w-4 opacity-80" />
               Export report
-            </Button>
+            </button>
           </template>
         </DataTableToolbar>
         <div class="space-y-4 p-3 sm:p-4">
-          <div class="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
-            <StatCard
-              label="Total revenue"
-              :value="formatCurrency(consolidatedReport.totalRevenue)"
-              subtext="In range"
-            />
-            <StatCard
-              label="Total sales"
-              :value="String(consolidatedReport.totalSales)"
-              subtext="Orders"
-            />
-            <StatCard
-              label="Total items"
-              :value="String(consolidatedReport.totalItems)"
-              subtext="Units sold"
-            />
-            <StatCard
-              label="Avg order value"
-              :value="formatCurrency(consolidatedReport.avgOrderValue)"
-              subtext="Per order"
-            />
-          </div>
+          <dl :class="metricGridClass">
+            <div :class="metricRowClass">
+              <dt>Total revenue</dt>
+              <dd :class="numClass">{{ formatCurrency(consolidatedReport.totalRevenue) }}</dd>
+            </div>
+            <div :class="metricRowClass">
+              <dt>Total sales</dt>
+              <dd :class="numClass">{{ consolidatedReport.totalSales }}</dd>
+            </div>
+            <div :class="metricRowClass">
+              <dt>Total items</dt>
+              <dd :class="numClass">{{ consolidatedReport.totalItems }}</dd>
+            </div>
+            <div :class="metricRowClass">
+              <dt>Avg order value</dt>
+              <dd :class="numClass">{{ formatCurrency(consolidatedReport.avgOrderValue) }}</dd>
+            </div>
+          </dl>
 
-          <div class="overflow-hidden rounded-sm bg-white/90 dark:!bg-dashboard-card">
+          <div :class="[tableShellClass, 'overflow-hidden']">
             <DataTableToolbar>
               <template #heading>
                 <div class="min-w-0">
-                  <p
-                    class="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500"
-                  >
-                    Store breakdown
-                  </p>
-                  <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                    Per location in range
-                  </p>
+                  <p :class="tableEyebrowClass">Store breakdown</p>
+                  <p :class="tableMetaClass">Per location in range</p>
                 </div>
               </template>
             </DataTableToolbar>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto px-3 pb-3 sm:px-4">
               <table class="dashboard-table min-w-full">
                 <thead>
                   <tr>
-                    <th
-                      class="px-3 py-2 text-left text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Store
-                    </th>
-                    <th
-                      class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Revenue
-                    </th>
-                    <th
-                      class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Sales
-                    </th>
-                    <th
-                      class="px-3 py-2 text-right text-xs !font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400"
-                    >
-                      Items
-                    </th>
+                    <th class="text-left">Store</th>
+                    <th class="text-right">Revenue</th>
+                    <th class="text-right">Sales</th>
+                    <th class="text-right">Items</th>
                   </tr>
                 </thead>
-                <tbody
-                  class="divide-y divide-gray-200/80 bg-white dark:divide-gray-700/80 dark:!bg-dashboard-card/40"
-                >
-                  <tr
-                    v-for="store in consolidatedReport.storeBreakdown"
-                    :key="store.id"
-                    class="hover:bg-gray-50/80 dark:hover:bg-white/[0.03]"
-                  >
-                    <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">
-                      {{ store.name }}
-                    </td>
-                    <td class="px-3 py-2 text-right" :class="tableMoneyClass()">
+                <tbody>
+                  <tr v-for="store in consolidatedReport.storeBreakdown" :key="store.id">
+                    <td class="py-1.5 pr-2 font-medium">{{ store.name }}</td>
+                    <td class="py-1.5 px-2 text-right" :class="tableMoneyClass()">
                       {{ formatCurrency(store.revenue) }}
                     </td>
-                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">
-                      {{ store.sales }}
-                    </td>
-                    <td class="px-3 py-2 text-right text-gray-600 dark:text-gray-300">
-                      {{ store.items }}
-                    </td>
+                    <td class="py-1.5 px-2 text-right" :class="numClass">{{ store.sales }}</td>
+                    <td class="py-1.5 pl-2 text-right" :class="numClass">{{ store.items }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -467,201 +319,135 @@
         </div>
       </div>
 
-      <div v-if="activeTab === 'history'" class="data-table-shell mt-1 overflow-hidden sm:mt-2">
+      <div v-if="activeTab === 'history'" :class="[tableShellClass, 'overflow-hidden']">
         <DataTableToolbar>
           <template #heading>
             <div class="min-w-0">
-              <h2
-                class="text-xs font-semibold tracking-tight text-gray-900 dark:text-gray-50 sm:text-sm"
-              >
-                Transfer history
-              </h2>
-              <p class="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <h2 :class="sectionTitleClass">Transfer history</h2>
+              <p :class="sectionSubtitleClass">
                 Branch-to-branch transfers with approval and tracking
               </p>
             </div>
           </template>
         </DataTableToolbar>
         <div class="p-3 sm:p-4">
-          <DashboardTableEmptyState
-            v-if="transferHistory.length === 0"
-            :icon="ArrowsRightLeftIcon"
-            title="No transfer history"
-            description="Completed and pending transfers between branches will appear here."
-            :tips="[
-              'Start a transfer from the Transfer Items tab',
-              'Approvals and item details are tracked per transfer',
-            ]"
-            :fill="false"
-            extra-class="py-10"
-          />
+          <div v-if="transferHistory.length === 0" :class="stateCardClass">
+            <ArrowsRightLeftIcon
+              class="mx-auto mb-3 h-8 w-8 text-[#4876c7] dark:text-[#9ab5e3]"
+              stroke-width="1.5"
+            />
+            <p :class="['dash-state-card__title', pageTitleClass, '!text-sm']">No transfer history</p>
+            <p :class="['dash-state-card__desc', cardDescClass]">
+              Completed and pending transfers between branches will appear here.
+            </p>
+          </div>
 
-          <div v-else class="space-y-3">
-            <div
-              v-for="transfer in transferHistory"
-              :key="transfer.id"
-              class="rounded-sm bg-white/90 p-3 transition-colors hover:bg-gray-50/90 dark:!bg-dashboard-card/25 dark:hover:bg-dashboard-card/40 sm:p-4"
-            >
-              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-center gap-1.5 mb-1">
-                    <ArrowsRightLeftIcon
-                      class="w-3.5 h-3.5 text-primary-500 dark:text-primary-400 flex-shrink-0"
-                    />
-                    <p class="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                      {{ getStoreName(transfer.sourceStoreId) }} →
-                      {{ getStoreName(transfer.destinationStoreId) }}
-                    </p>
-                  </div>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
+          <ul v-else :class="transferListClass">
+            <li v-for="transfer in transferHistory" :key="transfer.id" :class="transferCardClass">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0 flex-1">
+                  <p :class="transferRouteClass">
+                    <ArrowsRightLeftIcon class="h-3.5 w-3.5 shrink-0 text-[#4876c7] dark:text-[#9ab5e3]" />
+                    {{ getStoreName(transfer.sourceStoreId) }} →
+                    {{ getStoreName(transfer.destinationStoreId) }}
+                  </p>
+                  <p :class="transferMetaClass">
                     {{ formatTransferProductSummary(transfer) }} ·
                     {{ formatDate(transfer.createdAt) }}
                   </p>
-                  <div v-if="transfer.items && transfer.items.length > 0" class="space-y-1 mt-2">
+                  <div v-if="transfer.items && transfer.items.length > 0" class="mt-2 space-y-1">
                     <div
                       v-for="(item, idx) in transfer.items.slice(0, 3)"
                       :key="idx"
-                      class="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2"
+                      :class="transferItemClass"
                     >
-                      <span
-                        class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0"
-                      ></span>
-                      <span
-                        >{{ item.itemName || 'Item'
-                        }}<span v-if="item.quantity > 1" class="text-gray-500">
-                          · {{ item.quantity }} units</span
-                        ><span v-if="item.serialNumber" class="text-gray-500">
-                          ({{ item.serialNumber }})</span
-                        ></span
-                      >
+                      <span class="dash-transfer-card__item-dot" aria-hidden="true" />
+                      <span>
+                        {{ item.itemName || 'Item'
+                        }}<span v-if="item.quantity > 1"> · {{ item.quantity }} units</span
+                        ><span v-if="item.serialNumber"> ({{ item.serialNumber }})</span>
+                      </span>
                     </div>
-                    <p
-                      v-if="transfer.items.length > 3"
-                      class="text-xs text-gray-500 dark:text-gray-500 italic pl-3.5"
-                    >
+                    <p v-if="transfer.items.length > 3" :class="[inlineNoteClass, 'pl-3.5 italic']">
                       +{{ transfer.items.length - 3 }} more
                     </p>
                   </div>
                   <div
                     v-if="transfer.trackingNumber || transfer.carrier"
-                    class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400"
+                    :class="[transferItemClass, 'mt-2']"
                   >
-                    <TruckIcon class="w-3.5 h-3.5 flex-shrink-0" />
+                    <TruckIcon class="h-3.5 w-3.5 shrink-0" />
                     <span v-if="transfer.carrier">{{ transfer.carrier }}</span>
                     <span v-if="transfer.trackingNumber" class="font-mono">{{
                       transfer.trackingNumber
                     }}</span>
                   </div>
-                  <p
-                    v-if="transfer.notes"
-                    class="text-xs text-gray-600 dark:text-gray-400 mt-2 italic"
-                  >
+                  <p v-if="transfer.notes" :class="[inlineNoteClass, 'mt-2 italic']">
                     {{ transfer.notes }}
                   </p>
                 </div>
-                <div class="flex flex-col items-end gap-2 shrink-0">
-                  <span
-                    :class="[
-                      'px-2 py-0.5 text-xs font-medium rounded-sm capitalize',
-                      getTransferStatusClass(transfer.status),
-                    ]"
-                  >
+                <div :class="transferActionsClass">
+                  <span :class="statusBadgeClass(transfer.status)">
                     {{ getTransferStatusLabel(transfer.status) }}
                   </span>
-                  <div
-                    v-if="isTransferActionable(transfer)"
-                    class="flex flex-wrap gap-1.5 justify-end"
-                  >
+                  <div v-if="isTransferActionable(transfer)" :class="transferCardActionRowClass">
                     <template v-if="transfer.status === 'pending_approval'">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        extra-class="!rounded-2xl font-medium"
-                        @click="approveTransfer(transfer)"
-                        >Approve</Button
-                      >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                        @click="cancelTransfer(transfer)"
-                        >Cancel</Button
-                      >
+                      <Button variant="primary" size="sm" @click="approveTransfer(transfer)">
+                        Approve
+                      </Button>
+                      <Button variant="outline" size="sm" @click="cancelTransfer(transfer)">
+                        Cancel
+                      </Button>
                     </template>
                     <template v-else-if="transfer.status === 'in_transit'">
                       <Button
                         variant="outline"
                         size="sm"
-                        extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                         :icon="TruckIcon"
                         @click="openTrackingModal(transfer)"
-                        >Tracking</Button
                       >
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        extra-class="!rounded-2xl font-medium"
-                        @click="completeTransfer(transfer)"
-                        >Complete</Button
-                      >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                        @click="cancelTransfer(transfer)"
-                        >Cancel</Button
-                      >
+                        Tracking
+                      </Button>
+                      <Button variant="primary" size="sm" @click="completeTransfer(transfer)">
+                        Complete
+                      </Button>
+                      <Button variant="outline" size="sm" @click="cancelTransfer(transfer)">
+                        Cancel
+                      </Button>
                     </template>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </div>
 
-      <!-- Tracking modal -->
       <Modal v-model="showTrackingModal" size="sm">
         <template #header>Shipment tracking</template>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >Carrier</label
-            >
+            <label :class="labelClass">Carrier</label>
             <input
               v-model="trackingForm.carrier"
               type="text"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              :class="fieldClass"
               placeholder="e.g. DHL, FedEx"
             />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >Tracking number</label
-            >
+            <label :class="labelClass">Tracking number</label>
             <input
               v-model="trackingForm.trackingNumber"
               type="text"
-              class="w-full px-3 py-2 text-xs rounded-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 font-mono"
+              :class="[fieldClass, 'font-mono']"
               placeholder="e.g. 1234567890"
             />
           </div>
         </div>
         <template #footer>
-          <Button
-            variant="outline"
-            size="sm"
-            extra-class="!rounded-2xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-            @click="showTrackingModal = false"
-            >Cancel</Button
-          >
-          <Button
-            variant="primary"
-            size="sm"
-            extra-class="!rounded-2xl font-medium"
-            @click="saveTracking"
-            >Save</Button
-          >
+          <Button variant="outline" size="sm" @click="showTrackingModal = false">Cancel</Button>
+          <Button variant="primary" size="sm" @click="saveTracking">Save</Button>
         </template>
       </Modal>
     </template>
@@ -677,7 +463,6 @@ import {
   TruckIcon,
 } from '@heroicons/vue/24/outline'
 import Button from '~/components/ui/Button.vue'
-import Card from '~/components/ui/Card.vue'
 import DataTableToolbar from '~/components/ui/DataTableToolbar.vue'
 import Modal from '~/components/ui/Modal.vue'
 import StatCard from '~/components/ui/StatCard.vue'
@@ -699,7 +484,49 @@ useHead({
   title: 'Multi-Store Sync - Storvv',
 })
 
-const { eyebrowClass, pageTitleClass, descriptionClass, headerBtnClass } = useDashboardPageChrome()
+const {
+  pageClass,
+  eyebrowClass,
+  pageTitleClass,
+  descriptionClass,
+  cardDescClass,
+  kpiGridCompactClass,
+  segmentGroupClass,
+  segmentBtnClass,
+  segmentBtnActiveClass,
+  panelClass,
+  panelHeaderClass,
+  panelBodyClass,
+  sectionTitleClass,
+  sectionSubtitleClass,
+  labelClass,
+  inlineNoteClass,
+  fieldClass,
+  textareaClass,
+  formNoteClass,
+  formActionsClass,
+  tableShellClass,
+  tableEyebrowClass,
+  tableMetaClass,
+  itemsTableShellClass,
+  numClass,
+  metricGridClass,
+  metricRowClass,
+  exportBtnClass,
+  restrictedClass,
+  restrictedIconClass,
+  restrictedTitleClass,
+  restrictedDescClass,
+  transferListClass,
+  transferCardClass,
+  transferRouteClass,
+  transferMetaClass,
+  transferItemClass,
+  transferActionsClass,
+  transferCardActionRowClass,
+  stateCardClass,
+  statusBadgeClass,
+} = useDashboardMultiStoreChrome()
 
 const { formatCurrency } = usePreferences()
 const toast = useAppToast()
@@ -1861,23 +1688,6 @@ const TRANSFER_STATUS_LABELS: Record<string, string> = {
 
 const getTransferStatusLabel = (status: string) => {
   return TRANSFER_STATUS_LABELS[status] || status || 'Pending'
-}
-
-const getTransferStatusClass = (status: string) => {
-  switch (status) {
-    case 'pending_approval':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-    case 'in_transit':
-      return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-    case 'completed':
-    case 'partial':
-    case 'completed_partial':
-      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-    case 'cancelled':
-      return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-    default:
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
-  }
 }
 
 const isTransferActionable = (transfer: any) => {
