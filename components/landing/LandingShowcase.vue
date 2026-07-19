@@ -284,6 +284,8 @@
       </div>
     </section>
 
+    <LandingUserGuide />
+
     <!-- 5. Multi-store -->
     <section
       id="multi-store"

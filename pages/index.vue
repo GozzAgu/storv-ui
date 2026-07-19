@@ -29,6 +29,12 @@
             <a href="#pricing" class="landing-nav-link" @click.prevent="scrollToSection('pricing')"
               >Plans</a
             >
+            <a
+              href="#user-guide"
+              class="landing-nav-link"
+              @click.prevent="scrollToSection('user-guide')"
+              >Guide</a
+            >
             <a href="#contact" class="landing-nav-link" @click.prevent="scrollToSection('contact')"
               >Contact</a
             >
@@ -107,6 +113,17 @@
                   }
                 "
                 >Plans</a
+              >
+              <a
+                href="#user-guide"
+                class="landing-mobile-nav-link"
+                @click.prevent="
+                  () => {
+                    scrollToSection('user-guide')
+                    mobileMenuOpen = false
+                  }
+                "
+                >Guide</a
               >
               <a
                 href="#contact"
