@@ -2,6 +2,8 @@
 
 Storvv is a retail operations platform for businesses that need to track **inventory**, **sales**, **returns**, and **customers** across one or more store locations. This document explains what the product does, how it is built, and how the main pieces fit together.
 
+> **Full reference:** For the complete product and technical guide (every module, data model, permissions, APIs, and workflows), see **[STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md)**.
+
 For step-by-step user journeys and module behavior, see [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md). For subscription tiers and limits, see [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md).
 
 ---
@@ -290,6 +292,7 @@ Example: **Copy from branch** requires super admin + Enterprise + at least two s
 
 | Document                                               | Contents                                                         |
 | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| [STORVV_COMPLETE_GUIDE.md](./STORVV_COMPLETE_GUIDE.md) | **Master guide** — full product & technical reference            |
 | [STORVV_APP_FLOW.md](./STORVV_APP_FLOW.md)             | Detailed user flows, module behavior, scenarios, file references |
 | [SUBSCRIPTION_FEATURES.md](./SUBSCRIPTION_FEATURES.md) | Micro / Medium / Enterprise feature matrix                       |
 | [STORAGE_SETUP.md](./STORAGE_SETUP.md)                 | Firebase Storage for images                                      |
