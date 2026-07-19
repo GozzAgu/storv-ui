@@ -1314,29 +1314,31 @@
       </form>
 
       <template #footer>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="handleCancelItem"
-          class="w-full sm:w-auto !rounded-2xl"
-          >Cancel</Button
-        >
-        <Button
-          variant="primary"
-          size="sm"
-          type="submit"
-          :disabled="!isItemDrawerValid"
-          @click="handleSaveItem"
-          class="w-full sm:w-auto !rounded-2xl"
-        >
-          {{
-            editingItem
-              ? 'Update Product'
-              : folder?.hasSerialNumbers && !editingItem
-              ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}`
-              : 'Add Product'
-          }}
-        </Button>
+        <div class="flex w-full flex-col gap-2 sm:flex-row sm:justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            @click="handleCancelItem"
+            class="w-full sm:w-auto"
+            >Cancel</Button
+          >
+          <Button
+            variant="primary"
+            size="sm"
+            type="submit"
+            :disabled="!isItemDrawerValid"
+            @click="handleSaveItem"
+            class="w-full sm:w-auto"
+          >
+            {{
+              editingItem
+                ? 'Update Product'
+                : folder?.hasSerialNumbers && !editingItem
+                ? `Add ${serialNumbers.length || 0} Product${serialNumbers.length !== 1 ? 's' : ''}`
+                : 'Add Product'
+            }}
+          </Button>
+        </div>
       </template>
     </SidePanel>
 

@@ -22,17 +22,89 @@
       />
     </Transition>
 
+    <!-- Web: drawer panel slides from the right edge -->
     <Transition
-      :enter-active-class="
-        nativeInApp ? 'side-panel-native-enter-active' : 'side-panel-enter-active'
-      "
-      :leave-active-class="
-        nativeInApp ? 'side-panel-native-leave-active' : 'side-panel-leave-active'
-      "
-      :enter-from-class="nativeInApp ? 'side-panel-native-enter-from' : 'side-panel-enter-from'"
-      :enter-to-class="nativeInApp ? 'side-panel-native-enter-to' : 'side-panel-enter-to'"
-      :leave-from-class="nativeInApp ? 'side-panel-native-leave-from' : 'side-panel-leave-from'"
-      :leave-to-class="nativeInApp ? 'side-panel-native-leave-to' : 'side-panel-leave-to'"
+      v-if="!nativeInApp"
+      enter-active-class="side-panel-enter-active"
+      leave-active-class="side-panel-leave-active"
+      enter-from-class="side-panel-enter-from"
+      enter-to-class="side-panel-enter-to"
+      leave-from-class="side-panel-leave-from"
+      leave-to-class="side-panel-leave-to"
+    >
+      <div
+        v-if="modelValue"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="labelledBy"
+        :aria-describedby="describedBy"
+        :class="panelDialogClass"
+        @click.stop
+      >
+        <!-- Header -->
+        <div
+          v-if="title || subtitle || $slots.header || showClose"
+          :class="[dense ? headerDenseClass : headerClass]"
+        >
+          <div class="flex min-w-0 flex-1 items-start gap-3 pr-1">
+            <slot name="header">
+              <div v-if="title || subtitle" class="min-w-0">
+                <p v-if="eyebrow" :class="eyebrowClass">
+                  {{ eyebrow }}
+                </p>
+                <h3 v-if="title" :id="titleId" :class="dense ? titleDenseClass : titleClass">
+                  {{ title }}
+                </h3>
+                <p
+                  v-if="subtitle"
+                  :id="subtitleId"
+                  :class="dense ? subtitleDenseClass : subtitleClass"
+                >
+                  {{ subtitle }}
+                </p>
+              </div>
+            </slot>
+          </div>
+          <button
+            v-if="showClose"
+            type="button"
+            :class="closeButtonClass"
+            aria-label="Close panel"
+            @click="handleClose"
+          >
+            <XMarkIcon class="h-4 w-4" stroke-width="1.75" />
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div
+          :class="[
+            bodyClass,
+            fitContent ? 'dash-overlay-body--fit-content' : '',
+            'side-panel-body-scroll flex flex-col',
+            fitContent ? 'min-h-0 shrink-0' : 'min-h-0 flex-1',
+            resolvedContentPadding,
+          ]"
+        >
+          <slot />
+        </div>
+
+        <!-- Footer -->
+        <div v-if="$slots.footer" :class="dense ? footerDenseClass : footerClass">
+          <slot name="footer" />
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Native: full-screen in-app drawer -->
+    <Transition
+      v-else
+      enter-active-class="side-panel-native-enter-active"
+      leave-active-class="side-panel-native-leave-active"
+      enter-from-class="side-panel-native-enter-from"
+      enter-to-class="side-panel-native-enter-to"
+      leave-from-class="side-panel-native-leave-from"
+      leave-to-class="side-panel-native-leave-to"
     >
       <div v-if="modelValue" :class="panelShellClass" role="presentation">
         <div
@@ -80,7 +152,11 @@
 
           <!-- Body -->
           <div
-            :class="[bodyClass, 'side-panel-body-scroll flex min-h-0 flex-1 flex-col', resolvedContentPadding]"
+            :class="[
+              bodyClass,
+              'side-panel-body-scroll flex min-h-0 flex-1 flex-col',
+              resolvedContentPadding,
+            ]"
           >
             <slot />
           </div>
@@ -105,7 +181,7 @@ interface Props {
   subtitle?: string
   eyebrow?: string
   /**
-   * Kept for API compatibility; all drawers share the same width on desktop (`--dashboard-drawer-width`).
+   * Kept for API compatibility; width is always `--dashboard-drawer-width` on desktop.
    * Below `lg`, the panel is full width.
    */
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'drawer'
@@ -115,6 +191,8 @@ interface Props {
   blurBackdrop?: boolean
   /** Tighter header, body, and footer padding */
   dense?: boolean
+  /** Shrink drawer height to form content (web); avoids footer pinned to viewport bottom */
+  fitContent?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -125,6 +203,7 @@ const props = withDefaults(defineProps<Props>(), {
   contentPadding: '',
   blurBackdrop: false,
   dense: false,
+  fitContent: false,
 })
 
 const { isNativeApp } = useCapacitorNativeApp()
@@ -166,13 +245,10 @@ const subtitleId = useId()
 const labelledBy = computed(() => (props.title ? titleId : undefined))
 const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
-const panelWidthClasses = 'max-lg:w-full lg:w-[min(92vw,var(--dashboard-drawer-width))]'
+const fitContent = computed(() => props.fitContent && !nativeInApp.value)
 
-const panelShellClass = computed(() =>
-  nativeInApp.value
-    ? 'side-panel-native-shell pointer-events-auto flex h-full min-h-0 w-full flex-col'
-    : 'pointer-events-none fixed inset-y-0 right-0 z-[1110] flex h-[100dvh] min-h-[100dvh] w-full items-stretch justify-end'
-)
+const panelShellClass =
+  'side-panel-native-shell pointer-events-auto flex h-full min-h-0 w-full flex-col'
 
 const panelDialogClass = computed(() =>
   nativeInApp.value
@@ -181,9 +257,9 @@ const panelDialogClass = computed(() =>
         drawerShellClass,
       ]
     : [
-        'pointer-events-auto flex min-h-0 flex-col overflow-hidden',
+        'side-panel-drawer pointer-events-auto fixed inset-y-0 right-0 z-[1111] flex h-[100dvh] max-h-[100dvh] min-h-0 flex-col overflow-hidden',
         drawerShellClass,
-        panelWidthClasses,
+        fitContent.value ? 'side-panel--fit-content !inset-y-auto top-4 sm:top-6' : '',
       ]
 )
 
@@ -237,6 +313,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.side-panel--fit-content {
+  height: auto !important;
+  max-height: min(92dvh, calc(100dvh - 2rem));
+}
+
 .side-panel-body-scroll {
   scrollbar-gutter: stable;
 }

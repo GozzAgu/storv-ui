@@ -33,7 +33,7 @@ html.dark .dash-overlay-backdrop {
 .dash-overlay-shell {
   display: flex;
   min-height: 0;
-  width: 100%;
+  max-width: 100%;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--dash-overlay-border);
@@ -43,10 +43,13 @@ html.dark .dash-overlay-backdrop {
 }
 
 .dash-overlay-modal {
+  width: 100%;
   border-radius: 1rem;
+  max-height: min(92dvh, calc(100dvh - 2rem));
 }
 
 .dash-overlay-drawer {
+  width: 100%;
   height: 100dvh;
   max-height: 100dvh;
   min-height: 0;
@@ -58,7 +61,28 @@ html.dark .dash-overlay-backdrop {
 }
 
 @media (min-width: 1024px) {
-  .dash-overlay-drawer {
+  .side-panel-drawer.dash-overlay-drawer {
+    width: min(92vw, var(--dashboard-drawer-width));
+    height: 100dvh;
+    max-height: 100dvh;
+    border-left: 1px solid var(--dash-overlay-border);
+    border-radius: 1rem 0 0 1rem;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+.dash-overlay-drawer.side-panel--fit-content {
+  height: auto;
+  max-height: min(92dvh, calc(100dvh - 2rem));
+}
+
+@media (min-width: 1024px) {
+  .dash-overlay-drawer.side-panel--fit-content {
+    height: auto;
+    max-height: min(92dvh, calc(100dvh - 2rem));
     border-left: 1px solid var(--dash-overlay-border);
     border-radius: 1rem 0 0 1rem;
   }
@@ -102,6 +126,11 @@ html.dark .dash-overlay-header {
   overflow-x: hidden;
   overscroll-behavior: contain;
   background: var(--dash-overlay-surface);
+}
+
+.dash-overlay-body--fit-content {
+  flex: 0 0 auto;
+  overflow-y: visible;
 }
 
 .dash-overlay-footer {

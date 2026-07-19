@@ -144,10 +144,10 @@ const describedBy = computed(() => (props.subtitle ? subtitleId : undefined))
 
 const sizeClasses = computed(() => {
   const sizeMap = {
-    sm: 'max-w-[100%] sm:mx-4 sm:max-w-md',
-    md: 'max-w-[100%] sm:mx-4 sm:max-w-lg',
-    lg: 'max-w-[100%] sm:mx-4 sm:max-w-2xl',
-    xl: 'max-w-[100%] sm:mx-4 sm:max-w-4xl',
+    sm: 'w-full max-w-[100%] sm:mx-4 sm:max-w-md',
+    md: 'w-full max-w-[100%] sm:mx-4 sm:max-w-lg',
+    lg: 'w-full max-w-[100%] sm:mx-4 sm:max-w-2xl',
+    xl: 'w-full max-w-[100%] sm:mx-4 sm:max-w-4xl',
   }
   return sizeMap[props.size]
 })
@@ -155,13 +155,13 @@ const sizeClasses = computed(() => {
 const rootClass = computed(() =>
   nativeInApp.value
     ? 'modal-native-shell pointer-events-auto flex h-full min-h-0 w-full flex-col overflow-hidden'
-    : 'fixed inset-0 z-[105] overflow-hidden'
+    : 'fixed inset-0 z-[105] overflow-y-auto'
 )
 
 const stageClass = computed(() =>
   nativeInApp.value
     ? 'pointer-events-none relative z-10 flex h-full min-h-0 flex-1 items-center justify-center p-3'
-    : 'pointer-events-none relative z-10 flex min-h-full items-end justify-center sm:items-center sm:p-4 md:p-5'
+    : 'pointer-events-none relative z-10 flex min-h-full w-full items-end justify-center p-3 sm:min-h-0 sm:h-full sm:items-center sm:p-4 md:p-5'
 )
 
 const dialogClass = computed(() =>
@@ -172,9 +172,10 @@ const dialogClass = computed(() =>
         sizeClasses.value,
       ]
     : [
-        'pointer-events-auto relative max-h-[min(92dvh,calc(100dvh-1rem))]',
+        'pointer-events-auto relative flex w-full flex-col overflow-hidden',
         modalShellClass,
         'rounded-t-2xl sm:rounded-2xl',
+        'max-h-[min(92dvh,calc(100dvh-1rem))] sm:max-h-[min(92dvh,calc(100dvh-2rem))]',
         sizeClasses.value,
       ]
 )
